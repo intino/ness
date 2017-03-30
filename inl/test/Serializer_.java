@@ -1,6 +1,5 @@
 import io.intino.ness.inl.Serializer;
 import schemas.*;
-import tests.schemas.*;
 import org.junit.Test;
 
 import java.util.Date;

@@ -1,0 +1,11 @@
+dsl Legio
+
+Project(groupId = "io.intino.ness", version = "1.0.0") inl-java7
+	Repositories
+		Release("https://artifactory.intino.io/artifactory/release-libraries", "intino-maven")
+	Dependencies
+
+LifeCycle
+	Package(LibrariesLinkedByManifest)
+	Distribution
+		Release(url = "https://artifactory.intino.io/artifactory/release-libraries", mavenId = "intino-maven")

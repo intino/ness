@@ -1,0 +1,11 @@
+dsl Legio
+
+Project(groupId = "io.intino.ness", version = "1.0.0") inl
+	Repositories
+		Release("https://artifactory.intino.io/artifactory/releases", "intino-maven")
+	Dependencies
+		Test(groupId = "junit", artifactId = "junit", version = "4.12")
+
+
+LifeCycle
+	Package(ModulesAndLibrariesLinkedByManifest)
