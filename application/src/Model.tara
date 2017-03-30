@@ -1,6 +1,12 @@
 dsl Proteo
 
+Concept Function
 
+Concept Topic
 
+Concept Connection //TODO find better name
+	var Topic faucet
+	var Topic flooder
+	var Function plug
 
 

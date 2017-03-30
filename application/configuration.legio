@@ -6,6 +6,8 @@ Project(groupId = "io.intino.ness", version = "1.0.0") application
 		Language("https://artifactory.intino.io/artifactory/releases", "intino-maven")
 	Dependencies
 		Test(groupId = "junit", artifactId = "junit", version = "LATEST")
+		Compile(groupId = "io.intino.konos", artifactId = "konos-jms", version = "1.0.3")
+		Compile(groupId = "io.intino.konos", artifactId = "konos-slack", version = "LATEST")
 	Factory("1.2.0", "io.intino.ness") as Application
 		Language("Proteo", "LATEST")
 		Interface("1.7.5")

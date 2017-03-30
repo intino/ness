@@ -10,6 +10,7 @@ import io.intino.tara.magritte.Graph;
 public class ApplicationBox extends io.intino.konos.Box {
 	private static Logger LOG = Logger.getGlobal();
 	protected ApplicationConfiguration configuration;
+	private io.intino.konos.slack.Bot nessy;
 	private io.intino.ness.konos.NessBus nessBus;
 
 	private String graphID;
@@ -18,6 +19,7 @@ public class ApplicationBox extends io.intino.konos.Box {
 		box.put(graphID = UUID.randomUUID().toString(), graph);
 		configuration.args().entrySet().forEach((e) -> box.put(e.getKey(), e.getValue()));
 		this.configuration = configuration;
+
 	}
 
 	public io.intino.tara.magritte.Graph graph() {
@@ -32,6 +34,9 @@ public class ApplicationBox extends io.intino.konos.Box {
 		return (ApplicationConfiguration) configuration;
 	}
 
+	public NessySlackBot nessy() {
+		return (NessySlackBot) nessy;
+	}
 
 	public io.intino.ness.konos.NessBus nessBus() {
 		return nessBus;
@@ -68,7 +73,8 @@ public class ApplicationBox extends io.intino.konos.Box {
 	}
 
 	private void initSlackBots() {
-
+		if (configuration().nessyConfiguration == null) return;
+		this.nessy = new NessySlackBot(this);
 	}
 
 	private void initActivities() {
