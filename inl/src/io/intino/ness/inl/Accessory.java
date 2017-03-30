@@ -111,8 +111,8 @@ class Accessory {
         formatters.put(Integer.class, new Formatter() { @Override public String format(Object data) { return data.toString();}});
         formatters.put(Float.class, new Formatter() { @Override public String format(Object data) { return data.toString();}});
         formatters.put(Double.class, new Formatter() { @Override public String format(Object data) { return data.toString();}});
-        formatters.put(String.class, new Formatter() { @Override public String format(Object text) { return text.toString().contains("\n") ? "\n" + text.toString().replaceAll("\n","\t\n") + "\n" : text.toString();}});
-        formatters.put(Date.class, new Formatter() { @Override public String format(Object date) { return dateFormatter.format(date); } });
+        formatters.put(String.class, new Formatter() { @Override public String format(Object text) { return formatText(text);}});
+        formatters.put(Date.class, new Formatter() { @Override public String format(Object date) { return dateFormatter.format(date);}});
         formatters.put(Boolean[].class, new Formatter() { @Override public String format(Object array) { return ArrayFormatter.of(Boolean.class).format(array);}});
         formatters.put(Byte[].class, new Formatter() { @Override public String format(Object array) { return ArrayFormatter.of(Byte.class).format(array);}});
         formatters.put(Integer[].class, new Formatter() { @Override public String format(Object array) { return ArrayFormatter.of(Integer.class).format(array);}});
@@ -120,6 +120,10 @@ class Accessory {
         formatters.put(Double[].class, new Formatter() { @Override public String format(Object array) { return ArrayFormatter.of(Double.class).format(array);}});
         formatters.put(String[].class, new Formatter() { @Override public String format(Object array) { return ArrayFormatter.of(String.class).format(array);}});
         formatters.put(Date[].class, new Formatter() { @Override public String format(Object array) { return ArrayFormatter.of(Date.class).format(array);}});
+    }
+
+    private static String formatText(Object text) {
+        return text == null ? "\0" : text.toString().contains("\n") ? "\n" + text.toString().replaceAll("\n", "\t\n") + "\n" : text.toString();
     }
 
     private static Date parseDate(final String text) {
@@ -144,10 +148,11 @@ class Accessory {
         public String format(Object o) {
             String result = "";
             for (Object item : (Object[]) o)
-                result += "\n\t" + formatter.format(item);
+                result += "\n\t" + (item == null ? "\0" : formatter.format(item));
             return result;
         }
     }
+
     static class ArrayParser {
 
         private Class type;
@@ -166,10 +171,8 @@ class Accessory {
             String[] lines = text.split("\n");
             Object result = Array.newInstance(type, lines.length);
             for (int i = 0; i < lines.length; i++)
-                Array.set(result,i,parser.parse(lines[i]));
+                Array.set(result, i, parser.parse(lines[i]));
             return result;
         }
     }
-
-
 }

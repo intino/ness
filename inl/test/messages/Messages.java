@@ -127,6 +127,30 @@ public class Messages {
                 "\tfalse\n";
     }
 
+    public static String emptyMenu() {
+        return "[Menu]\n" +
+                "availability:\n" +
+                "\ttrue\n" +
+                "\tfalse\n";
+    }
+
+    public static String nullMenu() {
+        return "[Menu]\n" +
+                "meals:\n" +
+                "\tSoup\n" +
+                "\t\0\n" +
+                "\tMussels\n" +
+                "\tCake\n" +
+                "prices:\n" +
+                "\t5.0\n" +
+                "\t\0\n" +
+                "\t8.0\n" +
+                "\t7.0\n" +
+                "availability:\n" +
+                "\ttrue\n" +
+                "\tfalse\n";
+    }
+
     public static String stack() {
         return "java.lang.NullPointerException: Attempt to invoke interface method 'java.lang.Object java.util.List.get(int)' on a null object reference\n" +
                 "    at io.intino.consul.AppService$5.run(AppService.java:154)\n" +

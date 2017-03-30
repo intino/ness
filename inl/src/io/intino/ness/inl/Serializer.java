@@ -3,8 +3,8 @@ package io.intino.ness.inl;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import static io.intino.ness.inl.Accessory.fieldsOf;
-import static java.lang.reflect.Modifier.*;
+import static java.lang.reflect.Modifier.isStatic;
+import static java.lang.reflect.Modifier.isTransient;
 
 public class Serializer {
 	private final Object object;
@@ -36,11 +36,11 @@ public class Serializer {
 		return "[" + type() + "]" + "\n";
 	}
 
-    private String type() {
-        return path + (path.isEmpty() ? "" : ".") + map(className());
-    }
+	private String type() {
+		return path + (path.isEmpty() ? "" : ".") + map(className());
+	}
 
-    private String map(String text) {
+	private String map(String text) {
 		return mapping.get(text);
 	}
 
@@ -54,7 +54,7 @@ public class Serializer {
 			if (isTransient(field.getModifiers())) continue;
 			if (isStatic(field.getModifiers())) continue;
 			if (!isAttribute(field)) continue;
-			if (valueOf(field) == null) continue;
+			if (valueOf(field) == null || isEmpty(field)) continue;
 			result += serializeAttribute(field) + "\n";
 		}
 		return result;
@@ -114,6 +114,12 @@ public class Serializer {
 				aClass.isPrimitive() ||
 				aClass.isArray();
 	}
+
+	private boolean isEmpty(Field field) {
+		Object value = valueOf(field);
+		return value.getClass().isArray() && ((Object[]) value).length == 0;
+	}
+
 
 	private boolean isList(Field field) {
 		return field.getType().isAssignableFrom(List.class);
