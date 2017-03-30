@@ -8,6 +8,12 @@
         <outputRelativeToContentRoot value="true" />
         <module name="inl8" />
       </profile>
+      <profile name="Annotation profile for inl-java7" enabled="true">
+        <sourceOutputDir name="../out/build/inl-java7/generated-sources/annotations" />
+        <sourceTestOutputDir name="../out/build/inl-java7/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="inl7" />
+      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="inl7" target="1.7" />

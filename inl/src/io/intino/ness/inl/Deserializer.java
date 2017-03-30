@@ -31,7 +31,7 @@ public class Deserializer {
     }
 
     private boolean startBlockOf(Class type) {
-        return map(Accessory.unwrap(line)).equalsIgnoreCase(type.getSimpleName());
+        return line != null && map(Accessory.unwrap(line)).equalsIgnoreCase(type.getSimpleName());
     }
 
     private String map(String id) {
