@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/datalake/datalake.iml" filepath="$PROJECT_DIR$/datalake/datalake.iml" />
+      <module fileurl="file://$PROJECT_DIR$/inl/inl.iml" filepath="$PROJECT_DIR$/inl/inl.iml" />
+      <module fileurl="file://$PROJECT_DIR$/inl7/inl7.iml" filepath="$PROJECT_DIR$/inl7/inl7.iml" />
+      <module fileurl="file://$PROJECT_DIR$/inl8/inl8.iml" filepath="$PROJECT_DIR$/inl8/inl8.iml" />
+    </modules>
+  </component>
+</project>
