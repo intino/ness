@@ -1,7 +1,7 @@
-package io.intino.ness.datalake.konos;
+package io.intino.ness.konos;
 
-import io.intino.ness.datalake.konos.DatalakeBox;
-import io.intino.ness.datalake.konos.DatalakeConfiguration;
+import io.intino.ness.konos.ApplicationBox;
+import io.intino.ness.konos.ApplicationConfiguration;
 import io.intino.konos.jms.TopicConsumer;
 import io.intino.konos.jms.TopicProducer;
 import io.intino.konos.jms.Consumer;
@@ -15,13 +15,13 @@ import java.util.logging.Logger;
 public class NessBus extends Bus {
 	private static Logger logger = Logger.getGlobal();
 
-	private DatalakeConfiguration configuration;
-	private DatalakeBox box;
+	private ApplicationConfiguration configuration;
+	private ApplicationBox box;
 
-	public NessBus(DatalakeBox box) {
+	public NessBus(ApplicationBox box) {
 		this.box = box;
 		this.configuration = box.configuration();
-		DatalakeConfiguration.NessConfiguration busConfiguration = this.configuration.nessConfiguration();
+		ApplicationConfiguration.NessConfiguration busConfiguration = this.configuration.nessConfiguration();
 		try {
 			connection = new org.apache.activemq.ActiveMQConnectionFactory(busConfiguration.user, busConfiguration.password, busConfiguration.url).createConnection();
 			if (busConfiguration.clientID != null && !busConfiguration.clientID.isEmpty()) connection.setClientID(busConfiguration.clientID);
@@ -35,9 +35,9 @@ public class NessBus extends Bus {
 
 	private static class Subscriptor implements Consumer {
 
-		private DatalakeBox box;
+		private ApplicationBox box;
 
-		Subscriptor(DatalakeBox box) {
+		Subscriptor(ApplicationBox box) {
 			this.box = box;
 		}
 

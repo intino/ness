@@ -1,32 +1,39 @@
-package io.intino.ness.datalake.konos;
+package io.intino.ness.konos;
 
 import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 import java.util.Map;
 import java.util.UUID;
 
+import io.intino.tara.magritte.Graph;
 
-
-public class DatalakeBox extends io.intino.konos.Box {
+public class ApplicationBox extends io.intino.konos.Box {
 	private static Logger LOG = Logger.getGlobal();
-	protected DatalakeConfiguration configuration;
-	private io.intino.ness.datalake.konos.NessBus nessBus;
+	protected ApplicationConfiguration configuration;
+	private io.intino.ness.konos.NessBus nessBus;
 
+	private String graphID;
 
-
-	public DatalakeBox(DatalakeConfiguration configuration) {
-
+	public ApplicationBox(io.intino.tara.magritte.Graph graph, ApplicationConfiguration configuration) {
+		box.put(graphID = UUID.randomUUID().toString(), graph);
 		configuration.args().entrySet().forEach((e) -> box.put(e.getKey(), e.getValue()));
 		this.configuration = configuration;
 	}
 
+	public io.intino.tara.magritte.Graph graph() {
+		return (io.intino.tara.magritte.Graph) box().get(graphID);
+	}
 
-	public DatalakeConfiguration configuration() {
-		return (DatalakeConfiguration) configuration;
+	public void graph(io.intino.tara.magritte.Graph graph) {
+		box().put(graphID, graph);
+	}
+
+	public ApplicationConfiguration configuration() {
+		return (ApplicationConfiguration) configuration;
 	}
 
 
-	public io.intino.ness.datalake.konos.NessBus nessBus() {
+	public io.intino.ness.konos.NessBus nessBus() {
 		return nessBus;
 	}
 
@@ -69,7 +76,7 @@ public class DatalakeBox extends io.intino.konos.Box {
 	}
 
 	private void initBuses() {
-		this.nessBus = new io.intino.ness.datalake.konos.NessBus(this);
+		this.nessBus = new io.intino.ness.konos.NessBus(this);
 	}
 
 	private void initTasks() {

@@ -1,24 +1,27 @@
-package io.intino.ness.datalake.konos;
+package io.intino.ness.konos;
 
-public class DatalakeConfiguration extends io.intino.konos.BoxConfiguration {
+public class ApplicationConfiguration extends io.intino.konos.BoxConfiguration {
 
 	NessConfiguration nessConfiguration;
 
-	public DatalakeConfiguration(String[] args) {
+	public ApplicationConfiguration(String[] args) {
 		super(args);
 		fillWithArgs();
 	}
 
 	private void fillWithArgs() {
-
+		if (this.store == null && args.get("graph.store") != null)
+			store = new java.io.File(args.remove("graph.store"));
 		if (args.containsKey("ness.url"))
 			nessConfiguration(args.remove("ness.url"), args.remove("ness.user"), args.remove("ness.password"), args.remove("ness.clientID"), args.remove("ness.productionPaths"));
 
 	}
 
+	public java.io.File store() {
+		return this.store;
+	}
 
-
-	public DatalakeConfiguration nessConfiguration(String url, String user, String password, String clientID, String... productionPaths) {
+	public ApplicationConfiguration nessConfiguration(String url, String user, String password, String clientID, String... productionPaths) {
 		this.nessConfiguration = new NessConfiguration();
 		this.nessConfiguration.url = url;
 		this.nessConfiguration.user = user;

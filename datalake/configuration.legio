@@ -7,8 +7,6 @@ Project("io.intino.ness", "1.0.0") datalake
 		Compile(groupId = "io.intino.ness", artifactId = "inl-java8", version = "1.0.0")
 		Compile(groupId = "io.intino.konos", artifactId = "konos-jms", version = "1.0.3")
 		Test(groupId = "junit", artifactId = "junit", version = "4.12")
-	Factory(version = "1.2.0", "io.intino.ness.datalake")
-		Interface(version = "1.7.5")
 LifeCycle
 	Package(LibrariesLinkedByManifest)
 	Distribution
