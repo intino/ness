@@ -4,7 +4,7 @@ import io.intino.ness.*;
 
 
 public class Topic extends io.intino.tara.magritte.Layer implements io.intino.tara.magritte.tags.Terminal {
-	protected java.lang.String name$;
+	protected java.lang.String qualifiedName;
 	protected Status status;
 
 	public enum Status {
@@ -16,8 +16,8 @@ public class Topic extends io.intino.tara.magritte.Layer implements io.intino.ta
 		super(node);
 	}
 
-	public java.lang.String name$() {
-		return name$;
+	public java.lang.String qualifiedName() {
+		return qualifiedName;
 	}
 
 	public Status status() {
@@ -36,8 +36,8 @@ public class Topic extends io.intino.tara.magritte.Layer implements io.intino.ta
 		return tags().stream().filter(predicate).collect(java.util.stream.Collectors.toList());
 	}
 
-	public void name$(java.lang.String value) {
-		this.name$ = value;
+	public void qualifiedName(java.lang.String value) {
+		this.qualifiedName = value;
 	}
 
 	public void status(io.intino.ness.Topic.Status value) {
@@ -47,7 +47,7 @@ public class Topic extends io.intino.tara.magritte.Layer implements io.intino.ta
 	@Override
 	public java.util.Map<java.lang.String, java.util.List<?>> variables() {
 		java.util.Map<String, java.util.List<?>> map = new java.util.LinkedHashMap<>();
-		map.put("name", new java.util.ArrayList(java.util.Collections.singletonList(this.name$)));
+		map.put("qualifiedName", new java.util.ArrayList(java.util.Collections.singletonList(this.qualifiedName)));
 		map.put("status", new java.util.ArrayList(java.util.Collections.singletonList(this.status)));
 		map.put("tags", this.tags);
 		return map;
@@ -60,7 +60,7 @@ public class Topic extends io.intino.tara.magritte.Layer implements io.intino.ta
 	@Override
 	protected void _load(java.lang.String name, java.util.List<?> values) {
 		super._load(name, values);
-		if (name.equalsIgnoreCase("name")) this.name$ = io.intino.tara.magritte.loaders.StringLoader.load(values, this).get(0);
+		if (name.equalsIgnoreCase("qualifiedName")) this.qualifiedName = io.intino.tara.magritte.loaders.StringLoader.load(values, this).get(0);
 		else if (name.equalsIgnoreCase("status")) this.status = io.intino.tara.magritte.loaders.WordLoader.load(values, Status.class, this).get(0);
 		else if (name.equalsIgnoreCase("tags")) this.tags = io.intino.tara.magritte.loaders.StringLoader.load(values, this);
 	}
@@ -68,7 +68,7 @@ public class Topic extends io.intino.tara.magritte.Layer implements io.intino.ta
 	@Override
 	protected void _set(java.lang.String name, java.util.List<?> values) {
 		super._set(name, values);
-		if (name.equalsIgnoreCase("name")) this.name$ = (java.lang.String) values.get(0);
+		if (name.equalsIgnoreCase("qualifiedName")) this.qualifiedName = (java.lang.String) values.get(0);
 		else if (name.equalsIgnoreCase("status")) this.status = (Status) values.get(0);
 		else if (name.equalsIgnoreCase("tags")) this.tags = new java.util.ArrayList<>((java.util.List<java.lang.String>) values);
 	}

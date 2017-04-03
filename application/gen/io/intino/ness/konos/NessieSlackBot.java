@@ -18,6 +18,7 @@ public class NessieSlackBot extends Bot {
         });
 		add("topics".toLowerCase(), java.util.Arrays.asList("tags"), java.util.Arrays.asList(), "Request all topics nessy is subscribed filtered by tags", (properties, args) -> NessieSlackBotActions.topics(box, properties, args));
 		add("topic".toLowerCase(), java.util.Arrays.asList("name"), java.util.Arrays.asList(), "Select a topic to operate with", (properties, args) -> NessieSlackBotActions.topic(box, properties, args.length > 0 ? args[0] : ""));
+		add("remove-topic".toLowerCase(), java.util.Arrays.asList("name"), java.util.Arrays.asList(), "Select a topic to operate with", (properties, args) -> NessieSlackBotActions.removeTopic(box, properties, args.length > 0 ? args[0] : ""));
 		add("functions".toLowerCase(), java.util.Arrays.asList(), java.util.Arrays.asList(), "Show all functions registered", (properties, args) -> NessieSlackBotActions.functions(box, properties));
 		add("add-function".toLowerCase(), java.util.Arrays.asList("name", "code"), java.util.Arrays.asList(), "Create a function associated to an input topic and output topic", (properties, args) -> NessieSlackBotActions.addFunction(box, properties, args.length > 0 ? args[0] : "", args.length > 1 ? args[1] : ""));
 		add("tag".toLowerCase(), java.util.Arrays.asList("tags"), java.util.Arrays.asList(), "Tag a topic with `tags`", (properties, args) -> NessieSlackBotActions.tag(box, properties, args));

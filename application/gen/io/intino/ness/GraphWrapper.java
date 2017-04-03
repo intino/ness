@@ -1,7 +1,5 @@
 package io.intino.ness;
 
-import io.intino.tara.magritte.Graph;
-
 public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 
 	protected io.intino.tara.magritte.Graph graph;
@@ -153,9 +151,9 @@ public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 			return newElement;
 		}
 
-		public io.intino.ness.Topic topic(java.lang.String name$) {
+		public io.intino.ness.Topic topic(java.lang.String qualifiedName) {
 			io.intino.ness.Topic newElement = GraphWrapper.this.graph.createRoot(io.intino.ness.Topic.class, namespace, name).as(io.intino.ness.Topic.class);
-			newElement.node().set(newElement, "name", java.util.Collections.singletonList(name$));
+			newElement.node().set(newElement, "qualifiedName", java.util.Collections.singletonList(qualifiedName));
 			return newElement;
 		}
 

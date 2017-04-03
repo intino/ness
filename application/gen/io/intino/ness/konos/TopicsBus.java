@@ -4,7 +4,6 @@ import io.intino.konos.jms.Bus;
 import io.intino.konos.jms.Consumer;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.advisory.DestinationListener;
-import org.apache.activemq.advisory.DestinationSource;
 import org.apache.activemq.command.ActiveMQTopic;
 
 import javax.jms.JMSException;

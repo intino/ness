@@ -1,10 +1,11 @@
 package io.intino.ness.konos;
 
 import io.intino.ness.Ness;
-import io.intino.ness.TopicLoader;
+import io.intino.ness.TopicManager;
 import io.intino.ness.datalake.filesystem.FileDataLake;
 import io.intino.tara.magritte.Graph;
-import io.intino.tara.magritte.stores.FileSystemStore;
+import io.intino.tara.magritte.Store;
+import io.intino.tara.magritte.stores.InMemoryFileStore;
 
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -13,11 +14,11 @@ import java.util.logging.Logger;
 class Setup {
 
 	static Graph initGraph(NessConfiguration configuration) {
-		return Graph.use(store(configuration), io.intino.ness.Ness.class).load("application");
+		return Graph.use(store(configuration), io.intino.ness.Ness.class).load("ness");
 	}
 
-	private static io.intino.tara.magritte.Store store(NessConfiguration configuration) {
-		return new FileSystemStore(configuration.store());
+	private static Store store(NessConfiguration configuration) {
+		return new InMemoryFileStore(configuration.store());
 	}
 
 	static void configureBox(NessBox box) {
@@ -27,7 +28,9 @@ class Setup {
 	}
 
 	static void execute(NessBox box) {
-		new TopicLoader(box.graph().wrapper(Ness.class), box.topicsBus()).reload();
+		TopicManager topicManager = new TopicManager(box.graph().wrapper(Ness.class), box.topicsBus());
+		box.put("topicManager", topicManager);
+		topicManager.reload();
 	}
 
 	private static void configureLogger(String path) {

@@ -10,6 +10,8 @@ import io.intino.ness.Topic;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class NessieSlackBotActions {
 
@@ -30,12 +32,16 @@ public class NessieSlackBotActions {
 		for (int i = 0; i < topics.size(); i++) {
 			Topic topic = topics.get(i);
 			if (tags.length == 0 || isTagged(tags, topic.tags()))
-				builder.append(i).append(") ").append(topic.name$());
+				builder.append(i).append(") ").append(topic.qualifiedName());
 			if (!topic.tags().isEmpty()) builder.append(" {").append(String.join(" ", topic.tags())).append("}");
 			builder.append("\n");
 		}
 		String value = builder.toString();
 		return value.isEmpty() ? "No topics" : value;
+	}
+
+	static String removeTopic(NessBox box, MessageProperties properties, String name) {
+		return "";
 	}
 
 	private static boolean isTagged(String[] tags, List<String> topicTags) {
@@ -46,7 +52,7 @@ public class NessieSlackBotActions {
 		Ness ness = box.graph().wrapper(Ness.class);
 		Topic topic = findTopic(name, ness);
 		if (topic == null) return "topic not found";
-		selectedTopicByUser.put(properties.username(), topic.name$());
+		selectedTopicByUser.put(properties.username(), topic.qualifiedName());
 		return "Selected " + name;
 	}
 
@@ -95,8 +101,23 @@ public class NessieSlackBotActions {
 	}
 
 	private static Topic findTopic(String name, Ness ness) {
-		List<Topic> topics = ness.topicList(t -> t.name$().equalsIgnoreCase(name));
-		return topics.isEmpty() ? null : topics.get(0);
+		List<Topic> topics = ness.topicList(t -> t.qualifiedName().equalsIgnoreCase(name));
+		return topics.isEmpty() ? findByPosition(name, ness) : topics.get(0);
+	}
+
+
+	private static Topic findByPosition(String name, Ness ness) {
+		final List<Topic> topics = sortedTopics(ness).collect(Collectors.toList());
+		try {
+			final int position = Integer.parseInt(name);
+			return position <= topics.size() ? topics.get(position - 1) : null;
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
+	private static Stream<Topic> sortedTopics(Ness ness) {
+		return ness.topicList().stream().sorted((s1, s2) -> String.CASE_INSENSITIVE_ORDER.compare(s1.qualifiedName(), s2.qualifiedName()));
 	}
 
 	private static String downloadFile(String code) {

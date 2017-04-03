@@ -4,7 +4,7 @@ Concept Function
 	var string source
 
 Concept Topic
-	var string name
+	var string qualifiedName
 	var word:{Active Inactive} status = Active
 	var string[] tags = empty
 
