@@ -27,7 +27,7 @@ class Setup {
 	}
 
 	static void execute(NessBox box) {
-		new TopicLoader(box.graph().wrapper(Ness.class), box.topicsBus().topics()).reload();
+		new TopicLoader(box.graph().wrapper(Ness.class), box.topicsBus()).reload();
 	}
 
 	private static void configureLogger(String path) {

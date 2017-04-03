@@ -23,15 +23,23 @@ public class NessieSlackBotActions {
 
 	}
 
-	static String topics(NessBox box, MessageProperties properties) {
+	static String topics(NessBox box, MessageProperties properties, String[] tags) {
 		Ness ness = box.graph().wrapper(Ness.class);
 		StringBuilder builder = new StringBuilder();
 		List<Topic> topics = ness.topicList();
-		for (int i = 0; i < topics.size(); i++)
-			builder.append(i).append(") ").append(topics.get(i).name$()).append(" {").append(String.join(" ", topics.get(i).tags())).append("\n");
+		for (int i = 0; i < topics.size(); i++) {
+			Topic topic = topics.get(i);
+			if (tags.length == 0 || isTagged(tags, topic.tags()))
+				builder.append(i).append(") ").append(topic.name$());
+			if (!topic.tags().isEmpty()) builder.append(" {").append(String.join(" ", topic.tags())).append("}");
+			builder.append("\n");
+		}
 		String value = builder.toString();
 		return value.isEmpty() ? "No topics" : value;
+	}
 
+	private static boolean isTagged(String[] tags, List<String> topicTags) {
+		return Arrays.stream(tags).anyMatch(topicTags::contains);
 	}
 
 	static String topic(NessBox box, MessageProperties properties, String name) {
@@ -49,7 +57,7 @@ public class NessieSlackBotActions {
 		for (int i = 0; i < topics.size(); i++)
 			builder.append(i).append(") ").append(topics.get(i).name()).append(". Being used on:...\n");
 		String value = builder.toString();
-		return value.isEmpty() ? "No topics" : value;
+		return value.isEmpty() ? "No functions" : value;
 	}
 
 	static String addFunction(NessBox box, MessageProperties properties, String name, String code) {

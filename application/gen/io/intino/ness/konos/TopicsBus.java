@@ -26,8 +26,7 @@ public class TopicsBus extends Bus {
 		NessConfiguration.TopicsConfiguration busConfiguration = this.configuration.topicsConfiguration();
 		try {
 			connection = new org.apache.activemq.ActiveMQConnectionFactory(busConfiguration.user, busConfiguration.password, busConfiguration.url).createConnection();
-			if (busConfiguration.clientID != null && !busConfiguration.clientID.isEmpty())
-				connection.setClientID(busConfiguration.clientID);
+			if (busConfiguration.clientID != null && !busConfiguration.clientID.isEmpty()) connection.setClientID(busConfiguration.clientID);
 			connection.start();
 			this.session = connection.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
 
@@ -39,8 +38,7 @@ public class TopicsBus extends Bus {
 	public List<String> topics() {
 		List<String> topics = new ArrayList<>();
 		try {
-			DestinationSource destination = ((ActiveMQConnection) connection).getDestinationSource();
-			for (ActiveMQTopic topic : destination.getTopics())
+			for (ActiveMQTopic topic : ((ActiveMQConnection) connection).getDestinationSource().getTopics())
 				topics.add(topic.getTopicName());
 		} catch (JMSException e) {
 		}
@@ -49,8 +47,7 @@ public class TopicsBus extends Bus {
 
 	public void setListener(DestinationListener listener) {
 		try {
-			DestinationSource destination = ((ActiveMQConnection) connection).getDestinationSource();
-			destination.setDestinationListener(listener);
+			((ActiveMQConnection) connection).getDestinationSource().setDestinationListener(listener);
 		} catch (JMSException e) {
 		}
 	}

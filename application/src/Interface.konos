@@ -4,7 +4,8 @@ dsl Konos
 Bus topics
 
 Service Nessie as SlackBot
-	Request("Request all topics nessy is subscribed") topics
+	Request("Request all topics nessy is subscribed filtered by tags") topics
+		Parameter(String, true) tags
 	Request("Select a topic to operate with") topic
 		Parameter(String) name
 	Request("Show all functions registered") functions
