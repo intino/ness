@@ -11,7 +11,7 @@ public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 
 	public GraphWrapper(io.intino.tara.magritte.Graph graph) {
 		this.graph = graph;
-		this.graph.i18n().register("application");
+		this.graph.i18n().register("ness");
 	}
 
 	public void update() {
@@ -147,15 +147,15 @@ public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 			this.name = name;
 		}
 
-		public io.intino.ness.Function function() {
+		public io.intino.ness.Function function(java.lang.String source) {
 			io.intino.ness.Function newElement = GraphWrapper.this.graph.createRoot(io.intino.ness.Function.class, namespace, name).as(io.intino.ness.Function.class);
-			
+			newElement.node().set(newElement, "source", java.util.Collections.singletonList(source));
 			return newElement;
 		}
 
-		public io.intino.ness.Topic topic() {
+		public io.intino.ness.Topic topic(java.lang.String name$) {
 			io.intino.ness.Topic newElement = GraphWrapper.this.graph.createRoot(io.intino.ness.Topic.class, namespace, name).as(io.intino.ness.Topic.class);
-			
+			newElement.node().set(newElement, "name", java.util.Collections.singletonList(name$));
 			return newElement;
 		}
 

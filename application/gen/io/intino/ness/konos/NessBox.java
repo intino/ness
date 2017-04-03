@@ -7,15 +7,15 @@ import java.util.UUID;
 
 import io.intino.tara.magritte.Graph;
 
-public class ApplicationBox extends io.intino.konos.Box {
+public class NessBox extends io.intino.konos.Box {
 	private static Logger LOG = Logger.getGlobal();
-	protected ApplicationConfiguration configuration;
-	private io.intino.konos.slack.Bot nessy;
-	private io.intino.ness.konos.NessBus nessBus;
+	protected NessConfiguration configuration;
+	private io.intino.konos.slack.Bot nessie;
+	private io.intino.ness.konos.TopicsBus topicsBus;
 
 	private String graphID;
 
-	public ApplicationBox(io.intino.tara.magritte.Graph graph, ApplicationConfiguration configuration) {
+	public NessBox(io.intino.tara.magritte.Graph graph, NessConfiguration configuration) {
 		box.put(graphID = UUID.randomUUID().toString(), graph);
 		configuration.args().entrySet().forEach((e) -> box.put(e.getKey(), e.getValue()));
 		this.configuration = configuration;
@@ -30,16 +30,16 @@ public class ApplicationBox extends io.intino.konos.Box {
 		box().put(graphID, graph);
 	}
 
-	public ApplicationConfiguration configuration() {
-		return (ApplicationConfiguration) configuration;
+	public NessConfiguration configuration() {
+		return (NessConfiguration) configuration;
 	}
 
-	public NessySlackBot nessy() {
-		return (NessySlackBot) nessy;
+	public NessieSlackBot nessie() {
+		return (NessieSlackBot) nessie;
 	}
 
-	public io.intino.ness.konos.NessBus nessBus() {
-		return nessBus;
+	public io.intino.ness.konos.TopicsBus topicsBus() {
+		return topicsBus;
 	}
 
 
@@ -56,7 +56,7 @@ public class ApplicationBox extends io.intino.konos.Box {
 
 	void quit() {
 
-		nessBus.closeSession();
+		topicsBus.closeSession();
 	}
 
 	private void initRESTServices() {
@@ -73,8 +73,8 @@ public class ApplicationBox extends io.intino.konos.Box {
 	}
 
 	private void initSlackBots() {
-		if (configuration().nessyConfiguration == null) return;
-		this.nessy = new NessySlackBot(this);
+		if (configuration().nessieConfiguration == null) return;
+		this.nessie = new NessieSlackBot(this);
 	}
 
 	private void initActivities() {
@@ -82,7 +82,7 @@ public class ApplicationBox extends io.intino.konos.Box {
 	}
 
 	private void initBuses() {
-		this.nessBus = new io.intino.ness.konos.NessBus(this);
+		this.topicsBus = new io.intino.ness.konos.TopicsBus(this);
 	}
 
 	private void initTasks() {

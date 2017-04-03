@@ -82,7 +82,7 @@ public class Connection extends io.intino.tara.magritte.Layer implements io.inti
 		
 	}
 	
-	public io.intino.ness.Application applicationWrapper() {
-		return (io.intino.ness.Application) graph().wrapper(io.intino.ness.Application.class);
+	public io.intino.ness.Ness nessWrapper() {
+		return (io.intino.ness.Ness) graph().wrapper(io.intino.ness.Ness.class);
 	}
 }

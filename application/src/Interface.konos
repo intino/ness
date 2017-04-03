@@ -1,21 +1,23 @@
 dsl Konos
 
 
-Bus ness
+Bus topics
 
-Service Nessy as SlackBot
-	Request(description = "Request all topics nessy is subscribed") topics
-	Request(description = "Select a topic to operate with") topic
-		Parameter(type = String) name
-	Request(description = "Create a function associated to an input topic and output topic") create
-		Parameter(type = String) name
-		Parameter(type = String) code
-
-	Request(description = "Connect a source and destination topics by a `function`") pump
-		Parameter(type = String) functionName
-		Parameter(type = String) input
-		Parameter(type = String) output
-	Request(description = "Reproduce events of a topic") mount
-		Parameter(type = String) since
-	Request(description = "Consolidates current events of a topic to reservoir") consolidate
-		Parameter(type = String) topic
+Service Nessie as SlackBot
+	Request("Request all topics nessy is subscribed") topics
+	Request("Select a topic to operate with") topic
+		Parameter(String) name
+	Request("Show all functions registered") functions
+	Request("Create a function associated to an input topic and output topic") add-function
+		Parameter(String) name
+		Parameter(String) code
+	Request("Tag a topic with `tags`") tag
+		Parameter(String, true) tags
+	Request("Connect a source and destination topics by a `function`") pump
+		Parameter(String) functionName
+		Parameter(String) input
+		Parameter(String) output
+	Request("Reproduce events of a topic") mount
+		Parameter(String) since
+	Request("Consolidates current events of a topic to reservoir") consolidate
+		Parameter(String) topic

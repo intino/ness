@@ -1,12 +1,14 @@
 dsl Proteo
 
 Concept Function
+	var string source
 
 Concept Topic
+	var string name
+	var word:{Active Inactive} status = Active
+	var string[] tags = empty
 
 Concept Connection //TODO find better name
 	var Topic faucet
 	var Topic flooder
 	var Function plug
-
-
