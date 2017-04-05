@@ -1,6 +1,7 @@
 package io.intino.ness.konos;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.jms.*;
@@ -21,6 +22,7 @@ public class Launcher {
 	}
 
 	@Test
+	@Ignore
 	public void produce() {
 		try {
 			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");

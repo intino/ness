@@ -18,7 +18,7 @@ Service Nessie as SlackBot
 		Request("Consolidates current events of a topic to reservoir") consolidate
 	Request("Select a topic to operate with") remove-topic
 		Parameter(String) name
-	Request("Clear all topics in ness") clear-all
+	Request("Clear all topics in ness", Attachment) clear
 		Parameter(String) name
 	Request("Show all functions registered") functions
 	Request("Create a function associated to an input topic and output topic") add-function

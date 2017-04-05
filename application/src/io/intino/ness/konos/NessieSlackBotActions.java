@@ -1,5 +1,6 @@
 package io.intino.ness.konos;
 
+import com.ullink.slack.simpleslackapi.SlackAttachment;
 import com.ullink.slack.simpleslackapi.SlackSession;
 import io.intino.konos.slack.Bot;
 import io.intino.konos.slack.Bot.MessageProperties;
@@ -17,6 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.ullink.slack.simpleslackapi.SlackAction.TYPE_BUTTON;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.copyOfRange;
 
@@ -56,7 +58,7 @@ final class NessieSlackBotActions {
 		for (int i = 0; i < topics.size(); i++) {
 			Topic topic = topics.get(i);
 			if (tags.length == 0 || isTagged(tags, topic.tags()))
-				builder.append(i).append(") ").append(topic.qualifiedName());
+				builder.append(i + 1).append(") ").append(topic.qualifiedName());
 			if (!topic.tags().isEmpty()) builder.append(" {").append(String.join(" ", topic.tags())).append("}");
 			builder.append("\n");
 		}
@@ -83,11 +85,14 @@ final class NessieSlackBotActions {
 		Topic topic = findTopic(name, ness);
 		if (topic == null) return "topic not found";
 		selectedTopicByUser.put(properties.username(), topic.qualifiedName());
-		return "Selected " + name;
+		return "Selected " + topic.qualifiedName();
 	}
 
-	static String clearAll(NessBox box, MessageProperties properties, String name) {
-		return "";
+	static SlackAttachment clear(NessBox box, MessageProperties properties, String name) {
+		SlackAttachment attachment = new SlackAttachment("Are you sure to clear this topic?", "", "", "");
+		attachment.addAction("answer", "yes", "Yes", TYPE_BUTTON);
+		attachment.addAction("answer", "no", "No", TYPE_BUTTON);
+		return attachment;
 	}
 
 	static String rename(NessBox box, MessageProperties properties, String name) {
@@ -127,11 +132,11 @@ final class NessieSlackBotActions {
 
 	static String pump(NessBox box, MessageProperties properties, String functionName, String input, String output) {
 		NessFunctionContainer container = new NessFunctionContainer(box.get(FileDataLake.class));
-		container.pump(input).with(seachFunction(functionName)).into(output).start();
+		container.pump(input).with(searchFunction(functionName)).into(output).start();
 		return ":ok_hand:";
 	}
 
-	private static Class<? extends NessFunction> seachFunction(String functionName) {
+	private static Class<? extends NessFunction> searchFunction(String functionName) {
 		return null;
 	}
 

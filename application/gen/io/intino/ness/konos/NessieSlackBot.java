@@ -1,6 +1,7 @@
 package io.intino.ness.konos;
 
 import io.intino.konos.slack.Bot;
+import com.ullink.slack.simpleslackapi.SlackAttachment;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -21,11 +22,11 @@ public class NessieSlackBot extends Bot {
 		add("remove-user".toLowerCase(), java.util.Arrays.asList("name"), java.util.Arrays.asList(), "Request all topics nessy is subscribed filtered by tags", (properties, args) -> NessieSlackBotActions.removeUser(box, properties, args.length > 0 ? args[0] : ""));
 		add("topics".toLowerCase(), java.util.Arrays.asList("tags"), java.util.Arrays.asList(), "Request all topics nessy is subscribed filtered by tags", (properties, args) -> NessieSlackBotActions.topics(box, properties, args));
 		add("topic".toLowerCase(), java.util.Arrays.asList("name"), java.util.Arrays.asList("tag", "rename", "consolidate"), "Select a topic to operate with", (properties, args) -> NessieSlackBotActions.topic(box, properties, args.length > 0 ? args[0] : ""));
-		add("tag".toLowerCase(), java.util.Arrays.asList("tags"), java.util.Arrays.asList(), "Tag a topic with `tags`", (properties, args) -> NessieSlackBotActions.tag(box, properties, args));
-		add("rename".toLowerCase(), java.util.Arrays.asList("name"), java.util.Arrays.asList(), "Select a topic to operate with", (properties, args) -> NessieSlackBotActions.rename(box, properties, args.length > 0 ? args[0] : ""));
+		add("tag".toLowerCase(), java.util.Arrays.asList("tags"), java.util.Arrays.asList(), "Tags thes topic with `tags`", (properties, args) -> NessieSlackBotActions.tag(box, properties, args));
+		add("rename".toLowerCase(), java.util.Arrays.asList("name"), java.util.Arrays.asList(), "Changes name of this topic to new one", (properties, args) -> NessieSlackBotActions.rename(box, properties, args.length > 0 ? args[0] : ""));
 		add("consolidate".toLowerCase(), java.util.Arrays.asList(), java.util.Arrays.asList(), "Consolidates current events of a topic to reservoir", (properties, args) -> NessieSlackBotActions.consolidate(box, properties));
 		add("remove-topic".toLowerCase(), java.util.Arrays.asList("name"), java.util.Arrays.asList(), "Select a topic to operate with", (properties, args) -> NessieSlackBotActions.removeTopic(box, properties, args.length > 0 ? args[0] : ""));
-		add("clear-all".toLowerCase(), java.util.Arrays.asList("name"), java.util.Arrays.asList(), "Clear all topics in ness", (properties, args) -> NessieSlackBotActions.clearAll(box, properties, args.length > 0 ? args[0] : ""));
+		add("clear".toLowerCase(), java.util.Arrays.asList("name"), java.util.Arrays.asList(), "Clear all topics in ness", (properties, args) -> NessieSlackBotActions.clear(box, properties, args.length > 0 ? args[0] : ""));
 		add("functions".toLowerCase(), java.util.Arrays.asList(), java.util.Arrays.asList(), "Show all functions registered", (properties, args) -> NessieSlackBotActions.functions(box, properties));
 		add("add-function".toLowerCase(), java.util.Arrays.asList("name", "code"), java.util.Arrays.asList(), "Create a function associated to an input topic and output topic", (properties, args) -> NessieSlackBotActions.addFunction(box, properties, args.length > 0 ? args[0] : "", args.length > 1 ? args[1] : ""));
 		add("pump".toLowerCase(), java.util.Arrays.asList("functionName", "input", "output"), java.util.Arrays.asList(), "Connect a source and destination topics by a `function`", (properties, args) -> NessieSlackBotActions.pump(box, properties, args.length > 0 ? args[0] : "", args.length > 1 ? args[1] : "", args.length > 2 ? args[2] : ""));

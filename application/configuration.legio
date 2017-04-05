@@ -8,11 +8,11 @@ Project(groupId = "io.intino.ness", version = "1.0.0") ness
 		Test("junit", "junit", "LATEST")
 		Compile("io.intino.konos", "konos-jms", "1.0.3")
 		Compile("org.apache.activemq", "activemq-jaas", "5.14.0")
-		Compile("io.intino.konos", "konos-slack", "1.0.2")
+		Compile("io.intino.konos", "konos-slack", "1.0.3")
 		Compile("io.intino.ness", "datalake", "LATEST")
 	Factory("1.2.0", "io.intino.ness") as Application
 		Language("Proteo", "LATEST")
-		Interface("1.7.7")
+		Interface("1.8.0")
 LifeCycle
 	Package(LibrariesLinkedByManifest) as Runnable("io.intino.ness.konos.Main")
 	Distribution
