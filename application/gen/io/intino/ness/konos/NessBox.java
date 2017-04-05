@@ -11,7 +11,6 @@ public class NessBox extends io.intino.konos.Box {
 	private static Logger LOG = Logger.getGlobal();
 	protected NessConfiguration configuration;
 	private io.intino.konos.slack.Bot nessie;
-	private io.intino.ness.konos.TopicsBus topicsBus;
 
 	private String graphID;
 
@@ -38,9 +37,7 @@ public class NessBox extends io.intino.konos.Box {
 		return (NessieSlackBot) nessie;
 	}
 
-	public io.intino.ness.konos.TopicsBus topicsBus() {
-		return topicsBus;
-	}
+
 
 
 
@@ -56,7 +53,7 @@ public class NessBox extends io.intino.konos.Box {
 
 	void quit() {
 
-		topicsBus.closeSession();
+
 	}
 
 	private void initRESTServices() {
@@ -82,7 +79,7 @@ public class NessBox extends io.intino.konos.Box {
 	}
 
 	private void initBuses() {
-		this.topicsBus = new io.intino.ness.konos.TopicsBus(this);
+
 	}
 
 	private void initTasks() {

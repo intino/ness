@@ -5,10 +5,13 @@ Concept Function
 
 Concept Topic
 	var string qualifiedName
-	var word:{Active Inactive} status = Active
 	var string[] tags = empty
 
 Concept Connection //TODO find better name
 	var Topic faucet
 	var Topic flooder
 	var Function plug
+
+Concept User
+	var string password
+	var string[] groups
