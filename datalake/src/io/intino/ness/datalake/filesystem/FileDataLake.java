@@ -2,10 +2,10 @@ package io.intino.ness.datalake.filesystem;
 
 import io.intino.ness.datalake.NessDataLake;
 
-import java.io.*;
+import java.io.File;
 import java.util.List;
 
-import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
 public class FileDataLake implements NessDataLake {
@@ -21,9 +21,9 @@ public class FileDataLake implements NessDataLake {
 
     @Override
     public List<Topic> topics() {
-        List<File> files = asList(files());
-        files.sort(File::compareTo);
-        return files.stream().map(FileTopic::new).collect(toList());
+        return stream(files())
+                .map(FileTopic::new)
+                .collect(toList());
     }
 
     @Override
@@ -34,7 +34,6 @@ public class FileDataLake implements NessDataLake {
     private File fileOf(String topic) {
         return new File(this.file, topic);
     }
-
 
     private File[] files() {
         File[] files = file.listFiles();

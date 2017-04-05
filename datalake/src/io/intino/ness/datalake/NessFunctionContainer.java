@@ -1,57 +1,67 @@
 package io.intino.ness.datalake;
 
-import io.intino.ness.datalake.NessAction.Provider;
+import io.intino.ness.datalake.NessDataLake.Topic;
 import io.intino.ness.datalake.actions.PumpAction;
+import io.intino.ness.datalake.virtual.VirtualTopic;
 import io.intino.ness.inl.Inl;
-import io.intino.ness.inl.Message;
 
-import java.time.Instant;
 import java.util.*;
-
-import static java.util.stream.Collectors.toList;
 
 public class NessFunctionContainer {
     private final NessDataLake dataLake;
-    private final Map<String, Plug> plugs = new HashMap<>();
     private final Map<Thread, NessAction> actions = new HashMap<>();
 
     public NessFunctionContainer(NessDataLake dataLake) {
         this.dataLake = dataLake;
     }
 
-    public String plugs() {
-        String result = "";
-        for (Plug plug : plugs.values())
-            result += plug.toString() + "\n";
-        return result;
+    public Pumping pump(String topic) {
+        return new Pumping(topic);
     }
 
-    public Plugging plug(String name) {
-        return topic -> plug(classOf(name), topic);
-    }
+    public class Pumping {
+        private Topic topic;
 
-    public Plugging plug(String name, String... sources)  {
-        return topic -> plug(compile(name, sources), topic);
-    }
+        public Pumping(String topic) {
+            this.topic = dataLake.get(topic);
+        }
 
-    public Plugging plug(Class<? extends NessFunction> functionClass) {
-        return topic -> plug(functionClass, topic);
-    }
+        public Pumping with(String function) {
+            return with(classOf(function));
+        }
 
-    public String unplug(String id) {
-        if (!plugs.containsKey(id)) return "Function doesn't exist";
-        plugs.remove(id);
-        return "Function unplugged";
-    }
+        public Pumping with(String function, String... sources) {
+            return with(compile(function, sources));
+        }
 
-    public List<Plug> plugsFor(String topic) {
-        return plugs.values().stream().
-                filter(p->p.inTopic.equalsIgnoreCase(topic)).
-                collect(toList());
-    }
+        public Pumping with(Class<? extends NessFunction> nessFunctionClass) {
+            try {
+                return with(nessFunctionClass.newInstance());
+            } catch (InstantiationException | IllegalAccessException e) {
+                return null;
+            }
+        }
 
-    public Thread pump(String topic) {
-        return start(new PumpAction(provider(), topic));
+        private Pumping with(NessFunction function) {
+            topic = new VirtualTopic(topic, function);
+            return this;
+        }
+
+        public Thread into(String target) {
+            return start(createPumpAction(target));
+        }
+
+        private NessAction createPumpAction(String target) {
+            return new PumpAction(faucet(), flooderOf(target));
+        }
+
+        private NessMessageFlooder flooderOf(String target) {
+            return new NessMessageFlooder(dataLake.get(target));
+        }
+
+        private NessMessageFaucet faucet() {
+            return new NessMessageFaucet(this.topic);
+        }
     }
 
     public void kill(Thread thread) {
@@ -61,19 +71,6 @@ public class NessFunctionContainer {
 
     public Set<Thread> threads() {
         return actions.keySet();
-    }
-
-    private String plug(Class<? extends NessFunction> functionClass, String inTopic)  {
-        if (functionClass == null) return "Function not found";
-        try {
-            add(new Plug(functionClass.newInstance(), inTopic));
-        } catch (InstantiationException | IllegalAccessException ignored) {
-        }
-        return "Function plugged to " + inTopic;
-    }
-
-    private void add(Plug plug) {
-        plugs.put(UUID.randomUUID().toString(), plug);
     }
 
     private Thread start(NessAction action) {
@@ -99,61 +96,6 @@ public class NessFunctionContainer {
         }
     }
 
-    private Provider provider() {
-        return new Provider() {
-            @Override
-            public List<Plug> plugsFor(String topic) {
-                return NessFunctionContainer.this.plugsFor(topic);
-            }
-
-            @Override
-            public NessMessageFaucet open(String topic) {
-                return new NessMessageFaucet(dataLake.get(topic));
-            }
-
-            @Override
-            public NessMessageFlooder flood() {
-                return new NessMessageFlooder(dataLake);
-            }
-        };
-    }
-
-    public static class Plug {
-        private NessFunction function;
-        private String inTopic;
-        private Instant executionInstant;
-        private int executionCount;
-
-        Plug(NessFunction function, String inTopic) {
-            this.function = function;
-            this.inTopic = inTopic;
-        }
-
-        public Message cast(Message input) {
-            return use().function.cast(input);
-        }
-
-        private Plug use() {
-            executionInstant = Instant.now();
-            executionCount++;
-            return this;
-        }
-
-        @Override
-        public String toString() {
-            return inTopic + " > " + function.getClass().getName() + " : " + execution();
-        }
-
-        private String execution() {
-            if (executionInstant == null) return "Never executed";
-            return String.format("%,d times execution", executionCount) + ". Last " + executionInstant.toString();
-        }
-
-    }
-
-    public interface Plugging {
-        String to(String topic);
-    }
 
     static  {
         Inl.init();

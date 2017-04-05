@@ -7,7 +7,7 @@ public class ImportPowerConsumptionFunction implements NessFunction {
 
     @Override
     public Message cast(Message input) {
-        Message output = new Message("PowerConsumption", "feed.edf.PowerConsumption.1");
+        Message output = new Message("PowerConsumption");
         output.write("ts", ts(input));
         output.write("activePower", input.read("Global_active_power").as(String.class));
         output.write("reactivePower", input.read("Global_reactive_power").as(String.class));

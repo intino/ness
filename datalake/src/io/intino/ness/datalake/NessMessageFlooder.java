@@ -6,33 +6,21 @@ import io.intino.ness.inl.Message;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 
 public class NessMessageFlooder {
-    private final NessDataLake dataLake;
-    private final Map<String, Writer> writers = new HashMap<>();
+    private final Writer writer;
 
-    public NessMessageFlooder(NessDataLake dataLake) {
-        this.dataLake = dataLake;
+    public NessMessageFlooder(Topic topic) {
+        this.writer = new Writer(topic);
     }
 
     public void add(Message message) {
-        if (message == null || message.topic() == null || message.topic().isEmpty()) return;
-        writerOf(message.topic()).write(message);
-    }
-
-    private Writer writerOf(String topic) {
-        if (!writers.containsKey(topic)) writers.put(topic, new Writer(get(topic)));
-        return writers.get(topic);
+        if (message == null) return;
+        writer.write(message);
     }
 
     public void close() {
-        writers.values().forEach(Writer::close);
-    }
-
-    private Topic get(String topic) {
-        return dataLake.get(topic);
+        writer.close();
     }
 
     public static class Writer {
@@ -44,10 +32,9 @@ public class NessMessageFlooder {
         }
 
         public void write(Message message) {
-            String data = message.toString() + "\n\n";
             try {
                 open(reservoirOf(message));
-                currentReservoir.outputStream().write(data.getBytes());
+                currentReservoir.outputStream().write(message);
             }
             catch (IOException ignored) {
             }
@@ -61,12 +48,15 @@ public class NessMessageFlooder {
 
         public void close() {
             if (currentReservoir == null) return;
-            currentReservoir.close();
+            try {
+                currentReservoir.outputStream().close();
+            } catch (IOException ignored) {
+            }
             currentReservoir = null;
         }
 
         private Reservoir reservoirOf(Message message) {
-            return topic.get(tsOf(message));
+            return topic.create(tsOf(message));
         }
 
         private Instant tsOf(Message message) {

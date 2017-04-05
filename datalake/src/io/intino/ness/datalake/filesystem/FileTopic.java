@@ -1,17 +1,18 @@
 package io.intino.ness.datalake.filesystem;
 
-import io.intino.ness.datalake.NessDataLake;
 import io.intino.ness.datalake.NessDataLake.Reservoir;
+import io.intino.ness.datalake.NessDataLake.Topic;
 
 import java.io.File;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.*;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
 
-public class FileTopic implements NessDataLake.Topic {
-
+public class FileTopic implements Topic {
     private final File file;
 
     public FileTopic(File file) {
@@ -25,18 +26,23 @@ public class FileTopic implements NessDataLake.Topic {
 
     @Override
     public List<Reservoir> reservoirs() {
-        List<File> files = asList(files());
-        files.sort(File::compareTo);
-        return files.stream().map(FileReservoir::new).collect(toList());
+        return stream(files())
+                .map(FileReservoir::new)
+                .sorted(FileReservoir::compareTo)
+                .collect(toList());
+    }
+
+    private Comparator<FileReservoir> byName() {
+        return FileReservoir::compareTo;
     }
 
     @Override
-    public Reservoir get(Instant instant) {
+    public Reservoir create(Instant instant) {
         return new FileReservoir(fileOf(instant));
     }
 
     private File fileOf(Instant instant) {
-        return new File(this.file, filenameOf(instant));
+        return new File(file, filenameOf(instant));
     }
 
     private String filenameOf(Instant instant) {
@@ -45,7 +51,12 @@ public class FileTopic implements NessDataLake.Topic {
 
     private File[] files() {
         File[] files = file.listFiles();
-        return files != null ? files : new File[0];
+        return files != null ? sort(files) : new File[0];
+    }
+
+    private File[] sort(File[] files) {
+        Arrays.sort(files);
+        return files;
     }
 
 }

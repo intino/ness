@@ -29,7 +29,6 @@ public class TransformCallFunction implements NessFunction {
         if (message.contains("call-id")) message.rename("call-id", "callId");
         if (message.contains("sip-dc")) message.rename("sip-dc", "sipDC");
         if (message.contains("call-dc")) message.rename("call-dc", "callDC");
-        message.topic("feed.genie."+ type + ".1");
         return message;
     }
 }

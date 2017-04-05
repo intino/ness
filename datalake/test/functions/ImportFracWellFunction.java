@@ -8,7 +8,7 @@ public class ImportFracWellFunction implements NessFunction {
     @Override
     public Message cast(Message input) {
         String apiCode = input.read("APINumber").as(String.class);
-        Message output = new Message("Well", "feed.fracfocus.Well.1");
+        Message output = new Message("Well");
         output.write("ts",ts(input));
         output.write("code", apiCode);
         output.write("name",input.read("WellName").as(String.class));

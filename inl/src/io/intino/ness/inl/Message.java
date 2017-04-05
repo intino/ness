@@ -5,18 +5,12 @@ import java.util.List;
 
 public class Message {
     String type;
-    String topic;
     Message owner;
     List<Attribute> attributes;
     List<Message> components;
 
     public Message(String type) {
-        this(type, "");
-    }
-
-    public Message(String type, String topic) {
         this.type = type;
-        this.topic = topic;
         this.owner = null;
         this.attributes = new ArrayList<>();
         this.components = new ArrayList<>();
@@ -33,20 +27,12 @@ public class Message {
         return type;
     }
 
-    public String topic() {
-        return topic;
-    }
-
     public boolean is(String type) {
         return type.equalsIgnoreCase(this.type);
     }
 
     public void type(String type) {
         this.type = type;
-    }
-
-    public void topic(String topic) {
-        this.topic = topic;
     }
 
     public Data read(final String attribute) {

@@ -83,17 +83,25 @@ public interface MessageInputStream {
     }
 
     class Csv implements MessageInputStream {
-        private final String type;
-        private final BufferedReader reader;
-        private final String[] header;
+        protected BufferedReader reader;
+        protected String[] header;
 
-        public Csv(String type, InputStream is) {
-            this.type = type;
+        public Csv(InputStream is) {
             this.reader = new BufferedReader(new InputStreamReader(is), 65536);
             this.header = nextRow();
         }
 
-        private String[] nextRow() {
+        @Override
+        public Message next() {
+            String[] data = nextRow();
+            if (data.length == 0) return null;
+            Message message = new Message("");
+            for (int i = 0; i < Math.min(data.length, header.length); i++)
+                message.write(header[i].trim(), data[i].trim());
+            return message;
+        }
+
+        protected String[] nextRow() {
             try {
                 String line = reader.readLine();
                 return line != null ? line.split(";") : new String[0];
@@ -101,22 +109,31 @@ public interface MessageInputStream {
                 return new String[0];
             }
         }
+    }
+
+    class Dat extends Csv {
+
+        protected final String[] data;
+
+        public Dat(InputStream is) {
+            super(is);
+            this.data = header[0].split("[ =]");
+            this.header = nextRow();
+        }
 
         @Override
         public Message next() {
-            String[] data = nextRow();
-            if (data.length == 0) return null;
-            Message message = new Message(type);
-            for (int i = 0; i < Math.min(data.length, header.length); i++)
-                message.write(header[i], data[i]);
+            Message message = super.next();
+            if (message == null) return null;
+            if (!isOdd(data.length)) return null;
+            for (int i = 0; i < data.length; i+=2)
+                message.write(data[i], data[i+1]);
             return message;
         }
-    }
 
-    class Empty implements MessageInputStream {
-        @Override
-        public Message next() {
-            return null;
+        private boolean isOdd(int i) {
+            return (i/2)*2 == i;
         }
     }
+
 }

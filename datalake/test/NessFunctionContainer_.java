@@ -1,9 +1,13 @@
+import com.sun.javafx.geom.transform.Identity;
 import io.intino.ness.datalake.NessFunctionContainer;
 import io.intino.ness.datalake.filesystem.FileDataLake;
+import io.intino.ness.inl.Inl;
+import io.intino.ness.inl.Message;
 import org.junit.Before;
 import org.junit.Test;
 import functions.*;
 
+import java.time.Instant;
 import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -18,48 +22,38 @@ public class NessFunctionContainer_ {
     }
 
     @Test
-    public void should_start_with_no_plugs() throws Exception {
-        assertThat(container.plugs(), is(""));
-    }
-
-    @Test
-    public void should_plug_function() throws Exception {
-        container.plug(TransformCallFunction.class).to("feed.test.text");
-        assertThat(container.plugs(), is("feed.test.text > functions.TransformCallFunction : Never executed\n"));
-    }
-
-    @Test
-    public void should_plug_function_from_code() throws Exception {
-        container.plug("tests.UpperCaseFunction", NessCompiler_.upperCaseFunction()).to("feed.test.text");
-        assertThat(container.plugs(), is("feed.test.text > tests.UpperCaseFunction : Never executed\n"));
-    }
-
-
-    @Test
     public void should_pump_topic() throws Exception {
-        String topic = "feed.ultra.Call";
-        container.plug(TransformCallFunction.class).to(topic);
-        container.pump(topic);
-        Set<Thread> threads = Thread.getAllStackTraces().keySet();
-        for (Thread thread : threads) {
-            if (thread == Thread.currentThread()) continue;
-            thread.join();
-        }
-    }
-
-    @Test
-    public void should_pump_topic_with_one_csv() throws Exception {
-        String topic = "legacy.edf.PowerConsumption";
-        container.plug(ImportPowerConsumptionFunction.class).to(topic);
-        Thread thread = container.pump(topic);
+        Thread thread = container
+                .pump("feed.ultra.Call")
+                .with(TransformCallFunction.class)
+                .into("feed.ultra.Call.1");
         thread.join();
     }
 
     @Test
-    public void should_pump_topic_with_many_csv() throws Exception {
-        String topic = "legacy.fracfocus.Job";
-        container.plug(ImportFracWellFunction.class).to(topic);
-        Thread thread = container.pump(topic);
+    public void should_pump_topic_with_one_csv_file() throws Exception {
+        Thread thread = container
+                .pump("legacy.edf.PowerConsumption")
+                .with(ImportPowerConsumptionFunction.class)
+                .into("feed.edf.PowerConsumption.1");
+        thread.join();
+    }
+
+    @Test
+    public void should_pump_topic_with_many_csv_files() throws Exception {
+        Thread thread = container
+                .pump("legacy.fracfocus.Job")
+                .with(ImportFracWellFunction.class)
+                .into("feed.fracfocus.Job.1");
+        thread.join();
+    }
+
+    @Test
+    public void should_pump_many_topics_with_dat_file() throws Exception {
+        Thread thread = container
+                .pump("legacy.ritheim.Heater")
+                .with(ImportHeaterFunction.class)
+                .into("feed.ritheim.Heater.1");
         thread.join();
     }
 

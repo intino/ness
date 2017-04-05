@@ -1,5 +1,8 @@
 package io.intino.ness.datalake;
 
+import io.intino.ness.inl.MessageInputStream;
+import io.intino.ness.inl.MessageOutputStream;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Instant;
@@ -11,22 +14,23 @@ public interface NessDataLake {
 
     interface Topic {
         String name();
-
         List<Reservoir> reservoirs();
-        Reservoir get(Instant ts);
+
+        Reservoir create(Instant instant);
     }
 
     interface Reservoir {
         String name();
-        Format format();
 
-        InputStream inputStream();
-        OutputStream outputStream();
+        MessageInputStream[] inputStreams();
+        MessageOutputStream outputStream();
+    }
 
-        void close();
+    enum Serie {
+        single, multiple
     }
 
     enum Format {
-        inl, csv, unknown
+        inl, csv, dat, xml, json, unknown
     }
 }

@@ -39,7 +39,7 @@ public class MessageInputStream_ {
         assertThat(message.is("teacher"), is(true));
         assertThat(message.contains("name"), is(true));
         assertThat(message.contains("money"), is(true));
-        assertThat(message.contains("birthdate"), is(true));
+        assertThat(message.contains("BirthDate"), is(true));
         assertThat(message.components("country").get(0).contains("name"), is(true));
         assertThat(message.components("country").get(0).contains("continent"), is(false));
         assertThat(message.components("country").get(0).read("name").as(String.class), is("Spain"));
@@ -91,21 +91,21 @@ public class MessageInputStream_ {
     @Test
     public void should_parse_messages_in_csv() throws Exception {
         InputStream is = inputStreamOf(messagesInCsv());
-        MessageInputStream.Csv mis = new MessageInputStream.Csv("PowerConsumption", is);
+        MessageInputStream.Csv mis = new MessageInputStream.Csv(is);
         Message message = mis.next();
-        assertThat(message.type(), is("PowerConsumption"));
+        assertThat(message.type(), is(""));
         assertThat(message.read("date").as(String.class), is("16/12/2006"));
         assertThat(message.read("time").as(String.class), is("17:24:00"));
         assertThat(message.read("sub_metering_3").as(Double.class), is(17.0));
 
         message = mis.next();
-        assertThat(message.type(), is("PowerConsumption"));
+        assertThat(message.type(), is(""));
         assertThat(message.read("date").as(String.class), is("16/12/2006"));
         assertThat(message.read("time").as(String.class), is("17:25:00"));
         assertThat(message.read("sub_metering_3").as(Double.class), is(16.0));
 
         message = mis.next();
-        assertThat(message.type(), is("PowerConsumption"));
+        assertThat(message.type(), is(""));
         assertThat(message.read("date").as(String.class), is("16/12/2006"));
         assertThat(message.read("time").as(String.class), is("17:26:00"));
         assertThat(message.read("sub_metering_3").as(Double.class), is(17.0));
@@ -115,6 +115,41 @@ public class MessageInputStream_ {
 
     }
 
+    @Test
+    public void should_parse_messages_in_data() throws Exception {
+        InputStream is = inputStreamOf(messagesInDat());
+        MessageInputStream.Dat mis = new MessageInputStream.Dat(is);
+        Message message = mis.next();
+        assertThat(message.type(), is(""));
+        assertThat(message.read("date").as(String.class), is("16/12/2006"));
+        assertThat(message.read("time").as(String.class), is("17:24:00"));
+        assertThat(message.read("sub_metering_3").as(Double.class), is(17.0));
+        assertThat(message.read("class").as(String.class), is("01"));
+        assertThat(message.read("building").as(String.class), is("01"));
+        assertThat(message.read("room").as(String.class), is("HZG"));
+
+        message = mis.next();
+        assertThat(message.type(), is(""));
+        assertThat(message.read("date").as(String.class), is("16/12/2006"));
+        assertThat(message.read("time").as(String.class), is("17:25:00"));
+        assertThat(message.read("sub_metering_3").as(Double.class), is(16.0));
+        assertThat(message.read("class").as(String.class), is("01"));
+        assertThat(message.read("building").as(String.class), is("01"));
+        assertThat(message.read("room").as(String.class), is("HZG"));
+
+        message = mis.next();
+        assertThat(message.type(), is("PowerConsumption"));
+        assertThat(message.read("date").as(String.class), is("16/12/2006"));
+        assertThat(message.read("time").as(String.class), is("17:26:00"));
+        assertThat(message.read("sub_metering_3").as(Double.class), is(17.0));
+        assertThat(message.read("class").as(String.class), is("01"));
+        assertThat(message.read("building").as(String.class), is("01"));
+        assertThat(message.read("room").as(String.class), is("HZG"));
+
+        message = mis.next();
+        assertThat(message, is(nullValue()));
+
+    }
 
     private InputStream inputStreamOf(String text) {
         return new ByteArrayInputStream(text.getBytes());
