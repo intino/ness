@@ -1,11 +1,16 @@
 package io.intino.ness.konos;
 
+import com.ullink.slack.simpleslackapi.SlackAttachment;
 import com.ullink.slack.simpleslackapi.SlackSession;
 import io.intino.konos.slack.Bot;
 import io.intino.konos.slack.Bot.MessageProperties;
 import io.intino.ness.Function;
 import io.intino.ness.Ness;
 import io.intino.ness.Topic;
+import io.intino.ness.bus.BusManager;
+import io.intino.ness.datalake.NessFunction;
+import io.intino.ness.datalake.NessFunctionContainer;
+import io.intino.ness.datalake.filesystem.FileDataLake;
 
 import java.io.IOException;
 import java.net.URL;
@@ -13,26 +18,47 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class NessieSlackBotActions {
+import static com.ullink.slack.simpleslackapi.SlackAction.TYPE_BUTTON;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.copyOfRange;
+
+final class NessieSlackBotActions {
 
 	private static Map<String, String> selectedTopicByUser = new HashMap<>();
 
 	static String help(NessBox box, MessageProperties properties, Map<String, Bot.CommandInfo> info) {
-		return "";
+		String help = "";
+		if (selectedTopicByUser.get(properties.username()) == null) {
+			for (String command : info.keySet())
+				if (!isComponent(info, command)) help += formatCommand(info, command);
+		} else for (String command : info.get("topic").components()) help += formatCommand(info, command);
+		return help;
 	}
 
-	public static void init(NessBox box, SlackSession session) {
+	static void init(NessBox box, SlackSession session) {
+	}
 
+	static String users(NessBox box, MessageProperties properties) {
+		Map<String, List<String>> users = box.get(BusManager.class).users();
+		StringBuilder builder = new StringBuilder();
+		for (String user : users.keySet()) {
+			builder.append(user);
+			List<String> groups = users.get(user);
+			if (!groups.isEmpty()) builder.append(" {").append(String.join(" ", groups)).append("}");
+			builder.append("\n");
+		}
+		String result = builder.toString();
+		return result.isEmpty() ? "There aren't users registered" : result;
 	}
 
 	static String topics(NessBox box, MessageProperties properties, String[] tags) {
-		Ness ness = box.graph().wrapper(Ness.class);
+		Ness ness = ness(box);
 		StringBuilder builder = new StringBuilder();
 		List<Topic> topics = ness.topicList();
 		for (int i = 0; i < topics.size(); i++) {
 			Topic topic = topics.get(i);
 			if (tags.length == 0 || isTagged(tags, topic.tags()))
-				builder.append(i).append(") ").append(topic.qualifiedName());
+				builder.append(i + 1).append(") ").append(topic.qualifiedName());
 			if (!topic.tags().isEmpty()) builder.append(" {").append(String.join(" ", topic.tags())).append("}");
 			builder.append("\n");
 		}
@@ -41,23 +67,42 @@ public class NessieSlackBotActions {
 	}
 
 	static String removeTopic(NessBox box, MessageProperties properties, String name) {
-		return "";
+		return box.get(BusManager.class).cleanTopic(name) ? ":ok:hand:" : "Topic not found";
 	}
 
-	private static boolean isTagged(String[] tags, List<String> topicTags) {
-		return Arrays.stream(tags).anyMatch(topicTags::contains);
+	static String addUser(NessBox box, MessageProperties properties, String name, String[] groups) {
+		String password = box.get(BusManager.class).addUser(name, asList(copyOfRange(groups, 1, groups.length)));
+		if (password == null) return "User already exists";
+		return "User *" + name + "* added with password `" + password + "`";
+	}
+
+	static String removeUser(NessBox box, MessageProperties properties, String name) {
+		return box.get(BusManager.class).removeUser(name) ? ":ok_hand:" : "User not found";
 	}
 
 	static String topic(NessBox box, MessageProperties properties, String name) {
-		Ness ness = box.graph().wrapper(Ness.class);
+		Ness ness = ness(box);
 		Topic topic = findTopic(name, ness);
 		if (topic == null) return "topic not found";
 		selectedTopicByUser.put(properties.username(), topic.qualifiedName());
-		return "Selected " + name;
+		return "Selected " + topic.qualifiedName();
+	}
+
+	static SlackAttachment clear(NessBox box, MessageProperties properties, String name) {
+		SlackAttachment attachment = new SlackAttachment("Are you sure to clear this topic?", "", "", "");
+		attachment.addAction("answer", "yes", "Yes", TYPE_BUTTON);
+		attachment.addAction("answer", "no", "No", TYPE_BUTTON);
+		return attachment;
+	}
+
+	static String rename(NessBox box, MessageProperties properties, String name) {
+		String topicName = selectedTopicByUser.get(properties.username());
+		if (topicName == null) return "Please select a topic";
+		return box.get(BusManager.class).renameTopic(topicName, name) ? ":ok_hand:" : "Impossible to rename topic";
 	}
 
 	static String functions(NessBox box, MessageProperties properties) {
-		Ness ness = box.graph().wrapper(Ness.class);
+		Ness ness = ness(box);
 		StringBuilder builder = new StringBuilder();
 		List<Function> topics = ness.functionList();
 		for (int i = 0; i < topics.size(); i++)
@@ -67,7 +112,7 @@ public class NessieSlackBotActions {
 	}
 
 	static String addFunction(NessBox box, MessageProperties properties, String name, String code) {
-		Ness ness = box.graph().wrapper(Ness.class);
+		Ness ness = ness(box);
 		String sourceCode = downloadFile(code);
 		List<Function> functions = ness.functionList(f -> f.name().equals(name));
 		if (!functions.isEmpty()) return "function name is already defined";
@@ -76,7 +121,7 @@ public class NessieSlackBotActions {
 	}
 
 	static String tag(NessBox box, MessageProperties properties, String[] tags) {
-		Ness ness = box.graph().wrapper(Ness.class);
+		Ness ness = ness(box);
 		String topicName = selectedTopicByUser.get(properties.username());
 		if (topicName == null) return "Please select a topic";
 		Topic topic = findTopic(topicName, ness);
@@ -86,18 +131,31 @@ public class NessieSlackBotActions {
 	}
 
 	static String pump(NessBox box, MessageProperties properties, String functionName, String input, String output) {
-		Ness ness = box.graph().wrapper(Ness.class);
+		NessFunctionContainer container = new NessFunctionContainer(box.get(FileDataLake.class));
+		container.pump(input).with(searchFunction(functionName)).into(output).start();
 		return ":ok_hand:";
+	}
+
+	private static Class<? extends NessFunction> searchFunction(String functionName) {
+		return null;
 	}
 
 	static String mount(NessBox box, MessageProperties properties, String since) {
-		Ness ness = box.graph().wrapper(Ness.class);
+		Ness ness = ness(box);
 		return ":ok_hand:";
 	}
 
-	static String consolidate(NessBox box, MessageProperties properties, String topic) {
-		Ness ness = box.graph().wrapper(Ness.class);
+	static String consolidate(NessBox box, MessageProperties properties) {
+		Ness ness = ness(box);
 		return ":ok_hand:";
+	}
+
+	private static Ness ness(NessBox box) {
+		return box.graph().wrapper(Ness.class);
+	}
+
+	private static boolean isTagged(String[] tags, List<String> topicTags) {
+		return Arrays.stream(tags).anyMatch(topicTags::contains);
 	}
 
 	private static Topic findTopic(String name, Ness ness) {
@@ -131,4 +189,18 @@ public class NessieSlackBotActions {
 			return "";
 		}
 	}
+
+	private static boolean isComponent(Map<String, Bot.CommandInfo> info, String command) {
+		for (Bot.CommandInfo commandInfo : info.values()) if (commandInfo.components().contains(command)) return true;
+		return false;
+	}
+
+	private static String formatCommand(Map<String, Bot.CommandInfo> info, String command) {
+		return "`" + command + helpParameters(info.get(command).parameters()) + "` " + info.get(command).description() + "\n";
+	}
+
+	private static String helpParameters(List<String> parameters) {
+		return parameters.isEmpty() ? "" : " <" + String.join("> <", parameters) + ">";
+	}
+
 }

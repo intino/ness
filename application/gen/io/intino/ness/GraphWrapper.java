@@ -1,11 +1,14 @@
 package io.intino.ness;
 
+import io.intino.tara.magritte.Graph;
+
 public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 
 	protected io.intino.tara.magritte.Graph graph;
 	private java.util.List<io.intino.ness.Function> functionList;
 	private java.util.List<io.intino.ness.Topic> topicList;
 	private java.util.List<io.intino.ness.Connection> connectionList;
+	private java.util.List<io.intino.ness.User> userList;
 
 	public GraphWrapper(io.intino.tara.magritte.Graph graph) {
 		this.graph = graph;
@@ -16,6 +19,7 @@ public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 		functionList = this.graph.rootList(io.intino.ness.Function.class);
 		topicList = this.graph.rootList(io.intino.ness.Topic.class);
 		connectionList = this.graph.rootList(io.intino.ness.Connection.class);
+		userList = this.graph.rootList(io.intino.ness.User.class);
 	}
 
 	@Override
@@ -23,6 +27,7 @@ public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 		if (node.is("Function")) this.functionList.add(node.as(io.intino.ness.Function.class));
 		if (node.is("Topic")) this.topicList.add(node.as(io.intino.ness.Topic.class));
 		if (node.is("Connection")) this.connectionList.add(node.as(io.intino.ness.Connection.class));
+		if (node.is("User")) this.userList.add(node.as(io.intino.ness.User.class));
 	}
 
 	@Override
@@ -30,6 +35,7 @@ public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 		if (node.is("Function")) this.functionList.remove(node.as(io.intino.ness.Function.class));
 		if (node.is("Topic")) this.topicList.remove(node.as(io.intino.ness.Topic.class));
 		if (node.is("Connection")) this.connectionList.remove(node.as(io.intino.ness.Connection.class));
+		if (node.is("User")) this.userList.remove(node.as(io.intino.ness.User.class));
 	}
 
 	public String message(String language, String key, Object... parameters) {
@@ -96,6 +102,10 @@ public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 		return connectionList;
 	}
 
+	public java.util.List<io.intino.ness.User> userList() {
+		return userList;
+	}
+
 	public java.util.List<io.intino.ness.Function> functionList(java.util.function.Predicate<io.intino.ness.Function> predicate) {
 		return functionList.stream().filter(predicate).collect(java.util.stream.Collectors.toList());
 	}
@@ -118,6 +128,14 @@ public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 
 	public io.intino.ness.Connection connection(int index) {
 		return connectionList.get(index);
+	}
+
+	public java.util.List<io.intino.ness.User> userList(java.util.function.Predicate<io.intino.ness.User> predicate) {
+		return userList.stream().filter(predicate).collect(java.util.stream.Collectors.toList());
+	}
+
+	public io.intino.ness.User user(int index) {
+		return userList.get(index);
 	}
 
 	public io.intino.tara.magritte.Graph graph() {
@@ -162,6 +180,13 @@ public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 			newElement.node().set(newElement, "faucet", java.util.Collections.singletonList(faucet));
 			newElement.node().set(newElement, "flooder", java.util.Collections.singletonList(flooder));
 			newElement.node().set(newElement, "plug", java.util.Collections.singletonList(plug));
+			return newElement;
+		}
+
+		public io.intino.ness.User user(java.lang.String password, java.util.List<java.lang.String> groups) {
+			io.intino.ness.User newElement = GraphWrapper.this.graph.createRoot(io.intino.ness.User.class, namespace, name).as(io.intino.ness.User.class);
+			newElement.node().set(newElement, "password", java.util.Collections.singletonList(password));
+			newElement.node().set(newElement, "groups", groups);
 			return newElement;
 		}
 

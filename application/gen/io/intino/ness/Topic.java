@@ -5,11 +5,6 @@ import io.intino.ness.*;
 
 public class Topic extends io.intino.tara.magritte.Layer implements io.intino.tara.magritte.tags.Terminal {
 	protected java.lang.String qualifiedName;
-	protected Status status;
-
-	public enum Status {
-		Active, Inactive;
-	}
 	protected java.util.List<java.lang.String> tags = new java.util.ArrayList<>();
 
 	public Topic(io.intino.tara.magritte.Node node) {
@@ -18,10 +13,6 @@ public class Topic extends io.intino.tara.magritte.Layer implements io.intino.ta
 
 	public java.lang.String qualifiedName() {
 		return qualifiedName;
-	}
-
-	public Status status() {
-		return status;
 	}
 
 	public java.util.List<java.lang.String> tags() {
@@ -40,15 +31,10 @@ public class Topic extends io.intino.tara.magritte.Layer implements io.intino.ta
 		this.qualifiedName = value;
 	}
 
-	public void status(io.intino.ness.Topic.Status value) {
-		this.status = value;
-	}
-
 	@Override
 	public java.util.Map<java.lang.String, java.util.List<?>> variables() {
 		java.util.Map<String, java.util.List<?>> map = new java.util.LinkedHashMap<>();
 		map.put("qualifiedName", new java.util.ArrayList(java.util.Collections.singletonList(this.qualifiedName)));
-		map.put("status", new java.util.ArrayList(java.util.Collections.singletonList(this.status)));
 		map.put("tags", this.tags);
 		return map;
 	}
@@ -61,7 +47,6 @@ public class Topic extends io.intino.tara.magritte.Layer implements io.intino.ta
 	protected void _load(java.lang.String name, java.util.List<?> values) {
 		super._load(name, values);
 		if (name.equalsIgnoreCase("qualifiedName")) this.qualifiedName = io.intino.tara.magritte.loaders.StringLoader.load(values, this).get(0);
-		else if (name.equalsIgnoreCase("status")) this.status = io.intino.tara.magritte.loaders.WordLoader.load(values, Status.class, this).get(0);
 		else if (name.equalsIgnoreCase("tags")) this.tags = io.intino.tara.magritte.loaders.StringLoader.load(values, this);
 	}
 
@@ -69,7 +54,6 @@ public class Topic extends io.intino.tara.magritte.Layer implements io.intino.ta
 	protected void _set(java.lang.String name, java.util.List<?> values) {
 		super._set(name, values);
 		if (name.equalsIgnoreCase("qualifiedName")) this.qualifiedName = (java.lang.String) values.get(0);
-		else if (name.equalsIgnoreCase("status")) this.status = (Status) values.get(0);
 		else if (name.equalsIgnoreCase("tags")) this.tags = new java.util.ArrayList<>((java.util.List<java.lang.String>) values);
 	}
 
