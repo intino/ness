@@ -2,7 +2,7 @@ package io.intino.ness.konos;
 
 import io.intino.ness.Ness;
 import io.intino.ness.TopicManager;
-import io.intino.ness.datalake.filesystem.FileDataLake;
+import io.intino.ness.datalake.FileDataLake;
 import io.intino.tara.magritte.Graph;
 import io.intino.tara.magritte.Store;
 import io.intino.tara.magritte.stores.InMemoryFileStore;

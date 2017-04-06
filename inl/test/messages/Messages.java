@@ -164,8 +164,8 @@ public class Messages {
                 "    at android.app.ActivityThread.main(ActivityThread.java:5666)\n" +
                 "    at java.lang.reflect.Method.invoke(Native Method)\n" +
                 "    at java.lang.reflect.Method.invoke(Method.java:372)\n" +
-                "    at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:959)\n" +
-                "    at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:754)";
+                "    at com.android.compiler.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:959)\n" +
+                "    at com.android.compiler.os.ZygoteInit.main(ZygoteInit.java:754)";
     }
 
     private static String indent(String text) {

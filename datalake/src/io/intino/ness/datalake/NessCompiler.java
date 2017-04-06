@@ -1,8 +1,8 @@
 package io.intino.ness.datalake;
 
-import io.intino.ness.datalake.internal.NessClassLoader;
-import io.intino.ness.datalake.internal.NessFileManager;
-import io.intino.ness.datalake.internal.JavaSourceFile;
+import io.intino.ness.datalake.compiler.NessClassLoader;
+import io.intino.ness.datalake.compiler.NessFileManager;
+import io.intino.ness.datalake.compiler.JavaSourceFile;
 
 import java.util.*;
 
@@ -72,7 +72,7 @@ public class NessCompiler {
 
     private JavaCompiler checkTools(JavaCompiler compiler) {
         if (compiler != null) return compiler;
-        throw new IllegalStateException("Cannot find the system Java internal. " + "Check that your class path includes tools.jar");
+        throw new IllegalStateException("Cannot find the system Java compiler. " + "Check that your class path includes tools.jar");
     }
 
     public static class Exception extends RuntimeException {

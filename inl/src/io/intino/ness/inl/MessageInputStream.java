@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static io.intino.ness.inl.Accessory.*;
@@ -84,11 +86,11 @@ public interface MessageInputStream {
 
     class Csv implements MessageInputStream {
         protected BufferedReader reader;
-        protected String[] header;
+        protected String[] headers;
 
         public Csv(InputStream is) {
             this.reader = new BufferedReader(new InputStreamReader(is), 65536);
-            this.header = nextRow();
+            this.headers = nextRow();
         }
 
         @Override
@@ -96,8 +98,8 @@ public interface MessageInputStream {
             String[] data = nextRow();
             if (data.length == 0) return null;
             Message message = new Message("");
-            for (int i = 0; i < Math.min(data.length, header.length); i++)
-                message.write(header[i].trim(), data[i].trim());
+            for (int i = 0; i < Math.min(data.length, headers.length); i++)
+                message.write(headers[i].trim(), data[i].trim());
             return message;
         }
 
@@ -117,15 +119,34 @@ public interface MessageInputStream {
 
         public Dat(InputStream is) {
             super(is);
-            this.data = header[0].split("[ =]");
-            this.header = nextRow();
+            this.data = parse(headers);
+            this.headers = nextRow();
+        }
+
+        private String[] parse(String[] headers) {
+            List<String> data = new ArrayList<>();
+            for (String header : headers) {
+                data.addAll(parse(header.trim()));
+            }
+            return data.toArray(new String[data.size()]);
+        }
+
+        private List<String> parse(String header) {
+            List<String> data = new ArrayList<>();
+            for (String str : header.split(" ")) {
+                int index = str.indexOf('=');
+                if (index < 0) continue;
+                data.add(str.substring(0,index));
+                data.add(str.substring(index+1));
+            }
+            return data;
         }
 
         @Override
         public Message next() {
             Message message = super.next();
             if (message == null) return null;
-            if (!isOdd(data.length)) return null;
+            if (!isOdd(data.length)) return message;
             for (int i = 0; i < data.length; i+=2)
                 message.write(data[i], data[i+1]);
             return message;

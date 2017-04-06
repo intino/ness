@@ -12,11 +12,13 @@ public class FileMessageInputStream {
 
     public static MessageInputStream of(File file) {
         Format format = formatOf(file);
-        if (format == inl) return new Inl(streamOf(file));
+        if (format == sealed) return new Inl(streamOf(file));
+        if (format == feeding) return new Inl(new SortingInputStream(streamOf(file)));
         if (format == dat) return new Dat(streamOf(file));
         if (format == csv) return new Csv(streamOf(file));
         return messageInputStream();
     }
+
 
     private static InputStream streamOf(File file) {
         try {
@@ -61,12 +63,12 @@ public class FileMessageInputStream {
     private static Map<String, Format> formats = new HashMap<>();
 
     public enum Format {
-        inl, csv, dat, unknown
+        feeding, sealed, csv, dat, unknown
     }
 
     static {
-        formats.put(".zip", inl);
-        formats.put(".inl", inl);
+        formats.put(".feed.zip", feeding);
+        formats.put(".zip", sealed);
         formats.put(".csv", csv);
         formats.put(".dat", dat);
     }
