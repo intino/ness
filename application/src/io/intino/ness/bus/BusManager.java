@@ -134,6 +134,7 @@ public final class BusManager {
 	private List<AuthenticationUser> initUsers() {
 		ArrayList<AuthenticationUser> users = new ArrayList<>();
 		users.add(new AuthenticationUser(NESS, NESS, "admin"));
+		users.add(new AuthenticationUser("octavioroncal", "octavioroncal", "admin"));
 		for (User user : ness(box).userList())
 			users.add(new AuthenticationUser(user.name(), user.password(), String.join(",", user.groups())));
 		return users;

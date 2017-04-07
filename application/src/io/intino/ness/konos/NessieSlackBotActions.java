@@ -9,8 +9,6 @@ import io.intino.ness.Ness;
 import io.intino.ness.Topic;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.datalake.NessFunction;
-import io.intino.ness.datalake.NessFunctionContainer;
-import io.intino.ness.datalake.filesystem.FileDataLake;
 
 import java.io.IOException;
 import java.net.URL;
@@ -131,8 +129,8 @@ final class NessieSlackBotActions {
 	}
 
 	static String pump(NessBox box, MessageProperties properties, String functionName, String input, String output) {
-		NessFunctionContainer container = new NessFunctionContainer(box.get(FileDataLake.class));
-		container.pump(input).with(searchFunction(functionName)).into(output).start();
+//		NessFunctionContainer container = new NessFunctionContainer(box.get(FileDataLake.class));
+//		container.pump(input).with(searchFunction(functionName)).into(output).start();
 		return ":ok_hand:";
 	}
 

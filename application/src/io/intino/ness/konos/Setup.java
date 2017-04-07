@@ -1,7 +1,7 @@
 package io.intino.ness.konos;
 
 import io.intino.ness.bus.BusManager;
-import io.intino.ness.datalake.filesystem.FileDataLake;
+import io.intino.ness.datalake.FileDataLake;
 import io.intino.tara.io.Stash;
 import io.intino.tara.magritte.Graph;
 import io.intino.tara.magritte.Store;
