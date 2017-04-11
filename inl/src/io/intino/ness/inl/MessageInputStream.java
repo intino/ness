@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static io.intino.ness.inl.Accessory.*;
@@ -13,11 +12,11 @@ import static io.intino.ness.inl.Accessory.*;
 public interface MessageInputStream {
     Message next();
 
-    class Inl implements MessageInputStream {
+    class Inz implements MessageInputStream {
         private BufferedReader reader;
         private Message message;
 
-        public Inl(InputStream is) {
+        public Inz(InputStream is) {
             this.reader = new BufferedReader(new InputStreamReader(is), 65536);
             this.message = createMessage(typeIn(nextLine()), null);
         }
@@ -64,8 +63,10 @@ public interface MessageInputStream {
         private Message ownerIn(String line) {
             if (!line.contains(".")) return null;
             Message result = message;
-            for (int i = 1; i < pathOf(line).length - 1; i++)
+            for (int i = 1; i < pathOf(line).length - 1; i++) {
+                assert result != null;
                 result = lastItemOf(result.components);
+            }
             return result;
         }
 
@@ -93,10 +94,15 @@ public interface MessageInputStream {
             this.headers = nextRow();
         }
 
+
         @Override
         public Message next() {
-            String[] data = nextRow();
-            if (data.length == 0) return null;
+            String[] data;
+            do {
+                data = nextRow();
+                if (data == null) return null;
+            }
+            while (data.length == 0);
             Message message = new Message("");
             for (int i = 0; i < Math.min(data.length, headers.length); i++)
                 message.write(headers[i].trim(), data[i].trim());
@@ -106,11 +112,28 @@ public interface MessageInputStream {
         protected String[] nextRow() {
             try {
                 String line = reader.readLine();
-                return line != null ? line.split(";") : new String[0];
+                return line != null ? line.split(";") : null;
             } catch (IOException e) {
-                return new String[0];
+                return null;
             }
         }
+    }
+
+    class Tsv extends Csv {
+
+        public Tsv(InputStream is) {
+            super(is);
+        }
+
+        protected String[] nextRow() {
+            try {
+                String line = reader.readLine();
+                return line != null ? line.split("\\t") : null;
+            } catch (IOException e) {
+                return null;
+            }
+        }
+
     }
 
     class Dat extends Csv {

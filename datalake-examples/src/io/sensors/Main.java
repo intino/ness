@@ -1,4 +1,4 @@
-package iot.sensors;
+package io.sensors;
 
 import io.intino.ness.datalake.*;
 

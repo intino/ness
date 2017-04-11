@@ -1,4 +1,4 @@
-package iot.fracfocus;
+package io.fracfocus;
 
 import io.intino.ness.datalake.NessDataLake;
 import io.intino.ness.datalake.NessFunction;
@@ -11,6 +11,9 @@ public class Main {
     public static void main(String[] args) throws Exception {
         NessDataLake dataLake = new FileDataLake("datalake-examples/local.store");
         NessPump pump = new NessPump(dataLake);
+        pump.plug("legacy.frac.usa.Job")
+            .with(ImportFracJobFunction.class)
+            .into("feeding.frac.usa.Job.1");
         pump.plug("legacy.frac.usa.Job")
             .with(ImportFracJobFunction.class)
             .into("feeding.frac.usa.Job.1");
@@ -43,7 +46,7 @@ public class Main {
         }
 
         private String read(Message input, String attribute) {
-            return check(input.read(attribute).as(String.class));
+            return check(input.parse(attribute).as(String.class));
         }
 
         private String check(String value) {

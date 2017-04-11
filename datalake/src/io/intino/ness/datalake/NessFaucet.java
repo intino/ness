@@ -75,13 +75,21 @@ public class NessFaucet {
             private String get(Message message) {
                 if (message == null) return null;
                 if (!message.contains("ts")) throw new Exception("Legacy topics with multiple datafiles require a timestamp generator function");
-                return message.read("ts").as(String.class);
+                return message.parse("ts").as(String.class);
             }
         };
     }
 
     private MessageInputStream emptyMessageInputStream() {
         return () -> null;
+    }
+
+    public String name() {
+        return topic.name();
+    }
+
+    public boolean isEmpty() {
+        return topic.reservoirs().isEmpty();
     }
 
 

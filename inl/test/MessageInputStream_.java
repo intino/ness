@@ -16,7 +16,7 @@ public class MessageInputStream_ {
     @Test
     public void should_parse_multiple_messages() throws Exception {
         InputStream is = inputStreamOf(status());
-        MessageInputStream messageInputStream = new MessageInputStream.Inl(is);
+        MessageInputStream messageInputStream = new MessageInputStream.Inz(is);
         Message[] messages = new Message[3];
         messages[0] = messageInputStream.next();
         messages[1] = messageInputStream.next();
@@ -26,50 +26,50 @@ public class MessageInputStream_ {
         assertThat(messages[0].contains("isPlugged"), is(true));
         assertThat(messages[0].contains("created"), is(true));
         assertThat(messages[0].contains("xxxx"), is(false));
-        assertThat(messages[0].read("battery").as(Double.class), is(78.0));
-        assertThat(messages[0].read("isPlugged").as(Boolean.class), is(true));
-        assertThat(messages[0].read("created").as(Date.class).toString(), is("Wed Mar 22 12:56:18 GMT 2017"));
+        assertThat(messages[0].parse("battery").as(Double.class), is(78.0));
+        assertThat(messages[0].parse("isPlugged").as(Boolean.class), is(true));
+        assertThat(messages[0].parse("created").as(Date.class).toString(), is("Wed Mar 22 12:56:18 GMT 2017"));
         assertThat(messages[2], is(nullValue()));
     }
 
     @Test
     public void should_ignore_empty_attributes() throws Exception {
         InputStream is = inputStreamOf(messageWithEmptyAttributes());
-        Message message = new MessageInputStream.Inl(is).next();
+        Message message = new MessageInputStream.Inz(is).next();
         assertThat(message.is("teacher"), is(true));
         assertThat(message.contains("name"), is(true));
         assertThat(message.contains("money"), is(true));
         assertThat(message.contains("BirthDate"), is(true));
         assertThat(message.components("country").get(0).contains("name"), is(true));
         assertThat(message.components("country").get(0).contains("continent"), is(false));
-        assertThat(message.components("country").get(0).read("name").as(String.class), is("Spain"));
-        assertThat(message.components("country").get(0).read("continent").as(String.class), is(nullValue()));
+        assertThat(message.components("country").get(0).parse("name").as(String.class), is("Spain"));
+        assertThat(message.components("country").get(0).parse("continent").as(String.class), is(nullValue()));
 
     }
 
     @Test
     public void should_parse_multiline_attributes() throws Exception {
         InputStream is = inputStreamOf(crash());
-        Message message = new MessageInputStream.Inl(is).next();
+        Message message = new MessageInputStream.Inz(is).next();
         assertThat(message.type(), is("crash"));
         assertThat(message.contains("instant"), is(true));
         assertThat(message.contains("app"), is(true));
         assertThat(message.contains("deviceId"), is(true));
         assertThat(message.contains("stack"), is(true));
-        assertThat(message.read("instant").as(Date.class).toString(), is("Tue Mar 21 07:39:00 GMT 2017"));
-        assertThat(message.read("app").as(String.class), is("io.intino.consul"));
-        assertThat(message.read("deviceId").as(String.class), is("b367172b0c6fe726"));
-        assertThat(message.read("stack").as(String.class), is(stack().trim()));
+        assertThat(message.parse("instant").as(Date.class).toString(), is("Tue Mar 21 07:39:00 GMT 2017"));
+        assertThat(message.parse("app").as(String.class), is("io.intino.consul"));
+        assertThat(message.parse("deviceId").as(String.class), is("b367172b0c6fe726"));
+        assertThat(message.parse("stack").as(String.class), is(stack().trim()));
     }
 
     @Test
     public void should_parse_message_with_multiple_components() throws Exception {
         InputStream is = inputStreamOf(messageWithMultipleComponents());
-        Message message = new MessageInputStream.Inl(is).next();
+        Message message = new MessageInputStream.Inz(is).next();
         assertThat(message.type(), is("Teacher"));
         assertThat(message.components("country").size(), is(1));
         assertThat(message.components("country").get(0).type(), is("Country"));
-        assertThat(message.components("country").get(0).read("name").as(String.class), is("Spain"));
+        assertThat(message.components("country").get(0).parse("name").as(String.class), is("Spain"));
         assertThat(message.components("phone").size(), is(2));
         assertThat(message.toString(), is(messageWithMultipleComponents().trim()));
     }
@@ -77,12 +77,12 @@ public class MessageInputStream_ {
     @Test
     public void should_parse_message_in_old_format() throws Exception {
         InputStream is = inputStreamOf(messageInOldFormat());
-        Message message = new MessageInputStream.Inl(is).next();
+        Message message = new MessageInputStream.Inz(is).next();
         assertThat(message.type(), is("ActiveTeacher"));
-        assertThat(message.read("name").as(String.class), is("Jose"));
+        assertThat(message.parse("name").as(String.class), is("Jose"));
         assertThat(message.components("country").size(), is(1));
         assertThat(message.components("country").get(0).type(), is("Country"));
-        assertThat(message.components("country").get(0).read("name").as(String.class), is("Spain"));
+        assertThat(message.components("country").get(0).parse("name").as(String.class), is("Spain"));
 
         message.type("Teacher");
         assertThat(message.toString(), is(messageWithParentClass().trim()));
@@ -94,21 +94,21 @@ public class MessageInputStream_ {
         MessageInputStream.Csv mis = new MessageInputStream.Csv(is);
         Message message = mis.next();
         assertThat(message.type(), is(""));
-        assertThat(message.read("date").as(String.class), is("16/12/2006"));
-        assertThat(message.read("time").as(String.class), is("17:24:00"));
-        assertThat(message.read("sub_metering_3").as(Double.class), is(17.0));
+        assertThat(message.parse("date").as(String.class), is("16/12/2006"));
+        assertThat(message.parse("time").as(String.class), is("17:24:00"));
+        assertThat(message.parse("sub_metering_3").as(Double.class), is(17.0));
 
         message = mis.next();
         assertThat(message.type(), is(""));
-        assertThat(message.read("date").as(String.class), is("16/12/2006"));
-        assertThat(message.read("time").as(String.class), is("17:25:00"));
-        assertThat(message.read("sub_metering_3").as(Double.class), is(16.0));
+        assertThat(message.parse("date").as(String.class), is("16/12/2006"));
+        assertThat(message.parse("time").as(String.class), is("17:25:00"));
+        assertThat(message.parse("sub_metering_3").as(Double.class), is(16.0));
 
         message = mis.next();
         assertThat(message.type(), is(""));
-        assertThat(message.read("date").as(String.class), is("16/12/2006"));
-        assertThat(message.read("time").as(String.class), is("17:26:00"));
-        assertThat(message.read("sub_metering_3").as(Double.class), is(17.0));
+        assertThat(message.parse("date").as(String.class), is("16/12/2006"));
+        assertThat(message.parse("time").as(String.class), is("17:26:00"));
+        assertThat(message.parse("sub_metering_3").as(Double.class), is(17.0));
 
         message = mis.next();
         assertThat(message, is(nullValue()));
@@ -121,30 +121,30 @@ public class MessageInputStream_ {
         MessageInputStream.Dat mis = new MessageInputStream.Dat(is);
         Message message = mis.next();
         assertThat(message.type(), is(""));
-        assertThat(message.read("date").as(String.class), is("16/12/2006"));
-        assertThat(message.read("time").as(String.class), is("17:24:00"));
-        assertThat(message.read("sub_metering_3").as(Double.class), is(17.0));
-        assertThat(message.read("class").as(String.class), is("01"));
-        assertThat(message.read("building").as(String.class), is("01"));
-        assertThat(message.read("room").as(String.class), is("HZG"));
+        assertThat(message.parse("date").as(String.class), is("16/12/2006"));
+        assertThat(message.parse("time").as(String.class), is("17:24:00"));
+        assertThat(message.parse("sub_metering_3").as(Double.class), is(17.0));
+        assertThat(message.parse("class").as(String.class), is("01"));
+        assertThat(message.parse("building").as(String.class), is("01"));
+        assertThat(message.parse("room").as(String.class), is("HZG"));
 
         message = mis.next();
         assertThat(message.type(), is(""));
-        assertThat(message.read("date").as(String.class), is("16/12/2006"));
-        assertThat(message.read("time").as(String.class), is("17:25:00"));
-        assertThat(message.read("sub_metering_3").as(Double.class), is(16.0));
-        assertThat(message.read("class").as(String.class), is("01"));
-        assertThat(message.read("building").as(String.class), is("01"));
-        assertThat(message.read("room").as(String.class), is("HZG"));
+        assertThat(message.parse("date").as(String.class), is("16/12/2006"));
+        assertThat(message.parse("time").as(String.class), is("17:25:00"));
+        assertThat(message.parse("sub_metering_3").as(Double.class), is(16.0));
+        assertThat(message.parse("class").as(String.class), is("01"));
+        assertThat(message.parse("building").as(String.class), is("01"));
+        assertThat(message.parse("room").as(String.class), is("HZG"));
 
         message = mis.next();
         assertThat(message.type(), is("PowerConsumption"));
-        assertThat(message.read("date").as(String.class), is("16/12/2006"));
-        assertThat(message.read("time").as(String.class), is("17:26:00"));
-        assertThat(message.read("sub_metering_3").as(Double.class), is(17.0));
-        assertThat(message.read("class").as(String.class), is("01"));
-        assertThat(message.read("building").as(String.class), is("01"));
-        assertThat(message.read("room").as(String.class), is("HZG"));
+        assertThat(message.parse("date").as(String.class), is("16/12/2006"));
+        assertThat(message.parse("time").as(String.class), is("17:26:00"));
+        assertThat(message.parse("sub_metering_3").as(Double.class), is(17.0));
+        assertThat(message.parse("class").as(String.class), is("01"));
+        assertThat(message.parse("building").as(String.class), is("01"));
+        assertThat(message.parse("room").as(String.class), is("HZG"));
 
         message = mis.next();
         assertThat(message, is(nullValue()));

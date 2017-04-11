@@ -14,10 +14,17 @@
         <outputRelativeToContentRoot value="true" />
         <module name="inl7" />
       </profile>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="tgs" />
+      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="inl7" target="1.7" />
       <module name="inl8" target="1.8" />
+      <module name="tgs" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

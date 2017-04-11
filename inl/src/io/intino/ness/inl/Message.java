@@ -3,6 +3,8 @@ package io.intino.ness.inl;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.intino.ness.inl.Deserializer.*;
+
 public class Message {
     String type;
     Message owner;
@@ -13,7 +15,7 @@ public class Message {
         this.type = type;
         this.owner = null;
         this.attributes = new ArrayList<>();
-        this.components = new ArrayList<>();
+        this.components = null;
     }
 
     Message(String type, Message owner) {
@@ -31,11 +33,26 @@ public class Message {
         return type.equalsIgnoreCase(this.type);
     }
 
+    public <T> T as(Class<T> type) {
+        return deserialize(toString()).next(type);
+    }
+
     public void type(String type) {
         this.type = type;
     }
 
-    public Data read(final String attribute) {
+    public String read(String attribute) {
+        return valueOf(attribute);
+    }
+
+    public void write(String attribute, String value) {
+        if (contains(attribute))
+            get(attribute).value = value;
+        else
+        if (value != null) attributes.add(new Attribute(attribute,value));
+    }
+
+    public Data parse(final String attribute) {
         return new Data() {
             @Override @SuppressWarnings("unchecked")
             public <T> T as(Class<T> type) {
@@ -47,13 +64,6 @@ public class Message {
 
     void write(Attribute attribute) {
         write(attribute.name, attribute.value);
-    }
-
-    public void write(String attribute, String value) {
-        if (contains(attribute))
-            get(attribute).value = value;
-        else
-            if (value != null) attributes.add(new Attribute(attribute,value));
     }
 
     public void write(String attribute, Boolean value) {
@@ -104,6 +114,7 @@ public class Message {
     }
 
     public void add(Message component) {
+        if (components == null) components = new ArrayList<>();
         components.add(component);
         component.owner = this;
     }
@@ -120,12 +131,21 @@ public class Message {
     public String toString() {
         String result = "[" + path() + "]" ;
         for (Attribute attribute : attributes) result += "\n" + attribute.toString();
-        for (Message component : components) result += "\n\n" + component.toString();
+        for (Message component : components()) result += "\n\n" + component.toString();
         return result;
+    }
+
+    private List<Message> components() {
+        return components == null ? new ArrayList<Message>() : components;
     }
 
     private String path() {
         return owner != null ? owner.path() + "." + type : type;
+    }
+
+    private static Message empty = new Message("");
+    public static Message empty() {
+        return empty;
     }
 
     public interface Data {

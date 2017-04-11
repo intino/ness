@@ -7,6 +7,8 @@ import io.intino.ness.inl.Message;
 import java.io.IOException;
 import java.time.Instant;
 
+import static io.intino.ness.inl.Message.empty;
+
 public class NessFeeder {
     private final Topic topic;
     private final Writer writer;
@@ -17,12 +19,12 @@ public class NessFeeder {
     }
 
     public void pump(Message message) throws IOException {
-        if (message == null) return;
+        if (message == empty()) return;
         writer.write(message);
     }
 
     public void feed(Message message) throws IOException {
-        if (message == null) return;
+        if (message == empty()) return;
         writer.write(message);
     }
 
@@ -58,7 +60,7 @@ public class NessFeeder {
         }
 
         private Instant tsOf(Message message) {
-            return message.read("ts").as(Instant.class);
+            return message.parse("ts").as(Instant.class);
         }
 
 

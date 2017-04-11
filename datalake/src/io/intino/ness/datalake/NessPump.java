@@ -104,6 +104,7 @@ public class NessPump {
         }
 
         private void execute(NessFaucet faucet) {
+            if (faucet.isEmpty()) throw new RuntimeException(faucet.name() + " is empty");
             List<Plug> plugs = plugsOf(faucet);
             while (running) {
                 Message message = faucet.next();
@@ -128,7 +129,6 @@ public class NessPump {
         }
 
     }
-
 
     static  {
         Inl.init();

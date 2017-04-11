@@ -18,7 +18,7 @@ public class Message_ {
     @Before
     public void setUp() throws Exception {
         InputStream is = inputStreamOf(status());
-        message = new MessageInputStream.Inl(is).next();
+        message = new MessageInputStream.Inz(is).next();
     }
 
     @Test
@@ -26,7 +26,7 @@ public class Message_ {
         message.write("battery", 80.0);
         message.write("isPlugged", true);
         message.write("taps", 100);
-        assertThat(message.read("battery").as(Double.class), is(80.0));
+        assertThat(message.parse("battery").as(Double.class), is(80.0));
         assertThat(message.toString(), is("[Status]\nbattery: 80.0\ncpuUsage: 11.95\nisPlugged: true\nisScreenOn: false\ntemperature: 29.0\ncreated: 2017-03-22T12:56:18Z\ntaps: 100"));
     }
 
@@ -59,7 +59,7 @@ public class Message_ {
     @Test
     public void should_add_and_remove_components() throws Exception {
         InputStream is = inputStreamOf(messageWithMultipleComponents());
-        Message message = new MessageInputStream.Inl(is).next();
+        Message message = new MessageInputStream.Inz(is).next();
 
         message.remove(message.components("phone").get(0));
         assertThat(message.components("phone").size(), is(1));

@@ -3,3 +3,4 @@ out/
 .idea/workspace.xml
 .idea/libraries/
 *.conf
+*.class
