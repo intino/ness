@@ -1,6 +1,6 @@
 dsl Legio
 
-Project(groupId = "io.intino.ness", version = "1.0.0") inl-java8
+Project(groupId = "io.intino.ness", version = "1.0.1") inl-java8
 	Repositories
 		Release("https://artifactory.intino.io/artifactory/releases", "intino-maven")
 
