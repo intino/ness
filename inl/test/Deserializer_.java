@@ -62,8 +62,8 @@ public class Deserializer_ {
 	}
 
 	@Test
-	public void should_deserialize_null_valued_array_attributes() throws Exception {
-		Menu menu = deserialize(nullMenu()).next(Menu.class);
+	public void should_deserialize_array_attributes_with_null_values() throws Exception {
+		Menu menu = deserialize(menuWithNullValues()).next(Menu.class);
 		assertThat(menu.meals.length, is(4));
 		assertThat(menu.prices.length, is(4));
 		assertThat(menu.availability.length, is(2));

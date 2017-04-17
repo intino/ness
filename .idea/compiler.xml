@@ -18,10 +18,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="tgs" />
+        <module name="datalake-examples" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="datalake-examples" target="1.8" />
       <module name="inl7" target="1.7" />
       <module name="inl8" target="1.8" />
       <module name="tgs" target="1.8" />

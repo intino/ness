@@ -1,11 +1,13 @@
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageInputStream;
+import io.intino.ness.inl.MessageInputStreamFormat;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import static io.intino.ness.inl.MessageInputStreamFormat.*;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static messages.Messages.messageWithMultipleComponents;
@@ -18,7 +20,7 @@ public class Message_ {
     @Before
     public void setUp() throws Exception {
         InputStream is = inputStreamOf(status());
-        message = new MessageInputStream.Inz(is).next();
+        message = Inl.of("test", is).next();
     }
 
     @Test
@@ -59,7 +61,7 @@ public class Message_ {
     @Test
     public void should_add_and_remove_components() throws Exception {
         InputStream is = inputStreamOf(messageWithMultipleComponents());
-        Message message = new MessageInputStream.Inz(is).next();
+        Message message = Inl.of("test", is).next();
 
         message.remove(message.components("phone").get(0));
         assertThat(message.components("phone").size(), is(1));
@@ -75,6 +77,17 @@ public class Message_ {
         message.components("phone").get(0).components("country").get(0).write("name","Spain");
         message.type("Professor");
         assertThat(message.toString(), is("[Professor]\nname: Jose\nmoney: 50.0\nbirthDate: 2016-10-04T20:10:11Z\nuniversity: ULPGC\n\n[Professor.Country]\nname: Spain\n\n[Professor.phone]\nvalue: +345101023\n\n[Professor.phone.Country]\nname: Spain"));
+    }
+
+    @Test
+    public void should_serialize_and_deserialize_multiline_attributes() throws Exception {
+        Message message = new Message("Multiline");
+        message.write("comment", "hello\nworld\n!!!");
+        byte[] bytes = message.toString().getBytes();
+        MessageInputStream stream = Inl.of("test", new ByteArrayInputStream(bytes));
+        Message parsed = stream.next();
+        assertThat(parsed.read("comment"), is("hello\nworld\n!!!"));
+
 
     }
 

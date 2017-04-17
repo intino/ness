@@ -3,7 +3,7 @@
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
-        <option value="$PROJECT_DIR$/tgs/pom.xml" />
+        <option value="$PROJECT_DIR$/datalake-examples/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

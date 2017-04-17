@@ -16,9 +16,9 @@ import static java.util.stream.Collectors.toList;
 public class NessCompiler {
 
     private final List<JavaSourceFile> sources;
+    private final DiagnosticCollector<JavaFileObject> diagnostics;
     private final JavaCompiler compiler;
     private final NessClassLoader classLoader;
-    private final DiagnosticCollector<JavaFileObject> diagnostics;
     private final List<String> options;
 
     private NessCompiler(List<JavaSourceFile> sources) {

@@ -8,7 +8,6 @@
       <module fileurl="file://$PROJECT_DIR$/inl/inl.iml" filepath="$PROJECT_DIR$/inl/inl.iml" group="inl" />
       <module fileurl="file://$PROJECT_DIR$/inl7/inl7.iml" filepath="$PROJECT_DIR$/inl7/inl7.iml" group="inl" />
       <module fileurl="file://$PROJECT_DIR$/inl8/inl8.iml" filepath="$PROJECT_DIR$/inl8/inl8.iml" group="inl" />
-      <module fileurl="file://$PROJECT_DIR$/tgs/tgs.iml" filepath="$PROJECT_DIR$/tgs/tgs.iml" />
     </modules>
   </component>
 </project>

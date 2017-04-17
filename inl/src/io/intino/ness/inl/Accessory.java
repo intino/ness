@@ -7,11 +7,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static java.lang.reflect.Array.set;
 import static java.util.Arrays.asList;
 
 class Accessory {
 
-	private static final String NULL_VALUE = "\0";
+	private static final String NullValue = "\0";
 
 	interface Parser {
 		Object parse(String text);
@@ -243,7 +244,7 @@ class Accessory {
 	}
 
 	private static String formatText(Object text) {
-		return text == null ? NULL_VALUE : text.toString().contains("\n") ? "\n" + text.toString().replaceAll("\n", "\t\n") + "\n" : text.toString();
+		return text == null ? NullValue : text.toString().contains("\n") ? "\n" + text.toString().replaceAll("\n", "\t\n") + "\n" : text.toString();
 	}
 
 	private static Date parseDate(final String text) {
@@ -268,7 +269,7 @@ class Accessory {
 		public String format(Object o) {
 			String result = "";
 			for (Object item : (Object[]) o)
-				result += "\n\t" + (item == null ? NULL_VALUE : formatter.format(item));
+				result += "\n\t" + (item == null ? NullValue : formatter.format(item));
 			return result;
 		}
 	}
@@ -291,7 +292,7 @@ class Accessory {
 			String[] lines = text.split("\n");
 			Object result = Array.newInstance(type, lines.length);
 			for (int i = 0; i < lines.length; i++) {
-				Array.set(result, i, (lines[i].equals(NULL_VALUE) ? null : parser.parse(lines[i])));
+				set(result, i, (NullValue.equals(lines[i]) ? null : parser.parse(lines[i])));
 			}
 			return result;
 		}

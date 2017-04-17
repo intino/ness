@@ -33,7 +33,7 @@ public class Serializer_ {
 	@Test
 	public void should_serialize_array_attribute_with_null_values_of_a_class() throws Exception {
 		Menu menu = new Menu(new String[]{"Soup", null, "Mussels", "Cake"}, new Double[]{5.0, null, 8.0, 7.0}, new Boolean[]{true, false});
-		assertThat(serialize(menu).toInl(), is(nullMenu()));
+		assertThat(serialize(menu).toInl(), is(menuWithNullValues()));
 	}
 
 	@Test

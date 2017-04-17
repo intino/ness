@@ -138,7 +138,7 @@ public class Messages {
                 "\tfalse\n";
     }
 
-    public static String nullMenu() {
+    public static String menuWithNullValues() {
         return "[Menu]\n" +
                 "meals:\n" +
                 "\tSoup\n" +

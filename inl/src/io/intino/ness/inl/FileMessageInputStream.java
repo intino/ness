@@ -1,5 +1,7 @@
 package io.intino.ness.inl;
 
+import io.intino.ness.inl.MessageInputStreamFormat.*;
+
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,25 +12,26 @@ import static io.intino.ness.inl.MessageInputStream.*;
 
 public class FileMessageInputStream {
 
-    public static MessageInputStream of(File file) {
+    public static MessageInputStream of(File file) throws IOException {
         Format format = formatOf(file);
-        if (format == inz) return new Inz(streamOf(file));
-        if (format == inf) return new Inz(new SortingInputStream(streamOf(file)));
-        if (format == csv) return new Csv(streamOf(file));
-        if (format == tsv) return new Tsv(streamOf(file));
-        if (format == dat) return new Dat(streamOf(file));
-        return messageInputStream();
+
+        if (format == inl) return Sort.of(Inl.of(file.getName(), streamOf(file)));
+        if (format == inz) return Inl.of(file.getName(), streamOf(file));
+        if (format == csv) return Csv.of(file.getName(), streamOf(file));
+        if (format == tsv) return Tsv.of(file.getName(), streamOf(file));
+        if (format == dat) return Dat.of(file.getName(), streamOf(file));
+        return new Empty();
+    }
+
+    public static MessageInputStream of(File[] files) throws IOException {
+        MessageInputStream[] inputStreams = new MessageInputStream[files.length];
+        for (int i = 0; i < files.length; i++) inputStreams[i] = of(files[i]);
+        return Sort.of(inputStreams);
     }
 
 
-    private static InputStream streamOf(File file) {
-        try {
-            return isZip(file) ?
-                    zipStreamOf(file) :
-                    new FileInputStream(file);
-        } catch (IOException e) {
-            return emptyInputStream();
-        }
+    private static InputStream streamOf(File file) throws IOException {
+        return isZip(file) ? zipStreamOf(file) : new FileInputStream(file);
     }
 
     private static boolean isZip(File file) {
@@ -41,19 +44,6 @@ public class FileMessageInputStream {
         return zipStream;
     }
 
-    private static ByteArrayInputStream emptyInputStream() {
-        return new ByteArrayInputStream(new byte[0]);
-    }
-
-    private static MessageInputStream messageInputStream() {
-        return new MessageInputStream() {
-            @Override
-            public Message next() {
-                return null;
-            }
-        };
-    }
-
     private static Format formatOf(File file) {
         String name = file.getName().toLowerCase();
         for (String extension : formats.keySet())
@@ -64,14 +54,16 @@ public class FileMessageInputStream {
     private static Map<String, Format> formats = new HashMap<>();
 
     public enum Format {
-        inz, inf, csv, dat, tsv, unknown
+        inl, inz, csv, tsv, dat, xml, unknown
     }
 
     static {
+        formats.put(".inl", inl);
         formats.put(".zip", inz);
-        formats.put(".feed.zip", inf);
         formats.put(".csv", csv);
+        formats.put(".tsv", tsv);
         formats.put(".dat", dat);
+        formats.put(".xml", xml);
     }
 
 

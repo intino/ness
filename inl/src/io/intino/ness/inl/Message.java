@@ -41,6 +41,14 @@ public class Message {
         this.type = type;
     }
 
+    public String ts() {
+        return read("ts");
+    }
+
+    public void ts(String ts) {
+        write("ts", ts);
+    }
+
     public String read(String attribute) {
         return valueOf(attribute);
     }
@@ -48,8 +56,8 @@ public class Message {
     public void write(String attribute, String value) {
         if (contains(attribute))
             get(attribute).value = value;
-        else
-        if (value != null) attributes.add(new Attribute(attribute,value));
+        else if (value != null)
+            attributes.add(new Attribute(attribute,value));
     }
 
     public Data parse(final String attribute) {
@@ -108,6 +116,7 @@ public class Message {
 
     public List<Message> components(String type) {
         List<Message> result = new ArrayList<>();
+        if (components == null) return result;
         for (Message component : components)
             if (component.is(type)) result.add(component);
         return result;
@@ -117,6 +126,11 @@ public class Message {
         if (components == null) components = new ArrayList<>();
         components.add(component);
         component.owner = this;
+    }
+
+    public void add(List<Message> components) {
+        if (components == null) return;
+        for (Message component : components) add(component);
     }
 
     public void remove(Message component) {
@@ -148,10 +162,61 @@ public class Message {
         return empty;
     }
 
+    public int length() {
+        return toString().length();
+    }
+
+    public List<String> attributes() {
+        List<String> result = new ArrayList<>();
+        for (Attribute attribute : attributes) result.add(attribute.name);
+        return result;
+    }
+
     public interface Data {
         <T> T as(Class<T> type);
     }
 
+    static class Attribute {
+        String name;
+        String value;
 
+        Attribute() {
+
+        }
+
+        Attribute(String name, String value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        Attribute parse(String line) {
+            int i = line.indexOf(":");
+            name = line.substring(0, i);
+            value = i < line.length() - 1 ? unwrap(line.substring(i + 1)) : null;
+            return this;
+        }
+
+        Attribute add(String line) {
+            value = (value == null) ? line : value + "\n" + line;
+            return this;
+        }
+
+        private String unwrap(String text) {
+            return text.startsWith("\"") && text.endsWith("\"") ? text.substring(1, text.length() - 1) : text;
+        }
+
+        @Override
+        public String toString() {
+            return name + ": " + (isMultiline() ? indent(value) : value);
+        }
+
+        private static String indent(String text) {
+            return "\n\t" + text.replaceAll("\\n", "\n\t");
+        }
+
+        private boolean isMultiline() {
+            return value.contains("\n");
+        }
+    }
 }
 

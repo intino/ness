@@ -4,14 +4,10 @@ import io.intino.ness.inl.*;
 
 import java.io.*;
 
-import static java.util.Arrays.stream;
-
 public class FileReservoir implements NessDataLake.Reservoir {
 
     private final File file;
-    private MessageInputStream[] inputs;
-    private MessageOutputStream output;
-    private MessageOutputStream feed;
+    private MessageInputStream input;
 
     public FileReservoir(File file) {
         this.file = file;
@@ -23,39 +19,23 @@ public class FileReservoir implements NessDataLake.Reservoir {
     }
 
     @Override
-    public MessageInputStream[] inputs() {
-        if (inputs != null) return inputs;
-        return inputs = createInputStreams();
+    public MessageInputStream input() {
+        if (input != null) return input;
+        return input = createInputStream();
     }
 
-    @Override
-    public MessageOutputStream output() {
-        if (output != null) return output;
-        return output = createOutputStream(file);
+    private MessageInputStream createInputStream() {
+        return messageInputStreamOf(file);
     }
 
-    @Override
-    public MessageOutputStream feed() {
-        if (feed != null) return feed;
-        return feed = createOutputStream(feed(file));
-    }
-
-    private File feed(File file) {
-        return new File(file.getAbsolutePath().replace("\\.zip",".feeding.zip"));
-    }
-
-    private MessageOutputStream createOutputStream(File file) {
+    private MessageInputStream messageInputStreamOf(File file) {
         try {
-            return new FileMessageOutputStream(file);
-        } catch (IOException e) {
-            return null;
+            return FileMessageInputStream.of(file);
         }
-    }
-
-    private MessageInputStream[] createInputStreams() {
-        return stream(files())
-                .map(FileMessageInputStream::of)
-                .toArray(MessageInputStream[]::new);
+        catch (IOException e) {
+            e.printStackTrace();
+            return new MessageInputStream.Empty();
+        }
     }
 
     private File[] files() {
@@ -74,5 +54,6 @@ public class FileReservoir implements NessDataLake.Reservoir {
     public int compareTo(FileReservoir reservoir) {
         return file.compareTo(reservoir.file);
     }
+
 
 }

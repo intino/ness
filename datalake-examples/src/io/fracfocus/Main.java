@@ -1,32 +1,27 @@
 package io.fracfocus;
 
-import io.intino.ness.datalake.NessDataLake;
-import io.intino.ness.datalake.NessFunction;
-import io.intino.ness.datalake.NessPump;
-import io.intino.ness.datalake.FileDataLake;
+import io.intino.ness.datalake.FilePumpingStation;
+import io.intino.ness.datalake.NessPumpingStation;
 import io.intino.ness.inl.Message;
+import io.intino.ness.inl.MessageFunction;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        NessDataLake dataLake = new FileDataLake("datalake-examples/local.store");
-        NessPump pump = new NessPump(dataLake);
-        pump.plug("legacy.frac.usa.Job")
+        NessPumpingStation station = new FilePumpingStation("datalake-examples/local.store");
+        station.pipe("legacy.frac.Job")
             .with(ImportFracJobFunction.class)
-            .into("feeding.frac.usa.Job.1");
-        pump.plug("legacy.frac.usa.Job")
-            .with(ImportFracJobFunction.class)
-            .into("feeding.frac.usa.Job.1");
-        pump.execute().thread().join();
+            .to("channel.frac.Job.1");
+        station.pump("legacy.frac.Job").thread().join();
     }
 
-    public static class ImportFracJobFunction implements NessFunction {
+    public static class ImportFracJobFunction implements MessageFunction {
 
         @Override
         public Message cast(Message input) {
             String apiCode = read(input, "APINumber");
             Message output = new Message("Well");
-            output.write("ts",ts(input));
+            output.ts(ts(input));
             output.write("code", apiCode);
             output.write("name", read(input, "WellName"));
             output.write("state", read(input, "state"));

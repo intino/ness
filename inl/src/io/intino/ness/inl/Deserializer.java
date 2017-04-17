@@ -6,6 +6,8 @@ import java.lang.reflect.ParameterizedType;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static io.intino.ness.inl.Accessory.*;
+
 public class Deserializer {
     private final BufferedReader reader;
     private Accessory.Mapping mapping = new Accessory.Mapping();
@@ -31,7 +33,7 @@ public class Deserializer {
     }
 
     private boolean startBlockOf(Class type) {
-        return line != null && map(Accessory.unwrap(line)).equalsIgnoreCase(type.getSimpleName());
+        return line != null && map(unwrap(line)).equalsIgnoreCase(type.getSimpleName());
     }
 
     private String map(String id) {
@@ -40,14 +42,14 @@ public class Deserializer {
 
     private <T> T fill(T object) {
         Object scope = object;
-        Attribute attribute = new Attribute();
+        Message.Attribute attribute = new Message.Attribute();
         nextLine();
         while (!isTerminated(object)) {
-            if (Accessory.isMultilineIn(line)) setAttribute(scope, attribute.add(line.substring(1)));
+            if (isMultilineIn(line)) setAttribute(scope, attribute.add(line.substring(1)));
             else
-            if (Accessory.isMessageIn(line)) scope = addComponent(object, line.substring(1,line.length()-1));
+            if (isMessageIn(line)) scope = addComponent(object, line.substring(1,line.length()-1));
             else
-            if (Accessory.isAttributeIn(line)) setAttribute(scope, attribute.parse(line));
+            if (isAttributeIn(line)) setAttribute(scope, attribute.parse(line));
             nextLine();
         }
         return object;
@@ -66,14 +68,14 @@ public class Deserializer {
         return createComponent(paths[paths.length-1], scope);
     }
 
-    private void setAttribute(Object object, Attribute attribute) {
+    private void setAttribute(Object object, Message.Attribute attribute) {
         if (object == null || attribute.value == null) return;
-        Field field = Accessory.fieldsOf(object).get(map(attribute.name));
+        Field field = fieldsOf(object).get(map(attribute.name));
         setField(field, object, parserOf(field).parse(attribute.value));
     }
 
     private Object findScope(Object object, String attribute) {
-        for (Field field : Accessory.fieldsOf(object).asList()) {
+        for (Field field : fieldsOf(object).asList()) {
             if (!match(field, attribute)) continue;
             Object result = valueOf(field, object);
             return result instanceof List ? lastItemOf((List) result) : result;
@@ -144,7 +146,7 @@ public class Deserializer {
     }
 
     private Field findField(String type, Object object) {
-        for (Field field : Accessory.fieldsOf(object).asList()) {
+        for (Field field : fieldsOf(object).asList()) {
             if (!match(field, type)) continue;
             if (isList(field) || valueOf(field, object) == null) return field;
         }
@@ -162,7 +164,7 @@ public class Deserializer {
     private void nextLine()  {
         try {
             do {
-                line = Accessory.normalize(reader.readLine());
+                line = normalize(reader.readLine());
             } while (line != null && line.isEmpty());
         }
         catch (IOException e) {
@@ -170,8 +172,8 @@ public class Deserializer {
         }
     }
 
-    private Accessory.Parser parserOf(Field field) {
-        return Accessory.parsers.get(field.getType());
+    private Parser parserOf(Field field) {
+        return parsers.get(field.getType());
     }
 
     public Deserializer map(String from, String to) {
