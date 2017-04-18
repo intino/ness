@@ -3,22 +3,22 @@ package io.fracfocus;
 import io.intino.ness.datalake.FilePumpingStation;
 import io.intino.ness.datalake.NessPumpingStation;
 import io.intino.ness.inl.Message;
-import io.intino.ness.inl.MessageFunction;
+import io.intino.ness.inl.MessageMapper;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
         NessPumpingStation station = new FilePumpingStation("datalake-examples/local.store");
         station.pipe("legacy.frac.Job")
-            .with(ImportFracJobFunction.class)
+            .map(ImportFracJobMapper.class)
             .to("channel.frac.Job.1");
         station.pump("legacy.frac.Job").thread().join();
     }
 
-    public static class ImportFracJobFunction implements MessageFunction {
+    public static class ImportFracJobMapper implements MessageMapper {
 
         @Override
-        public Message cast(Message input) {
+        public Message map(Message input) {
             String apiCode = read(input, "APINumber");
             Message output = new Message("Well");
             output.ts(ts(input));

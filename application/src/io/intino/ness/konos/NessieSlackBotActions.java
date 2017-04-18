@@ -71,7 +71,7 @@ final class NessieSlackBotActions {
 	static String addUser(NessBox box, MessageProperties properties, String name, String[] groups) {
 		String password = box.get(BusManager.class).addUser(name, asList(copyOfRange(groups, 1, groups.length)));
 		if (password == null) return "User already exists";
-		return "User *" + name + "* added with password `" + password + "`";
+		return "User *" + name + "* added map password `" + password + "`";
 	}
 
 	static String removeUser(NessBox box, MessageProperties properties, String name) {
@@ -130,7 +130,7 @@ final class NessieSlackBotActions {
 
 	static String pump(NessBox box, MessageProperties properties, String functionName, String input, String output) {
 //		NessFunctionContainer container = new NessFunctionContainer(box.get(FileDataLake.class));
-//		container.pump(input).with(searchFunction(functionName)).into(output).start();
+//		container.pump(input).map(searchFunction(functionName)).into(output).start();
 		return ":ok_hand:";
 	}
 

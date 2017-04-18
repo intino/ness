@@ -6,13 +6,11 @@
         <sourceOutputDir name="../../inl/out/build/inl-java8/generated-sources/annotations" />
         <sourceTestOutputDir name="../../inl/out/build/inl-java8/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="inl8" />
       </profile>
       <profile name="Annotation profile for inl-java7" enabled="true">
         <sourceOutputDir name="../out/build/inl-java7/generated-sources/annotations" />
         <sourceTestOutputDir name="../out/build/inl-java7/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="inl7" />
       </profile>
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />

@@ -6,21 +6,20 @@ import io.intino.ness.inl.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.intino.ness.datalake.FileChannel.Format.*;
 
 import static java.nio.file.StandardOpenOption.*;
 import static java.util.Arrays.stream;
 
+@SuppressWarnings("unchecked")
 public class FilePumpingStation implements NessPumpingStation {
 
     private final File folder;
     private final Map<String, List<Pipe>> pipes = new HashMap<>();
     private Map<String, Joint> joints = new HashMap<>();
+    private static final String Feed = "feed";
 
     public FilePumpingStation(String folder) {
         this(new File(folder));
@@ -50,7 +49,6 @@ public class FilePumpingStation implements NessPumpingStation {
         return get(channel).exists();
     }
 
-
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private File[] setOf(File file) {
         File zipFile = zipOf(file);
@@ -61,26 +59,11 @@ public class FilePumpingStation implements NessPumpingStation {
         return new File(file.getAbsolutePath().replace(".inl",".zip"));
     }
 
-    @Override
-    public Pipe feed(String channel) {
-        return new Pipe() {
-            @Override
-            public void send(Message message) {
-                write(channel, message);
-                pipes.get(channel).forEach(p->p.send(message));
-            }
-
-            @Override
-            public void flush() {
-
-            }
-        };
-    }
-
     private void write(String channel, Message message)  {
         try {
             File file = get(channel).fileOf(message,inl);
             write(file, message);
+            pipes.get(channel).forEach(p->p.send(message));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -91,50 +74,90 @@ public class FilePumpingStation implements NessPumpingStation {
     }
 
     @Override
-    public Channeling pipe(String channel) {
+    public Channeling pipe() {
+        return pipe(Feed);
+    }
+
+    @Override
+    public Channeling pipe(String source) {
         return new Channeling() {
 
-            private List<MessageFunction> functions = new ArrayList<>();
+            private List<MessageMapper> mappers = new ArrayList<>();
 
-            @Override
-            public Channeling with(String function) throws Exception {
-                return with(classOf(function));
+            @Override @SuppressWarnings("unchecked")
+            public Channeling map(String function) throws Exception {
+                return map(mapperClassOf(function));
+            }
+
+            @Override @SuppressWarnings("unchecked")
+            public Channeling map(String function, String... sources) throws Exception {
+                return map(compile(function, sources).as(MessageMapper.class));
             }
 
             @Override
-            public Channeling with(String function, String... sources) throws Exception {
-                return with(compile(function, sources));
+            public Channeling map(Class<? extends MessageMapper> mapperClass) throws Exception {
+                return map(mapperClass.newInstance());
             }
 
             @Override
-            public Channeling with(Class<? extends MessageFunction> functionClass) throws Exception {
-                return with(functionClass.newInstance());
-            }
-
-            @Override
-            public Channeling with(MessageFunction function) {
-                this.functions.add(function);
+            public Channeling map(MessageMapper mapper) {
+                this.mappers.add(mapper);
                 return this;
             }
 
             @Override
+            public Channeling filter(String function) throws Exception {
+                return filter(filterClassOf(function));
+            }
+
+            @Override
+            public Channeling filter(String function, String... sources) throws Exception {
+                return filter(compile(function, sources).as(MessageFilter.class));
+            }
+
+            @Override
+            public Channeling filter(Class<? extends MessageFilter> filterClass) throws Exception {
+                return filter(filterClass.newInstance());
+            }
+
+            @Override
+            public Channeling filter(MessageFilter filter) throws Exception {
+                return map(input -> filter.filter(input) ? input : null);
+            }
+
+            @Override
             public Pipe to(String target) {
-                return put(channel, pipeOf(target));
+                if (!isFeed(source) && !isEmpty(source) && isEmpty(target))
+                    put(source, storePipeOf(target));
+                return put(source, feedPipeOf(target));
+            }
+
+            private boolean isFeed(String source) {
+                return source.equals(Feed);
+            }
+
+            private boolean isEmpty(String channel) {
+                return assertExists(get(channel)).isEmpty();
             }
 
             @Override
-            public Pipe to(Pipe... pipes) {
-                return put(channel, wrap(pipes));
+            public Pipe to(Pipe pipe) {
+                return put(source, wrapOf(pipe));
             }
 
             @Override
-            public void join(Joint joint) {
-                joints.put(channel, joint);
+            public Channeling join(Joint joint) {
+                joints.put(source, joint);
+                return this;
             }
 
-            private Pipe pipeOf(String target) {
-                FileChannel store = get(target);
-                return new Pipe() {
+            private Pipe feedPipeOf(String channel) {
+                return message -> write(channel, cast(message));
+            }
+
+            private Pipe storePipeOf(String channel) {
+                FileChannel store = get(channel);
+                return new SingleUsePipe() {
                     @Override
                     public void send(Message message) {
                         store.write(cast(message));
@@ -147,26 +170,29 @@ public class FilePumpingStation implements NessPumpingStation {
                 };
             }
 
-            private Pipe wrap(Pipe[] pipes) {
-                return new Pipe() {
+            private Pipe wrapOf(Pipe pipe) {
+                return pipe instanceof SingleUsePipe ?
+                        wrapOf((SingleUsePipe) pipe):
+                        message -> pipe.send(cast(message));
+            }
+
+            private Pipe wrapOf(SingleUsePipe pipe) {
+                return new SingleUsePipe() {
                     @Override
                     public void send(Message message) {
-                        Message cast = cast(message);
-                        if (cast == null) return;
-                        stream(pipes).forEach(p -> p.send(cast));
+                        pipe.send(cast(message));
                     }
 
                     @Override
                     public void flush() {
-                        stream(pipes).forEach(Pipe::flush);
+                        pipe.flush();
                     }
                 };
             }
-
             private Message cast(Message message) {
-                for (MessageFunction function : functions) {
+                for (MessageMapper function : mappers) {
                     if (message == null) return null;
-                    message = function.cast(message);
+                    message = function.map(message);
                 }
                 return message;
             }
@@ -183,112 +209,109 @@ public class FilePumpingStation implements NessPumpingStation {
 
     @Override
     public Task pump(String channel) throws Exception {
-        return start(createPumpTaskFor(channel));
+        return pumpTaskFor(assertExists(get(channel)));
     }
 
     @Override
     public Task seal(String channel) {
-        return start(createSealTaskFor(channel));
+        return sealTaskFor(assertExists(get(channel)));
     }
 
-    private Task start(Task task) {
-        task.thread().start();
-        return task;
-    }
-
-    private Task createPumpTaskFor(String channel) throws Exception {
+    private Task pumpTaskFor(FileChannel channel) throws Exception {
 
         return new Task() {
-            Thread thread = new Thread(this);
-            boolean running = true;
-            NessFaucet faucet = new NessFaucet(get(channel));
-            List<Pipe> pipes = FilePumpingStation.this.pipes.get(channel);
+            NessFaucet faucet;
+            List<Pipe> pipes;
 
-            @Override
-            public Thread thread() {
-                return thread;
+            public boolean init() {
+                faucet = new NessFaucet(channel);
+                pipes = FilePumpingStation.this.pipes.get(channel.name());
+                return pipes != null && pipes.size() != 0;
             }
 
-            @Override
-            public void run() {
-                while (running) try {
-                    running = step();
+            public boolean step() {
+                try {
+                    Message message = faucet.next();
+                    if (message == null) return false;
+                    pipes.forEach(p -> p.send(message));
+                    return true;
                 } catch (IOException e) {
                     e.printStackTrace();
+                    return false;
                 }
-                pipes.forEach(Pipe::flush);
-            }
-
-            public boolean step() throws IOException {
-                Message message = faucet.next();
-                if (message == null || pipes == null || pipes.size() == 0) return false;
-                pipes.forEach(p -> p.send(message));
-                return true;
             }
 
             @Override
-            public void stop() {
-                running = false;
+            protected void onTerminate()  {
+                pipes.forEach(this::flush);
+                pipes.removeIf(this::isSingleUse);
+            }
+
+            private boolean isSingleUse(Pipe pipe) {
+                return pipe instanceof SingleUsePipe;
+            }
+
+            private void flush(Pipe pipe) {
+                if (isSingleUse(pipe)) ((SingleUsePipe) pipe).flush();
             }
 
         };
     }
 
-    private Task createSealTaskFor(final String channel) {
+    private Task sealTaskFor(final FileChannel channel) {
         return new Task() {
-            Thread thread = new Thread(this);
-            FileChannel fileChannel = assertExists(get(channel));
+            Iterator<File> iterator;
+            FileChannel fileChannel = assertExists(channel);
 
             @Override
-            public Thread thread() {
-                return thread;
+            protected boolean init() {
+                File[] files = fileChannel.files(inl);
+                this.iterator = stream(files).iterator();
+                return files.length > 0;
             }
 
             @Override
-            public void run() {
-                stream(fileChannel.files(inl))
-                        .parallel()
-                        .forEach(this::seal);
-            }
-
-            private void seal(File file)  {
+            protected boolean step()  {
+                if (!iterator.hasNext()) return false;
                 try {
-                    MessageInputStream is = FileMessageInputStream.of(setOf(file));
-                    FileMessageOutputStream os = FileMessageOutputStream.of(zipOf(file));
-                    while (true) {
-                        Message message = is.next();
-                        if (message == null) break;
-                        os.write(message);
-                    }
-                    os.close();
-                    is.close();
-                    file.delete();
-
+                    seal(iterator.next());
+                    return true;
                 } catch (IOException e) {
                     e.printStackTrace();
+                    return false;
                 }
             }
 
-
-            @Override
-            public void stop() {
-
+            private void seal(File file) throws IOException {
+                MessageInputStream is = FileMessageInputStream.of(setOf(file));
+                FileMessageOutputStream os = FileMessageOutputStream.of(zipOf(file));
+                while (true) {
+                    Message message = is.next();
+                    if (message == null) break;
+                    os.write(message);
+                }
+                os.close();
+                is.close();
+                file.delete();
             }
-
 
         };
     }
 
     @SuppressWarnings("unchecked")
-    private Class<MessageFunction> classOf(String name) throws ClassNotFoundException {
-        return (Class<MessageFunction>) Class.forName(name);
+    private Class<MessageFilter> filterClassOf(String name) throws ClassNotFoundException {
+        return (Class<MessageFilter>) Class.forName(name);
     }
 
-    private Class<MessageFunction> compile(String function, String... sources) {
+    @SuppressWarnings("unchecked")
+    private Class<MessageMapper> mapperClassOf(String name) throws ClassNotFoundException {
+        return (Class<MessageMapper>) Class.forName(name);
+    }
+
+    private NessCompiler.Result compile(String function, String... sources) {
         return NessCompiler.compile(sources)
                 .with("-target", "1.8")
-                .load(function)
-                .as(MessageFunction.class);
+                .load(function);
     }
 
     private Pipe put(String channel, Pipe pipe) {
@@ -313,14 +336,16 @@ public class FilePumpingStation implements NessPumpingStation {
         return (message + "\n\n").getBytes();
     }
 
-    private static FileChannel assertExists(FileChannel store) {
-        if (!store.exists()) throw new RuntimeException("Channel does not exist");
-        return store;
+    private static FileChannel assertExists(FileChannel channel) {
+        if (!channel.exists()) throw new RuntimeException("Channel does not exist");
+        return channel;
     }
 
-    private FileChannel assertNotExists(FileChannel store) {
-        if (store.exists()) throw new RuntimeException("Channel already exists");
-        return store;
+    private FileChannel assertNotExists(FileChannel channel) {
+        if (channel.exists()) throw new RuntimeException("Channel already exists");
+        return channel;
     }
+
+
 
 }

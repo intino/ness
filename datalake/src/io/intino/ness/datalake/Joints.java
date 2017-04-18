@@ -39,6 +39,11 @@ public class Joints {
         }
 
         @Override
+        public void name(String value) {
+
+        }
+
+        @Override
         public Message next() throws IOException {
             int index = indexOfNext();
             if (index == -1) return null;

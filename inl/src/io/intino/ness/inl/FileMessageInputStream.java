@@ -1,13 +1,12 @@
 package io.intino.ness.inl;
 
-import io.intino.ness.inl.MessageInputStreamFormat.*;
-
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 import static io.intino.ness.inl.FileMessageInputStream.Format.*;
+import static io.intino.ness.inl.Formats.*;
 import static io.intino.ness.inl.MessageInputStream.*;
 
 public class FileMessageInputStream {
@@ -15,12 +14,17 @@ public class FileMessageInputStream {
     public static MessageInputStream of(File file) throws IOException {
         Format format = formatOf(file);
 
-        if (format == inl) return Sort.of(Inl.of(file.getName(), streamOf(file)));
-        if (format == inz) return Inl.of(file.getName(), streamOf(file));
-        if (format == csv) return Csv.of(file.getName(), streamOf(file));
-        if (format == tsv) return Tsv.of(file.getName(), streamOf(file));
-        if (format == dat) return Dat.of(file.getName(), streamOf(file));
+        if (format == inl) return name(Sort.of(Inl.of(streamOf(file))), file);
+        if (format == inz) return name(Inl.of(streamOf(file)), file);
+        if (format == csv) return name(Csv.of(streamOf(file)), file);
+        if (format == tsv) return name(Tsv.of(streamOf(file)), file);
+        if (format == dat) return name(Dat.of(streamOf(file)), file);
         return new Empty();
+    }
+
+    private static MessageInputStream name(MessageInputStream inputStream, File file) {
+        inputStream.name(file.getName());
+        return inputStream;
     }
 
     public static MessageInputStream of(File[] files) throws IOException {

@@ -27,10 +27,6 @@ ts: 2010-11-13T04:48:00Z
 value: 15.65
 
 [Temperature]
-ts: 2010-11-13T05:12:00Z
-value: 15.60
-
-[Temperature]
 ts: 2010-11-13T14:00:00Z
 value: 17.94
 
@@ -73,3 +69,8 @@ value: 5.65
 [Temperature]
 ts: 2010-11-14T12:00:00Z
 value: 20.13
+
+[Temperature]
+ts: 2010-11-13T05:12:00Z
+value: 15.60
+

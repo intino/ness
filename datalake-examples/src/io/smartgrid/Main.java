@@ -3,7 +3,7 @@ package io.smartgrid;
 import io.intino.ness.datalake.FilePumpingStation;
 import io.intino.ness.datalake.NessPumpingStation;
 import io.intino.ness.inl.Message;
-import io.intino.ness.inl.MessageFunction;
+import io.intino.ness.inl.MessageMapper;
 
 import static io.intino.ness.datalake.Joints.sortingBy;
 
@@ -12,17 +12,17 @@ public class Main {
     public static void main(String[] args) throws Exception {
         NessPumpingStation station = new FilePumpingStation("datalake-examples/local.store");
 
-        station.pipe("legacy.smartgrid.Heater").join(sortingBy("Time"));
-
         station.pipe("legacy.smartgrid.Heater")
-                .with(ImportHeaterFunction.class)
+                .join(sortingBy("Time"))
+                .map(ImportHeaterMapper.class)
                 .to("channel.smartgrid.Heater.1");
         station.pipe("legacy.smartgrid.Weather")
-                .with(ImportWeatherFunction.class)
+                .map(ImportWeatherMapper.class)
                 .to("channel.smartgrid.Temperature.1");
         station.pipe("legacy.smartgrid.PowerConsumption")
-                .with(ImportPowerConsumptionFunction.class)
+                .map(ImportPowerConsumptionMapper.class)
                 .to("channel.smartgrid.PowerConsumption.1");
+
         Thread t1 = station.pump("legacy.smartgrid.Heater").thread();
         Thread t2 = station.pump("legacy.smartgrid.Weather").thread();
         Thread t3 = station.pump("legacy.smartgrid.PowerConsumption").thread();
@@ -33,9 +33,9 @@ public class Main {
 
     }
 
-    public static class ImportWeatherFunction implements MessageFunction {
+    public static class ImportWeatherMapper implements MessageMapper {
         @Override
-        public Message cast(Message input) {
+        public Message map(Message input) {
             //http://process.monitorering.no/measureit/files/pdf_datablad/reinhardt/reinhardt_mws9-5_manual.pdf
             Message output = new Message("Weather");
             output.write("ts", ts(input));
@@ -50,9 +50,9 @@ public class Main {
         }
     }
 
-    public static class ImportHeaterFunction implements MessageFunction {
+    public static class ImportHeaterMapper implements MessageMapper {
         @Override
-        public Message cast(Message input) {
+        public Message map(Message input) {
             Message output = new Message("Heater");
             output.write("ts", ts(input));
             output.write("energy", input.read("ene"));
@@ -66,10 +66,10 @@ public class Main {
         }
 
     }
-    public static class ImportPowerConsumptionFunction implements MessageFunction {
+    public static class ImportPowerConsumptionMapper implements MessageMapper {
 
         @Override
-        public Message cast(Message input) {
+        public Message map(Message input) {
             Message output = new Message("PowerConsumption");
             output.write("ts", ts(input));
             output.write("activePower", input.read("Global_active_power"));

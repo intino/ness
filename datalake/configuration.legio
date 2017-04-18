@@ -4,8 +4,9 @@ Project("io.intino.ness", "1.0.0") datalake
 	Repositories
 		Release("https://artifactory.intino.io/artifactory/releases", "intino-maven")
 	Dependencies
-		Compile("io.intino.ness", "inl-java8", "1.0.0")
+		Compile("io.intino.ness", "inl", "1.0.0")
 		Test("junit", "junit", "4.12")
+
 LifeCycle
 	Package(ModulesAndLibrariesLinkedByManifest)
 	Distribution

@@ -1,9 +1,13 @@
 package io.intino.ness.inl;
 
+import io.intino.ness.inl.Formats.Inl;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.intino.ness.inl.Deserializer.*;
+import static io.intino.ness.inl.Deserializer.deserialize;
 
 public class Message {
     String type;
@@ -147,6 +151,18 @@ public class Message {
         for (Attribute attribute : attributes) result += "\n" + attribute.toString();
         for (Message component : components()) result += "\n\n" + component.toString();
         return result;
+    }
+
+    public static Message load(String message) {
+        return load(message.getBytes());
+    }
+
+    public static Message load(byte[] bytes) {
+        try {
+            return Inl.of(new ByteArrayInputStream(bytes)).next();
+        } catch (IOException e) {
+            return empty();
+        }
     }
 
     private List<Message> components() {

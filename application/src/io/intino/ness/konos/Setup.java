@@ -27,7 +27,7 @@ final class Setup {
 	}
 
 	static void configureBox(NessBox box) {
-		configureLogger("log"); //TODO change path in case
+		configureLogger("log"); //TODO change path pipe case
 		FileDataLake lake = new FileDataLake(box.get("ness.rootPath"));
 		box.put("datalake", lake);
 	}

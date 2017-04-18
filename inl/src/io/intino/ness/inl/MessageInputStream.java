@@ -11,6 +11,8 @@ import static java.util.Collections.sort;
 public interface MessageInputStream {
 
     String name();
+    void name(String value);
+
     Message next() throws IOException;
     void close() throws IOException;
 
@@ -18,14 +20,18 @@ public interface MessageInputStream {
         private String name;
         private Iterator<Message> iterator;
 
-        public Collection(String name, Iterator<Message> iterator) {
-            this.name = name;
+        public Collection(Iterator<Message> iterator) {
             this.iterator = iterator;
         }
 
         @Override
         public String name() {
             return name;
+        }
+
+        @Override
+        public void name(String value) {
+            this.name = value;
         }
 
         @Override
@@ -46,8 +52,8 @@ public interface MessageInputStream {
 
     class Sort extends Collection {
 
-        public Sort(String name, Iterator<Message> iterator) {
-            super(name, iterator);
+        public Sort(Iterator<Message> iterator) {
+            super(iterator);
         }
 
         public static MessageInputStream of(MessageInputStream... inputs) throws IOException {
@@ -58,7 +64,9 @@ public interface MessageInputStream {
                 name += ":"+ input.name();
             }
             sort(messages, byTs());
-            return new Sort(name, messages.iterator());
+            Sort sort = new Sort(messages.iterator());
+            sort.name(name);
+            return sort;
         }
 
         private static Comparator<Message> byTs() {
@@ -77,6 +85,11 @@ public interface MessageInputStream {
         @Override
         public String name() {
             return "empty";
+        }
+
+        @Override
+        public void name(String value) {
+
         }
 
         @Override

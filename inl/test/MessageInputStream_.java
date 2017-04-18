@@ -1,6 +1,6 @@
+import io.intino.ness.inl.Formats;
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageInputStream;
-import io.intino.ness.inl.MessageInputStreamFormat;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -17,7 +17,7 @@ public class MessageInputStream_ {
     @Test
     public void should_parse_multiple_messages() throws Exception {
         InputStream is = inputStreamOf(status());
-        MessageInputStream messageInputStream = MessageInputStreamFormat.Inl.of("test", is);
+        MessageInputStream messageInputStream = Formats.Inl.of(is);
         Message[] messages = new Message[3];
         messages[0] = messageInputStream.next();
         messages[1] = messageInputStream.next();
@@ -36,7 +36,7 @@ public class MessageInputStream_ {
     @Test
     public void should_ignore_empty_attributes() throws Exception {
         InputStream is = inputStreamOf(messageWithEmptyAttributes());
-        Message message = MessageInputStreamFormat.Inl.of("test", is).next();
+        Message message = Formats.Inl.of(is).next();
         assertThat(message.is("teacher"), is(true));
         assertThat(message.contains("name"), is(true));
         assertThat(message.contains("money"), is(true));
@@ -51,7 +51,7 @@ public class MessageInputStream_ {
     @Test
     public void should_parse_multiline_attributes() throws Exception {
         InputStream is = inputStreamOf(crash());
-        Message message = MessageInputStreamFormat.Inl.of("test", is).next();
+        Message message = Formats.Inl.of(is).next();
         assertThat(message.type(), is("crash"));
         assertThat(message.contains("instant"), is(true));
         assertThat(message.contains("app"), is(true));
@@ -66,7 +66,7 @@ public class MessageInputStream_ {
     @Test
     public void should_parse_message_with_multiple_components() throws Exception {
         InputStream is = inputStreamOf(messageWithMultipleComponents());
-        Message message = MessageInputStreamFormat.Inl.of("test", is).next();
+        Message message = Formats.Inl.of(is).next();
         assertThat(message.type(), is("Teacher"));
         assertThat(message.components("country").size(), is(1));
         assertThat(message.components("country").get(0).type(), is("Country"));
@@ -78,7 +78,7 @@ public class MessageInputStream_ {
     @Test
     public void should_parse_message_in_old_format() throws Exception {
         InputStream is = inputStreamOf(messageInOldFormat());
-        Message message = MessageInputStreamFormat.Inl.of("test", is).next();
+        Message message = Formats.Inl.of(is).next();
         assertThat(message.type(), is("ActiveTeacher"));
         assertThat(message.parse("name").as(String.class), is("Jose"));
         assertThat(message.components("country").size(), is(1));
@@ -92,7 +92,7 @@ public class MessageInputStream_ {
     @Test
     public void should_parse_messages_in_csv() throws Exception {
         InputStream is = inputStreamOf(messagesInCsv());
-        MessageInputStream mis = MessageInputStreamFormat.Csv.of("test", is);
+        MessageInputStream mis = Formats.Csv.of(is);
         Message message = mis.next();
         assertThat(message.type(), is(""));
         assertThat(message.parse("date").as(String.class), is("16/12/2006"));
@@ -119,7 +119,7 @@ public class MessageInputStream_ {
     @Test
     public void should_parse_messages_in_data() throws Exception {
         InputStream is = inputStreamOf(messagesInDat());
-        MessageInputStream mis = MessageInputStreamFormat.Dat.of("test", is);
+        MessageInputStream mis = Formats.Dat.of(is);
         Message message = mis.next();
         assertThat(message.type(), is(""));
         assertThat(message.parse("date").as(String.class), is("16/12/2006"));

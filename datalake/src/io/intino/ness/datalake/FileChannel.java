@@ -115,7 +115,7 @@ public class FileChannel implements Channel {
         return file.renameTo(new File(file.getParent(), newName));
     }
 
-    private boolean isEmpty() {
+    boolean isEmpty() {
         return folder.listFiles() == null;
     }
 

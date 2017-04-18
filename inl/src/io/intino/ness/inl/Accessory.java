@@ -10,21 +10,21 @@ import java.util.*;
 import static java.lang.reflect.Array.set;
 import static java.util.Arrays.asList;
 
-class Accessory {
+public class Accessory {
 
 	private static final String NullValue = "\0";
 
-	interface Parser {
+	public interface Parser {
 		Object parse(String text);
 	}
 
-	interface Formatter {
+	public interface Formatter {
 		String format(Object value);
 	}
 
-	static final Map<Class, Formatter> formatters = new HashMap<>();
-	static final Map<Class, Parser> parsers = new HashMap<>();
-	static final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
+	public static final Map<Class, Formatter> formatters = new HashMap<>();
+	public static final Map<Class, Parser> parsers = new HashMap<>();
+	public static final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
 
 	static class Mapping {
 		private Map<String, String> map = new HashMap<>();
@@ -88,7 +88,7 @@ class Accessory {
 		Field get(String name) {
 			for (Field field : fieldsOf(object.getClass()))
 				if (name.equalsIgnoreCase(field.getName())) return field;
-			return null;
+			throw new RuntimeException(name + " attribute doesn't exist");
 		}
 	}
 

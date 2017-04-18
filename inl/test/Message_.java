@@ -1,13 +1,12 @@
+import io.intino.ness.inl.Formats;
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageInputStream;
-import io.intino.ness.inl.MessageInputStreamFormat;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import static io.intino.ness.inl.MessageInputStreamFormat.*;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static messages.Messages.messageWithMultipleComponents;
@@ -20,7 +19,7 @@ public class Message_ {
     @Before
     public void setUp() throws Exception {
         InputStream is = inputStreamOf(status());
-        message = Inl.of("test", is).next();
+        message = Formats.Inl.of(is).next();
     }
 
     @Test
@@ -61,7 +60,7 @@ public class Message_ {
     @Test
     public void should_add_and_remove_components() throws Exception {
         InputStream is = inputStreamOf(messageWithMultipleComponents());
-        Message message = Inl.of("test", is).next();
+        Message message = Formats.Inl.of(is).next();
 
         message.remove(message.components("phone").get(0));
         assertThat(message.components("phone").size(), is(1));
@@ -84,7 +83,7 @@ public class Message_ {
         Message message = new Message("Multiline");
         message.write("comment", "hello\nworld\n!!!");
         byte[] bytes = message.toString().getBytes();
-        MessageInputStream stream = Inl.of("test", new ByteArrayInputStream(bytes));
+        MessageInputStream stream = Formats.Inl.of(new ByteArrayInputStream(bytes));
         Message parsed = stream.next();
         assertThat(parsed.read("comment"), is("hello\nworld\n!!!"));
 
