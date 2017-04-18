@@ -49,7 +49,7 @@ public class NessBox extends io.intino.konos.Box {
 		initRESTServices();
 		initJMXServices();
 		initJMSServices();
-		initBuses();
+		initDataLake();
 		initTasks();
 		initSlackBots();
 	}
@@ -81,7 +81,7 @@ public class NessBox extends io.intino.konos.Box {
 
 	}
 
-	private void initBuses() {
+	private void initDataLake() {
 
 	}
 
