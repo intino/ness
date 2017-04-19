@@ -2,6 +2,7 @@ package io.intino.ness.inl;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,8 +12,6 @@ import static java.lang.reflect.Array.set;
 import static java.util.Arrays.asList;
 
 public class Accessory {
-
-	private static final String NullValue = "\0";
 
 	public interface Parser {
 		Object parse(String text);
@@ -24,7 +23,8 @@ public class Accessory {
 
 	public static final Map<Class, Formatter> formatters = new HashMap<>();
 	public static final Map<Class, Parser> parsers = new HashMap<>();
-	public static final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
+	private static final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
+    private static final String NullValue = "\0";
 
 	static class Mapping {
 		private Map<String, String> map = new HashMap<>();
@@ -74,7 +74,7 @@ public class Accessory {
 		return line.contains(":");
 	}
 
-	static class FieldQuery extends Accessory {
+	private static class FieldQuery extends Accessory {
 		private final Object object;
 
 		FieldQuery(Object object) {
@@ -255,10 +255,10 @@ public class Accessory {
 		}
 	}
 
-	static class ArrayFormatter {
+	private static class ArrayFormatter {
 		private Formatter formatter;
 
-		public ArrayFormatter(Formatter formatter) {
+		ArrayFormatter(Formatter formatter) {
 			this.formatter = formatter;
 		}
 
@@ -266,7 +266,7 @@ public class Accessory {
 			return new ArrayFormatter(formatters.get(type));
 		}
 
-		public String format(Object o) {
+		String format(Object o) {
 			String result = "";
 			for (Object item : (Object[]) o)
 				result += "\n\t" + (item == null ? NullValue : formatter.format(item));
@@ -274,12 +274,12 @@ public class Accessory {
 		}
 	}
 
-	static class ArrayParser {
+	private static class ArrayParser {
 
 		private Class type;
 		private Parser parser;
 
-		public ArrayParser(Class type, Parser parser) {
+		ArrayParser(Class type, Parser parser) {
 			this.type = type;
 			this.parser = parser;
 		}
@@ -297,4 +297,53 @@ public class Accessory {
 			return result;
 		}
 	}
+
+    static {
+        String version = System.getProperty("java.version");
+        Class<?> instantClass = instantClass();
+        if (version.startsWith("1.8") && instantClass != null) {
+            formatters.put(instantClass, instantFormatter());
+            parsers.put(instantClass, instantParserOf(instantClass));
+        }
+    }
+
+    private static Class<?> instantClass() {
+        try {
+            return Class.forName("java.time.Instant");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static Parser instantParserOf(Class<?> instantClass)  {
+        try {
+            final Method method = instantClass.getDeclaredMethod("parse", CharSequence.class);
+            return new Parser() {
+                @Override
+                public Object parse(String text)  {
+                    try {
+                        return method.invoke(null, text);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                }
+            };
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static Formatter instantFormatter() {
+        return new Formatter() {
+            @Override
+            public String format(Object value) {
+                return value.toString();
+            }
+        };
+    }
+
+
 }
