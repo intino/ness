@@ -6,7 +6,7 @@ public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 
 	protected io.intino.tara.magritte.Graph graph;
 	private java.util.List<io.intino.ness.Function> functionList;
-	private java.util.List<io.intino.ness.Topic> topicList;
+	private java.util.List<io.intino.ness.Channel> channelList;
 	private java.util.List<io.intino.ness.Connection> connectionList;
 	private java.util.List<io.intino.ness.User> userList;
 
@@ -17,7 +17,7 @@ public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 
 	public void update() {
 		functionList = this.graph.rootList(io.intino.ness.Function.class);
-		topicList = this.graph.rootList(io.intino.ness.Topic.class);
+		channelList = this.graph.rootList(io.intino.ness.Channel.class);
 		connectionList = this.graph.rootList(io.intino.ness.Connection.class);
 		userList = this.graph.rootList(io.intino.ness.User.class);
 	}
@@ -25,7 +25,7 @@ public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 	@Override
 	protected void addNode(io.intino.tara.magritte.Node node) {
 		if (node.is("Function")) this.functionList.add(node.as(io.intino.ness.Function.class));
-		if (node.is("Topic")) this.topicList.add(node.as(io.intino.ness.Topic.class));
+		if (node.is("Channel")) this.channelList.add(node.as(io.intino.ness.Channel.class));
 		if (node.is("Connection")) this.connectionList.add(node.as(io.intino.ness.Connection.class));
 		if (node.is("User")) this.userList.add(node.as(io.intino.ness.User.class));
 	}
@@ -33,7 +33,7 @@ public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 	@Override
 	protected void removeNode(io.intino.tara.magritte.Node node) {
 		if (node.is("Function")) this.functionList.remove(node.as(io.intino.ness.Function.class));
-		if (node.is("Topic")) this.topicList.remove(node.as(io.intino.ness.Topic.class));
+		if (node.is("Channel")) this.channelList.remove(node.as(io.intino.ness.Channel.class));
 		if (node.is("Connection")) this.connectionList.remove(node.as(io.intino.ness.Connection.class));
 		if (node.is("User")) this.userList.remove(node.as(io.intino.ness.User.class));
 	}
@@ -94,8 +94,8 @@ public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 		return functionList;
 	}
 
-	public java.util.List<io.intino.ness.Topic> topicList() {
-		return topicList;
+	public java.util.List<io.intino.ness.Channel> channelList() {
+		return channelList;
 	}
 
 	public java.util.List<io.intino.ness.Connection> connectionList() {
@@ -114,12 +114,12 @@ public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 		return functionList.get(index);
 	}
 
-	public java.util.List<io.intino.ness.Topic> topicList(java.util.function.Predicate<io.intino.ness.Topic> predicate) {
-		return topicList.stream().filter(predicate).collect(java.util.stream.Collectors.toList());
+	public java.util.List<io.intino.ness.Channel> channelList(java.util.function.Predicate<io.intino.ness.Channel> predicate) {
+		return channelList.stream().filter(predicate).collect(java.util.stream.Collectors.toList());
 	}
 
-	public io.intino.ness.Topic topic(int index) {
-		return topicList.get(index);
+	public io.intino.ness.Channel channel(int index) {
+		return channelList.get(index);
 	}
 
 	public java.util.List<io.intino.ness.Connection> connectionList(java.util.function.Predicate<io.intino.ness.Connection> predicate) {
@@ -169,13 +169,13 @@ public class GraphWrapper extends io.intino.tara.magritte.GraphWrapper {
 			return newElement;
 		}
 
-		public io.intino.ness.Topic topic(java.lang.String qualifiedName) {
-			io.intino.ness.Topic newElement = GraphWrapper.this.graph.createRoot(io.intino.ness.Topic.class, namespace, name).as(io.intino.ness.Topic.class);
+		public io.intino.ness.Channel channel(java.lang.String qualifiedName) {
+			io.intino.ness.Channel newElement = GraphWrapper.this.graph.createRoot(io.intino.ness.Channel.class, namespace, name).as(io.intino.ness.Channel.class);
 			newElement.node().set(newElement, "qualifiedName", java.util.Collections.singletonList(qualifiedName));
 			return newElement;
 		}
 
-		public io.intino.ness.Connection connection(io.intino.ness.Topic faucet, io.intino.ness.Topic flooder, io.intino.ness.Function plug) {
+		public io.intino.ness.Connection connection(io.intino.ness.Channel faucet, io.intino.ness.Channel flooder, io.intino.ness.Function plug) {
 			io.intino.ness.Connection newElement = GraphWrapper.this.graph.createRoot(io.intino.ness.Connection.class, namespace, name).as(io.intino.ness.Connection.class);
 			newElement.node().set(newElement, "faucet", java.util.Collections.singletonList(faucet));
 			newElement.node().set(newElement, "flooder", java.util.Collections.singletonList(flooder));

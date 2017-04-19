@@ -2,12 +2,11 @@ package io.intino.ness.bus;
 
 import io.intino.konos.jms.Consumer;
 import io.intino.konos.jms.TopicConsumer;
+import io.intino.konos.jms.TopicProducer;
 import io.intino.ness.Ness;
-import io.intino.ness.Topic;
 import io.intino.ness.User;
 import io.intino.ness.konos.NessBox;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.advisory.AdvisorySupport;
 import org.apache.activemq.broker.Broker;
 import org.apache.activemq.broker.BrokerPlugin;
 import org.apache.activemq.broker.BrokerService;
@@ -18,7 +17,6 @@ import org.apache.activemq.security.AuthenticationUser;
 import org.apache.activemq.security.SimpleAuthenticationPlugin;
 import org.apache.activemq.store.kahadb.KahaDBPersistenceAdapter;
 
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Session;
 import java.io.File;
@@ -84,7 +82,7 @@ public final class BusManager {
 		return true;
 	}
 
-	public boolean cleanTopic(String topic) {
+	public boolean cleanChannel(String topic) {
 		try {
 			ActiveMQDestination destination = findTopic(topic);
 			if (destination == null) return false;
@@ -101,10 +99,6 @@ public final class BusManager {
 		if (destination == null) return false;
 		destination.setPhysicalName(newName);
 		return true;
-	}
-
-	public void subscribe(String topic, Consumer consumer) {
-		new TopicConsumer(this.session, topic).listen(consumer);
 	}
 
 	private void configure() {
@@ -141,8 +135,8 @@ public final class BusManager {
 	}
 
 	private void startAdvisories() throws JMSException {
-		Destination advisoryDestination = AdvisorySupport.getDestinationAdvisoryTopic(AdvisorySupport.QUEUE_ADVISORY_TOPIC);
-		session.createConsumer(advisoryDestination).setMessageListener(new TopicListener(box, session));
+//		Destination advisoryDestination = AdvisorySupport.getDestinationAdvisoryTopic(AdvisorySupport.QUEUE_ADVISORY_TOPIC);
+//		session.createConsumer(advisoryDestination).setMessageListener(new TopicListener(box, session));
 	}
 
 	private static Ness ness(NessBox box) {
@@ -158,10 +152,6 @@ public final class BusManager {
 			getGlobal().severe(e.getMessage());
 			return null;
 		}
-	}
-
-	private List<Topic> topics() {
-		return ness(box).topicList();
 	}
 
 	private Session nessSession() {
@@ -185,12 +175,25 @@ public final class BusManager {
 		}
 	}
 
+	public TopicConsumer registerConsumer(String feedQN, Consumer consumer) {
+		TopicConsumer topicConsumer = new TopicConsumer(session, feedQN);
+		topicConsumer.listen(consumer);
+		return topicConsumer;
+	}
+
+	public TopicProducer createProducer(String path) {
+		try {
+			return new TopicProducer(session, path);
+		} catch (JMSException e) {
+			getGlobal().severe(e.getMessage());
+			return null;
+		}
+	}
+
 	static final class PasswordGenerator {
 
 		static String nextPassword() {
 			return new BigInteger(130, new SecureRandom()).toString(32).substring(0, 12);
 		}
 	}
-
-
 }

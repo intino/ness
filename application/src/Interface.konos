@@ -1,36 +1,43 @@
 dsl Konos
 
 Service Nessie as SlackBot
-	Request("Request all users registered in ness") users
-	Request("Request all topics nessy is subscribed filtered by tags") add-user
-		Parameter(String) name
-		Parameter(String, true) groups
-	Request("Request all topics nessy is subscribed filtered by tags") remove-user
-		Parameter(String) name
-	Request("Request all topics nessy is subscribed filtered by tags") topics
-		Parameter(String, true) tags
-	Request("Select a topic to operate with") topic
-		Parameter(String) name
-		Request("Tags thes topic with `tags`") tag
-			Parameter(String, true) tags
-		Request("Changes name of this topic to new one") rename
+	Request("Enter in the management area to add/remove channels or users and other management actions") manage
+		Request("Request all channels nessy is subscribed filtered by tags") add-user
 			Parameter(String) name
-		Request("Consolidates current events of a topic to reservoir") consolidate
-	Request("Select a topic to operate with") remove-topic
-		Parameter(String) name
-	Request("Clear all topics in ness", Attachment) clear
-		Parameter(String) name
+			Parameter(String, true) groups
+		Request("Remove user from ness service") remove-user
+			Parameter(String) name
+		Request("Creates a channel") add-channel
+			Parameter(String) name
+		Request("Select a channel to operate with") remove-channel
+			Parameter(String) name
+	Request("Request all users registered in ness") users
+	Request("Request all channels nessy is subscribed filtering by tags") channels
+		Parameter(String, true) tags
 	Request("Show all functions registered") functions
-	Request("Create a function associated to an input topic and output topic") add-function
+
+	Request("Select a channel to operate with") channel
+		Parameter(String) name
+		Request("Tags thes channel with `tags`") tag
+			Parameter(String, true) tags
+		Request("Changes name of this channel to new one") rename
+			Parameter(String) name
+		Request("Consolidates current events of a channel to reservoir") consolidate
+
+	Request("Create a function associated to an input channel and output channel") add-function
 		Parameter(String) name
 		Parameter(String) code
-	Request("Connect a source and destination topics by a `function`") pump
+	Request("Connect a source and destination channels through a `function`") pump
 		Parameter(String) functionName
 		Parameter(String) input
 		Parameter(String) output
-	Request("Reproduce events of a topic") mount
-		Parameter(String) since
-		
+	Request("Reproduce events of a channel") migrate
+		Parameter(String) channel
+		Parameter(String, true) functions
+	Request("Reproduce events of a channel") reflow
+		Parameter(String) channel
+
+
 		
 Task toReservoir as CronTrigger("0 0 0 1/1 * ? *", "daily starting at 00:00")
 
