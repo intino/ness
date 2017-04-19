@@ -244,7 +244,7 @@ public class Accessory {
 	}
 
 	private static String formatText(Object text) {
-		return text == null ? NullValue : text.toString().contains("\n") ? "\n" + text.toString().replaceAll("\n", "\t\n") + "\n" : text.toString();
+		return text == null ? NullValue : text.toString().contains("\n") ? "\n" + text.toString().replaceAll("\n", "\n\t") + "\n" : text.toString();
 	}
 
 	private static Date parseDate(final String text) {
