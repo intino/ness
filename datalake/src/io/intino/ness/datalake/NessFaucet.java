@@ -10,7 +10,7 @@ import static io.intino.ness.datalake.NessDataLake.Channel;
 import static io.intino.ness.datalake.NessDataLake.Reservoir;
 
 public class NessFaucet {
-    private final NessDataLake.Channel channel;
+    private final Channel channel;
     private final Iterator<Reservoir> reservoirs;
     private MessageInputStream inputStream;
 

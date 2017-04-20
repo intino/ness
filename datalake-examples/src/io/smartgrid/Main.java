@@ -1,7 +1,7 @@
 package io.smartgrid;
 
-import io.intino.ness.datalake.FilePumpingStation;
-import io.intino.ness.datalake.NessPumpingStation;
+import io.intino.ness.datalake.FileStation;
+import io.intino.ness.datalake.NessStation;
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageMapper;
 
@@ -10,7 +10,7 @@ import static io.intino.ness.datalake.Joints.sortingBy;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        NessPumpingStation station = new FilePumpingStation("datalake-examples/local.store");
+        NessStation station = new FileStation("datalake-examples/local.store");
 
         station.pipe("legacy.smartgrid.Heater")
                 .join(sortingBy("Time"))

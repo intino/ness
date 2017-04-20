@@ -1,7 +1,5 @@
 package io.intino.ness.datalake;
 
-import io.intino.ness.datalake.NessPumpingStation.Pipe;
-import io.intino.ness.datalake.NessPumpingStation.SingleUsePipe;
 import io.intino.ness.inl.Message;
 
 import java.io.BufferedWriter;
@@ -10,18 +8,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
-public class Pipes {
+public class Posts {
 
-    public static Pipe csv(String filename) throws IOException {
-        return csv(new File(filename));
+    public static Post exportTo(String filename) throws IOException {
+        return exportTo(new File(filename));
     }
 
-    public static Pipe csv(File file) throws IOException {
+    public static Post exportTo(File file) throws IOException {
         List<String> header = new ArrayList<>();
         BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-        return new SingleUsePipe() {
+        return new Post() {
             @Override
             public void send(Message message) {
                 if (header.isEmpty()) loadHeaderOf(message);

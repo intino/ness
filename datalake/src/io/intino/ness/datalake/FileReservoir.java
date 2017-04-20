@@ -1,6 +1,7 @@
 package io.intino.ness.datalake;
 
 import io.intino.ness.inl.*;
+import io.intino.ness.inl.FileMessageInputStream;
 
 import java.io.*;
 
@@ -38,21 +39,9 @@ public class FileReservoir implements NessDataLake.Reservoir {
         }
     }
 
-    private File[] files() {
-        return file.isDirectory() ? array(file.listFiles()) : new File[]{file};
-    }
-
-    private File[] array(File[] files) {
-        return files != null ? files : new File[0];
-    }
-
     @Override
     public boolean equals(Object obj) {
         return obj != null && obj instanceof FileReservoir && file.equals(((FileReservoir) obj).file);
-    }
-
-    public int compareTo(FileReservoir reservoir) {
-        return file.compareTo(reservoir.file);
     }
 
 

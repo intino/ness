@@ -1,14 +1,14 @@
 package io.fracfocus;
 
-import io.intino.ness.datalake.FilePumpingStation;
-import io.intino.ness.datalake.NessPumpingStation;
+import io.intino.ness.datalake.FileStation;
+import io.intino.ness.datalake.NessStation;
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageMapper;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        NessPumpingStation station = new FilePumpingStation("datalake-examples/local.store");
+        NessStation station = new FileStation("datalake-examples/local.store");
         station.pipe("legacy.frac.Job")
             .map(ImportFracJobMapper.class)
             .to("channel.frac.Job.1");

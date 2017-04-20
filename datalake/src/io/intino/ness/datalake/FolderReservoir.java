@@ -2,6 +2,7 @@ package io.intino.ness.datalake;
 
 import io.intino.ness.datalake.NessDataLake.Joint;
 import io.intino.ness.inl.*;
+import io.intino.ness.inl.FileMessageInputStream;
 
 import java.io.File;
 import java.io.IOException;
