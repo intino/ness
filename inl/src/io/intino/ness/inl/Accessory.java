@@ -74,7 +74,7 @@ public class Accessory {
 		return line.contains(":");
 	}
 
-	private static class FieldQuery extends Accessory {
+	static class FieldQuery extends Accessory {
 		private final Object object;
 
 		FieldQuery(Object object) {

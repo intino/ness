@@ -36,13 +36,13 @@ public class Messages {
     }
 
     public static String messageInOldFormat() {
-        return "[active-teacher]\n" +
+        return "[Teacher]\n" +
                 "name = \"Jose\"\n" +
                 "money=50.0\n" +
                 "birthDate= 2016-10-04T20:10:11Z\n" +
                 "university = ULPGC\n" +
                 "\n" +
-                "[Person.Country]\n" +
+                "[Teacher.Country]\n" +
                 "name=\"Spain\"\n" +
                 "continent=\n";
     }
