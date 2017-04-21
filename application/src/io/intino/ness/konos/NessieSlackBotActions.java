@@ -6,9 +6,7 @@ import io.intino.konos.slack.Bot;
 import io.intino.konos.slack.Bot.MessageProperties;
 import io.intino.ness.Function;
 import io.intino.ness.Ness;
-import io.intino.ness.Topic;
 import io.intino.ness.bus.BusManager;
-import io.intino.ness.datalake.NessFunction;
 
 import java.io.IOException;
 import java.net.URL;

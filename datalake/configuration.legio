@@ -1,10 +1,10 @@
 dsl Legio
 
-Project("io.intino.ness", "1.0.0") datalake
+Project("io.intino.ness", "1.0.1") datalake
 	Repositories
 		Release("https://artifactory.intino.io/artifactory/releases", "intino-maven")
 	Dependencies
-		Compile("io.intino.ness", "inl", "1.0.0")
+		Compile("io.intino.ness", "inl", "1.0.2")
 		Test("junit", "junit", "4.12")
 
 LifeCycle

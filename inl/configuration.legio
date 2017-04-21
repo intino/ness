@@ -1,11 +1,14 @@
 dsl Legio
 
-Project(groupId = "io.intino.ness", version = "1.0.0") inl
+Project(groupId = "io.intino.ness", version = "1.0.2") inl
 	Repositories
 		Release("https://artifactory.intino.io/artifactory/releases", "intino-maven")
 	Dependencies
-		Test(groupId = "junit", artifactId = "junit", version = "4.12")
+		Test("junit", "junit", "4.12")
 
 
 LifeCycle
-	Package(ModulesAndLibrariesLinkedByManifest)
+	Package(LibrariesLinkedByManifest)
+		attachSources = true
+	Distribution
+		Release("https://artifactory.intino.io/artifactory/release-libraries", "intino-maven")

@@ -37,6 +37,8 @@ public final class BusManager {
 	private final NessBox box;
 	private final BrokerService service;
 	private final SimpleAuthenticationPlugin authenticator;
+	private final Map<String, TopicProducer> producers = new HashMap<>();
+	private final Map<String, TopicConsumer> consumers = new HashMap<>();
 	private Session session;
 
 	public BusManager(NessBox box) {
@@ -176,18 +178,26 @@ public final class BusManager {
 	}
 
 	public TopicConsumer registerConsumer(String feedQN, Consumer consumer) {
-		TopicConsumer topicConsumer = new TopicConsumer(session, feedQN);
+		consumers.putIfAbsent(feedQN, new TopicConsumer(session, feedQN));
+		TopicConsumer topicConsumer = consumers.get(feedQN);
 		topicConsumer.listen(consumer);
 		return topicConsumer;
 	}
 
-	public TopicProducer createProducer(String path) {
+
+
+	public TopicProducer registerOrGetProducer(String path) {
 		try {
-			return new TopicProducer(session, path);
+			producers.putIfAbsent(path, new TopicProducer(session, path));
+			return producers.get(path);
 		} catch (JMSException e) {
 			getGlobal().severe(e.getMessage());
 			return null;
 		}
+	}
+
+	public TopicConsumer consumerOf(String feedQN) {
+		return consumers.get(feedQN);
 	}
 
 	static final class PasswordGenerator {

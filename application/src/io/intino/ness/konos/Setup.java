@@ -2,7 +2,7 @@ package io.intino.ness.konos;
 
 import io.intino.ness.DatalakeManager;
 import io.intino.ness.bus.BusManager;
-import io.intino.ness.datalake.FilePumpingStation;
+import io.intino.ness.datalake.FileStation;
 import io.intino.tara.io.Stash;
 import io.intino.tara.magritte.Graph;
 import io.intino.tara.magritte.Store;
@@ -34,7 +34,7 @@ final class Setup {
 	static void execute(NessBox box) {
 		BusManager manager = new BusManager(box);
 		manager.start();
-		box.put("datalake", new DatalakeManager(new FilePumpingStation(box.get("ness.rootPath")), manager));
+		box.put("datalake", new DatalakeManager(new FileStation(box.get("ness.rootPath")), manager));
 	}
 
 	private static void configureLogger(String path) {
