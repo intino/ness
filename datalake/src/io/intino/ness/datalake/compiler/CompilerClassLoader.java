@@ -5,10 +5,10 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class NessClassLoader extends ClassLoader {
+final class CompilerClassLoader extends ClassLoader {
     private final Map<String, JavaFileObject> classes = new HashMap<>();
 
-    public NessClassLoader(ClassLoader parent) {
+    CompilerClassLoader(ClassLoader parent) {
         super(parent);
     }
 

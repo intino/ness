@@ -1,6 +1,7 @@
 package io.intino.ness.datalake;
 
-import io.intino.ness.datalake.NessDataLake.Joint;
+import io.intino.ness.datalake.Tank.Tub;
+import io.intino.ness.datalake.toolbox.Import;
 import io.intino.ness.inl.*;
 import io.intino.ness.inl.FileMessageInputStream;
 
@@ -9,12 +10,12 @@ import java.io.IOException;
 
 import static java.util.Arrays.stream;
 
-public class FolderReservoir implements NessDataLake.Reservoir {
+public class FolderTub implements Tub {
 
     private File folder;
-    private Joint joint;
+    private Import.Joint joint;
 
-    public FolderReservoir(File folder, Joint joint) {
+    public FolderTub(File folder, Import.Joint joint) {
         if (joint == null) throw new RuntimeException(folder.getAbsolutePath() + " is a folder reservoir that requires a joint");
         this.folder = folder;
         this.joint = joint;

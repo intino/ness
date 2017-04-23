@@ -8,11 +8,11 @@ import java.net.URISyntaxException;
 import static io.intino.ness.datalake.compiler.SimpleParser.qualifiedClassNameIn;
 import static javax.tools.StandardLocation.SOURCE_PATH;
 
-public class JavaSourceFile extends SimpleJavaFileObject {
-    static final String JavaExtension = ".java";
+class JavaSourceFile extends SimpleJavaFileObject {
+    private static final String JavaExtension = ".java";
     private final String source;
 
-    public JavaSourceFile(String source) {
+    JavaSourceFile(String source) {
         super(uriOf(SOURCE_PATH, qualifiedClassNameIn(source)), Kind.SOURCE);
         this.source = source;
     }
@@ -22,11 +22,11 @@ public class JavaSourceFile extends SimpleJavaFileObject {
         return source;
     }
 
-    public static URI uriOf(Location location, String packageName, String name) {
+    static URI uriOf(Location location, String packageName, String name) {
         return uriOf(location, packageName + "." + name);
     }
 
-    public static URI uriOf(Location location, String name) {
+    static URI uriOf(Location location, String name) {
         try {
             return new URI(location + "/" + name.replaceAll("\\.","/") + JavaExtension);
         } catch (URISyntaxException e) {

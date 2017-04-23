@@ -2,30 +2,30 @@ package io.smartgrid;
 
 import io.intino.ness.datalake.FileStation;
 import io.intino.ness.datalake.NessStation;
+import io.intino.ness.datalake.toolbox.Import;
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageMapper;
-
-import static io.intino.ness.datalake.Joints.sortingBy;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
         NessStation station = new FileStation("datalake-examples/local.store");
 
-        station.pipe("legacy.smartgrid.Heater")
-                .join(sortingBy("Time"))
-                .map(ImportHeaterMapper.class)
-                .to("channel.smartgrid.Heater.1");
-        station.pipe("legacy.smartgrid.Weather")
-                .map(ImportWeatherMapper.class)
-                .to("channel.smartgrid.Temperature.1");
-        station.pipe("legacy.smartgrid.PowerConsumption")
-                .map(ImportPowerConsumptionMapper.class)
-                .to("channel.smartgrid.PowerConsumption.1");
 
-        Thread t1 = station.pump("legacy.smartgrid.Heater").thread();
-        Thread t2 = station.pump("legacy.smartgrid.Weather").thread();
-        Thread t3 = station.pump("legacy.smartgrid.PowerConsumption").thread();
+        Thread t1 = Import.from("datalake-examples/local.legacy/smart-heater")
+                    .map(new ImportHeaterMapper())
+                    .to(station.feed("tank.smartgrid.Heater.1")).thread();
+
+
+        Thread t2 = Import.from("datalake-examples/local.legacy/weather")
+                    .map(new ImportWeatherMapper())
+                    .to(station.feed("tank.smartgrid.Temperature.1")).thread();
+
+
+        Thread t3 = Import.from("datalake-examples/local.legacy/power-consumption")
+                    .map(new ImportPowerConsumptionMapper())
+                    .to(station.feed("tank.smartgrid.PowerConsumption.1")).thread();
+
 
         t1.join();
         t2.join();

@@ -1,9 +1,9 @@
 package io.intino.ness.datalake.compiler;
 
-public class SimpleParser {
+class SimpleParser {
     private String source;
 
-    public static String qualifiedClassNameIn(String source) {
+    static String qualifiedClassNameIn(String source) {
         return new SimpleParser(source).getQualifiedClassName();
     }
 

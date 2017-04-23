@@ -8,10 +8,10 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public class JavaClassFile extends SimpleJavaFileObject {
+class JavaClassFile extends SimpleJavaFileObject {
     private ByteArrayOutputStream byteCode;
 
-    public JavaClassFile(String className, Kind kind) {
+    JavaClassFile(String className, Kind kind) {
         super(uriOf(className), kind);
     }
 
@@ -30,7 +30,7 @@ public class JavaClassFile extends SimpleJavaFileObject {
         return byteCode = new ByteArrayOutputStream();
     }
 
-    public byte[] getByteCode() {
+    byte[] getByteCode() {
         return byteCode.toByteArray();
     }
 

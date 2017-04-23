@@ -1,5 +1,6 @@
 package io.intino.ness.datalake;
 
+import io.intino.ness.datalake.compiler.Compiler;
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageFilter;
 import io.intino.ness.inl.MessageMapper;
@@ -63,8 +64,8 @@ public class Valve implements MessageMapper {
         return (Class<MessageFilter>) Class.forName(name);
     }
 
-    private NessCompiler.Result compile(String function, String... sources) {
-        return NessCompiler.compile(sources)
+    private Compiler.Result compile(String function, String... sources) {
+        return Compiler.compile(sources)
                 .with("-target", "1.8")
                 .load(function);
     }

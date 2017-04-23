@@ -18,15 +18,15 @@ public class FileDataLake implements NessDataLake {
     }
 
     @Override
-    public List<Channel> channels() {
+    public List<Tank> tanks() {
         return stream(files())
-                .map(FileChannel::new)
+                .map(FileTank::new)
                 .collect(toList());
     }
 
     @Override
-    public Channel get(String channel) {
-        return new FileChannel(folderOf(channel));
+    public Tank get(String tank) {
+        return new FileTank(folderOf(tank));
     }
 
     private File folderOf(String channel) {

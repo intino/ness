@@ -1,12 +1,84 @@
-package io.intino.ness.datalake;
+package io.intino.ness.datalake.toolbox;
 
-import io.intino.ness.datalake.NessDataLake.Joint;
+import io.intino.ness.datalake.*;
+import io.intino.ness.datalake.NessStation.Feed;
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageInputStream;
+import io.intino.ness.inl.MessageMapper;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Joints {
+public class Import implements Feeder {
+
+    private File folder;
+    private List<MessageMapper> mappers = new ArrayList<>();
+    private Joint joint = null;
+
+    private Import(File folder) {
+        this.folder = folder;
+    }
+
+    public static Import from(String filename) {
+        return from(new File(filename));
+    }
+
+    public static Import from(File file) {
+        if (!file.exists()) throw new RuntimeException("'" + file.getAbsolutePath() + "' doesn't exist");
+        return new Import(file);
+    }
+
+
+    public Import join(Joint joint) {
+        this.joint = joint;
+        return this;
+    }
+
+    @Override
+    public Job to(Feed feed) {
+        Faucet faucet = new TankFaucet(new FileTank(folder, joint));
+        return new Job() {
+
+            @Override
+            protected boolean step() {
+                try {
+                    Message message  = cast(faucet.next());
+                    if (message == null) return false;
+                    feed.send(message);
+                    return true;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+
+            @Override
+            protected void onTerminate() {
+                feed.flush();
+            }
+        };
+    }
+
+    private Message cast(Message message) {
+        for (MessageMapper mapper : mappers) {
+            if (message == null) return null;
+            message = mapper.map(message);
+        }
+        return message;
+    }
+
+    public Import map(MessageMapper mapper) {
+        mappers.add(mapper);
+        return this;
+    }
+
+
+    public interface Joint {
+        MessageInputStream join(MessageInputStream[] inputStreams);
+    }
+
 
     public static Joint sortingBy(String attribute) {
         return inputStreams -> {
@@ -60,7 +132,7 @@ public class Joints {
 
         private int indexOfNext() {
             int index = -1;
-            String min = "99999999";
+            String min = "z";
             String val;
             for (int i = 0; i < messages.length; i++) {
                 if (messages[i] == null) continue;
@@ -73,4 +145,5 @@ public class Joints {
         }
 
     }
+
 }

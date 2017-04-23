@@ -1,45 +1,42 @@
 package io.intino.ness.datalake;
 
-import io.intino.ness.datalake.NessDataLake.Joint;
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageMapper;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public interface NessStation {
 
-    List<String> channels();
-    boolean exists(String channel);
+    Tank tank(String tank);
+    Feed feed(String tank);
+    Pipe pipe(String tank);
+    Flow flow(String tank);
 
-    void create(String channel);
-    void remove(String channel);
-    void rename(String channel, String newName);
-    void settle(String channel, Joint joint);
-
-    Feed feed(String channel);
-    Pipe pipe(String channel);
-    Flow flow(String channel);
-
+    void remove(String tank);
     void remove(Feed... feeds);
     void remove(Pipe... pipes);
     void remove(Flow... flows);
 
-    List<Feed> feedsTo(String channel);
-    List<Pipe> pipesFrom(String channel);
-    List<Pipe> pipesTo(String channel);
+    List<Tank> tanks();
+    List<Feed> feedsTo(String tank);
+    List<Pipe> pipesFrom(String tank);
+    List<Pipe> pipesTo(String tank);
     List<Pipe> pipesBetween(String source, String target);
-    List<Flow> flowsFrom(String channel);
+    List<Flow> flowsFrom(String tank);
 
-    Pump pump(String channel);
-    Task seal(String channel);
+    Pump pump(String tank);
+    Job seal(String tank);
 
+    boolean exists(String tank);
+    void rename(String tank, String newName);
 
-    interface Feed extends Post {
+    interface Feed {
+        void send(Message message);
+        default void flush() {}
     }
 
     interface Flow {
-        Flow onMessage(Post post);
+        Flow to(Post post);
         default void send(Message message) {
             throw new RuntimeException("");
         }
@@ -50,63 +47,13 @@ public interface NessStation {
         String to();
 
         Pipe with(Valve valve);
-        Pipe to(String channel);
+        Pipe to(String tank);
     }
 
     interface Pump {
-        Pump to(String channel);
+        Pump to(String tank);
         Pump to(Post post);
-        Task start();
-    }
-
-    abstract class Task {
-        private Thread thread;
-        private boolean running = true;
-        private List<Runnable> onTerminate = new ArrayList<>();
-
-        public Task() {
-            this.thread = new Thread(runnable());
-            this.thread.start();
-        }
-
-        private Runnable runnable() {
-            return new Runnable() {
-                @Override
-                public void run() {
-                    if (init()) {
-                        while (running)
-                            running = step();
-                        terminate();
-                    }
-                }
-            };
-        }
-
-        public Thread thread() {
-            return thread;
-        }
-
-        protected abstract boolean init();
-
-        protected abstract boolean step();
-
-        private void terminate() {
-            onTerminate();
-            if (onTerminate != null) onTerminate.forEach(Runnable::run);
-        }
-
-        protected void onTerminate() {
-
-        }
-
-        public void stop() {
-            running = false;
-        }
-
-        private void onTerminate(Runnable runnable) {
-            this.onTerminate.add(runnable);
-        }
-
+        Job start();
     }
 
 }

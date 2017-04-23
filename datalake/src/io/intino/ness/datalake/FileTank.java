@@ -1,8 +1,6 @@
 package io.intino.ness.datalake;
 
-import io.intino.ness.datalake.NessDataLake.Channel;
-import io.intino.ness.datalake.NessDataLake.Joint;
-import io.intino.ness.datalake.NessDataLake.Reservoir;
+import io.intino.ness.datalake.toolbox.Import;
 import io.intino.ness.inl.FileMessageOutputStream;
 import io.intino.ness.inl.Message;
 
@@ -13,26 +11,26 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.intino.ness.datalake.FileChannel.Format.zip;
+import static io.intino.ness.datalake.FileTank.Format.zip;
 import static io.intino.ness.inl.Message.empty;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
-public class FileChannel implements Channel {
+public class FileTank implements Tank {
 
     private final File folder;
-    private final Joint joint;
+    private final Import.Joint joint;
     private final Writer writer;
 
     public enum Format {
         zip, inl
     }
 
-    public FileChannel(File folder) {
+    public FileTank(File folder) {
         this(folder, null);
     }
 
-    public FileChannel(File folder, Joint joint) {
+    public FileTank(File folder, Import.Joint joint) {
         this.folder = folder;
         this.joint = joint;
         this.writer = new Writer();
@@ -44,20 +42,20 @@ public class FileChannel implements Channel {
     }
 
     @Override
-    public List<Reservoir> reservoirs() {
+    public List<Tub> tubs() {
         return stream(files())
                 .sorted(File::compareTo)
-                .map(this::reservoir)
+                .map(this::tub)
                 .collect(toList());
     }
 
-    private Reservoir reservoir(File file) {
-        return file.isFile() ? new FileReservoir(file) : new FolderReservoir(file, joint);
+    private Tub tub(File file) {
+        return file.isDirectory() ? new FolderTub(file, joint) : new FileTub(file);
     }
 
     @Override
-    public Reservoir get(Instant instant) {
-        return new FileReservoir(fileOf(instant, zip));
+    public Tub get(Instant instant) {
+        return new FileTub(fileOf(instant, zip));
     }
 
 
@@ -83,8 +81,8 @@ public class FileChannel implements Channel {
         return new File(folder, dayOf(instant.toString()) + "." + format.name());
     }
 
-    void create() {
-        if (folder.mkdirs()) return;
+    Tank create() {
+        if (folder.mkdirs()) return this;
         throw new RuntimeException("Channel could not be created");
     }
 
@@ -100,7 +98,7 @@ public class FileChannel implements Channel {
     void remove() {
         if (isEmpty()) {
             if (folder.delete()) return;
-            throw new RuntimeException("Empty channel could not be removed");
+            throw new RuntimeException("Empty tank could not be removed");
         }
         if (rename(folder, "trash." + uid() + "." + folder.getName())) return;
         throw new RuntimeException("Channel could not be removed");
@@ -124,7 +122,7 @@ public class FileChannel implements Channel {
     }
 
     void write(Message message)  {
-        if (message == empty()) return;
+        if (message == empty) return;
         try {
             this.writer.write(message);
         } catch (IOException e) {

@@ -6,26 +6,24 @@ import io.intino.ness.inl.MessageInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
-import static io.intino.ness.datalake.NessDataLake.Channel;
-import static io.intino.ness.datalake.NessDataLake.Reservoir;
+public class TankFaucet implements Faucet {
 
-public class NessFaucet {
-    private final Channel channel;
-    private final Iterator<Reservoir> reservoirs;
+    private final Tank tank;
+    private final Iterator<Tank.Tub> tubs;
     private MessageInputStream inputStream;
 
-    public NessFaucet(Channel channel) {
-        this.channel = channel;
-        this.reservoirs = channel.reservoirs().iterator();
+    public TankFaucet(Tank tank) {
+        this.tank = tank;
+        this.tubs = tank.tubs().iterator();
         this.inputStream = nextInputStream();
     }
 
-    public Channel channel() {
-        return channel;
+    public Tank channel() {
+        return tank;
     }
 
     public String name() {
-        return channel.name();
+        return tank.name();
     }
 
 
@@ -40,14 +38,12 @@ public class NessFaucet {
 
     private MessageInputStream nextInputStream() {
         try {
-            if (!reservoirs.hasNext()) return null;
-            return reservoirs.next().input();
+            if (!tubs.hasNext()) return null;
+            return tubs.next().input();
         }
         catch (Exception e) {
             e.printStackTrace();
             return new MessageInputStream.Empty();
         }
     }
-
-
 }

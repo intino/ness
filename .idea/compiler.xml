@@ -12,7 +12,6 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
         <module name="datalake-examples" />
-        <module name="tgs" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

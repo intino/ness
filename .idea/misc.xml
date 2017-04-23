@@ -7,7 +7,6 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/datalake-examples/pom.xml" />
-        <option value="$PROJECT_DIR$/tgs/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

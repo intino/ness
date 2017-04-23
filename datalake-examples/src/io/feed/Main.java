@@ -2,7 +2,10 @@ package io.feed;
 
 import io.intino.ness.datalake.FileStation;
 import io.intino.ness.datalake.NessStation;
+import io.intino.ness.datalake.NessStation.Feed;
+import io.intino.ness.datalake.NessStation.Flow;
 import io.intino.ness.datalake.NessStation.Pipe;
+import io.intino.ness.datalake.Valve;
 import io.intino.ness.inl.Formats;
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageInputStream;
@@ -13,88 +16,52 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 
-import static io.intino.ness.datalake.Posts.csv;
-import static io.intino.ness.datalake.Probes.out;
-import static io.intino.ness.datalake.Probes.progress;
+import static io.intino.ness.datalake.toolbox.Posts.*;
 import static java.lang.Thread.currentThread;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        clean();
-        feedToFlow();
-        exportChannelToCsv();
-    }
+    private static final String temperature_1 = "tank.weather.Temperature.1";
+    private static final String temperature_2 = "tank.weather.Temperature.2";
 
-    private static void feedToFlow() throws Exception {
+    public static void main(String[] args) throws Exception {
+        MessageInputStream messages = messages();
         NessStation station = createStation();
 
-        station.create("channel.weather.Temperature.1");
-        Pipe feed = station
-                .pipe()
-                .map(out)
-                .to("channel.weather.Temperature.1");
+        Feed feed = station.feed(temperature_1);
+        Flow flow = station.flow(temperature_1).to(out);
+        Pipe pipe = station.pipe(temperature_1)
+                .with(Valve.define().map(ToFahrenheit.class))
+                .to(temperature_2);
 
-        Pipe flow = station
-                .pipe("channel.weather.Temperature.1")
-                .map(progress(1))
-                .to(flow());
 
-        MessageInputStream messages = messages();
         for (int i = 0; i < 10; i++) feed.send(messages.next());
-        station.seal("channel.weather.Temperature.1").thread().join();
-        station.close(flow);
+        station.seal(temperature_1).thread().join();
+
+        station.remove(flow);
+        station.flow(temperature_2).to(console);
 
         for (int i = 0; i < 9; i++) feed.send(messages.next());
-        station.seal("channel.weather.Temperature.1").thread().join();
+        station.seal(temperature_1).thread().join();
 
-        station.close(feed);
+        station.pump(temperature_1).to(file("temperatures.csv"));
+        station.pump(temperature_1).start().thread().join();
     }
 
-    private static void exportChannelToCsv() throws Exception {
-        NessStation station = createStation();
-        Pipe pipe = station.pipe("channel.weather.Temperature.1")
-                .map(ToFahrenheit.class)
-                .to(csv("temperatures.csv"));
-        station.pump("channel.weather.Temperature.1").thread().join();
-        // El pipe se destruye al terminar el bombeo
-    }
 
-    private static void channelToChannelAndFeed() throws Exception {
-        NessStation station = createStation();
-        station.create("channel.weather.Temperature.2");
-        station.pipe("channel.weather.Temperature.1")
-                .map(ToFahrenheit.class)
-                .to("channel.weather.Temperature.2");
-        station.pump("channel.weather.Temperature.1").thread().join();
-    }
+    private static NessStation clean(FileStation station) {
+        if (station.exists(temperature_1)) station.remove(temperature_1);
+        station.tank(temperature_1);
 
-    private static void channelToFlow() throws Exception {
-        NessStation station = createStation();
-        station.pipe("channel.weather.Temperature.1")
-                .map(progress(100))
-                .to(flow());
-        station.pump("channel.weather.Temperature.1").thread().join();
+        if (station.exists(temperature_2)) station.remove(temperature_2);
+        station.tank(temperature_2);
 
-    }
-
-    private static Pipe flow() {
-        return message -> System.out.println(message.length());
-    }
-
-    private static void clean() {
-        NessStation station = createStation();
-
-        if (station.exists("channel.weather.Temperature.1"))
-            station.remove("channel.weather.Temperature.1");
-
-        if (station.exists("channel.weather.Temperature.2"))
-            station.remove("channel.weather.Temperature.2");
+        return station;
     }
 
     private static NessStation createStation() {
         File file = new File("datalake-examples/local.store");
-        return new FileStation(file);
+        return clean(new FileStation(file));
     }
 
     private static MessageInputStream messages() throws URISyntaxException, IOException {

@@ -1,8 +1,4 @@
-package io.intino.ness.datalake;
-
-import io.intino.ness.datalake.compiler.NessClassLoader;
-import io.intino.ness.datalake.compiler.NessFileManager;
-import io.intino.ness.datalake.compiler.JavaSourceFile;
+package io.intino.ness.datalake.compiler;
 
 import java.util.*;
 
@@ -13,39 +9,39 @@ import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
-public class NessCompiler {
+public class Compiler {
 
     private final List<JavaSourceFile> sources;
     private final DiagnosticCollector<JavaFileObject> diagnostics;
     private final JavaCompiler compiler;
-    private final NessClassLoader classLoader;
+    private final CompilerClassLoader classLoader;
     private final List<String> options;
 
-    private NessCompiler(List<JavaSourceFile> sources) {
+    private Compiler(List<JavaSourceFile> sources) {
         this.sources = sources;
         this.compiler = checkTools(ToolProvider.getSystemJavaCompiler());
-        this.classLoader = new NessClassLoader(this.getClass().getClassLoader());
+        this.classLoader = new CompilerClassLoader(this.getClass().getClassLoader());
         this.diagnostics = new DiagnosticCollector<>();
         this.options = new ArrayList<>();
     }
 
-    public static NessCompiler compile(String... sources)  {
+    public static Compiler compile(String... sources)  {
         return compile(stream(sources).map(JavaSourceFile::new).collect(toList()));
     }
 
     @SuppressWarnings("unchecked")
-    public static NessCompiler compile(List<JavaSourceFile> sources) {
-        return new NessCompiler(sources);
+    public static Compiler compile(List<JavaSourceFile> sources) {
+        return new Compiler(sources);
     }
 
-    public NessCompiler with(String... options) {
+    public Compiler with(String... options) {
         this.options.addAll(asList(options));
         return this;
     }
 
     @SuppressWarnings("unchecked")
     public Result load(String className) {
-        NessFileManager fileManager = new NessFileManager(standardFileManager(), classLoader);
+        CompilerFileManager fileManager = new CompilerFileManager(standardFileManager(), classLoader);
         fileManager.putFilesForInput(sources);
         CompilationTask task = compiler.getTask(null, fileManager, diagnostics, options, null, sources);
         check(task.call());

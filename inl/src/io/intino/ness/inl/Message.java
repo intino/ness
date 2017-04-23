@@ -57,11 +57,12 @@ public class Message {
         return valueOf(attribute);
     }
 
-    public void write(String attribute, String value) {
+    public Message write(String attribute, String value) {
         if (contains(attribute))
             get(attribute).value = value;
         else if (value != null)
             attributes.add(new Attribute(attribute,value));
+        return this;
     }
 
     public Data parse(final String attribute) {
@@ -74,29 +75,30 @@ public class Message {
         };
     }
 
-    void write(Attribute attribute) {
-        write(attribute.name, attribute.value);
+    Message write(Attribute attribute) {
+        return write(attribute.name, attribute.value);
     }
 
-    public void write(String attribute, Boolean value) {
-        get(attribute).value = value.toString();
+    public Message write(String attribute, Boolean value) {
+        return write(attribute, value.toString());
     }
 
-    public void write(String attribute, Integer value) {
-        write(attribute, value.toString());
+    public Message write(String attribute, Integer value) {
+        return write(attribute, value.toString());
     }
 
-    public void write(String attribute, Double value) {
-        write(attribute, value.toString());
+    public Message write(String attribute, Double value) {
+        return write(attribute, value.toString());
     }
 
-    public void rename(String attribute, String newName) {
+    public Message rename(String attribute, String newName) {
         get(attribute).name = newName;
+        return this;
     }
 
-    public void remove(String attribute) {
-        if (!contains(attribute)) return;
-        attributes.remove(indexOf(attribute));
+    public Message remove(String attribute) {
+        if (contains(attribute)) attributes.remove(indexOf(attribute));
+        return this;
     }
 
     private String valueOf(String attribute) {
@@ -161,7 +163,7 @@ public class Message {
         try {
             return Inl.of(new ByteArrayInputStream(bytes)).next();
         } catch (IOException e) {
-            return empty();
+            return empty;
         }
     }
 
@@ -173,10 +175,7 @@ public class Message {
         return owner != null ? owner.path() + "." + type : type;
     }
 
-    private static Message empty = new Message("");
-    public static Message empty() {
-        return empty;
-    }
+    public static Message empty = new Message("");
 
     public int length() {
         return toString().length();

@@ -7,3 +7,4 @@ out/
 datalake-examples/local.store/legacy.frac.Well/
 tgs/
 datalake-examples/target/
+datalake-examples/local.legacy/wells

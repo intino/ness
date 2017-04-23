@@ -5,12 +5,14 @@ import io.intino.ness.inl.FileMessageInputStream;
 
 import java.io.*;
 
-public class FileReservoir implements NessDataLake.Reservoir {
+import static io.intino.ness.datalake.Tank.*;
+
+public class FileTub implements Tub {
 
     private final File file;
     private MessageInputStream input;
 
-    public FileReservoir(File file) {
+    public FileTub(File file) {
         this.file = file;
     }
 
@@ -41,7 +43,7 @@ public class FileReservoir implements NessDataLake.Reservoir {
 
     @Override
     public boolean equals(Object obj) {
-        return obj != null && obj instanceof FileReservoir && file.equals(((FileReservoir) obj).file);
+        return obj != null && obj instanceof FileTub && file.equals(((FileTub) obj).file);
     }
 
 

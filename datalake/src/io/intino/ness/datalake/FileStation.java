@@ -1,6 +1,5 @@
 package io.intino.ness.datalake;
 
-import io.intino.ness.datalake.NessDataLake.Joint;
 import io.intino.ness.inl.*;
 import io.intino.ness.inl.FileMessageInputStream;
 import io.intino.ness.inl.FileMessageOutputStream;
@@ -11,7 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static io.intino.ness.datalake.FileChannel.Format.inl;
+import static io.intino.ness.datalake.FileTank.Format.inl;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.util.Arrays.stream;
@@ -21,8 +20,6 @@ import static java.util.stream.Collectors.toList;
 public class FileStation implements NessStation {
 
     private final File folder;
-
-    private final Map<String, Joint> joints = new HashMap<>();
     private final Map<String, List<Feed>> feeds = new HashMap<>();
     private final Map<String, List<Flow>> flows = new HashMap<>();
     private final List<Pipe> pipes = new ArrayList<>();
@@ -36,66 +33,42 @@ public class FileStation implements NessStation {
     }
 
     @Override
-    public boolean exists(String channel) {
-        return get(channel).exists();
+    public Tank tank(String tank) {
+        return assertNotExists(get(tank)).create();
     }
 
     @Override
-    public List<String> channels() {
-        return stream(channelFiles())
-                .map(File::getName)
-                .collect(toList());
-    }
-
-    @Override
-    public void create(String channel) {
-        assertNotExists(get(channel)).create();
-    }
-
-    @Override
-    public void remove(String channel) {
-        assertExists(get(channel)).remove();
-    }
-
-    @Override
-    public void rename(String channel, String newName) {
-        assertExists(get(channel)).rename(newName);
-    }
-
-    @Override
-    public void settle(String channel, Joint joint) {
-        joints.put(channel, joint);
-    }
-
-    @Override
-    public NessStation.Feed feed(String channel) {
+    public NessStation.Feed feed(String tank) {
+        assertExists(get(tank));
         Feed feed = new Feed() {
             @Override
             public void send(Message message) {
-                FileStation.this.send(message, channel);
+                FileStation.this.send(message, tank);
             }
 
             @Override
             public String toString() {
-                return "feed > " + channel;
+                return "feed > " + tank;
             }
         };
-        feedsTo(channel).add(feed);
+        feedsTo(tank).add(feed);
         return feed;
     }
 
     @Override
-    public Pipe pipe(String channel) {
-        return createPipeFor(channel);
+    public Pipe pipe(String tank) {
+        assertExists(get(tank));
+        return createPipeFor(tank);
     }
 
     @Override
-    public Flow flow(String channel) {
+    public Flow flow(String tank) {
+        assertExists(get(tank));
         Flow flow = new Flow() {
             List<Post> posts = new ArrayList<>();
 
             @Override
-            public Flow onMessage(Post post) {
+            public Flow to(Post post) {
                 this.posts.add(post);
                 return this;
             }
@@ -107,11 +80,16 @@ public class FileStation implements NessStation {
 
             @Override
             public String toString() {
-                return channel + " > flow";
+                return tank + " > flow";
             }
         };
-        flowsFrom(channel).add(flow);
+        flowsFrom(tank).add(flow);
         return flow;
+    }
+
+    @Override
+    public void remove(String tank) {
+        assertExists(assertIsNotUsed(get(tank))).remove();
     }
 
     @Override
@@ -133,13 +111,73 @@ public class FileStation implements NessStation {
             this.flows.values().forEach(list->list.remove(flow));
     }
 
-
     @Override
-    public Pump pump(String channel)  {
-        return createPumpFor(channel);
+    public Pump pump(String tank)  {
+        return createPumpFor(tank);
     }
 
-    private File[] channelFiles() {
+    @Override
+    public Job seal(String tank) {
+        return createSealTaskFor(assertExists(get(tank)));
+    }
+
+
+    @Override
+    public List<Tank> tanks() {
+        return stream(tankFiles())
+                .map(FileTank::new)
+                .collect(toList());
+    }
+
+    @Override
+    public List<Feed> feedsTo(String tank) {
+        if (feeds.containsKey(tank)) return feeds.get(tank);
+        ArrayList<Feed> result =  new ArrayList<>();
+        feeds.put(tank, result);
+        return result;
+    }
+
+    @Override
+    public List<Pipe> pipesFrom(String tank) {
+        return pipes.stream()
+                .filter(p -> tank.equalsIgnoreCase(p.from()))
+                .collect(toList());
+    }
+
+    @Override
+    public List<Pipe> pipesTo(String tank) {
+        return pipes.stream()
+                .filter(p -> tank.equalsIgnoreCase(p.to()))
+                .collect(toList());
+    }
+
+    @Override
+    public List<Pipe> pipesBetween(String source, String target) {
+        return pipes.stream()
+                .filter(p -> source.equalsIgnoreCase(p.from()) && target.equalsIgnoreCase(p.to()))
+                .collect(toList());
+    }
+
+    @Override
+    public List<Flow> flowsFrom(String tank) {
+        if (flows.containsKey(tank)) return flows.get(tank);
+        ArrayList<Flow> result =  new ArrayList<>();
+        flows.put(tank, result);
+        return result;
+    }
+
+
+    @Override
+    public boolean exists(String tank) {
+        return get(tank).exists();
+    }
+
+    @Override
+    public void rename(String tank, String newName) {
+        assertExists(get(tank)).rename(newName);
+    }
+
+    private File[] tankFiles() {
         File[] files = folder.listFiles(File::isDirectory);
         return files != null ? files : new File[0];
     }
@@ -154,61 +192,19 @@ public class FileStation implements NessStation {
         return new File(file.getAbsolutePath().replace(".inl",".zip"));
     }
 
-    private void send(Message message, String channel)  {
+    private void send(Message message, String tank)  {
         try {
-            write(message, channel);
-            pipesFrom(channel).forEach(pipe -> send(pipe.map(message), pipe.to()));
-            flowsFrom(channel).forEach(flow -> flow.send(message));
+            write(message, tank);
+            pipesFrom(tank).forEach(pipe -> send(pipe.map(message), pipe.to()));
+            flowsFrom(tank).forEach(flow -> flow.send(message));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void write(Message message, String channel) throws IOException {
-        Path path = get(channel).fileOf(message,inl).toPath();
+    private void write(Message message, String tank) throws IOException {
+        Path path = get(tank).fileOf(message, inl).toPath();
         Files.write(path, bytesOf(message), APPEND, CREATE);
-    }
-
-    @Override
-    public List<Feed> feedsTo(String channel) {
-        if (feeds.containsKey(channel)) return feeds.get(channel);
-        ArrayList<Feed> result =  new ArrayList<>();
-        feeds.put(channel, result);
-        return result;
-    }
-
-    @Override
-    public List<Pipe> pipesFrom(String channel) {
-        return pipes.stream()
-                .filter(p -> channel.equalsIgnoreCase(p.from()))
-                .collect(toList());
-    }
-
-    @Override
-    public List<Pipe> pipesTo(String channel) {
-        return pipes.stream()
-                .filter(p -> channel.equalsIgnoreCase(p.to()))
-                .collect(toList());
-    }
-
-    @Override
-    public List<Pipe> pipesBetween(String source, String target) {
-        return pipes.stream()
-                .filter(p -> source.equalsIgnoreCase(p.from()) && target.equalsIgnoreCase(p.to()))
-                .collect(toList());
-    }
-
-    @Override
-    public List<Flow> flowsFrom(String channel) {
-        if (flows.containsKey(channel)) return flows.get(channel);
-        ArrayList<Flow> result =  new ArrayList<>();
-        flows.put(channel, result);
-        return result;
-    }
-
-    @Override
-    public Task seal(String channel) {
-        return createSealTaskFor(assertExists(get(channel)));
     }
 
     private Pipe createPipeFor(final String source) {
@@ -233,8 +229,9 @@ public class FileStation implements NessStation {
             }
 
             @Override
-            public Pipe to(String channel) {
-                this.target = channel;
+            public Pipe to(String tank) {
+                assertExists(get(tank));
+                this.target = tank;
                 return this;
             }
 
@@ -254,15 +251,15 @@ public class FileStation implements NessStation {
 
     private Pump createPumpFor(String source) {
         return new Pump() {
-            private NessFaucet faucet = new NessFaucet(get(source));
-            private Map<String, FileChannel> channels = new HashMap<>();
+            private Faucet faucet = new TankFaucet(get(source));
+            private Map<String, FileTank> tanks = new HashMap<>();
             private List<Pipe> pipes = new ArrayList<>();
             private List<Post> posts = new ArrayList<>();
 
             @Override
-            public Pump to(String channel) {
-                channels.put(channel, get(channel));
-                pipes.addAll(pipesBetween(source,channel));
+            public Pump to(String tank) {
+                tanks.put(tank, get(tank));
+                pipes.addAll(pipesBetween(source, tank));
                 return this;
             }
 
@@ -273,19 +270,19 @@ public class FileStation implements NessStation {
             }
 
             @Override
-            public Task start() {
+            public Job start() {
 
-                return new Task() {
+                return new Job() {
 
                     public boolean init() {
-                        return pipes != null && pipes.size() != 0;
+                        return pipes.size() > 0 || flows.size() > 0;
                     }
 
                     public boolean step() {
                         try {
                             Message message = faucet.next();
                             if (message == null) return false;
-                            pipes.forEach(pipe -> get(pipe).write(message));
+                            pipes.forEach(pipe -> get(pipe).write(pipe.map(message)));
                             posts.forEach(post -> post.send(message));
                             return true;
                         } catch (IOException e) {
@@ -294,13 +291,13 @@ public class FileStation implements NessStation {
                         }
                     }
 
-                    private FileChannel get(Pipe pipe) {
-                        return channels.get(pipe.to());
+                    private FileTank get(Pipe pipe) {
+                        return tanks.get(pipe.to());
                     }
 
                     @Override
                     protected void onTerminate()  {
-                        channels.values().forEach(FileChannel::close);
+                        tanks.values().forEach(FileTank::close);
                         posts.forEach(Post::flush);
                     }
 
@@ -310,14 +307,14 @@ public class FileStation implements NessStation {
         };
     }
 
-    private Task createSealTaskFor(final FileChannel channel) {
-        return new Task() {
+    private Job createSealTaskFor(final FileTank tank) {
+        assertExists(tank);
+        return new Job() {
             Iterator<File> iterator;
-            FileChannel fileChannel = assertExists(channel);
 
             @Override
             protected boolean init() {
-                File[] files = fileChannel.files(inl);
+                File[] files = tank.files(inl);
                 this.iterator = stream(files).iterator();
                 return files.length > 0;
             }
@@ -351,8 +348,8 @@ public class FileStation implements NessStation {
         };
     }
 
-    private FileChannel get(String channel) {
-        return new FileChannel(new File(this.folder, channel), joints.get(channel));
+    private FileTank get(String tank) {
+        return new FileTank(new File(this.folder, tank));
     }
 
     private static byte[] bytesOf(Object message) {
@@ -366,14 +363,30 @@ public class FileStation implements NessStation {
         return (message + "\n\n").getBytes();
     }
 
-    private static FileChannel assertExists(FileChannel channel) {
-        if (!channel.exists()) throw new RuntimeException("Channel does not exist");
-        return channel;
+    private FileTank assertExists(FileTank tank) {
+        if (!tank.exists()) throw new StationException("Tank does not exist");
+        return tank;
     }
 
-    private FileChannel assertNotExists(FileChannel channel) {
-        if (channel.exists()) throw new RuntimeException("Channel already exists");
-        return channel;
+    private FileTank assertIsNotUsed(FileTank tank) {
+        String name = tank.name();
+        if (pipesFrom(name).size() > 0) throw new StationException("Tank is source of pipes. Remove pipes first");
+        if (pipesTo(name).size() > 0) throw new StationException("Tank is target of pipes. Remove pipes first");
+        if (feedsTo(name).size() > 0) throw new StationException("Tank is target of feeds. Remove feeds first");
+        if (flowsFrom(name).size() > 0) throw new StationException("Tank is source of flows. Remove flows first");
+        return tank;
+    }
+
+    private FileTank assertNotExists(FileTank tank) {
+        if (tank.exists()) throw new StationException("Tank already exists");
+        return tank;
+    }
+
+
+    private class StationException extends RuntimeException {
+        StationException(String message) {
+            super("DataLake Station: " + message);
+        }
     }
 
 

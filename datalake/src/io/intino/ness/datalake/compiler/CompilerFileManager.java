@@ -7,11 +7,11 @@ import java.util.*;
 
 import static io.intino.ness.datalake.compiler.JavaSourceFile.uriOf;
 
-public final class NessFileManager extends ForwardingJavaFileManager<JavaFileManager> {
-    private final NessClassLoader classLoader;
+final class CompilerFileManager extends ForwardingJavaFileManager<JavaFileManager> {
+    private final CompilerClassLoader classLoader;
     private final Map<URI, JavaFileObject> sources = new HashMap<>();
 
-    public NessFileManager(JavaFileManager fileManager, NessClassLoader classLoader) {
+    CompilerFileManager(JavaFileManager fileManager, CompilerClassLoader classLoader) {
         super(fileManager);
         this.classLoader = classLoader;
     }
@@ -22,11 +22,11 @@ public final class NessFileManager extends ForwardingJavaFileManager<JavaFileMan
         return result != null ? result : super.getFileForInput(location, packageName, name);
     }
 
-    public void putFilesForInput(List<JavaSourceFile> sources) {
+    void putFilesForInput(List<JavaSourceFile> sources) {
         sources.forEach(this::putFileForInput);
     }
 
-    public void putFileForInput(JavaSourceFile source) {
+    private void putFileForInput(JavaSourceFile source) {
         sources.put(source.toUri(), source);
     }
 
