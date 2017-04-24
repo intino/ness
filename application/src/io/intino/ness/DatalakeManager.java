@@ -4,10 +4,11 @@ import io.intino.konos.jms.Consumer;
 import io.intino.konos.jms.TopicConsumer;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.datalake.FileStation;
-import io.intino.ness.datalake.NessCompiler;
+import io.intino.ness.datalake.Job;
 import io.intino.ness.datalake.NessStation;
 import io.intino.ness.datalake.NessStation.Feed;
 import io.intino.ness.datalake.Valve;
+import io.intino.ness.datalake.compiler.Compiler;
 import io.intino.ness.inl.MessageFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,7 @@ public class DatalakeManager {
 	private Logger logger = LoggerFactory.getLogger(DatalakeManager.class);
 	private NessStation station;
 	private BusManager bus;
-	private List<NessStation.Task> tasks = new ArrayList<>();
+	private List<Job> jobs = new ArrayList<>();
 
 	public DatalakeManager(FileStation station, BusManager bus) {
 		this.station = station;
@@ -37,7 +38,7 @@ public class DatalakeManager {
 
 	private MessageFunction compile(String code) {
 		try {
-			return NessCompiler.
+			return Compiler.
 					compile(code).
 					with("-target", "1.8").
 					load("tests.UpperCaseFunction").
@@ -51,48 +52,49 @@ public class DatalakeManager {
 	public void pump(Function function, String input, String output) {
 		try {
 			station.pipe(input).to(output).with(Valve.define().filter(function.name(), function.source()));
-			NessStation.Task task = station.pump(input).to(output).start();
-			tasks.add(task);
-			task.thread().start();
+			Job job = station.pump(input).to(output).start();
+			jobs.add(job);
+			job.thread().start();
 		} catch (Exception e) {
 
 		}
 	}
 
-	public void registerChannel(Channel channel) {
-		feed(channel, station.feed(channel.qualifiedName));
-		flow(channel);
+	public void registerTank(Tank tank) {
+		feed(tank, station.feed(tank.qualifiedName));
+		flow(tank);
 	}
 
-	private void feed(Channel channel, final Feed feed) {
-		bus.registerConsumer(channel.feedQN(), new Consumer() {
+	private void feed(Tank tank, final Feed feed) {
+		bus.registerConsumer(tank.feedQN(), new Consumer() {
 			public void consume(Message message) {
 				load(textFrom(message)).forEach(feed::send);
 			}
 		});
 	}
 
-	private void flow(Channel channel) {
-		station.flow(channel.qualifiedName).onMessage(m -> bus.registerOrGetProducer(channel.flowQN()).produce(createMessageFor(m.toString())));
+	private void flow(Tank tank) {
+		station.flow(tank.qualifiedName).to(m -> bus.registerOrGetProducer(tank.flowQN()).produce(createMessageFor(m.toString())));
 	}
 
-	public void reflow(Channel channel) {
-		pauseFeed(channel);
-		station.pump(channel.qualifiedName).to(m -> bus.registerOrGetProducer(channel.flowQN()).produce(createMessageFor(m.toString())));
+	public void reflow(Tank tank) {
+		pauseFeed(tank);
+		station.pump(tank.qualifiedName).to(m -> bus.registerOrGetProducer(tank.flowQN()).produce(createMessageFor(m.toString())));
 	}
 
-	public void migrate(Channel oldChannel, Channel newChannel) {
-		registerChannel(newChannel);
-		pauseFeed(oldChannel);
-		station.pipe(oldChannel.feedQN()).to(newChannel.feedQN());
-		NessStation.Task task = station.pump(oldChannel.feedQN()).start();
-		tasks.add(task);
-		task.thread().start();
-		//onTerminate feed(channel,
+	public void migrate(Tank oldTank, Tank newTank) {
+		registerTank(newTank);
+		pauseFeed(oldTank);
+		station.pipe(oldTank.feedQN()).to(newTank.feedQN());
+		Job job = station.pump(oldTank.feedQN()).start();
+		jobs.add(job);
+		job.onTerminate(() -> feed(newTank, station.feed(newTank.qualifiedName)));
+		job.thread().start();
+		//Destroy old tank?
 	}
 
-	private void pauseFeed(Channel channel) {
-		TopicConsumer consumer = bus.consumerOf(channel.feedQN());
+	private void pauseFeed(Tank tank) {
+		TopicConsumer consumer = bus.consumerOf(tank.feedQN());
 		if (consumer != null) consumer.stop();
 	}
 

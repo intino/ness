@@ -1,0 +1,41 @@
+dsl Konos
+
+Service Nessie as SlackBot
+	Request("Enter in the management area to add/remove tanks or users and other management actions") manage
+		Request("Request all tanks nessy is subscribed filtered by tags") add-user
+			Parameter(String) name
+			Parameter(String, true) groups
+		Request("Remove user from ness service") remove-user
+			Parameter(String) name
+		Request("Creates a tank") add-tank
+			Parameter(String) name
+		Request("Select a tank to operate with") remove-tank
+			Parameter(String) name
+	Request("Request all users registered in ness") users
+	Request("Request all tanks nessy is subscribed filtering by tags") tanks
+		Parameter(String, true) tags
+	Request("Show all functions registered") functions
+
+	Request("Select a tank to operate with") tank
+		Parameter(String) name
+		Request("Tags thes tank with `tags`") tag
+			Parameter(String, true) tags
+		Request("Changes name of this tank to new one") rename
+			Parameter(String) name
+		Request("Consolidates current events of a tank to reservoir") consolidate
+
+	Request("Create a function associated to an input tank and output tank") add-function
+		Parameter(String) name
+		Parameter(String) code
+	Request("Connect a source and destination tanks through a `function`") pump
+		Parameter(String) functionName
+		Parameter(String) input
+		Parameter(String) output
+	Request("Reproduce events of a tank") migrate
+		Parameter(String) tank
+		Parameter(String, true) functions
+	Request("Reproduce events of a tank") reflow
+		Parameter(String) tank
+Task toReservoir as CronTrigger("0 0 0 1/1 * ? *", "daily starting at 00:00")
+
+

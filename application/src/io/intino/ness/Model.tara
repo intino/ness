@@ -3,7 +3,7 @@ dsl Proteo
 Concept Function
 	var string source
 
-Concept Channel
+Concept Tank
 	var string qualifiedName
 	var string feedQN = '"feed." + self.qualifiedName()' is reactive
 	var string flowQN = '"flow." + self.qualifiedName()' is reactive
@@ -11,8 +11,8 @@ Concept Channel
 	var integer version = @version is reactive
 
 Concept Connection //TODO find better name
-	var Channel faucet
-	var Channel flooder
+	var Tank faucet
+	var Tank flooder
 	var Function plug
 
 Concept User

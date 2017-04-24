@@ -4,19 +4,19 @@ import io.intino.ness.*;
 
 
 public class Connection extends io.intino.tara.magritte.Layer implements io.intino.tara.magritte.tags.Terminal {
-	protected io.intino.ness.Channel faucet;
-	protected io.intino.ness.Channel flooder;
+	protected io.intino.ness.Tank faucet;
+	protected io.intino.ness.Tank flooder;
 	protected io.intino.ness.Function plug;
 
 	public Connection(io.intino.tara.magritte.Node node) {
 		super(node);
 	}
 
-	public io.intino.ness.Channel faucet() {
+	public io.intino.ness.Tank faucet() {
 		return faucet;
 	}
 
-	public io.intino.ness.Channel flooder() {
+	public io.intino.ness.Tank flooder() {
 		return flooder;
 	}
 
@@ -24,11 +24,11 @@ public class Connection extends io.intino.tara.magritte.Layer implements io.inti
 		return plug;
 	}
 
-	public void faucet(io.intino.ness.Channel value) {
+	public void faucet(io.intino.ness.Tank value) {
 		this.faucet = value;
 	}
 
-	public void flooder(io.intino.ness.Channel value) {
+	public void flooder(io.intino.ness.Tank value) {
 		this.flooder = value;
 	}
 
@@ -52,16 +52,16 @@ public class Connection extends io.intino.tara.magritte.Layer implements io.inti
 	@Override
 	protected void _load(java.lang.String name, java.util.List<?> values) {
 		super._load(name, values);
-		if (name.equalsIgnoreCase("faucet")) this.faucet = io.intino.tara.magritte.loaders.NodeLoader.load(values, io.intino.ness.Channel.class, this).get(0);
-		else if (name.equalsIgnoreCase("flooder")) this.flooder = io.intino.tara.magritte.loaders.NodeLoader.load(values, io.intino.ness.Channel.class, this).get(0);
+		if (name.equalsIgnoreCase("faucet")) this.faucet = io.intino.tara.magritte.loaders.NodeLoader.load(values, io.intino.ness.Tank.class, this).get(0);
+		else if (name.equalsIgnoreCase("flooder")) this.flooder = io.intino.tara.magritte.loaders.NodeLoader.load(values, io.intino.ness.Tank.class, this).get(0);
 		else if (name.equalsIgnoreCase("plug")) this.plug = io.intino.tara.magritte.loaders.NodeLoader.load(values, io.intino.ness.Function.class, this).get(0);
 	}
 
 	@Override
 	protected void _set(java.lang.String name, java.util.List<?> values) {
 		super._set(name, values);
-		if (name.equalsIgnoreCase("faucet")) this.faucet = values.get(0)!= null ? graph().loadNode(((io.intino.tara.magritte.Layer) values.get(0)).id()).as(io.intino.ness.Channel.class) : null;
-		else if (name.equalsIgnoreCase("flooder")) this.flooder = values.get(0)!= null ? graph().loadNode(((io.intino.tara.magritte.Layer) values.get(0)).id()).as(io.intino.ness.Channel.class) : null;
+		if (name.equalsIgnoreCase("faucet")) this.faucet = values.get(0)!= null ? graph().loadNode(((io.intino.tara.magritte.Layer) values.get(0)).id()).as(io.intino.ness.Tank.class) : null;
+		else if (name.equalsIgnoreCase("flooder")) this.flooder = values.get(0)!= null ? graph().loadNode(((io.intino.tara.magritte.Layer) values.get(0)).id()).as(io.intino.ness.Tank.class) : null;
 		else if (name.equalsIgnoreCase("plug")) this.plug = values.get(0)!= null ? graph().loadNode(((io.intino.tara.magritte.Layer) values.get(0)).id()).as(io.intino.ness.Function.class) : null;
 	}
 

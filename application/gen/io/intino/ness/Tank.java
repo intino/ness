@@ -3,14 +3,14 @@ package io.intino.ness;
 import io.intino.ness.*;
 
 
-public class Channel extends io.intino.tara.magritte.Layer implements io.intino.tara.magritte.tags.Terminal {
+public class Tank extends io.intino.tara.magritte.Layer implements io.intino.tara.magritte.tags.Terminal {
 	protected java.lang.String qualifiedName;
 	protected io.intino.tara.magritte.Expression<java.lang.String> feedQN;
 	protected io.intino.tara.magritte.Expression<java.lang.String> flowQN;
 	protected java.util.List<java.lang.String> tags = new java.util.ArrayList<>();
 	protected io.intino.tara.magritte.Expression<java.lang.Integer> version;
 
-	public Channel(io.intino.tara.magritte.Node node) {
+	public Tank(io.intino.tara.magritte.Node node) {
 		super(node);
 	}
 
@@ -70,7 +70,7 @@ public class Channel extends io.intino.tara.magritte.Layer implements io.intino.
 	}
 
 	public io.intino.tara.magritte.Concept concept() {
-		return this.graph().concept(io.intino.ness.Channel.class);
+		return this.graph().concept(io.intino.ness.Tank.class);
 	}
 
 	@Override

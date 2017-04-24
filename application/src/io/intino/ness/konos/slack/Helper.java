@@ -1,6 +1,6 @@
 package io.intino.ness.konos.slack;
 
-import io.intino.ness.Channel;
+import io.intino.ness.Tank;
 import io.intino.ness.Ness;
 import io.intino.ness.konos.NessBox;
 
@@ -18,8 +18,8 @@ public class Helper {
 		return box.graph().wrapper(Ness.class);
 	}
 
-	static Channel findChannel(NessBox box, String name) {
-		List<Channel> topics = ness(box).channelList(t -> t.qualifiedName().equalsIgnoreCase(name));
+	static Tank findChannel(NessBox box, String name) {
+		List<Tank> topics = ness(box).tankList(t -> t.qualifiedName().equalsIgnoreCase(name));
 		return topics.isEmpty() ? findByPosition(box, name) : topics.get(0);
 	}
 
@@ -27,8 +27,8 @@ public class Helper {
 		return Arrays.stream(tags).anyMatch(topicTags::contains);
 	}
 
-	static Channel findByPosition(NessBox box, String name) {
-		final List<Channel> topics = sortedTopics(ness(box)).collect(Collectors.toList());
+	static Tank findByPosition(NessBox box, String name) {
+		final List<Tank> topics = sortedTopics(ness(box)).collect(Collectors.toList());
 		try {
 			final int position = Integer.parseInt(name);
 			return position <= topics.size() ? topics.get(position - 1) : null;
@@ -37,8 +37,8 @@ public class Helper {
 		}
 	}
 
-	static Stream<Channel> sortedTopics(Ness ness) {
-		return ness.channelList().stream().sorted((s1, s2) -> String.CASE_INSENSITIVE_ORDER.compare(s1.qualifiedName(), s2.qualifiedName()));
+	static Stream<Tank> sortedTopics(Ness ness) {
+		return ness.tankList().stream().sorted((s1, s2) -> String.CASE_INSENSITIVE_ORDER.compare(s1.qualifiedName(), s2.qualifiedName()));
 	}
 
 	static String downloadFile(String code) {
