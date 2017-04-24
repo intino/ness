@@ -50,7 +50,7 @@ public class ManageSlack {
 		List<Tank> tanks = wrapper.tankList(t -> t.name().equals(tank));
 		if (!tanks.isEmpty()) return "Tank already exist";
 		datalake().registerTank(wrapper.create().tank(tank.replaceFirst("feed\\.", "")));
-		return ":ok:hand:";
+		return ":ok_hand:";
 	}
 
 	private DatalakeManager datalake() {

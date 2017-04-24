@@ -22,7 +22,7 @@ Service Nessie as SlackBot
 			Parameter(String, true) tags
 		Request("Changes name of this tank to new one") rename
 			Parameter(String) name
-		Request("Consolidates current events of a tank to reservoir") consolidate
+		Request("Seals current events of a tank to reservoir") seal
 
 	Request("Create a function associated to an input tank and output tank") add-function
 		Parameter(String) name

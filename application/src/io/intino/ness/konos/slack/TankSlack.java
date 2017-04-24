@@ -1,14 +1,15 @@
 package io.intino.ness.konos.slack;
 
 import io.intino.konos.slack.Bot.MessageProperties;
-import io.intino.ness.Tank;
+import io.intino.ness.DatalakeManager;
 import io.intino.ness.Ness;
+import io.intino.ness.Tank;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.konos.NessBox;
 
 import java.util.Collections;
 
-import static io.intino.ness.konos.slack.Helper.findChannel;
+import static io.intino.ness.konos.slack.Helper.findTank;
 import static io.intino.ness.konos.slack.Helper.ness;
 
 public class TankSlack {
@@ -24,20 +25,26 @@ public class TankSlack {
 	}
 
 	public String tag(MessageProperties properties, String[] tags) {
-		Tank topic = findChannel(box, properties.context().getObjects()[0]);
-		topic.tags().clear();
-		Collections.addAll(topic.tags(), tags);
+		Tank tank = findTank(box, properties.context().getObjects()[0]);
+		tank.tags().clear();
+		Collections.addAll(tank.tags(), tags);
 		return ":ok_hand:";
 	}
 
 	public String rename(MessageProperties properties, String name) {
-		Tank topic = findChannel(box, properties.context().getObjects()[0]);
-		if (topic == null) return "Please select a topic";
-		return box.get(BusManager.class).renameTopic(topic.qualifiedName(), name) ? ":ok_hand:" : "Impossible to rename topic";
+		Tank tank = findTank(box, properties.context().getObjects()[0]);
+		if (tank == null) return "Please select a tank";
+		return box.get(BusManager.class).renameTopic(tank.qualifiedName(), name) ? ":ok_hand:" : "Impossible to rename tank";
 	}
 
-	public String consolidate(MessageProperties properties) {
+	public String seal(MessageProperties properties) {
 		Ness ness = ness(box);
-		return "TODO";
+		Tank tank = findTank(box, properties.context().getObjects()[0]);
+		datalake().seal(tank.qualifiedName());
+		return ":ok_hand:";
+	}
+
+	private DatalakeManager datalake() {
+		return box.get(DatalakeManager.class);
 	}
 }

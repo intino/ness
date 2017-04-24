@@ -18,7 +18,7 @@ public class Helper {
 		return box.graph().wrapper(Ness.class);
 	}
 
-	static Tank findChannel(NessBox box, String name) {
+	static Tank findTank(NessBox box, String name) {
 		List<Tank> topics = ness(box).tankList(t -> t.qualifiedName().equalsIgnoreCase(name));
 		return topics.isEmpty() ? findByPosition(box, name) : topics.get(0);
 	}

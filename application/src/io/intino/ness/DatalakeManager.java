@@ -56,11 +56,12 @@ public class DatalakeManager {
 			jobs.add(job);
 			job.thread().start();
 		} catch (Exception e) {
-
+			logger.error(e.getMessage(), e);
 		}
 	}
 
 	public void registerTank(Tank tank) {
+		station.tank(tank.qualifiedName);
 		feed(tank, station.feed(tank.qualifiedName));
 		flow(tank);
 	}
@@ -104,5 +105,9 @@ public class DatalakeManager {
 
 	public boolean removeUser(String name) {
 		return bus.removeUser(name);
+	}
+
+	public void seal(String tank) {
+		station.seal(tank);
 	}
 }
