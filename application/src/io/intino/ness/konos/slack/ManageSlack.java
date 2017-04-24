@@ -1,9 +1,9 @@
 package io.intino.ness.konos.slack;
 
 import io.intino.konos.slack.Bot.MessageProperties;
-import io.intino.ness.Tank;
 import io.intino.ness.DatalakeManager;
 import io.intino.ness.Ness;
+import io.intino.ness.Tank;
 import io.intino.ness.konos.NessBox;
 
 import java.util.List;
@@ -33,23 +33,25 @@ public class ManageSlack {
 		return datalake().removeUser(name) ? ":ok:hand:" : "User not found";
 	}
 
+	public String addTank(MessageProperties properties, String tank) {
+		Ness ness = box.graph().wrapper(Ness.class);
+		List<Tank> tanks = ness.tankList(t -> t.name().equals(tank));
+		if (!tanks.isEmpty()) return "Tank already exist";
+		String name = tank.replaceFirst("feed\\.", "");
+		Tank newTank = ness.create("tanks").tank(name);
+		datalake().registerTank(newTank);
+		newTank.save();
+		return ":ok_hand:";
+	}
+
 	public String removeTank(MessageProperties properties, String name) {
 		Ness wrapper = box.graph().wrapper(Ness.class);
 		List<Tank> tanks = wrapper.tankList(t -> t.name().equals(name));
 		if (tanks.isEmpty()) return "Tank not found";
 		for (Tank tank : tanks) {
-			//TODO stop feed-flow
-			//TODO stop pumps from/to
+			datalake().removeTank(tank);
 			tank.delete();
 		}
-		return ":ok_hand:";
-	}
-
-	public String addTank(MessageProperties properties, String tank) {
-		Ness wrapper = box.graph().wrapper(Ness.class);
-		List<Tank> tanks = wrapper.tankList(t -> t.name().equals(tank));
-		if (!tanks.isEmpty()) return "Tank already exist";
-		datalake().registerTank(wrapper.create().tank(tank.replaceFirst("feed\\.", "")));
 		return ":ok_hand:";
 	}
 

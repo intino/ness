@@ -2,11 +2,10 @@ package io.intino.ness.konos.slack;
 
 import com.ullink.slack.simpleslackapi.SlackSession;
 import io.intino.konos.slack.Bot.MessageProperties;
-import io.intino.ness.Tank;
 import io.intino.ness.DatalakeManager;
 import io.intino.ness.Function;
 import io.intino.ness.Ness;
-import io.intino.ness.bus.BusManager;
+import io.intino.ness.Tank;
 import io.intino.ness.konos.NessBox;
 
 import java.util.List;
@@ -33,7 +32,7 @@ public class NessieSlack {
 	}
 
 	public String users(MessageProperties properties) {
-		Map<String, List<String>> users = box.get(BusManager.class).users();
+		Map<String, List<String>> users = datalake().users();
 		StringBuilder builder = new StringBuilder();
 		for (String user : users.keySet()) {
 			builder.append(user);
@@ -57,7 +56,7 @@ public class NessieSlack {
 			builder.append("\n");
 		}
 		String value = builder.toString();
-		return value.isEmpty() ? "No tank" : value;
+		return value.isEmpty() ? "There aren't tanks" : value;
 	}
 
 	public String functions(MessageProperties properties) {
@@ -67,7 +66,7 @@ public class NessieSlack {
 		for (int i = 0; i < functions.size(); i++)
 			builder.append(i).append(") ").append(functions.get(i).name()).append(". Being used on:...\n");
 		String value = builder.toString();
-		return value.isEmpty() ? "No functions" : value;
+		return value.isEmpty() ? "There aren't functions registered yet" : value;
 	}
 
 	public String tank(MessageProperties properties, String name) {
@@ -98,10 +97,6 @@ public class NessieSlack {
 		return OK;
 	}
 
-	private DatalakeManager datalake() {
-		return box.get(DatalakeManager.class);
-	}
-
 	public String reflow(MessageProperties properties, String tankName) {
 		Tank tank = findTank(box, tankName);
 		if (tank == null) return "Channel not found";
@@ -111,14 +106,19 @@ public class NessieSlack {
 	}
 
 	private String nextVersionOf(Tank tank) {
-		return tank.name().replace("." + tank.version(), "." + tank.version() + 1);
+		return tank.qualifiedName().replace("." + tank.version(), "." + (tank.version() + 1));
 	}
 
 	public String migrate(MessageProperties properties, String tankName, String[] args) {
 		Tank tank = findTank(box, tankName);
-		String newChannelName = nextVersionOf(tank);
-		Tank newChannel = ness(box).create("tanks", newChannelName).tank(newChannelName);
+		String newTankName = nextVersionOf(tank);
+		Tank newChannel = ness(box).create("tanks", newTankName).tank(newTankName);
 		datalake().migrate(tank, newChannel);
+//		newChannel.save();
 		return OK;
+	}
+
+	private DatalakeManager datalake() {
+		return box.get(DatalakeManager.class);
 	}
 }

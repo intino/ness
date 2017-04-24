@@ -2,7 +2,6 @@ package io.intino.ness.konos.slack;
 
 import io.intino.konos.slack.Bot.MessageProperties;
 import io.intino.ness.DatalakeManager;
-import io.intino.ness.Ness;
 import io.intino.ness.Tank;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.konos.NessBox;
@@ -10,7 +9,6 @@ import io.intino.ness.konos.NessBox;
 import java.util.Collections;
 
 import static io.intino.ness.konos.slack.Helper.findTank;
-import static io.intino.ness.konos.slack.Helper.ness;
 
 public class TankSlack {
 
@@ -38,9 +36,8 @@ public class TankSlack {
 	}
 
 	public String seal(MessageProperties properties) {
-		Ness ness = ness(box);
 		Tank tank = findTank(box, properties.context().getObjects()[0]);
-		datalake().seal(tank.qualifiedName());
+		datalake().seal(tank);
 		return ":ok_hand:";
 	}
 

@@ -7,6 +7,7 @@ import io.intino.ness.datalake.FileStation;
 import io.intino.ness.datalake.Job;
 import io.intino.ness.datalake.NessStation;
 import io.intino.ness.datalake.NessStation.Feed;
+import io.intino.ness.datalake.NessStation.Flow;
 import io.intino.ness.datalake.Valve;
 import io.intino.ness.datalake.compiler.Compiler;
 import io.intino.ness.inl.MessageFunction;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import javax.jms.Message;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
 import static io.intino.ness.Inl.load;
@@ -30,6 +32,14 @@ public class DatalakeManager {
 	public DatalakeManager(FileStation station, BusManager bus) {
 		this.station = station;
 		this.bus = bus;
+		init();
+	}
+
+	private void init() {
+		for (io.intino.ness.datalake.Tank tank : station.tanks()) {
+			feed("feed." + tank.name(), station.feed(tank.name()));
+			flow(tank.name(), "flow." + tank.name());
+		}
 	}
 
 	public boolean isCorrect(String code) {
@@ -67,7 +77,11 @@ public class DatalakeManager {
 	}
 
 	private void feed(Tank tank, final Feed feed) {
-		bus.registerConsumer(tank.feedQN(), new Consumer() {
+		feed(tank.feedQN(), feed);
+	}
+
+	private void feed(String tank, final Feed feed) {
+		bus.registerConsumer(tank, new Consumer() {
 			public void consume(Message message) {
 				load(textFrom(message)).forEach(feed::send);
 			}
@@ -78,23 +92,26 @@ public class DatalakeManager {
 		station.flow(tank.qualifiedName).to(m -> bus.registerOrGetProducer(tank.flowQN()).produce(createMessageFor(m.toString())));
 	}
 
+	private void flow(String tank, String flow) {
+		station.flow(tank).to(m -> bus.registerOrGetProducer(flow).produce(createMessageFor(m.toString())));
+	}
+
 	public void reflow(Tank tank) {
-		pauseFeed(tank);
+		stopFeed(tank);
 		station.pump(tank.qualifiedName).to(m -> bus.registerOrGetProducer(tank.flowQN()).produce(createMessageFor(m.toString())));
 	}
 
 	public void migrate(Tank oldTank, Tank newTank) {
 		registerTank(newTank);
-		pauseFeed(oldTank);
-		station.pipe(oldTank.feedQN()).to(newTank.feedQN());
+		stopFeed(oldTank);
+		station.pipe(oldTank.qualifiedName()).to(newTank.qualifiedName());
 		Job job = station.pump(oldTank.feedQN()).start();
 		jobs.add(job);
 		job.onTerminate(() -> feed(newTank, station.feed(newTank.qualifiedName)));
-		job.thread().start();
 		//Destroy old tank?
 	}
 
-	private void pauseFeed(Tank tank) {
+	private void stopFeed(Tank tank) {
 		TopicConsumer consumer = bus.consumerOf(tank.feedQN());
 		if (consumer != null) consumer.stop();
 	}
@@ -107,7 +124,32 @@ public class DatalakeManager {
 		return bus.removeUser(name);
 	}
 
-	public void seal(String tank) {
-		station.seal(tank);
+	public void seal(Tank tank) {
+		stopFeed(tank);
+		Job seal = station.seal(tank.qualifiedName);
+		seal.onTerminate(() -> feed(tank, station.feed(tank.qualifiedName)));
+	}
+
+	public void removeTank(Tank tank) {
+		String qualifiedName = tank.qualifiedName();
+
+		List<Feed> feeds = station.feedsTo(qualifiedName);
+		bus.consumerOf(tank.feedQN()).stop();
+		station.remove(feeds.toArray(new NessStation.Feed[feeds.size()]));
+
+		List<Flow> flows = station.flowsFrom(qualifiedName);
+		station.remove(flows.toArray(new NessStation.Flow[flows.size()]));
+
+		List<NessStation.Pipe> pipesFrom = station.pipesFrom(qualifiedName);
+		station.remove(pipesFrom.toArray(new NessStation.Pipe[pipesFrom.size()]));
+
+		List<NessStation.Pipe> pipesTo = station.pipesTo(qualifiedName);
+		station.remove(pipesTo.toArray(new NessStation.Pipe[pipesTo.size()]));
+
+		station.remove(qualifiedName);
+	}
+
+	public Map<String, List<String>> users() {
+		return bus.users();
 	}
 }

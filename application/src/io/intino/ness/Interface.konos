@@ -36,6 +36,6 @@ Service Nessie as SlackBot
 		Parameter(String, true) functions
 	Request("Reproduce events of a tank") reflow
 		Parameter(String) tank
-Task toReservoir as CronTrigger("0 0 0 1/1 * ? *", "daily starting at 00:00")
+Task toTub as CronTrigger("0 0 0 1/1 * ? *", "daily starting at 00:00")
 
 

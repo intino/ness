@@ -160,6 +160,7 @@ public final class BusManager {
 		try {
 			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("vm://ness");
 			javax.jms.Connection connection = connectionFactory.createConnection(NESS, NESS);
+			connection.setClientID(NESS);
 			connection.start();
 			return connection.createSession(false, AUTO_ACKNOWLEDGE);
 		} catch (JMSException e) {
@@ -177,14 +178,11 @@ public final class BusManager {
 		}
 	}
 
-	public TopicConsumer registerConsumer(String feedQN, Consumer consumer) {
+	public void registerConsumer(String feedQN, Consumer consumer) {
 		consumers.putIfAbsent(feedQN, new TopicConsumer(session, feedQN));
 		TopicConsumer topicConsumer = consumers.get(feedQN);
-		topicConsumer.listen(consumer);
-		return topicConsumer;
+		topicConsumer.listen(consumer, NESS + "-" + feedQN);
 	}
-
-
 
 	public TopicProducer registerOrGetProducer(String path) {
 		try {
