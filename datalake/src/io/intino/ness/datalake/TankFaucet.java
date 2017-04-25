@@ -1,5 +1,6 @@
 package io.intino.ness.datalake;
 
+import io.intino.ness.datalake.Tank.Tub;
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageInputStream;
 
@@ -9,7 +10,7 @@ import java.util.Iterator;
 public class TankFaucet implements Faucet {
 
     private final Tank tank;
-    private final Iterator<Tank.Tub> tubs;
+    private final Iterator<Tub> tubs;
     private MessageInputStream inputStream;
 
     public TankFaucet(Tank tank) {

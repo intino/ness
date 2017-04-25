@@ -100,9 +100,7 @@ public class FileStation implements NessStation {
 
     @Override
     public void remove(Pipe... pipes) {
-        for (Pipe pipe : pipes) {
-            this.pipes.remove(pipe);
-        }
+        this.pipes.removeAll(Arrays.asList(pipes));
     }
 
     @Override
@@ -152,10 +150,11 @@ public class FileStation implements NessStation {
     }
 
     @Override
-    public List<Pipe> pipesBetween(String source, String target) {
+    public Pipe pipeBetween(String source, String target) {
         return pipes.stream()
                 .filter(p -> source.equalsIgnoreCase(p.from()) && target.equalsIgnoreCase(p.to()))
-                .collect(toList());
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
@@ -231,6 +230,7 @@ public class FileStation implements NessStation {
             @Override
             public Pipe to(String tank) {
                 assertExists(get(tank));
+                assertNotExistsPipeBetween(source,tank);
                 this.target = tank;
                 return this;
             }
@@ -259,7 +259,7 @@ public class FileStation implements NessStation {
             @Override
             public Pump to(String tank) {
                 tanks.put(tank, get(tank));
-                pipes.addAll(pipesBetween(source, tank));
+                pipes.add(pipeBetween(source, tank));
                 return this;
             }
 
@@ -282,7 +282,7 @@ public class FileStation implements NessStation {
                         try {
                             Message message = faucet.next();
                             if (message == null) return false;
-                            pipes.forEach(pipe -> get(pipe).write(pipe.map(message)));
+                            pipes.forEach(pipe -> targetTankOf(pipe).write(pipe.map(message)));
                             posts.forEach(post -> post.send(message));
                             return true;
                         } catch (IOException e) {
@@ -291,7 +291,7 @@ public class FileStation implements NessStation {
                         }
                     }
 
-                    private FileTank get(Pipe pipe) {
+                    private FileTank targetTankOf(Pipe pipe) {
                         return tanks.get(pipe.to());
                     }
 
@@ -364,22 +364,27 @@ public class FileStation implements NessStation {
     }
 
     private FileTank assertExists(FileTank tank) {
-        if (!tank.exists()) throw new StationException("Tank does not exist");
+        if (!tank.exists()) throw new StationException("Tank " + tank.name() + "  does not exist");
         return tank;
     }
 
     private FileTank assertIsNotUsed(FileTank tank) {
         String name = tank.name();
-        if (pipesFrom(name).size() > 0) throw new StationException("Tank is source of pipes. Remove pipes first");
-        if (pipesTo(name).size() > 0) throw new StationException("Tank is target of pipes. Remove pipes first");
-        if (feedsTo(name).size() > 0) throw new StationException("Tank is target of feeds. Remove feeds first");
-        if (flowsFrom(name).size() > 0) throw new StationException("Tank is source of flows. Remove flows first");
+        if (pipesFrom(name).size() > 0) throw new StationException("Tank " + tank.name() + " is source of pipes. Remove pipes first");
+        if (pipesTo(name).size() > 0) throw new StationException("Tank " + tank.name() + " is target of pipes. Remove pipes first");
+        if (feedsTo(name).size() > 0) throw new StationException("Tank " + tank.name() + " is target of feeds. Remove feeds first");
+        if (flowsFrom(name).size() > 0) throw new StationException("Tank " + tank.name() + " is source of flows. Remove flows first");
         return tank;
     }
 
     private FileTank assertNotExists(FileTank tank) {
-        if (tank.exists()) throw new StationException("Tank already exists");
+        if (tank.exists()) throw new StationException("Tank " + tank.name() + " already exists");
         return tank;
+    }
+
+    private void assertNotExistsPipeBetween(String source, String target) {
+        if (pipeBetween(source,target) == null) return;
+        throw new StationException("Pipe between " + source + " - " + target + " already exists");
     }
 
 

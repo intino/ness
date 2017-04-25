@@ -33,12 +33,18 @@ public class FileTub implements Tub {
 
     private MessageInputStream messageInputStreamOf(File file) {
         try {
-            return FileMessageInputStream.of(file);
+            if (file.getName().endsWith(".inl")) return FileMessageInputStream.of(file);
+            File feedFile = feedFile(file);
+            return feedFile.exists() ? FileMessageInputStream.of(file, feedFile) : FileMessageInputStream.of(file);
         }
         catch (IOException e) {
             e.printStackTrace();
             return new MessageInputStream.Empty();
         }
+    }
+
+    private File feedFile(File file) {
+        return new File(file.getAbsolutePath().replace(".zip",".inl"));
     }
 
     @Override

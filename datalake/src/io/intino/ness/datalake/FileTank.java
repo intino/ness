@@ -60,8 +60,16 @@ public class FileTank implements Tank {
 
 
     private File[] files() {
-        File[] files = folder.listFiles();
+        File[] files = folder.listFiles(this::isTub);
         return files != null ? sort(files) : new File[0];
+    }
+
+    private boolean isTub(File file) {
+        return file.getName().endsWith(".zip") || (file.getName().endsWith("inl") && !sealFile(file).exists());
+    }
+
+    private File sealFile(File file) {
+        return new File(file.getAbsolutePath().replace(".inl",".zip"));
     }
 
     private File[] sort(File[] files) {

@@ -19,10 +19,10 @@ public interface NessStation {
 
     List<Tank> tanks();
     List<Feed> feedsTo(String tank);
+    List<Flow> flowsFrom(String tank);
     List<Pipe> pipesFrom(String tank);
     List<Pipe> pipesTo(String tank);
-    List<Pipe> pipesBetween(String source, String target);
-    List<Flow> flowsFrom(String tank);
+    Pipe pipeBetween(String source, String target);
 
     Pump pump(String tank);
     Job seal(String tank);

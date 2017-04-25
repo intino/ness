@@ -130,7 +130,7 @@ public class FileStation_ {
         station.pipe(temperature_1).to(temperature_2);
         assertThat(station.pipesFrom(temperature_1).size(), is(1));
         assertThat(station.pipesTo(temperature_2).size(), is(1));
-        assertThat(station.pipesBetween(temperature_1, temperature_2).size(), is(1));
+        assertThat(station.pipeBetween(temperature_1, temperature_2).size(), is(1));
     }
 
     @Test
@@ -249,7 +249,7 @@ public class FileStation_ {
         assertThat(station.pipesFrom(temperature_1).size(), is(1));
         assertThat(station.pipesFrom(temperature_2).size(), is(0));
         assertThat(station.pipesTo(temperature_2).size(), is(1));
-        assertThat(station.pipesBetween(temperature_1,temperature_2).size(), is(1));
+        assertThat(station.pipeBetween(temperature_1,temperature_2).size(), is(1));
         assertThat(station.flowsFrom(temperature_1).size(), is(0));
         assertThat(station.flowsFrom(temperature_2).size(), is(1));
         assertThat(feed.toString(), is("feed > tank.weather.Temperature.1"));

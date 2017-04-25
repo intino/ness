@@ -27,7 +27,7 @@ public class FileMessageInputStream {
         return inputStream;
     }
 
-    public static MessageInputStream of(File[] files) throws IOException {
+    public static MessageInputStream of(File... files) throws IOException {
         MessageInputStream[] inputStreams = new MessageInputStream[files.length];
         for (int i = 0; i < files.length; i++) inputStreams[i] = of(files[i]);
         return Sort.of(inputStreams);
