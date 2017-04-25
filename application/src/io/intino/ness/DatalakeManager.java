@@ -72,6 +72,9 @@ public class DatalakeManager {
 
 	public void registerTank(Tank tank) {
 		station.tank(tank.qualifiedName);
+	}
+
+	public void feedFlow(Tank tank) {
 		feed(tank, station.feed(tank.qualifiedName));
 		flow(tank);
 	}
@@ -104,10 +107,11 @@ public class DatalakeManager {
 	public void migrate(Tank oldTank, Tank newTank) {
 		registerTank(newTank);
 		stopFeed(oldTank);
-		station.pipe(oldTank.qualifiedName()).to(newTank.qualifiedName());
-		Job job = station.pump(oldTank.feedQN()).start();
+
+		NessStation.Pipe to = station.pipe(oldTank.qualifiedName()).to(newTank.qualifiedName());
+		Job job = station.pump(oldTank.qualifiedName).start();
 		jobs.add(job);
-		job.onTerminate(() -> feed(newTank, station.feed(newTank.qualifiedName)));
+		job.onTerminate(() -> feedFlow(newTank));
 		//Destroy old tank?
 	}
 
@@ -151,5 +155,10 @@ public class DatalakeManager {
 
 	public Map<String, List<String>> users() {
 		return bus.users();
+	}
+
+	public void quit() {
+		jobs.forEach(Job::stop);
+		bus.quit();
 	}
 }

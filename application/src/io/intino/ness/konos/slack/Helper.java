@@ -28,7 +28,7 @@ public class Helper {
 	}
 
 	static Tank findByPosition(NessBox box, String name) {
-		final List<Tank> topics = sortedTopics(ness(box)).collect(Collectors.toList());
+		final List<Tank> topics = sortedTanks(ness(box)).collect(Collectors.toList());
 		try {
 			final int position = Integer.parseInt(name);
 			return position <= topics.size() ? topics.get(position - 1) : null;
@@ -37,7 +37,7 @@ public class Helper {
 		}
 	}
 
-	static Stream<Tank> sortedTopics(Ness ness) {
+	static Stream<Tank> sortedTanks(Ness ness) {
 		return ness.tankList().stream().sorted((s1, s2) -> String.CASE_INSENSITIVE_ORDER.compare(s1.qualifiedName(), s2.qualifiedName()));
 	}
 

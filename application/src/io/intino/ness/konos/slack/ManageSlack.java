@@ -40,6 +40,7 @@ public class ManageSlack {
 		String name = tank.replaceFirst("feed\\.", "");
 		Tank newTank = ness.create("tanks").tank(name);
 		datalake().registerTank(newTank);
+		datalake().feedFlow(newTank);
 		newTank.save();
 		return ":ok_hand:";
 	}

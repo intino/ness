@@ -55,8 +55,7 @@ public class NessBox extends io.intino.konos.Box {
 	}
 
 	void quit() {
-
-
+		Setup.quit(this);
 	}
 
 	private void initRESTServices() {

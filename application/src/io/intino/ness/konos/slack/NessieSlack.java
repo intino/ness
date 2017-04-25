@@ -10,11 +10,11 @@ import io.intino.ness.konos.NessBox;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.intino.ness.konos.slack.Helper.*;
 
 public class NessieSlack {
-
 	private static final String OK = ":ok_hand:";
 	private NessBox box;
 
@@ -47,7 +47,7 @@ public class NessieSlack {
 	public String tanks(MessageProperties properties, String[] tags) {
 		Ness ness = ness(box);
 		StringBuilder builder = new StringBuilder();
-		List<Tank> tank = ness.tankList();
+		List<Tank> tank = sortedTanks(ness).collect(Collectors.toList());
 		for (int i = 0; i < tank.size(); i++) {
 			Tank topic = tank.get(i);
 			if (tags.length == 0 || isTagged(tags, topic.tags()))

@@ -17,7 +17,11 @@ public class Feeder {
 
 
 	public static void main(String[] args) throws JMSException, InterruptedException {
-		TopicProducer producer = new TopicProducer(session(), "feed.tank.weather.Temperature.1");
+		start(new TopicProducer(session("octavioroncal"), "feed.tank.weather.Temperature.1"));
+		start(new TopicProducer(session("octavioroncal2"), "feed.tank.weather.Humidity.1"));
+	}
+
+	private static void start(TopicProducer producer) {
 		new Thread(() -> {
 			while (true)
 				try {
@@ -29,25 +33,25 @@ public class Feeder {
 	}
 
 	private static String message() {
-		return Inl.serialize(new ExampleMessage(java.util.UUID.randomUUID().toString(), "temperature"));
+		return Inl.serialize(new ExampleMessage(java.util.UUID.randomUUID().toString(), Math.random() * 60));
 	}
 
 	public static class ExampleMessage {
 		Instant ts = Instant.now();
 		String user;
-		String operation;
+		double value;
 
-		public ExampleMessage(String user, String operation) {
+		public ExampleMessage(String user, double value) {
 			this.user = user;
-			this.operation = operation;
+			this.value = value;
 		}
 	}
 
-	private static Session session() {
+	private static Session session(String clientID) {
 		try {
 			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
 			javax.jms.Connection connection = connectionFactory.createConnection("octavioroncal", "octavioroncal");
-			connection.setClientID("octavioroncal");
+			connection.setClientID(clientID);
 			connection.start();
 			return connection.createSession(false, AUTO_ACKNOWLEDGE);
 		} catch (JMSException e) {

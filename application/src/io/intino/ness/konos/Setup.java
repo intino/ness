@@ -27,6 +27,10 @@ final class Setup {
 		};
 	}
 
+	static void quit(NessBox nessBox) {
+		nessBox.get(DatalakeManager.class).quit();
+	}
+
 	static void configureBox(NessBox box) {
 		configureLogger("log"); //TODO change path in case
 	}

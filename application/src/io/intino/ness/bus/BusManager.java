@@ -11,11 +11,17 @@ import org.apache.activemq.broker.Broker;
 import org.apache.activemq.broker.BrokerPlugin;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
+import org.apache.activemq.broker.region.DestinationInterceptor;
+import org.apache.activemq.broker.region.virtual.CompositeTopic;
+import org.apache.activemq.broker.region.virtual.VirtualDestination;
+import org.apache.activemq.broker.region.virtual.VirtualDestinationInterceptor;
 import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.jaas.GroupPrincipal;
 import org.apache.activemq.security.AuthenticationUser;
 import org.apache.activemq.security.SimpleAuthenticationPlugin;
 import org.apache.activemq.store.kahadb.KahaDBPersistenceAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jms.JMSException;
 import javax.jms.Session;
@@ -27,12 +33,11 @@ import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.logging.Logger.getGlobal;
 import static java.util.stream.Collectors.toList;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 
 public final class BusManager {
-
+	private Logger logger = LoggerFactory.getLogger(BusManager.class);
 	static final String NESS = "ness";
 	private final NessBox box;
 	private final BrokerService service;
@@ -54,7 +59,7 @@ public final class BusManager {
 			session = nessSession();
 			startAdvisories();
 		} catch (Exception e) {
-			getGlobal().severe(e.getMessage());
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -84,14 +89,14 @@ public final class BusManager {
 		return true;
 	}
 
-	public boolean cleanChannel(String topic) {
+	public boolean cleanTank(String topic) {
 		try {
 			ActiveMQDestination destination = findTopic(topic);
 			if (destination == null) return false;
 			broker().removeDestination(service.getAdminConnectionContext(), destination, 0);
 			return true;
 		} catch (Exception e) {
-			getGlobal().severe(e.getMessage());
+			logger.error(e.getMessage(), e);
 			return false;
 		}
 	}
@@ -101,6 +106,95 @@ public final class BusManager {
 		if (destination == null) return false;
 		destination.setPhysicalName(newName);
 		return true;
+	}
+
+	public void pipe(String from, String to) {
+		ActiveMQDestination fromTopic = findTopic(from);
+		ActiveMQDestination toTopic = findTopic(to);
+		CompositeTopic virtualTopic = new CompositeTopic();
+		try {
+			virtualTopic.setName(from);
+			virtualTopic.intercept(service.getDestination(fromTopic));
+			virtualTopic.setForwardTo(Collections.singletonList(service.getDestination(toTopic)));
+			VirtualDestinationInterceptor interceptor = new VirtualDestinationInterceptor();
+			interceptor.setVirtualDestinations(new VirtualDestination[]{virtualTopic});
+			service.setDestinationInterceptors(new DestinationInterceptor[]{interceptor});
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+
+	public void registerConsumer(String feedQN, Consumer consumer) {
+		consumers.putIfAbsent(feedQN, new TopicConsumer(session, feedQN));
+		TopicConsumer topicConsumer = consumers.get(feedQN);
+		topicConsumer.listen(consumer, NESS + "-" + feedQN);
+	}
+
+	public TopicProducer registerOrGetProducer(String path) {
+		try {
+			producers.putIfAbsent(path, new TopicProducer(session, path));
+			return producers.get(path);
+		} catch (JMSException e) {
+			logger.error(e.getMessage(), e);
+			return null;
+		}
+	}
+
+	public TopicConsumer consumerOf(String feedQN) {
+		return consumers.get(feedQN);
+	}
+
+	public void quit() {
+		try {
+			consumers.values().forEach(TopicConsumer::stop);
+			session.close();
+			service.stop();
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	private void startAdvisories() throws JMSException {
+//		Destination advisoryDestination = AdvisorySupport.getDestinationAdvisoryTopic(AdvisorySupport.QUEUE_ADVISORY_TOPIC);
+//		session.createConsumer(advisoryDestination).setMessageListener(new TopicListener(box, session));
+	}
+
+	private static Ness ness(NessBox box) {
+		return box.graph().wrapper(Ness.class);
+	}
+
+	private ActiveMQDestination findTopic(String topic) {
+		try {
+			ActiveMQDestination[] destinations = broker().getDestinations();
+			if (destinations == null) return null;
+			return Arrays.stream(destinations).filter(d -> d.getPhysicalName().equals(topic)).findFirst().orElse(null);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return null;
+		}
+	}
+
+	private Session nessSession() {
+		try {
+			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("vm://ness");
+			javax.jms.Connection connection = connectionFactory.createConnection(NESS, NESS);
+			connection.setClientID(NESS);
+			connection.start();
+			return connection.createSession(false, AUTO_ACKNOWLEDGE);
+		} catch (JMSException e) {
+			logger.error(e.getMessage(), e);
+			return null;
+		}
+	}
+
+	private Broker broker() {
+		try {
+			return service.getBroker();
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return null;
+		}
 	}
 
 	private void configure() {
@@ -115,7 +209,7 @@ public final class BusManager {
 			connector.setUri(new URI("tcp://localhost:" + box.get("broker.port")));
 			service.addConnector(connector);
 		} catch (Exception e) {
-			getGlobal().severe("Error configuring: " + e.getMessage());
+			logger.error("Error configuring: " + e.getMessage(), e);
 		}
 	}
 
@@ -136,70 +230,7 @@ public final class BusManager {
 		return users;
 	}
 
-	private void startAdvisories() throws JMSException {
-//		Destination advisoryDestination = AdvisorySupport.getDestinationAdvisoryTopic(AdvisorySupport.QUEUE_ADVISORY_TOPIC);
-//		session.createConsumer(advisoryDestination).setMessageListener(new TopicListener(box, session));
-	}
-
-	private static Ness ness(NessBox box) {
-		return box.graph().wrapper(Ness.class);
-	}
-
-	private ActiveMQDestination findTopic(String topic) {
-		try {
-			ActiveMQDestination[] destinations = broker().getDestinations();
-			if (destinations == null) return null;
-			return Arrays.stream(destinations).filter(d -> d.getPhysicalName().equals(topic)).findFirst().orElse(null);
-		} catch (Exception e) {
-			getGlobal().severe(e.getMessage());
-			return null;
-		}
-	}
-
-	private Session nessSession() {
-		try {
-			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("vm://ness");
-			javax.jms.Connection connection = connectionFactory.createConnection(NESS, NESS);
-			connection.setClientID(NESS);
-			connection.start();
-			return connection.createSession(false, AUTO_ACKNOWLEDGE);
-		} catch (JMSException e) {
-			getGlobal().severe(e.getMessage());
-			return null;
-		}
-	}
-
-	private Broker broker() {
-		try {
-			return service.getBroker();
-		} catch (Exception e) {
-			getGlobal().severe(e.getMessage());
-			return null;
-		}
-	}
-
-	public void registerConsumer(String feedQN, Consumer consumer) {
-		consumers.putIfAbsent(feedQN, new TopicConsumer(session, feedQN));
-		TopicConsumer topicConsumer = consumers.get(feedQN);
-		topicConsumer.listen(consumer, NESS + "-" + feedQN);
-	}
-
-	public TopicProducer registerOrGetProducer(String path) {
-		try {
-			producers.putIfAbsent(path, new TopicProducer(session, path));
-			return producers.get(path);
-		} catch (JMSException e) {
-			getGlobal().severe(e.getMessage());
-			return null;
-		}
-	}
-
-	public TopicConsumer consumerOf(String feedQN) {
-		return consumers.get(feedQN);
-	}
-
 	static final class PasswordGenerator {
-
 		static String nextPassword() {
 			return new BigInteger(130, new SecureRandom()).toString(32).substring(0, 12);
 		}
