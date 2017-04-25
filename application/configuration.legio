@@ -1,21 +1,22 @@
 dsl Legio
 
-Project(groupId = "io.intino.ness", version = "1.0.0") ness
+Project(groupId = "io.intino.ness", version = "1.0.1") ness
 	Repositories
 		Release("https://artifactory.intino.io/artifactory/releases", "intino-maven")
 		Language("https://artifactory.intino.io/artifactory/releases", "intino-maven")
 	Dependencies
 		Test("junit", "junit", "LATEST")
+		Compile("org.slf4j", "slf4j-log4j12", "1.7.7")
 		Compile("io.intino.konos", "konos-jms", "1.0.5")
 		Compile("org.apache.activemq", "activemq-broker", "5.14.4")
 		Compile("org.apache.activemq", "activemq-kahadb-store", "5.14.4")
 		Compile("org.apache.activemq", "activemq-jaas", "5.14.4")
 		Compile("io.intino.konos", "konos-slack", "1.0.4")
-		Compile("io.intino.konos", "konos-scheduler", "1.0.0")
-		Compile("io.intino.ness", "datalake", "1.0.1")
-	Factory("1.2.1", "io.intino.ness") as Application
-		Language("Proteo", "1.0.5")
-		Interface("1.8.2")
+		Compile("io.intino.konos", "konos-scheduler", "1.0.1")
+		Compile("io.intino.ness", "datalake", "1.0.2")
+	Factory("1.2.3", "io.intino.ness") as Application
+		Language("Proteo", "1.0.6")
+		Interface("1.8.7")
 LifeCycle
 	Package(ModulesAndLibrariesLinkedByManifest) as Runnable("io.intino.ness.konos.Main")
 	Distribution

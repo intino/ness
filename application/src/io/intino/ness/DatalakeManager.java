@@ -4,10 +4,12 @@ import io.intino.konos.jms.Consumer;
 import io.intino.konos.jms.TopicConsumer;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.datalake.FileStation;
-import io.intino.ness.datalake.NessCompiler;
+import io.intino.ness.datalake.Job;
 import io.intino.ness.datalake.NessStation;
 import io.intino.ness.datalake.NessStation.Feed;
+import io.intino.ness.datalake.NessStation.Flow;
 import io.intino.ness.datalake.Valve;
+import io.intino.ness.datalake.compiler.Compiler;
 import io.intino.ness.inl.MessageFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import javax.jms.Message;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
 import static io.intino.ness.Inl.load;
@@ -24,11 +27,19 @@ public class DatalakeManager {
 	private Logger logger = LoggerFactory.getLogger(DatalakeManager.class);
 	private NessStation station;
 	private BusManager bus;
-	private List<NessStation.Task> tasks = new ArrayList<>();
+	private List<Job> jobs = new ArrayList<>();
 
 	public DatalakeManager(FileStation station, BusManager bus) {
 		this.station = station;
 		this.bus = bus;
+		init();
+	}
+
+	private void init() {
+		for (io.intino.ness.datalake.Tank tank : station.tanks()) {
+			feed("feed." + tank.name(), station.feed(tank.name()));
+			flow(tank.name(), "flow." + tank.name());
+		}
 	}
 
 	public boolean isCorrect(String code) {
@@ -37,7 +48,7 @@ public class DatalakeManager {
 
 	private MessageFunction compile(String code) {
 		try {
-			return NessCompiler.
+			return Compiler.
 					compile(code).
 					with("-target", "1.8").
 					load("tests.UpperCaseFunction").
@@ -51,48 +62,61 @@ public class DatalakeManager {
 	public void pump(Function function, String input, String output) {
 		try {
 			station.pipe(input).to(output).with(Valve.define().filter(function.name(), function.source()));
-			NessStation.Task task = station.pump(input).to(output).start();
-			tasks.add(task);
-			task.thread().start();
+			Job job = station.pump(input).to(output).start();
+			jobs.add(job);
+			job.thread().start();
 		} catch (Exception e) {
-
+			logger.error(e.getMessage(), e);
 		}
 	}
 
-	public void registerChannel(Channel channel) {
-		feed(channel, station.feed(channel.qualifiedName));
-		flow(channel);
+	public void registerTank(Tank tank) {
+		station.tank(tank.qualifiedName);
 	}
 
-	private void feed(Channel channel, final Feed feed) {
-		bus.registerConsumer(channel.feedQN(), new Consumer() {
+	public void feedFlow(Tank tank) {
+		feed(tank, station.feed(tank.qualifiedName));
+		flow(tank);
+	}
+
+	private void feed(Tank tank, final Feed feed) {
+		feed(tank.feedQN(), feed);
+	}
+
+	private void feed(String tank, final Feed feed) {
+		bus.registerConsumer(tank, new Consumer() {
 			public void consume(Message message) {
 				load(textFrom(message)).forEach(feed::send);
 			}
 		});
 	}
 
-	private void flow(Channel channel) {
-		station.flow(channel.qualifiedName).onMessage(m -> bus.registerOrGetProducer(channel.flowQN()).produce(createMessageFor(m.toString())));
+	private void flow(Tank tank) {
+		station.flow(tank.qualifiedName).to(m -> bus.registerOrGetProducer(tank.flowQN()).produce(createMessageFor(m.toString())));
 	}
 
-	public void reflow(Channel channel) {
-		pauseFeed(channel);
-		station.pump(channel.qualifiedName).to(m -> bus.registerOrGetProducer(channel.flowQN()).produce(createMessageFor(m.toString())));
+	private void flow(String tank, String flow) {
+		station.flow(tank).to(m -> bus.registerOrGetProducer(flow).produce(createMessageFor(m.toString())));
 	}
 
-	public void migrate(Channel oldChannel, Channel newChannel) {
-		registerChannel(newChannel);
-		pauseFeed(oldChannel);
-		station.pipe(oldChannel.feedQN()).to(newChannel.feedQN());
-		NessStation.Task task = station.pump(oldChannel.feedQN()).start();
-		tasks.add(task);
-		task.thread().start();
-		//onTerminate feed(channel,
+	public void reflow(Tank tank) {
+		stopFeed(tank);
+		station.pump(tank.qualifiedName).to(m -> bus.registerOrGetProducer(tank.flowQN()).produce(createMessageFor(m.toString())));
 	}
 
-	private void pauseFeed(Channel channel) {
-		TopicConsumer consumer = bus.consumerOf(channel.feedQN());
+	public void migrate(Tank oldTank, Tank newTank) {
+		registerTank(newTank);
+		stopFeed(oldTank);
+
+		NessStation.Pipe to = station.pipe(oldTank.qualifiedName()).to(newTank.qualifiedName());
+		Job job = station.pump(oldTank.qualifiedName).start();
+		jobs.add(job);
+		job.onTerminate(() -> feedFlow(newTank));
+		//Destroy old tank?
+	}
+
+	private void stopFeed(Tank tank) {
+		TopicConsumer consumer = bus.consumerOf(tank.feedQN());
 		if (consumer != null) consumer.stop();
 	}
 
@@ -102,5 +126,39 @@ public class DatalakeManager {
 
 	public boolean removeUser(String name) {
 		return bus.removeUser(name);
+	}
+
+	public void seal(Tank tank) {
+		stopFeed(tank);
+		Job seal = station.seal(tank.qualifiedName);
+		seal.onTerminate(() -> feed(tank, station.feed(tank.qualifiedName)));
+	}
+
+	public void removeTank(Tank tank) {
+		String qualifiedName = tank.qualifiedName();
+
+		List<Feed> feeds = station.feedsTo(qualifiedName);
+		bus.consumerOf(tank.feedQN()).stop();
+		station.remove(feeds.toArray(new NessStation.Feed[feeds.size()]));
+
+		List<Flow> flows = station.flowsFrom(qualifiedName);
+		station.remove(flows.toArray(new NessStation.Flow[flows.size()]));
+
+		List<NessStation.Pipe> pipesFrom = station.pipesFrom(qualifiedName);
+		station.remove(pipesFrom.toArray(new NessStation.Pipe[pipesFrom.size()]));
+
+		List<NessStation.Pipe> pipesTo = station.pipesTo(qualifiedName);
+		station.remove(pipesTo.toArray(new NessStation.Pipe[pipesTo.size()]));
+
+		station.remove(qualifiedName);
+	}
+
+	public Map<String, List<String>> users() {
+		return bus.users();
+	}
+
+	public void quit() {
+		jobs.forEach(Job::stop);
+		bus.quit();
 	}
 }

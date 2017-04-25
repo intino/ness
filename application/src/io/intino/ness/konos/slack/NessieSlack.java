@@ -2,20 +2,19 @@ package io.intino.ness.konos.slack;
 
 import com.ullink.slack.simpleslackapi.SlackSession;
 import io.intino.konos.slack.Bot.MessageProperties;
-import io.intino.ness.Channel;
 import io.intino.ness.DatalakeManager;
 import io.intino.ness.Function;
 import io.intino.ness.Ness;
-import io.intino.ness.bus.BusManager;
+import io.intino.ness.Tank;
 import io.intino.ness.konos.NessBox;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.intino.ness.konos.slack.Helper.*;
 
 public class NessieSlack {
-
 	private static final String OK = ":ok_hand:";
 	private NessBox box;
 
@@ -33,7 +32,7 @@ public class NessieSlack {
 	}
 
 	public String users(MessageProperties properties) {
-		Map<String, List<String>> users = box.get(BusManager.class).users();
+		Map<String, List<String>> users = datalake().users();
 		StringBuilder builder = new StringBuilder();
 		for (String user : users.keySet()) {
 			builder.append(user);
@@ -45,19 +44,19 @@ public class NessieSlack {
 		return result.isEmpty() ? "There aren't users registered" : result;
 	}
 
-	public String channels(MessageProperties properties, String[] tags) {
+	public String tanks(MessageProperties properties, String[] tags) {
 		Ness ness = ness(box);
 		StringBuilder builder = new StringBuilder();
-		List<Channel> channel = ness.channelList();
-		for (int i = 0; i < channel.size(); i++) {
-			Channel topic = channel.get(i);
+		List<Tank> tank = sortedTanks(ness).collect(Collectors.toList());
+		for (int i = 0; i < tank.size(); i++) {
+			Tank topic = tank.get(i);
 			if (tags.length == 0 || isTagged(tags, topic.tags()))
 				builder.append(i + 1).append(") ").append(topic.qualifiedName());
 			if (!topic.tags().isEmpty()) builder.append(" {").append(String.join(" ", topic.tags())).append("}");
 			builder.append("\n");
 		}
 		String value = builder.toString();
-		return value.isEmpty() ? "No channel" : value;
+		return value.isEmpty() ? "There aren't tanks" : value;
 	}
 
 	public String functions(MessageProperties properties) {
@@ -67,15 +66,15 @@ public class NessieSlack {
 		for (int i = 0; i < functions.size(); i++)
 			builder.append(i).append(") ").append(functions.get(i).name()).append(". Being used on:...\n");
 		String value = builder.toString();
-		return value.isEmpty() ? "No functions" : value;
+		return value.isEmpty() ? "There aren't functions registered yet" : value;
 	}
 
-	public String channel(MessageProperties properties, String name) {
-		Channel channel = findChannel(box, name);
-		if (channel == null) return "channel not found";
-		properties.context().command("channel");
+	public String tank(MessageProperties properties, String name) {
+		Tank tank = findTank(box, name);
+		if (tank == null) return "tank not found";
+		properties.context().command("tank");
 		properties.context().objects(name);
-		return "Selected " + channel.qualifiedName();
+		return "Selected " + tank.qualifiedName();
 	}
 
 	public String addFunction(MessageProperties properties, String name, String code) {
@@ -98,27 +97,28 @@ public class NessieSlack {
 		return OK;
 	}
 
+	public String reflow(MessageProperties properties, String tankName) {
+		Tank tank = findTank(box, tankName);
+		if (tank == null) return "Channel not found";
+		DatalakeManager manager = datalake();
+		manager.reflow(tank);
+		return OK;
+	}
+
+	private String nextVersionOf(Tank tank) {
+		return tank.qualifiedName().replace("." + tank.version(), "." + (tank.version() + 1));
+	}
+
+	public String migrate(MessageProperties properties, String tankName, String[] args) {
+		Tank tank = findTank(box, tankName);
+		String newTankName = nextVersionOf(tank);
+		Tank newChannel = ness(box).create("tanks", newTankName).tank(newTankName);
+		datalake().migrate(tank, newChannel);
+//		newChannel.save();
+		return OK;
+	}
+
 	private DatalakeManager datalake() {
 		return box.get(DatalakeManager.class);
-	}
-
-	public String reflow(MessageProperties properties, String channelName) {
-		Channel channel = findChannel(box, channelName);
-		if (channel == null) return "Channel not found";
-		DatalakeManager manager = datalake();
-		manager.reflow(channel);
-		return OK;
-	}
-
-	private String nextVersionOf(Channel channel) {
-		return channel.name().replace("." + channel.version(), "." + channel.version() + 1);
-	}
-
-	public String migrate(MessageProperties properties, String channelName, String[] args) {
-		Channel channel = findChannel(box, channelName);
-		String newChannelName = nextVersionOf(channel);
-		Channel newChannel = ness(box).create("channels", newChannelName).channel(newChannelName);
-		datalake().migrate(channel, newChannel);
-		return OK;
 	}
 }

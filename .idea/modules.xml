@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/datalake/datalake.iml" filepath="$PROJECT_DIR$/datalake/datalake.iml" />
       <module fileurl="file://$PROJECT_DIR$/datalake-examples/datalake-examples.iml" filepath="$PROJECT_DIR$/datalake-examples/datalake-examples.iml" />
       <module fileurl="file://$PROJECT_DIR$/inl/inl.iml" filepath="$PROJECT_DIR$/inl/inl.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tgs/tgs.iml" filepath="$PROJECT_DIR$/tgs/tgs.iml" />
     </modules>
   </component>
 </project>

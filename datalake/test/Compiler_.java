@@ -77,6 +77,15 @@ public class Compiler_ {
                 "}";
     }
 
+    public class UpperCaseFunction implements MessageMapper {
+
+        @Override
+        public Message map(Message input) {
+            input.attributes().add("object=value");
+            return input;
+        }
+    }
+
     public static String frontFunction() {
         return  "package io.yyy;\n" +
                 "\n" +

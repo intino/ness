@@ -1,6 +1,6 @@
 dsl Legio
 
-Project("io.intino.ness", "1.0.1") datalake
+Project("io.intino.ness", "1.0.2") datalake
 	Repositories
 		Release("https://artifactory.intino.io/artifactory/releases", "intino-maven")
 	Dependencies
