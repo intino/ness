@@ -107,7 +107,6 @@ public class DatalakeManager {
 	public void migrate(Tank oldTank, Tank newTank) {
 		registerTank(newTank);
 		stopFeed(oldTank);
-
 		NessStation.Pipe to = station.pipe(oldTank.qualifiedName()).to(newTank.qualifiedName());
 		Job job = station.pump(oldTank.qualifiedName).start();
 		jobs.add(job);
