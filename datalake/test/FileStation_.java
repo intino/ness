@@ -18,7 +18,9 @@ import java.util.List;
 
 import static java.lang.Thread.currentThread;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsNull.nullValue;
 
 public class FileStation_ {
 
@@ -130,7 +132,7 @@ public class FileStation_ {
         station.pipe(temperature_1).to(temperature_2);
         assertThat(station.pipesFrom(temperature_1).size(), is(1));
         assertThat(station.pipesTo(temperature_2).size(), is(1));
-        assertThat(station.pipeBetween(temperature_1, temperature_2).size(), is(1));
+        assertThat(station.pipeBetween(temperature_1, temperature_2), is(notNullValue()));
     }
 
     @Test
@@ -187,7 +189,7 @@ public class FileStation_ {
         List<Message> messages = new ArrayList<>();
         station.tank(temperature_1);
         Flow flow = station.flow(temperature_1).to(messages::add);
-        feedTemperatures();
+        feedTemperatures(0,19);
         station.remove(flow);
 
         assertThat(messages.size(), is(19));
@@ -198,41 +200,67 @@ public class FileStation_ {
     @Test
     public void should_seal_a_tank() throws Exception {
         Tank tank = station.tank(temperature_1);
-        feedTemperatures();
+        feedTemperatures(0,19);
         station.seal(temperature_1).thread().join();
-        assertThat(tank.tubs().size(), is(4));
-        assertThat(tank.tubs().get(0).name(), is("20101112.zip"));
-        assertThat(tank.tubs().get(0).input().next().toString(), is("[Temperature]\nts: 2010-11-12T03:36:00Z\nvalue: 11.26"));
-        assertThat(tank.tubs().get(1).name(), is("20101113.zip"));
-        assertThat(tank.tubs().get(1).input().next().toString(), is("[Temperature]\nts: 2010-11-13T01:12:00Z\nvalue: 15.42"));
+        checkTank(tank);
     }
 
     @Test
-    public void should_pump_between_tanks() throws Exception {
+    public void should_seal_a_tank_already_sealed() throws Exception {
+        Tank tank = station.tank(temperature_1);
+        feedTemperatures(0,10);
+        station.seal(temperature_1).thread().join();
+        feedTemperatures(11,19);
+        station.seal(temperature_1).thread().join();
+        checkTank(tank);
+    }
+
+    @Test
+    public void should_pump_not_sealed_tank() throws Exception {
         station.tank(temperature_1);
-        feedTemperatures();
+        feedTemperatures(0,19);
 
         Tank tank = station.tank(temperature_2);
         station.pipe(temperature_1).with(Valve.define().map(toFarenheit())).to(temperature_2);
         station.pump(temperature_1).to(temperature_2).start().thread().join();
-        assertThat(tank.tubs().size(), is(4));
-        assertThat(tank.tubs().get(0).name(), is("20101112.zip"));
-        assertThat(tank.tubs().get(0).input().next().toString(), is("[Temperature]\nts: 2010-11-12T03:36:00Z\nvalue: 52.268"));
-        assertThat(tank.tubs().get(1).name(), is("20101113.zip"));
-        assertThat(tank.tubs().get(1).input().next().toString(), is("[Temperature]\nts: 2010-11-13T01:12:00Z\nvalue: 59.756"));
+
+        checkTank(tank);
+    }
+
+    @Test
+    public void should_pump_sealed_tank() throws Exception {
+        station.tank(temperature_1);
+        feedTemperatures(0,19);
+        station.seal(temperature_1).thread().join();
+
+        Tank tank = station.tank(temperature_2);
+        station.pipe(temperature_1).with(Valve.define().map(toFarenheit())).to(temperature_2);
+        station.pump(temperature_1).to(temperature_2).start().thread().join();
+
+        checkTank(tank);
+    }
+
+    @Test
+    public void should_pump_partially_sealed_tank() throws Exception {
+        station.tank(temperature_1);
+        feedTemperatures(0,5);
+        station.seal(temperature_1).thread().join();
+        feedTemperatures(6,19);
+
+        Tank tank = station.tank(temperature_2);
+        station.pipe(temperature_1).with(Valve.define().map(toFarenheit())).to(temperature_2);
+        station.pump(temperature_1).to(temperature_2).start().thread().join();
+
+        checkTank(tank);
     }
 
     @Test
     public void should_reflow_from_tank() throws Exception {
         List<Message> messages = new ArrayList<>();
         station.tank(temperature_1);
-        feedTemperatures();
+        feedTemperatures(0,19);
         station.pump(temperature_1).to(messages::add).start().thread().join();
         assertThat(messages.size(), is(19));
-    }
-
-    private MessageMapper toFarenheit() {
-        return message -> message.write("value", message.parse("value").as(Double.class)* 9/5.0 + 32);
     }
 
     @Test
@@ -249,7 +277,7 @@ public class FileStation_ {
         assertThat(station.pipesFrom(temperature_1).size(), is(1));
         assertThat(station.pipesFrom(temperature_2).size(), is(0));
         assertThat(station.pipesTo(temperature_2).size(), is(1));
-        assertThat(station.pipeBetween(temperature_1,temperature_2).size(), is(1));
+        assertThat(station.pipeBetween(temperature_1,temperature_2), is(notNullValue()));
         assertThat(station.flowsFrom(temperature_1).size(), is(0));
         assertThat(station.flowsFrom(temperature_2).size(), is(1));
         assertThat(feed.toString(), is("feed > tank.weather.Temperature.1"));
@@ -257,21 +285,47 @@ public class FileStation_ {
         assertThat(flow.toString(), is("tank.weather.Temperature.2 > flow"));
     }
 
-    private void feedTemperatures() throws Exception {
-        Feed feed = station.feed(temperature_1);
-        MessageInputStream input = messages();
-        while (true) {
-            Message message = input.next();
-            if (message == null) break;
-            feed.send(message);
-        }
+    private void checkTank(Tank tank) throws IOException {
+        assertThat(tank.tubs().size(), is(4));
+        assertThat(tank.tubs().get(0).name(), is("20101112.zip"));
+        assertThat(tank.tubs().get(0).input().next().ts(), is("2010-11-12T03:36:00Z"));
+        checkTubSize(tank.tubs().get(0).input(), 5);
+        assertThat(tank.tubs().get(1).name(), is("20101113.zip"));
+        assertThat(tank.tubs().get(1).input().next().ts(), is("2010-11-13T01:12:00Z"));
+        checkTubSize(tank.tubs().get(1).input(), 5);
+        assertThat(tank.tubs().get(2).name(), is("20101114.zip"));
+        assertThat(tank.tubs().get(2).input().next().ts(), is("2010-11-14T04:00:00Z"));
+        checkTubSize(tank.tubs().get(2).input(), 5);
+        assertThat(tank.tubs().get(3).name(), is("20101115.zip"));
+        assertThat(tank.tubs().get(3).input().next().ts(), is("2010-11-15T16:48:00Z"));
+        checkTubSize(tank.tubs().get(3).input(), 4);
     }
 
+    private void checkTubSize(MessageInputStream input, int size) throws IOException {
+        for (int i = 0; i < size; i++) assertThat(input.next(), is(notNullValue()));
+        assertThat(input.next(), is(nullValue()));
+        assertThat(input.next(), is(nullValue()));
+
+    }
+
+    private MessageMapper toFarenheit() {
+        return message -> message.write("value", message.parse("value").as(Double.class)* 9/5.0 + 32);
+    }
+
+    private void feedTemperatures(int init, int finish) throws Exception {
+        int index = 0;
+        Feed feed = station.feed(temperature_1);
+        MessageInputStream input = messages();
+        while (index <= finish) {
+            Message message = input.next();
+            if (message == null) break;
+            if (index >= init) feed.send(message);
+        }
+    }
 
     private Valve valve() throws Exception {
         return Valve.define().filter(m->m.is("xxx")).filter(m->m.length() > 10);
     }
-
 
     private Post post() {
         return message -> System.out.println(message.toString());

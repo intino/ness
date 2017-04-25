@@ -65,7 +65,15 @@ public class FileTank implements Tank {
     }
 
     private boolean isTub(File file) {
-        return file.getName().endsWith(".zip") || (file.getName().endsWith("inl") && !sealFile(file).exists());
+        return isZip(file) || (isInl(file) && !sealFile(file).exists());
+    }
+
+    private boolean isInl(File file) {
+        return file.getName().endsWith("inl");
+    }
+
+    private boolean isZip(File file) {
+        return file.getName().endsWith(".zip");
     }
 
     private File sealFile(File file) {
