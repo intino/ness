@@ -47,7 +47,7 @@ public class ManageSlack {
 
 	public String removeTank(MessageProperties properties, String name) {
 		Ness wrapper = box.graph().wrapper(Ness.class);
-		List<Tank> tanks = wrapper.tankList(t -> t.name().equals(name));
+		List<Tank> tanks = wrapper.tankList(t -> t.qualifiedName().equals(name));
 		if (tanks.isEmpty()) return "Tank not found";
 		for (Tank tank : tanks) {
 			datalake().removeTank(tank);
