@@ -47,14 +47,14 @@ public class NessieSlackBot extends Bot {
 		add("users".toLowerCase(), "", java.util.Arrays.asList(), java.util.Arrays.asList(), "Request all users registered in ness", (properties, args) -> nessieSlack.users(properties));
 		add("tanks".toLowerCase(), "", java.util.Arrays.asList("tags"), java.util.Arrays.asList(), "Request all tanks nessy is subscribed filtering by tags", (properties, args) -> nessieSlack.tanks(properties, args));
 		add("functions".toLowerCase(), "", java.util.Arrays.asList(), java.util.Arrays.asList(), "Show all functions registered", (properties, args) -> nessieSlack.functions(properties));
-		add("tank".toLowerCase(), "", java.util.Arrays.asList("name"), java.util.Arrays.asList("tag", "rename", "seal"), "Select a tank to operate with", (properties, args) -> nessieSlack.tank(properties, args.length > 0 ? args[0] : ""));
+		add("tank".toLowerCase(), "", java.util.Arrays.asList("name"), java.util.Arrays.asList("tag", "rename", "seal", "migrate", "reflow"), "Select a tank to operate with", (properties, args) -> nessieSlack.tank(properties, args.length > 0 ? args[0] : ""));
 		add("tag".toLowerCase(), "tank", java.util.Arrays.asList("tags"), java.util.Arrays.asList(), "Tags thes tank with `tags`", (properties, args) -> tankSlack.tag(properties, args));
 		add("rename".toLowerCase(), "tank", java.util.Arrays.asList("name"), java.util.Arrays.asList(), "Changes name of this tank to new one", (properties, args) -> tankSlack.rename(properties, args.length > 0 ? args[0] : ""));
 		add("seal".toLowerCase(), "tank", java.util.Arrays.asList(), java.util.Arrays.asList(), "Seals current events of a tank to reservoir", (properties, args) -> tankSlack.seal(properties));
+		add("migrate".toLowerCase(), "tank", java.util.Arrays.asList("functions"), java.util.Arrays.asList(), "Reproduce events of a tank", (properties, args) -> tankSlack.migrate(properties, args));
+		add("reflow".toLowerCase(), "tank", java.util.Arrays.asList(), java.util.Arrays.asList(), "Reproduce events of a tank", (properties, args) -> tankSlack.reflow(properties));
 		add("add-function".toLowerCase(), "", java.util.Arrays.asList("name", "code"), java.util.Arrays.asList(), "Create a function associated to an input tank and output tank", (properties, args) -> nessieSlack.addFunction(properties, args.length > 0 ? args[0] : "", args.length > 1 ? args[1] : ""));
 		add("pump".toLowerCase(), "", java.util.Arrays.asList("functionName", "input", "output"), java.util.Arrays.asList(), "Connect a source and destination tanks through a `function`", (properties, args) -> nessieSlack.pump(properties, args.length > 0 ? args[0] : "", args.length > 1 ? args[1] : "", args.length > 2 ? args[2] : ""));
-		add("migrate".toLowerCase(), "", java.util.Arrays.asList("tank", "functions"), java.util.Arrays.asList(), "Reproduce events of a tank", (properties, args) -> nessieSlack.migrate(properties, args.length > 0 ? args[0] : "", args));
-		add("reflow".toLowerCase(), "", java.util.Arrays.asList("tank"), java.util.Arrays.asList(), "Reproduce events of a tank", (properties, args) -> nessieSlack.reflow(properties, args.length > 0 ? args[0] : ""));
 		try {
 			execute();
 			this.nessieSlack.init(session());

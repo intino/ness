@@ -104,14 +104,15 @@ public class DatalakeManager {
 		station.pump(tank.qualifiedName).to(m -> bus.registerOrGetProducer(tank.flowQN()).produce(createMessageFor(m.toString())));
 	}
 
-	public void migrate(Tank oldTank, Tank newTank) {
+	public void migrate(Tank oldTank, Tank newTank, List<Function> functions) throws Exception {
 		registerTank(newTank);
 		stopFeed(oldTank);
-		NessStation.Pipe to = station.pipe(oldTank.qualifiedName()).to(newTank.qualifiedName());
-		Job job = station.pump(oldTank.qualifiedName).start();
+		NessStation.Pipe pipe = station.pipe(oldTank.qualifiedName());
+		for (Function function : functions) pipe = pipe.with(Valve.define().map(function.name(), function.source()));
+		pipe.to(newTank.qualifiedName());
+		Job job = station.pump(oldTank.qualifiedName()).to(newTank.qualifiedName()).start();
 		jobs.add(job);
 		job.onTerminate(() -> feedFlow(newTank));
-		//Destroy old tank?
 	}
 
 	private void stopFeed(Tank tank) {

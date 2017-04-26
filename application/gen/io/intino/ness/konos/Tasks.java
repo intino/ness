@@ -24,9 +24,9 @@ public class Tasks {
 	public static void init(KonosTasker tasker, NessBox box) {
 		JobDetail job;
 		try {
-			job = newJob(ToReservoirTask.class).withIdentity("toReservoir").build();
+			job = newJob(ToTubTask.class).withIdentity("toTub").build();
 			job.getJobDataMap().put("box", box);
-			tasker.scheduleJob(job, newSet(newTrigger().withIdentity("Model#toReservoir").withSchedule(cronSchedule("0 0 0 1/1 * ? *")).build()), true);
+			tasker.scheduleJob(job, newSet(newTrigger().withIdentity("Model#toTub").withSchedule(cronSchedule("0 0 0 1/1 * ? *")).build()), true);
 			tasker.startSchedules();
 		} catch (Exception e) {
 			logger.severe(e.getMessage());

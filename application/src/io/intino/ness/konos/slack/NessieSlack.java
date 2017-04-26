@@ -97,27 +97,6 @@ public class NessieSlack {
 		return OK;
 	}
 
-	public String reflow(MessageProperties properties, String tankName) {
-		Tank tank = findTank(box, tankName);
-		if (tank == null) return "Channel not found";
-		DatalakeManager manager = datalake();
-		manager.reflow(tank);
-		return OK;
-	}
-
-	private String nextVersionOf(Tank tank) {
-		return tank.qualifiedName().replace("." + tank.version(), "." + (tank.version() + 1));
-	}
-
-	public String migrate(MessageProperties properties, String tankName, String[] args) {
-		Tank tank = findTank(box, tankName);
-		String newTankName = nextVersionOf(tank);
-		Tank newChannel = ness(box).create("tanks", newTankName).tank(newTankName);
-		datalake().migrate(tank, newChannel);
-//		newChannel.save();
-		return OK;
-	}
-
 	private DatalakeManager datalake() {
 		return box.get(DatalakeManager.class);
 	}

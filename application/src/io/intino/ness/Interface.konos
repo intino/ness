@@ -23,6 +23,9 @@ Service Nessie as SlackBot
 		Request("Changes name of this tank to new one") rename
 			Parameter(String) name
 		Request("Seals current events of a tank to reservoir") seal
+		Request("Reproduce events of a tank") migrate
+			Parameter(String, true) functions
+		Request("Reproduce events of a tank") reflow
 
 	Request("Create a function associated to an input tank and output tank") add-function
 		Parameter(String) name
@@ -31,11 +34,6 @@ Service Nessie as SlackBot
 		Parameter(String) functionName
 		Parameter(String) input
 		Parameter(String) output
-	Request("Reproduce events of a tank") migrate
-		Parameter(String) tank
-		Parameter(String, true) functions
-	Request("Reproduce events of a tank") reflow
-		Parameter(String) tank
 Task toTub as CronTrigger("0 0 0 1/1 * ? *", "daily starting at 00:00")
 
 

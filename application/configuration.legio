@@ -1,6 +1,6 @@
 dsl Legio
 
-Project(groupId = "io.intino.ness", version = "1.0.1") ness
+Project(groupId = "io.intino.ness", version = "1.0.2") ness
 	Repositories
 		Release("https://artifactory.intino.io/artifactory/releases", "intino-maven")
 		Language("https://artifactory.intino.io/artifactory/releases", "intino-maven")
