@@ -38,17 +38,17 @@ public class FileStation_ {
     @Test
     public void should_create_channel() throws Exception {
         station.tank(temperature_1);
-        assertThat(station.tanks().size(), is(1));
-        assertThat(station.tanks().get(0).name(), is(temperature_1));
+        assertThat(station.tanks().length, is(1));
+        assertThat(station.tanks()[0].name(), is(temperature_1));
     }
 
     @Test
     public void should_remove_channel() throws Exception {
         station.tank(temperature_1);
         station.remove(temperature_1);
-        assertThat(station.tanks().size(), is(1));
-        assertThat(station.tanks().get(0).name().startsWith("trash"), is(true));
-        assertThat(station.tanks().get(0).name().endsWith(temperature_1), is(true));
+        assertThat(station.tanks().length, is(1));
+        assertThat(station.tanks()[0].name().startsWith("trash"), is(true));
+        assertThat(station.tanks()[0].name().endsWith(temperature_1), is(true));
     }
 
     @Test
@@ -87,18 +87,18 @@ public class FileStation_ {
 
     @Test
     public void should_create_feed_to_channel() throws Exception {
-        assertThat(station.feedsTo(temperature_1).size(), is(0));
+        assertThat(station.feedsTo(temperature_1).length, is(0));
         station.tank(temperature_1);
         station.feed(temperature_1);
-        assertThat(station.feedsTo(temperature_1).size(), is(1));
+        assertThat(station.feedsTo(temperature_1).length, is(1));
     }
 
     @Test
     public void should_create_flow_from_channel() throws Exception {
-        assertThat(station.flowsFrom(temperature_1).size(), is(0));
+        assertThat(station.flowsFrom(temperature_1).length, is(0));
         station.tank(temperature_1);
         station.flow(temperature_1);
-        assertThat(station.flowsFrom(temperature_1).size(), is(1));
+        assertThat(station.flowsFrom(temperature_1).length, is(1));
     }
 
     @Test
@@ -125,13 +125,13 @@ public class FileStation_ {
 
     @Test
     public void should_create_pipe() throws Exception {
-        assertThat(station.pipesFrom(temperature_1).size(), is(0));
-        assertThat(station.pipesTo(temperature_2).size(), is(0));
+        assertThat(station.pipesFrom(temperature_1).length, is(0));
+        assertThat(station.pipesTo(temperature_2).length, is(0));
         station.tank(temperature_1);
         station.tank(temperature_2);
         station.pipe(temperature_1).to(temperature_2);
-        assertThat(station.pipesFrom(temperature_1).size(), is(1));
-        assertThat(station.pipesTo(temperature_2).size(), is(1));
+        assertThat(station.pipesFrom(temperature_1).length, is(1));
+        assertThat(station.pipesTo(temperature_2).length, is(1));
         assertThat(station.pipeBetween(temperature_1, temperature_2), is(notNullValue()));
     }
 
@@ -193,8 +193,8 @@ public class FileStation_ {
         station.remove(flow);
 
         assertThat(messages.size(), is(19));
-        assertThat(station.flowsFrom(temperature_1).size(),is(0));
-        assertThat(station.feedsTo(temperature_1).size(),is(1));
+        assertThat(station.flowsFrom(temperature_1).length,is(0));
+        assertThat(station.feedsTo(temperature_1).length,is(1));
     }
 
     @Test
@@ -273,32 +273,32 @@ public class FileStation_ {
                 .to(temperature_2);
         Flow flow = station.flow(temperature_2).to(post());
 
-        assertThat(station.feedsTo(temperature_1).size(), is(1));
-        assertThat(station.pipesFrom(temperature_1).size(), is(1));
-        assertThat(station.pipesFrom(temperature_2).size(), is(0));
-        assertThat(station.pipesTo(temperature_2).size(), is(1));
+        assertThat(station.feedsTo(temperature_1).length, is(1));
+        assertThat(station.pipesFrom(temperature_1).length, is(1));
+        assertThat(station.pipesFrom(temperature_2).length, is(0));
+        assertThat(station.pipesTo(temperature_2).length, is(1));
         assertThat(station.pipeBetween(temperature_1,temperature_2), is(notNullValue()));
-        assertThat(station.flowsFrom(temperature_1).size(), is(0));
-        assertThat(station.flowsFrom(temperature_2).size(), is(1));
+        assertThat(station.flowsFrom(temperature_1).length, is(0));
+        assertThat(station.flowsFrom(temperature_2).length, is(1));
         assertThat(feed.toString(), is("feed > tank.weather.Temperature.1"));
         assertThat(pipe.toString(), is("tank.weather.Temperature.1 > [2] > tank.weather.Temperature.2"));
         assertThat(flow.toString(), is("tank.weather.Temperature.2 > flow"));
     }
 
     private void checkTank(Tank tank) throws IOException {
-        assertThat(tank.tubs().size(), is(4));
-        assertThat(tank.tubs().get(0).name(), is("20101112.zip"));
-        assertThat(tank.tubs().get(0).input().next().ts(), is("2010-11-12T03:36:00Z"));
-        checkTubSize(tank.tubs().get(0).input(), 5);
-        assertThat(tank.tubs().get(1).name(), is("20101113.zip"));
-        assertThat(tank.tubs().get(1).input().next().ts(), is("2010-11-13T01:12:00Z"));
-        checkTubSize(tank.tubs().get(1).input(), 5);
-        assertThat(tank.tubs().get(2).name(), is("20101114.zip"));
-        assertThat(tank.tubs().get(2).input().next().ts(), is("2010-11-14T04:00:00Z"));
-        checkTubSize(tank.tubs().get(2).input(), 5);
-        assertThat(tank.tubs().get(3).name(), is("20101115.zip"));
-        assertThat(tank.tubs().get(3).input().next().ts(), is("2010-11-15T16:48:00Z"));
-        checkTubSize(tank.tubs().get(3).input(), 4);
+        assertThat(tank.tubs().length, is(4));
+        assertThat(tank.tubs()[0].name(), is("20101112.zip"));
+        assertThat(tank.tubs()[0].input().next().ts(), is("2010-11-12T03:36:00Z"));
+        checkTubSize(tank.tubs()[0].input(), 5);
+        assertThat(tank.tubs()[1].name(), is("20101113.zip"));
+        assertThat(tank.tubs()[1].input().next().ts(), is("2010-11-13T01:12:00Z"));
+        checkTubSize(tank.tubs()[1].input(), 5);
+        assertThat(tank.tubs()[2].name(), is("20101114.zip"));
+        assertThat(tank.tubs()[2].input().next().ts(), is("2010-11-14T04:00:00Z"));
+        checkTubSize(tank.tubs()[2].input(), 5);
+        assertThat(tank.tubs()[3].name(), is("20101115.zip"));
+        assertThat(tank.tubs()[3].input().next().ts(), is("2010-11-15T16:48:00Z"));
+        checkTubSize(tank.tubs()[3].input(), 4);
     }
 
     private void checkTubSize(MessageInputStream input, int size) throws IOException {

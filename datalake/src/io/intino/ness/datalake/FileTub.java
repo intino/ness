@@ -34,7 +34,7 @@ public class FileTub implements Tub {
     private MessageInputStream messageInputStreamOf(File file) {
         try {
             File feedFile = isInl(file) ? file : feedFile(file);
-            File sealFile = isInl(file) ? sealFile(file) : file;
+            File sealFile = isZip(file) ? file : sealFile(file);
             return feedFile.exists() && sealFile.exists() ?
                     FileMessageInputStream.of(sealFile, feedFile) :
                     FileMessageInputStream.of(file);
@@ -47,6 +47,10 @@ public class FileTub implements Tub {
 
     private boolean isInl(File file) {
         return file.getName().endsWith(".inl");
+    }
+
+    private boolean isZip(File file) {
+        return file.getName().endsWith(".zip");
     }
 
     private File feedFile(File file) {

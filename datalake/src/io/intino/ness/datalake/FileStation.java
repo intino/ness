@@ -1,8 +1,9 @@
 package io.intino.ness.datalake;
 
-import io.intino.ness.inl.*;
 import io.intino.ness.inl.FileMessageInputStream;
 import io.intino.ness.inl.FileMessageOutputStream;
+import io.intino.ness.inl.Message;
+import io.intino.ness.inl.MessageInputStream;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,11 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static io.intino.ness.datalake.FileTank.Format.inl;
-import static java.nio.file.StandardOpenOption.APPEND;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toList;
+import static io.intino.ness.datalake.FileTank.Format.*;
+import static java.nio.file.StandardOpenOption.*;
+import static java.util.Arrays.*;
 
 @SuppressWarnings("unchecked")
 public class FileStation implements NessStation {
@@ -51,7 +50,7 @@ public class FileStation implements NessStation {
                 return "feed > " + tank;
             }
         };
-        feedsTo(tank).add(feed);
+        feedListTo(tank).add(feed);
         return feed;
     }
 
@@ -83,7 +82,7 @@ public class FileStation implements NessStation {
                 return tank + " > flow";
             }
         };
-        flowsFrom(tank).add(flow);
+        flowListFrom(tank).add(flow);
         return flow;
     }
 
@@ -121,32 +120,29 @@ public class FileStation implements NessStation {
 
 
     @Override
-    public List<Tank> tanks() {
+    public Tank[] tanks() {
         return stream(tankFiles())
                 .map(FileTank::new)
-                .collect(toList());
+                .toArray(Tank[]::new);
     }
 
     @Override
-    public List<Feed> feedsTo(String tank) {
-        if (feeds.containsKey(tank)) return feeds.get(tank);
-        ArrayList<Feed> result =  new ArrayList<>();
-        feeds.put(tank, result);
-        return result;
+    public Feed[] feedsTo(String tank) {
+        return feedListTo(tank).toArray(new Feed[0]);
     }
 
     @Override
-    public List<Pipe> pipesFrom(String tank) {
+    public Pipe[] pipesFrom(String tank) {
         return pipes.stream()
                 .filter(p -> tank.equalsIgnoreCase(p.from()))
-                .collect(toList());
+                .toArray(Pipe[]::new);
     }
 
     @Override
-    public List<Pipe> pipesTo(String tank) {
+    public Pipe[] pipesTo(String tank) {
         return pipes.stream()
                 .filter(p -> tank.equalsIgnoreCase(p.to()))
-                .collect(toList());
+                .toArray(Pipe[]::new);
     }
 
     @Override
@@ -158,11 +154,22 @@ public class FileStation implements NessStation {
     }
 
     @Override
-    public List<Flow> flowsFrom(String tank) {
-        if (flows.containsKey(tank)) return flows.get(tank);
-        ArrayList<Flow> result =  new ArrayList<>();
-        flows.put(tank, result);
-        return result;
+    public Flow[] flowsFrom(String tank) {
+        return flowListFrom(tank).toArray(new Flow[0]);
+    }
+
+    private List<Feed> feedListTo(String tank) {
+        if (!feeds.containsKey(tank)) feeds.put(tank, new ArrayList<>());
+        return feeds.get(tank);
+    }
+
+    private List<Flow> flowListFrom(String tank) {
+        if (!flows.containsKey(tank)) flows.put(tank, new ArrayList<>());
+        return flows.get(tank);
+    }
+
+    private List<Pipe> pipeListFrom(String tank) {
+        return asList(pipesFrom(tank));
     }
 
 
@@ -194,8 +201,8 @@ public class FileStation implements NessStation {
     private void send(Message message, String tank)  {
         try {
             write(message, tank);
-            pipesFrom(tank).forEach(pipe -> send(pipe.map(message), pipe.to()));
-            flowsFrom(tank).forEach(flow -> flow.send(message));
+            pipeListFrom(tank).forEach(pipe -> send(pipe.map(message), pipe.to()));
+            flowListFrom(tank).forEach(flow -> flow.send(message));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -370,10 +377,10 @@ public class FileStation implements NessStation {
 
     private FileTank assertIsNotUsed(FileTank tank) {
         String name = tank.name();
-        if (pipesFrom(name).size() > 0) throw new StationException("Tank " + tank.name() + " is source of pipes. Remove pipes first");
-        if (pipesTo(name).size() > 0) throw new StationException("Tank " + tank.name() + " is target of pipes. Remove pipes first");
-        if (feedsTo(name).size() > 0) throw new StationException("Tank " + tank.name() + " is target of feeds. Remove feeds first");
-        if (flowsFrom(name).size() > 0) throw new StationException("Tank " + tank.name() + " is source of flows. Remove flows first");
+        if (pipesFrom(name).length > 0) throw new StationException("Tank " + tank.name() + " is source of pipes. Remove pipes first");
+        if (pipesTo(name).length > 0) throw new StationException("Tank " + tank.name() + " is target of pipes. Remove pipes first");
+        if (feedsTo(name).length > 0) throw new StationException("Tank " + tank.name() + " is target of feeds. Remove feeds first");
+        if (flowsFrom(name).length > 0) throw new StationException("Tank " + tank.name() + " is source of flows. Remove flows first");
         return tank;
     }
 

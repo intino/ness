@@ -1,10 +1,8 @@
 package io.intino.ness.datalake;
 
 import java.io.File;
-import java.util.List;
 
 import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toList;
 
 public class FileDataLake implements NessDataLake {
     private final File folder;
@@ -18,10 +16,10 @@ public class FileDataLake implements NessDataLake {
     }
 
     @Override
-    public List<Tank> tanks() {
+    public Tank[] tanks() {
         return stream(files())
                 .map(FileTank::new)
-                .collect(toList());
+                .toArray(Tank[]::new);
     }
 
     @Override

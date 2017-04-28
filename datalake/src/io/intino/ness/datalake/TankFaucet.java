@@ -7,6 +7,8 @@ import io.intino.ness.inl.MessageInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
+import static java.util.Arrays.stream;
+
 public class TankFaucet implements Faucet {
 
     private final Tank tank;
@@ -15,11 +17,11 @@ public class TankFaucet implements Faucet {
 
     public TankFaucet(Tank tank) {
         this.tank = tank;
-        this.tubs = tank.tubs().iterator();
+        this.tubs = stream(tank.tubs()).iterator();
         this.inputStream = nextInputStream();
     }
 
-    public Tank channel() {
+    public Tank tank() {
         return tank;
     }
 

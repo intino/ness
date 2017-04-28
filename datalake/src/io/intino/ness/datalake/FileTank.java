@@ -8,13 +8,11 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 import static io.intino.ness.datalake.FileTank.Format.zip;
 import static io.intino.ness.inl.Message.empty;
 import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toList;
 
 public class FileTank implements Tank {
 
@@ -42,11 +40,11 @@ public class FileTank implements Tank {
     }
 
     @Override
-    public List<Tub> tubs() {
+    public Tub[] tubs() {
         return stream(files())
                 .sorted(File::compareTo)
                 .map(this::tub)
-                .collect(toList());
+                .toArray(Tub[]::new);
     }
 
     private Tub tub(File file) {

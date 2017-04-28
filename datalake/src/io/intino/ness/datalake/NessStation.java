@@ -17,11 +17,11 @@ public interface NessStation {
     void remove(Pipe... pipes);
     void remove(Flow... flows);
 
-    List<Tank> tanks();
-    List<Feed> feedsTo(String tank);
-    List<Flow> flowsFrom(String tank);
-    List<Pipe> pipesFrom(String tank);
-    List<Pipe> pipesTo(String tank);
+    Tank[] tanks();
+    Feed[] feedsTo(String tank);
+    Flow[] flowsFrom(String tank);
+    Pipe[] pipesFrom(String tank);
+    Pipe[] pipesTo(String tank);
     Pipe pipeBetween(String source, String target);
 
     Pump pump(String tank);

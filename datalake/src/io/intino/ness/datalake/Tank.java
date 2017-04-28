@@ -8,7 +8,7 @@ import java.util.List;
 public interface Tank {
     String name();
 
-    List<Tub> tubs();
+    Tub[] tubs();
     Tub get(Instant instant);
 
     interface Tub {
