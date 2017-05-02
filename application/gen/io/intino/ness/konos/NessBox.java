@@ -1,6 +1,7 @@
 package io.intino.ness.konos;
 
 import java.util.LinkedHashMap;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.Map;
 import java.util.UUID;
@@ -10,6 +11,7 @@ import io.intino.tara.magritte.Graph;
 public class NessBox extends io.intino.konos.Box {
 	private static Logger LOG = Logger.getGlobal();
 	protected NessConfiguration configuration;
+	private io.intino.konos.jmx.JMXServer manager;
 	private io.intino.konos.slack.Bot nessie;
 	private io.intino.konos.scheduling.KonosTasker tasker = new io.intino.konos.scheduling.KonosTasker();
 
@@ -19,6 +21,7 @@ public class NessBox extends io.intino.konos.Box {
 		box.put(graphID = UUID.randomUUID().toString(), graph);
 		configuration.args().entrySet().forEach((e) -> box.put(e.getKey(), e.getValue()));
 		this.configuration = configuration;
+
 
 	}
 
@@ -33,6 +36,8 @@ public class NessBox extends io.intino.konos.Box {
 	public NessConfiguration configuration() {
 		return (NessConfiguration) configuration;
 	}
+
+
 
 	public NessieSlackBot nessie() {
 		return (NessieSlackBot) nessie;
@@ -60,18 +65,22 @@ public class NessBox extends io.intino.konos.Box {
 
 	private void initRESTServices() {
 
+
 	}
 
 	private void initJMSServices() {
 
 
+
 	}
 
 	private void initJMXServices() {
+		this.manager = new JMXManager().init(this);
 
 	}
 
 	private void initSlackBots() {
+
 		if (configuration().nessieConfiguration == null) return;
 		this.nessie = new NessieSlackBot(this);
 	}

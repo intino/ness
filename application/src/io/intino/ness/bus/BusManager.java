@@ -37,8 +37,8 @@ import static java.util.stream.Collectors.toList;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 
 public final class BusManager {
-	private Logger logger = LoggerFactory.getLogger(BusManager.class);
-	static final String NESS = "ness";
+	private  Logger logger = LoggerFactory.getLogger(BusManager.class);
+	private static final String NESS = "ness";
 	private final NessBox box;
 	private final BrokerService service;
 	private final SimpleAuthenticationPlugin authenticator;
@@ -206,7 +206,7 @@ public final class BusManager {
 			service.setAdvisorySupport(true);
 			service.setPlugins(new BrokerPlugin[]{authenticator});
 			TransportConnector connector = new TransportConnector();
-			connector.setUri(new URI("tcp://localhost:" + box.get("broker.port")));
+			connector.setUri(new URI("tcp://0.0.0.0:" + box.get("broker.port")));
 			service.addConnector(connector);
 		} catch (Exception e) {
 			logger.error("Error configuring: " + e.getMessage(), e);
@@ -228,6 +228,15 @@ public final class BusManager {
 		for (User user : ness(box).userList())
 			users.add(new AuthenticationUser(user.name(), user.password(), String.join(",", user.groups())));
 		return users;
+	}
+
+	public List<String> topics() {
+		try {
+			ActiveMQDestination[] destinations = service.getBroker().getDestinations();
+			return Arrays.stream(destinations).map(ActiveMQDestination::getPhysicalName).filter(n -> !n.contains("ActiveMQ.Advisory")).collect(Collectors.toList());
+		} catch (Exception e) {
+			return Collections.emptyList();
+		}
 	}
 
 	static final class PasswordGenerator {

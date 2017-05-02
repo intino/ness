@@ -80,5 +80,6 @@
     <orderEntry type="library" name="Legio: com.mchange:mchange-commons-java:0.2.11" level="project" />
     <orderEntry type="library" name="Legio: com.zaxxer:HikariCP-java6:2.3.13" level="project" />
     <orderEntry type="library" name="Legio: org.quartz-scheduler:quartz-jobs:2.2.1" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.konos:konos-jmx:1.0.1" level="project" />
   </component>
 </module>

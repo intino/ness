@@ -25,7 +25,7 @@ public class Launcher {
 	@Ignore
 	public void produce() {
 		try {
-			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://10.13.32.126:61616");
 			Connection connection = connectionFactory.createConnection("cesar", "6e4518bj1hpm");
 			connection.start();
 			Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);

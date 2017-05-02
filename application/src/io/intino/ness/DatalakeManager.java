@@ -7,7 +7,6 @@ import io.intino.ness.datalake.FileStation;
 import io.intino.ness.datalake.Job;
 import io.intino.ness.datalake.NessStation;
 import io.intino.ness.datalake.NessStation.Feed;
-import io.intino.ness.datalake.NessStation.Flow;
 import io.intino.ness.datalake.Valve;
 import io.intino.ness.datalake.compiler.Compiler;
 import io.intino.ness.inl.MessageFunction;
@@ -18,9 +17,11 @@ import javax.jms.Message;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
 import static io.intino.ness.Inl.load;
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 
 public class DatalakeManager {
@@ -137,18 +138,11 @@ public class DatalakeManager {
 	public void removeTank(Tank tank) {
 		String qualifiedName = tank.qualifiedName();
 
-		List<Feed> feeds = station.feedsTo(qualifiedName);
 		bus.consumerOf(tank.feedQN()).stop();
-		station.remove(feeds.toArray(new NessStation.Feed[feeds.size()]));
-
-		List<Flow> flows = station.flowsFrom(qualifiedName);
-		station.remove(flows.toArray(new NessStation.Flow[flows.size()]));
-
-		List<NessStation.Pipe> pipesFrom = station.pipesFrom(qualifiedName);
-		station.remove(pipesFrom.toArray(new NessStation.Pipe[pipesFrom.size()]));
-
-		List<NessStation.Pipe> pipesTo = station.pipesTo(qualifiedName);
-		station.remove(pipesTo.toArray(new NessStation.Pipe[pipesTo.size()]));
+		station.remove(station.feedsTo(qualifiedName));
+		station.remove(station.flowsFrom(qualifiedName));
+		station.remove(station.pipesFrom(qualifiedName));
+		station.remove(station.pipesTo(qualifiedName));
 
 		station.remove(qualifiedName);
 	}
@@ -157,8 +151,18 @@ public class DatalakeManager {
 		return bus.users();
 	}
 
+	public List<String> topics() {
+		return bus.topics().stream().sorted(CASE_INSENSITIVE_ORDER::compare).collect(Collectors.toList());
+	}
+
 	public void quit() {
 		jobs.forEach(Job::stop);
 		bus.quit();
+	}
+
+	public boolean rename(Tank tank, String name) {
+		station.remove(station.feedsTo(tank.qualifiedName()));
+		station.rename(tank.qualifiedName, name);
+		return false;
 	}
 }

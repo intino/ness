@@ -2,19 +2,20 @@ dsl Konos
 
 Service Nessie as SlackBot
 	Request("Enter in the management area to add/remove tanks or users and other management actions") manage
-		Request("Request all tanks nessy is subscribed filtered by tags") add-user
+		Request("Add user to the datalake") add-user
 			Parameter(String) name
 			Parameter(String, true) groups
 		Request("Remove user from ness service") remove-user
 			Parameter(String) name
 		Request("Creates a tank") add-tank
 			Parameter(String) name
-		Request("Select a tank to operate with") remove-tank
+		Request("Removes registered tank") remove-tank
 			Parameter(String) name
 	Request("Request all users registered in ness") users
 	Request("Request all tanks nessy is subscribed filtering by tags") tanks
 		Parameter(String, true) tags
 	Request("Show all functions registered") functions
+	Request("Show registered topics") topics
 
 	Request("Select a tank to operate with") tank
 		Parameter(String) name
@@ -34,6 +35,53 @@ Service Nessie as SlackBot
 		Parameter(String) functionName
 		Parameter(String) input
 		Parameter(String) output
+
 Task toTub as CronTrigger("0 0 0 1/1 * ? *", "daily starting at 00:00")
 
+Service Manager as JMX
+	Operation("Add user to the datalake") add-user
+		Parameter name as Text
+		Parameter groups as Text List
+		Response as Text
+	Operation("Remove user from ness service") remove-user
+		Parameter name as Text
+		Response as Text
+	Operation("Creates a tank") add-tank
+		Parameter name as Text
+		Response as Text
+	Operation("Removes registered tank") remove-tank
+		Parameter name as Text
+		Response as Text
+	Operation("Request all users registered in ness") users
+		Response as Text List
+	Operation("Request all tanks nessy is subscribed filtering by tags") tanks
+		Parameter tags as Text List
+		Response as Text List
+	Operation("Show all functions registered") functions
+		Response as Text List
+	Operation("Show registered topics") topics
+		Response as Text List
+	Operation("Changes name of a tank for a new one") rename
+		Parameter tank as Text
+		Parameter name as Text
+		Response as Text
+	Operation("Seals current events of a tank to reservoir") seal
+		Parameter tank as Text
+		Response as Text
+	Operation("Transforms events of a tank to a evolved tank") migrate
+		Parameter tank as Text
+		Parameter functions as Text List
+		Response as Text
+	Operation("Reproduce events of a tank") reflow
+		Parameter tank as Text
+		Response as Text
+	Operation("Create a function associated to an input tank and output tank") add-function
+		Parameter name as Text
+		Parameter code as Text
+		Response as Text
+	Operation("Connect a source and destination tanks through a `function`") pump
+		Parameter functionName as Text
+		Parameter input as Text
+		Parameter output as Text
+		Response as Text
 
