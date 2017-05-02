@@ -1,35 +1,66 @@
 package io.intino.ness.konos.jmx;
 
+import io.intino.konos.jmx.Description;
+import io.intino.konos.jmx.Parameters;
+
 import java.util.*;
 import java.time.*;
 
 public interface ManagerMBean {
 
-    String addUser(String name, java.util.List<String> groups);
+	@Description("Add user to the datalake")
+	@Parameters({"name", "groups"})
+	String addUser(String name, java.util.List<String> groups);
 
-    String removeUser(String name);
+	@Description("Remove user from ness service")
+	@Parameters({"name"})
+	String removeUser(String name);
 
-    String addTank(String name);
+	@Description("Creates a tank")
+	@Parameters({"name"})
+	String addTank(String name);
 
-    String removeTank(String name);
+	@Description("Removes registered tank")
+	@Parameters({"name"})
+	String removeTank(String name);
 
-    java.util.List<String> users();
+	@Description("Request all users registered in ness")
+	@Parameters({})
+	java.util.List<String> users();
 
-    java.util.List<String> tanks(java.util.List<String> tags);
+	@Description("Request all tanks nessy is subscribed filtering by tags")
+	@Parameters({"tags"})
+	java.util.List<String> tanks(java.util.List<String> tags);
 
-    java.util.List<String> functions();
+	@Description("Show all functions registered")
+	@Parameters({})
+	java.util.List<String> functions();
 
-    java.util.List<String> topics();
+	@Description("Show registered topics")
+	@Parameters({})
+	java.util.List<String> topics();
 
-    String rename(String tank, String name);
+	@Description("Changes name of a tank for a new one")
+	@Parameters({"tank", "name"})
+	String rename(String tank, String name);
 
-    String seal(String tank);
+	@Description("Seals current events of a tank to reservoir")
+	@Parameters({"tank"})
+	String seal(String tank);
 
-    String migrate(String tank, java.util.List<String> functions);
+	@Description("Transforms events of a tank to a evolved tank")
+	@Parameters({"tank", "functions"})
+	String migrate(String tank, java.util.List<String> functions);
 
-    String reflow(String tank);
+	@Description("Reproduce events of a tank")
+	@Parameters({"tank"})
+	String reflow(String tank);
 
-    String addFunction(String name, String code);
+	@Description("Create a function associated to an input tank and output tank")
+	@Parameters({"name", "code"})
+	String addFunction(String name, String code);
 
-    String pump(String functionName, String input, String output);
+	@Description("Connect a source and destination tanks through a `function`")
+	@Parameters({"functionName", "input", "output"})
+	String pump(String functionName, String input, String output);
 }

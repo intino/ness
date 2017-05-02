@@ -17,7 +17,7 @@ Project(groupId = "io.intino.ness", version = "1.0.3") ness
 		Compile("io.intino.ness", "datalake", "1.0.2")
 	Factory("1.2.3", "io.intino.ness") as Application
 		Language("Proteo", "1.0.6")
-		Interface("1.8.8")
+		Interface("1.8.9")
 LifeCycle
 	Package(ModulesAndLibrariesLinkedByManifest) as Runnable("io.intino.ness.konos.Main")
 	Distribution
