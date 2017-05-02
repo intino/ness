@@ -13,6 +13,7 @@ import static java.util.Arrays.copyOfRange;
 
 public class ManageSlack {
 
+	private static final String OK = ":ok_hand:";
 	private NessBox box;
 
 	public ManageSlack(NessBox box) {
@@ -30,7 +31,7 @@ public class ManageSlack {
 	}
 
 	public String removeUser(MessageProperties properties, String name) {
-		return datalake().removeUser(name) ? ":ok:hand:" : "User not found";
+		return datalake().removeUser(name) ? OK : "User not found";
 	}
 
 	public String addTank(MessageProperties properties, String tank) {
@@ -42,7 +43,7 @@ public class ManageSlack {
 		datalake().registerTank(newTank);
 		datalake().feedFlow(newTank);
 		newTank.save();
-		return ":ok_hand:";
+		return OK;
 	}
 
 	public String removeTank(MessageProperties properties, String name) {
@@ -53,7 +54,7 @@ public class ManageSlack {
 			datalake().removeTank(tank);
 			tank.delete();
 		}
-		return ":ok_hand:";
+		return OK;
 	}
 
 	private DatalakeManager datalake() {

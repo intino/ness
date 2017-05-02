@@ -18,9 +18,11 @@ import javax.jms.Message;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
 import static io.intino.ness.Inl.load;
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 
 public class DatalakeManager {
@@ -157,8 +159,19 @@ public class DatalakeManager {
 		return bus.users();
 	}
 
+	public List<String> topics() {
+		return bus.topics().stream().sorted(CASE_INSENSITIVE_ORDER::compare).collect(Collectors.toList());
+	}
+
 	public void quit() {
 		jobs.forEach(Job::stop);
 		bus.quit();
+	}
+
+	public boolean rename(Tank tank, String name) {
+		station.remove(station.feedsTo(tank.qualifiedName()).stream().toArray(Feed[]::new));
+		station.rename(tank.qualifiedName, name);
+
+		return false;
 	}
 }

@@ -46,7 +46,7 @@ public class NessieSlack {
 
 	public String tanks(MessageProperties properties, String[] tags) {
 		Ness ness = ness(box);
-		StringBuilder builder = new StringBuilder();
+		StringBuilder builder = new StringBuilder().append("Tanks: \n");
 		List<Tank> tank = sortedTanks(ness).collect(Collectors.toList());
 		for (int i = 0; i < tank.size(); i++) {
 			Tank topic = tank.get(i);
@@ -57,6 +57,15 @@ public class NessieSlack {
 		}
 		String value = builder.toString();
 		return value.isEmpty() ? "There aren't tanks" : value;
+	}
+
+	public String topics(MessageProperties properties) {
+		List<String> topics = datalake().topics();
+		StringBuilder builder = new StringBuilder();
+		int i = 1;
+		for (String topic : topics)
+			builder.append(i++).append(") ").append(topic).append("\n");
+		return builder.toString();
 	}
 
 	public String functions(MessageProperties properties) {

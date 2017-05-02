@@ -40,13 +40,14 @@ public class NessieSlackBot extends Bot {
 			return context != null ? context : "root";
 		});
 		add("manage".toLowerCase(), "", java.util.Arrays.asList(), java.util.Arrays.asList("add-user", "remove-user", "add-tank", "remove-tank"), "Enter in the management area to add/remove tanks or users and other management actions", (properties, args) -> nessieSlack.manage(properties));
-		add("add-user".toLowerCase(), "manage", java.util.Arrays.asList("name", "groups"), java.util.Arrays.asList(), "Request all tanks nessy is subscribed filtered by tags", (properties, args) -> manageSlack.addUser(properties, args.length > 0 ? args[0] : "", args));
+		add("add-user".toLowerCase(), "manage", java.util.Arrays.asList("name", "groups"), java.util.Arrays.asList(), "Add user to the datalake", (properties, args) -> manageSlack.addUser(properties, args.length > 0 ? args[0] : "", args));
 		add("remove-user".toLowerCase(), "manage", java.util.Arrays.asList("name"), java.util.Arrays.asList(), "Remove user from ness service", (properties, args) -> manageSlack.removeUser(properties, args.length > 0 ? args[0] : ""));
 		add("add-tank".toLowerCase(), "manage", java.util.Arrays.asList("name"), java.util.Arrays.asList(), "Creates a tank", (properties, args) -> manageSlack.addTank(properties, args.length > 0 ? args[0] : ""));
-		add("remove-tank".toLowerCase(), "manage", java.util.Arrays.asList("name"), java.util.Arrays.asList(), "Select a tank to operate with", (properties, args) -> manageSlack.removeTank(properties, args.length > 0 ? args[0] : ""));
+		add("remove-tank".toLowerCase(), "manage", java.util.Arrays.asList("name"), java.util.Arrays.asList(), "Removes registered tank", (properties, args) -> manageSlack.removeTank(properties, args.length > 0 ? args[0] : ""));
 		add("users".toLowerCase(), "", java.util.Arrays.asList(), java.util.Arrays.asList(), "Request all users registered in ness", (properties, args) -> nessieSlack.users(properties));
 		add("tanks".toLowerCase(), "", java.util.Arrays.asList("tags"), java.util.Arrays.asList(), "Request all tanks nessy is subscribed filtering by tags", (properties, args) -> nessieSlack.tanks(properties, args));
 		add("functions".toLowerCase(), "", java.util.Arrays.asList(), java.util.Arrays.asList(), "Show all functions registered", (properties, args) -> nessieSlack.functions(properties));
+		add("topics".toLowerCase(), "", java.util.Arrays.asList(), java.util.Arrays.asList(), "Show registered topics", (properties, args) -> nessieSlack.topics(properties));
 		add("tank".toLowerCase(), "", java.util.Arrays.asList("name"), java.util.Arrays.asList("tag", "rename", "seal", "migrate", "reflow"), "Select a tank to operate with", (properties, args) -> nessieSlack.tank(properties, args.length > 0 ? args[0] : ""));
 		add("tag".toLowerCase(), "tank", java.util.Arrays.asList("tags"), java.util.Arrays.asList(), "Tags thes tank with `tags`", (properties, args) -> tankSlack.tag(properties, args));
 		add("rename".toLowerCase(), "tank", java.util.Arrays.asList("name"), java.util.Arrays.asList(), "Changes name of this tank to new one", (properties, args) -> tankSlack.rename(properties, args.length > 0 ? args[0] : ""));

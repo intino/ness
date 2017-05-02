@@ -4,7 +4,6 @@ import io.intino.konos.slack.Bot.MessageProperties;
 import io.intino.ness.DatalakeManager;
 import io.intino.ness.Function;
 import io.intino.ness.Tank;
-import io.intino.ness.bus.BusManager;
 import io.intino.ness.konos.NessBox;
 
 import java.util.Arrays;
@@ -38,7 +37,7 @@ public class TankSlack {
 	public String rename(MessageProperties properties, String name) {
 		Tank tank = findTank(box, properties.context().getObjects()[0]);
 		if (tank == null) return "Please select a tank";
-		return box.get(BusManager.class).renameTopic(tank.qualifiedName(), name) ? OK : "Impossible to rename tank";
+		return box.get(DatalakeManager.class).rename(tank, name) ? OK : "Impossible to rename tank";
 	}
 
 	public String seal(MessageProperties properties) {
@@ -50,7 +49,7 @@ public class TankSlack {
 
 	public String reflow(MessageProperties properties) {
 		Tank tank = findTank(box, properties.context().getObjects()[0]);
-		if (tank == null) return "Channel not found";
+		if (tank == null) return "Tank not found";
 		DatalakeManager manager = datalake();
 		manager.reflow(tank);
 		return OK;

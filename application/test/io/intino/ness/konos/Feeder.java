@@ -49,7 +49,7 @@ public class Feeder {
 
 	private static Session session(String clientID) {
 		try {
-			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://10.13.32.126:61616");
 			javax.jms.Connection connection = connectionFactory.createConnection("octavioroncal", "octavioroncal");
 			connection.setClientID(clientID);
 			connection.start();
