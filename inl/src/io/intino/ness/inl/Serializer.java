@@ -26,9 +26,9 @@ public class Serializer {
 	}
 
 	private String toInl(List list) {
-		String result = "";
+		StringBuilder result = new StringBuilder();
 		for (Object o : list)
-			result += "\n" + serialize(o).toInl();
+			result.append("\n").append(serialize(o).toInl());
 		return result.substring(1);
 	}
 
@@ -49,15 +49,15 @@ public class Serializer {
 	}
 
 	private String serializeAttributes() {
-		String result = "";
+		StringBuilder result = new StringBuilder();
 		for (Field field : Accessory.fieldsOf(object).asList()) {
 			if (isTransient(field.getModifiers())) continue;
 			if (isStatic(field.getModifiers())) continue;
 			if (!isAttribute(field)) continue;
 			if (valueOf(field) == null || isEmpty(field)) continue;
-			result += serializeAttribute(field) + "\n";
+			result.append(serializeAttribute(field)).append("\n");
 		}
-		return result;
+		return result.toString();
 	}
 
 	private String serializeAttribute(Field field) {
@@ -77,13 +77,13 @@ public class Serializer {
 	}
 
 	private String serializeComponents() {
-		String result = "";
+		StringBuilder result = new StringBuilder();
 		for (Field field : Accessory.fieldsOf(object).asList()) {
 			if (isTransient(field.getModifiers())) continue;
 			if (isAttribute(field.getType())) continue;
-			result += serializeComponent(field);
+			result.append(serializeComponent(field));
 		}
-		return result;
+		return result.toString();
 	}
 
 	private String serializeComponent(Field field) {
@@ -93,10 +93,10 @@ public class Serializer {
 	}
 
 	private String serializeTable(List list) {
-		String result = "";
+		StringBuilder result = new StringBuilder();
 		for (Object item : list)
-			result += serializeItem(item);
-		return result;
+			result.append(serializeItem(item));
+		return result.toString();
 	}
 
 	private String serializeItem(Object value) {

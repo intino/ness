@@ -9,8 +9,8 @@ import java.io.InputStream;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static messages.Messages.messageWithMultipleComponents;
-import static messages.Messages.status;
+import static messages.Messages.MultipleComponentMessage;
+import static messages.Messages.StatusMessage;
 
 public class Message_ {
 
@@ -18,7 +18,7 @@ public class Message_ {
 
     @Before
     public void setUp() throws Exception {
-        InputStream is = inputStreamOf(status());
+        InputStream is = inputStreamOf(StatusMessage);
         message = Formats.Inl.of(is).next();
     }
 
@@ -59,7 +59,7 @@ public class Message_ {
 
     @Test
     public void should_add_and_remove_components() throws Exception {
-        InputStream is = inputStreamOf(messageWithMultipleComponents());
+        InputStream is = inputStreamOf(MultipleComponentMessage);
         Message message = Formats.Inl.of(is).next();
 
         message.remove(message.components("phone").get(0));
@@ -79,7 +79,7 @@ public class Message_ {
     }
 
     @Test
-    public void should_serialize_and_deserialize_multiline_attributes() throws Exception {
+    public void should_serialize_and_deserialize_multi_line_attributes() throws Exception {
         Message message = new Message("Multiline");
         message.write("comment", "hello\nworld\n!!!");
         byte[] bytes = message.toString().getBytes();

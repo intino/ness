@@ -1,10 +1,9 @@
+import org.junit.Before;
 import org.junit.Test;
-import schemas.Crash;
-import schemas.CrashX;
-import schemas.Menu;
-import schemas.Teacher;
+import schemas.*;
 
 import java.util.Date;
+import java.util.TimeZone;
 
 import static io.intino.ness.inl.Deserializer.deserialize;
 import static messages.Messages.*;
@@ -14,20 +13,24 @@ import static org.junit.Assert.assertThat;
 
 public class Deserializer_ {
 
+	@Before
+	public void setUp() throws Exception {
+		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+	}
+
 	@Test
 	public void should_deserialize_messages_in_a_class_with_parent() throws Exception {
-		Teacher teacher = deserialize(messageWithParentClass()).next(Teacher.class);
+		Teacher teacher = deserialize(MessageWithParentClass).next(Teacher.class);
 		assertThat(teacher.name, is("Jose"));
 		assertThat(teacher.money, is(50.0));
-		assertThat(teacher.birthDate, is(date(2016, 10, 4, 20, 10, 11)));
+		assertThat(teacher.birthDate, is(date(2016, 10, 4, 20, 10, 12)));
 		assertThat(teacher.university, is("ULPGC"));
 		assertThat(teacher.country.name, is("Spain"));
-		assertThat(teacher.country.continent, is(nullValue()));
 	}
 
 	@Test
 	public void should_deserialize_message_with_empty_attributes() throws Exception {
-		Teacher teacher = deserialize(messageWithEmptyAttributes()).next(Teacher.class);
+		Teacher teacher = deserialize(EmptyAttributeMessage).next(Teacher.class);
 		assertThat(teacher.name, is("Jose"));
 		assertThat(teacher.money, is(50.0));
 		assertThat(teacher.birthDate, is(date(2016, 10, 4, 20, 10, 11)));
@@ -36,9 +39,16 @@ public class Deserializer_ {
 		assertThat(teacher.country.continent, is(nullValue()));
 	}
 
+
+	@Test
+	public void should_serialize_message_with_multi_line() throws Exception {
+		Teacher teacher = deserialize(MultiLineMessage).next(Teacher.class);
+		assertThat(teacher.name, is("Jose\nHernandez"));
+	}
+
 	@Test
 	public void should_deserialize_messages_with_array_attributes() throws Exception {
-		Menu menu = deserialize(menu()).next(Menu.class);
+		Menu menu = deserialize(MenuMessage).next(Menu.class);
 		assertThat(menu.meals.length, is(4));
 		assertThat(menu.prices.length, is(4));
 		assertThat(menu.availability.length, is(2));
@@ -53,7 +63,7 @@ public class Deserializer_ {
 
 	@Test
 	public void should_deserialize_empty_array_attributes() throws Exception {
-		Menu menu = deserialize(emptyMenu()).next(Menu.class);
+		Menu menu = deserialize(EmptyMenuMessage).next(Menu.class);
 		assertThat(menu.meals.length, is(0));
 		assertThat(menu.prices.length, is(0));
 		assertThat(menu.availability.length, is(2));
@@ -63,7 +73,7 @@ public class Deserializer_ {
 
 	@Test
 	public void should_deserialize_array_attributes_with_null_values() throws Exception {
-		Menu menu = deserialize(menuWithNullValues()).next(Menu.class);
+		Menu menu = deserialize(NullValueMenuMessage).next(Menu.class);
 		assertThat(menu.meals.length, is(4));
 		assertThat(menu.prices.length, is(4));
 		assertThat(menu.availability.length, is(2));
@@ -78,22 +88,22 @@ public class Deserializer_ {
 
 	@Test
 	public void should_return_null_if_header_doesnt_match_the_class() throws Exception {
-		Crash crash = deserialize(messageWithParentClass()).next(Crash.class);
+		Crash crash = deserialize(MessageWithParentClass).next(Crash.class);
 		assertThat(crash, is(nullValue()));
 	}
 
 	@Test
-	public void should_deserialize_message_with_multiline_attributes() throws Exception {
-		Crash crash = deserialize(crash()).next(Crash.class);
-		assertThat(crash.instant.toString(), is("Tue Mar 21 07:39:00 GMT 2017"));
+	public void should_deserialize_message_with_multi_line_attributes() throws Exception {
+		Crash crash = deserialize(CrashMessage).next(Crash.class);
+		assertThat(crash.instant.toString(), is("Tue Mar 21 07:39:00 UTC 2017"));
 		assertThat(crash.app, is("io.intino.consul"));
 		assertThat(crash.deviceId, is("b367172b0c6fe726"));
-		assertThat(crash.stack, is(stack().trim()));
+		assertThat(crash.stack, is(Stack.trim()));
 	}
 
 	@Test
 	public void should_map_identifiers() throws Exception {
-		CrashX crash = deserialize(crash()).
+		CrashX crash = deserialize(CrashMessage).
 				map("Crash", "CrashX").
 				map("instant", "ts").
 				map("app", "application").
@@ -101,7 +111,7 @@ public class Deserializer_ {
 				map("stack", "lines").
 				next(CrashX.class);
 
-		assertThat(crash.ts.toString(), is("Tue Mar 21 07:39:00 GMT 2017"));
+		assertThat(crash.ts.toString(), is("Tue Mar 21 07:39:00 UTC 2017"));
 		assertThat(crash.application, is("io.intino.consul"));
 		assertThat(crash.device, is("b367172b0c6fe726"));
 		assertThat(crash.lines.length, is(10));
@@ -111,7 +121,7 @@ public class Deserializer_ {
 
 	@Test
 	public void should_deserialize_message_with_multiple_components() throws Exception {
-		Teacher teacher = deserialize(messageWithMultipleComponents()).next(Teacher.class);
+		Teacher teacher = deserialize(MultipleComponentMessage).next(Teacher.class);
 		assertThat(teacher.name, is("Jose"));
 		assertThat(teacher.money, is(50.0));
 		assertThat(teacher.birthDate, is(date(2016, 10, 4, 20, 10, 11)));
@@ -125,10 +135,10 @@ public class Deserializer_ {
 
 	@Test
 	public void should_deserialize_message_in_old_format() throws Exception {
-		Teacher teacher = deserialize(messageInOldFormat()).next(Teacher.class);
+		Teacher teacher = deserialize(OldFormatMessage).next(Teacher.class);
 		assertThat(teacher.name, is("Jose"));
 		assertThat(teacher.money, is(50.0));
-		assertThat(teacher.birthDate, is(date(2016, 10, 4, 20, 10, 11)));
+		assertThat(teacher.birthDate, is(date(2016, 10, 4, 20, 10, 12)));
 		assertThat(teacher.university, is("ULPGC"));
 		assertThat(teacher.country.name, is("Spain"));
 		assertThat(teacher.country.continent, is(nullValue()));
