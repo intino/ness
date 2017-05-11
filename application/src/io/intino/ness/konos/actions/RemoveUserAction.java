@@ -1,18 +1,15 @@
 package io.intino.ness.konos.actions;
 
 import io.intino.ness.konos.NessBox;
-import io.intino.konos.exceptions.*;
-import java.time.*;
-import java.util.*;
 
 
-public class RemoveUserAction {
+public class RemoveUserAction extends Action {
 
 	public NessBox box;
 	public String name;
 
 	public String execute() {
-		return null;
+		return datalake(box).removeUser(name) ? OK : "User not found";
 	}
 
 
