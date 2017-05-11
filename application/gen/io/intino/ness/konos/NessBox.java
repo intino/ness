@@ -9,15 +9,21 @@ import io.intino.tara.magritte.Graph;
 
 public class NessBox extends io.intino.konos.Box {
 	private static Logger LOG = Logger.getGlobal();
+	private Tuner tuner;
 	protected NessConfiguration configuration;
 	private io.intino.konos.jmx.JMXServer manager;
 	private io.intino.konos.slack.Bot nessie;
 	private io.intino.konos.scheduling.KonosTasker tasker = new io.intino.konos.scheduling.KonosTasker();
 
-	private String graphID;
+	protected String graphID;
 
-	public NessBox(io.intino.tara.magritte.Graph graph, NessConfiguration configuration) {
-		box.put(graphID = UUID.randomUUID().toString(), graph);
+	public NessBox(String[] args) {
+		this(new NessConfiguration(args));
+	}
+
+	public NessBox(NessConfiguration configuration) {
+
+		this.tuner = new Tuner(configuration);
 		configuration.args().entrySet().forEach((e) -> box.put(e.getKey(), e.getValue()));
 		this.configuration = configuration;
 
@@ -48,6 +54,18 @@ public class NessBox extends io.intino.konos.Box {
 		return this.tasker;
 	}
 
+	public NessBox open() {
+		graphID = UUID.randomUUID().toString();
+		box.put(graphID, tuner.initGraph());
+		init();
+		start();
+		return this;
+	}
+
+	private void start() {
+		tuner.start(this);
+	}
+
 	public void init() { 
 		initActivities();
 		initRESTServices();
@@ -58,8 +76,11 @@ public class NessBox extends io.intino.konos.Box {
 		initSlackBots();
 	}
 
-	void quit() {
-		Setup.quit(this);
+	void close() {
+		tuner.terminate(this);
+
+
+
 	}
 
 	private void initRESTServices() {
@@ -99,5 +120,4 @@ public class NessBox extends io.intino.konos.Box {
 	public void stopJMSServices() {
 
 	}
-
 }

@@ -1,0 +1,13 @@
+dsl Legio
+
+Artifact ("io.intino.ness", "1.0.2") datalake
+	Imports
+		Compile("io.intino.ness", "inl", "1.0.3")
+		Test("junit", "junit", "4.12")
+
+	Pack(ModulesAndLibrariesLinkedByManifest)
+	Distribution("intino-maven")
+		Release("https://artifactory.intino.io/artifactory/release-libraries")
+Repository("intino-maven")
+	Release("https://artifactory.intino.io/artifactory/releases")
+	Language("https://artifactory.intino.io/artifactory/releases")
