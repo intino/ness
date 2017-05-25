@@ -62,7 +62,7 @@ public class DatalakeManager {
 
 	public void pump(Function function, String input, String output) {
 		try {
-			station.pipe(input).to(output).with(Valve.define().filter(function.name(), function.source()));
+			station.pipe(input).to(output).with(Valve.define().filter(function.name$(), function.source()));
 			Job job = station.pump(input).to(output).start();
 			jobs.add(job);
 			job.thread().start();
@@ -109,7 +109,7 @@ public class DatalakeManager {
 		registerTank(newTank);
 		stopFeed(oldTank);
 		NessStation.Pipe pipe = station.pipe(oldTank.qualifiedName());
-		for (Function function : functions) pipe = pipe.with(Valve.define().map(function.name(), function.source()));
+		for (Function function : functions) pipe = pipe.with(Valve.define().map(function.name$(), function.source()));
 		pipe.to(newTank.qualifiedName());
 		Job job = station.pump(oldTank.qualifiedName()).to(newTank.qualifiedName()).start();
 		jobs.add(job);
@@ -137,13 +137,11 @@ public class DatalakeManager {
 
 	public void removeTank(Tank tank) {
 		String qualifiedName = tank.qualifiedName();
-
 		bus.consumerOf(tank.feedQN()).stop();
 		station.remove(station.feedsTo(qualifiedName));
 		station.remove(station.flowsFrom(qualifiedName));
 		station.remove(station.pipesFrom(qualifiedName));
 		station.remove(station.pipesTo(qualifiedName));
-
 		station.remove(qualifiedName);
 	}
 
@@ -152,7 +150,7 @@ public class DatalakeManager {
 	}
 
 	public List<String> topics() {
-		return bus.topics().stream().sorted(CASE_INSENSITIVE_ORDER::compare).collect(Collectors.toList());
+		return bus.topics().stream().sorted(CASE_INSENSITIVE_ORDER).collect(Collectors.toList());
 	}
 
 	public void quit() {

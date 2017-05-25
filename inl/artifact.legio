@@ -4,10 +4,11 @@ Artifact (groupId = "io.intino.ness", version = "1.0.3") inl
 	Imports
 		Test("junit", "junit", "4.12")
 
-	Pack(LibrariesLinkedByManifest) > attachSources = true
-	Distribution("intino-maven")
-		Release("https://artifactory.intino.io/artifactory/release-libraries")
+	Package(LibrariesLinkedByManifest) > attachSources = true
+	Distribution(intino.releases, empty)
 
 
-Repository("intino-maven")
+
+Repository("intino-maven") intino
 	Release("https://artifactory.intino.io/artifactory/releases")
+	Release("https://artifactory.intino.io/artifactory/release-libraries") releases

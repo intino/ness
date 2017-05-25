@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "1.0.3") ness
+Artifact("io.intino.ness", "1.0.3") ness as Product
 	Imports
 		Test("junit", "junit", "LATEST")
 		Compile("org.slf4j", "slf4j-log4j12", "1.7.7")
@@ -10,16 +10,18 @@ Artifact("io.intino.ness", "1.0.3") ness
 		Compile("org.apache.activemq", "activemq-jaas", "5.14.4")
 		Compile("io.intino.konos", "konos-slack", "1.0.4")
 		Compile("io.intino.konos", "konos-jmx", "1.0.1")
+		Compile("io.intino.konos", "konos-core", "2.0.0")
 		Compile("io.intino.konos", "konos-scheduler", "1.0.1")
 		Compile("io.intino.ness", "datalake", "1.0.2")
-	Generation("2.0.0", "io.intino.ness") as Application
-	Modeling > Language("Proteo", "1.0.6")
-	Boxing("2.0.0")
+	Code("io.intino.ness")
+	Model("Proteo", "2.0.0", "2.0.0")
+	Box("Konos", "2.0.0", "2.0.0")
 
-	Pack(ModulesAndLibrariesLinkedByManifest) as Runnable("io.intino.ness.konos.Main")
-	Distribution("intino-maven")
-		Release("https://artifactory.intino.io/artifactory/release-frameworks")
-		Language("https://artifactory.intino.io/artifactory/release-languages")
-Repository("intino-maven")
+	Package(ModulesAndLibrariesLinkedByManifest) as Runnable("io.intino.ness.konos.Main")
+	Distribution(intino.frameworks, intino.languages)
+
+
+Repository("intino-maven") intino
 	Release("https://artifactory.intino.io/artifactory/releases")
-	Language("https://artifactory.intino.io/artifactory/releases")
+	Release("https://artifactory.intino.io/artifactory/release-frameworks") frameworks
+	Language("https://artifactory.intino.io/artifactory/release-languages") languages

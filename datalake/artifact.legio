@@ -5,9 +5,10 @@ Artifact ("io.intino.ness", "1.0.2") datalake
 		Compile("io.intino.ness", "inl", "1.0.3")
 		Test("junit", "junit", "4.12")
 
-	Pack(ModulesAndLibrariesLinkedByManifest)
-	Distribution("intino-maven")
-		Release("https://artifactory.intino.io/artifactory/release-libraries")
-Repository("intino-maven")
+	Package(ModulesAndLibrariesLinkedByManifest)
+	Distribution(intino.release, empty)
+
+Repository("intino-maven") intino
 	Release("https://artifactory.intino.io/artifactory/releases")
 	Language("https://artifactory.intino.io/artifactory/releases")
+	Release("https://artifactory.intino.io/artifactory/release-libraries") release

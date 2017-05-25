@@ -42,24 +42,28 @@ public class Tank extends io.intino.tara.magritte.Layer implements io.intino.tar
 		return version.value();
 	}
 
-	public void qualifiedName(java.lang.String value) {
+	public Tank qualifiedName(java.lang.String value) {
 		this.qualifiedName = value;
+		return (Tank) this;
 	}
 
-	public void feedQN(io.intino.tara.magritte.Expression<java.lang.String> value) {
+	public Tank feedQN(io.intino.tara.magritte.Expression<java.lang.String> value) {
 		this.feedQN = io.intino.tara.magritte.loaders.FunctionLoader.load(value, this, io.intino.tara.magritte.Expression.class);
+		return (Tank) this;
 	}
 
-	public void flowQN(io.intino.tara.magritte.Expression<java.lang.String> value) {
+	public Tank flowQN(io.intino.tara.magritte.Expression<java.lang.String> value) {
 		this.flowQN = io.intino.tara.magritte.loaders.FunctionLoader.load(value, this, io.intino.tara.magritte.Expression.class);
+		return (Tank) this;
 	}
 
-	public void version(io.intino.tara.magritte.Expression<java.lang.Integer> value) {
+	public Tank version(io.intino.tara.magritte.Expression<java.lang.Integer> value) {
 		this.version = io.intino.tara.magritte.loaders.FunctionLoader.load(value, this, io.intino.tara.magritte.Expression.class);
+		return (Tank) this;
 	}
 
 	@Override
-	public java.util.Map<java.lang.String, java.util.List<?>> variables() {
+	protected java.util.Map<java.lang.String, java.util.List<?>> variables$() {
 		java.util.Map<String, java.util.List<?>> map = new java.util.LinkedHashMap<>();
 		map.put("qualifiedName", new java.util.ArrayList(java.util.Collections.singletonList(this.qualifiedName)));
 		map.put("feedQN", new java.util.ArrayList(java.util.Collections.singletonList(this.feedQN)));
@@ -69,13 +73,9 @@ public class Tank extends io.intino.tara.magritte.Layer implements io.intino.tar
 		return map;
 	}
 
-	public io.intino.tara.magritte.Concept concept() {
-		return this.graph().concept(io.intino.ness.Tank.class);
-	}
-
 	@Override
-	protected void _load(java.lang.String name, java.util.List<?> values) {
-		super._load(name, values);
+	protected void load$(java.lang.String name, java.util.List<?> values) {
+		super.load$(name, values);
 		if (name.equalsIgnoreCase("qualifiedName")) this.qualifiedName = io.intino.tara.magritte.loaders.StringLoader.load(values, this).get(0);
 		else if (name.equalsIgnoreCase("feedQN")) this.feedQN = io.intino.tara.magritte.loaders.FunctionLoader.load(values, this, io.intino.tara.magritte.Expression.class).get(0);
 		else if (name.equalsIgnoreCase("flowQN")) this.flowQN = io.intino.tara.magritte.loaders.FunctionLoader.load(values, this, io.intino.tara.magritte.Expression.class).get(0);
@@ -84,8 +84,8 @@ public class Tank extends io.intino.tara.magritte.Layer implements io.intino.tar
 	}
 
 	@Override
-	protected void _set(java.lang.String name, java.util.List<?> values) {
-		super._set(name, values);
+	protected void set$(java.lang.String name, java.util.List<?> values) {
+		super.set$(name, values);
 		if (name.equalsIgnoreCase("qualifiedName")) this.qualifiedName = (java.lang.String) values.get(0);
 		else if (name.equalsIgnoreCase("feedQN")) this.feedQN = io.intino.tara.magritte.loaders.FunctionLoader.load(values.get(0), this, io.intino.tara.magritte.Expression.class);
 		else if (name.equalsIgnoreCase("flowQN")) this.flowQN = io.intino.tara.magritte.loaders.FunctionLoader.load(values.get(0), this, io.intino.tara.magritte.Expression.class);
@@ -101,6 +101,10 @@ public class Tank extends io.intino.tara.magritte.Layer implements io.intino.tar
 		return new Create(name);
 	}
 
+	public Clear clear() {
+		return new Clear();
+	}
+
 	public class Create {
 		protected final java.lang.String name;
 
@@ -109,8 +113,12 @@ public class Tank extends io.intino.tara.magritte.Layer implements io.intino.tar
 		}
 		
 	}
+
+	public class Clear {
+		
+	}
 	
-	public io.intino.ness.Ness nessWrapper() {
-		return (io.intino.ness.Ness) graph().wrapper(io.intino.ness.Ness.class);
+	public io.intino.ness.NessGraph graph() {
+		return (io.intino.ness.NessGraph) core$().graph().as(io.intino.ness.NessGraph.class);
 	}
 }

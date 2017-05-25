@@ -3,9 +3,8 @@ package io.intino.ness.bus;
 import io.intino.konos.jms.Consumer;
 import io.intino.konos.jms.TopicConsumer;
 import io.intino.konos.jms.TopicProducer;
-import io.intino.ness.Ness;
 import io.intino.ness.User;
-import io.intino.ness.konos.NessBox;
+import io.intino.ness.box.NessBox;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.Broker;
 import org.apache.activemq.broker.BrokerPlugin;
@@ -77,7 +76,7 @@ public final class BusManager {
 		String password = PasswordGenerator.nextPassword();
 		authenticator.getUserPasswords().put(name, password);
 		authenticator.getUserGroups().put(name, groups.stream().map(GroupPrincipal::new).collect(Collectors.toSet()));
-		ness(box).create("users", name).user(password, groups).save();
+		box.ness().create("users", name).user(password, groups).save$();
 		return password;
 	}
 
@@ -85,7 +84,8 @@ public final class BusManager {
 		if (name.equals(NESS)) return false;
 		authenticator.getUserGroups().remove(name);
 		authenticator.getUserPasswords().remove(name);
-		ness(box).userList(user -> user.name().equals(name)).get(0).delete();
+		User user1 = box.ness().userList(user -> user.name$().equals(name)).findFirst().orElse(null);
+		user1.core$().delete();
 		return true;
 	}
 
@@ -160,9 +160,6 @@ public final class BusManager {
 //		session.createConsumer(advisoryDestination).setMessageListener(new TopicListener(box, session));
 	}
 
-	private static Ness ness(NessBox box) {
-		return box.graph().wrapper(Ness.class);
-	}
 
 	private ActiveMQDestination findTopic(String topic) {
 		try {
@@ -206,7 +203,7 @@ public final class BusManager {
 			service.setAdvisorySupport(true);
 			service.setPlugins(new BrokerPlugin[]{authenticator});
 			TransportConnector connector = new TransportConnector();
-			connector.setUri(new URI("tcp://0.0.0.0:" + box.get("broker.port")));
+			connector.setUri(new URI("tcp://0.0.0.0:" + box.configuration().args().get("broker.port")));
 			service.addConnector(connector);
 		} catch (Exception e) {
 			logger.error("Error configuring: " + e.getMessage(), e);
@@ -215,7 +212,7 @@ public final class BusManager {
 
 	private KahaDBPersistenceAdapter persistenceAdapter() {
 		KahaDBPersistenceAdapter adapter = new KahaDBPersistenceAdapter();
-		adapter.setDirectory(new File(box.get("broker.store")));
+		adapter.setDirectory(new File(box.configuration().args().get("broker.store")));
 		adapter.setBrokerName(NESS);
 		adapter.setBrokerService(service);
 		return adapter;
@@ -225,8 +222,8 @@ public final class BusManager {
 		ArrayList<AuthenticationUser> users = new ArrayList<>();
 		users.add(new AuthenticationUser(NESS, NESS, "admin"));
 		users.add(new AuthenticationUser("octavioroncal", "octavioroncal", "admin"));
-		for (User user : ness(box).userList())
-			users.add(new AuthenticationUser(user.name(), user.password(), String.join(",", user.groups())));
+		for (User user : box.ness().userList())
+			users.add(new AuthenticationUser(user.name$(), user.password(), String.join(",", user.groups())));
 		return users;
 	}
 

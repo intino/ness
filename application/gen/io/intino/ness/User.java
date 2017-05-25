@@ -27,32 +27,29 @@ public class User extends io.intino.tara.magritte.Layer implements io.intino.tar
 		return groups().stream().filter(predicate).collect(java.util.stream.Collectors.toList());
 	}
 
-	public void password(java.lang.String value) {
+	public User password(java.lang.String value) {
 		this.password = value;
+		return (User) this;
 	}
 
 	@Override
-	public java.util.Map<java.lang.String, java.util.List<?>> variables() {
+	protected java.util.Map<java.lang.String, java.util.List<?>> variables$() {
 		java.util.Map<String, java.util.List<?>> map = new java.util.LinkedHashMap<>();
 		map.put("password", new java.util.ArrayList(java.util.Collections.singletonList(this.password)));
 		map.put("groups", this.groups);
 		return map;
 	}
 
-	public io.intino.tara.magritte.Concept concept() {
-		return this.graph().concept(io.intino.ness.User.class);
-	}
-
 	@Override
-	protected void _load(java.lang.String name, java.util.List<?> values) {
-		super._load(name, values);
+	protected void load$(java.lang.String name, java.util.List<?> values) {
+		super.load$(name, values);
 		if (name.equalsIgnoreCase("password")) this.password = io.intino.tara.magritte.loaders.StringLoader.load(values, this).get(0);
 		else if (name.equalsIgnoreCase("groups")) this.groups = io.intino.tara.magritte.loaders.StringLoader.load(values, this);
 	}
 
 	@Override
-	protected void _set(java.lang.String name, java.util.List<?> values) {
-		super._set(name, values);
+	protected void set$(java.lang.String name, java.util.List<?> values) {
+		super.set$(name, values);
 		if (name.equalsIgnoreCase("password")) this.password = (java.lang.String) values.get(0);
 		else if (name.equalsIgnoreCase("groups")) this.groups = new java.util.ArrayList<>((java.util.List<java.lang.String>) values);
 	}
@@ -65,6 +62,10 @@ public class User extends io.intino.tara.magritte.Layer implements io.intino.tar
 		return new Create(name);
 	}
 
+	public Clear clear() {
+		return new Clear();
+	}
+
 	public class Create {
 		protected final java.lang.String name;
 
@@ -73,8 +74,12 @@ public class User extends io.intino.tara.magritte.Layer implements io.intino.tar
 		}
 		
 	}
+
+	public class Clear {
+		
+	}
 	
-	public io.intino.ness.Ness nessWrapper() {
-		return (io.intino.ness.Ness) graph().wrapper(io.intino.ness.Ness.class);
+	public io.intino.ness.NessGraph graph() {
+		return (io.intino.ness.NessGraph) core$().graph().as(io.intino.ness.NessGraph.class);
 	}
 }

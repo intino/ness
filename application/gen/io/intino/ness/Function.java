@@ -14,30 +14,27 @@ public class Function extends io.intino.tara.magritte.Layer implements io.intino
 		return source;
 	}
 
-	public void source(java.lang.String value) {
+	public Function source(java.lang.String value) {
 		this.source = value;
+		return (Function) this;
 	}
 
 	@Override
-	public java.util.Map<java.lang.String, java.util.List<?>> variables() {
+	protected java.util.Map<java.lang.String, java.util.List<?>> variables$() {
 		java.util.Map<String, java.util.List<?>> map = new java.util.LinkedHashMap<>();
 		map.put("source", new java.util.ArrayList(java.util.Collections.singletonList(this.source)));
 		return map;
 	}
 
-	public io.intino.tara.magritte.Concept concept() {
-		return this.graph().concept(io.intino.ness.Function.class);
-	}
-
 	@Override
-	protected void _load(java.lang.String name, java.util.List<?> values) {
-		super._load(name, values);
+	protected void load$(java.lang.String name, java.util.List<?> values) {
+		super.load$(name, values);
 		if (name.equalsIgnoreCase("source")) this.source = io.intino.tara.magritte.loaders.StringLoader.load(values, this).get(0);
 	}
 
 	@Override
-	protected void _set(java.lang.String name, java.util.List<?> values) {
-		super._set(name, values);
+	protected void set$(java.lang.String name, java.util.List<?> values) {
+		super.set$(name, values);
 		if (name.equalsIgnoreCase("source")) this.source = (java.lang.String) values.get(0);
 	}
 
@@ -49,6 +46,10 @@ public class Function extends io.intino.tara.magritte.Layer implements io.intino
 		return new Create(name);
 	}
 
+	public Clear clear() {
+		return new Clear();
+	}
+
 	public class Create {
 		protected final java.lang.String name;
 
@@ -57,8 +58,12 @@ public class Function extends io.intino.tara.magritte.Layer implements io.intino
 		}
 		
 	}
+
+	public class Clear {
+		
+	}
 	
-	public io.intino.ness.Ness nessWrapper() {
-		return (io.intino.ness.Ness) graph().wrapper(io.intino.ness.Ness.class);
+	public io.intino.ness.NessGraph graph() {
+		return (io.intino.ness.NessGraph) core$().graph().as(io.intino.ness.NessGraph.class);
 	}
 }

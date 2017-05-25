@@ -1,5 +1,6 @@
 package io.intino.ness.konos;
 
+import io.intino.ness.box.Main;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -12,7 +13,7 @@ public class Launcher {
 
 		public static void main(String[] args) throws Exception {
 			Main.main(new String[]{
-					"graph.store=./temp/store",
+					"ness.store=./temp/store",
 					"nessie.token=xoxb-162074419812-gB5oNUwzxGWQ756TrRyu1Ii9",
 					"ness.rootPath=./temp/local",
 					"broker.port=61616",
