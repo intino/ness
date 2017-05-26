@@ -1,13 +1,11 @@
-package io.gemini;
+package io.humket.gemini;
 
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import io.intino.ness.Inl;
-import io.intino.ness.datalake.Feeder;
 import io.intino.ness.datalake.FileStation;
-import io.intino.ness.datalake.Job;
 import io.intino.ness.datalake.NessStation;
 import io.intino.ness.datalake.NessStation.Feed;
 import io.intino.ness.inl.Message;
