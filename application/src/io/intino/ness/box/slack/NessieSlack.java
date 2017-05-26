@@ -2,8 +2,8 @@ package io.intino.ness.box.slack;
 
 import com.ullink.slack.simpleslackapi.SlackSession;
 import io.intino.konos.slack.Bot.MessageProperties;
-import io.intino.ness.Function;
-import io.intino.ness.Tank;
+import io.intino.ness.graph.Function;
+import io.intino.ness.graph.Tank;
 import io.intino.ness.box.NessBox;
 
 import java.util.List;

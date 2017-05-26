@@ -14,5 +14,4 @@ public class AddUserAction {
 		if (password == null) return "User already exists";
 		return "User *" + name + "* added with password `" + password + "`";
 	}
-
 }

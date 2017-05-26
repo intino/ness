@@ -9,6 +9,8 @@ import io.intino.ness.datalake.NessStation;
 import io.intino.ness.datalake.NessStation.Feed;
 import io.intino.ness.datalake.Valve;
 import io.intino.ness.datalake.compiler.Compiler;
+import io.intino.ness.graph.Function;
+import io.intino.ness.graph.Tank;
 import io.intino.ness.inl.MessageFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,11 +74,11 @@ public class DatalakeManager {
 	}
 
 	public void registerTank(Tank tank) {
-		station.tank(tank.qualifiedName);
+		station.tank(tank.qualifiedName());
 	}
 
 	public void feedFlow(Tank tank) {
-		feed(tank, station.feed(tank.qualifiedName));
+		feed(tank, station.feed(tank.qualifiedName()));
 		flow(tank);
 	}
 
@@ -93,7 +95,7 @@ public class DatalakeManager {
 	}
 
 	private void flow(Tank tank) {
-		station.flow(tank.qualifiedName).to(m -> bus.registerOrGetProducer(tank.flowQN()).produce(createMessageFor(m.toString())));
+		station.flow(tank.qualifiedName()).to(m -> bus.registerOrGetProducer(tank.flowQN()).produce(createMessageFor(m.toString())));
 	}
 
 	private void flow(String tank, String flow) {
@@ -102,7 +104,7 @@ public class DatalakeManager {
 
 	public void reflow(Tank tank) {
 		stopFeed(tank);
-		station.pump(tank.qualifiedName).to(m -> bus.registerOrGetProducer(tank.flowQN()).produce(createMessageFor(m.toString())));
+		station.pump(tank.qualifiedName()).to(m -> bus.registerOrGetProducer(tank.flowQN()).produce(createMessageFor(m.toString())));
 	}
 
 	public void migrate(Tank oldTank, Tank newTank, List<Function> functions) throws Exception {
@@ -131,8 +133,8 @@ public class DatalakeManager {
 
 	public void seal(Tank tank) {
 		stopFeed(tank);
-		Job seal = station.seal(tank.qualifiedName);
-		seal.onTerminate(() -> feed(tank, station.feed(tank.qualifiedName)));
+		Job seal = station.seal(tank.qualifiedName());
+		seal.onTerminate(() -> feed(tank, station.feed(tank.qualifiedName())));
 	}
 
 	public void removeTank(Tank tank) {
@@ -160,7 +162,7 @@ public class DatalakeManager {
 
 	public boolean rename(Tank tank, String name) {
 		station.remove(station.feedsTo(tank.qualifiedName()));
-		station.rename(tank.qualifiedName, name);
+		station.rename(tank.qualifiedName(), name);
 		return false;
 	}
 }

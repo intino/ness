@@ -1,5 +1,7 @@
 package io.intino.ness;
 
+import io.intino.ness.graph.Tank;
+
 public class Model {
 	public static int version(Tank self) {
 		try {

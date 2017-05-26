@@ -1,7 +1,7 @@
 package io.intino.ness.box.actions;
 
-import io.intino.ness.Function;
 import io.intino.ness.box.NessBox;
+import io.intino.ness.graph.Function;
 
 import java.util.List;
 

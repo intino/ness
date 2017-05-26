@@ -10,8 +10,8 @@ public class NessConfiguration extends io.intino.konos.BoxConfiguration {
 	}
 
 	private void fillWithArgs() {
-		if (this.store == null && args.get("ness.store") != null)
-			store = new java.io.File(args.remove("ness.store"));
+		if (this.store == null && args.get("graph.store") != null)
+			store = new java.io.File(args.remove("graph.store"));
 		if (args.containsKey("nessie.token"))
 			nessieConfiguration(args.remove("nessie.token"));
 

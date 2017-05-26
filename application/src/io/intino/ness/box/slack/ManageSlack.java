@@ -2,12 +2,11 @@ package io.intino.ness.box.slack;
 
 import io.intino.konos.slack.Bot.MessageProperties;
 import io.intino.ness.DatalakeManager;
-import io.intino.ness.NessGraph;
-import io.intino.ness.Tank;
 import io.intino.ness.box.NessBox;
+import io.intino.ness.graph.NessGraph;
+import io.intino.ness.graph.Tank;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.copyOfRange;

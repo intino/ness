@@ -1,7 +1,7 @@
 package io.intino.ness.box.slack;
 
-import io.intino.ness.Tank;
-import io.intino.ness.NessGraph;
+import io.intino.ness.graph.Tank;
+import io.intino.ness.graph.NessGraph;
 import io.intino.ness.box.NessBox;
 
 import java.io.IOException;

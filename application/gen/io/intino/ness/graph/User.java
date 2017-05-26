@@ -1,6 +1,6 @@
-package io.intino.ness;
+package io.intino.ness.graph;
 
-import io.intino.ness.*;
+import io.intino.ness.graph.*;
 
 
 public class User extends io.intino.tara.magritte.Layer implements io.intino.tara.magritte.tags.Terminal {
@@ -79,7 +79,7 @@ public class User extends io.intino.tara.magritte.Layer implements io.intino.tar
 		
 	}
 	
-	public io.intino.ness.NessGraph graph() {
-		return (io.intino.ness.NessGraph) core$().graph().as(io.intino.ness.NessGraph.class);
+	public io.intino.ness.graph.NessGraph graph() {
+		return (io.intino.ness.graph.NessGraph) core$().graph().as(io.intino.ness.graph.NessGraph.class);
 	}
 }
