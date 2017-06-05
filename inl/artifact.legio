@@ -1,13 +1,11 @@
 dsl Legio
 
-Artifact (groupId = "io.intino.ness", version = "1.0.3") inl
+Artifact (groupId = "io.intino.ness", version = "1.0.4") inl
 	Imports
 		Test("junit", "junit", "4.12")
 
 	Package(LibrariesLinkedByManifest) > attachSources = true
 	Distribution(intino.releases, empty)
-
-
 
 Repository("intino-maven") intino
 	Release("https://artifactory.intino.io/artifactory/releases")
