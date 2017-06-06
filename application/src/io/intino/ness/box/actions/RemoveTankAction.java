@@ -14,6 +14,4 @@ public class RemoveTankAction {
 	public String execute() {
 		return null;
 	}
-
-
 }

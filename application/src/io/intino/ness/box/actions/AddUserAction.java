@@ -1,6 +1,9 @@
 package io.intino.ness.box.actions;
 
 import io.intino.ness.box.NessBox;
+import io.intino.konos.exceptions.*;
+import java.time.*;
+import java.util.*;
 
 
 public class AddUserAction {
@@ -10,8 +13,6 @@ public class AddUserAction {
 	public java.util.List<String> groups;
 
 	public String execute() {
-		String password = box.datalakeManager().addUser(name, groups);
-		if (password == null) return "User already exists";
-		return "User *" + name + "* added with password `" + password + "`";
+		return null;
 	}
 }

@@ -22,8 +22,8 @@ public abstract class AbstractBox extends io.intino.konos.Box {
 
 	public AbstractBox(NessConfiguration configuration) {
 
-		initLogger();
 		this.configuration = configuration;
+		initLogger();
 
 
 	}
@@ -32,16 +32,10 @@ public abstract class AbstractBox extends io.intino.konos.Box {
 		return (NessConfiguration) configuration;
 	}
 
+	@Override
+	public io.intino.konos.Box put(Object o) {
 
-
-	public NessieSlackBot nessie() {
-		return (NessieSlackBot) nessie;
-	}
-
-
-
-	public io.intino.konos.scheduling.KonosTasker tasker() {
-		return this.tasker;
+		return this;
 	}
 
 	public io.intino.konos.Box open() {
@@ -62,6 +56,19 @@ public abstract class AbstractBox extends io.intino.konos.Box {
 
 
 	}
+
+
+
+public NessieSlackBot nessie() {
+	return (NessieSlackBot) nessie;
+}
+
+
+
+	public io.intino.konos.scheduling.KonosTasker tasker() {
+		return this.tasker;
+	}
+
 
 	private void initRESTServices() {
 

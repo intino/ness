@@ -17,6 +17,11 @@ Artifact("io.intino.ness", "1.0.0") ness as Product
 	Box("Konos", "2.0.0", "2.0.0")
 
 	Package(ModulesAndLibrariesLinkedByManifest) as Runnable("io.intino.ness.konos.Main")
+		Parameter("ness.store", "./temp/store")
+		Parameter("nessie.token", "xoxb-162074419812-gB5oNUwzxGWQ756TrRyu1Ii9")
+		Parameter("ness.rootPath", "./temp/local")
+		Parameter("broker.port", "61616")
+		Parameter("broker.store", "./temp/broker/")
 	Distribution(intino.frameworks, intino.languages)
 
 Repository("intino-maven") intino
