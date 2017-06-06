@@ -8,17 +8,15 @@ import javax.jms.*;
 
 public class Launcher {
 
-	public static class Pre {
 
-		public static void main(String[] args) throws Exception {
-			Main.main(new String[]{
-					"ness.store=./temp/store",
-					"nessie.token=xoxb-162074419812-gB5oNUwzxGWQ756TrRyu1Ii9",
-					"ness.rootPath=./temp/local",
-					"broker.port=61616",
-					"broker.store=./temp/broker/"
-			});
-		}
+	public static void main(String[] args) throws Exception {
+		Main.main(new String[]{
+				"ness_store=./temp/store",
+				"nessie_token=xoxb-162074419812-gB5oNUwzxGWQ756TrRyu1Ii9",
+				"ness_datalake=./temp/local",
+				"broker_port=61616",
+				"broker_store=./temp/broker/"
+		});
 	}
 
 	@Test
