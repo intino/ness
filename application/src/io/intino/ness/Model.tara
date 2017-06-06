@@ -1,0 +1,20 @@
+dsl Proteo
+
+Concept Function
+	var string source
+
+Concept Tank
+	var string qualifiedName
+	var string feedQN = '"feed." + self.qualifiedName()' is reactive
+	var string flowQN = '"flow." + self.qualifiedName()' is reactive
+	var string[] tags = empty
+	var integer version = @version is reactive
+
+Concept Connection //TODO find better name
+	var Tank faucet
+	var Tank flooder
+	var Function plug
+
+Concept User
+	var string password
+	var string[] groups
