@@ -6,6 +6,8 @@ import io.intino.ness.datalake.FileStation;
 import io.intino.ness.graph.NessGraph;
 import io.intino.tara.magritte.Graph;
 
+import java.util.Collections;
+
 public class NessBox extends AbstractBox {
 
 	private DatalakeManager datalakeManager;
@@ -27,6 +29,7 @@ public class NessBox extends AbstractBox {
 		busManager = new BusManager(this);
 		busManager.start();
 		datalakeManager = new DatalakeManager(new FileStation(configuration.args().get("ness.rootPath")), busManager);
+		System.out.println(busManager.addUser("cesar", Collections.emptyList()));
 		return this;
 	}
 

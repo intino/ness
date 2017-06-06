@@ -1,4 +1,4 @@
-package io.intino.ness.konos;
+package io.intino.ness.box;
 
 import io.intino.konos.jms.TopicProducer;
 import io.intino.ness.Inl;

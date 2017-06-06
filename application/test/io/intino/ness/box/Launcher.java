@@ -1,6 +1,5 @@
-package io.intino.ness.konos;
+package io.intino.ness.box;
 
-import io.intino.ness.box.Main;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.junit.Ignore;
 import org.junit.Test;

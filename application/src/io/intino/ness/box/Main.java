@@ -10,8 +10,8 @@ import java.util.Arrays;
 
 public class Main {
 	public static void main(String[] args) {
-		new Graph(store(param(args, "ness.store"))).loadStashes("Ness");
-		Box box = new NessBox(args).open();
+		Graph graph = new Graph(store(param(args, "ness.store"))).loadStashes("Ness");
+		Box box = new NessBox(args).put(graph).open();
 		Runtime.getRuntime().addShutdownHook(new Thread(box::close));
 	}
 
