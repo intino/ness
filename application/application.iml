@@ -79,7 +79,7 @@
     <orderEntry type="library" name="Legio: org.apache.httpcomponents:httpclient:4.5.2" level="project" />
     <orderEntry type="library" name="Legio: org.apache.httpcomponents:httpcore:4.4.4" level="project" />
     <orderEntry type="library" name="Legio: com.google.guava:guava:18.0" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.ness:inl:1.0.4" level="project" />
-    <orderEntry type="library" name="Legio: commons-logging:commons-logging:1.2" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.ness:inl:1.0.5" level="project" />
+    <orderEntry type="library" name="Legio: commons-logging:commons-logging:1.1.1" level="project" />
   </component>
 </module>
