@@ -86,8 +86,6 @@ public class Message_ {
         MessageInputStream stream = Formats.Inl.of(new ByteArrayInputStream(bytes));
         Message parsed = stream.next();
         assertThat(parsed.read("comment"), is("hello\nworld\n!!!"));
-
-
     }
 
     private InputStream inputStreamOf(String text) {

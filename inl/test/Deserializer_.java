@@ -98,7 +98,7 @@ public class Deserializer_ {
 		assertThat(crash.instant.toString(), is("Tue Mar 21 07:39:00 UTC 2017"));
 		assertThat(crash.app, is("io.intino.consul"));
 		assertThat(crash.deviceId, is("b367172b0c6fe726"));
-		assertThat(crash.stack, is(Stack.trim()));
+		assertThat(crash.stack, is(Stack));
 	}
 
 	@Test
@@ -114,7 +114,7 @@ public class Deserializer_ {
 		assertThat(crash.ts.toString(), is("Tue Mar 21 07:39:00 UTC 2017"));
 		assertThat(crash.application, is("io.intino.consul"));
 		assertThat(crash.device, is("b367172b0c6fe726"));
-		assertThat(crash.lines.length, is(10));
+		assertThat(crash.lines.length, is(11));
 		assertThat(crash.lines[0], is("java.lang.NullPointerException: Attempt to invoke interface method 'java.lang.Object java.util.List.get(int)' on a null object reference"));
 		assertThat(crash.lines[1], is("    at io.intino.consul.AppService$5.run(AppService.java:154)"));
 	}

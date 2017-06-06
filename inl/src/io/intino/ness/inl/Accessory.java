@@ -59,7 +59,7 @@ public class Accessory {
 	}
 
 	static String unwrap(String text) {
-		return text.substring(1, text.length() - 1);
+		return text.startsWith("[") ? text.substring(1, text.length()-1) : text;
 	}
 
 	static boolean isMultilineIn(String line) {
@@ -243,8 +243,10 @@ public class Accessory {
 		});
 	}
 
-	private static String formatText(Object text) {
-		return text == null ? NullValue : text.toString().contains("\n") ? "\n\t" + text.toString().replaceAll("\n", "\n\t") : text.toString();
+	private static String formatText(Object o) {
+		if (o == null) return NullValue;
+		String text = o.toString();
+		return text.contains("\n") ? "\n\t" + text.replaceAll("\n", "\n\t") : text;
 	}
 
 	private static Date parseDate(final String text) {

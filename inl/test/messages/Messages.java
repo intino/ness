@@ -108,15 +108,18 @@ public class Messages {
                     "    at android.app.ActivityThread.main(ActivityThread.java:5666)\n" +
                     "    at java.lang.reflect.Method.invoke(Native Method)\n" +
                     "    at java.lang.reflect.Method.invoke(Method.java:372)\n" +
+                    "\n" +
                     "    at com.android.compiler.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:959)\n" +
-                    "    at com.android.compiler.os.ZygoteInit.main(ZygoteInit.java:754)";
+                    "    at com.android.compiler.os.ZygoteInit.main(ZygoteInit.java:754)" +
+					"\n" +
+					"\n";
 
 
     public static String CrashMessage =
-        "[crash]\n" +
+        "[Crash]\n" +
         "instant: 2017-03-21T07:39:00Z\n" +
-        "app: \"io.intino.consul\"\n" +
-        "deviceId: \"b367172b0c6fe726\"\n" +
+        "app: io.intino.consul\n" +
+        "deviceId: b367172b0c6fe726\n" +
         "stack:\n" + indent(Stack) + "\n";
 
     private static String Status1 =

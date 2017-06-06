@@ -59,7 +59,7 @@ public class MessageInputStream_ {
     public void should_parse_multiline_attributes() throws Exception {
         InputStream is = inputStreamOf(CrashMessage);
         Message message = Formats.Inl.of(is).next();
-        assertThat(message.type(), is("crash"));
+        assertThat(message.type(), is("Crash"));
         assertThat(message.contains("instant"), is(true));
         assertThat(message.contains("app"), is(true));
         assertThat(message.contains("deviceId"), is(true));
@@ -67,7 +67,7 @@ public class MessageInputStream_ {
         assertThat(message.parse("instant").as(Date.class).toString(), is("Tue Mar 21 07:39:00 UTC 2017"));
         assertThat(message.parse("app").as(String.class), is("io.intino.consul"));
         assertThat(message.parse("deviceId").as(String.class), is("b367172b0c6fe726"));
-        assertThat(message.parse("stack").as(String.class), is(Stack.trim()));
+        assertThat(message.parse("stack").as(String.class), is(Stack));
     }
 
     @Test

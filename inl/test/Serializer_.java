@@ -2,9 +2,16 @@ import io.intino.ness.inl.Serializer;
 import org.junit.Test;
 import schemas.*;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import static io.intino.ness.inl.Serializer.serialize;
+import static java.text.DateFormat.DEFAULT;
+import static java.text.DateFormat.FULL;
+import static java.text.DateFormat.LONG;
 import static java.util.Arrays.asList;
 import static messages.Messages.*;
 import static org.hamcrest.core.Is.is;
@@ -76,6 +83,22 @@ public class Serializer_ {
 		Status status1 = new Status().battery(78.0).cpuUsage(11.95).isPlugged(true).isScreenOn(false).temperature(29.0).created("2017-03-22T12:56:18Z");
 		Status status2 = new Status().battery(78.0).cpuUsage(11.95).isPlugged(true).isScreenOn(true).temperature(29.0).created("2017-03-22T12:56:18Z");
 		assertThat(Serializer.serialize(asList(status1, status2)).toInl(), is(StatusMessage.replaceAll(" = ", "=")));
+	}
+
+
+	@Test
+	public void should_serialize_crash() throws Exception {
+		Crash crash = new Crash();
+		crash.instant = parse("Tue Mar 21 07:39:00 UTC 2017");
+		crash.app = "io.intino.consul";
+		crash.deviceId = "b367172b0c6fe726";
+		crash.stack = Stack;
+		assertThat(Serializer.serialize(crash).toInl(), is(CrashMessage));
+	}
+
+	private Date parse(String s) throws ParseException {
+		DateFormat formatter = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy", Locale.ENGLISH);
+		return formatter.parse(s);
 	}
 
 	private Date date(int y, int m, int d, int h, int mn, int s) {
