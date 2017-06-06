@@ -3,7 +3,6 @@ package io.intino.ness.box;
 import io.intino.konos.jms.Consumer;
 import io.intino.konos.jms.TopicConsumer;
 import io.intino.konos.jms.TopicProducer;
-import io.intino.ness.box.Main;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.Connection;
@@ -27,11 +26,11 @@ public class Ness {
 
 	public Ness(File workingDirectory, String nessieToken, int busPort) {
 		thread = new Thread(() -> Main.main(new String[]{
-				"ness.store=" + new File(workingDirectory, "store"),
-				"nessie.token=" + nessieToken,
-				"ness.rootPath=" + new File(workingDirectory, "ness"),
-				"broker.port=" + busPort,
-				"broker.store=" + new File(workingDirectory, "broker").getAbsolutePath()
+				"ness_store=" + new File(workingDirectory, "store"),
+				"nessie_token=" + nessieToken,
+				"ness_datalake=" + new File(workingDirectory, "ness"),
+				"broker_port=" + busPort,
+				"broker_store=" + new File(workingDirectory, "broker").getAbsolutePath()
 		}));
 	}
 

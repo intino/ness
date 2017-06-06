@@ -16,6 +16,10 @@ public class NessBox extends AbstractBox {
 		super(args);
 	}
 
+	public NessBox(NessConfiguration configuration) {
+		super(configuration);
+	}
+
 	@Override
 	public io.intino.konos.Box put(Object o) {
 		if (o instanceof Graph) this.graph = (Graph) o;

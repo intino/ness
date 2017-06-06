@@ -6,12 +6,12 @@ import io.intino.tara.magritte.Graph;
 import io.intino.tara.magritte.stores.InMemoryFileStore;
 
 import java.io.File;
-import java.util.Arrays;
 
 public class Main {
 	public static void main(String[] args) {
-		Graph graph = new Graph(store(param(args, "ness_store"))).loadStashes("Ness");
-		Box box = new NessBox(args).put(graph).open();
+		NessConfiguration boxConfiguration = new NessConfiguration(args);
+		Graph graph = new Graph(store(boxConfiguration.args().get("ness_store"))).loadStashes("Ness");
+		Box box = new NessBox(boxConfiguration).put(graph).open();
 		Runtime.getRuntime().addShutdownHook(new Thread(box::close));
 	}
 
@@ -22,9 +22,5 @@ public class Main {
 				super.writeStash(stash, path);
 			}
 		};
-	}
-
-	private static String param(String[] args, String name) {
-		return Arrays.stream(args).filter(a -> a.split("=")[0].equalsIgnoreCase(name)).findFirst().orElse(null);
 	}
 }
