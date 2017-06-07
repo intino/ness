@@ -59,4 +59,8 @@ public class NessBox extends AbstractBox {
 	public String brokerStore() {
 		return configuration().args().get("broker_store");
 	}
+
+	public String mqttPort() {
+		return configuration().args().get("mqtt_port");
+	}
 }
