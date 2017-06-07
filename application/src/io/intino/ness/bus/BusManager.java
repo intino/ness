@@ -205,6 +205,14 @@ public final class BusManager {
 			TransportConnector connector = new TransportConnector();
 			connector.setUri(new URI("tcp://0.0.0.0:" + box.brokerPort()));
 			service.addConnector(connector);
+			TransportConnector mqtt = new TransportConnector();
+			mqtt.setUri(new URI("mqtt://0.0.0.0:" + 1883));
+			mqtt.setName("MQTTConn");
+			service.addConnector(mqtt);
+//			TransportConnector ws = new TransportConnector();
+//			connector.setUri(new URI("ws://0.0.0.0:" + 1884));
+//			mqtt.setName("WSConn");
+//			service.addConnector(ws);
 		} catch (Exception e) {
 			logger.error("Error configuring: " + e.getMessage(), e);
 		}

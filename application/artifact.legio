@@ -6,6 +6,7 @@ Artifact("io.intino.ness", "1.0.0") ness as Product
 		Compile("org.slf4j", "slf4j-log4j12", "1.7.7")
 		Compile("io.intino.ness", "datalake", "1.0.2")
 		Compile("org.apache.activemq", "activemq-broker", "5.14.4")
+		Compile("org.apache.activemq", "activemq-mqtt", "5.14.4")
 		Compile("org.apache.activemq", "activemq-kahadb-store", "5.14.4")
 		Compile("org.apache.activemq", "activemq-jaas", "5.14.4")
 		Compile("io.intino.konos", "konos-jms", "1.0.6")
