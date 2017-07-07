@@ -6,6 +6,7 @@ import io.intino.ness.box.NessBox;
 import io.intino.ness.graph.NessGraph;
 import io.intino.ness.graph.Tank;
 
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -26,7 +27,7 @@ public class ManageSlack {
 	}
 
 	public String addUser(MessageProperties properties, String name, String[] groups) {
-		String password = datalake().addUser(name, asList(copyOfRange(groups, 1, groups.length)));
+		String password = datalake().addUser(name, groups.length == 0 ? Collections.emptyList() : asList(copyOfRange(groups, 1, groups.length)));
 		if (password == null) return "User already exists";
 		return "User *" + name + "* added with password `" + password + "`";
 	}

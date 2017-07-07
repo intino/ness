@@ -15,6 +15,7 @@ public class Launcher {
 				"nessie_token=xoxb-162074419812-gB5oNUwzxGWQ756TrRyu1Ii9",
 				"ness_datalake=./temp/local",
 				"broker_port=61616",
+				"mqtt_port=1884",
 				"broker_store=./temp/broker/"
 		});
 	}

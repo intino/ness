@@ -1,9 +1,9 @@
 package io.intino.ness.box.actions;
 
 import io.intino.ness.box.NessBox;
-import io.intino.konos.exceptions.*;
-import java.time.*;
-import java.util.*;
+import io.intino.ness.graph.Tank;
+
+import static io.intino.ness.box.actions.Action.OK;
 
 
 public class RemoveTankAction {
@@ -12,6 +12,11 @@ public class RemoveTankAction {
 	public String name;
 
 	public String execute() {
-		return null;
+		Tank tank = box.ness().tankList(t -> t.name$().equals(name)).findFirst().orElse(null);
+		if (tank != null) {
+			tank.delete$();
+			box.datalakeManager().removeTank(tank);
+			return OK;
+		} else return "Tank not found";
 	}
 }
