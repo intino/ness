@@ -37,7 +37,6 @@ public class NessBox extends AbstractBox {
 	public void close() {
 		super.close();
 		datalakeManager.quit();
-
 	}
 
 	public NessGraph ness() {
@@ -62,5 +61,9 @@ public class NessBox extends AbstractBox {
 
 	public String mqttPort() {
 		return configuration().args().get("mqtt_port");
+	}
+
+	public String brokerKeyStore() {
+		return configuration().args().get("broker_keyStore");
 	}
 }

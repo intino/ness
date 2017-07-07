@@ -84,6 +84,6 @@
     <orderEntry type="library" name="Legio: org.fusesource.mqtt-client:mqtt-client:1.14" level="project" />
     <orderEntry type="library" name="Legio: org.fusesource.hawtdispatch:hawtdispatch-transport:1.22" level="project" />
     <orderEntry type="library" name="Legio: org.fusesource.hawtdispatch:hawtdispatch:1.22" level="project" />
-    <orderEntry type="library" name="Legio: commons-logging:commons-logging:1.2" level="project" />
+    <orderEntry type="library" name="Legio: commons-logging:commons-logging:1.1.1" level="project" />
   </component>
 </module>

@@ -6,10 +6,7 @@ import io.intino.konos.jms.TopicProducer;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.graph.User;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.broker.Broker;
-import org.apache.activemq.broker.BrokerPlugin;
-import org.apache.activemq.broker.BrokerService;
-import org.apache.activemq.broker.TransportConnector;
+import org.apache.activemq.broker.*;
 import org.apache.activemq.broker.region.DestinationInterceptor;
 import org.apache.activemq.broker.region.virtual.CompositeTopic;
 import org.apache.activemq.broker.region.virtual.VirtualDestination;
@@ -160,7 +157,6 @@ public final class BusManager {
 //		session.createConsumer(advisoryDestination).setMessageListener(new TopicListener(box, session));
 	}
 
-
 	private ActiveMQDestination findTopic(String topic) {
 		try {
 			ActiveMQDestination[] destinations = broker().getDestinations();
@@ -202,16 +198,27 @@ public final class BusManager {
 			service.setUseShutdownHook(true);
 			service.setAdvisorySupport(true);
 			service.setPlugins(new BrokerPlugin[]{authenticator});
-			TransportConnector connector = new TransportConnector();
-			connector.setUri(new URI("tcp://0.0.0.0:" + box.brokerPort()));
-			service.addConnector(connector);
-			TransportConnector mqtt = new TransportConnector();
-			mqtt.setUri(new URI("mqtt://0.0.0.0:" + box.mqttPort()));
-			mqtt.setName("MQTTConn");
-			service.addConnector(mqtt);
+			addTCPConnector();
+			addMQTTConnector();
 		} catch (Exception e) {
 			logger.error("Error configuring: " + e.getMessage(), e);
 		}
+	}
+
+	private void addTCPConnector() throws Exception {
+		TransportConnector connector = new TransportConnector();
+		if (box.brokerKeyStore() != null) {
+			service.setSslContext(new SslContext());
+			connector.setUri(new URI("ssl://0.0.0.0:" + box.brokerPort()));
+		} else connector.setUri(new URI("tcp://0.0.0.0:" + box.brokerPort()));
+		service.addConnector(connector);
+	}
+
+	private void addMQTTConnector() throws Exception {
+		TransportConnector mqtt = new TransportConnector();
+		mqtt.setUri(new URI("mqtt://0.0.0.0:" + box.mqttPort()));
+		mqtt.setName("MQTTConn");
+		service.addConnector(mqtt);
 	}
 
 	private KahaDBPersistenceAdapter persistenceAdapter() {

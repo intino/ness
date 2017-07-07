@@ -23,10 +23,16 @@ public class Accessory {
 
 	public static final Map<Class, Formatter> formatters = new HashMap<>();
 	public static final Map<Class, Parser> parsers = new HashMap<>();
-	private static final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
-    private static final String NullValue = "\0";
+	private static final DateFormat dateFormatter;
+	private static final String NullValue = "\0";
+
+	static {
+		dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
+		dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+	}
 
 	static class Mapping {
+
 		private Map<String, String> map = new HashMap<>();
 
 		public void put(String from, String to) {
@@ -59,7 +65,7 @@ public class Accessory {
 	}
 
 	static String unwrap(String text) {
-		return text.startsWith("[") ? text.substring(1, text.length()-1) : text;
+		return text.startsWith("[") ? text.substring(1, text.length() - 1) : text;
 	}
 
 	static boolean isMultilineIn(String line) {
@@ -300,52 +306,52 @@ public class Accessory {
 		}
 	}
 
-    static {
-        String version = System.getProperty("java.version");
-        Class<?> instantClass = instantClass();
-        if (version.startsWith("1.8") && instantClass != null) {
-            formatters.put(instantClass, instantFormatter());
-            parsers.put(instantClass, instantParserOf(instantClass));
-        }
-    }
+	static {
+		String version = System.getProperty("java.version");
+		Class<?> instantClass = instantClass();
+		if (version.startsWith("1.8") && instantClass != null) {
+			formatters.put(instantClass, instantFormatter());
+			parsers.put(instantClass, instantParserOf(instantClass));
+		}
+	}
 
-    private static Class<?> instantClass() {
-        try {
-            return Class.forName("java.time.Instant");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+	private static Class<?> instantClass() {
+		try {
+			return Class.forName("java.time.Instant");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 
-    private static Parser instantParserOf(Class<?> instantClass)  {
-        try {
-            final Method method = instantClass.getDeclaredMethod("parse", CharSequence.class);
-            return new Parser() {
-                @Override
-                public Object parse(String text)  {
-                    try {
-                        return method.invoke(null, text);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return null;
-                    }
-                }
-            };
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+	private static Parser instantParserOf(Class<?> instantClass) {
+		try {
+			final Method method = instantClass.getDeclaredMethod("parse", CharSequence.class);
+			return new Parser() {
+				@Override
+				public Object parse(String text) {
+					try {
+						return method.invoke(null, text);
+					} catch (Exception e) {
+						e.printStackTrace();
+						return null;
+					}
+				}
+			};
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 
-    private static Formatter instantFormatter() {
-        return new Formatter() {
-            @Override
-            public String format(Object value) {
-                return value.toString();
-            }
-        };
-    }
+	private static Formatter instantFormatter() {
+		return new Formatter() {
+			@Override
+			public String format(Object value) {
+				return value.toString();
+			}
+		};
+	}
 
 
 }
