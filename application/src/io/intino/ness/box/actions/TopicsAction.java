@@ -11,6 +11,6 @@ public class TopicsAction {
 
 
 	public List<String> execute() {
-		return box.datalakeManager().topics();
+		return box.datalakeManager().topicsInfo();
 	}
 }

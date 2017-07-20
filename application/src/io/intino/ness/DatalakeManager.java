@@ -151,8 +151,8 @@ public class DatalakeManager {
 		return bus.users();
 	}
 
-	public List<String> topics() {
-		return bus.topics().stream().sorted(CASE_INSENSITIVE_ORDER).collect(Collectors.toList());
+	public List<String> topicsInfo() {
+		return bus.topicsInfo().stream().sorted(CASE_INSENSITIVE_ORDER).collect(Collectors.toList());
 	}
 
 	public void quit() {

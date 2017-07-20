@@ -6,7 +6,10 @@ import io.intino.konos.jms.TopicProducer;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.graph.User;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.broker.*;
+import org.apache.activemq.broker.Broker;
+import org.apache.activemq.broker.BrokerPlugin;
+import org.apache.activemq.broker.BrokerService;
+import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.broker.region.DestinationInterceptor;
 import org.apache.activemq.broker.region.virtual.CompositeTopic;
 import org.apache.activemq.broker.region.virtual.VirtualDestination;
@@ -33,7 +36,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 
 public final class BusManager {
-	private Logger logger = LoggerFactory.getLogger(BusManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(BusManager.class);
 	private static final String NESS = "ness";
 	private final NessBox box;
 	private final BrokerService service;
@@ -41,6 +44,7 @@ public final class BusManager {
 	private final Map<String, TopicProducer> producers = new HashMap<>();
 	private final Map<String, TopicConsumer> consumers = new HashMap<>();
 	private Session session;
+	private AdvisoryManager advisoryManager;
 
 	public BusManager(NessBox box) {
 		this.box = box;
@@ -52,8 +56,7 @@ public final class BusManager {
 	public void start() {
 		try {
 			service.start();
-			session = nessSession();
-			startAdvisories();
+			initNessSession();
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -153,8 +156,8 @@ public final class BusManager {
 	}
 
 	private void startAdvisories() throws JMSException {
-//		Destination advisoryDestination = AdvisorySupport.getDestinationAdvisoryTopic(AdvisorySupport.QUEUE_ADVISORY_TOPIC);
-//		session.createConsumer(advisoryDestination).setMessageListener(new TopicListener(box, session));
+		advisoryManager = new AdvisoryManager(broker(), session);
+		advisoryManager.start();
 	}
 
 	private ActiveMQDestination findTopic(String topic) {
@@ -168,16 +171,16 @@ public final class BusManager {
 		}
 	}
 
-	private Session nessSession() {
+	private void initNessSession() {
 		try {
 			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("vm://ness");
 			javax.jms.Connection connection = connectionFactory.createConnection(NESS, NESS);
 			connection.setClientID(NESS);
+			session = connection.createSession(false, AUTO_ACKNOWLEDGE);
+			startAdvisories();
 			connection.start();
-			return connection.createSession(false, AUTO_ACKNOWLEDGE);
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
-			return null;
 		}
 	}
 
@@ -207,10 +210,8 @@ public final class BusManager {
 
 	private void addTCPConnector() throws Exception {
 		TransportConnector connector = new TransportConnector();
-		if (box.brokerKeyStore() != null) {
-			service.setSslContext(new SslContext());
-			connector.setUri(new URI("ssl://0.0.0.0:" + box.brokerPort()));
-		} else connector.setUri(new URI("tcp://0.0.0.0:" + box.brokerPort()));
+		connector.setUri(new URI("tcp://0.0.0.0:" + box.brokerPort()));
+		connector.setName("OWireConn");
 		service.addConnector(connector);
 	}
 
@@ -238,10 +239,21 @@ public final class BusManager {
 		return users;
 	}
 
+	public List<String> topicsInfo() {
+		try {
+			List<ActiveMQDestination> destinations = Arrays.stream(service.getBroker().getDestinations()).filter(d -> !d.getPhysicalName().contains("ActiveMQ.Advisory")).collect(Collectors.toList());
+			return destinations.stream().map((d) ->
+					d.getPhysicalName() + " Consumers:" + advisoryManager.consumersOf(d) + " Producers:" + advisoryManager.producersOf(d) + " Enqueued:" + advisoryManager.enqueuedMessageOf(d) +
+							" Enqueued:" + advisoryManager.dequeuedMessageOf(d)).collect(Collectors.toList());
+		} catch (Exception e) {
+			return Collections.emptyList();
+		}
+	}
+
 	public List<String> topics() {
 		try {
-			ActiveMQDestination[] destinations = service.getBroker().getDestinations();
-			return Arrays.stream(destinations).map(ActiveMQDestination::getPhysicalName).filter(n -> !n.contains("ActiveMQ.Advisory")).collect(Collectors.toList());
+			return Arrays.stream(service.getBroker().getDestinations())
+					.map(ActiveMQDestination::getPhysicalName).filter(n -> !n.contains("ActiveMQ.Advisory")).collect(Collectors.toList());
 		} catch (Exception e) {
 			return Collections.emptyList();
 		}

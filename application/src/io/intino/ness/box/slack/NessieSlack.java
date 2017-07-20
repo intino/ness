@@ -56,7 +56,7 @@ public class NessieSlack {
 	}
 
 	public String topics(MessageProperties properties) {
-		List<String> topics = box.datalakeManager().topics();
+		List<String> topics = box.datalakeManager().topicsInfo();
 		StringBuilder builder = new StringBuilder();
 		int i = 1;
 		for (String topic : topics)
