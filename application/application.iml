@@ -84,6 +84,6 @@
     <orderEntry type="library" name="Legio: io.intino.konos:konos-scheduler:1.0.3" level="project" />
     <orderEntry type="library" name="Legio: com.ullink.slack:simpleslackapi:0.6.0" level="project" />
     <orderEntry type="library" name="Legio: io.intino.konos:konos-slack:1.0.8" level="project" />
-    <orderEntry type="library" name="Legio: commons-logging:commons-logging:1.1.1" level="project" />
+    <orderEntry type="library" name="Legio: commons-logging:commons-logging:1.2" level="project" />
   </component>
 </module>

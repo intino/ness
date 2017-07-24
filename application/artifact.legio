@@ -23,6 +23,7 @@ Artifact("io.intino.ness", "1.0.0") ness as Product
 		Parameter("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
 		Parameter("ness_rootPath", "./temp/local")
 		Parameter("broker_port", "61616")
+		Parameter("mqtt_port", "1883")
 		Parameter("broker_store", "./temp/broker/")
 	Distribution(intino.frameworks, intino.languages)
 
@@ -32,6 +33,7 @@ RunConfiguration dev
 	Argument("ness_rootPath", "./temp/local")
 	Argument("broker_store", "./temp/broker/")
 	Argument("broker_port", "61616")
+	Argument("mqtt_port", "1883")
 
 Repository("intino-maven") intino
 	Release("https://artifactory.intino.io/artifactory/releases")
