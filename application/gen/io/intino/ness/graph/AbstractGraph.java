@@ -9,6 +9,7 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 	private java.util.List<io.intino.ness.graph.Tank> tankList;
 	private java.util.List<io.intino.ness.graph.Connection> connectionList;
 	private java.util.List<io.intino.ness.graph.User> userList;
+	private java.util.List<io.intino.ness.graph.Aqueduct> aqueductList;
 
 	public AbstractGraph(io.intino.tara.magritte.Graph graph) {
 		this.graph = graph;
@@ -20,6 +21,7 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		tankList = this.graph.rootList(io.intino.ness.graph.Tank.class);
 		connectionList = this.graph.rootList(io.intino.ness.graph.Connection.class);
 		userList = this.graph.rootList(io.intino.ness.graph.User.class);
+		aqueductList = this.graph.rootList(io.intino.ness.graph.Aqueduct.class);
 	}
 
 	@Override
@@ -28,6 +30,7 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		if (node.is("Tank")) this.tankList.add(node.as(io.intino.ness.graph.Tank.class));
 		if (node.is("Connection")) this.connectionList.add(node.as(io.intino.ness.graph.Connection.class));
 		if (node.is("User")) this.userList.add(node.as(io.intino.ness.graph.User.class));
+		if (node.is("Aqueduct")) this.aqueductList.add(node.as(io.intino.ness.graph.Aqueduct.class));
 	}
 
 	@Override
@@ -36,6 +39,7 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		if (node.is("Tank")) this.tankList.remove(node.as(io.intino.ness.graph.Tank.class));
 		if (node.is("Connection")) this.connectionList.remove(node.as(io.intino.ness.graph.Connection.class));
 		if (node.is("User")) this.userList.remove(node.as(io.intino.ness.graph.User.class));
+		if (node.is("Aqueduct")) this.aqueductList.remove(node.as(io.intino.ness.graph.Aqueduct.class));
 	}
 
 	public java.net.URL resourceAsMessage$(String language, String key) {
@@ -56,6 +60,10 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 
 	public java.util.List<io.intino.ness.graph.User> userList() {
 		return userList;
+	}
+
+	public java.util.List<io.intino.ness.graph.Aqueduct> aqueductList() {
+		return aqueductList;
 	}
 
 	public java.util.stream.Stream<io.intino.ness.graph.Function> functionList(java.util.function.Predicate<io.intino.ness.graph.Function> filter) {
@@ -88,6 +96,14 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 
 	public io.intino.ness.graph.User user(int index) {
 		return userList.get(index);
+	}
+
+	public java.util.stream.Stream<io.intino.ness.graph.Aqueduct> aqueductList(java.util.function.Predicate<io.intino.ness.graph.Aqueduct> filter) {
+		return aqueductList.stream().filter(filter);
+	}
+
+	public io.intino.ness.graph.Aqueduct aqueduct(int index) {
+		return aqueductList.get(index);
 	}
 
 	public io.intino.tara.magritte.Graph core$() {
@@ -149,6 +165,17 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 			newElement.core$().set(newElement, "groups", groups);
 			return newElement;
 		}
+
+		public io.intino.ness.graph.Aqueduct aqueduct(java.lang.String originURL, java.lang.String user, java.lang.String password, java.lang.String originTopic, java.lang.String destinationTopic, io.intino.ness.graph.Function transformer) {
+			io.intino.ness.graph.Aqueduct newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.Aqueduct.class, stash, name).core$().as(io.intino.ness.graph.Aqueduct.class);
+			newElement.core$().set(newElement, "originURL", java.util.Collections.singletonList(originURL));
+			newElement.core$().set(newElement, "user", java.util.Collections.singletonList(user));
+			newElement.core$().set(newElement, "password", java.util.Collections.singletonList(password));
+			newElement.core$().set(newElement, "originTopic", java.util.Collections.singletonList(originTopic));
+			newElement.core$().set(newElement, "destinationTopic", java.util.Collections.singletonList(destinationTopic));
+			newElement.core$().set(newElement, "transformer", java.util.Collections.singletonList(transformer));
+			return newElement;
+		}
 	}
 
 	public class Clear {
@@ -166,6 +193,10 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 
 	    public void user(java.util.function.Predicate<io.intino.ness.graph.User>... filters) {
 	    	new java.util.ArrayList<>(AbstractGraph.this.userList()).forEach(io.intino.tara.magritte.Layer::delete$);
+	    }
+
+	    public void aqueduct(java.util.function.Predicate<io.intino.ness.graph.Aqueduct>... filters) {
+	    	new java.util.ArrayList<>(AbstractGraph.this.aqueductList()).forEach(io.intino.tara.magritte.Layer::delete$);
 	    }
 	}
 }

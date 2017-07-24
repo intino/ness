@@ -2,6 +2,7 @@ package io.intino.ness;
 
 import io.intino.konos.jms.Consumer;
 import io.intino.konos.jms.TopicConsumer;
+import io.intino.ness.bus.AqueductManager;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.datalake.FileStation;
 import io.intino.ness.datalake.Job;
@@ -9,6 +10,7 @@ import io.intino.ness.datalake.NessStation;
 import io.intino.ness.datalake.NessStation.Feed;
 import io.intino.ness.datalake.Valve;
 import io.intino.ness.datalake.compiler.Compiler;
+import io.intino.ness.graph.Aqueduct;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
 import io.intino.ness.inl.MessageFunction;
@@ -164,5 +166,13 @@ public class DatalakeManager {
 		station.remove(station.feedsTo(tank.qualifiedName()));
 		station.rename(tank.qualifiedName(), name);
 		return false;
+	}
+
+	public void startAqueduct(Aqueduct aqueduct) throws InterruptedException {
+		new AqueductManager(aqueduct, bus.nessSession()).start();
+	}
+
+	public void stopAqueduct(Aqueduct aqueduct) {
+
 	}
 }

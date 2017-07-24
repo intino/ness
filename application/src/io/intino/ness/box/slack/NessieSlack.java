@@ -2,9 +2,11 @@ package io.intino.ness.box.slack;
 
 import com.ullink.slack.simpleslackapi.SlackSession;
 import io.intino.konos.slack.Bot.MessageProperties;
+import io.intino.ness.box.NessBox;
+import io.intino.ness.box.actions.PumpAction;
+import io.intino.ness.graph.Aqueduct;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
-import io.intino.ness.box.NessBox;
 
 import java.util.List;
 import java.util.Map;
@@ -84,19 +86,41 @@ public class NessieSlack {
 	public String addFunction(MessageProperties properties, String name, String code) {
 		String sourceCode = Helper.downloadFile(code);
 		List<Function> functions = box.ness().functionList(f -> f.name$().equals(name)).collect(toList());
-		if (!functions.isEmpty()) return "function name is already defined";
+		if (!functions.isEmpty()) return "Function name is already defined";
 		if (!box.datalakeManager().isCorrect(code)) return "Code has errors or does not complies with NessFunction interface";
 		Function function = box.ness().create("functions", name).function(sourceCode);
 		function.save$();
 		return OK;
 	}
 
-	public String pump(MessageProperties properties, String functionName, String input, String output) {
-		List<Function> functions = box.ness().functionList(f -> f.name$().equals(functionName)).collect(toList());
-		if (functions.isEmpty()) return "Function not found";
-		Function function = functions.get(0);
-		box.datalakeManager().pump(function, input, output);
+	public String startAqueduct(MessageProperties properties, String name, String origin, String user, String password, String originTopic, String destinationTank, String functionName) {
+		Function function = box.ness().functionList(f -> f.name$().equals(functionName)).findFirst().orElse(null);
+		if (function == null) return "Function not found";
+		Aqueduct aqueduct = box.ness().create("aqueducts", name).aqueduct(origin, user, password, originTopic, destinationTank, function);
+		aqueduct.save$();
+		try {
+			box.datalakeManager().startAqueduct(aqueduct);
+			return OK;
+		} catch (InterruptedException e) {
+			return e.getMessage();
+		}
+	}
+
+	public String stopAqueduct(MessageProperties properties, String name) {
+		Aqueduct aqueduct = box.ness().aqueductList(f -> f.name$().equals(name)).findFirst().orElse(null);
+		if (aqueduct == null) return "Function not found";
+		aqueduct.save$();
+		box.datalakeManager().stopAqueduct(aqueduct);
 		return OK;
 	}
 
+	public String pump(MessageProperties properties, String functionName, String input, String output) {
+		PumpAction pumpAction = new PumpAction();
+		pumpAction.box = box;
+		pumpAction.functionName = functionName;
+		pumpAction.input = input;
+		pumpAction.output = output;
+		pumpAction.execute();
+		return OK;
+	}
 }

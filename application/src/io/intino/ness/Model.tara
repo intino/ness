@@ -18,3 +18,11 @@ Concept Connection //TODO find better name
 Concept User
 	var string password
 	var string[] groups
+
+Concept Aqueduct
+	var string originURL
+	var string user
+	var string password
+	var string originTopic
+	var string destinationTopic
+	var Function transformer

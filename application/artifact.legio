@@ -4,13 +4,13 @@ Artifact("io.intino.ness", "1.0.0") ness as Product
 	Imports
 		Test("junit", "junit", "LATEST")
 		Compile("org.slf4j", "slf4j-log4j12", "1.7.7")
-		Compile("io.intino.ness", "datalake", "1.0.2")
+		Compile("io.intino.ness", "datalake", "1.0.3")
 		Compile("org.apache.activemq", "activemq-broker", "5.14.4")
 		Compile("org.apache.activemq", "activemq-mqtt", "5.14.4")
 		Compile("org.apache.activemq", "activemq-kahadb-store", "5.14.4")
 		Compile("org.apache.activemq", "activemq-jaas", "5.14.4")
 		Compile("io.intino.konos", "konos-jms", "1.0.7")
-		Compile("io.intino.konos", "konos-slack", "1.0.7")
+		Compile("io.intino.konos", "konos-slack", "1.0.8")
 		Compile("io.intino.konos", "konos-jmx", "1.0.1")
 		Compile("io.intino.konos", "konos-scheduler", "1.0.3")
 	Code("io.intino.ness")
@@ -20,11 +20,18 @@ Artifact("io.intino.ness", "1.0.0") ness as Product
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness") as Runnable("io.intino.ness.box.Main")
 		classpathPrefix = "lib"
 		Parameter("ness_store", "./temp/store")
-		Parameter("nessie_token", "xoxb-162074419812-gB5oNUwzxGWQ756TrRyu1Ii9")
+		Parameter("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
 		Parameter("ness_rootPath", "./temp/local")
 		Parameter("broker_port", "61616")
 		Parameter("broker_store", "./temp/broker/")
 	Distribution(intino.frameworks, intino.languages)
+
+RunConfiguration dev
+	Argument("ness_store", "./temp/store")
+	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
+	Argument("ness_rootPath", "./temp/local")
+	Argument("broker_store", "./temp/broker/")
+	Argument("broker_port", "61616")
 
 Repository("intino-maven") intino
 	Release("https://artifactory.intino.io/artifactory/releases")

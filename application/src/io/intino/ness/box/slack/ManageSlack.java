@@ -23,7 +23,6 @@ public class ManageSlack {
 	}
 
 	public void init(com.ullink.slack.simpleslackapi.SlackSession session) {
-
 	}
 
 	public String addUser(MessageProperties properties, String name, String[] groups) {

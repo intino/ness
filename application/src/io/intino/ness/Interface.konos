@@ -16,7 +16,6 @@ Service Nessie as SlackBot
 		Parameter(String, true) tags
 	Request("Show all functions registered") functions
 	Request("Show registered topics") topics
-
 	Request("Select a tank to operate with") tank
 		Parameter(String) name
 		Request("Tags thes tank with `tags`") tag
@@ -28,9 +27,21 @@ Service Nessie as SlackBot
 			Parameter(String, true) functions
 		Request("Reproduce events of a tank") reflow
 
+	Request("connect out jms topic with a ness tank") start-aqueduct
+		Parameter(String) name
+		Parameter(String) originURL
+		Parameter(String) user
+		Parameter(String) password
+		Parameter(String) originTopic
+		Parameter(String) destinationTank
+		Parameter(String) functionName
+	Request("connect out jms topic with a ness tank") stop-aqueduct
+		Parameter(String) name
+
 	Request("Create a function associated to an input tank and output tank") add-function
 		Parameter(String) name
 		Parameter(String) code
+
 	Request("Connect a source and destination tanks through a `function`") pump
 		Parameter(String) functionName
 		Parameter(String) input

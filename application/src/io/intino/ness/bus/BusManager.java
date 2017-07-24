@@ -62,6 +62,10 @@ public final class BusManager {
 		}
 	}
 
+	public Session nessSession() {
+		return session;
+	}
+
 	public Map<String, List<String>> users() {
 		Map<String, List<String>> users = new LinkedHashMap<>();
 		Map<String, Set<Principal>> userGroups = authenticator.getUserGroups();
