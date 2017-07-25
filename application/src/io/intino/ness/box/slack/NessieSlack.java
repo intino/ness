@@ -8,13 +8,10 @@ import io.intino.ness.graph.Aqueduct;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 
+import static io.intino.ness.box.slack.Helper.downloadTextFile;
 import static java.util.stream.Collectors.toList;
 
 public class NessieSlack {
@@ -74,7 +71,7 @@ public class NessieSlack {
 		StringBuilder builder = new StringBuilder();
 		List<Function> functions = box.ness().functionList();
 		for (int i = 0; i < functions.size(); i++)
-			builder.append(i).append(") ").append(functions.get(i).name$()).append(". Being used on:...\n");
+			builder.append(i).append(") ").append(functions.get(i).name$()).append(". Being used on:...TODO\n");
 		String value = builder.toString();
 		return value.isEmpty() ? "There aren't functions registered yet" : value;
 	}
@@ -87,30 +84,18 @@ public class NessieSlack {
 		return "Selected " + tank.qualifiedName();
 	}
 
-	public String addFunction(MessageProperties properties, String name, String codeURL) {
-		String sourceCode = Helper.downloadFile(codeURL);
-		List<Function> functions = box.ness().functionList(f -> f.name$().equals(name)).collect(toList());
+	public String addFunction(MessageProperties properties, String qualifiedName, String codeURL) {
+		List<Function> functions = box.ness().functionList(f -> f.name$().equals(qualifiedName)).collect(toList());
 		if (!functions.isEmpty()) return "Function name is already defined";
-		String code = download(codeURL);
-		if (code.isEmpty() || !box.datalakeManager().isCorrect(name, code)) return "Code has errors or does not complies with NessFunction interface";
-		Function function = box.ness().create("functions", name).function(sourceCode);
+		String sourceCode = downloadTextFile(codeURL, box.configuration().nessieConfiguration().token);
+		if (sourceCode.isEmpty()) return "Code has errors or does not complies with MessageFunction interface";
+		else {
+			String result = box.datalakeManager().check(qualifiedName, sourceCode);
+			if (!result.isEmpty()) return result;
+		}
+		Function function = box.ness().create("functions", qualifiedName).function(sourceCode);
 		function.save$();
 		return OK;
-	}
-
-	private String download(String url) {
-		try {
-			URL website = new URL(url);
-			URLConnection connection = website.openConnection();
-			BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-			StringBuilder response = new StringBuilder();
-			String inputLine;
-			while ((inputLine = in.readLine()) != null) response.append(inputLine);
-			in.close();
-			return response.toString();
-		} catch (Exception e) {
-			return "";
-		}
 	}
 
 	public String startAqueduct(MessageProperties properties, String name, String origin, String user, String password, String originTopic, String destinationTank, String functionName) {

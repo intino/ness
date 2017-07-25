@@ -1,14 +1,19 @@
 package io.intino.ness.box.slack;
 
-import io.intino.ness.graph.Tank;
-import io.intino.ness.graph.NessGraph;
 import io.intino.ness.box.NessBox;
+import io.intino.ness.graph.NessGraph;
+import io.intino.ness.graph.Tank;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
 
-import java.io.IOException;
-import java.net.URL;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,15 +46,25 @@ public class Helper {
 		return ness.tankList().stream().sorted((s1, s2) -> String.CASE_INSENSITIVE_ORDER.compare(s1.qualifiedName(), s2.qualifiedName()));
 	}
 
-	public static String downloadFile(String code) {
+	public static String downloadTextFile(String url, String slackToken) {
 		try {
-			Scanner scanner = new Scanner(new URL(code).openStream(), "UTF-8").useDelimiter("\\A");
-			String sourceCode = scanner.hasNext() ? scanner.next() : "";
-			scanner.close();
-			return sourceCode;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return "";
+			HttpClient client = HttpClientBuilder.create().build();
+			HttpGet request = new HttpGet(url);
+			request.addHeader("Authorization", "Bearer " + slackToken);
+			HttpResponse response = client.execute(request);
+			HttpEntity entity = response.getEntity();
+			if (entity != null) try (InputStream stream = entity.getContent()) {
+				StringBuilder builder = new StringBuilder();
+				BufferedReader reader =
+						new BufferedReader(new InputStreamReader(stream));
+				String line;
+				while ((line = reader.readLine()) != null) {
+					builder.append(line + "\n");
+				}
+				return builder.toString();
+			}
+		} catch (Exception e) {
 		}
+		return "";
 	}
 }

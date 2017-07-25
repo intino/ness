@@ -14,6 +14,7 @@ import io.intino.ness.graph.Aqueduct;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
 import io.intino.ness.inl.MessageFunction;
+import io.intino.ness.inl.TextMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,11 +48,11 @@ public class DatalakeManager {
 		}
 	}
 
-	public boolean isCorrect(String className, String code) {
+	public String check(String className, String code) {
 		try {
-			return compile(className, code) != null;
-		} catch (Exception e) {
-			return false;
+			return compile(className, code) != null ? "" : "";
+		} catch (Compiler.Exception e) {
+			return e.getMessage();
 		}
 	}
 
@@ -61,7 +62,7 @@ public class DatalakeManager {
 					compile(code).
 					with("-target", "1.8").
 					load(className).
-					as(MessageFunction.class).
+					as(TextMapper.class).
 					newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			return null;
