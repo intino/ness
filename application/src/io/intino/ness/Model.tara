@@ -1,6 +1,7 @@
 dsl Proteo
 
 Concept Function
+	var string qualifiedName
 	var string source
 
 Concept Tank

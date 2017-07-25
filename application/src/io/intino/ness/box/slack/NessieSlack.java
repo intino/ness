@@ -22,6 +22,10 @@ public class NessieSlack {
 		this.box = box;
 	}
 
+	public static String shortName(String qualifiedName) {
+		return qualifiedName.substring(qualifiedName.lastIndexOf(".") + 1);
+	}
+
 	public void init(SlackSession session) {
 
 	}
@@ -93,7 +97,7 @@ public class NessieSlack {
 			String result = box.datalakeManager().check(qualifiedName, sourceCode);
 			if (!result.isEmpty()) return result;
 		}
-		Function function = box.ness().create("functions", qualifiedName).function(sourceCode);
+		Function function = box.ness().create("functions", shortName(qualifiedName)).function(qualifiedName, sourceCode);
 		function.save$();
 		return OK;
 	}
@@ -101,14 +105,10 @@ public class NessieSlack {
 	public String startAqueduct(MessageProperties properties, String name, String origin, String user, String password, String originTopic, String destinationTank, String functionName) {
 		Function function = box.ness().functionList(f -> f.name$().equals(functionName)).findFirst().orElse(null);
 		if (function == null) return "Function not found";
-		Aqueduct aqueduct = box.ness().create("aqueducts", name).aqueduct(origin, user, password, originTopic, destinationTank, function);
+		Aqueduct aqueduct = box.ness().create("aqueducts", name).aqueduct(origin.replaceAll("<|>", ""), user, password, originTopic, destinationTank, function);
 		aqueduct.save$();
-		try {
-			box.datalakeManager().startAqueduct(aqueduct);
-			return OK;
-		} catch (InterruptedException e) {
-			return e.getMessage();
-		}
+		box.datalakeManager().startAqueduct(aqueduct);
+		return OK;
 	}
 
 	public String stopAqueduct(MessageProperties properties, String name) {

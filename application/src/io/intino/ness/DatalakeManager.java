@@ -173,7 +173,7 @@ public class DatalakeManager {
 		return false;
 	}
 
-	public void startAqueduct(Aqueduct aqueduct) throws InterruptedException {
+	public void startAqueduct(Aqueduct aqueduct) {
 		new AqueductManager(aqueduct, bus.nessSession()).start();
 	}
 

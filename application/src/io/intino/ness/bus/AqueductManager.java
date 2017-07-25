@@ -30,11 +30,10 @@ public class AqueductManager {
 		this.aqueduct = aqueduct;
 		this.ness = nessSession;
 		this.origin = initOriginSession();
-		this.function = map(aqueduct.transformer().name$(), aqueduct.transformer().source());
+		this.function = map(aqueduct.transformer().qualifiedName(), aqueduct.transformer().source());
 	}
 
-	public void start() throws InterruptedException {
-		if (function == null) throw new InterruptedException("function " + aqueduct.transformer().name$() + " cannot be loaded");
+	public void start() {
 		topicConsumer = new TopicConsumer(origin, aqueduct.originTopic());
 		topicConsumer.listen(message -> consumeFeed(ness, aqueduct.destinationTopic(), message));
 	}
@@ -63,7 +62,7 @@ public class AqueductManager {
 
 	private void consumeFeed(Session destination, String topic, Message message) {
 		try {
-			new TopicProducer(destination, topic).produce(createMessageFor(mapToMessage(textFrom(message))));
+			new TopicProducer(destination, topic).produce(createMessageFor(mapToMessage(textFrom(message)).toString()));
 		} catch (JMSException e) {
 			Logger.getGlobal().severe(e.getMessage());
 		}
