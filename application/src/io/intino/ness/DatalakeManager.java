@@ -47,20 +47,20 @@ public class DatalakeManager {
 		}
 	}
 
-	public boolean isCorrect(String code) {
+	public boolean isCorrect(String className, String code) {
 		try {
-			return compile(code) != null;
+			return compile(className, code) != null;
 		} catch (Exception e) {
 			return false;
 		}
 	}
 
-	private MessageFunction compile(String code) {
+	private MessageFunction compile(String className, String code) {
 		try {
 			return Compiler.
 					compile(code).
 					with("-target", "1.8").
-					load("tests.UpperCaseFunction").
+					load(className).
 					as(MessageFunction.class).
 					newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {

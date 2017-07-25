@@ -3,8 +3,8 @@ package io.intino.ness.bus;
 import io.intino.konos.jms.TopicConsumer;
 import io.intino.konos.jms.TopicProducer;
 import io.intino.ness.datalake.compiler.Compiler;
-import io.intino.ness.datalake.compiler.TextMapper;
 import io.intino.ness.graph.Aqueduct;
+import io.intino.ness.inl.TextMapper;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.slf4j.LoggerFactory;
 

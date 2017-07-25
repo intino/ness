@@ -22,8 +22,8 @@ public class AddFunctionAction {
 		String sourceCode = downloadFile(code);
 		List<Function> functions = ness.functionList(f -> f.name$().equals(name)).collect(toList());
 		if (!functions.isEmpty()) return "function name is already defined";
-		if (!box.datalakeManager().isCorrect(code))
-			return "Code has errors or does not complies with NessFunction interface";
+		if (!box.datalakeManager().isCorrect(name, code))
+			return "Code has errors or does not complies with MessageFunction interface";
 		Function function = ness.create("functions", name).function(sourceCode);
 		function.save$();
 		return OK;
