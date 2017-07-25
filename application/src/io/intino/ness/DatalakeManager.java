@@ -48,7 +48,11 @@ public class DatalakeManager {
 	}
 
 	public boolean isCorrect(String code) {
-		return compile(code) != null;
+		try {
+			return compile(code) != null;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	private MessageFunction compile(String code) {
