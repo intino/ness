@@ -58,6 +58,7 @@ public class NessieSlackBot extends Bot {
 		add("stop-aqueduct".toLowerCase(), "", java.util.Arrays.asList("name"), java.util.Arrays.asList(), "connect out jms topic with a ness tank", (properties, args) -> nessieSlack.stopAqueduct(properties, args.length > 0 ? args[0] : ""));
 		add("add-function".toLowerCase(), "", java.util.Arrays.asList("name", "code"), java.util.Arrays.asList(), "Create a function associated to an input tank and output tank", (properties, args) -> nessieSlack.addFunction(properties, args.length > 0 ? args[0] : "", args.length > 1 ? args[1] : ""));
 		add("pump".toLowerCase(), "", java.util.Arrays.asList("functionName", "input", "output"), java.util.Arrays.asList(), "Connect a source and destination tanks through a `function`", (properties, args) -> nessieSlack.pump(properties, args.length > 0 ? args[0] : "", args.length > 1 ? args[1] : "", args.length > 2 ? args[2] : ""));
+		add("reflow".toLowerCase(), "", java.util.Arrays.asList("tank"), java.util.Arrays.asList(), "Reproduce events of a tank", (properties, args) -> nessieSlack.reflow(properties, args.length > 0 ? args[0] : ""));
 		try {
 			execute();
 			this.nessieSlack.init(session());

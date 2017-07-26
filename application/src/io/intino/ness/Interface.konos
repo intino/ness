@@ -37,7 +37,6 @@ Service Nessie as SlackBot
 		Parameter(String) functionName
 	Request("connect out jms topic with a ness tank") stop-aqueduct
 		Parameter(String) name
-
 	Request("Create a function associated to an input tank and output tank") add-function
 		Parameter(String) name
 		Parameter(String) code
@@ -46,7 +45,8 @@ Service Nessie as SlackBot
 		Parameter(String) functionName
 		Parameter(String) input
 		Parameter(String) output
-
+	Request ("Reproduce events of a tank") reflow
+		Parameter(String) tank
 Task toTub as CronTrigger("0 0 0 1/1 * ? *", "daily starting at 00:00")
 
 Service Manager as JMX

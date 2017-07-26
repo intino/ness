@@ -4,6 +4,7 @@ import com.ullink.slack.simpleslackapi.SlackSession;
 import io.intino.konos.slack.Bot.MessageProperties;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.box.actions.PumpAction;
+import io.intino.ness.box.actions.ReflowAction;
 import io.intino.ness.graph.Aqueduct;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
@@ -120,12 +121,20 @@ public class NessieSlack {
 	}
 
 	public String pump(MessageProperties properties, String functionName, String input, String output) {
-		PumpAction pumpAction = new PumpAction();
-		pumpAction.box = box;
-		pumpAction.functionName = functionName;
-		pumpAction.input = input;
-		pumpAction.output = output;
-		pumpAction.execute();
+		PumpAction action = new PumpAction();
+		action.box = box;
+		action.functionName = functionName;
+		action.input = input;
+		action.output = output;
+		action.execute();
+		return OK;
+	}
+
+	public String reflow(MessageProperties properties, String tank) {
+		ReflowAction action = new ReflowAction();
+		action.box = box;
+		action.tank = tank;
+		action.execute();
 		return OK;
 	}
 }
