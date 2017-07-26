@@ -23,13 +23,12 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
 import static io.intino.ness.Inl.load;
-import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 
 public class DatalakeManager {
@@ -37,6 +36,7 @@ public class DatalakeManager {
 	private NessStation station;
 	private BusManager bus;
 	private List<Job> jobs = new ArrayList<>();
+	private Map<Aqueduct, AqueductManager> aqueducts = new HashMap<>();
 
 	public DatalakeManager(FileStation station, BusManager bus) {
 		this.station = station;
@@ -45,10 +45,10 @@ public class DatalakeManager {
 	}
 
 	private void init() {
-		for (io.intino.ness.datalake.Tank tank : station.tanks()) startFeed(tank);
+		for (io.intino.ness.datalake.Tank tank : station.tanks()) startFeedFlow(tank);
 	}
 
-	private void startFeed(io.intino.ness.datalake.Tank tank) {
+	private void startFeedFlow(io.intino.ness.datalake.Tank tank) {
 		feed("feed." + tank.name(), station.feed(tank.name()));
 		flow(tank.name(), "flow." + tank.name());
 	}
@@ -90,8 +90,12 @@ public class DatalakeManager {
 	}
 
 	public void feedFlow(Tank tank) {
-		feed(tank, station.feed(tank.qualifiedName()));
+		feed(tank);
 		flow(tank);
+	}
+
+	private void feed(Tank tank) {
+		feed(tank.feedQN(), station.feed(tank.qualifiedName()));
 	}
 
 	private void feed(Tank tank, final Feed feed) {
@@ -114,16 +118,25 @@ public class DatalakeManager {
 		station.flow(tank).to(m -> bus.registerOrGetProducer(flow).produce(createMessageFor(m.toString())));
 	}
 
+	private void stopFeed(Tank tank) {
+		TopicConsumer consumer = bus.consumerOf(tank.feedQN());
+		if (consumer == null) return;
+		consumer.stop();
+	}
+
 	public void reflow(Tank tank) {
 		try {
-			stopFeed(tank);
 			Session session = bus.transactedSession();
-			TopicProducer producer = new TopicProducer(session, tank.flowQN());
-			station.pump(tank.qualifiedName()).to(m -> producer.produce(createMessageFor(m.toString())));
-			session.commit();
-			// TODO octavio startFeed(tank);
+			if (session != null) {
+				stopFeed(tank);
+				TopicProducer producer = new TopicProducer(session, tank.flowQN());
+				station.pump(tank.qualifiedName()).to(m -> producer.produce(createMessageFor(m.toString())));
+				session.commit();
+				session.close();
+				feed(tank);
+			} else logger.error("Impossible to create transacted session");
 		} catch (JMSException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -136,20 +149,6 @@ public class DatalakeManager {
 		Job job = station.pump(oldTank.qualifiedName()).to(newTank.qualifiedName()).start();
 		jobs.add(job);
 		job.onTerminate(() -> feedFlow(newTank));
-	}
-
-	private void stopFeed(Tank tank) {
-		TopicConsumer consumer = bus.consumerOf(tank.feedQN());
-		if (consumer == null) return;
-		consumer.stop();
-	}
-
-	public String addUser(String name, List<String> groups) {
-		return bus.addUser(name, groups);
-	}
-
-	public boolean removeUser(String name) {
-		return bus.removeUser(name);
 	}
 
 	public void seal(Tank tank) {
@@ -168,14 +167,6 @@ public class DatalakeManager {
 		station.remove(qualifiedName);
 	}
 
-	public Map<String, List<String>> users() {
-		return bus.users();
-	}
-
-	public List<String> topicsInfo() {
-		return bus.topicsInfo().stream().sorted(CASE_INSENSITIVE_ORDER).collect(Collectors.toList());
-	}
-
 	public void quit() {
 		jobs.forEach(Job::stop);
 		bus.quit();
@@ -188,10 +179,13 @@ public class DatalakeManager {
 	}
 
 	public void startAqueduct(Aqueduct aqueduct) {
-		new AqueductManager(aqueduct, bus.nessSession()).start();
+		AqueductManager manager = new AqueductManager(aqueduct, bus.nessSession());
+		manager.start();
+		aqueducts.put(aqueduct, manager);
 	}
 
 	public void stopAqueduct(Aqueduct aqueduct) {
-
+		AqueductManager aqueductManager = aqueducts.get(aqueduct);
+		aqueductManager.stop();
 	}
 }

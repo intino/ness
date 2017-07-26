@@ -10,7 +10,7 @@ public class AddUserAction {
 	public java.util.List<String> groups;
 
 	public String execute() {
-		String password = box.datalakeManager().addUser(name, groups);
+		String password = box.busManager().addUser(name, groups);
 		if (password == null) return "User already exists";
 		return "User *" + name + "* added with password `" + password + "`";
 	}

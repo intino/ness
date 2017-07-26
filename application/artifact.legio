@@ -8,9 +8,11 @@ Artifact("io.intino.ness", "1.0.0") ness as Product
 		Compile("org.apache.activemq", "activemq-mqtt", "5.14.4")
 		Compile("org.apache.activemq", "activemq-kahadb-store", "5.14.4")
 		Compile("org.apache.activemq", "activemq-jaas", "5.14.4")
+
 		Compile("io.intino.ness", "datalake", "1.0.3")
 		Compile("io.intino.ness", "inl", "1.0.7")
-		Compile("io.intino.konos", "konos-jms", "1.0.8")
+
+		Compile("io.intino.konos", "konos-jms", "1.0.9")
 		Compile("io.intino.konos", "konos-slack", "1.0.9")
 		Compile("io.intino.konos", "konos-jmx", "1.0.1")
 		Compile("io.intino.konos", "konos-scheduler", "1.0.4")

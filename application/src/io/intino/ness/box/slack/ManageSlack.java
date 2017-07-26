@@ -3,6 +3,7 @@ package io.intino.ness.box.slack;
 import io.intino.konos.slack.Bot.MessageProperties;
 import io.intino.ness.DatalakeManager;
 import io.intino.ness.box.NessBox;
+import io.intino.ness.bus.BusManager;
 import io.intino.ness.graph.NessGraph;
 import io.intino.ness.graph.Tank;
 
@@ -26,13 +27,13 @@ public class ManageSlack {
 	}
 
 	public String addUser(MessageProperties properties, String name, String[] groups) {
-		String password = datalake().addUser(name, groups.length == 0 ? Collections.emptyList() : asList(copyOfRange(groups, 1, groups.length)));
+		String password = bus().addUser(name, groups.length == 0 ? Collections.emptyList() : asList(copyOfRange(groups, 1, groups.length)));
 		if (password == null) return "User already exists";
 		return "User *" + name + "* added with password `" + password + "`";
 	}
 
 	public String removeUser(MessageProperties properties, String name) {
-		return datalake().removeUser(name) ? OK : "User not found";
+		return bus().removeUser(name) ? OK : "User not found";
 	}
 
 	public String addTank(MessageProperties properties, String tank) {
@@ -47,10 +48,6 @@ public class ManageSlack {
 		return OK;
 	}
 
-	private NessGraph ness() {
-		return box.ness();
-	}
-
 	public String removeTank(MessageProperties properties, String name) {
 		NessGraph wrapper = ness();
 		List<Tank> tanks = wrapper.tankList(t -> t.qualifiedName().equals(name)).collect(toList());
@@ -62,7 +59,15 @@ public class ManageSlack {
 		return OK;
 	}
 
+	private NessGraph ness() {
+		return box.ness();
+	}
+
 	private DatalakeManager datalake() {
 		return box.datalakeManager();
+	}
+
+	private BusManager bus() {
+		return box.busManager();
 	}
 }

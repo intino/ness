@@ -36,7 +36,7 @@ public class NessieSlack {
 	}
 
 	public String users(MessageProperties properties) {
-		Map<String, List<String>> users = box.datalakeManager().users();
+		Map<String, List<String>> users = box.busManager().users();
 		StringBuilder builder = new StringBuilder();
 		for (String user : users.keySet()) {
 			builder.append(user);
@@ -63,7 +63,7 @@ public class NessieSlack {
 	}
 
 	public String topics(MessageProperties properties) {
-		List<String> topics = box.datalakeManager().topicsInfo();
+		List<String> topics = box.busManager().topicsInfo();
 		StringBuilder builder = new StringBuilder();
 		int i = 1;
 		for (String topic : topics)

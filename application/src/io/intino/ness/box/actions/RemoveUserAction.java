@@ -11,7 +11,7 @@ public class RemoveUserAction {
 	public String name;
 
 	public String execute() {
-		return box.datalakeManager().removeUser(name) ? OK : "User not found";
+		return box.busManager().removeUser(name) ? OK : "User not found";
 	}
 
 
