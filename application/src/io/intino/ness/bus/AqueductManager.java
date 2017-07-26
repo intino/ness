@@ -25,12 +25,24 @@ public class AqueductManager {
 	private TopicConsumer topicConsumer;
 	private Session session;
 
-
 	public AqueductManager(Aqueduct aqueduct, Session nessSession) {
 		this.aqueduct = aqueduct;
 		this.ness = nessSession;
 		this.origin = initOriginSession();
 		this.function = map(aqueduct.transformer().qualifiedName(), aqueduct.transformer().source());
+	}
+
+	private static String textFrom(Message message) {
+		try {
+			if (message instanceof BytesMessage) {
+				byte[] data = new byte[(int) ((BytesMessage) message).getBodyLength()];
+				((BytesMessage) message).readBytes(data);
+				return new String(data);
+			} else return ((TextMessage) message).getText();
+		} catch (JMSException e) {
+			e.printStackTrace();
+			return "";
+		}
 	}
 
 	public void start() {
@@ -60,7 +72,7 @@ public class AqueductManager {
 		}
 	}
 
-	private void consumeFeed(Session destination, String topic, Message message) {
+	private synchronized void consumeFeed(Session destination, String topic, Message message) {
 		try {
 			new TopicProducer(destination, topic).produce(createMessageFor(mapToMessage(textFrom(message)).toString()));
 		} catch (JMSException e) {
@@ -88,18 +100,5 @@ public class AqueductManager {
 
 	private TextMapper map(Class<? extends TextMapper> mapperClass) throws Exception {
 		return mapperClass.newInstance();
-	}
-
-	private static String textFrom(Message message) {
-		try {
-			if (message instanceof BytesMessage) {
-				byte[] data = new byte[(int) ((BytesMessage) message).getBodyLength()];
-				((BytesMessage) message).readBytes(data);
-				return new String(data);
-			} else return ((TextMessage) message).getText();
-		} catch (JMSException e) {
-			e.printStackTrace();
-			return "";
-		}
 	}
 }

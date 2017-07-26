@@ -2,6 +2,7 @@ package io.intino.ness;
 
 import io.intino.konos.jms.Consumer;
 import io.intino.konos.jms.TopicConsumer;
+import io.intino.konos.jms.TopicProducer;
 import io.intino.ness.bus.AqueductManager;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.datalake.FileStation;
@@ -18,7 +19,9 @@ import io.intino.ness.inl.TextMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.Session;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,10 +45,12 @@ public class DatalakeManager {
 	}
 
 	private void init() {
-		for (io.intino.ness.datalake.Tank tank : station.tanks()) {
-			feed("feed." + tank.name(), station.feed(tank.name()));
-			flow(tank.name(), "flow." + tank.name());
-		}
+		for (io.intino.ness.datalake.Tank tank : station.tanks()) startFeed(tank);
+	}
+
+	private void startFeed(io.intino.ness.datalake.Tank tank) {
+		feed("feed." + tank.name(), station.feed(tank.name()));
+		flow(tank.name(), "flow." + tank.name());
 	}
 
 	public String check(String className, String code) {
@@ -110,8 +115,16 @@ public class DatalakeManager {
 	}
 
 	public void reflow(Tank tank) {
-		stopFeed(tank);
-		station.pump(tank.qualifiedName()).to(m -> bus.registerOrGetProducer(tank.flowQN()).produce(createMessageFor(m.toString())));
+		try {
+			stopFeed(tank);
+			Session session = bus.transactedSession();
+			TopicProducer producer = new TopicProducer(session, tank.flowQN());
+			station.pump(tank.qualifiedName()).to(m -> producer.produce(createMessageFor(m.toString())));
+			session.commit();
+			// TODO octavio startFeed(tank);
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void migrate(Tank oldTank, Tank newTank, List<Function> functions) throws Exception {
@@ -127,7 +140,8 @@ public class DatalakeManager {
 
 	private void stopFeed(Tank tank) {
 		TopicConsumer consumer = bus.consumerOf(tank.feedQN());
-		if (consumer != null) consumer.stop();
+		if (consumer == null) return;
+		consumer.stop();
 	}
 
 	public String addUser(String name, List<String> groups) {

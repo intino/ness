@@ -24,7 +24,7 @@ public class AddFunctionAction {
 		if (!functions.isEmpty()) return "function name is already defined";
 		if (!box.datalakeManager().check(name, code).isEmpty())
 			return "Code has errors or does not complies with MessageFunction interface";
-		Function function = ness.create("functions", name).function(sourceCode);
+		Function function = ness.create("functions", name).function(name, sourceCode);
 		function.save$();
 		return OK;
 	}

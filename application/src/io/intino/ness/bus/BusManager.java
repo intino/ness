@@ -22,6 +22,7 @@ import org.apache.activemq.store.kahadb.KahaDBPersistenceAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Session;
 import java.io.File;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
+import static javax.jms.Session.SESSION_TRANSACTED;
 
 public final class BusManager {
 	private static final Logger logger = LoggerFactory.getLogger(BusManager.class);
@@ -43,6 +45,7 @@ public final class BusManager {
 	private final SimpleAuthenticationPlugin authenticator;
 	private final Map<String, TopicProducer> producers = new HashMap<>();
 	private final Map<String, TopicConsumer> consumers = new HashMap<>();
+	private Connection connection;
 	private Session session;
 	private AdvisoryManager advisoryManager;
 
@@ -178,7 +181,7 @@ public final class BusManager {
 	private void initNessSession() {
 		try {
 			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("vm://ness");
-			javax.jms.Connection connection = connectionFactory.createConnection(NESS, NESS);
+			connection = connectionFactory.createConnection(NESS, NESS);
 			connection.setClientID(NESS);
 			session = connection.createSession(false, AUTO_ACKNOWLEDGE);
 			startAdvisories();
@@ -260,6 +263,15 @@ public final class BusManager {
 					.map(ActiveMQDestination::getPhysicalName).filter(n -> !n.contains("ActiveMQ.Advisory")).collect(Collectors.toList());
 		} catch (Exception e) {
 			return Collections.emptyList();
+		}
+	}
+
+	public Session transactedSession() {
+		try {
+			return connection.createSession(true, SESSION_TRANSACTED);
+		} catch (JMSException e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 

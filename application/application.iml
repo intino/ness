@@ -83,8 +83,8 @@
     <orderEntry type="module" module-name="inl" />
     <orderEntry type="library" name="Legio: io.intino.konos:konos-jms:1.0.8" level="project" />
     <orderEntry type="library" name="Legio: io.intino.konos:konos-scheduler:1.0.4" level="project" />
-    <orderEntry type="library" name="Legio: commons-logging:commons-logging:1.2" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.konos:konos-core:2.0.1" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.ness:inl:1.0.6" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.konos:konos-core:2.0.2" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.ness:inl:1.0.7" level="project" />
+    <orderEntry type="library" name="Legio: commons-logging:commons-logging:1.1.1" level="project" />
   </component>
 </module>
