@@ -53,8 +53,8 @@ public interface ManagerMBean {
 	String migrate(String tank, java.util.List<String> functions);
 
 	@Description("Reproduce events of a tank")
-	@Parameters({"tank"})
-	String reflow(String tank);
+	@Parameters({"tanks"})
+	String reflow(java.util.List<String> tanks);
 
 	@Description("Create a function associated to an input tank and output tank")
 	@Parameters({"name", "code"})

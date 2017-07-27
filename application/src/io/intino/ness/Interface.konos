@@ -45,8 +45,8 @@ Service Nessie as SlackBot
 		Parameter(String) functionName
 		Parameter(String) input
 		Parameter(String) output
-	Request ("Reproduce events of a tank") reflow
-		Parameter(String) tank
+	Request ("Reproduce events of the tanks given. 'all' word will reflow all tanks") reflow
+		Parameter(String, true) tanks
 Task toTub as CronTrigger("0 0 0 1/1 * ? *", "daily starting at 00:00")
 
 Service Manager as JMX
@@ -84,7 +84,7 @@ Service Manager as JMX
 		Parameter functions as Text List
 		Response as Text
 	Operation("Reproduce events of a tank") reflow
-		Parameter tank as Text
+		Parameter tanks as Text List
 		Response as Text
 	Operation("Create a function associated to an input tank and output tank") add-function
 		Parameter name as Text

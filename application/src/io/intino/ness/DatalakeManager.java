@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +46,10 @@ public class DatalakeManager {
 	}
 
 	private void init() {
-		for (io.intino.ness.datalake.Tank tank : station.tanks()) startFeedFlow(tank);
+		for (io.intino.ness.datalake.Tank tank : station.tanks()) {
+			startFeedFlow(tank);
+			LoggerFactory.getLogger(this.getClass()).info("Tank started: " + tank.name());
+		}
 	}
 
 	private void startFeedFlow(io.intino.ness.datalake.Tank tank) {
@@ -77,7 +81,7 @@ public class DatalakeManager {
 	public void pump(Function function, String input, String output) {
 		try {
 			station.pipe(input).to(output).with(Valve.define().filter(function.name$(), function.source()));
-			Job job = station.pump(input).to(output).start();
+			Job job = station.pump(input).to(output).asJob();
 			jobs.add(job);
 			job.thread().start();
 		} catch (Exception e) {
@@ -124,20 +128,61 @@ public class DatalakeManager {
 		consumer.stop();
 	}
 
-	public void reflow(Tank tank) {
+	public void reflow(List<Tank> tanks) {
+		if(tanks.isEmpty()) return;
+		Session session = bus.transactedSession();
+		if (session == null) {
+			logger.error("Impossible to create transacted session");
+			return;
+		}
+		doReflow(tanks, session);
+	}
+
+	private void doReflow(List<Tank> tanks, Session session) {
+		List<TankReflowManager> reflowManagers = reflowManagers(tanks, session);
+		while(flowsAreActive(reflowManagers)) beforeFlow(reflowManagers).send();
+		terminateReflow(session, reflowManagers);
+	}
+
+	private void terminateReflow(Session session, List<TankReflowManager> reflowManagers) {
 		try {
-			Session session = bus.transactedSession();
-			if (session != null) {
-				stopFeed(tank);
-				TopicProducer producer = new TopicProducer(session, tank.flowQN());
-				station.pump(tank.qualifiedName()).to(m -> producer.produce(createMessageFor(m.toString())));
-				session.commit();
-				session.close();
-				feed(tank);
-			} else logger.error("Impossible to create transacted session");
+			session.commit();
+			session.close();
+			for (TankReflowManager reflowManager : reflowManagers) feed(reflowManager.tank);
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
 		}
+	}
+
+	private TankReflowManager beforeFlow(List<TankReflowManager> reflowManagers) {
+		Instant reference = instantOf(reflowManagers.get(0).message);
+		TankReflowManager manager = reflowManagers.get(0);
+		for (int i = 1; i < reflowManagers.size(); i++) {
+			Instant comparable = instantOf(reflowManagers.get(i).message);
+			if(comparable.isBefore(reference)){
+				reference = comparable;
+				manager = reflowManagers.get(i);
+			}
+		}
+		return manager;
+	}
+
+	private Instant instantOf(io.intino.ness.inl.Message message) {
+		return message != null ? Instant.parse(message.ts()) : Instant.MAX;
+	}
+
+	private boolean flowsAreActive(List<TankReflowManager> reflowManagers) {
+		for (TankReflowManager reflowManager : reflowManagers) if (reflowManager.message != null) return true;
+		return false;
+	}
+
+	private List<TankReflowManager> reflowManagers(List<Tank> tanks, Session session) {
+		List<TankReflowManager> reflowManagers = new ArrayList<>();
+		for (Tank tank : tanks) {
+			stopFeed(tank);
+			reflowManagers.add(new TankReflowManager(tank, session));
+		}
+		return reflowManagers;
 	}
 
 	public void migrate(Tank oldTank, Tank newTank, List<Function> functions) throws Exception {
@@ -146,9 +191,8 @@ public class DatalakeManager {
 		NessStation.Pipe pipe = station.pipe(oldTank.qualifiedName());
 		for (Function function : functions) pipe = pipe.with(Valve.define().map(function.name$(), function.source()));
 		pipe.to(newTank.qualifiedName());
-		Job job = station.pump(oldTank.qualifiedName()).to(newTank.qualifiedName()).start();
+		Job job = station.pump(oldTank.qualifiedName()).to(newTank.qualifiedName()).asJob();
 		jobs.add(job);
-		job.onTerminate(() -> feedFlow(newTank));
 	}
 
 	public void seal(Tank tank) {
@@ -182,10 +226,42 @@ public class DatalakeManager {
 		AqueductManager manager = new AqueductManager(aqueduct, bus.nessSession());
 		manager.start();
 		aqueducts.put(aqueduct, manager);
+		LoggerFactory.getLogger(this.getClass()).info("Aqueduct started: " + aqueduct.name$());
 	}
 
 	public void stopAqueduct(Aqueduct aqueduct) {
 		AqueductManager aqueductManager = aqueducts.get(aqueduct);
 		aqueductManager.stop();
+	}
+
+	private class TankReflowManager {
+
+		private final Tank tank;
+		private final TopicProducer producer;
+		private final NessStation.Pump pump;
+		private io.intino.ness.inl.Message message;
+
+		TankReflowManager(Tank tank, Session session) {
+			try {
+				this.tank = tank;
+				this.producer = new TopicProducer(session, tank.flowQN());
+				this.pump = station.pump(tank.qualifiedName()).to(m -> message = m);
+				this.pump.step();
+			} catch (JMSException e) {
+				throw new RuntimeException(e.getMessage());
+			}
+		}
+
+		boolean step() {
+			if (message == null || pump.step()) return true;
+			pump.terminate();
+			message = null;
+			return false;
+		}
+
+		public void send() {
+			producer.produce(createMessageFor(message.toString()));
+			step();
+		}
 	}
 }

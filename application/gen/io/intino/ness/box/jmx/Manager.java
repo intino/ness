@@ -92,10 +92,10 @@ public class Manager implements ManagerMBean {
 		return action.execute();
 	}
 
-	public String reflow(String tank) {
+	public String reflow(java.util.List<String> tanks) {
 		io.intino.ness.box.actions.ReflowAction action = new io.intino.ness.box.actions.ReflowAction();
 		action.box = box;
-		action.tank = tank;
+		action.tanks = tanks;
 		return action.execute();
 	}
 

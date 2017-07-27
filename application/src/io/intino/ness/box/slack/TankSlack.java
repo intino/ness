@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
+
 public class TankSlack {
 	private static final String OK = ":ok_hand:";
 
@@ -45,7 +47,7 @@ public class TankSlack {
 	public String reflow(MessageProperties properties) {
 		Tank tank = Helper.findTank(box, properties.context().getObjects()[0]);
 		if (tank == null) return "Tank not found";
-		box.datalakeManager().reflow(tank);
+		box.datalakeManager().reflow(singletonList(tank));
 		return OK;
 	}
 

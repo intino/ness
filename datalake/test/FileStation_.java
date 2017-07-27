@@ -222,7 +222,7 @@ public class FileStation_ {
 
         Tank tank = station.tank(temperature_2);
         station.pipe(temperature_1).with(Valve.define().map(toFarenheit())).to(temperature_2);
-        station.pump(temperature_1).to(temperature_2).start().thread().join();
+        station.pump(temperature_1).to(temperature_2).asJob().thread().join();
 
         checkTank(tank);
     }
@@ -235,7 +235,7 @@ public class FileStation_ {
 
         Tank tank = station.tank(temperature_2);
         station.pipe(temperature_1).with(Valve.define().map(toFarenheit())).to(temperature_2);
-        station.pump(temperature_1).to(temperature_2).start().thread().join();
+        station.pump(temperature_1).to(temperature_2).asJob().thread().join();
 
         checkTank(tank);
     }
@@ -249,7 +249,7 @@ public class FileStation_ {
 
         Tank tank = station.tank(temperature_2);
         station.pipe(temperature_1).with(Valve.define().map(toFarenheit())).to(temperature_2);
-        station.pump(temperature_1).to(temperature_2).start().thread().join();
+        station.pump(temperature_1).to(temperature_2).asJob().thread().join();
 
         checkTank(tank);
     }
@@ -259,7 +259,7 @@ public class FileStation_ {
         List<Message> messages = new ArrayList<>();
         station.tank(temperature_1);
         feedTemperatures(0,19);
-        station.pump(temperature_1).to(messages::add).start().thread().join();
+        station.pump(temperature_1).to(messages::add).asJob().thread().join();
         assertThat(messages.size(), is(19));
     }
 

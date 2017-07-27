@@ -16,8 +16,6 @@ import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 
 public class AqueductManager {
 	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(AqueductManager.class);
-	private static final String ID = "aqueduct";
-
 	private final Aqueduct aqueduct;
 	private final Session ness;
 	private final Session origin;
@@ -62,7 +60,6 @@ public class AqueductManager {
 		try {
 			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(aqueduct.originURL());
 			javax.jms.Connection connection = connectionFactory.createConnection(aqueduct.user(), aqueduct.password());
-			connection.setClientID(ID);
 			session = connection.createSession(false, AUTO_ACKNOWLEDGE);
 			connection.start();
 			return session;

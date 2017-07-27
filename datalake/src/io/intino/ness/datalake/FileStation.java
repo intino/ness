@@ -277,8 +277,8 @@ public class FileStation implements NessStation {
             }
 
             @Override
-            public Job start() {
-
+            public Job asJob() {
+            	Pump pump = this;
                 return new Job() {
 
                     public boolean init() {
@@ -286,32 +286,43 @@ public class FileStation implements NessStation {
                     }
 
                     public boolean step() {
-                        try {
-                            Message message = faucet.next();
-                            if (message == null) return false;
-                            pipes.forEach(pipe -> targetTankOf(pipe).write(pipe.map(message)));
-                            posts.forEach(post -> post.send(message));
-                            return true;
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            return false;
-                        }
-                    }
-
-                    private FileTank targetTankOf(Pipe pipe) {
-                        return tanks.get(pipe.to());
+						return pump.step();
                     }
 
                     @Override
                     protected void onTerminate()  {
-                        tanks.values().forEach(FileTank::close);
-                        posts.forEach(Post::flush);
+                        pump.terminate();
                     }
 
 
                 };
             }
-        };
+
+			@Override
+			public boolean step() {
+				try {
+					Message message = faucet.next();
+					if (message == null) return false;
+					pipes.forEach(pipe -> targetTankOf(pipe).write(pipe.map(message)));
+					posts.forEach(post -> post.send(message));
+					return true;
+				} catch (IOException e) {
+					e.printStackTrace();
+					return false;
+				}
+			}
+
+
+			private FileTank targetTankOf(Pipe pipe) {
+				return tanks.get(pipe.to());
+			}
+
+			@Override
+			public void terminate() {
+				tanks.values().forEach(FileTank::close);
+				posts.forEach(Post::flush);
+			}
+		};
     }
 
     private Job createSealTaskFor(final FileTank tank) {

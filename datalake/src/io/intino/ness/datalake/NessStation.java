@@ -53,7 +53,9 @@ public interface NessStation {
     interface Pump {
         Pump to(String tank);
         Pump to(Post post);
-        Job start();
+        Job asJob();
+        boolean step();
+        void terminate();
     }
 
 }
