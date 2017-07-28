@@ -11,6 +11,25 @@ Service Nessie as SlackBot
 			Parameter(String) name
 		Request("Removes registered tank") remove-tank
 			Parameter(String) name
+		Request("Creates a function associated to an input tank and output tank. It requires the file of the function") add-function
+		Request("Removes a registered function") remove-function
+			Parameter(String) name
+		Request("Defines an external bus to interact with it using aqueducts") add-external-bus
+			Parameter(String) name
+			Parameter(String) externalBusUrl
+			Parameter(String) user
+			Parameter(String) password
+		Request("Removes a registed aqueduct") remove-external-bus
+			Parameter(String) name
+		Request("Creates a data flow between an external bus and ness. It is necesary to define de direction of the data flow (*incoming* or *outgoing*). Also it is posible to set a conversion function.") add-aqueduct
+			Parameter(String) name
+			Parameter(String) externalBus
+			Parameter(String) direction
+			Parameter(String) functionName
+			Parameter(String) tankMacro
+		Request("Removes a registed aqueduct") remove-aqueduct
+			Parameter(String) name
+
 	Request("Request all users registered in ness") users
 	Request("Request all tanks nessy is subscribed filtering by tags") tanks
 		Parameter(String, true) tags
@@ -29,17 +48,9 @@ Service Nessie as SlackBot
 
 	Request("connect out jms topic with a ness tank") start-aqueduct
 		Parameter(String) name
-		Parameter(String) originURL
-		Parameter(String) user
-		Parameter(String) password
-		Parameter(String) originTopic
-		Parameter(String) destinationTank
-		Parameter(String) functionName
+
 	Request("connect out jms topic with a ness tank") stop-aqueduct
 		Parameter(String) name
-	Request("Create a function associated to an input tank and output tank") add-function
-		Parameter(String) name
-		Parameter(String) code
 
 	Request("Connect a source and destination tanks through a `function`") pump
 		Parameter(String) functionName

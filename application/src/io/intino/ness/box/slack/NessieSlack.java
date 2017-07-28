@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static io.intino.ness.box.slack.Helper.downloadTextFile;
 import static java.util.stream.Collectors.toList;
 
 public class NessieSlack {
@@ -90,33 +89,17 @@ public class NessieSlack {
 		return "Selected " + tank.qualifiedName();
 	}
 
-	public String addFunction(MessageProperties properties, String qualifiedName, String codeURL) {
-		List<Function> functions = box.ness().functionList(f -> f.name$().equals(qualifiedName)).collect(toList());
-		if (!functions.isEmpty()) return "Function name is already defined";
-		String sourceCode = downloadTextFile(codeURL, box.configuration().nessieConfiguration().token);
-		if (sourceCode.isEmpty()) return "Code has errors or does not complies with MessageFunction interface";
-		else {
-			String result = box.datalakeManager().check(qualifiedName, sourceCode);
-			if (!result.isEmpty()) return result;
-		}
-		Function function = box.ness().create("functions", shortName(qualifiedName)).function(qualifiedName, sourceCode);
-		function.save$();
-		return OK;
-	}
 
-	public String startAqueduct(MessageProperties properties, String name, String origin, String user, String password, String originTopic, String destinationTank, String functionName) {
-		Function function = box.ness().functionList(f -> f.name$().equals(functionName)).findFirst().orElse(null);
-		if (function == null) return "Function not found";
-		Aqueduct aqueduct = box.ness().create("aqueducts", name).aqueduct(origin.replaceAll("<|>", ""), user, password, originTopic, destinationTank, function);
-		aqueduct.save$();
+	public String startAqueduct(MessageProperties properties, String name) {
+		Aqueduct aqueduct = box.ness().aqueductList(f -> f.name$().equals(name)).findFirst().orElse(null);
+		if (aqueduct == null) return "Aqueduct not found";
 		box.datalakeManager().startAqueduct(aqueduct);
 		return OK;
 	}
 
 	public String stopAqueduct(MessageProperties properties, String name) {
 		Aqueduct aqueduct = box.ness().aqueductList(f -> f.name$().equals(name)).findFirst().orElse(null);
-		if (aqueduct == null) return "Function not found";
-		aqueduct.save$();
+		if (aqueduct == null) return "Aqueduct not found";
 		box.datalakeManager().stopAqueduct(aqueduct);
 		return OK;
 	}

@@ -12,10 +12,10 @@ import io.intino.ness.datalake.NessStation.Feed;
 import io.intino.ness.datalake.Valve;
 import io.intino.ness.datalake.compiler.Compiler;
 import io.intino.ness.graph.Aqueduct;
+import io.intino.ness.graph.ExternalBus;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
 import io.intino.ness.inl.MessageFunction;
-import io.intino.ness.inl.TextMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ public class DatalakeManager {
 	private NessStation station;
 	private BusManager bus;
 	private List<Job> jobs = new ArrayList<>();
-	private Map<Aqueduct, AqueductManager> aqueducts = new HashMap<>();
+	private Map<Aqueduct, AqueductManager> runningAqueducts = new HashMap<>();
 
 	public DatalakeManager(FileStation station, BusManager bus) {
 		this.station = station;
@@ -71,9 +71,9 @@ public class DatalakeManager {
 					compile(code).
 					with("-target", "1.8").
 					load(className).
-					as(TextMapper.class).
+					as(MessageFunction.class).
 					newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 			return null;
 		}
 	}
@@ -129,7 +129,7 @@ public class DatalakeManager {
 	}
 
 	public void reflow(List<Tank> tanks) {
-		if(tanks.isEmpty()) return;
+		if (tanks.isEmpty()) return;
 		Session session = bus.transactedSession();
 		if (session == null) {
 			logger.error("Impossible to create transacted session");
@@ -140,7 +140,7 @@ public class DatalakeManager {
 
 	private void doReflow(List<Tank> tanks, Session session) {
 		List<TankReflowManager> reflowManagers = reflowManagers(tanks, session);
-		while(flowsAreActive(reflowManagers)) beforeFlow(reflowManagers).send();
+		while (flowsAreActive(reflowManagers)) beforeFlow(reflowManagers).send();
 		terminateReflow(session, reflowManagers);
 	}
 
@@ -159,7 +159,7 @@ public class DatalakeManager {
 		TankReflowManager manager = reflowManagers.get(0);
 		for (int i = 1; i < reflowManagers.size(); i++) {
 			Instant comparable = instantOf(reflowManagers.get(i).message);
-			if(comparable.isBefore(reference)){
+			if (comparable.isBefore(reference)) {
 				reference = comparable;
 				manager = reflowManagers.get(i);
 			}
@@ -223,15 +223,26 @@ public class DatalakeManager {
 	}
 
 	public void startAqueduct(Aqueduct aqueduct) {
-		AqueductManager manager = new AqueductManager(aqueduct, bus.nessSession());
+		AqueductManager manager = new AqueductManager(aqueduct, bus);
 		manager.start();
-		aqueducts.put(aqueduct, manager);
+		runningAqueducts.put(aqueduct, manager);
 		LoggerFactory.getLogger(this.getClass()).info("Aqueduct started: " + aqueduct.name$());
 	}
 
 	public void stopAqueduct(Aqueduct aqueduct) {
-		AqueductManager aqueductManager = aqueducts.get(aqueduct);
-		aqueductManager.stop();
+		AqueductManager aqueductManager = runningAqueducts.get(aqueduct);
+		if (aqueductManager != null) {
+			aqueductManager.stop();
+			runningAqueducts.remove(aqueduct);
+		}
+	}
+
+	public void removeExternalBus(ExternalBus tank) {
+
+	}
+
+	public void removeFunction(Function tank) {
+
 	}
 
 	private class TankReflowManager {

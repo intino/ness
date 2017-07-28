@@ -13,7 +13,7 @@ Artifact("io.intino.ness", "1.0.0") ness as Product
 		Compile("io.intino.ness", "inl", "1.0.7")
 
 		Compile("io.intino.konos", "konos-jms", "1.0.9")
-		Compile("io.intino.konos", "konos-slack", "1.0.9")
+		Compile("io.intino.konos", "konos-slack", "1.0.10")
 		Compile("io.intino.konos", "konos-jmx", "1.0.1")
 		Compile("io.intino.konos", "konos-scheduler", "1.0.4")
 	Code("io.intino.ness")
@@ -37,6 +37,15 @@ RunConfiguration dev
 	Argument("broker_store", "./temp/broker/")
 	Argument("broker_port", "61616")
 	Argument("mqtt_port", "1883")
+
+RunConfiguration pro
+	Argument("ness_store", "/home/intino/.ness/store")
+	Argument("ness_datalake", "/home/intino/.ness/store/datalake")
+	Argument("nessie_token", "xoxb-162074419812-gB5oNUwzxGWQ756TrRyu1Ii9")
+	Argument("broker_store", "/home/intino/.ness/broker/")
+	Argument("broker_port", "63000")
+	Argument("mqtt_port", "1884")
+
 
 Repository("intino-maven") intino
 	Release("https://artifactory.intino.io/artifactory/releases")

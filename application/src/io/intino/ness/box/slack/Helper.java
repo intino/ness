@@ -59,11 +59,11 @@ public class Helper {
 						new BufferedReader(new InputStreamReader(stream));
 				String line;
 				while ((line = reader.readLine()) != null) {
-					builder.append(line + "\n");
+					builder.append(line).append("\n");
 				}
 				return builder.toString();
 			}
-		} catch (Exception e) {
+		} catch (Exception ignored) {
 		}
 		return "";
 	}
