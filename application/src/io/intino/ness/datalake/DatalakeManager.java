@@ -1,28 +1,17 @@
-package io.intino.ness;
+package io.intino.ness.datalake;
 
 import io.intino.konos.jms.Consumer;
 import io.intino.konos.jms.TopicConsumer;
-import io.intino.konos.jms.TopicProducer;
 import io.intino.ness.bus.AqueductManager;
 import io.intino.ness.bus.BusManager;
-import io.intino.ness.datalake.FileStation;
-import io.intino.ness.datalake.Job;
-import io.intino.ness.datalake.NessStation;
 import io.intino.ness.datalake.NessStation.Feed;
-import io.intino.ness.datalake.Valve;
-import io.intino.ness.datalake.compiler.Compiler;
 import io.intino.ness.graph.Aqueduct;
-import io.intino.ness.graph.ExternalBus;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
-import io.intino.ness.inl.MessageFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.Session;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,27 +46,6 @@ public class DatalakeManager {
 		flow(tank.name(), "flow." + tank.name());
 	}
 
-	public String check(String className, String code) {
-		try {
-			return compile(className, code) != null ? "" : "";
-		} catch (Compiler.Exception e) {
-			return e.getMessage();
-		}
-	}
-
-	private MessageFunction compile(String className, String code) {
-		try {
-			return Compiler.
-					compile(code).
-					with("-target", "1.8").
-					load(className).
-					as(MessageFunction.class).
-					newInstance();
-		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-			return null;
-		}
-	}
-
 	public void pump(Function function, String input, String output) {
 		try {
 			station.pipe(input).to(output).with(Valve.define().filter(function.name$(), function.source()));
@@ -98,7 +66,7 @@ public class DatalakeManager {
 		flow(tank);
 	}
 
-	private void feed(Tank tank) {
+	public void feed(Tank tank) {
 		feed(tank.feedQN(), station.feed(tank.qualifiedName()));
 	}
 
@@ -122,67 +90,13 @@ public class DatalakeManager {
 		station.flow(tank).to(m -> bus.registerOrGetProducer(flow).produce(createMessageFor(m.toString())));
 	}
 
-	private void stopFeed(Tank tank) {
+	public void stopFeed(Tank tank) {
 		TopicConsumer consumer = bus.consumerOf(tank.feedQN());
-		if (consumer == null) return;
-		consumer.stop();
+		if (consumer != null) consumer.stop();
 	}
 
 	public void reflow(List<Tank> tanks) {
-		if (tanks.isEmpty()) return;
-		Session session = bus.transactedSession();
-		if (session == null) {
-			logger.error("Impossible to create transacted session");
-			return;
-		}
-		doReflow(tanks, session);
-	}
-
-	private void doReflow(List<Tank> tanks, Session session) {
-		List<TankReflowManager> reflowManagers = reflowManagers(tanks, session);
-		while (flowsAreActive(reflowManagers)) beforeFlow(reflowManagers).send();
-		terminateReflow(session, reflowManagers);
-	}
-
-	private void terminateReflow(Session session, List<TankReflowManager> reflowManagers) {
-		try {
-			session.commit();
-			session.close();
-			for (TankReflowManager reflowManager : reflowManagers) feed(reflowManager.tank);
-		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
-
-	private TankReflowManager beforeFlow(List<TankReflowManager> reflowManagers) {
-		Instant reference = instantOf(reflowManagers.get(0).message);
-		TankReflowManager manager = reflowManagers.get(0);
-		for (int i = 1; i < reflowManagers.size(); i++) {
-			Instant comparable = instantOf(reflowManagers.get(i).message);
-			if (comparable.isBefore(reference)) {
-				reference = comparable;
-				manager = reflowManagers.get(i);
-			}
-		}
-		return manager;
-	}
-
-	private Instant instantOf(io.intino.ness.inl.Message message) {
-		return message != null ? Instant.parse(message.ts()) : Instant.MAX;
-	}
-
-	private boolean flowsAreActive(List<TankReflowManager> reflowManagers) {
-		for (TankReflowManager reflowManager : reflowManagers) if (reflowManager.message != null) return true;
-		return false;
-	}
-
-	private List<TankReflowManager> reflowManagers(List<Tank> tanks, Session session) {
-		List<TankReflowManager> reflowManagers = new ArrayList<>();
-		for (Tank tank : tanks) {
-			stopFeed(tank);
-			reflowManagers.add(new TankReflowManager(tank, session));
-		}
-		return reflowManagers;
+		new ReflowProcess(this, bus, station).start(tanks);
 	}
 
 	public void migrate(Tank oldTank, Tank newTank, List<Function> functions) throws Exception {
@@ -237,42 +151,7 @@ public class DatalakeManager {
 		}
 	}
 
-	public void removeExternalBus(ExternalBus tank) {
-
-	}
-
-	public void removeFunction(Function tank) {
-
-	}
-
-	private class TankReflowManager {
-
-		private final Tank tank;
-		private final TopicProducer producer;
-		private final NessStation.Pump pump;
-		private io.intino.ness.inl.Message message;
-
-		TankReflowManager(Tank tank, Session session) {
-			try {
-				this.tank = tank;
-				this.producer = new TopicProducer(session, tank.flowQN());
-				this.pump = station.pump(tank.qualifiedName()).to(m -> message = m);
-				this.pump.step();
-			} catch (JMSException e) {
-				throw new RuntimeException(e.getMessage());
-			}
-		}
-
-		boolean step() {
-			if (message == null || pump.step()) return true;
-			pump.terminate();
-			message = null;
-			return false;
-		}
-
-		public void send() {
-			producer.produce(createMessageFor(message.toString()));
-			step();
-		}
+	public boolean status(Aqueduct aqueduct) {
+		return runningAqueducts.get(aqueduct) != null;
 	}
 }

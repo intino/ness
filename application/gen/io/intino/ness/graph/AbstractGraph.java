@@ -17,6 +17,7 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		this.graph.i18n().register("ness");
 	}
 
+    @Override
 	public void update() {
 		functionList = this.graph.rootList(io.intino.ness.graph.Function.class);
 		tankList = this.graph.rootList(io.intino.ness.graph.Tank.class);
@@ -24,6 +25,18 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		userList = this.graph.rootList(io.intino.ness.graph.User.class);
 		externalBusList = this.graph.rootList(io.intino.ness.graph.ExternalBus.class);
 		aqueductList = this.graph.rootList(io.intino.ness.graph.Aqueduct.class);
+	}
+
+    @Override
+	public AbstractGraph clone() {
+	    AbstractGraph graph = (AbstractGraph)super.clone();
+		graph.functionList = new java.util.ArrayList<>(this.functionList);
+		graph.tankList = new java.util.ArrayList<>(this.tankList);
+		graph.connectionList = new java.util.ArrayList<>(this.connectionList);
+		graph.userList = new java.util.ArrayList<>(this.userList);
+		graph.externalBusList = new java.util.ArrayList<>(this.externalBusList);
+		graph.aqueductList = new java.util.ArrayList<>(this.aqueductList);
+		return graph;
 	}
 
 	@Override
@@ -156,20 +169,20 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		}
 
 		public io.intino.ness.graph.Function function(java.lang.String qualifiedName, java.lang.String source) {
-			io.intino.ness.graph.Function newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.Function.class, stash, name).core$().as(io.intino.ness.graph.Function.class);
+			io.intino.ness.graph.Function newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.Function.class, stash, name).a$(io.intino.ness.graph.Function.class);
 			newElement.core$().set(newElement, "qualifiedName", java.util.Collections.singletonList(qualifiedName));
 			newElement.core$().set(newElement, "source", java.util.Collections.singletonList(source));
 			return newElement;
 		}
 
 		public io.intino.ness.graph.Tank tank(java.lang.String qualifiedName) {
-			io.intino.ness.graph.Tank newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.Tank.class, stash, name).core$().as(io.intino.ness.graph.Tank.class);
+			io.intino.ness.graph.Tank newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.Tank.class, stash, name).a$(io.intino.ness.graph.Tank.class);
 			newElement.core$().set(newElement, "qualifiedName", java.util.Collections.singletonList(qualifiedName));
 			return newElement;
 		}
 
 		public io.intino.ness.graph.Connection connection(io.intino.ness.graph.Tank faucet, io.intino.ness.graph.Tank flooder, io.intino.ness.graph.Function plug) {
-			io.intino.ness.graph.Connection newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.Connection.class, stash, name).core$().as(io.intino.ness.graph.Connection.class);
+			io.intino.ness.graph.Connection newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.Connection.class, stash, name).a$(io.intino.ness.graph.Connection.class);
 			newElement.core$().set(newElement, "faucet", java.util.Collections.singletonList(faucet));
 			newElement.core$().set(newElement, "flooder", java.util.Collections.singletonList(flooder));
 			newElement.core$().set(newElement, "plug", java.util.Collections.singletonList(plug));
@@ -177,14 +190,14 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		}
 
 		public io.intino.ness.graph.User user(java.lang.String password, java.util.List<java.lang.String> groups) {
-			io.intino.ness.graph.User newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.User.class, stash, name).core$().as(io.intino.ness.graph.User.class);
+			io.intino.ness.graph.User newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.User.class, stash, name).a$(io.intino.ness.graph.User.class);
 			newElement.core$().set(newElement, "password", java.util.Collections.singletonList(password));
 			newElement.core$().set(newElement, "groups", groups);
 			return newElement;
 		}
 
 		public io.intino.ness.graph.ExternalBus externalBus(java.lang.String originURL, java.lang.String user, java.lang.String password) {
-			io.intino.ness.graph.ExternalBus newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.ExternalBus.class, stash, name).core$().as(io.intino.ness.graph.ExternalBus.class);
+			io.intino.ness.graph.ExternalBus newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.ExternalBus.class, stash, name).a$(io.intino.ness.graph.ExternalBus.class);
 			newElement.core$().set(newElement, "originURL", java.util.Collections.singletonList(originURL));
 			newElement.core$().set(newElement, "user", java.util.Collections.singletonList(user));
 			newElement.core$().set(newElement, "password", java.util.Collections.singletonList(password));
@@ -192,7 +205,7 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		}
 
 		public io.intino.ness.graph.Aqueduct aqueduct(io.intino.ness.graph.Aqueduct.Direction direction, io.intino.ness.graph.ExternalBus bus, io.intino.ness.graph.Function transformer, java.lang.String tankMacro) {
-			io.intino.ness.graph.Aqueduct newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.Aqueduct.class, stash, name).core$().as(io.intino.ness.graph.Aqueduct.class);
+			io.intino.ness.graph.Aqueduct newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.Aqueduct.class, stash, name).a$(io.intino.ness.graph.Aqueduct.class);
 			newElement.core$().set(newElement, "direction", java.util.Collections.singletonList(direction));
 			newElement.core$().set(newElement, "bus", java.util.Collections.singletonList(bus));
 			newElement.core$().set(newElement, "transformer", java.util.Collections.singletonList(transformer));
@@ -202,28 +215,28 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 	}
 
 	public class Clear {
-	    public void function(java.util.function.Predicate<io.intino.ness.graph.Function>... filters) {
-	    	new java.util.ArrayList<>(AbstractGraph.this.functionList()).forEach(io.intino.tara.magritte.Layer::delete$);
+	    public void function(java.util.function.Predicate<io.intino.ness.graph.Function> filter) {
+	    	new java.util.ArrayList<>(AbstractGraph.this.functionList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
 	    }
 
-	    public void tank(java.util.function.Predicate<io.intino.ness.graph.Tank>... filters) {
-	    	new java.util.ArrayList<>(AbstractGraph.this.tankList()).forEach(io.intino.tara.magritte.Layer::delete$);
+	    public void tank(java.util.function.Predicate<io.intino.ness.graph.Tank> filter) {
+	    	new java.util.ArrayList<>(AbstractGraph.this.tankList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
 	    }
 
-	    public void connection(java.util.function.Predicate<io.intino.ness.graph.Connection>... filters) {
-	    	new java.util.ArrayList<>(AbstractGraph.this.connectionList()).forEach(io.intino.tara.magritte.Layer::delete$);
+	    public void connection(java.util.function.Predicate<io.intino.ness.graph.Connection> filter) {
+	    	new java.util.ArrayList<>(AbstractGraph.this.connectionList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
 	    }
 
-	    public void user(java.util.function.Predicate<io.intino.ness.graph.User>... filters) {
-	    	new java.util.ArrayList<>(AbstractGraph.this.userList()).forEach(io.intino.tara.magritte.Layer::delete$);
+	    public void user(java.util.function.Predicate<io.intino.ness.graph.User> filter) {
+	    	new java.util.ArrayList<>(AbstractGraph.this.userList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
 	    }
 
-	    public void externalBus(java.util.function.Predicate<io.intino.ness.graph.ExternalBus>... filters) {
-	    	new java.util.ArrayList<>(AbstractGraph.this.externalBusList()).forEach(io.intino.tara.magritte.Layer::delete$);
+	    public void externalBus(java.util.function.Predicate<io.intino.ness.graph.ExternalBus> filter) {
+	    	new java.util.ArrayList<>(AbstractGraph.this.externalBusList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
 	    }
 
-	    public void aqueduct(java.util.function.Predicate<io.intino.ness.graph.Aqueduct>... filters) {
-	    	new java.util.ArrayList<>(AbstractGraph.this.aqueductList()).forEach(io.intino.tara.magritte.Layer::delete$);
+	    public void aqueduct(java.util.function.Predicate<io.intino.ness.graph.Aqueduct> filter) {
+	    	new java.util.ArrayList<>(AbstractGraph.this.aqueductList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
 	    }
 	}
 }

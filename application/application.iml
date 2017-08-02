@@ -59,14 +59,12 @@
     <orderEntry type="library" name="Legio: com.mchange:mchange-commons-java:0.2.11" level="project" />
     <orderEntry type="library" name="Legio: com.zaxxer:HikariCP-java6:2.3.13" level="project" />
     <orderEntry type="library" name="Legio: org.quartz-scheduler:quartz-jobs:2.2.1" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.tara:magritte:2.0.0" level="project" />
     <orderEntry type="library" name="Legio: io.intino.tara:io:1.0" level="project" />
     <orderEntry type="library" name="Legio: com.esotericsoftware:kryo:4.0.0" level="project" />
     <orderEntry type="library" name="Legio: com.esotericsoftware:reflectasm:1.11.3" level="project" />
     <orderEntry type="library" name="Legio: org.ow2.asm:asm:5.0.4" level="project" />
     <orderEntry type="library" name="Legio: com.esotericsoftware:minlog:1.3.0" level="project" />
     <orderEntry type="library" name="Legio: org.objenesis:objenesis:2.2" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.tara:language:1.0.4" level="project" />
     <orderEntry type="library" name="Legio: commons-codec:commons-codec:1.9" level="project" />
     <orderEntry type="library" name="Legio: org.slf4j:slf4j-api:1.7.7" level="project" />
     <orderEntry type="library" name="Legio: org.glassfish.tyrus.bundles:tyrus-standalone-client:1.8.3" level="project" />
@@ -83,8 +81,10 @@
     <orderEntry type="library" name="Legio: io.intino.konos:konos-scheduler:1.0.4" level="project" />
     <orderEntry type="library" name="Legio: io.intino.konos:konos-jms:1.0.9" level="project" />
     <orderEntry type="library" name="Legio: io.intino.konos:konos-slack:1.0.10" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.konos:konos-core:2.0.2" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.ness:inl:1.0.7" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.tara:language:1.0.5" level="project" />
     <orderEntry type="library" name="Legio: commons-logging:commons-logging:1.2" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.konos:konos-core:2.0.1" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.ness:inl:1.0.6" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.tara:magritte:2.0.6" level="project" />
   </component>
 </module>

@@ -104,6 +104,15 @@ public class NessieSlack {
 		return OK;
 	}
 
+	public String aqueducts(MessageProperties properties) {
+		List<Aqueduct> aqueducts = box.ness().aqueductList();
+		if (aqueducts.isEmpty()) return "There aren't aqueducts registered";
+		StringBuilder builder = new StringBuilder();
+		for (Aqueduct aqueduct : aqueducts)
+			builder.append(aqueduct.name$()).append(": ").append(box.datalakeManager().status(aqueduct) ? " started" : " stopped").append("\n");
+		return builder.toString();
+	}
+
 	public String pump(MessageProperties properties, String functionName, String input, String output) {
 		PumpAction action = new PumpAction();
 		action.box = box;
@@ -119,5 +128,19 @@ public class NessieSlack {
 		action.box = box;
 		action.tanks = !tank[0].equalsIgnoreCase("all") ? Arrays.asList(tank) : box.ness().tankList().stream().map(Tank::qualifiedName).collect(toList());
 		return action.execute();
+	}
+
+	public String startFeedflow(MessageProperties properties, String tankName) {
+		Tank tank = Helper.findTank(box, tankName);
+		if (tank == null) return "tank not found";
+		box.datalakeManager().feed(tank);
+		return OK;
+	}
+
+	public String stopFeedflow(MessageProperties properties, String tankName) {
+		Tank tank = Helper.findTank(box, tankName);
+		if (tank == null) return "tank not found";
+		box.datalakeManager().stopFeed(tank);
+		return OK;
 	}
 }

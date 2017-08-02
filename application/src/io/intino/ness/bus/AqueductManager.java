@@ -19,12 +19,14 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
+import static io.intino.ness.graph.Aqueduct.Direction.incoming;
 import static java.lang.Thread.sleep;
 import static java.util.stream.Collectors.toList;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
+import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
 public class AqueductManager {
-	private static final Logger logger = LoggerFactory.getLogger(AqueductManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(ROOT_LOGGER_NAME);
 	private final Aqueduct aqueduct;
 	private final Session ness;
 	private final Session externalBus;
@@ -43,7 +45,7 @@ public class AqueductManager {
 	}
 
 	public void start() {
-		if (aqueduct.direction().equals(Aqueduct.Direction.incoming)) {
+		if (aqueduct.direction().equals(incoming)) {
 			for (String topic : filter(externalBusTopics(), aqueduct.tankMacro())) {
 				TopicConsumer consumer = new TopicConsumer(externalBus, topic);
 				consumer.listen(m -> sendTo(ness, topic, m));
@@ -60,7 +62,6 @@ public class AqueductManager {
 
 	private void sendTo(Session destination, String topic, Message message) {
 		try {
-			System.out.println("producing...");
 			TopicProducer producer = new TopicProducer(destination, topic);
 			String messageMapped = mapToMessage(textFrom(message));
 			producer.produce(createMessageFor(messageMapped));
@@ -76,7 +77,12 @@ public class AqueductManager {
 
 	public void stop() {
 		try {
-			for (TopicConsumer topicConsumer : topicConsumers) topicConsumer.stop();
+			TopicConsumer consumer = null;
+			for (TopicConsumer topicConsumer : topicConsumers) {
+				consumer = topicConsumer;
+				topicConsumer.stop();
+			}
+			if (consumer != null) topicConsumers.remove(consumer);
 			session.close();
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);

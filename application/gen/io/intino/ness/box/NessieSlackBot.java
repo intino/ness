@@ -60,8 +60,11 @@ public class NessieSlackBot extends Bot {
 		add("seal".toLowerCase(), "tank", java.util.Arrays.asList(), java.util.Arrays.asList(), "Seals current events of a tank to reservoir", (properties, args) -> tankSlack.seal(properties));
 		add("migrate".toLowerCase(), "tank", java.util.Arrays.asList("functions"), java.util.Arrays.asList(), "Reproduce events of a tank", (properties, args) -> tankSlack.migrate(properties, args));
 		add("reflow".toLowerCase(), "tank", java.util.Arrays.asList(), java.util.Arrays.asList(), "Reproduce events of a tank", (properties, args) -> tankSlack.reflow(properties));
+		add("start-feedflow".toLowerCase(), "", java.util.Arrays.asList("tank"), java.util.Arrays.asList(), "connect feed and flow channes of a tank", (properties, args) -> nessieSlack.startFeedflow(properties, args.length > 0 ? args[0] : ""));
+		add("stop-feedflow".toLowerCase(), "", java.util.Arrays.asList("tank"), java.util.Arrays.asList(), "stops the feed and flow channes of a tank", (properties, args) -> nessieSlack.stopFeedflow(properties, args.length > 0 ? args[0] : ""));
 		add("start-aqueduct".toLowerCase(), "", java.util.Arrays.asList("name"), java.util.Arrays.asList(), "connect out jms topic with a ness tank", (properties, args) -> nessieSlack.startAqueduct(properties, args.length > 0 ? args[0] : ""));
 		add("stop-aqueduct".toLowerCase(), "", java.util.Arrays.asList("name"), java.util.Arrays.asList(), "connect out jms topic with a ness tank", (properties, args) -> nessieSlack.stopAqueduct(properties, args.length > 0 ? args[0] : ""));
+		add("aqueducts".toLowerCase(), "", java.util.Arrays.asList(), java.util.Arrays.asList(), "list of aqueducts and its status", (properties, args) -> nessieSlack.aqueducts(properties));
 		add("pump".toLowerCase(), "", java.util.Arrays.asList("functionName", "input", "output"), java.util.Arrays.asList(), "Connect a source and destination tanks through a `function`", (properties, args) -> nessieSlack.pump(properties, args.length > 0 ? args[0] : "", args.length > 1 ? args[1] : "", args.length > 2 ? args[2] : ""));
 		add("reflow".toLowerCase(), "", java.util.Arrays.asList("tanks"), java.util.Arrays.asList(), "Reproduce events of the tanks given. 'all' word will reflow all tanks", (properties, args) -> nessieSlack.reflow(properties, args));
 		try {

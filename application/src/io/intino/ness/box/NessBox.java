@@ -1,6 +1,6 @@
 package io.intino.ness.box;
 
-import io.intino.ness.DatalakeManager;
+import io.intino.ness.datalake.DatalakeManager;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.datalake.FileStation;
 import io.intino.ness.graph.Aqueduct;

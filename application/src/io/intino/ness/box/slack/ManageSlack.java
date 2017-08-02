@@ -2,9 +2,10 @@ package io.intino.ness.box.slack;
 
 import io.intino.konos.slack.Bot;
 import io.intino.konos.slack.Bot.MessageProperties;
-import io.intino.ness.DatalakeManager;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.bus.BusManager;
+import io.intino.ness.datalake.DatalakeManager;
+import io.intino.ness.datalake.FunctionManager;
 import io.intino.ness.graph.*;
 
 import java.util.Collections;
@@ -37,6 +38,7 @@ public class ManageSlack {
 	}
 
 	public String addTank(MessageProperties properties, String tank) {
+		if (tank.isEmpty()) return "Tank is empty";
 		NessGraph ness = ness();
 		List<Tank> tanks = ness.tankList(t -> t.name$().equals(tank)).collect(toList());
 		if (!tanks.isEmpty()) return "Tank already exist";
@@ -65,11 +67,8 @@ public class ManageSlack {
 		List<Function> functions = box.ness().functionList(f -> f.name$().equals(file.name())).collect(toList());
 		if (!functions.isEmpty()) return "Function name is already defined";
 		String sourceCode = file.textContent();
-		if (sourceCode.isEmpty()) return "Code has errors or does not complies with MessageFunction interface";
-		else {
-			String result = box.datalakeManager().check(className, sourceCode);
-			if (!result.isEmpty()) return result;
-		}
+		if (sourceCode.isEmpty() || !FunctionManager.check(className, sourceCode))
+			return "Code has errors or does not complies with MessageFunction interface";
 		Function function = box.ness().create("functions", className).function(packageOf(sourceCode) + "." + className, sourceCode);
 		function.save$();
 		return OK + " ";
@@ -82,10 +81,7 @@ public class ManageSlack {
 	public String removeFunction(MessageProperties properties, String name) {
 		List<Function> functions = ness().functionList(t -> t.name$().equals(name)).collect(toList());
 		if (functions.isEmpty()) return "Function not found";
-		for (Function function : functions) {
-			datalake().removeFunction(function);
-			function.delete$();
-		}
+		for (Function function : functions) function.delete$();
 		return OK;
 	}
 
@@ -99,10 +95,7 @@ public class ManageSlack {
 	public String removeExternalBus(MessageProperties properties, String name) {
 		List<ExternalBus> buses = ness().externalBusList(t -> t.name$().equals(name)).collect(toList());
 		if (buses.isEmpty()) return "External bus not found";
-		for (ExternalBus externalBus : buses) {
-			datalake().removeExternalBus(externalBus);
-			externalBus.delete$();
-		}
+		for (ExternalBus externalBus : buses) externalBus.delete$();
 		return OK;
 	}
 
