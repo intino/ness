@@ -17,6 +17,17 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		this.graph.i18n().register("ness");
 	}
 
+	public AbstractGraph(io.intino.tara.magritte.Graph graph, AbstractGraph wrapper) {
+		this.graph = graph;
+		this.graph.i18n().register("ness");
+		this.functionList = new java.util.ArrayList<>(wrapper.functionList);
+		this.tankList = new java.util.ArrayList<>(wrapper.tankList);
+		this.connectionList = new java.util.ArrayList<>(wrapper.connectionList);
+		this.userList = new java.util.ArrayList<>(wrapper.userList);
+		this.externalBusList = new java.util.ArrayList<>(wrapper.externalBusList);
+		this.aqueductList = new java.util.ArrayList<>(wrapper.aqueductList);
+	}
+
     @Override
 	public void update() {
 		functionList = this.graph.rootList(io.intino.ness.graph.Function.class);
@@ -25,18 +36,6 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		userList = this.graph.rootList(io.intino.ness.graph.User.class);
 		externalBusList = this.graph.rootList(io.intino.ness.graph.ExternalBus.class);
 		aqueductList = this.graph.rootList(io.intino.ness.graph.Aqueduct.class);
-	}
-
-    @Override
-	public AbstractGraph clone() {
-	    AbstractGraph graph = (AbstractGraph)super.clone();
-		graph.functionList = new java.util.ArrayList<>(this.functionList);
-		graph.tankList = new java.util.ArrayList<>(this.tankList);
-		graph.connectionList = new java.util.ArrayList<>(this.connectionList);
-		graph.userList = new java.util.ArrayList<>(this.userList);
-		graph.externalBusList = new java.util.ArrayList<>(this.externalBusList);
-		graph.aqueductList = new java.util.ArrayList<>(this.aqueductList);
-		return graph;
 	}
 
 	@Override

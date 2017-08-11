@@ -1,6 +1,5 @@
 package io.intino.ness.datalake;
 
-import io.intino.konos.jms.Consumer;
 import io.intino.konos.jms.TopicConsumer;
 import io.intino.ness.bus.AqueductManager;
 import io.intino.ness.bus.BusManager;
@@ -11,12 +10,12 @@ import io.intino.ness.graph.Tank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.Message;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.intino.konos.jms.Consumer.textFrom;
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
 import static io.intino.ness.Inl.load;
 
@@ -75,11 +74,7 @@ public class DatalakeManager {
 	}
 
 	private void feed(String tank, final Feed feed) {
-		bus.registerConsumer(tank, new Consumer() {
-			public void consume(Message message) {
-				load(textFrom(message)).forEach(feed::send);
-			}
-		});
+		bus.registerConsumer(tank, message -> load(textFrom(message)).forEach(feed::send));
 	}
 
 	private void flow(Tank tank) {

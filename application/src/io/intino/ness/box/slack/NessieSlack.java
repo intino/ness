@@ -51,12 +51,12 @@ public class NessieSlack {
 
 	public String tanks(MessageProperties properties, String[] tags) {
 		StringBuilder builder = new StringBuilder().append("Tanks: \n");
-		List<Tank> tank = Helper.sortedTanks(box.ness()).collect(toList());
-		for (int i = 0; i < tank.size(); i++) {
-			Tank topic = tank.get(i);
-			if (tags.length == 0 || Helper.isTagged(tags, topic.tags()))
-				builder.append(i + 1).append(") ").append(topic.qualifiedName());
-			if (!topic.tags().isEmpty()) builder.append(" {").append(String.join(" ", topic.tags())).append("}");
+		List<Tank> tanks = Helper.sortedTanks(box.ness()).collect(toList());
+		for (int i = 0; i < tanks.size(); i++) {
+			Tank tank = tanks.get(i);
+			if (tags.length == 0 || Helper.isTagged(tags, tank.tags()))
+				builder.append(i + 1).append(") ").append(tank.qualifiedName());
+			if (!tank.tags().isEmpty()) builder.append(" {").append(String.join(" ", tank.tags())).append("}");
 			builder.append("\n");
 		}
 		String value = builder.toString();
@@ -123,24 +123,24 @@ public class NessieSlack {
 		return OK;
 	}
 
-	public String reflow(MessageProperties properties, String... tank) {
+	public String reflow(MessageProperties properties, String[] tanks) {
 		ReflowAction action = new ReflowAction();
 		action.box = box;
-		action.tanks = !tank[0].equalsIgnoreCase("all") ? Arrays.asList(tank) : box.ness().tankList().stream().map(Tank::qualifiedName).collect(toList());
+		action.tanks = !tanks[0].equalsIgnoreCase("all") ? Arrays.asList(tanks) : box.ness().tankList().stream().map(Tank::qualifiedName).collect(toList());
 		return action.execute();
 	}
 
-	public String startFeedflow(MessageProperties properties, String tankName) {
-		Tank tank = Helper.findTank(box, tankName);
-		if (tank == null) return "tank not found";
-		box.datalakeManager().feed(tank);
+	public String startFeedflow(MessageProperties properties, String tank) {
+		Tank aTank = Helper.findTank(box, tank);
+		if (aTank == null) return "tank not found";
+		box.datalakeManager().feed(aTank);
 		return OK;
 	}
 
-	public String stopFeedflow(MessageProperties properties, String tankName) {
-		Tank tank = Helper.findTank(box, tankName);
-		if (tank == null) return "tank not found";
-		box.datalakeManager().stopFeed(tank);
+	public String stopFeedflow(MessageProperties properties, String tank) {
+		Tank aTank = Helper.findTank(box, tank);
+		if (aTank == null) return "tank not found";
+		box.datalakeManager().stopFeed(aTank);
 		return OK;
 	}
 }

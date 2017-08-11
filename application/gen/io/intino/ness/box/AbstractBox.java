@@ -1,16 +1,17 @@
 package io.intino.ness.box;
 
 import java.util.LinkedHashMap;
-import java.util.logging.Logger;
 import java.util.Map;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
 
 public abstract class AbstractBox extends io.intino.konos.Box {
-	private static Logger LOG = Logger.getGlobal();
+	private static Logger logger = LoggerFactory.getLogger(ROOT_LOGGER_NAME);
 	protected NessConfiguration configuration;
 	private io.intino.konos.jmx.JMXServer manager;
 	private io.intino.konos.slack.Bot nessie;
@@ -59,6 +60,8 @@ public abstract class AbstractBox extends io.intino.konos.Box {
 
 
 
+
+
 public NessieSlackBot nessie() {
 	return (NessieSlackBot) nessie;
 }
@@ -68,7 +71,6 @@ public NessieSlackBot nessie() {
 	public io.intino.konos.scheduling.KonosTasker tasker() {
 		return this.tasker;
 	}
-
 
 	private void initRESTServices() {
 
@@ -83,6 +85,7 @@ public NessieSlackBot nessie() {
 
 	private void initJMXServices() {
 		this.manager = new JMXManager().init(((NessBox) this));
+		logger.info("JMX service Manager: started!");
 
 	}
 
@@ -90,6 +93,7 @@ public NessieSlackBot nessie() {
 
 		if (configuration().nessieConfiguration == null) return;
 		this.nessie = new NessieSlackBot((NessBox) this);
+		logger.info("Slack service Nessie: started!");
 	}
 
 	private void initActivities() {
@@ -105,7 +109,7 @@ public NessieSlackBot nessie() {
 	}
 
 	private void initLogger() {
-		final Logger logger = Logger.getGlobal();
+		final java.util.logging.Logger logger = java.util.logging.Logger.getGlobal();
 		final ConsoleHandler handler = new ConsoleHandler();
 		handler.setLevel(Level.INFO);
 		handler.setFormatter(new io.intino.konos.LogFormatter("log"));

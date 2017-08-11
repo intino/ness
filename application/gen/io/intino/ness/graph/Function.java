@@ -51,31 +51,7 @@ public class Function extends io.intino.tara.magritte.Layer implements io.intino
 		else if (name.equalsIgnoreCase("source")) this.source = (java.lang.String) values.get(0);
 	}
 
-	public Create create() {
-		return new Create(null);
-	}
 
-	public Create create(java.lang.String name) {
-		return new Create(name);
-	}
-
-	public Clear clear() {
-		return new Clear();
-	}
-
-	public class Create {
-		protected final java.lang.String name;
-
-		public Create(java.lang.String name) {
-			this.name = name;
-		}
-		
-	}
-
-	public class Clear {
-		
-	}
-	
 	public io.intino.ness.graph.NessGraph graph() {
 		return (io.intino.ness.graph.NessGraph) core$().graph().as(io.intino.ness.graph.NessGraph.class);
 	}

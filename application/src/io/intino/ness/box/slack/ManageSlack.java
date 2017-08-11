@@ -39,11 +39,12 @@ public class ManageSlack {
 
 	public String addTank(MessageProperties properties, String tank) {
 		if (tank.isEmpty()) return "Tank is empty";
+		String tankName = tank.startsWith("feed.") ? tank.replaceFirst("feed\\.", "") : tank;
 		NessGraph ness = ness();
-		List<Tank> tanks = ness.tankList(t -> t.name$().equals(tank)).collect(toList());
+		List<Tank> tanks = ness.tankList(t -> t.qualifiedName().equals(tankName)).collect(toList());
 		if (!tanks.isEmpty()) return "Tank already exist";
-		String name = tank.replaceFirst("feed\\.", "");
-		Tank newTank = ness.create("tanks").tank(name);
+		Tank newTank = ness.create("tanks").tank(tankName.replace(".", "-"));
+		newTank.qualifiedName(tankName);
 		datalake().registerTank(newTank);
 		datalake().feedFlow(newTank);
 		newTank.save$();
