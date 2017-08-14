@@ -69,5 +69,4 @@ public class TankSlack {
 	private String nextVersionOf(Tank tank) {
 		return tank.qualifiedName().replace("." + tank.version(), "." + (tank.version() + 1));
 	}
-
 }

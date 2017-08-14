@@ -10,10 +10,7 @@ import io.intino.ness.graph.Tank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.intino.konos.jms.Consumer.textFrom;
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
@@ -112,12 +109,13 @@ public class DatalakeManager {
 
 	public void removeTank(Tank tank) {
 		String qualifiedName = tank.qualifiedName();
-		bus.consumerOf(tank.feedQN()).stop();
+		TopicConsumer topicConsumer = bus.consumerOf(tank.feedQN());
+		if (topicConsumer != null) topicConsumer.stop();
 		station.remove(station.feedsTo(qualifiedName));
 		station.remove(station.flowsFrom(qualifiedName));
 		station.remove(station.pipesFrom(qualifiedName));
 		station.remove(station.pipesTo(qualifiedName));
-		station.remove(qualifiedName);
+		if (Arrays.stream(station.tanks()).anyMatch(t -> t.name().equals(qualifiedName))) station.remove(qualifiedName);
 	}
 
 	public void quit() {

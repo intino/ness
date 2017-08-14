@@ -29,9 +29,7 @@ Artifact("io.intino.ness", "1.0.0") ness as Product
 		Parameter("broker_store", "./temp/broker/")
 	Distribution(intino.frameworks, intino.languages)
 	Deployment
-		Dev(server = empty, runConfiguration = ebar-pre-ness)
-
-
+		Dev(server = ebar-pre, runConfiguration = ebar-pre-ness)
 
 Server(cesar = "cesar.pre.intino.io") ebar-pre
 
