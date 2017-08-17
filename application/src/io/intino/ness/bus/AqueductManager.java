@@ -9,6 +9,7 @@ import io.intino.ness.inl.MessageMapper;
 import io.intino.ness.inl.Text2TextMapper;
 import io.intino.ness.inl.TextMapper;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.ActiveMQSession;
 import org.apache.activemq.command.ActiveMQMessage;
 import org.apache.activemq.command.DestinationInfo;
 import org.slf4j.Logger;
@@ -28,15 +29,17 @@ import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 public class AqueductManager {
 	private static final Logger logger = LoggerFactory.getLogger(ROOT_LOGGER_NAME);
 	private final Aqueduct aqueduct;
-	private final Session ness;
+	private Session ness;
 	private final Session externalBus;
 	private final MessageFunction function;
 	private final List<String> nessTopics;
 	private final List<TopicConsumer> topicConsumers;
+	private final BusManager busManager;
 	private Session session;
 
 	public AqueductManager(Aqueduct aqueduct, BusManager busManager) {
 		this.aqueduct = aqueduct;
+		this.busManager = busManager;
 		this.ness = busManager.nessSession();
 		this.nessTopics = busManager.topics();
 		this.externalBus = initOriginSession();
@@ -53,6 +56,7 @@ public class AqueductManager {
 			}
 		} else {
 			for (String topic : filter(nessTopics, aqueduct.tankMacro())) {
+				if (((ActiveMQSession) ness).isClosed()) this.ness = busManager.nessSession();
 				TopicConsumer consumer = new TopicConsumer(ness, topic);
 				consumer.listen(m -> sendTo(externalBus, topic, m));
 				topicConsumers.add(consumer);

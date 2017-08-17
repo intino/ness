@@ -3,8 +3,7 @@ package io.intino.ness.box.slack;
 import com.ullink.slack.simpleslackapi.SlackSession;
 import io.intino.konos.slack.Bot.MessageProperties;
 import io.intino.ness.box.NessBox;
-import io.intino.ness.box.actions.PumpAction;
-import io.intino.ness.box.actions.ReflowAction;
+import io.intino.ness.box.actions.*;
 import io.intino.ness.graph.Aqueduct;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
@@ -13,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static io.intino.ness.box.slack.Helper.findTank;
 import static java.util.stream.Collectors.toList;
 
 public class NessieSlack {
@@ -82,7 +82,7 @@ public class NessieSlack {
 	}
 
 	public String tank(MessageProperties properties, String name) {
-		Tank tank = Helper.findTank(box, name);
+		Tank tank = findTank(box, name);
 		if (tank == null) return "tank not found";
 		properties.context().command("tank");
 		properties.context().objects(name);
@@ -91,17 +91,17 @@ public class NessieSlack {
 
 
 	public String startAqueduct(MessageProperties properties, String name) {
-		Aqueduct aqueduct = box.ness().aqueductList(f -> f.name$().equals(name)).findFirst().orElse(null);
-		if (aqueduct == null) return "Aqueduct not found";
-		box.datalakeManager().startAqueduct(aqueduct);
-		return OK;
+		StartAqueductAction action = new StartAqueductAction();
+		action.box = box;
+		action.name = name;
+		return action.execute();
 	}
 
 	public String stopAqueduct(MessageProperties properties, String name) {
-		Aqueduct aqueduct = box.ness().aqueductList(f -> f.name$().equals(name)).findFirst().orElse(null);
-		if (aqueduct == null) return "Aqueduct not found";
-		box.datalakeManager().stopAqueduct(aqueduct);
-		return OK;
+		StopAqueductAction action = new StopAqueductAction();
+		action.box = box;
+		action.name = name;
+		return action.execute();
 	}
 
 	public String aqueducts(MessageProperties properties) {
@@ -131,16 +131,16 @@ public class NessieSlack {
 	}
 
 	public String startFeedflow(MessageProperties properties, String tank) {
-		Tank aTank = Helper.findTank(box, tank);
-		if (aTank == null) return "tank not found";
-		box.datalakeManager().feed(aTank);
-		return OK;
+		StartFeedflowAction action = new StartFeedflowAction();
+		action.box = box;
+		action.tank = tank;
+		return action.execute();
 	}
 
 	public String stopFeedflow(MessageProperties properties, String tank) {
-		Tank aTank = Helper.findTank(box, tank);
-		if (aTank == null) return "tank not found";
-		box.datalakeManager().stopFeed(aTank);
-		return OK;
+		StopFeedflowAction action = new StopFeedflowAction();
+		action.box = box;
+		action.tank = tank;
+		return action.execute();
 	}
 }

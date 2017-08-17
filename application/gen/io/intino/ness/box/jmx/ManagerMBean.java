@@ -8,21 +8,9 @@ import java.time.*;
 
 public interface ManagerMBean {
 
-	@Description("Add user to the datalake")
-	@Parameters({"name", "groups"})
-	String addUser(String name, java.util.List<String> groups);
-
-	@Description("Remove user from ness service")
-	@Parameters({"name"})
-	String removeUser(String name);
-
-	@Description("Creates a tank")
-	@Parameters({"name"})
-	String addTank(String name);
-
-	@Description("Removes registered tank")
-	@Parameters({"name"})
-	String removeTank(String name);
+	@Description("Shows information about the available operations")
+	@Parameters({})
+	java.util.List<String> help();
 
 	@Description("Request all users registered in ness")
 	@Parameters({})
@@ -40,9 +28,9 @@ public interface ManagerMBean {
 	@Parameters({})
 	java.util.List<String> topics();
 
-	@Description("Changes name of a tank for a new one")
-	@Parameters({"tank", "name"})
-	String rename(String tank, String name);
+	@Description("list of aqueducts and its status")
+	@Parameters({})
+	java.util.List<String> aqueducts();
 
 	@Description("Seals current events of a tank to reservoir")
 	@Parameters({"tank"})
@@ -56,11 +44,67 @@ public interface ManagerMBean {
 	@Parameters({"tanks"})
 	String reflow(java.util.List<String> tanks);
 
+	@Description("Connect a source and destination tanks through a `function`")
+	@Parameters({"functionName", "input", "output"})
+	String pump(String functionName, String input, String output);
+
+	@Description("connect out jms topic with a ness tank")
+	@Parameters({"name"})
+	String startAqueduct(String name);
+
+	@Description("connect out jms topic with a ness tank")
+	@Parameters({"name"})
+	String stopAqueduct(String name);
+
+	@Description("connect feed and flow channes of a tank")
+	@Parameters({"tank"})
+	String startFeedflow(String tank);
+
+	@Description("stops the feed and flow channes of a tank")
+	@Parameters({"tank"})
+	String stopFeedflow(String tank);
+
+	@Description("Add user to the datalake")
+	@Parameters({"name"})
+	String addUser(String name);
+
+	@Description("Remove user from ness service")
+	@Parameters({"name"})
+	String removeUser(String name);
+
+	@Description("Creates a tank")
+	@Parameters({"name"})
+	String addTank(String name);
+
+	@Description("Removes registered tank")
+	@Parameters({"name"})
+	String removeTank(String name);
+
+	@Description("Changes name of a tank for a new one")
+	@Parameters({"tank", "name"})
+	String renameTank(String tank, String name);
+
 	@Description("Create a function associated to an input tank and output tank")
 	@Parameters({"name", "code"})
 	String addFunction(String name, String code);
 
-	@Description("Connect a source and destination tanks through a `function`")
-	@Parameters({"functionName", "input", "output"})
-	String pump(String functionName, String input, String output);
+	@Description("Removes a registered function")
+	@Parameters({"name"})
+	String removeFunction(String name);
+
+	@Description("Defines an external bus to interact with it using aqueducts")
+	@Parameters({"name", "externalBusUrl", "user", "password"})
+	String addExternalBus(String name, String externalBusUrl, String user, String password);
+
+	@Description("Removes a registed aqueduct")
+	@Parameters({"name"})
+	String removeExternalBus(String name);
+
+	@Description("Creates a data flow between an external bus and ness. It is necesary to define de direction of the data flow (*incoming* or *outgoing*). Also it is posible to set a conversion function.")
+	@Parameters({"name", "externalBus", "direction", "functionName", "tankMacro"})
+	String addAqueduct(String name, String externalBus, String direction, String functionName, String tankMacro);
+
+	@Description("Removes a registed aqueduct")
+	@Parameters({"name"})
+	String removeAqueduct(String name);
 }

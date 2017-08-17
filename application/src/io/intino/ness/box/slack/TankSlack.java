@@ -1,9 +1,10 @@
 package io.intino.ness.box.slack;
 
 import io.intino.konos.slack.Bot.MessageProperties;
+import io.intino.ness.box.NessBox;
+import io.intino.ness.box.actions.RenameTankAction;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
-import io.intino.ness.box.NessBox;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,9 +34,11 @@ public class TankSlack {
 	}
 
 	public String rename(MessageProperties properties, String name) {
-		Tank tank = Helper.findTank(box, properties.context().getObjects()[0]);
-		if (tank == null) return "Please select a tank";
-		return box.datalakeManager().rename(tank, name) ? OK : "Impossible to rename tank";
+		RenameTankAction action = new RenameTankAction();
+		action.box = box;
+		action.tank = properties.context().getObjects()[0];
+		action.name = name;
+		return action.execute();
 	}
 
 	public String seal(MessageProperties properties) {

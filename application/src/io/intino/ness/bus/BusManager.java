@@ -6,6 +6,7 @@ import io.intino.konos.jms.TopicProducer;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.graph.User;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.ActiveMQSession;
 import org.apache.activemq.broker.Broker;
 import org.apache.activemq.broker.BrokerPlugin;
 import org.apache.activemq.broker.BrokerService;
@@ -15,7 +16,6 @@ import org.apache.activemq.broker.region.virtual.CompositeTopic;
 import org.apache.activemq.broker.region.virtual.VirtualDestination;
 import org.apache.activemq.broker.region.virtual.VirtualDestinationInterceptor;
 import org.apache.activemq.command.ActiveMQDestination;
-import org.apache.activemq.jaas.GroupPrincipal;
 import org.apache.activemq.security.AuthenticationUser;
 import org.apache.activemq.security.SimpleAuthenticationPlugin;
 import org.apache.activemq.store.kahadb.KahaDBPersistenceAdapter;
@@ -66,6 +66,7 @@ public final class BusManager {
 	}
 
 	public Session nessSession() {
+		if (this.session == null || ((ActiveMQSession) session).isClosed()) initNessSession();
 		return session;
 	}
 
@@ -78,12 +79,12 @@ public final class BusManager {
 		return users;
 	}
 
-	public String addUser(String name, List<String> groups) {
-		if (authenticator.getUserPasswords().containsKey(name) || groups.contains("admin")) return null;
+	public String addUser(String name) {
+		if (authenticator.getUserPasswords().containsKey(name)) return null;
 		String password = PasswordGenerator.nextPassword();
 		authenticator.getUserPasswords().put(name, password);
-		authenticator.getUserGroups().put(name, groups.stream().map(GroupPrincipal::new).collect(Collectors.toSet()));
-		box.ness().create("users", name).user(password, groups).save$();
+		authenticator.getUserGroups().put(name, Collections.emptySet());
+		box.ness().create("users", name).user(password, Collections.emptyList()).save$();
 		return password;
 	}
 
