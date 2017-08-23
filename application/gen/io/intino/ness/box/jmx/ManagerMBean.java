@@ -84,6 +84,10 @@ public interface ManagerMBean {
 	@Parameters({"tank", "name"})
 	String renameTank(String tank, String name);
 
+	@Description("Removes registered topic")
+	@Parameters({"topic"})
+	Boolean removeTopic(String topic);
+
 	@Description("Create a function associated to an input tank and output tank")
 	@Parameters({"name", "code"})
 	String addFunction(String name, String code);

@@ -97,7 +97,7 @@ public final class BusManager {
 		return true;
 	}
 
-	public boolean cleanTank(String topic) {
+	public boolean removeTopic(String topic) {
 		try {
 			ActiveMQDestination destination = findTopic(topic);
 			if (destination == null) return false;
@@ -131,7 +131,6 @@ public final class BusManager {
 			logger.error(e.getMessage(), e);
 		}
 	}
-
 
 	public void registerConsumer(String feedQN, Consumer consumer) {
 		consumers.putIfAbsent(feedQN, new TopicConsumer(session, feedQN));

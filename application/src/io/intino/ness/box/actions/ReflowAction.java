@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.intino.ness.box.slack.Helper.findTank;
+import static org.apache.log4j.Logger.getRootLogger;
 
 
 public class ReflowAction extends Action {
@@ -21,6 +22,7 @@ public class ReflowAction extends Action {
 			realTanks.add(realTank);
 			if (realTank == null) return "Tank not found: " + tank;
 		}
+		getRootLogger().info("Starting reflow over " + String.join(", ", tanks));
 		new Thread(() -> box.datalakeManager().reflow(realTanks)).start();
 		return OK;
 	}

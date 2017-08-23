@@ -84,7 +84,7 @@ Service Manager as JMX
 		Parameter tank as Text
 		Parameter functions as Text List
 		Response as Text
-	Operation("Reproduce events of a tank") reflow
+	Operation("Reproduce events of a list of tanks") reflow
 		Parameter tanks as Text List
 		Response as Text
 	Operation("Connect a source and destination tanks through a `function`") pump
@@ -124,6 +124,9 @@ Service Manager as JMX
 		Parameter tank as Text
 		Parameter name as Text
 		Response as Text
+	Operation("Removes registered topic") remove-topic
+		Parameter topic as Text
+		Response as Bool
 
 	Operation("Create a function associated to an input tank and output tank") add-function
 		Parameter name as Text
