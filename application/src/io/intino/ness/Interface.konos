@@ -53,9 +53,9 @@ Service Nessie as SlackBot
 	Request ("Reproduce events of the tanks given. 'all' word will reflow all tanks") reflow
 		Parameter(String, true) tanks
 
-	Request("connect feed and flow channes of a tank") start-feedflow
+	Request("connect feed and flow channes of a tank") resume-tank
 		Parameter(String) tank
-	Request("stops the feed and flow channes of a tank") stop-feedflow
+	Request("stops the feed and flow channes of a tank") pause-tank
 		Parameter(String) tank
 	Request("connect out jms topic with a ness tank") start-aqueduct
 		Parameter(String) name

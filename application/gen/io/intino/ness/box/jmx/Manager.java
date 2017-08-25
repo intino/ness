@@ -1,8 +1,10 @@
 package io.intino.ness.box.jmx;
 
 import io.intino.ness.box.NessBox;
+import io.intino.ness.box.actions.PauseTankAction;
+import io.intino.ness.box.actions.ResumeTankAction;
+
 import java.util.*;
-import java.time.*;
 
 public class Manager implements ManagerMBean {
 
@@ -99,14 +101,14 @@ public class Manager implements ManagerMBean {
 	}
 
 	public String startFeedflow(String tank) {
-		io.intino.ness.box.actions.StartFeedflowAction action = new io.intino.ness.box.actions.StartFeedflowAction();
+		ResumeTankAction action = new ResumeTankAction();
 		action.box = box;
 		action.tank = tank;
 		return action.execute();
 	}
 
 	public String stopFeedflow(String tank) {
-		io.intino.ness.box.actions.StopFeedflowAction action = new io.intino.ness.box.actions.StopFeedflowAction();
+		PauseTankAction action = new PauseTankAction();
 		action.box = box;
 		action.tank = tank;
 		return action.execute();

@@ -131,14 +131,14 @@ public class NessieSlack {
 	}
 
 	public String startFeedflow(MessageProperties properties, String tank) {
-		StartFeedflowAction action = new StartFeedflowAction();
+		ResumeTankAction action = new ResumeTankAction();
 		action.box = box;
 		action.tank = tank;
 		return action.execute();
 	}
 
 	public String stopFeedflow(MessageProperties properties, String tank) {
-		StopFeedflowAction action = new StopFeedflowAction();
+		PauseTankAction action = new PauseTankAction();
 		action.box = box;
 		action.tank = tank;
 		return action.execute();

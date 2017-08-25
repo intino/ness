@@ -12,6 +12,9 @@ import org.apache.activemq.broker.BrokerPlugin;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.broker.region.DestinationInterceptor;
+import org.apache.activemq.broker.region.policy.ConstantPendingMessageLimitStrategy;
+import org.apache.activemq.broker.region.policy.PolicyEntry;
+import org.apache.activemq.broker.region.policy.PolicyMap;
 import org.apache.activemq.broker.region.virtual.CompositeTopic;
 import org.apache.activemq.broker.region.virtual.VirtualDestination;
 import org.apache.activemq.broker.region.virtual.VirtualDestinationInterceptor;
@@ -208,11 +211,25 @@ public final class BusManager {
 			service.setUseShutdownHook(true);
 			service.setAdvisorySupport(true);
 			service.setPlugins(new BrokerPlugin[]{authenticator});
+			addPolicies();
 			addTCPConnector();
 			addMQTTConnector();
 		} catch (Exception e) {
 			logger.error("Error configuring: " + e.getMessage(), e);
 		}
+	}
+
+	private void addPolicies() {
+		final List<PolicyEntry> policyEntries = new ArrayList<>();
+		final PolicyEntry entry = new PolicyEntry();
+		entry.setAdvisoryForDiscardingMessages(true);
+		entry.setTopicPrefetch(1);
+		ConstantPendingMessageLimitStrategy pendingMessageLimitStrategy = new ConstantPendingMessageLimitStrategy();
+		pendingMessageLimitStrategy.setLimit(100000);
+		entry.setPendingMessageLimitStrategy(pendingMessageLimitStrategy);
+		final PolicyMap policyMap = new PolicyMap();
+		policyMap.setPolicyEntries(policyEntries);
+		service.setDestinationPolicy(policyMap);
 	}
 
 	private void addTCPConnector() throws Exception {

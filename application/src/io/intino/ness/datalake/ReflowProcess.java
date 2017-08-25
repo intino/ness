@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
+import static org.apache.log4j.Logger.getRootLogger;
 import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
 class ReflowProcess {
@@ -35,6 +36,8 @@ class ReflowProcess {
 			return;
 		}
 		doReflow(tanks, session);
+		getRootLogger().info("Reflow finished");
+
 	}
 
 	private void doReflow(List<Tank> tanks, Session session) {

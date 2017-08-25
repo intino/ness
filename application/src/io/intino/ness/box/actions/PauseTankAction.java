@@ -7,7 +7,7 @@ import io.intino.ness.graph.Tank;
 import static io.intino.ness.box.actions.Action.OK;
 
 
-public class StartFeedflowAction {
+public class PauseTankAction {
 
 	public NessBox box;
 	public String tank;
@@ -15,7 +15,7 @@ public class StartFeedflowAction {
 	public String execute() {
 		Tank aTank = Helper.findTank(box, tank);
 		if (aTank == null) return "tank not found";
-		box.datalakeManager().feed(aTank);
+		box.datalakeManager().stopFeed(aTank);
 		return OK;
 	}
 }
