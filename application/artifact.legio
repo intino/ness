@@ -30,6 +30,7 @@ Artifact("io.intino.ness", "1.0.0") ness as Product
 	Distribution(intino.frameworks, intino.languages)
 	Deployment
 		Dev(server = ebar-pre, runConfiguration = ebar-pre-ness)
+			project = "ebar"
 
 Server(cesar = "cesar.pre.intino.io") ebar-pre
 
@@ -42,17 +43,17 @@ RunConfiguration dev
 	Argument("mqtt_port", "1883")
 
 RunConfiguration pro
-	Argument("ness_store", "/home/intino/.ness/store")
-	Argument("ness_datalake", "/home/intino/.ness/datalake")
+	Argument("ness_store", "$HOME/.ness/store")
+	Argument("ness_datalake", "$HOME/.ness/datalake")
 	Argument("nessie_token", "xoxb-162074419812-gB5oNUwzxGWQ756TrRyu1Ii9")
-	Argument("broker_store", "/home/intino/.ness/broker/")
+	Argument("broker_store", "$HOME/.ness/broker/")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
 
 RunConfiguration ebar-pre-ness
-	Argument("ness_store", "/home/intino/.ness/store")
-	Argument("ness_datalake", "/home/intino/.ness/datalake")
-	Argument("broker_store", "/home/intino/.ness/broker/")
+	Argument("ness_store", "$HOME/.ness/store")
+	Argument("ness_datalake", "$HOME/.ness/datalake")
+	Argument("broker_store", "$HOME/.ness/broker/")
 	Argument("broker_port", "62000")
 	Argument("mqtt_port", "1884")
 

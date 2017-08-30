@@ -30,12 +30,11 @@ public class AqueductManager {
 	private static final Logger logger = LoggerFactory.getLogger(ROOT_LOGGER_NAME);
 	private final Aqueduct aqueduct;
 	private Session ness;
-	private final Session externalBus;
+	private Session externalBus;
 	private final MessageFunction function;
 	private final List<String> nessTopics;
 	private final List<TopicConsumer> topicConsumers;
 	private final BusManager busManager;
-	private Session session;
 
 	public AqueductManager(Aqueduct aqueduct, BusManager busManager) {
 		this.aqueduct = aqueduct;
@@ -58,7 +57,10 @@ public class AqueductManager {
 			for (String topic : filter(nessTopics, aqueduct.tankMacro())) {
 				if (((ActiveMQSession) ness).isClosed()) this.ness = busManager.nessSession();
 				TopicConsumer consumer = new TopicConsumer(ness, topic);
-				consumer.listen(m -> sendTo(externalBus, topic, m));
+				consumer.listen(m -> {
+					if (((ActiveMQSession) externalBus).isClosed()) this.externalBus = initOriginSession();
+					sendTo(externalBus, topic, m);
+				});
 				topicConsumers.add(consumer);
 			}
 		}
@@ -87,7 +89,7 @@ public class AqueductManager {
 				topicConsumer.stop();
 			}
 			if (consumer != null) topicConsumers.remove(consumer);
-			session.close();
+			externalBus.close();
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -97,9 +99,9 @@ public class AqueductManager {
 		try {
 			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(aqueduct.bus().originURL());
 			javax.jms.Connection connection = connectionFactory.createConnection(aqueduct.bus().user(), aqueduct.bus().password());
-			session = connection.createSession(false, AUTO_ACKNOWLEDGE);
+			externalBus = connection.createSession(false, AUTO_ACKNOWLEDGE);
 			connection.start();
-			return session;
+			return externalBus;
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
 			return null;
@@ -109,7 +111,7 @@ public class AqueductManager {
 	private Collection<String> externalBusTopics() {
 		Set<String> topics = new HashSet<>();
 		try {
-			MessageConsumer consumer = session.createConsumer(session.createTopic("ActiveMQ.Advisory.Topic"));
+			MessageConsumer consumer = externalBus.createConsumer(externalBus.createTopic("ActiveMQ.Advisory.Topic"));
 			consumer.setMessageListener(message -> {
 				ActiveMQMessage m = (ActiveMQMessage) message;
 				if (m.getDataStructure() instanceof DestinationInfo) {
