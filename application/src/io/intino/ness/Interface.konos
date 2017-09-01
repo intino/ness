@@ -52,7 +52,9 @@ Service Nessie as SlackBot
 		Parameter(String) output
 	Request ("Reproduce events of the tanks given. 'all' word will reflow all tanks") reflow
 		Parameter(String, true) tanks
-
+	Request ("Connects two topics") pipe
+		Parameter(String) from
+		Parameter(String) to
 	Request("connect feed and flow channes of a tank") resume-tank
 		Parameter(String) tank
 	Request("stops the feed and flow channes of a tank") pause-tank
@@ -92,7 +94,10 @@ Service Manager as JMX
 		Parameter input as Text
 		Parameter output as Text
 		Response as Text
-
+	Operation("Connects source and destination topics") pipe
+		Parameter from as Text
+		Parameter to as Text
+		Response as Text
 	Operation("connect out jms topic with a ness tank") start-aqueduct
 		Parameter name as Text
 		Response as Text
@@ -100,10 +105,10 @@ Service Manager as JMX
 		Parameter name as Text
 		Response as Text
 
-	Operation("connect feed and flow channes of a tank") start-feedflow
+	Operation("connect feed and flow channes of a tank") resume-tank
 		Parameter tank as Text
 		Response as Text
-	Operation("stops the feed and flow channes of a tank") stop-feedflow
+	Operation("stops the feed and flow channes of a tank") pause-tank
 		Parameter tank as Text
 		Response as Text
 

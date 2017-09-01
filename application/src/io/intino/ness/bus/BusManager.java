@@ -119,19 +119,32 @@ public final class BusManager {
 		return true;
 	}
 
-	public void pipe(String from, String to) {
+	public boolean pipe(String from, String to) {
 		ActiveMQDestination fromTopic = findTopic(from);
 		ActiveMQDestination toTopic = findTopic(to);
+		if (toTopic == null) toTopic = createTopic(to);
+		if (toTopic == null) return false;
 		CompositeTopic virtualTopic = new CompositeTopic();
 		try {
 			virtualTopic.setName(from);
 			virtualTopic.intercept(service.getDestination(fromTopic));
-			virtualTopic.setForwardTo(Collections.singletonList(service.getDestination(toTopic)));
+			virtualTopic.setForwardTo(Collections.singletonList(toTopic));
 			VirtualDestinationInterceptor interceptor = new VirtualDestinationInterceptor();
 			interceptor.setVirtualDestinations(new VirtualDestination[]{virtualTopic});
 			service.setDestinationInterceptors(new DestinationInterceptor[]{interceptor});
+			return true;
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			return false;
+		}
+	}
+
+	private ActiveMQDestination createTopic(String name) {
+		try {
+			return (ActiveMQDestination) session.createTopic(name);
+		} catch (JMSException e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 
@@ -270,6 +283,7 @@ public final class BusManager {
 					d.getPhysicalName() + " Consumers:" + advisoryManager.consumersOf(d) + " Producers:" + advisoryManager.producersOf(d) + " Enqueued:" + advisoryManager.enqueuedMessageOf(d) +
 							" Enqueued:" + advisoryManager.dequeuedMessageOf(d)).collect(Collectors.toList());
 		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
 			return Collections.emptyList();
 		}
 	}

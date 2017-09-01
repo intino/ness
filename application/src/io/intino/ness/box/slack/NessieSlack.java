@@ -130,14 +130,22 @@ public class NessieSlack {
 		return action.execute();
 	}
 
-	public String startFeedflow(MessageProperties properties, String tank) {
+	public String pipe(MessageProperties properties, String from, String to) {
+		PipeAction action = new PipeAction();
+		action.box = box;
+		action.from = from;
+		action.to = to;
+		return action.execute();
+	}
+
+	public String resumeTank(MessageProperties properties, String tank) {
 		ResumeTankAction action = new ResumeTankAction();
 		action.box = box;
 		action.tank = tank;
 		return action.execute();
 	}
 
-	public String stopFeedflow(MessageProperties properties, String tank) {
+	public String pauseTank(MessageProperties properties, String tank) {
 		PauseTankAction action = new PauseTankAction();
 		action.box = box;
 		action.tank = tank;

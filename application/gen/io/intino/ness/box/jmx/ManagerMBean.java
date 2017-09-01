@@ -40,13 +40,17 @@ public interface ManagerMBean {
 	@Parameters({"tank", "functions"})
 	String migrate(String tank, java.util.List<String> functions);
 
-	@Description("Reproduce events of a tank")
+	@Description("Reproduce events of a list of tanks")
 	@Parameters({"tanks"})
 	String reflow(java.util.List<String> tanks);
 
 	@Description("Connect a source and destination tanks through a `function`")
 	@Parameters({"functionName", "input", "output"})
 	String pump(String functionName, String input, String output);
+
+	@Description("Connects source and destination topics")
+	@Parameters({"from", "to"})
+	String pipe(String from, String to);
 
 	@Description("connect out jms topic with a ness tank")
 	@Parameters({"name"})
@@ -58,11 +62,11 @@ public interface ManagerMBean {
 
 	@Description("connect feed and flow channes of a tank")
 	@Parameters({"tank"})
-	String startFeedflow(String tank);
+	String resumeTank(String tank);
 
 	@Description("stops the feed and flow channes of a tank")
 	@Parameters({"tank"})
-	String stopFeedflow(String tank);
+	String pauseTank(String tank);
 
 	@Description("Add user to the datalake")
 	@Parameters({"name"})

@@ -48,12 +48,12 @@ public class AdvisoryManager {
 	}
 
 	public int consumersOf(ActiveMQDestination d) {
-		return info.get(d.getPhysicalName()).consumers;
+		return info.get(d.getPhysicalName()) == null ? 0 : info.get(d.getPhysicalName()).consumers;
 	}
 
 
 	public int producersOf(ActiveMQDestination d) {
-		return info.get(d.getPhysicalName()).producers;
+		return info.get(d.getPhysicalName()) == null ? 0 : info.get(d.getPhysicalName()).producers;
 	}
 
 	public int enqueuedMessageOf(ActiveMQDestination d) {

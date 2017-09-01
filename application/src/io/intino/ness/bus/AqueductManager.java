@@ -70,7 +70,7 @@ public class AqueductManager {
 		try {
 			TopicProducer producer = new TopicProducer(destination, topic);
 			String messageMapped = mapToMessage(textFrom(message));
-			producer.produce(createMessageFor(messageMapped));
+			if (!messageMapped.isEmpty()) producer.produce(createMessageFor(messageMapped));
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -118,7 +118,7 @@ public class AqueductManager {
 					topics.add(((DestinationInfo) m.getDataStructure()).getDestination().getPhysicalName());
 				}
 			});
-			sleep(1000);
+			sleep(3000);
 			consumer.close();
 		} catch (JMSException | InterruptedException e) {
 			logger.error(e.getMessage(), e);
@@ -127,9 +127,16 @@ public class AqueductManager {
 	}
 
 	private String mapToMessage(String message) {
-		if (function instanceof TextMapper) return ((TextMapper) function).map(message).toString();
-		if (function instanceof Text2TextMapper) return ((Text2TextMapper) function).map(message);
-		else return ((MessageMapper) function).map(io.intino.ness.inl.Message.load(message)).toString();
+		if (function instanceof Text2TextMapper) {
+			String newMessage = ((Text2TextMapper) function).map(message);
+			return newMessage == null ? "" : newMessage;
+		}
+		if (function instanceof TextMapper) {
+			io.intino.ness.inl.Message newMessage = ((TextMapper) function).map(message);
+			return newMessage == null ? "" : newMessage.toString();
+		}
+		io.intino.ness.inl.Message newMessage = ((MessageMapper) function).map(io.intino.ness.inl.Message.load(message));
+		return newMessage == null ? "" : newMessage.toString();
 	}
 
 	private Compiler.Result compile(String function, String... sources) {
