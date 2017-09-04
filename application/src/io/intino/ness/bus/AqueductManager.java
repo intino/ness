@@ -41,9 +41,9 @@ public class AqueductManager {
 		this.busManager = busManager;
 		this.ness = busManager.nessSession();
 		this.nessTopics = busManager.topics();
-		this.externalBus = initOriginSession();
 		this.function = map(aqueduct.transformer().qualifiedName(), aqueduct.transformer().source());
 		this.topicConsumers = new ArrayList<>();
+		initForeignSession();
 	}
 
 	public void start() {
@@ -58,7 +58,7 @@ public class AqueductManager {
 				if (((ActiveMQSession) ness).isClosed()) this.ness = busManager.nessSession();
 				TopicConsumer consumer = new TopicConsumer(ness, topic);
 				consumer.listen(m -> {
-					if (((ActiveMQSession) externalBus).isClosed()) this.externalBus = initOriginSession();
+					if (externalBus == null || ((ActiveMQSession) externalBus).isClosed()) initForeignSession();
 					sendTo(externalBus, topic, m);
 				});
 				topicConsumers.add(consumer);
@@ -95,20 +95,19 @@ public class AqueductManager {
 		}
 	}
 
-	private Session initOriginSession() {
+	private void initForeignSession() {
 		try {
 			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(aqueduct.bus().originURL());
 			javax.jms.Connection connection = connectionFactory.createConnection(aqueduct.bus().user(), aqueduct.bus().password());
 			externalBus = connection.createSession(false, AUTO_ACKNOWLEDGE);
 			connection.start();
-			return externalBus;
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
-			return null;
 		}
 	}
 
 	private Collection<String> externalBusTopics() {
+		if (externalBus == null || ((ActiveMQSession) externalBus).isClosed()) initForeignSession();
 		Set<String> topics = new HashSet<>();
 		try {
 			MessageConsumer consumer = externalBus.createConsumer(externalBus.createTopic("ActiveMQ.Advisory.Topic"));
