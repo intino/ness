@@ -17,8 +17,8 @@ Artifact("io.intino.ness", "1.0.0") ness as Product
 		Compile("io.intino.konos", "konos-jmx", "1.0.1")
 		Compile("io.intino.konos", "konos-scheduler", "1.0.4")
 	Code("io.intino.ness")
-	Model("Proteo", "2.1.3", "2.1.3")
-	Box("Konos", "2.1.2", "2.1.2")
+	Model("Proteo", "2.1.4", "2.1.4")
+	Box("Konos", "2.1.4", "2.1.4")
 
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness") as Runnable("io.intino.ness.box.Main")
 		classpathPrefix = "lib"
@@ -28,7 +28,7 @@ Artifact("io.intino.ness", "1.0.0") ness as Product
 		Parameter("mqtt_port", "1883")
 		Parameter("broker_store", "./temp/broker/")
 	Distribution(intino.frameworks, intino.languages)
-	Deployment
+	Deployment ness-ebar
 		Dev(server = ebar-pre, runConfiguration = ebar-pre-ness)
 			project = "ebar"
 

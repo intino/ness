@@ -89,10 +89,16 @@ public class ManageSlack {
 		return action.execute();
 	}
 
-	public Object removeAqueduct(MessageProperties properties, String name) {
+	public String removeAqueduct(MessageProperties properties, String name) {
 		RemoveAqueductAction action = new RemoveAqueductAction();
 		action.box = box;
 		action.name = name;
+		return action.execute();
+	}
+
+	public String pipes(MessageProperties properties) {
+		PipesAction action = new PipesAction();
+		action.box = box;
 		return action.execute();
 	}
 }

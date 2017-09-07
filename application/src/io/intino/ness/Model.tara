@@ -30,3 +30,7 @@ Concept Aqueduct
 	var ExternalBus bus
 	var Function transformer
 	var string tankMacro
+
+Concept Pipe
+	var string origin
+	var string destination

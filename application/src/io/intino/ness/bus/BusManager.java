@@ -95,8 +95,8 @@ public final class BusManager {
 		if (name.equals(NESS)) return false;
 		authenticator.getUserGroups().remove(name);
 		authenticator.getUserPasswords().remove(name);
-		User user1 = box.ness().userList(user -> user.name$().equals(name)).findFirst().orElse(null);
-		user1.core$().delete();
+		User user = box.ness().userList(u -> u.name$().equals(name)).findFirst().orElse(null);
+		user.core$().delete();
 		return true;
 	}
 

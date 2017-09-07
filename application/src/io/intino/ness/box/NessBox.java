@@ -1,10 +1,11 @@
 package io.intino.ness.box;
 
-import io.intino.ness.datalake.DatalakeManager;
 import io.intino.ness.bus.BusManager;
+import io.intino.ness.datalake.DatalakeManager;
 import io.intino.ness.datalake.FileStation;
 import io.intino.ness.graph.Aqueduct;
 import io.intino.ness.graph.NessGraph;
+import io.intino.ness.graph.Pipe;
 import io.intino.tara.magritte.Graph;
 
 public class NessBox extends AbstractBox {
@@ -33,7 +34,12 @@ public class NessBox extends AbstractBox {
 		busManager.start();
 		datalakeManager = new DatalakeManager(new FileStation(configuration.args().get("ness_datalake")), busManager);
 		initAqueducts();
+		initPipes();
 		return this;
+	}
+
+	private void initPipes() {
+		for (Pipe pipe : graph.pipeList()) busManager().pipe(pipe.origin(), pipe.destination());
 	}
 
 	private void initAqueducts() {

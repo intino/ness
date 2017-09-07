@@ -52,6 +52,10 @@ public interface ManagerMBean {
 	@Parameters({"from", "to"})
 	String pipe(String from, String to);
 
+	@Description("Connects source and destination topics")
+	@Parameters({})
+	String pipes();
+
 	@Description("connect out jms topic with a ness tank")
 	@Parameters({"name"})
 	String startAqueduct(String name);
@@ -99,6 +103,10 @@ public interface ManagerMBean {
 	@Description("Removes a registered function")
 	@Parameters({"name"})
 	String removeFunction(String name);
+
+	@Description("Removes a registered function")
+	@Parameters({"origin"})
+	String removePipes(String origin);
 
 	@Description("Defines an external bus to interact with it using aqueducts")
 	@Parameters({"name", "externalBusUrl", "user", "password"})

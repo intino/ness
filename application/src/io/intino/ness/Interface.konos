@@ -30,7 +30,7 @@ Service Nessie as SlackBot
 			Parameter(String) tankMacro
 		Request("Removes a registed aqueduct") remove-aqueduct
 			Parameter(String) name
-
+		Request("Connects source and destination topics") pipes
 	Request("Request all users registered in ness") users
 	Request("Request all tanks nessy is subscribed filtering by tags") tanks
 		Parameter(String, true) tags
@@ -98,6 +98,8 @@ Service Manager as JMX
 		Parameter from as Text
 		Parameter to as Text
 		Response as Text
+	Operation("Connects source and destination topics") pipes
+		Response as Text
 	Operation("connect out jms topic with a ness tank") start-aqueduct
 		Parameter name as Text
 		Response as Text
@@ -139,6 +141,9 @@ Service Manager as JMX
 		Response as Text
 	Operation("Removes a registered function") remove-function
 		Parameter name as Text
+		Response as Text
+	Operation("Removes a registered function") remove-pipes
+		Parameter origin as Text
 		Response as Text
 
 	Operation("Defines an external bus to interact with it using aqueducts") add-external-bus

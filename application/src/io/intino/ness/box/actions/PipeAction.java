@@ -16,7 +16,9 @@ public class PipeAction {
 	public String execute() {
 		List<String> topics = box.busManager().topics();
 		if (!topics.contains(from)) return "Origin topic not found";
-		box.busManager().pipe(from, to);
+		if (box.busManager().pipe(from, to)) {
+			box.ness().create("pipes").pipe(from, to).save$();
+		}
 		return OK;
 	}
 }
