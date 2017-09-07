@@ -1,7 +1,7 @@
 package io.intino.ness.box.actions;
 
 import io.intino.ness.box.NessBox;
-import io.intino.ness.datalake.FunctionManager;
+import io.intino.ness.datalake.FunctionHelper;
 import io.intino.ness.graph.Function;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public class AddFunctionAction {
 		List<Function> functions = box.ness().functionList(f -> f.name$().equals(name)).collect(toList());
 		if (!functions.isEmpty()) return "Function name is already defined";
 		String thePackage = packageOf(code);
-		if (code.isEmpty() || !FunctionManager.check(thePackage + "." + name, code))
+		if (code.isEmpty() || !FunctionHelper.check(thePackage + "." + name, code))
 			return "Code has errors or does not complies with MessageFunction interface";
 		Function function = box.ness().create("functions", name).function(thePackage + "." + name, code);
 		function.save$();

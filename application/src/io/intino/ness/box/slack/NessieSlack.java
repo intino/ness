@@ -130,14 +130,6 @@ public class NessieSlack {
 		return action.execute();
 	}
 
-	public String pipe(MessageProperties properties, String from, String to) {
-		PipeAction action = new PipeAction();
-		action.box = box;
-		action.from = from;
-		action.to = to;
-		return action.execute();
-	}
-
 	public String resumeTank(MessageProperties properties, String tank) {
 		ResumeTankAction action = new ResumeTankAction();
 		action.box = box;
@@ -149,6 +141,15 @@ public class NessieSlack {
 		PauseTankAction action = new PauseTankAction();
 		action.box = box;
 		action.tank = tank;
+		return action.execute();
+	}
+
+	public String addPipe(MessageProperties properties, String from, String to, String functionName) {
+		AddPipeAction action = new AddPipeAction();
+		action.box = box;
+		action.from = from;
+		action.to = to;
+		action.functionName = functionName;
 		return action.execute();
 	}
 }

@@ -50,11 +50,12 @@ Service Nessie as SlackBot
 		Parameter(String) functionName
 		Parameter(String) input
 		Parameter(String) output
-	Request ("Reproduce events of the tanks given. 'all' word will reflow all tanks") reflow
-		Parameter(String, true) tanks
-	Request ("Connects two topics") pipe
+	Request ("Connects source and destination topics real-time, optionaly converting the message with a function") add-pipe
 		Parameter(String) from
 		Parameter(String) to
+		Parameter(String) functionName
+	Request ("Reproduce events of the tanks given. 'all' word will reflow all tanks") reflow
+		Parameter(String, true) tanks
 	Request("connect feed and flow channes of a tank") resume-tank
 		Parameter(String) tank
 	Request("stops the feed and flow channes of a tank") pause-tank
@@ -69,15 +70,91 @@ Service Nessie as SlackBot
 Service Manager as JMX
 	Operation("Request all users registered in ness") users
 		Response as Text List
+	Operation("Add user to the datalake") add-user
+		Parameter name as Text
+		Response as Text
+	Operation("Remove user from ness service") remove-user
+		Parameter name as Text
+		Response as Text
+
 	Operation("Request all tanks nessy is subscribed filtering by tags") tanks
 		Parameter tags as Text List
 		Response as Text List
-	Operation("Show all functions registered") functions
-		Response as Text List
+	Operation("connect feed and flow channes of a tank") resume-tank
+		Parameter tank as Text
+		Response as Text
+	Operation("stops the feed and flow channes of a tank") pause-tank
+		Parameter tank as Text
+		Response as Text
+	Operation("Creates a tank") add-tank
+		Parameter name as Text
+		Response as Text
+	Operation("Removes registered tank") remove-tank
+		Parameter name as Text
+		Response as Text
+	Operation("Changes name of a tank for a new one") rename-tank
+		Parameter tank as Text
+		Parameter name as Text
+		Response as Text
+
+	Operation("Connects source and destination topics") pipes
+		Response as Text
+	Operation("Connects source and destination topics real-time, optionaly converting the message with a function") add-pipe
+		Parameter from as Text
+		Parameter to as Text
+		Parameter functionName as Text
+		Response as Text
+	Operation("Removes a registered function") remove-pipes
+		Parameter origin as Text
+		Response as Text
+
 	Operation("Show registered topics") topics
 		Response as Text List
+	Operation("Removes registered topic") remove-topic
+		Parameter topic as Text
+		Response as Bool
+
+	Operation("Show all functions registered") functions
+		Response as Text List
+	Operation("Create a function associated to an input tank and output tank") add-function
+		Parameter name as Text
+		Parameter code as Text
+		Response as Text
+	Operation("Removes a registered function") remove-function
+		Parameter name as Text
+		Response as Text
+
+	Operation("list of external buses") external-buses
+		Response as Text List
+	Operation("Defines an external bus to interact with it using aqueducts") add-external-bus
+		Parameter name  as Text
+		Parameter externalBusUrl  as Text
+		Parameter user  as Text
+		Parameter password  as Text
+		Response as Text
+	Operation("Removes a registed aqueduct") remove-external-bus
+		Parameter name as Text
+		Response as Text
+
 	Operation("list of aqueducts and its status") aqueducts
 		Response as Text List
+	Operation("Creates a data flow between an external bus and ness. It is necesary to define de direction of the data flow (*incoming* or *outgoing*). Also it is posible to set a conversion function.") add-aqueduct
+		Parameter name as Text
+		Parameter externalBus as Text
+		Parameter direction as Text
+		Parameter functionName as Text
+		Parameter tankMacro as Text
+		Response as Text
+	Operation("Removes a registed aqueduct") remove-aqueduct
+		Parameter name as Text
+		Response as Text
+	Operation("connect out jms topic with a ness tank") start-aqueduct
+		Parameter name as Text
+		Response as Text
+	Operation("connect out jms topic with a ness tank") stop-aqueduct
+		Parameter name as Text
+		Response as Text
+
 
 	Operation("Seals current events of a tank to reservoir") seal
 		Parameter tank as Text
@@ -94,76 +171,3 @@ Service Manager as JMX
 		Parameter input as Text
 		Parameter output as Text
 		Response as Text
-	Operation("Connects source and destination topics") pipe
-		Parameter from as Text
-		Parameter to as Text
-		Response as Text
-	Operation("Connects source and destination topics") pipes
-		Response as Text
-	Operation("connect out jms topic with a ness tank") start-aqueduct
-		Parameter name as Text
-		Response as Text
-	Operation("connect out jms topic with a ness tank") stop-aqueduct
-		Parameter name as Text
-		Response as Text
-
-	Operation("connect feed and flow channes of a tank") resume-tank
-		Parameter tank as Text
-		Response as Text
-	Operation("stops the feed and flow channes of a tank") pause-tank
-		Parameter tank as Text
-		Response as Text
-
-	Operation("Add user to the datalake") add-user
-		Parameter name as Text
-		Response as Text
-	Operation("Remove user from ness service") remove-user
-		Parameter name as Text
-		Response as Text
-
-	Operation("Creates a tank") add-tank
-		Parameter name as Text
-		Response as Text
-	Operation("Removes registered tank") remove-tank
-		Parameter name as Text
-		Response as Text
-	Operation("Changes name of a tank for a new one") rename-tank
-		Parameter tank as Text
-		Parameter name as Text
-		Response as Text
-	Operation("Removes registered topic") remove-topic
-		Parameter topic as Text
-		Response as Bool
-
-	Operation("Create a function associated to an input tank and output tank") add-function
-		Parameter name as Text
-		Parameter code as Text
-		Response as Text
-	Operation("Removes a registered function") remove-function
-		Parameter name as Text
-		Response as Text
-	Operation("Removes a registered function") remove-pipes
-		Parameter origin as Text
-		Response as Text
-
-	Operation("Defines an external bus to interact with it using aqueducts") add-external-bus
-		Parameter name  as Text
-		Parameter externalBusUrl  as Text
-		Parameter user  as Text
-		Parameter password  as Text
-		Response as Text
-	Operation("Removes a registed aqueduct") remove-external-bus
-		Parameter name as Text
-		Response as Text
-
-	Operation("Creates a data flow between an external bus and ness. It is necesary to define de direction of the data flow (*incoming* or *outgoing*). Also it is posible to set a conversion function.") add-aqueduct
-		Parameter name as Text
-		Parameter externalBus as Text
-		Parameter direction as Text
-		Parameter functionName as Text
-		Parameter tankMacro as Text
-		Response as Text
-	Operation("Removes a registed aqueduct") remove-aqueduct
-		Parameter name as Text
-		Response as Text
-

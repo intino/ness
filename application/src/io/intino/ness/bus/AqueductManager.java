@@ -1,13 +1,7 @@
 package io.intino.ness.bus;
 
 import io.intino.konos.jms.TopicConsumer;
-import io.intino.konos.jms.TopicProducer;
-import io.intino.ness.datalake.compiler.Compiler;
 import io.intino.ness.graph.Aqueduct;
-import io.intino.ness.inl.MessageFunction;
-import io.intino.ness.inl.MessageMapper;
-import io.intino.ness.inl.Text2TextMapper;
-import io.intino.ness.inl.TextMapper;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQSession;
 import org.apache.activemq.command.ActiveMQMessage;
@@ -15,11 +9,13 @@ import org.apache.activemq.command.DestinationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.*;
+import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
+import javax.jms.Session;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static io.intino.konos.jms.MessageFactory.createMessageFor;
+import static io.intino.ness.bus.MessageSender.send;
 import static io.intino.ness.graph.Aqueduct.Direction.incoming;
 import static java.lang.Thread.sleep;
 import static java.util.stream.Collectors.toList;
@@ -31,7 +27,6 @@ public class AqueductManager {
 	private final Aqueduct aqueduct;
 	private Session ness;
 	private Session externalBus;
-	private final MessageFunction function;
 	private final List<String> nessTopics;
 	private final List<TopicConsumer> topicConsumers;
 	private final BusManager busManager;
@@ -41,7 +36,6 @@ public class AqueductManager {
 		this.busManager = busManager;
 		this.ness = busManager.nessSession();
 		this.nessTopics = busManager.topics();
-		this.function = map(aqueduct.transformer().qualifiedName(), aqueduct.transformer().source());
 		this.topicConsumers = new ArrayList<>();
 		initForeignSession();
 	}
@@ -50,7 +44,7 @@ public class AqueductManager {
 		if (aqueduct.direction().equals(incoming)) {
 			for (String topic : filter(externalBusTopics(), aqueduct.tankMacro())) {
 				TopicConsumer consumer = new TopicConsumer(externalBus, topic);
-				consumer.listen(m -> sendTo(ness, topic, m));
+				consumer.listen(m -> send(ness, topic, m, aqueduct.transformer()));
 				topicConsumers.add(consumer);
 			}
 		} else {
@@ -59,20 +53,10 @@ public class AqueductManager {
 				TopicConsumer consumer = new TopicConsumer(ness, topic);
 				consumer.listen(m -> {
 					if (externalBus == null || ((ActiveMQSession) externalBus).isClosed()) initForeignSession();
-					sendTo(externalBus, topic, m);
+					send(externalBus, topic, m, aqueduct.transformer());
 				});
 				topicConsumers.add(consumer);
 			}
-		}
-	}
-
-	private void sendTo(Session destination, String topic, Message message) {
-		try {
-			TopicProducer producer = new TopicProducer(destination, topic);
-			String messageMapped = mapToMessage(textFrom(message));
-			if (!messageMapped.isEmpty()) producer.produce(createMessageFor(messageMapped));
-		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -123,50 +107,5 @@ public class AqueductManager {
 			logger.error(e.getMessage(), e);
 		}
 		return filter(topics, aqueduct.tankMacro());
-	}
-
-	private String mapToMessage(String message) {
-		if (function instanceof Text2TextMapper) {
-			String newMessage = ((Text2TextMapper) function).map(message);
-			return newMessage == null ? "" : newMessage;
-		}
-		if (function instanceof TextMapper) {
-			io.intino.ness.inl.Message newMessage = ((TextMapper) function).map(message);
-			return newMessage == null ? "" : newMessage.toString();
-		}
-		io.intino.ness.inl.Message newMessage = ((MessageMapper) function).map(io.intino.ness.inl.Message.load(message));
-		return newMessage == null ? "" : newMessage.toString();
-	}
-
-	private Compiler.Result compile(String function, String... sources) {
-		return Compiler.compile(sources)
-				.with("-target", "1.8")
-				.load(function);
-	}
-
-	private MessageFunction map(String function, String... sources) {
-		try {
-			return map(compile(function, sources).as(MessageFunction.class));
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return null;
-		}
-	}
-
-	private MessageFunction map(Class<? extends MessageFunction> mapperClass) throws Exception {
-		return mapperClass.newInstance();
-	}
-
-	private static String textFrom(Message message) {
-		try {
-			if (message instanceof BytesMessage) {
-				byte[] data = new byte[(int) ((BytesMessage) message).getBodyLength()];
-				((BytesMessage) message).readBytes(data);
-				return new String(data);
-			} else return ((TextMessage) message).getText();
-		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
-			return "";
-		}
 	}
 }

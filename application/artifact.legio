@@ -31,13 +31,17 @@ Artifact("io.intino.ness", "1.0.0") ness as Product
 	Deployment ness-ebar
 		Dev(server = ebar-pre, runConfiguration = ebar-pre-ness)
 			project = "ebar"
-
+	Deployment ness-dev
+		Dev(server = consul-dev, runConfiguration = ebar-pre-ness)
+			project = "dev"
 Server(cesar = "cesar.pre.intino.io") ebar-pre
+
+Server(cesar = "cesar.pre.intino.io") consul-dev
 
 RunConfiguration dev
 	Argument("ness_store", "./temp/store")
 	Argument("ness_datalake", "./temp/datalake")
-	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
+//	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
 	Argument("broker_store", "./temp/broker/")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1883")
