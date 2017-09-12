@@ -319,7 +319,6 @@ public class Accessory {
 		try {
 			return Class.forName("java.time.Instant");
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
@@ -332,14 +331,26 @@ public class Accessory {
 				public Object parse(String text) {
 					try {
 						return method.invoke(null, text);
-					} catch (Exception e) {
-						e.printStackTrace();
-						return null;
+					} catch (Throwable e) {
+						return simpleDateFormatter(text);
 					}
 				}
 			};
 		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private static Object simpleDateFormatter(String text) {
+		try {
+			Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").parse(text);
+			Method toInstant = Date.class.getDeclaredMethod("toInstant");
+			try {
+				return toInstant.invoke(date, text);
+			} catch (Throwable e) {
+				return null;
+			}
+		} catch (ParseException | NoSuchMethodException e) {
 			return null;
 		}
 	}

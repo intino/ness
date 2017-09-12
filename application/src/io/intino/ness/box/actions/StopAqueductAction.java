@@ -14,7 +14,7 @@ public class StopAqueductAction {
 	public String execute() {
 		Aqueduct aqueduct = box.ness().aqueductList(f -> f.name$().equals(name)).findFirst().orElse(null);
 		if (aqueduct == null) return "Aqueduct not found";
-		box.datalakeManager().stopAqueduct(aqueduct);
+		box.datalakeManager().stopBusPipe(aqueduct);
 		return OK;
 	}
 }

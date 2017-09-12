@@ -39,7 +39,7 @@ public class MessageSender {
 		io.intino.ness.inl.Message newMessage = ((MessageMapper) function).map(io.intino.ness.inl.Message.load(message));
 		return newMessage == null ? "" : newMessage.toString();
 	}
-	
+
 	private static String textFrom(Message message) {
 		try {
 			if (message instanceof BytesMessage) {

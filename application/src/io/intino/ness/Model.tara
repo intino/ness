@@ -8,6 +8,7 @@ Concept Tank
 	var string qualifiedName
 	var string feedQN = '"feed." + self.qualifiedName()' is reactive
 	var string flowQN = '"flow." + self.qualifiedName()' is reactive
+	var string dropQN = '"drop." + self.qualifiedName()' is reactive
 	var string[] tags = empty
 	var integer version = @version is reactive
 
@@ -34,3 +35,4 @@ Concept Aqueduct
 Concept Pipe
 	var string origin
 	var string destination
+	var Function transformer = empty

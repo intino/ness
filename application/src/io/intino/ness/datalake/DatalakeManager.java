@@ -3,9 +3,11 @@ package io.intino.ness.datalake;
 import io.intino.konos.jms.TopicConsumer;
 import io.intino.ness.bus.AqueductManager;
 import io.intino.ness.bus.BusManager;
+import io.intino.ness.datalake.NessStation.Drop;
 import io.intino.ness.datalake.NessStation.Feed;
 import io.intino.ness.graph.Aqueduct;
 import io.intino.ness.graph.Function;
+import io.intino.ness.graph.Pipe;
 import io.intino.ness.graph.Tank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,10 +45,15 @@ public class DatalakeManager {
 	public void feedFlow(Tank tank) {
 		feed(tank);
 		flow(tank);
+		drop(tank);
 	}
 
 	public void feed(Tank tank) {
 		feed(tank.feedQN(), station.feed(tank.qualifiedName()));
+	}
+
+	public void drop(Tank tank) {
+		drop(tank.dropQN(), station.drop(tank.qualifiedName()));
 	}
 
 	public void stopFeed(Tank tank) {
@@ -56,6 +63,10 @@ public class DatalakeManager {
 
 	public void reflow(List<Tank> tanks) {
 		new ReflowProcess(this, bus, station).start(tanks);
+	}
+
+	public boolean pipe(Pipe pipe) {
+		return pipe(pipe.origin(), pipe.destination(), pipe.transformer());
 	}
 
 	public boolean pipe(String from, String to, Function function) {
@@ -74,8 +85,8 @@ public class DatalakeManager {
 
 	private boolean pipeTopic(String from, String to, Function function) {
 		Session ness = bus.nessSession();
-		boolean tank = stream(station.tanks()).anyMatch(t -> t.name().equals(to));
-		new TopicConsumer(ness, from).listen(m -> send(ness, (tank ? "feed." : "") + to, m, function));
+		boolean isTank = stream(station.tanks()).anyMatch(t -> t.name().equals(to));
+		new TopicConsumer(ness, from).listen(m -> send(ness, (isTank ? "feed." : "") + to, m, function));
 		return true;
 	}
 
@@ -129,15 +140,15 @@ public class DatalakeManager {
 		return false;
 	}
 
-	public void startAqueduct(Aqueduct aqueduct) {
+	public void startBusPipe(Aqueduct aqueduct) {
 		AqueductManager manager = new AqueductManager(aqueduct, bus);
 		manager.start();
 		runningAqueducts.put(aqueduct, manager);
-		LoggerFactory.getLogger(this.getClass()).info("Aqueduct started: " + aqueduct.name$());
+		logger.info("Aqueduct started: " + aqueduct.name$());
 	}
 
 
-	public void stopAqueduct(Aqueduct aqueduct) {
+	public void stopBusPipe(Aqueduct aqueduct) {
 		AqueductManager aqueductManager = runningAqueducts.get(aqueduct);
 		if (aqueductManager != null) {
 			aqueductManager.stop();
@@ -152,7 +163,7 @@ public class DatalakeManager {
 	private void init() {
 		for (io.intino.ness.datalake.Tank tank : station.tanks()) {
 			startFeedFlow(tank);
-			LoggerFactory.getLogger(this.getClass()).info("Tank started: " + tank.name());
+			logger.info("Tank started: " + tank.name());
 		}
 	}
 
@@ -163,6 +174,10 @@ public class DatalakeManager {
 
 	private void feed(Tank tank, final Feed feed) {
 		feed(tank.feedQN(), feed);
+	}
+
+	private void drop(String tank, final Drop drop) {
+		bus.registerConsumer(tank, message -> load(textFrom(message)).forEach(drop::register));
 	}
 
 	private void feed(String tank, final Feed feed) {

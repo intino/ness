@@ -3,14 +3,13 @@ package io.intino.ness.datalake;
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageMapper;
 
-import java.util.List;
-
 public interface NessStation {
 
     Tank tank(String tank);
     Feed feed(String tank);
-    Pipe pipe(String tank);
     Flow flow(String tank);
+    Drop drop(String tank);
+    Pipe pipe(String tank);
 
     void remove(String tank);
     void remove(Feed... feeds);
@@ -33,6 +32,13 @@ public interface NessStation {
     interface Feed {
         void send(Message message);
         default void flush() {}
+    }
+
+    interface Drop {
+        void register(Message message);
+
+        default void flush() {
+        }
     }
 
     interface Flow {

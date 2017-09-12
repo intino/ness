@@ -1,8 +1,9 @@
 dsl Legio
 
-Artifact (groupId = "io.intino.ness", version = "1.0.7") inl
+Artifact (groupId = "io.intino.ness", version = "1.0.8") inl
 	Imports
 		Test("junit", "junit", "4.12")
+		Compile("org.slf4j", "slf4j-api", "1.7.13")
 
 	Package(LibrariesLinkedByManifest) > attachSources = true
 	Distribution(intino.releases, empty)

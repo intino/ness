@@ -39,11 +39,11 @@ public class NessBox extends AbstractBox {
 	}
 
 	private void initPipes() {
-		for (Pipe pipe : graph.pipeList()) busManager().pipe(pipe.origin(), pipe.destination());
+		for (Pipe pipe : graph.pipeList()) datalakeManager().pipe(pipe);
 	}
 
 	private void initAqueducts() {
-		for (Aqueduct aqueduct : ness().aqueductList()) datalakeManager.startAqueduct(aqueduct);
+		for (Aqueduct aqueduct : ness().aqueductList()) datalakeManager.startBusPipe(aqueduct);
 	}
 
 	public void close() {
