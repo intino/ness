@@ -1,17 +1,9 @@
 package io.intino.ness.box.slack;
 
+import io.intino.konos.slack.Bot;
 import io.intino.konos.slack.Bot.MessageProperties;
-import io.intino.ness.DatalakeManager;
 import io.intino.ness.box.NessBox;
-import io.intino.ness.graph.NessGraph;
-import io.intino.ness.graph.Tank;
-
-import java.util.Collections;
-import java.util.List;
-
-import static java.util.Arrays.asList;
-import static java.util.Arrays.copyOfRange;
-import static java.util.stream.Collectors.toList;
+import io.intino.ness.box.actions.*;
 
 public class ManageSlack {
 
@@ -23,47 +15,90 @@ public class ManageSlack {
 	}
 
 	public void init(com.ullink.slack.simpleslackapi.SlackSession session) {
-
 	}
 
-	public String addUser(MessageProperties properties, String name, String[] groups) {
-		String password = datalake().addUser(name, groups.length == 0 ? Collections.emptyList() : asList(copyOfRange(groups, 1, groups.length)));
-		if (password == null) return "User already exists";
-		return "User *" + name + "* added with password `" + password + "`";
+	public String addUser(MessageProperties properties, String name) {
+		AddUserAction action = new AddUserAction();
+		action.box = box;
+		action.name = name;
+		return action.execute();
 	}
 
 	public String removeUser(MessageProperties properties, String name) {
-		return datalake().removeUser(name) ? OK : "User not found";
+		RemoveUserAction action = new RemoveUserAction();
+		action.box = box;
+		action.name = name;
+		return action.execute();
 	}
 
 	public String addTank(MessageProperties properties, String tank) {
-		NessGraph ness = ness();
-		List<Tank> tanks = ness.tankList(t -> t.name$().equals(tank)).collect(toList());
-		if (!tanks.isEmpty()) return "Tank already exist";
-		String name = tank.replaceFirst("feed\\.", "");
-		Tank newTank = ness.create("tanks").tank(name);
-		datalake().registerTank(newTank);
-		datalake().feedFlow(newTank);
-		newTank.save$();
-		return OK;
-	}
-
-	private NessGraph ness() {
-		return box.ness();
+		AddTankAction action = new AddTankAction();
+		action.box = box;
+		action.name = tank;
+		return action.execute();
 	}
 
 	public String removeTank(MessageProperties properties, String name) {
-		NessGraph wrapper = ness();
-		List<Tank> tanks = wrapper.tankList(t -> t.qualifiedName().equals(name)).collect(toList());
-		if (tanks.isEmpty()) return "Tank not found";
-		for (Tank tank : tanks) {
-			datalake().removeTank(tank);
-			tank.delete$();
-		}
-		return OK;
+		RemoveTankAction action = new RemoveTankAction();
+		action.box = box;
+		action.name = name;
+		return action.execute();
 	}
 
-	private DatalakeManager datalake() {
-		return box.datalakeManager();
+	public String addFunction(MessageProperties properties) {
+		Bot.BotFile file = properties.file();
+		AddFunctionAction action = new AddFunctionAction();
+		action.box = box;
+		action.name = file.name().replace(".java", "");
+		action.code = file.textContent();
+		return action.execute();
+	}
+
+	public String removeFunction(MessageProperties properties, String name) {
+		RemoveFunctionAction action = new RemoveFunctionAction();
+		action.box = box;
+		action.name = name;
+		return action.execute();
+	}
+
+	public Object addExternalBus(MessageProperties properties, String name, String externalBusUrl, String user, String password) {
+		AddExternalBusAction action = new AddExternalBusAction();
+		action.box = box;
+		action.name = name;
+		action.externalBusUrl = externalBusUrl.replaceAll("<|>", "");
+		action.user = user;
+		action.password = password;
+		return action.execute();
+	}
+
+	public String removeExternalBus(MessageProperties properties, String name) {
+		RemoveExternalBusAction action = new RemoveExternalBusAction();
+		action.box = box;
+		action.name = name;
+		return action.execute();
+	}
+
+	public String addAqueduct(MessageProperties properties, String name, String externalBus, String direction, String functionName, String tankMacro) {
+		AddAqueductAction action = new AddAqueductAction();
+		action.box = box;
+		action.name = name;
+		action.externalBus = externalBus;
+		action.direction = direction;
+		action.functionName = functionName;
+		action.tankMacro = tankMacro;
+		return action.execute();
+	}
+
+	public String removeAqueduct(MessageProperties properties, String name) {
+		RemoveAqueductAction action = new RemoveAqueductAction();
+		action.box = box;
+		action.name = name;
+		return action.execute();
+	}
+
+	public String pipes(MessageProperties properties) {
+		PipesAction action = new PipesAction();
+		action.box = box;
+		return action.execute();
 	}
 }

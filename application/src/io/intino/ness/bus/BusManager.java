@@ -6,19 +6,26 @@ import io.intino.konos.jms.TopicProducer;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.graph.User;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.broker.*;
+import org.apache.activemq.ActiveMQSession;
+import org.apache.activemq.broker.Broker;
+import org.apache.activemq.broker.BrokerPlugin;
+import org.apache.activemq.broker.BrokerService;
+import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.broker.region.DestinationInterceptor;
+import org.apache.activemq.broker.region.policy.ConstantPendingMessageLimitStrategy;
+import org.apache.activemq.broker.region.policy.PolicyEntry;
+import org.apache.activemq.broker.region.policy.PolicyMap;
 import org.apache.activemq.broker.region.virtual.CompositeTopic;
 import org.apache.activemq.broker.region.virtual.VirtualDestination;
 import org.apache.activemq.broker.region.virtual.VirtualDestinationInterceptor;
 import org.apache.activemq.command.ActiveMQDestination;
-import org.apache.activemq.jaas.GroupPrincipal;
 import org.apache.activemq.security.AuthenticationUser;
 import org.apache.activemq.security.SimpleAuthenticationPlugin;
 import org.apache.activemq.store.kahadb.KahaDBPersistenceAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Session;
 import java.io.File;
@@ -31,16 +38,19 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
+import static javax.jms.Session.SESSION_TRANSACTED;
 
 public final class BusManager {
-	private Logger logger = LoggerFactory.getLogger(BusManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(BusManager.class);
 	private static final String NESS = "ness";
 	private final NessBox box;
 	private final BrokerService service;
 	private final SimpleAuthenticationPlugin authenticator;
 	private final Map<String, TopicProducer> producers = new HashMap<>();
 	private final Map<String, TopicConsumer> consumers = new HashMap<>();
+	private Connection connection;
 	private Session session;
+	private AdvisoryManager advisoryManager;
 
 	public BusManager(NessBox box) {
 		this.box = box;
@@ -52,11 +62,15 @@ public final class BusManager {
 	public void start() {
 		try {
 			service.start();
-			session = nessSession();
-			startAdvisories();
+			initNessSession();
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
+	}
+
+	public Session nessSession() {
+		if (this.session == null || ((ActiveMQSession) session).isClosed()) initNessSession();
+		return session;
 	}
 
 	public Map<String, List<String>> users() {
@@ -68,12 +82,12 @@ public final class BusManager {
 		return users;
 	}
 
-	public String addUser(String name, List<String> groups) {
-		if (authenticator.getUserPasswords().containsKey(name) || groups.contains("admin")) return null;
+	public String addUser(String name) {
+		if (authenticator.getUserPasswords().containsKey(name)) return null;
 		String password = PasswordGenerator.nextPassword();
 		authenticator.getUserPasswords().put(name, password);
-		authenticator.getUserGroups().put(name, groups.stream().map(GroupPrincipal::new).collect(Collectors.toSet()));
-		box.ness().create("users", name).user(password, groups).save$();
+		authenticator.getUserGroups().put(name, Collections.emptySet());
+		box.ness().create("users", name).user(password, Collections.emptyList()).save$();
 		return password;
 	}
 
@@ -81,12 +95,12 @@ public final class BusManager {
 		if (name.equals(NESS)) return false;
 		authenticator.getUserGroups().remove(name);
 		authenticator.getUserPasswords().remove(name);
-		User user1 = box.ness().userList(user -> user.name$().equals(name)).findFirst().orElse(null);
-		user1.core$().delete();
+		User user = box.ness().userList(u -> u.name$().equals(name)).findFirst().orElse(null);
+		user.core$().delete();
 		return true;
 	}
 
-	public boolean cleanTank(String topic) {
+	public boolean removeTopic(String topic) {
 		try {
 			ActiveMQDestination destination = findTopic(topic);
 			if (destination == null) return false;
@@ -105,22 +119,34 @@ public final class BusManager {
 		return true;
 	}
 
-	public void pipe(String from, String to) {
+	public boolean pipe(String from, String to) {
 		ActiveMQDestination fromTopic = findTopic(from);
 		ActiveMQDestination toTopic = findTopic(to);
+		if (toTopic == null) toTopic = createTopic(to);
+		if (toTopic == null) return false;
 		CompositeTopic virtualTopic = new CompositeTopic();
 		try {
 			virtualTopic.setName(from);
 			virtualTopic.intercept(service.getDestination(fromTopic));
-			virtualTopic.setForwardTo(Collections.singletonList(service.getDestination(toTopic)));
+			virtualTopic.setForwardTo(Collections.singletonList(toTopic));
 			VirtualDestinationInterceptor interceptor = new VirtualDestinationInterceptor();
 			interceptor.setVirtualDestinations(new VirtualDestination[]{virtualTopic});
 			service.setDestinationInterceptors(new DestinationInterceptor[]{interceptor});
+			return true;
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			return false;
 		}
 	}
 
+	private ActiveMQDestination createTopic(String name) {
+		try {
+			return (ActiveMQDestination) session.createTopic(name);
+		} catch (JMSException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 
 	public void registerConsumer(String feedQN, Consumer consumer) {
 		consumers.putIfAbsent(feedQN, new TopicConsumer(session, feedQN));
@@ -153,8 +179,8 @@ public final class BusManager {
 	}
 
 	private void startAdvisories() throws JMSException {
-//		Destination advisoryDestination = AdvisorySupport.getDestinationAdvisoryTopic(AdvisorySupport.QUEUE_ADVISORY_TOPIC);
-//		session.createConsumer(advisoryDestination).setMessageListener(new TopicListener(box, session));
+		advisoryManager = new AdvisoryManager(broker(), session);
+		advisoryManager.start();
 	}
 
 	private ActiveMQDestination findTopic(String topic) {
@@ -168,16 +194,16 @@ public final class BusManager {
 		}
 	}
 
-	private Session nessSession() {
+	private void initNessSession() {
 		try {
 			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("vm://ness");
-			javax.jms.Connection connection = connectionFactory.createConnection(NESS, NESS);
+			connection = connectionFactory.createConnection(NESS, NESS);
 			connection.setClientID(NESS);
+			session = connection.createSession(false, AUTO_ACKNOWLEDGE);
+			startAdvisories();
 			connection.start();
-			return connection.createSession(false, AUTO_ACKNOWLEDGE);
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
-			return null;
 		}
 	}
 
@@ -198,6 +224,7 @@ public final class BusManager {
 			service.setUseShutdownHook(true);
 			service.setAdvisorySupport(true);
 			service.setPlugins(new BrokerPlugin[]{authenticator});
+			addPolicies();
 			addTCPConnector();
 			addMQTTConnector();
 		} catch (Exception e) {
@@ -205,12 +232,23 @@ public final class BusManager {
 		}
 	}
 
+	private void addPolicies() {
+		final List<PolicyEntry> policyEntries = new ArrayList<>();
+		final PolicyEntry entry = new PolicyEntry();
+		entry.setAdvisoryForDiscardingMessages(true);
+		entry.setTopicPrefetch(1);
+		ConstantPendingMessageLimitStrategy pendingMessageLimitStrategy = new ConstantPendingMessageLimitStrategy();
+		pendingMessageLimitStrategy.setLimit(100000);
+		entry.setPendingMessageLimitStrategy(pendingMessageLimitStrategy);
+		final PolicyMap policyMap = new PolicyMap();
+		policyMap.setPolicyEntries(policyEntries);
+		service.setDestinationPolicy(policyMap);
+	}
+
 	private void addTCPConnector() throws Exception {
 		TransportConnector connector = new TransportConnector();
-		if (box.brokerKeyStore() != null) {
-			service.setSslContext(new SslContext());
-			connector.setUri(new URI("ssl://0.0.0.0:" + box.brokerPort()));
-		} else connector.setUri(new URI("tcp://0.0.0.0:" + box.brokerPort()));
+		connector.setUri(new URI("tcp://0.0.0.0:" + box.brokerPort()));
+		connector.setName("OWireConn");
 		service.addConnector(connector);
 	}
 
@@ -238,12 +276,33 @@ public final class BusManager {
 		return users;
 	}
 
+	public List<String> topicsInfo() {
+		try {
+			List<ActiveMQDestination> destinations = Arrays.stream(service.getBroker().getDestinations()).filter(d -> !d.getPhysicalName().contains("ActiveMQ.Advisory")).collect(Collectors.toList());
+			return destinations.stream().map((d) ->
+					d.getPhysicalName() + " Consumers:" + advisoryManager.consumersOf(d) + " Producers:" + advisoryManager.producersOf(d) + " Enqueued:" + advisoryManager.enqueuedMessageOf(d) +
+							" Enqueued:" + advisoryManager.dequeuedMessageOf(d)).collect(Collectors.toList());
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return Collections.emptyList();
+		}
+	}
+
 	public List<String> topics() {
 		try {
-			ActiveMQDestination[] destinations = service.getBroker().getDestinations();
-			return Arrays.stream(destinations).map(ActiveMQDestination::getPhysicalName).filter(n -> !n.contains("ActiveMQ.Advisory")).collect(Collectors.toList());
+			return Arrays.stream(service.getBroker().getDestinations())
+					.map(ActiveMQDestination::getPhysicalName).filter(n -> !n.contains("ActiveMQ.Advisory")).collect(Collectors.toList());
 		} catch (Exception e) {
 			return Collections.emptyList();
+		}
+	}
+
+	public Session transactedSession() {
+		try {
+			return connection.createSession(true, SESSION_TRANSACTED);
+		} catch (JMSException e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 

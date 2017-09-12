@@ -41,7 +41,7 @@ public abstract class Job {
         };
     }
 
-    private void terminate() {
+    public void terminate() {
         onTerminate();
         if (onTerminate != null) onTerminate.forEach(Runnable::run);
     }

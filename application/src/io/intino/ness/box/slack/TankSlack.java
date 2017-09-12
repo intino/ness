@@ -1,14 +1,17 @@
 package io.intino.ness.box.slack;
 
 import io.intino.konos.slack.Bot.MessageProperties;
+import io.intino.ness.box.NessBox;
+import io.intino.ness.box.actions.RenameTankAction;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
-import io.intino.ness.box.NessBox;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.singletonList;
 
 public class TankSlack {
 	private static final String OK = ":ok_hand:";
@@ -31,9 +34,11 @@ public class TankSlack {
 	}
 
 	public String rename(MessageProperties properties, String name) {
-		Tank tank = Helper.findTank(box, properties.context().getObjects()[0]);
-		if (tank == null) return "Please select a tank";
-		return box.datalakeManager().rename(tank, name) ? OK : "Impossible to rename tank";
+		RenameTankAction action = new RenameTankAction();
+		action.box = box;
+		action.tank = properties.context().getObjects()[0];
+		action.name = name;
+		return action.execute();
 	}
 
 	public String seal(MessageProperties properties) {
@@ -45,7 +50,7 @@ public class TankSlack {
 	public String reflow(MessageProperties properties) {
 		Tank tank = Helper.findTank(box, properties.context().getObjects()[0]);
 		if (tank == null) return "Tank not found";
-		box.datalakeManager().reflow(tank);
+		box.datalakeManager().reflow(singletonList(tank));
 		return OK;
 	}
 
@@ -67,5 +72,4 @@ public class TankSlack {
 	private String nextVersionOf(Tank tank) {
 		return tank.qualifiedName().replace("." + tank.version(), "." + (tank.version() + 1));
 	}
-
 }

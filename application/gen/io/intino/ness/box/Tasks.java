@@ -26,7 +26,7 @@ public class Tasks {
 		try {
 			job = newJob(ToTubTask.class).withIdentity("toTub").build();
 			job.getJobDataMap().put("box", box);
-			tasker.scheduleJob(job, newSet(newTrigger().withIdentity("Interface#toTub").withSchedule(cronSchedule("0 0 0 1/1 * ? *")).build()), true);
+			tasker.scheduleJob(job, newSet(newTrigger().withIdentity("Application#toTub").withSchedule(cronSchedule("0 0 0 1/1 * ? *")).build()), true);
 			tasker.startSchedules();
 		} catch (Exception e) {
 			logger.severe(e.getMessage());

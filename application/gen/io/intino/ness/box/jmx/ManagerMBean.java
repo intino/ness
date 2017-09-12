@@ -8,13 +8,33 @@ import java.time.*;
 
 public interface ManagerMBean {
 
+	@Description("Shows information about the available operations")
+	@Parameters({})
+	java.util.List<String> help();
+
+	@Description("Request all users registered in ness")
+	@Parameters({})
+	java.util.List<String> users();
+
 	@Description("Add user to the datalake")
-	@Parameters({"name", "groups"})
-	String addUser(String name, java.util.List<String> groups);
+	@Parameters({"name"})
+	String addUser(String name);
 
 	@Description("Remove user from ness service")
 	@Parameters({"name"})
 	String removeUser(String name);
+
+	@Description("Request all tanks nessy is subscribed filtering by tags")
+	@Parameters({"tags"})
+	java.util.List<String> tanks(java.util.List<String> tags);
+
+	@Description("connect feed and flow channes of a tank")
+	@Parameters({"tank"})
+	String resumeTank(String tank);
+
+	@Description("stops the feed and flow channes of a tank")
+	@Parameters({"tank"})
+	String pauseTank(String tank);
 
 	@Description("Creates a tank")
 	@Parameters({"name"})
@@ -24,25 +44,73 @@ public interface ManagerMBean {
 	@Parameters({"name"})
 	String removeTank(String name);
 
-	@Description("Request all users registered in ness")
-	@Parameters({})
-	java.util.List<String> users();
+	@Description("Changes name of a tank for a new one")
+	@Parameters({"tank", "name"})
+	String renameTank(String tank, String name);
 
-	@Description("Request all tanks nessy is subscribed filtering by tags")
-	@Parameters({"tags"})
-	java.util.List<String> tanks(java.util.List<String> tags);
-
-	@Description("Show all functions registered")
+	@Description("Connects source and destination topics")
 	@Parameters({})
-	java.util.List<String> functions();
+	String pipes();
+
+	@Description("Connects source and destination topics real-time, optionaly converting the message with a function")
+	@Parameters({"from", "to", "functionName"})
+	String addPipe(String from, String to, String functionName);
+
+	@Description("Removes a registered function")
+	@Parameters({"origin"})
+	String removePipes(String origin);
 
 	@Description("Show registered topics")
 	@Parameters({})
 	java.util.List<String> topics();
 
-	@Description("Changes name of a tank for a new one")
-	@Parameters({"tank", "name"})
-	String rename(String tank, String name);
+	@Description("Removes registered topic")
+	@Parameters({"topic"})
+	Boolean removeTopic(String topic);
+
+	@Description("Show all functions registered")
+	@Parameters({})
+	java.util.List<String> functions();
+
+	@Description("Create a function associated to an input tank and output tank")
+	@Parameters({"name", "code"})
+	String addFunction(String name, String code);
+
+	@Description("Removes a registered function")
+	@Parameters({"name"})
+	String removeFunction(String name);
+
+	@Description("list of external buses")
+	@Parameters({})
+	java.util.List<String> externalBuses();
+
+	@Description("Defines an external bus to interact with it using aqueducts")
+	@Parameters({"name", "externalBusUrl", "user", "password"})
+	String addExternalBus(String name, String externalBusUrl, String user, String password);
+
+	@Description("Removes a registed aqueduct")
+	@Parameters({"name"})
+	String removeExternalBus(String name);
+
+	@Description("list of aqueducts and its status")
+	@Parameters({})
+	java.util.List<String> aqueducts();
+
+	@Description("Creates a data flow between an external bus and ness. It is necesary to define de direction of the data flow (*incoming* or *outgoing*). Also it is posible to set a conversion function.")
+	@Parameters({"name", "externalBus", "direction", "functionName", "tankMacro"})
+	String addAqueduct(String name, String externalBus, String direction, String functionName, String tankMacro);
+
+	@Description("Removes a registed aqueduct")
+	@Parameters({"name"})
+	String removeAqueduct(String name);
+
+	@Description("connect out jms topic with a ness tank")
+	@Parameters({"name"})
+	String startAqueduct(String name);
+
+	@Description("connect out jms topic with a ness tank")
+	@Parameters({"name"})
+	String stopAqueduct(String name);
 
 	@Description("Seals current events of a tank to reservoir")
 	@Parameters({"tank"})
@@ -52,13 +120,9 @@ public interface ManagerMBean {
 	@Parameters({"tank", "functions"})
 	String migrate(String tank, java.util.List<String> functions);
 
-	@Description("Reproduce events of a tank")
-	@Parameters({"tank"})
-	String reflow(String tank);
-
-	@Description("Create a function associated to an input tank and output tank")
-	@Parameters({"name", "code"})
-	String addFunction(String name, String code);
+	@Description("Reproduce events of a list of tanks")
+	@Parameters({"tanks"})
+	String reflow(java.util.List<String> tanks);
 
 	@Description("Connect a source and destination tanks through a `function`")
 	@Parameters({"functionName", "input", "output"})

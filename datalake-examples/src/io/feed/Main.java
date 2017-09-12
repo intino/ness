@@ -45,7 +45,7 @@ public class Main {
         station.seal(temperature_1).thread().join();
 
         station.pump(temperature_1).to(file("temperatures.csv"));
-        station.pump(temperature_1).start().thread().join();
+        station.pump(temperature_1).asJob().thread().join();
     }
 
 

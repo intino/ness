@@ -3,10 +3,6 @@ package io.intino.ness.box.actions;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.graph.Function;
 
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
-
 
 public class PumpAction extends Action {
 
@@ -16,12 +12,8 @@ public class PumpAction extends Action {
 	public String output;
 
 	public String execute() {
-		List<Function> functions = box.ness().functionList(f -> f.name$().equals(functionName)).collect(toList());
-		if (functions.isEmpty()) return "Function not found";
-		Function function = functions.get(0);
-		box.datalakeManager().pump(function, input, output);
+		Function function = box.ness().functionList(f -> f.name$().equals(functionName)).findFirst().orElse(null);
+		box.datalakeManager().pump(input, output, function);
 		return OK;
 	}
-
-
 }

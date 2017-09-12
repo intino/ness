@@ -64,31 +64,7 @@ public class Connection extends io.intino.tara.magritte.Layer implements io.inti
 		else if (name.equalsIgnoreCase("plug")) this.plug = values.get(0)!= null ? core$().graph().load(((io.intino.tara.magritte.Layer) values.get(0)).core$().id()).as(io.intino.ness.graph.Function.class) : null;
 	}
 
-	public Create create() {
-		return new Create(null);
-	}
 
-	public Create create(java.lang.String name) {
-		return new Create(name);
-	}
-
-	public Clear clear() {
-		return new Clear();
-	}
-
-	public class Create {
-		protected final java.lang.String name;
-
-		public Create(java.lang.String name) {
-			this.name = name;
-		}
-		
-	}
-
-	public class Clear {
-		
-	}
-	
 	public io.intino.ness.graph.NessGraph graph() {
 		return (io.intino.ness.graph.NessGraph) core$().graph().as(io.intino.ness.graph.NessGraph.class);
 	}

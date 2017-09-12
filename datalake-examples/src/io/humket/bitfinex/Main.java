@@ -1,13 +1,12 @@
 package io.humket.bitfinex;
 
-import org.glassfish.tyrus.core.WebSocketException;
 
 import java.io.IOException;
 
 public class Main {
 
 
-    public static void main(String[] args) throws IOException, WebSocketException {
+    public static void main(String[] args) throws IOException {
         String[] subscriptions = {
                 "{ \"event\":\"subscribe\",\"channel\":\"book\",\"pair\":\"BTCUSD\",\"prec\":\"P0\",\"freq\":\"F0\" }",
                 "{ \"event\":\"subscribe\",\"channel\":\"book\",\"pair\":\"LTCUSD\",\"prec\":\"P0\",\"freq\":\"F0\" }",
