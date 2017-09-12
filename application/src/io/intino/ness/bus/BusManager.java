@@ -47,7 +47,7 @@ public final class BusManager {
 	private final BrokerService service;
 	private final SimpleAuthenticationPlugin authenticator;
 	private final Map<String, TopicProducer> producers = new HashMap<>();
-	private final Map<String, TopicConsumer> consumers = new HashMap<>();
+	private final Map<String, List<TopicConsumer>> consumers = new HashMap<>();
 	private Connection connection;
 	private Session session;
 	private AdvisoryManager advisoryManager;
@@ -149,9 +149,11 @@ public final class BusManager {
 	}
 
 	public void registerConsumer(String feedQN, Consumer consumer) {
-		consumers.putIfAbsent(feedQN, new TopicConsumer(session, feedQN));
-		TopicConsumer topicConsumer = consumers.get(feedQN);
-		topicConsumer.listen(consumer, NESS + "-" + feedQN);
+		List<TopicConsumer> consumers = this.consumers.putIfAbsent(feedQN, new ArrayList<>());
+		if (consumers == null) consumers = this.consumers.get(feedQN);
+		TopicConsumer topicConsumer = new TopicConsumer(session, feedQN);
+		topicConsumer.listen(consumer, NESS + consumers.size() + "-" + feedQN);
+		consumers.add(topicConsumer);
 	}
 
 	public TopicProducer registerOrGetProducer(String path) {
@@ -164,13 +166,13 @@ public final class BusManager {
 		}
 	}
 
-	public TopicConsumer consumerOf(String feedQN) {
+	public List<TopicConsumer> consumersOf(String feedQN) {
 		return consumers.get(feedQN);
 	}
 
 	public void quit() {
 		try {
-			consumers.values().forEach(TopicConsumer::stop);
+			consumers.values().forEach(c -> c.forEach(TopicConsumer::stop));
 			session.close();
 			service.stop();
 		} catch (Exception e) {

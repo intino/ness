@@ -57,7 +57,7 @@ public class DatalakeManager {
 	}
 
 	public void stopFeed(Tank tank) {
-		TopicConsumer consumer = bus.consumerOf(tank.feedQN());
+		TopicConsumer consumer = bus.consumersOf(tank.feedQN()).get(0);
 		if (consumer != null) consumer.stop();
 	}
 
@@ -76,7 +76,6 @@ public class DatalakeManager {
 				return station.pipe(from).to(to).with(valve) != null;
 			}
 			return pipeTopic(from, to, function);
-
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return false;
@@ -86,7 +85,7 @@ public class DatalakeManager {
 	private boolean pipeTopic(String from, String to, Function function) {
 		Session ness = bus.nessSession();
 		boolean isTank = stream(station.tanks()).anyMatch(t -> t.name().equals(to));
-		new TopicConsumer(ness, from).listen(m -> send(ness, (isTank ? "feed." : "") + to, m, function));
+		bus.registerConsumer(from, m -> send(ness, (isTank ? "feed." : "") + to, m, function));
 		return true;
 	}
 
@@ -120,8 +119,8 @@ public class DatalakeManager {
 
 	public void removeTank(Tank tank) {
 		String qualifiedName = tank.qualifiedName();
-		TopicConsumer topicConsumer = bus.consumerOf(tank.feedQN());
-		if (topicConsumer != null) topicConsumer.stop();
+		List<TopicConsumer> consumers = bus.consumersOf(tank.feedQN());
+		if (!consumers.isEmpty()) consumers.forEach(TopicConsumer::stop);
 		station.remove(station.feedsTo(qualifiedName));
 		station.remove(station.flowsFrom(qualifiedName));
 		station.remove(station.pipesFrom(qualifiedName));
@@ -144,7 +143,7 @@ public class DatalakeManager {
 		AqueductManager manager = new AqueductManager(aqueduct, bus);
 		manager.start();
 		runningAqueducts.put(aqueduct, manager);
-		logger.info("Aqueduct started: " + aqueduct.name$());
+		logger.info("Bus pipe started: " + aqueduct.name$());
 	}
 
 
