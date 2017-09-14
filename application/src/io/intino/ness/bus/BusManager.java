@@ -143,7 +143,7 @@ public final class BusManager {
 		try {
 			return (ActiveMQDestination) session.createTopic(name);
 		} catch (JMSException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 			return null;
 		}
 	}
@@ -249,7 +249,7 @@ public final class BusManager {
 
 	private void addTCPConnector() throws Exception {
 		TransportConnector connector = new TransportConnector();
-		connector.setUri(new URI("tcp://0.0.0.0:" + box.brokerPort()));
+		connector.setUri(new URI("tcp://0.0.0.0:" + box.brokerPort() + "?transport.useInactivityMonitor=false"));
 		connector.setName("OWireConn");
 		service.addConnector(connector);
 	}
@@ -303,7 +303,7 @@ public final class BusManager {
 		try {
 			return connection.createSession(true, SESSION_TRANSACTED);
 		} catch (JMSException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 			return null;
 		}
 	}

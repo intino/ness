@@ -1,7 +1,7 @@
 package io.intino.ness.datalake;
 
 import io.intino.konos.jms.TopicConsumer;
-import io.intino.ness.bus.AqueductManager;
+import io.intino.ness.bus.BusPipesManager;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.datalake.NessStation.Drop;
 import io.intino.ness.datalake.NessStation.Feed;
@@ -30,7 +30,7 @@ public class DatalakeManager {
 	private NessStation station;
 	private BusManager bus;
 	private List<Job> jobs = new ArrayList<>();
-	private Map<Aqueduct, AqueductManager> runningAqueducts = new HashMap<>();
+	private Map<Aqueduct, BusPipesManager> runningBusPipes = new HashMap<>();
 
 	public DatalakeManager(FileStation station, BusManager bus) {
 		this.station = station;
@@ -111,7 +111,11 @@ public class DatalakeManager {
 		jobs.add(job);
 	}
 
-	public void seal(Tank tank) {
+	public void seal(Tank... tanks) {
+		for (Tank tank : tanks) seal(tank);
+	}
+
+	private void seal(Tank tank) {
 		stopFeed(tank);
 		Job seal = station.seal(tank.qualifiedName());
 		seal.onTerminate(() -> feed(tank, station.feed(tank.qualifiedName())));
@@ -140,23 +144,23 @@ public class DatalakeManager {
 	}
 
 	public void startBusPipe(Aqueduct aqueduct) {
-		AqueductManager manager = new AqueductManager(aqueduct, bus);
+		BusPipesManager manager = new BusPipesManager(aqueduct, bus);
 		manager.start();
-		runningAqueducts.put(aqueduct, manager);
+		runningBusPipes.put(aqueduct, manager);
 		logger.info("Bus pipe started: " + aqueduct.name$());
 	}
 
 
 	public void stopBusPipe(Aqueduct aqueduct) {
-		AqueductManager aqueductManager = runningAqueducts.get(aqueduct);
-		if (aqueductManager != null) {
-			aqueductManager.stop();
-			runningAqueducts.remove(aqueduct);
+		BusPipesManager busPipesManager = runningBusPipes.get(aqueduct);
+		if (busPipesManager != null) {
+			busPipesManager.stop();
+			runningBusPipes.remove(aqueduct);
 		}
 	}
 
 	public boolean status(Aqueduct aqueduct) {
-		return runningAqueducts.get(aqueduct) != null;
+		return runningBusPipes.get(aqueduct) != null;
 	}
 
 	private void init() {
