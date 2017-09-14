@@ -22,41 +22,35 @@ import static java.util.stream.Collectors.toList;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
-public class AqueductManager {
+public class BusPipesManager {
 	private static final Logger logger = LoggerFactory.getLogger(ROOT_LOGGER_NAME);
 	private final Aqueduct aqueduct;
-	private Session ness;
 	private Session externalBus;
 	private final List<String> nessTopics;
 	private final List<TopicConsumer> topicConsumers;
 	private final BusManager busManager;
 
-	public AqueductManager(Aqueduct aqueduct, BusManager busManager) {
+	public BusPipesManager(Aqueduct aqueduct, BusManager busManager) {
 		this.aqueduct = aqueduct;
 		this.busManager = busManager;
-		this.ness = busManager.nessSession();
 		this.nessTopics = busManager.topics();
 		this.topicConsumers = new ArrayList<>();
 		initForeignSession();
 	}
 
 	public void start() {
-		if (aqueduct.direction().equals(incoming)) {
-			for (String topic : filter(externalBusTopics(), aqueduct.tankMacro())) {
-				TopicConsumer consumer = new TopicConsumer(externalBus, topic);
-				consumer.listen(m -> send(ness, topic, m, aqueduct.transformer()));
-				topicConsumers.add(consumer);
-			}
-		} else {
-			for (String topic : filter(nessTopics, aqueduct.tankMacro())) {
-				if (((ActiveMQSession) ness).isClosed()) this.ness = busManager.nessSession();
-				TopicConsumer consumer = new TopicConsumer(ness, topic);
-				consumer.listen(m -> {
-					if (externalBus == null || ((ActiveMQSession) externalBus).isClosed()) initForeignSession();
-					send(externalBus, topic, m, aqueduct.transformer());
-				});
-				topicConsumers.add(consumer);
-			}
+		if (aqueduct.direction().equals(incoming)) for (String topic : filter(externalBusTopics(), aqueduct.tankMacro())) {
+			TopicConsumer consumer = new TopicConsumer(externalBus, topic);
+			consumer.listen(m -> send(busManager.nessSession(), topic, m, aqueduct.transformer()));
+			topicConsumers.add(consumer);
+		}
+		else for (String topic : filter(nessTopics, aqueduct.tankMacro())) {
+			TopicConsumer consumer = new TopicConsumer(busManager.nessSession(), topic);
+			consumer.listen(m -> {
+				if (externalBus == null || ((ActiveMQSession) externalBus).isClosed()) initForeignSession();
+				send(externalBus, topic, m, aqueduct.transformer());
+			});
+			topicConsumers.add(consumer);
 		}
 	}
 
@@ -97,9 +91,8 @@ public class AqueductManager {
 			MessageConsumer consumer = externalBus.createConsumer(externalBus.createTopic("ActiveMQ.Advisory.Topic"));
 			consumer.setMessageListener(message -> {
 				ActiveMQMessage m = (ActiveMQMessage) message;
-				if (m.getDataStructure() instanceof DestinationInfo) {
+				if (m.getDataStructure() instanceof DestinationInfo)
 					topics.add(((DestinationInfo) m.getDataStructure()).getDestination().getPhysicalName());
-				}
 			});
 			sleep(3000);
 			consumer.close();
