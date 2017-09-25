@@ -1,6 +1,7 @@
 dsl Konos
 
-Task toTub as CronTrigger("0 0 0 1/1 * ? *", "daily starting at 00:00")
+Task seal as CronTrigger("0 0 0 1/1 * ? *", "daily starting at 00:00")
+Task checkBusPipes as CronTrigger("0 0 1 1/1 * ? *", "daily starting at 00:00")
 
 Service Nessie as SlackBot
 	Request("Enter in the management area to add/remove tanks or users and other management actions") manage

@@ -22,7 +22,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
-public class BusPipesManager {
+public class BusPipeManager {
 	private static final Logger logger = LoggerFactory.getLogger(ROOT_LOGGER_NAME);
 	private final Aqueduct aqueduct;
 	private Session externalBus;
@@ -30,7 +30,7 @@ public class BusPipesManager {
 	private final List<TopicConsumer> topicConsumers;
 	private final BusManager busManager;
 
-	public BusPipesManager(Aqueduct aqueduct, BusManager busManager) {
+	public BusPipeManager(Aqueduct aqueduct, BusManager busManager) {
 		this.aqueduct = aqueduct;
 		this.busManager = busManager;
 		this.nessTopics = busManager.topics();
@@ -85,9 +85,9 @@ public class BusPipesManager {
 	}
 
 	private Collection<String> externalBusTopics() {
-		if (externalBus == null || ((ActiveMQSession) externalBus).isClosed()) initForeignSession();
 		Set<String> topics = new HashSet<>();
 		try {
+			if (externalBus == null || ((ActiveMQSession) externalBus).isClosed()) initForeignSession();
 			MessageConsumer consumer = externalBus.createConsumer(externalBus.createTopic("ActiveMQ.Advisory.Topic"));
 			consumer.setMessageListener(message -> {
 				ActiveMQMessage m = (ActiveMQMessage) message;

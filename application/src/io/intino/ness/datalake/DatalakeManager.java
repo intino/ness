@@ -1,7 +1,7 @@
 package io.intino.ness.datalake;
 
 import io.intino.konos.jms.TopicConsumer;
-import io.intino.ness.bus.BusPipesManager;
+import io.intino.ness.bus.BusPipeManager;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.datalake.NessStation.Drop;
 import io.intino.ness.datalake.NessStation.Feed;
@@ -30,7 +30,7 @@ public class DatalakeManager {
 	private NessStation station;
 	private BusManager bus;
 	private List<Job> jobs = new ArrayList<>();
-	private Map<Aqueduct, BusPipesManager> runningBusPipes = new HashMap<>();
+	private Map<Aqueduct, BusPipeManager> runningBusPipes = new HashMap<>();
 
 	public DatalakeManager(FileStation station, BusManager bus) {
 		this.station = station;
@@ -144,17 +144,17 @@ public class DatalakeManager {
 	}
 
 	public void startBusPipe(Aqueduct aqueduct) {
-		BusPipesManager manager = new BusPipesManager(aqueduct, bus);
+		BusPipeManager manager = new BusPipeManager(aqueduct, bus);
 		manager.start();
 		runningBusPipes.put(aqueduct, manager);
 		logger.info("Bus pipe started: " + aqueduct.name$());
 	}
 
-
+	
 	public void stopBusPipe(Aqueduct aqueduct) {
-		BusPipesManager busPipesManager = runningBusPipes.get(aqueduct);
-		if (busPipesManager != null) {
-			busPipesManager.stop();
+		BusPipeManager busPipeManager = runningBusPipes.get(aqueduct);
+		if (busPipeManager != null) {
+			busPipeManager.stop();
 			runningBusPipes.remove(aqueduct);
 		}
 	}
