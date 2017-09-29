@@ -139,7 +139,7 @@ public final class BusManager {
 		}
 	}
 
-	private ActiveMQDestination createTopic(String name) {
+	public ActiveMQDestination createTopic(String name) {
 		try {
 			return (ActiveMQDestination) session.createTopic(name);
 		} catch (JMSException e) {

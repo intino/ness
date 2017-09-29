@@ -20,7 +20,7 @@ public class MessageSender {
 	public static void send(Session destination, String topic, Message message, Function function) {
 		try {
 			TopicProducer producer = new TopicProducer(destination, topic);
-			String messageMapped = mapToMessage(textFrom(message), map(function));
+			String messageMapped = function == null ? textFrom(message) : mapToMessage(textFrom(message), map(function));
 			if (!messageMapped.isEmpty()) producer.produce(createMessageFor(messageMapped));
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
