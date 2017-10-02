@@ -21,6 +21,7 @@ class ReflowProcess {
 	private static Logger logger = LoggerFactory.getLogger(ROOT_LOGGER_NAME);
 	private BusManager bus;
 	private final NessStation station;
+	private int messageCounter = 0;
 
 	ReflowProcess(DatalakeManager datalakeManager, BusManager bus, NessStation station) {
 		this.datalakeManager = datalakeManager;
@@ -42,7 +43,21 @@ class ReflowProcess {
 
 	private void doReflow(List<Tank> tanks, Session session) {
 		List<TankReflowManager> reflowManagers = reflowManagers(tanks, session);
-		while (flowsAreActive(reflowManagers)) beforeFlow(reflowManagers).send();
+		while (flowsAreActive(reflowManagers)) {
+			beforeFlow(reflowManagers).send();
+			messageCounter++;
+			if (messageCounter > 1e5) {
+				try {
+					session.commit();
+					Thread.sleep(60 * 1000);
+				} catch (JMSException e) {
+					logger.error(e.getMessage(), e);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				messageCounter = 0;
+			}
+		}
 		terminateReflow(session, reflowManagers);
 	}
 

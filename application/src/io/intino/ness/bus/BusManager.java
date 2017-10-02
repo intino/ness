@@ -158,7 +158,7 @@ public final class BusManager {
 
 	public TopicProducer registerOrGetProducer(String path) {
 		try {
-			producers.putIfAbsent(path, new TopicProducer(session, path));
+			if (!producers.containsKey(path)) producers.put(path, new TopicProducer(session, path));
 			return producers.get(path);
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
@@ -223,6 +223,9 @@ public final class BusManager {
 			service.setBrokerName(NESS);
 			service.setPersistenceAdapter(persistenceAdapter());
 			service.setUseJmx(true);
+//			service.setPersistent(false);
+//			service.setPersistenceAdapter(null);
+//			service.setUseJmx(true);
 			service.setUseShutdownHook(true);
 			service.setAdvisorySupport(true);
 			service.setPlugins(new BrokerPlugin[]{authenticator});

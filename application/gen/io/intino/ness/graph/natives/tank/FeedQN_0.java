@@ -2,7 +2,7 @@ package io.intino.ness.graph.natives.tank;
 
 
 
-/**#/Users/oroncal/workspace/ness/application/src/io/intino/ness/Model.tara#9#1**/
+/**#/Users/oroncal/workspace/ness/application/src/io/intino/ness/Model.tara#10#1**/
 public class FeedQN_0 implements io.intino.tara.magritte.Expression<String> {
 	private io.intino.ness.graph.Tank self;
 

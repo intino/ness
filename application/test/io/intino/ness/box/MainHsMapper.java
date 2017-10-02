@@ -1,9 +1,6 @@
 package io.intino.ness.box;
 
-import io.intino.ness.box.actions.AddFunctionAction;
-import io.intino.ness.box.actions.AddPipeAction;
-import io.intino.ness.box.actions.AddTankAction;
-import io.intino.ness.box.actions.AddUserAction;
+import io.intino.ness.box.actions.*;
 import io.intino.tara.io.Stash;
 import io.intino.tara.magritte.Graph;
 import io.intino.tara.magritte.stores.InMemoryFileStore;
@@ -11,21 +8,24 @@ import io.intino.tara.magritte.stores.InMemoryFileStore;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainHsMapper {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		args = new String[]{
-				"ness_store=$HOME/.ness/store",
-				"ness_datalake=$HOME/.ness/datalake",
-				"broker_store=$HOME/.ness/broker/",
+				"ness_store=./temp/store",
+				"ness_datalake=./temp/datalake",
+				"broker_store=./temp/broker/",
 				"broker_port=63000",
 				"mqtt_port=1884"
 		};
 		NessConfiguration boxConfiguration = new NessConfiguration(args);
 		Graph graph = new Graph(store(boxConfiguration.args().get("ness_store"))).loadStashes("Ness");
 		NessBox box = (NessBox) new NessBox(boxConfiguration).put(graph).open();
+		Thread.sleep(40000);
+		reflow(box);
 //		addUser(box, "happysense-server");
 //		addTank(box, "dialogs.v3");
 //		addTank(box, "dialogs.v4");
@@ -33,6 +33,13 @@ public class MainHsMapper {
 //		addFunction(box, "DialogMapper", dialogMapperCode());
 //		adddPipe(box, "feed.dialogs.v3", "feed.dialogs.v4", "DialogMapper");
 		Runtime.getRuntime().addShutdownHook(new Thread(box::close));
+	}
+
+	private static void reflow(NessBox box) {
+		ReflowAction reflowAction = new ReflowAction();
+		reflowAction.box = box;
+		reflowAction.tanks = Arrays.asList("dialogs.v4", "surveys.v4");
+		reflowAction.execute();
 	}
 
 	private static void addUser(NessBox box, String name) {
@@ -44,7 +51,7 @@ public class MainHsMapper {
 
 	private static String dialogMapperCode() {
 		try {
-			List<String> strings = Files.readAllLines(new File("DialogMapper.java").toPath());
+			List<String> strings = Files.readAllLines(new File("./temp/DialogMapper.java").toPath());
 			return String.join("\n", strings);
 		} catch (IOException e) {
 			e.printStackTrace();

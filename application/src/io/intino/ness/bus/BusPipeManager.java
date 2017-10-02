@@ -44,7 +44,7 @@ public class BusPipeManager {
 			Collection<String> filter = filter(topics, aqueduct.tankMacro());
 			for (String topic : filter) {
 				TopicConsumer consumer = new TopicConsumer(externalBus, topic);
-				consumer.listen(m -> send(busManager.nessSession(), topic, m, aqueduct.transformer()));
+				consumer.listen(m -> send(busManager.nessSession(), topic, m, aqueduct.transformer()), "ness." + topic);
 				topicConsumers.add(consumer);
 			}
 		} else for (String topic : filter(nessTopics, aqueduct.tankMacro())) {
@@ -79,6 +79,7 @@ public class BusPipeManager {
 	private void initForeignSession() {
 		try {
 			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(aqueduct.bus().originURL());
+			connectionFactory.setClientID("ness");
 			javax.jms.Connection connection = connectionFactory.createConnection(aqueduct.bus().user(), aqueduct.bus().password());
 			externalBus = connection.createSession(false, AUTO_ACKNOWLEDGE);
 			connection.start();

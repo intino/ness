@@ -3,6 +3,7 @@ dsl Proteo
 Concept Function
 	var string qualifiedName
 	var string source
+	var object:io.intino.ness.inl.MessageFunction aClass is volatile
 
 Concept Tank
 	var string qualifiedName
