@@ -1,7 +1,7 @@
 package io.intino.ness.datalake;
 
 import io.intino.ness.inl.*;
-import io.intino.ness.inl.FileMessageInputStream;
+import io.intino.ness.inl.streams.FileMessageInputStream;
 
 import java.io.*;
 

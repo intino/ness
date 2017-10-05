@@ -1,9 +1,9 @@
 package io.intino.ness.datalake;
 
-import io.intino.ness.inl.FileMessageInputStream;
-import io.intino.ness.inl.FileMessageOutputStream;
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageInputStream;
+import io.intino.ness.inl.streams.FileMessageInputStream;
+import io.intino.ness.inl.streams.FileMessageOutputStream;
 
 import java.io.File;
 import java.io.IOException;
