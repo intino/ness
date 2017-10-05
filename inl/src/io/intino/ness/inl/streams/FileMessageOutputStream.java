@@ -1,6 +1,11 @@
-package io.intino.ness.inl;
+package io.intino.ness.inl.streams;
 
-import java.io.*;
+import io.intino.ness.inl.Message;
+import io.intino.ness.inl.MessageOutputStream;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 

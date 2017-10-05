@@ -1,3 +1,4 @@
+
 package io.intino.ness.bus;
 
 import io.intino.konos.jms.Consumer;
@@ -29,6 +30,7 @@ import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Session;
 import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
 import java.security.Principal;
@@ -63,6 +65,7 @@ public final class BusManager {
 		try {
 			service.start();
 			initNessSession();
+			logger.info("JMS service: started!");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -221,11 +224,10 @@ public final class BusManager {
 	private void configure() {
 		try {
 			service.setBrokerName(NESS);
-			service.setPersistenceAdapter(persistenceAdapter());
+//			startPersistence();
+			service.setPersistent(false);
+			service.setPersistenceAdapter(null);
 			service.setUseJmx(true);
-//			service.setPersistent(false);
-//			service.setPersistenceAdapter(null);
-//			service.setUseJmx(true);
 			service.setUseShutdownHook(true);
 			service.setAdvisorySupport(true);
 			service.setPlugins(new BrokerPlugin[]{authenticator});
@@ -234,6 +236,26 @@ public final class BusManager {
 			addMQTTConnector();
 		} catch (Exception e) {
 			logger.error("Error configuring: " + e.getMessage(), e);
+		}
+	}
+
+	public void stopPersistence() {
+		try {
+			service.setPersistent(false);
+			service.setPersistenceAdapter(null);
+			service.requestRestart();
+		} catch (IOException e) {
+			logger.error("Error stopping persistence: " + e.getMessage(), e);
+		}
+	}
+
+	public void startPersistence() {
+		try {
+			service.setPersistent(true);
+			service.setPersistenceAdapter(persistenceAdapter());
+			service.requestRestart();
+		} catch (IOException e) {
+			logger.error("Error starting persistence: " + e.getMessage(), e);
 		}
 	}
 

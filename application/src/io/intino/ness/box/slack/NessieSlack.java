@@ -8,7 +8,6 @@ import io.intino.ness.graph.Aqueduct;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -123,12 +122,6 @@ public class NessieSlack {
 		return OK;
 	}
 
-	public String reflow(MessageProperties properties, String[] tanks) {
-		ReflowAction action = new ReflowAction();
-		action.box = box;
-		action.tanks = !tanks[0].equalsIgnoreCase("all") ? Arrays.asList(tanks) : box.ness().tankList().stream().map(Tank::qualifiedName).collect(toList());
-		return action.execute();
-	}
 
 	public String resumeTank(MessageProperties properties, String tank) {
 		ResumeTankAction action = new ResumeTankAction();
@@ -151,5 +144,9 @@ public class NessieSlack {
 		action.to = to;
 		action.functionName = functionName;
 		return action.execute();
+	}
+
+	public String reflow(MessageProperties properties, String[] tanks) {
+		return "";
 	}
 }

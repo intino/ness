@@ -1,6 +1,10 @@
 package io.intino.ness.box;
 
-import io.intino.ness.box.actions.*;
+import io.intino.ness.box.actions.AddFunctionAction;
+import io.intino.ness.box.actions.AddPipeAction;
+import io.intino.ness.box.actions.AddTankAction;
+import io.intino.ness.box.actions.AddUserAction;
+import io.intino.ness.datalake.reflow.ReflowProcessHandler;
 import io.intino.tara.io.Stash;
 import io.intino.tara.magritte.Graph;
 import io.intino.tara.magritte.stores.InMemoryFileStore;
@@ -36,10 +40,8 @@ public class MainHsMapper {
 	}
 
 	private static void reflow(NessBox box) {
-		ReflowAction reflowAction = new ReflowAction();
-		reflowAction.box = box;
-		reflowAction.tanks = Arrays.asList("dialogs.v4", "surveys.v4");
-		reflowAction.execute();
+		ReflowProcessHandler reflowProcessHandler = new ReflowProcessHandler(box, Arrays.asList("dialogs.v4", "surveys.v4"));
+//		reflowProcessHandler.
 	}
 
 	private static void addUser(NessBox box, String name) {

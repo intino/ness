@@ -19,9 +19,15 @@ import java.util.stream.Stream;
 
 public class Helper {
 
+
+	public static Tank findTank(NessGraph graph, String name) {
+		List<Tank> topics = graph.tankList(t -> t.qualifiedName().equalsIgnoreCase(name)).collect(Collectors.toList());
+		return topics.isEmpty() ? findByPosition(graph, name) : topics.get(0);
+	}
+
 	public static Tank findTank(NessBox box, String name) {
 		List<Tank> topics = box.ness().tankList(t -> t.qualifiedName().equalsIgnoreCase(name)).collect(Collectors.toList());
-		return topics.isEmpty() ? findByPosition(box, name) : topics.get(0);
+		return topics.isEmpty() ? findByPosition(box.ness(), name) : topics.get(0);
 	}
 
 	public static boolean isTagged(String[] tags, List<String> topicTags) {
@@ -32,8 +38,8 @@ public class Helper {
 		return tags.stream().anyMatch(topicTags::contains);
 	}
 
-	private static Tank findByPosition(NessBox box, String name) {
-		final List<Tank> topics = sortedTanks(box.ness()).collect(Collectors.toList());
+	private static Tank findByPosition(NessGraph ness, String name) {
+		final List<Tank> topics = sortedTanks(ness).collect(Collectors.toList());
 		try {
 			final int position = Integer.parseInt(name);
 			return position <= topics.size() ? topics.get(position - 1) : null;

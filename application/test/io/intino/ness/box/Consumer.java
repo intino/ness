@@ -20,6 +20,10 @@ public class Consumer {
 		StringBuilder builder = new StringBuilder();
 
 		Session session = session();
+		if (session == null) {
+			System.err.println("Session is null");
+			return;
+		}
 		MessageConsumer consumer = session.createConsumer(session.createTopic("ActiveMQ.Advisory.Topic"));
 		consumer.setMessageListener(message -> {
 			ActiveMQMessage m = (ActiveMQMessage) message;
@@ -38,8 +42,8 @@ public class Consumer {
 
 	private static Session session() {
 		try {
-			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://bus.pre.monentia.es:62616");
-			connection = connectionFactory.createConnection("happysense.sumus", "mol5:inquire");
+			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:63000");
+			connection = connectionFactory.createConnection("happysense-server", "ufprpiejjan0");
 			connection.start();
 			return connection.createSession(false, AUTO_ACKNOWLEDGE);
 		} catch (JMSException e) {

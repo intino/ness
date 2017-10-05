@@ -1,8 +1,8 @@
 package io.intino.ness.datalake;
 
 import io.intino.konos.jms.TopicConsumer;
-import io.intino.ness.bus.BusPipeManager;
 import io.intino.ness.bus.BusManager;
+import io.intino.ness.bus.BusPipeManager;
 import io.intino.ness.datalake.NessStation.Drop;
 import io.intino.ness.datalake.NessStation.Feed;
 import io.intino.ness.graph.Aqueduct;
@@ -59,10 +59,6 @@ public class DatalakeManager {
 	public void stopFeed(Tank tank) {
 		TopicConsumer consumer = bus.consumersOf(tank.feedQN()).get(0);
 		if (consumer != null) consumer.stop();
-	}
-
-	public void reflow(List<Tank> tanks) {
-		new ReflowProcess(this, bus, station).start(tanks);
 	}
 
 	public boolean pipe(Pipe pipe) {
@@ -150,7 +146,6 @@ public class DatalakeManager {
 		logger.info("Bus pipe started: " + aqueduct.name$());
 	}
 
-	
 	public void stopBusPipe(Aqueduct aqueduct) {
 		BusPipeManager busPipeManager = runningBusPipes.get(aqueduct);
 		if (busPipeManager != null) {
@@ -193,5 +188,9 @@ public class DatalakeManager {
 
 	private void flow(String tank, String flow) {
 		station.flow(tank).to(m -> bus.registerOrGetProducer(flow).produce(createMessageFor(m.toString())));
+	}
+
+	public NessStation station() {
+		return this.station;
 	}
 }

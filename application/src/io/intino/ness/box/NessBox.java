@@ -3,6 +3,7 @@ package io.intino.ness.box;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.datalake.DatalakeManager;
 import io.intino.ness.datalake.FileStation;
+import io.intino.ness.datalake.reflow.ReflowSession;
 import io.intino.ness.graph.Aqueduct;
 import io.intino.ness.graph.NessGraph;
 import io.intino.ness.graph.Pipe;
@@ -13,6 +14,7 @@ public class NessBox extends AbstractBox {
 	private DatalakeManager datalakeManager;
 	private NessGraph graph;
 	private BusManager busManager;
+	private ReflowSession reflowSession;
 
 	public NessBox(String[] args) {
 		super(args);
@@ -33,8 +35,10 @@ public class NessBox extends AbstractBox {
 		busManager = new BusManager(this);
 		busManager.start();
 		datalakeManager = new DatalakeManager(new FileStation(configuration.args().get("ness_datalake")), busManager);
+		reflowSession = new ReflowSession(this);
 		initAqueducts();
 		initPipes();
+		busManager().registerConsumer("service.ness.reflow", reflowSession);
 		return this;
 	}
 

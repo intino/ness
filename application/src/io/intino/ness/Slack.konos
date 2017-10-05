@@ -1,0 +1,69 @@
+dsl Konos
+
+Service Nessie as SlackBot
+	Request("Enter in the management area to add/remove tanks or users and other management actions") manage
+		Request("Add user to the datalake") add-user
+			Parameter(String) name
+		Request("Remove user from ness service") remove-user
+			Parameter(String) name
+		Request("Creates a tank") add-tank
+			Parameter(String) name
+		Request("Removes registered tank") remove-tank
+			Parameter(String) name
+		Request("Creates a function associated to an input tank and output tank. It requires the file of the function") add-function
+		Request("Removes a registered function") remove-function
+			Parameter(String) name
+		Request("Defines an external bus to interact with it using aqueducts") add-external-bus
+			Parameter(String) name
+			Parameter(String) externalBusUrl
+			Parameter(String) user
+			Parameter(String) password
+		Request("Removes a registed aqueduct") remove-external-bus
+			Parameter(String) name
+		Request("Creates a data flow between an external bus and ness. It is necesary to define de direction of the data flow (*incoming* or *outgoing*). Also it is posible to set a conversion function.") add-aqueduct
+			Parameter(String) name
+			Parameter(String) externalBus
+			Parameter(String) direction
+			Parameter(String) functionName
+			Parameter(String) tankMacro
+		Request("Removes a registed aqueduct") remove-aqueduct
+			Parameter(String) name
+		Request("Connects source and destination topics") pipes
+	Request("Request all users registered in ness") users
+	Request("Request all tanks nessy is subscribed filtering by tags") tanks
+		Parameter(String, true) tags
+	Request("Show all functions registered") functions
+	Request("Show registered topics") topics
+	Request("Select a tank to operate with") tank
+		Parameter(String) name
+		Request("Tags thes tank with `tags`") tag
+			Parameter(String, true) tags
+		Request("Changes name of this tank to new one") rename
+			Parameter(String) name
+		Request("Seals current events of a tank to reservoir") seal
+		Request("Reproduce events of a tank") migrate
+			Parameter(String, true) functions
+	Request("Connect a source and destination tanks through a `function`") pump
+		Parameter(String) functionName
+		Parameter(String) input
+		Parameter(String) output
+	Request ("Connects source and destination topics real-time, optionaly converting the message with a function") add-pipe
+		Parameter(String) from
+		Parameter(String) to
+		Parameter(String) functionName
+	Request ("Reproduce events of the tanks given. 'all' word will reflow all tanks") reflow
+		Parameter(String, true) tanks
+	Request("connect feed and flow channes of a tank") resume-tank
+		Parameter(String) tank
+	Request("stops the feed and flow channes of a tank") pause-tank
+		Parameter(String) tank
+	Request("connect out jms topic with a ness tank") start-aqueduct
+		Parameter(String) name
+
+	Request("connect out jms topic with a ness tank") stop-aqueduct
+		Parameter(String) name
+	Request("list of aqueducts and its status") aqueducts
+
+
+
+

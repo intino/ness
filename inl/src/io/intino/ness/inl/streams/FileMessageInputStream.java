@@ -1,13 +1,19 @@
-package io.intino.ness.inl;
+package io.intino.ness.inl.streams;
 
-import java.io.*;
+import io.intino.ness.inl.MessageInputStream;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
 
-import static io.intino.ness.inl.FileMessageInputStream.Format.*;
 import static io.intino.ness.inl.Formats.*;
-import static io.intino.ness.inl.MessageInputStream.*;
+import static io.intino.ness.inl.MessageInputStream.Empty;
+import static io.intino.ness.inl.MessageInputStream.Sort;
+import static io.intino.ness.inl.streams.FileMessageInputStream.Format.*;
 
 public class FileMessageInputStream {
 
