@@ -59,13 +59,11 @@ public interface NessStation {
 
     interface Pumping {
         Link from(String source);
-        Job asJob();
-
         interface Link {
             Pumping to(String target);
             Pumping to(Post target);
         }
-
+        Job asJob();
     }
 
     interface PumpingTo {
