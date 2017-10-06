@@ -18,15 +18,15 @@ public class ReflowProcessHandler {
 	private ReflowProcess reflowProcess;
 
 
-	public ReflowProcessHandler(NessBox box, List<String> tanks) {
+	public ReflowProcessHandler(NessBox box, List<String> tanks, Integer blockSize) {
 		this.graph = box.ness();
 		this.tanks = tanks;
-		this.reflowProcess = new ReflowProcess(box.datalakeManager(), box.busManager(), collectTanks());
+		this.reflowProcess = new ReflowProcess(box.datalakeManager(), box.busManager(), collectTanks(), blockSize == 0 ? Integer.MAX_VALUE : blockSize);
 	}
 
-	boolean next(Integer size) {
+	boolean next() {
 		if (tanks.isEmpty()) return false;
-		reflowProcess.next(size == 0 ? Integer.MAX_VALUE : size);
+		reflowProcess.next();
 		return true;
 	}
 

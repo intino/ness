@@ -265,7 +265,7 @@ public final class BusManager {
 		entry.setAdvisoryForDiscardingMessages(true);
 		entry.setTopicPrefetch(1);
 		ConstantPendingMessageLimitStrategy pendingMessageLimitStrategy = new ConstantPendingMessageLimitStrategy();
-		pendingMessageLimitStrategy.setLimit(100000);
+		pendingMessageLimitStrategy.setLimit(1000000);
 		entry.setPendingMessageLimitStrategy(pendingMessageLimitStrategy);
 		final PolicyMap policyMap = new PolicyMap();
 		policyMap.setPolicyEntries(policyEntries);

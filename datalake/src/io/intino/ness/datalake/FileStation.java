@@ -9,13 +9,17 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.*;
 
 import static io.intino.ness.datalake.FileTank.Format.inl;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
+import static java.time.Instant.parse;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -33,6 +37,21 @@ public class FileStation implements NessStation {
 
 	public FileStation(File folder) {
 		this.folder = folder;
+	}
+
+	private static File zipOf(File file) {
+		return new File(file.getAbsolutePath().replace(".inl", ".zip"));
+	}
+
+	private static byte[] bytesOf(Object message) {
+		if (message == null) return new byte[0];
+		if (message instanceof Message) message = message.toString();
+		if (message instanceof String) return trail((String) message);
+		return new byte[0];
+	}
+
+	private static byte[] trail(String message) {
+		return (message + "\n\n").getBytes();
 	}
 
 	@Override
@@ -131,7 +150,12 @@ public class FileStation implements NessStation {
 	}
 
 	@Override
-	public Pump pump(String tank) {
+	public Pumping pump() {
+		return createPumping();
+	}
+
+	@Override
+	public PumpingTo pump(String tank) {
 		return createPumpFor(tank);
 	}
 
@@ -139,7 +163,6 @@ public class FileStation implements NessStation {
 	public Job seal(String tank) {
 		return createSealTaskFor(assertExists(get(tank)));
 	}
-
 
 	@Override
 	public Tank[] tanks() {
@@ -199,7 +222,6 @@ public class FileStation implements NessStation {
 		return asList(pipesFrom(tank));
 	}
 
-
 	@Override
 	public boolean exists(String tank) {
 		return get(tank).exists();
@@ -219,10 +241,6 @@ public class FileStation implements NessStation {
 	private File[] setOf(File file) {
 		File zipFile = zipOf(file);
 		return zipFile.exists() ? new File[]{zipFile, file} : new File[]{file};
-	}
-
-	private static File zipOf(File file) {
-		return new File(file.getAbsolutePath().replace(".inl", ".zip"));
 	}
 
 	private void register(Message message, String tank) {
@@ -250,13 +268,12 @@ public class FileStation implements NessStation {
 
 	private Pipe createPipeFor(final String source) {
 		return new Pipe() {
+			private String target;
+			private Valve valve = new Valve();
+
 			{
 				pipes.add(this);
 			}
-
-			private String target;
-
-			private Valve valve = new Valve();
 
 			@Override
 			public String from() {
@@ -295,29 +312,190 @@ public class FileStation implements NessStation {
 		};
 	}
 
-	private Pump createPumpFor(String source) {
-		return new Pump() {
+	private Pumping createPumping() {
+		return new Pumping() {
+
+			List<TankManager> managers = new ArrayList<>();
+			List<LinkDef> links = new ArrayList<>();
+
+			@Override
+			public Link from(String source) {
+				Pumping pumping = this;
+				return new Link() {
+					@Override
+					public Pumping to(String target) {
+						links.add(new TankLinkDef(source, target));
+						return pumping;
+					}
+
+					@Override
+					public Pumping to(Post target) {
+						links.add(new PostLinkDef(source, target));
+						return pumping;
+					}
+				};
+			}
+
+			@Override
+			public Job asJob() {
+				return createJob(Integer.MAX_VALUE);
+			}
+
+			private Job createJob(int blockSize) {
+				return new Job() {
+
+					int messageCounter = 0;
+
+					@Override
+					protected boolean init() {
+						if (links.isEmpty()) return false;
+						managers = links.stream().map(l -> l.source).collect(toSet())
+								.stream().map(TankManager::new).collect(toList());
+						return true;
+					}
+
+					@Override
+					protected boolean step() {
+						if (!flowsAreActive(managers)) return false;
+						TankManager manager = managerWithOldestMessage(managers);
+						links.stream().filter(l -> l.source.equals(manager.source))
+								.forEach(l -> l.send(manager.message));
+						manager.next();
+						return ++messageCounter < blockSize;
+					}
+
+					@Override
+					public void terminate() {
+						super.terminate();
+					}
+				};
+			}
+
+			@Override
+			public Iterator<Job> asJob(int messageBlockSize) {
+				return new Iterator<Job>() {
+					@Override
+					public boolean hasNext() {
+						return flowsAreActive(managers);
+					}
+
+					@Override
+					public Job next() {
+						return createJob(messageBlockSize);
+					}
+				};
+			}
+
+
+			private TankManager managerWithOldestMessage(List<TankManager> managers) {
+				Instant reference = instantOf(managers.get(0).message);
+				TankManager manager = managers.get(0);
+				for (int i = 1; i < managers.size(); i++) {
+					Instant comparable = instantOf(managers.get(i).message);
+					if (comparable.isBefore(reference)) {
+						reference = comparable;
+						manager = managers.get(i);
+					}
+				}
+				return manager;
+			}
+
+			private Instant instantOf(io.intino.ness.inl.Message message) {
+				return message != null ? parse(message.ts()) : Instant.MAX;
+			}
+
+			private boolean flowsAreActive(List<TankManager> managers) {
+				for (TankManager manager : managers) if (manager.message != null) return true;
+				return false;
+			}
+
+			abstract class LinkDef {
+
+				String source;
+
+				LinkDef(String source) {
+					this.source = source;
+				}
+
+				abstract void send(Message message);
+
+			}
+
+			class TankLinkDef extends LinkDef {
+
+				Pipe pipe;
+
+				TankLinkDef(String source, String target) {
+					super(source);
+					this.pipe = pipeBetween(source, target);
+				}
+
+				@Override
+				void send(Message message) {
+					get(pipe.to()).write(message);
+				}
+			}
+
+			class PostLinkDef extends LinkDef {
+
+				Post target;
+
+				PostLinkDef(String source, Post target) {
+					super(source);
+					this.target = target;
+				}
+
+				@Override
+				void send(Message message) {
+					target.send(message);
+				}
+			}
+
+			class TankManager {
+				private final String source;
+				private final Faucet faucet;
+				private io.intino.ness.inl.Message message;
+
+				TankManager(String source) {
+					this.source = source;
+					this.faucet = new TankFaucet(get(source));
+				}
+
+				private void next() {
+					try {
+						this.message = faucet.next();
+					} catch (IOException e) {
+						getLogger(ROOT_LOGGER_NAME).error(e.getMessage(), e);
+					}
+				}
+			}
+		}
+
+				;
+	}
+
+	private PumpingTo createPumpFor(String source) {
+		return new PumpingTo() {
 			private Faucet faucet = new TankFaucet(get(source));
 			private Map<String, FileTank> tanks = new HashMap<>();
 			private List<Pipe> pipes = new ArrayList<>();
 			private List<Post> posts = new ArrayList<>();
 
 			@Override
-			public Pump to(String tank) {
+			public PumpingTo to(String tank) {
 				tanks.put(tank, get(tank));
 				pipes.add(pipeBetween(source, tank));
 				return this;
 			}
 
 			@Override
-			public Pump to(Post post) {
+			public PumpingTo to(Post post) {
 				posts.add(post);
 				return this;
 			}
 
 			@Override
 			public Job asJob() {
-				Pump pump = this;
 				return new Job() {
 
 					public boolean init() {
@@ -325,42 +503,31 @@ public class FileStation implements NessStation {
 					}
 
 					public boolean step() {
-						return pump.step();
+						try {
+							Message message = faucet.next();
+							if (message == null) return false;
+							pipes.forEach(pipe -> targetTankOf(pipe).write(pipe.map(message)));
+							posts.forEach(post -> post.send(message));
+							return true;
+						} catch (IOException e) {
+							getLogger(ROOT_LOGGER_NAME).error(e.getMessage(), e);
+							return false;
+						}
 					}
 
 					@Override
 					protected void onTerminate() {
-						pump.terminate();
+						tanks.values().forEach(FileTank::close);
+						posts.forEach(Post::flush);
 					}
-
 
 				};
 			}
-
-			@Override
-			public boolean step() {
-				try {
-					Message message = faucet.next();
-					if (message == null) return false;
-					pipes.forEach(pipe -> targetTankOf(pipe).write(pipe.map(message)));
-					posts.forEach(post -> post.send(message));
-					return true;
-				} catch (IOException e) {
-					getLogger(ROOT_LOGGER_NAME).error(e.getMessage(), e);
-					return false;
-				}
-			}
-
 
 			private FileTank targetTankOf(Pipe pipe) {
 				return tanks.get(pipe.to());
 			}
 
-			@Override
-			public void terminate() {
-				tanks.values().forEach(FileTank::close);
-				posts.forEach(Post::flush);
-			}
 		};
 	}
 
@@ -409,17 +576,6 @@ public class FileStation implements NessStation {
 		return new FileTank(new File(this.folder, tank));
 	}
 
-	private static byte[] bytesOf(Object message) {
-		if (message == null) return new byte[0];
-		if (message instanceof Message) message = message.toString();
-		if (message instanceof String) return trail((String) message);
-		return new byte[0];
-	}
-
-	private static byte[] trail(String message) {
-		return (message + "\n\n").getBytes();
-	}
-
 	private FileTank assertExists(FileTank tank) {
 		if (!tank.exists()) throw new StationException("Tank " + tank.name() + "  does not exist");
 		return tank;
@@ -427,10 +583,14 @@ public class FileStation implements NessStation {
 
 	private FileTank assertIsNotUsed(FileTank tank) {
 		String name = tank.name();
-		if (pipesFrom(name).length > 0) throw new StationException("Tank " + tank.name() + " is source of pipes. Remove pipes first");
-		if (pipesTo(name).length > 0) throw new StationException("Tank " + tank.name() + " is target of pipes. Remove pipes first");
-		if (feedsTo(name).length > 0) throw new StationException("Tank " + tank.name() + " is target of feeds. Remove feeds first");
-		if (flowsFrom(name).length > 0) throw new StationException("Tank " + tank.name() + " is source of flows. Remove flows first");
+		if (pipesFrom(name).length > 0)
+			throw new StationException("Tank " + tank.name() + " is source of pipes. Remove pipes first");
+		if (pipesTo(name).length > 0)
+			throw new StationException("Tank " + tank.name() + " is target of pipes. Remove pipes first");
+		if (feedsTo(name).length > 0)
+			throw new StationException("Tank " + tank.name() + " is target of feeds. Remove feeds first");
+		if (flowsFrom(name).length > 0)
+			throw new StationException("Tank " + tank.name() + " is source of flows. Remove flows first");
 		return tank;
 	}
 
