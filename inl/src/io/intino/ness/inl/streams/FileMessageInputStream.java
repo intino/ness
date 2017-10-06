@@ -20,7 +20,7 @@ public class FileMessageInputStream {
     public static MessageInputStream of(File file) throws IOException {
         Format format = formatOf(file);
 
-        if (format == inl) return name(Sort.of(Inl.of(streamOf(file))), file);
+        if (format == inl) return name(Inl.of(streamOf(file)), file);
         if (format == inz) return name(Inl.of(streamOf(file)), file);
         if (format == csv) return name(Csv.of(streamOf(file)), file);
         if (format == tsv) return name(Tsv.of(streamOf(file)), file);
@@ -38,7 +38,6 @@ public class FileMessageInputStream {
         for (int i = 0; i < files.length; i++) inputStreams[i] = of(files[i]);
         return Sort.of(inputStreams);
     }
-
 
     private static InputStream streamOf(File file) throws IOException {
         return isZip(file) ? zipStreamOf(file) : new FileInputStream(file);

@@ -23,7 +23,8 @@ public interface NessStation {
     Pipe[] pipesTo(String tank);
     Pipe pipeBetween(String source, String target);
 
-    Pump pump(String tank);
+    Pumping pump();
+    PumpingTo pump(String tank);
     Job seal(String tank);
 
     boolean exists(String tank);
@@ -56,12 +57,22 @@ public interface NessStation {
         Pipe to(String tank);
     }
 
-    interface Pump {
-        Pump to(String tank);
-        Pump to(Post post);
+    interface Pumping {
+        Link from(String source);
         Job asJob();
-        boolean step();
-        void terminate();
+
+        interface Link {
+            Pumping to(String target);
+            Pumping to(Post target);
+        }
+
     }
+
+    interface PumpingTo {
+        PumpingTo to(String tank);
+        PumpingTo to(Post post);
+        Job asJob();
+    }
+
 
 }
