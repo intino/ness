@@ -26,9 +26,10 @@ public class MainHsMapper {
 				"mqtt_port=1884"
 		};
 		NessConfiguration boxConfiguration = new NessConfiguration(args);
-		Graph graph = new Graph(store(boxConfiguration.args().get("ness_store"))).loadStashes("Ness");
+		Graph graph = new Graph(store(boxConfiguration.args().get("ness_store")))
+				.loadStashes("Ness");
 		NessBox box = (NessBox) new NessBox(boxConfiguration).put(graph).open();
-		Thread.sleep(40000);
+		Thread.sleep(15000);
 		reflow(box);
 //		addUser(box, "happysense-server");
 //		addTank(box, "dialogs.v3");

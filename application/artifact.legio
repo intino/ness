@@ -29,7 +29,7 @@ Artifact("io.intino.ness", "1.0.0") ness as Product
 		Dev(server = ebar-pre, runConfiguration = ebar-pre-ness)
 			project = "ebar"
 	Deployment ness-dev
-		tags = "Datalake"
+		//tags = "Datalake" TODO octavio
 		Dev(server = consul-dev, runConfiguration = ebar-pre-ness)
 			project = "dev"
 	Deployment ness-happysense
