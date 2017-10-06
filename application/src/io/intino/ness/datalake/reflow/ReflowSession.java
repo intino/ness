@@ -29,12 +29,12 @@ public class ReflowSession implements Consumer {
 
 	private void createSession(Reflow reflow) {
 		box.busManager().stopPersistence();
-		this.manager = new ReflowProcessHandler(box, reflow.tanks());
+		this.manager = new ReflowProcessHandler(box, reflow.tanks(), reflow.blockSize());
 		this.blockSize = reflow.blockSize();
 	}
 
 	private void next() {
-		manager.next(blockSize);
+		manager.next();
 		if (manager.finished()) {
 			box.busManager().startPersistence();
 			this.manager = null;

@@ -3,6 +3,8 @@ package io.intino.ness.datalake;
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageMapper;
 
+import java.util.Iterator;
+
 public interface NessStation {
 
     Tank tank(String tank);
@@ -64,6 +66,7 @@ public interface NessStation {
             Pumping to(Post target);
         }
         Job asJob();
+        Iterator<Job> asJob(int messageBlockSize);
     }
 
     interface PumpingTo {

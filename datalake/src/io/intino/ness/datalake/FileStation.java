@@ -338,7 +338,13 @@ public class FileStation implements NessStation {
 
 			@Override
 			public Job asJob() {
+				return createJob(Integer.MAX_VALUE);
+			}
+
+			private Job createJob(int blockSize) {
 				return new Job() {
+
+					int messageCounter = 0;
 
 					@Override
 					protected boolean init() {
@@ -355,12 +361,27 @@ public class FileStation implements NessStation {
 						links.stream().filter(l -> l.source.equals(manager.source))
 								.forEach(l -> l.send(manager.message));
 						manager.next();
-						return true;
+						return ++messageCounter < blockSize;
 					}
 
 					@Override
 					public void terminate() {
 						super.terminate();
+					}
+				};
+			}
+
+			@Override
+			public Iterator<Job> asJob(int messageBlockSize) {
+				return new Iterator<Job>() {
+					@Override
+					public boolean hasNext() {
+						return flowsAreActive(managers);
+					}
+
+					@Override
+					public Job next() {
+						return createJob(messageBlockSize);
 					}
 				};
 			}
