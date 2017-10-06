@@ -350,7 +350,6 @@ public class FileStation implements NessStation {
 
 					@Override
 					protected boolean step() {
-						int messageCounter = 0;
 						if (!flowsAreActive(managers)) return false;
 						TankManager manager = managerWithOldestMessage(managers);
 						links.stream().filter(l -> l.source.equals(manager.source))
