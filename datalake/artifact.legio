@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact ("io.intino.ness", "1.0.4") datalake
+Artifact ("io.intino.ness", "1.0.5") datalake
 	Imports
 		Compile("io.intino.ness", "inl", "1.0.9")
 		Test("junit", "junit", "4.12")
