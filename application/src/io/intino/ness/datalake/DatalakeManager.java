@@ -1,8 +1,8 @@
 package io.intino.ness.datalake;
 
 import io.intino.konos.jms.TopicConsumer;
-import io.intino.ness.bus.BusPipesManager;
 import io.intino.ness.bus.BusManager;
+import io.intino.ness.bus.BusPipeManager;
 import io.intino.ness.datalake.NessStation.Drop;
 import io.intino.ness.datalake.NessStation.Feed;
 import io.intino.ness.graph.Aqueduct;
@@ -30,7 +30,7 @@ public class DatalakeManager {
 	private NessStation station;
 	private BusManager bus;
 	private List<Job> jobs = new ArrayList<>();
-	private Map<Aqueduct, BusPipesManager> runningBusPipes = new HashMap<>();
+	private Map<Aqueduct, BusPipeManager> runningBusPipes = new HashMap<>();
 
 	public DatalakeManager(FileStation station, BusManager bus) {
 		this.station = station;
@@ -59,10 +59,6 @@ public class DatalakeManager {
 	public void stopFeed(Tank tank) {
 		TopicConsumer consumer = bus.consumersOf(tank.feedQN()).get(0);
 		if (consumer != null) consumer.stop();
-	}
-
-	public void reflow(List<Tank> tanks) {
-		new ReflowProcess(this, bus, station).start(tanks);
 	}
 
 	public boolean pipe(Pipe pipe) {
@@ -134,7 +130,7 @@ public class DatalakeManager {
 
 	public void quit() {
 		jobs.forEach(Job::stop);
-		bus.quit();
+		bus.stop();
 	}
 
 	public boolean rename(Tank tank, String name) {
@@ -144,17 +140,16 @@ public class DatalakeManager {
 	}
 
 	public void startBusPipe(Aqueduct aqueduct) {
-		BusPipesManager manager = new BusPipesManager(aqueduct, bus);
+		BusPipeManager manager = new BusPipeManager(aqueduct, bus);
 		manager.start();
 		runningBusPipes.put(aqueduct, manager);
 		logger.info("Bus pipe started: " + aqueduct.name$());
 	}
 
-
 	public void stopBusPipe(Aqueduct aqueduct) {
-		BusPipesManager busPipesManager = runningBusPipes.get(aqueduct);
-		if (busPipesManager != null) {
-			busPipesManager.stop();
+		BusPipeManager busPipeManager = runningBusPipes.get(aqueduct);
+		if (busPipeManager != null) {
+			busPipeManager.stop();
 			runningBusPipes.remove(aqueduct);
 		}
 	}
@@ -193,5 +188,9 @@ public class DatalakeManager {
 
 	private void flow(String tank, String flow) {
 		station.flow(tank).to(m -> bus.registerOrGetProducer(flow).produce(createMessageFor(m.toString())));
+	}
+
+	public NessStation station() {
+		return this.station;
 	}
 }

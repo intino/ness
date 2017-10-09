@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "1.0.0") ness as Product
+Artifact("io.intino.ness", "1.0.1") ness as Product
 	Imports
 		Compile("org.slf4j", "slf4j-log4j12", "1.7.7")
 		Compile("org.apache.activemq", "activemq-broker", "5.14.4")
@@ -8,16 +8,15 @@ Artifact("io.intino.ness", "1.0.0") ness as Product
 		Compile("org.apache.activemq", "activemq-kahadb-store", "5.14.4")
 		Compile("org.apache.activemq", "activemq-jaas", "5.14.4")
 
-		Compile("io.intino.ness", "datalake", "1.0.4")
+		Compile("io.intino.ness", "datalake", "1.0.5")
 
-		Compile("io.intino.konos", "konos-jms", "1.0.9")
+		Compile("io.intino.konos", "konos-jms", "1.0.10")
 		Compile("io.intino.konos", "konos-slack", "1.0.10")
 		Compile("io.intino.konos", "konos-jmx", "1.0.1")
 		Compile("io.intino.konos", "konos-scheduler", "1.0.4")
 	Code("io.intino.ness")
-	Model("Proteo", "2.1.4", "2.1.4")
+	Model("Proteo", "2.1.4", "2.1.7")
 	Box("Konos", "2.1.4", "2.1.4")
-
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness") as Runnable("io.intino.ness.box.Main")
 		classpathPrefix = "lib"
 		Parameter("ness_store", "./temp/store")
@@ -30,8 +29,15 @@ Artifact("io.intino.ness", "1.0.0") ness as Product
 		Dev(server = ebar-pre, runConfiguration = ebar-pre-ness)
 			project = "ebar"
 	Deployment ness-dev
+		tags = "Datalake"
 		Dev(server = consul-dev, runConfiguration = ebar-pre-ness)
 			project = "dev"
+	Deployment ness-happysense
+		Dev(server = happysense-pre, runConfiguration = happysense-pre-ness)
+			project = "happysense"
+
+Server(cesar = "cesar.pre.intino.io") happysense-pre
+
 Server(cesar = "cesar.pre.intino.io") ebar-pre
 
 Server(cesar = "cesar.pre.intino.io") consul-dev
@@ -57,6 +63,13 @@ RunConfiguration ebar-pre-ness
 	Argument("ness_datalake", "$HOME/.ness/datalake")
 	Argument("broker_store", "$HOME/.ness/broker/")
 	Argument("broker_port", "62000")
+	Argument("mqtt_port", "1884")
+
+RunConfiguration happysense-pre-ness
+	Argument("ness_store", "$HOME/.ness/store")
+	Argument("ness_datalake", "$HOME/.ness/datalake")
+	Argument("broker_store", "$HOME/.ness/broker/")
+	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
 
 

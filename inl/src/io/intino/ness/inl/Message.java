@@ -70,9 +70,13 @@ public class Message {
             @Override @SuppressWarnings("unchecked")
             public <T> T as(Class<T> type) {
                 String value = valueOf(attribute);
-                return value != null ? (T) Accessory.parsers.get(type).parse(value) : null;
+                return value != null ? (T) Accessory.parsers.get(type).parse(deIndent(value)) : null;
             }
         };
+    }
+
+    private String deIndent(String value) {
+        return value.startsWith("\n") ? value.substring(1) : value;
     }
 
     Message write(Attribute attribute) {
@@ -207,12 +211,12 @@ public class Message {
         Attribute parse(String line) {
             int i = line.indexOf(":");
             name = line.substring(0, i);
-            value = i < line.length() - 1 ? unwrap(line.substring(i + 1)) : null;
+            value = i < line.length() - 1 ? unwrap(line.substring(i + 1)) : "";
             return this;
         }
 
         Attribute add(String line) {
-            value = (value == null) ? line : value + "\n" + line;
+            value = value + "\n" + line;
             return this;
         }
 
@@ -226,11 +230,11 @@ public class Message {
         }
 
         private static String indent(String text) {
-            return "\n\t" + text.replaceAll("\\n", "\n\t");
+            return text.replaceAll("\\n", "\n\t");
         }
 
         private boolean isMultiline() {
-            return value.contains("\n");
+            return value != null && value.contains("\n");
         }
     }
 }

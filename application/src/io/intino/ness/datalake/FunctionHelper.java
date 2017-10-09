@@ -15,11 +15,12 @@ public class FunctionHelper {
 		try {
 			return compile(className, code) != null;
 		} catch (Compiler.Exception e) {
+			logger.error(e.getMessage(), e);
 			return false;
 		}
 	}
 
-	private static MessageFunction compile(String className, String code) {
+	public static MessageFunction compile(String className, String code) {
 		try {
 			return Compiler.
 					compile(code).
@@ -28,32 +29,14 @@ public class FunctionHelper {
 					as(MessageFunction.class).
 					newInstance();
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-			return null;
-		}
-	}
-
-
-
-	public static MessageFunction map(Function function) {
-		return map(function.qualifiedName(), function.source());
-	}
-
-	public static MessageFunction map(String function, String... sources) {
-		try {
-			return map(compile(function, sources).as(MessageFunction.class));
-		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			return null;
 		}
 	}
 
-	private static Compiler.Result compile(String function, String... sources) {
-		return Compiler.compile(sources)
-				.with("-target", "1.8")
-				.load(function);
-	}
-
-	private static MessageFunction map(Class<? extends MessageFunction> mapperClass) throws Exception {
-		return mapperClass.newInstance();
+	public static MessageFunction map(Function function) {
+		MessageFunction messageFunction = function.aClass() == null ? FunctionHelper.compile(function.qualifiedName(), function.source()) : function.aClass();
+		function.aClass(messageFunction);
+		return messageFunction;
 	}
 }

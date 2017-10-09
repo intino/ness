@@ -3,6 +3,8 @@ package io.intino.ness.datalake;
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageMapper;
 
+import java.util.Iterator;
+
 public interface NessStation {
 
     Tank tank(String tank);
@@ -23,7 +25,8 @@ public interface NessStation {
     Pipe[] pipesTo(String tank);
     Pipe pipeBetween(String source, String target);
 
-    Pump pump(String tank);
+    Pumping pump();
+    PumpingTo pump(String tank);
     Job seal(String tank);
 
     boolean exists(String tank);
@@ -56,12 +59,21 @@ public interface NessStation {
         Pipe to(String tank);
     }
 
-    interface Pump {
-        Pump to(String tank);
-        Pump to(Post post);
+    interface Pumping {
+        Link from(String source);
+        interface Link {
+            Pumping to(String target);
+            Pumping to(Post target);
+        }
         Job asJob();
-        boolean step();
-        void terminate();
+        Iterator<Job> asJob(int messageBlockSize);
     }
+
+    interface PumpingTo {
+        PumpingTo to(String tank);
+        PumpingTo to(Post post);
+        Job asJob();
+    }
+
 
 }

@@ -1,7 +1,7 @@
 package io.intino.ness.datalake;
 
 import io.intino.ness.datalake.toolbox.Import;
-import io.intino.ness.inl.FileMessageOutputStream;
+import io.intino.ness.inl.streams.FileMessageOutputStream;
 import io.intino.ness.inl.Message;
 
 import java.io.File;

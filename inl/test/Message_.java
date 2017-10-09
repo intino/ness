@@ -7,6 +7,7 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import static messages.Messages.MenuWithOnePriceMessage;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static messages.Messages.MultipleComponentMessage;
@@ -86,6 +87,22 @@ public class Message_ {
         MessageInputStream stream = Formats.Inl.of(new ByteArrayInputStream(bytes));
         Message parsed = stream.next();
         assertThat(parsed.read("comment"), is("hello\nworld\n!!!"));
+    }
+
+
+    @Test
+    public void should_deserialize_array_attributes() throws Exception {
+        InputStream is = inputStreamOf(MenuWithOnePriceMessage);
+        Message message = Formats.Inl.of(is).next();
+        assertThat(message.parse("meals").as(String[].class).length, is(4));
+        assertThat(message.parse("meals").as(String[].class)[0], is("Soup"));
+        assertThat(message.parse("meals").as(String[].class)[1], is("Lobster"));
+        assertThat(message.parse("prices").as(Double[].class).length, is(1));
+        assertThat(message.parse("prices").as(Double[].class)[0], is(7.0));
+        assertThat(message.parse("availability").as(Boolean[].class).length, is(2));
+        assertThat(message.parse("availability").as(Boolean[].class)[0], is(true));
+        assertThat(message.parse("availability").as(Boolean[].class)[1], is(false));
+
     }
 
     private InputStream inputStreamOf(String text) {

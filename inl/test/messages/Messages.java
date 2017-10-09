@@ -161,6 +161,18 @@ public class Messages {
         "\ttrue\n" +
         "\tfalse\n";
 
+    public static String MenuWithOnePriceMessage =
+            "[Menu]\n" +
+            "meals:\n" +
+            "\tSoup\n" +
+            "\tLobster\n" +
+            "\tMussels\n" +
+            "\tCake\n" +
+            "prices:\n" +
+            "\t7.0\n" +
+            "availability:\n" +
+            "\ttrue\n" +
+            "\tfalse\n";
 
     public static String EmptyMenuMessage =
         "[Menu]\n" +

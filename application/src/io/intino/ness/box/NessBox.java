@@ -3,6 +3,7 @@ package io.intino.ness.box;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.datalake.DatalakeManager;
 import io.intino.ness.datalake.FileStation;
+import io.intino.ness.datalake.reflow.ReflowSession;
 import io.intino.ness.graph.Aqueduct;
 import io.intino.ness.graph.NessGraph;
 import io.intino.ness.graph.Pipe;
@@ -13,6 +14,7 @@ public class NessBox extends AbstractBox {
 	private DatalakeManager datalakeManager;
 	private NessGraph graph;
 	private BusManager busManager;
+	private ReflowSession reflowSession;
 
 	public NessBox(String[] args) {
 		super(args);
@@ -30,16 +32,34 @@ public class NessBox extends AbstractBox {
 
 	public io.intino.konos.Box open() {
 		super.open();
-		busManager = new BusManager(this);
+		busManager = new BusManager(this, true);
 		busManager.start();
 		datalakeManager = new DatalakeManager(new FileStation(configuration.args().get("ness_datalake")), busManager);
+		reflowSession = new ReflowSession(this);
 		initAqueducts();
 		initPipes();
+		busManager().registerConsumer("service.ness.reflow", reflowSession);
 		return this;
 	}
 
 	private void initPipes() {
 		for (Pipe pipe : graph.pipeList()) datalakeManager().pipe(pipe);
+	}
+
+	public NessBox restartBusWithoutPersistence() {
+		busManager.stop();
+		busManager = new BusManager(this, false);
+		busManager.start();
+		busManager().registerConsumer("service.ness.reflow", reflowSession);
+		return this;
+	}
+
+	public void restartBus() {
+		busManager.stop();
+		busManager = new BusManager(this, true);
+		busManager.start();
+		busManager().registerConsumer("service.ness.reflow", reflowSession);
+
 	}
 
 	private void initAqueducts() {

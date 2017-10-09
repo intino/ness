@@ -46,10 +46,8 @@ public class Deserializer {
         nextLine();
         while (!isTerminated(object)) {
             if (isMultilineIn(line)) setAttribute(scope, attribute.add(line.substring(1)));
-            else
-            if (isMessageIn(line)) scope = addComponent(object, line.substring(1,line.length()-1));
-            else
-            if (isAttributeIn(line)) setAttribute(scope, attribute.parse(line));
+            else if (isMessageIn(line)) scope = addComponent(object, line.substring(1,line.length()-1));
+            else if (isAttributeIn(line)) setAttribute(scope, attribute.parse(line));
             nextLine();
         }
         return object;
@@ -69,9 +67,13 @@ public class Deserializer {
     }
 
     private void setAttribute(Object object, Message.Attribute attribute) {
-        if (object == null || attribute.value == null) return;
+        if (object == null || attribute.value == null || attribute.value.isEmpty()) return;
         Field field = fieldsOf(object).get(map(attribute.name));
-        setField(field, object, parserOf(field).parse(attribute.value));
+        setField(field, object, parserOf(field).parse(deIndent(attribute.value)));
+    }
+
+    private String deIndent(String value) {
+        return value.startsWith("\n") ? value.substring(1) : value;
     }
 
     private Object findScope(Object object, String attribute) {

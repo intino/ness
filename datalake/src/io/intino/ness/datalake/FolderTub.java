@@ -2,8 +2,8 @@ package io.intino.ness.datalake;
 
 import io.intino.ness.datalake.Tank.Tub;
 import io.intino.ness.datalake.toolbox.Import;
-import io.intino.ness.inl.*;
-import io.intino.ness.inl.FileMessageInputStream;
+import io.intino.ness.inl.MessageInputStream;
+import io.intino.ness.inl.streams.FileMessageInputStream;
 
 import java.io.File;
 import java.io.IOException;

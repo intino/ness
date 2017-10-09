@@ -19,7 +19,7 @@ public class AddPipeAction {
 	public String execute() {
 		Function function = box.ness().functionList(f -> f.name$().equals(functionName)).findFirst().orElse(null);
 		List<String> topics = box.busManager().topics();
-		if (!topics.contains(from)) return "Origin topic not found";
+		if (!topics.contains(from)) box.busManager().createTopic(from);
 		if (box.datalakeManager().pipe(from, to, function)) {
 			Pipe newPipe = box.ness().create("pipes").pipe(from, to);
 			if (function != null) newPipe.transformer(function);

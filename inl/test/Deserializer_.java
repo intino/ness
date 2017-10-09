@@ -62,6 +62,13 @@ public class Deserializer_ {
 	}
 
 	@Test
+	public void should_deserialize_messages_with_array_attributes_of_size_1() throws Exception {
+		Menu menu = deserialize(MenuWithOnePriceMessage).next(Menu.class);
+		assertThat(menu.prices.length, is(1));
+		assertThat(menu.prices[0], is(7.0));
+	}
+
+	@Test
 	public void should_deserialize_empty_array_attributes() throws Exception {
 		Menu menu = deserialize(EmptyMenuMessage).next(Menu.class);
 		assertThat(menu.meals.length, is(0));

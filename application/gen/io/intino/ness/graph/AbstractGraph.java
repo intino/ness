@@ -184,10 +184,11 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 			this.name = name;
 		}
 
-		public io.intino.ness.graph.Function function(java.lang.String qualifiedName, java.lang.String source) {
+		public io.intino.ness.graph.Function function(java.lang.String qualifiedName, java.lang.String source, io.intino.ness.inl.MessageFunction aClass) {
 			io.intino.ness.graph.Function newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.Function.class, stash, name).a$(io.intino.ness.graph.Function.class);
 			newElement.core$().set(newElement, "qualifiedName", java.util.Collections.singletonList(qualifiedName));
 			newElement.core$().set(newElement, "source", java.util.Collections.singletonList(source));
+			newElement.core$().set(newElement, "aClass", java.util.Collections.singletonList(aClass));
 			return newElement;
 		}
 
