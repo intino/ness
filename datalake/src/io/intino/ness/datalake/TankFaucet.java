@@ -32,8 +32,8 @@ public class TankFaucet implements Faucet {
 		while (inputStream != null) {
 			Message message = inputStream.next();
 			if (message != null) return message;
-			inputStream.close();
-			inputStream = nextInputStream();
+			this.inputStream.close();
+			this.inputStream = nextInputStream();
 		}
 		return null;
 	}
@@ -41,10 +41,10 @@ public class TankFaucet implements Faucet {
 	private MessageInputStream nextInputStream() {
 		try {
 			if (!tubs.hasNext()) {
-				tubs = null;
+				this.tubs = null;
 				return null;
 			}
-			return tubs.next().input();
+			return this.tubs.next().input();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

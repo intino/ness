@@ -7,73 +7,107 @@ import java.util.Iterator;
 
 public interface NessStation {
 
-    Tank tank(String tank);
-    Feed feed(String tank);
-    Flow flow(String tank);
-    Drop drop(String tank);
-    Pipe pipe(String tank);
+	Tank tank(String tank);
 
-    void remove(String tank);
-    void remove(Feed... feeds);
-    void remove(Pipe... pipes);
-    void remove(Flow... flows);
+	Feed feed(String tank);
 
-    Tank[] tanks();
-    Feed[] feedsTo(String tank);
-    Flow[] flowsFrom(String tank);
-    Pipe[] pipesFrom(String tank);
-    Pipe[] pipesTo(String tank);
-    Pipe pipeBetween(String source, String target);
+	Flow flow(String tank);
 
-    Pumping pump();
-    PumpingTo pump(String tank);
-    Job seal(String tank);
+	Drop drop(String tank);
 
-    boolean exists(String tank);
-    void rename(String tank, String newName);
+	Pipe pipe(String tank);
 
-    interface Feed {
-        void send(Message message);
-        default void flush() {}
-    }
+	void remove(String tank);
 
-    interface Drop {
-        void register(Message message);
+	void remove(Feed... feeds);
 
-        default void flush() {
-        }
-    }
+	void remove(Pipe... pipes);
 
-    interface Flow {
-        Flow to(Post post);
-        default void send(Message message) {
-            throw new RuntimeException("");
-        }
-    }
+	void remove(Flow... flows);
 
-    interface Pipe extends MessageMapper {
-        String from();
-        String to();
+	Tank[] tanks();
 
-        Pipe with(Valve valve);
-        Pipe to(String tank);
-    }
+	Feed[] feedsTo(String tank);
 
-    interface Pumping {
-        Link from(String source);
-        interface Link {
-            Pumping to(String target);
-            Pumping to(Post target);
-        }
-        Job asJob();
-        Iterator<Job> asJob(int messageBlockSize);
-    }
+	Flow[] flowsFrom(String tank);
 
-    interface PumpingTo {
-        PumpingTo to(String tank);
-        PumpingTo to(Post post);
-        Job asJob();
-    }
+	Pipe[] pipesFrom(String tank);
 
+	Pipe[] pipesTo(String tank);
 
+	Pipe pipeBetween(String source, String target);
+
+	Pumping pump();
+
+	PumpingTo pump(String tank);
+
+	Job seal(String tank);
+
+	boolean exists(String tank);
+
+	void rename(String tank, String newName);
+
+	interface Feed {
+		void send(Message message);
+
+		default void flush() {
+		}
+	}
+
+	interface Drop {
+		void register(Message message);
+
+		default void flush() {
+		}
+	}
+
+	interface Flow {
+		Flow to(Post post);
+
+		default void send(Message message) {
+			throw new RuntimeException("");
+		}
+	}
+
+	interface Post {
+		void send(Message message);
+
+		default void flush() {
+		}
+	}
+
+	interface Pipe extends MessageMapper {
+		String from();
+
+		String to();
+
+		Pipe with(Valve valve);
+
+		Pipe to(String tank);
+
+	}
+
+	interface Pumping {
+		Link from(String source);
+
+		Job asJob();
+
+		Iterator<Job> asJob(int messageBlockSize);
+
+		interface Link {
+			Pumping to(String target);
+
+			Pumping to(Post target);
+		}
+
+	}
+
+	interface PumpingTo {
+		PumpingTo to(String tank);
+
+		PumpingTo to(Post post);
+
+		Job asJob();
+
+	}
 }

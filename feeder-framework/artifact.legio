@@ -1,0 +1,13 @@
+dsl Legio
+
+Artifact (groupId = "io.intino.ness", version = "1.0.9") feeder-framework
+	Imports
+		Test("junit", "junit", "4.12")
+		Compile("io.intino.ness", "inl", "1.0.9")
+
+	Package(LibrariesLinkedByManifest) > attachSources = true
+	Distribution(intino.releases, empty)
+
+Repository("intino-maven") intino
+	Release("https://artifactory.intino.io/artifactory/releases")
+	Release("https://artifactory.intino.io/artifactory/release-libraries") releases

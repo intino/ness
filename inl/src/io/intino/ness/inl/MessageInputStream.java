@@ -58,14 +58,14 @@ public interface MessageInputStream {
 
         public static MessageInputStream of(MessageInputStream... inputs) throws IOException {
             List<Message> messages = new ArrayList<>();
-            String name = "sort";
+            StringBuilder name = new StringBuilder("sort");
             for (MessageInputStream input : inputs) {
                 messages.addAll(MessageReader.readAll(input));
-                name += ":"+ input.name();
+                name.append(":").append(input.name());
             }
             sort(messages, byTs());
             Sort sort = new Sort(messages.iterator());
-            sort.name(name);
+            sort.name(name.toString());
             return sort;
         }
 

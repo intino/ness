@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/application/application.iml" filepath="$PROJECT_DIR$/application/application.iml" />
       <module fileurl="file://$PROJECT_DIR$/datalake/datalake.iml" filepath="$PROJECT_DIR$/datalake/datalake.iml" />
       <module fileurl="file://$PROJECT_DIR$/datalake-examples/datalake-examples.iml" filepath="$PROJECT_DIR$/datalake-examples/datalake-examples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/feeder-framework/feeder-framework.iml" filepath="$PROJECT_DIR$/feeder-framework/feeder-framework.iml" />
       <module fileurl="file://$PROJECT_DIR$/inl/inl.iml" filepath="$PROJECT_DIR$/inl/inl.iml" />
     </modules>
   </component>

@@ -327,7 +327,7 @@ public class FileStation_ {
         return Valve.define().filter(m->m.is("xxx")).filter(m->m.length() > 10);
     }
 
-    private Post post() {
+    private NessStation.Post post() {
         return message -> System.out.println(message.toString());
     }
 
