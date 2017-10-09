@@ -32,7 +32,7 @@ public class NessBox extends AbstractBox {
 
 	public io.intino.konos.Box open() {
 		super.open();
-		busManager = new BusManager(this);
+		busManager = new BusManager(this, true);
 		busManager.start();
 		datalakeManager = new DatalakeManager(new FileStation(configuration.args().get("ness_datalake")), busManager);
 		reflowSession = new ReflowSession(this);
@@ -44,6 +44,22 @@ public class NessBox extends AbstractBox {
 
 	private void initPipes() {
 		for (Pipe pipe : graph.pipeList()) datalakeManager().pipe(pipe);
+	}
+
+	public NessBox restartBusWithoutPersistence() {
+		busManager.stop();
+		busManager = new BusManager(this, false);
+		busManager.start();
+		busManager().registerConsumer("service.ness.reflow", reflowSession);
+		return this;
+	}
+
+	public void restartBus() {
+		busManager.stop();
+		busManager = new BusManager(this, true);
+		busManager.start();
+		busManager().registerConsumer("service.ness.reflow", reflowSession);
+
 	}
 
 	private void initAqueducts() {

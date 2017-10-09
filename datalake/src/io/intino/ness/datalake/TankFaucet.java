@@ -28,7 +28,6 @@ public class TankFaucet implements Faucet {
 		return tank.name();
 	}
 
-
 	public Message next() throws IOException {
 		while (inputStream != null) {
 			Message message = inputStream.next();

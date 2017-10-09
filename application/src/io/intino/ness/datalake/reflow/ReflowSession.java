@@ -4,14 +4,16 @@ import com.google.gson.Gson;
 import io.intino.konos.jms.Consumer;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.box.schemas.Reflow;
+import io.intino.ness.graph.Tank;
 
 import javax.jms.Message;
+
+import static io.intino.ness.box.slack.Helper.findTank;
 
 public class ReflowSession implements Consumer {
 
 	private final NessBox box;
-	private ReflowProcessHandler manager;
-	private int blockSize;
+	private ReflowProcessHandler handler;
 
 	public ReflowSession(NessBox box) {
 		this.box = box;
@@ -21,23 +23,31 @@ public class ReflowSession implements Consumer {
 	public void consume(Message message) {
 		String json = Consumer.textFrom(message);
 		if (json.contains("blockSize")) {
-			if (this.manager != null) return;
+			if (this.handler != null) return;
 			createSession(new Gson().fromJson(json, Reflow.class));
-//			next();
 		} else next();
 	}
 
 	private void createSession(Reflow reflow) {
-		box.busManager().stopPersistence();
-		this.manager = new ReflowProcessHandler(box, reflow.tanks(), reflow.blockSize());
-		this.blockSize = reflow.blockSize();
+		for (String tank : reflow.tanks()) box.datalakeManager().stopFeed(findTank(box, tank));
+		restartBusWithOutPersistence();
+		this.handler = new ReflowProcessHandler(box, reflow.tanks(), reflow.blockSize());
 	}
 
 	private void next() {
-		manager.next();
-		if (manager.finished()) {
-			box.busManager().startPersistence();
-			this.manager = null;
+		handler.next();
+		if (handler.finished()) {
+			restart();
+			for (Tank tank : handler.tanks()) box.datalakeManager().feed(tank);
+			this.handler = null;
 		}
+	}
+
+	private void restartBusWithOutPersistence() {
+		box.restartBusWithoutPersistence();
+	}
+
+	private void restart() {
+		box.restartBus();
 	}
 }

@@ -2,10 +2,12 @@
 package io.intino.ness.bus;
 
 import io.intino.konos.jms.Consumer;
+import io.intino.konos.jms.Producer;
 import io.intino.konos.jms.TopicConsumer;
 import io.intino.konos.jms.TopicProducer;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.graph.User;
+import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQSession;
 import org.apache.activemq.broker.Broker;
@@ -30,7 +32,6 @@ import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Session;
 import java.io.File;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
 import java.security.Principal;
@@ -54,11 +55,11 @@ public final class BusManager {
 	private Session session;
 	private AdvisoryManager advisoryManager;
 
-	public BusManager(NessBox box) {
+	public BusManager(NessBox box, boolean persistence) {
 		this.box = box;
 		service = new BrokerService();
 		authenticator = new SimpleAuthenticationPlugin(initUsers());
-		configure();
+		configure(persistence);
 	}
 
 	public void start() {
@@ -169,13 +170,22 @@ public final class BusManager {
 		}
 	}
 
+	public Map<String, TopicProducer> producers() {
+		return producers;
+	}
+
+	public Map<String, List<TopicConsumer>> consumers() {
+		return consumers;
+	}
+
 	public List<TopicConsumer> consumersOf(String feedQN) {
 		return consumers.get(feedQN);
 	}
 
-	public void quit() {
+	public void stop() {
 		try {
 			consumers.values().forEach(c -> c.forEach(TopicConsumer::stop));
+			producers.values().forEach(Producer::close);
 			session.close();
 			service.stop();
 		} catch (Exception e) {
@@ -221,12 +231,16 @@ public final class BusManager {
 		}
 	}
 
-	private void configure() {
+	private void configure(boolean persistence) {
 		try {
 			service.setBrokerName(NESS);
-//			startPersistence();
-			service.setPersistent(false);
-			service.setPersistenceAdapter(null);
+			if (persistence) {
+				service.setPersistent(true);
+				service.setPersistenceAdapter(persistenceAdapter());
+			} else {
+				service.setPersistent(false);
+				service.setPersistenceAdapter(null);
+			}
 			service.setUseJmx(true);
 			service.setUseShutdownHook(true);
 			service.setAdvisorySupport(true);
@@ -236,26 +250,6 @@ public final class BusManager {
 			addMQTTConnector();
 		} catch (Exception e) {
 			logger.error("Error configuring: " + e.getMessage(), e);
-		}
-	}
-
-	public void stopPersistence() {
-		try {
-			service.setPersistent(false);
-			service.setPersistenceAdapter(null);
-			service.requestRestart();
-		} catch (IOException e) {
-			logger.error("Error stopping persistence: " + e.getMessage(), e);
-		}
-	}
-
-	public void startPersistence() {
-		try {
-			service.setPersistent(true);
-			service.setPersistenceAdapter(persistenceAdapter());
-			service.requestRestart();
-		} catch (IOException e) {
-			logger.error("Error starting persistence: " + e.getMessage(), e);
 		}
 	}
 
@@ -326,6 +320,7 @@ public final class BusManager {
 
 	public Session transactedSession() {
 		try {
+			if (((ActiveMQConnection) connection).isTransportFailed()) initNessSession();
 			return connection.createSession(true, SESSION_TRANSACTED);
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);

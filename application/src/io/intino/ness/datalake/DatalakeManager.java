@@ -130,7 +130,7 @@ public class DatalakeManager {
 
 	public void quit() {
 		jobs.forEach(Job::stop);
-		bus.quit();
+		bus.stop();
 	}
 
 	public boolean rename(Tank tank, String name) {

@@ -19,8 +19,6 @@ import java.util.Map;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
 import static java.util.stream.Collectors.toMap;
-import static org.apache.log4j.LogManager.getLogger;
-import static org.apache.log4j.Logger.getRootLogger;
 import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
 class ReflowProcess {
@@ -39,17 +37,16 @@ class ReflowProcess {
 		this.station = datalakeManager.station();
 		this.session = bus.transactedSession();
 		this.tanks = tanks;
-		this.producers = this.tanks.stream().collect(toMap(Tank::qualifiedName, this::createProducer));
 		this.jobs = createPumping(blockSize);
 		this.finished = false;
-		for (Tank tank : tanks) datalakeManager.stopFeed(tank);
+		this.producers = this.tanks.stream().collect(toMap(Tank::qualifiedName, this::createProducer));
 	}
 
 	private TopicProducer createProducer(Tank tank) {
 		try {
-			return new TopicProducer(session, tank.qualifiedName());
+			return new TopicProducer(session, tank.flowQN());
 		} catch (JMSException e) {
-			getLogger(ROOT_LOGGER_NAME).error(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 			return null;
 		}
 	}
@@ -57,7 +54,7 @@ class ReflowProcess {
 	private Iterator<Job> createPumping(Integer blockSize) {
 		Pumping pumping = station.pump();
 		tanks.forEach(t -> pumping.from(t.qualifiedName())
-				.to(m -> producers.get(t.qualifiedName()).produce(createMessageFor(m))));
+				.to(m -> producers.get(t.qualifiedName()).produce(createMessageFor(m.toString()))));
 		return pumping.asJob(blockSize);
 	}
 
@@ -65,7 +62,7 @@ class ReflowProcess {
 		if (!jobs.hasNext()) terminateReflow();
 		jobs.next().onTerminate(() -> {
 			commit();
-			if (jobs.hasNext()) terminateReflow();
+			if (!jobs.hasNext()) terminateReflow();
 		});
 	}
 
@@ -77,7 +74,7 @@ class ReflowProcess {
 		try {
 			session.commit();
 		} catch (JMSException e) {
-			getRootLogger().error(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -87,9 +84,8 @@ class ReflowProcess {
 			commit();
 			session.close();
 			this.finished = true;
-			for (Tank tank : tanks) datalakeManager.feed(tank);
 		} catch (JMSException e) {
-			ReflowProcess.logger.error(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		}
 	}
 

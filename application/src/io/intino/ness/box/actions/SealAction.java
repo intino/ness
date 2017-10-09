@@ -24,6 +24,6 @@ public class SealAction extends Action {
 	}
 
 	private void seal(Tank tank) {
-//		box.datalakeManager().seal(tank);
+		box.datalakeManager().seal(tank);
 	}
 }

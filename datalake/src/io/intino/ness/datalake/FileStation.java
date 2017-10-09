@@ -338,6 +338,7 @@ public class FileStation implements NessStation {
 
 			@Override
 			public Job asJob() {
+				init();
 				return createJob(Integer.MAX_VALUE);
 			}
 
@@ -348,10 +349,7 @@ public class FileStation implements NessStation {
 
 					@Override
 					protected boolean init() {
-						if (links.isEmpty()) return false;
-						managers = links.stream().map(l -> l.source).collect(toSet())
-								.stream().map(TankManager::new).collect(toList());
-						return true;
+						return !links.isEmpty();
 					}
 
 					@Override
@@ -373,6 +371,7 @@ public class FileStation implements NessStation {
 
 			@Override
 			public Iterator<Job> asJob(int messageBlockSize) {
+				init();
 				return new Iterator<Job>() {
 					@Override
 					public boolean hasNext() {
@@ -384,6 +383,12 @@ public class FileStation implements NessStation {
 						return createJob(messageBlockSize);
 					}
 				};
+			}
+
+			private void init() {
+				if (links.isEmpty()) return;
+				managers = links.stream().map(l -> l.source).collect(toSet())
+						.stream().map(TankManager::new).collect(toList());
 			}
 
 
@@ -405,7 +410,8 @@ public class FileStation implements NessStation {
 			}
 
 			private boolean flowsAreActive(List<TankManager> managers) {
-				for (TankManager manager : managers) if (manager.message != null) return true;
+				for (TankManager manager : managers)
+					if (manager.message != null) return true;
 				return false;
 			}
 
@@ -459,6 +465,7 @@ public class FileStation implements NessStation {
 				TankManager(String source) {
 					this.source = source;
 					this.faucet = new TankFaucet(get(source));
+					next();
 				}
 
 				private void next() {
@@ -469,9 +476,7 @@ public class FileStation implements NessStation {
 					}
 				}
 			}
-		}
-
-				;
+		};
 	}
 
 	private PumpingTo createPumpFor(String source) {
