@@ -29,10 +29,6 @@ public class ReflowProcessHandler {
 		return true;
 	}
 
-	boolean finished() {
-		return reflowProcess.finished();
-	}
-
 	public List<Tank> tanks() {
 		return tanks;
 	}

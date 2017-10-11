@@ -9,6 +9,7 @@ import org.apache.activemq.command.DestinationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.Session;
@@ -29,6 +30,7 @@ public class BusPipeManager {
 	private final List<String> nessTopics;
 	private final List<TopicConsumer> topicConsumers;
 	private final BusManager busManager;
+	private Connection externalBusConnection;
 
 	public BusPipeManager(Aqueduct aqueduct, BusManager busManager) {
 		this.aqueduct = aqueduct;
@@ -64,13 +66,9 @@ public class BusPipeManager {
 
 	public void stop() {
 		try {
-			TopicConsumer consumer = null;
-			for (TopicConsumer topicConsumer : topicConsumers) {
-				consumer = topicConsumer;
-				topicConsumer.stop();
-			}
-			if (consumer != null) topicConsumers.remove(consumer);
 			externalBus.close();
+			externalBusConnection.close();
+			topicConsumers.clear();
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -78,11 +76,11 @@ public class BusPipeManager {
 
 	private void initForeignSession() {
 		try {
-			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(aqueduct.bus().originURL());
-			connectionFactory.setClientID("ness");
-			javax.jms.Connection connection = connectionFactory.createConnection(aqueduct.bus().user(), aqueduct.bus().password());
-			externalBus = connection.createSession(false, AUTO_ACKNOWLEDGE);
-			connection.start();
+			ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(aqueduct.bus().originURL());
+			factory.setClientID(busManager.nessID() + "-" + aqueduct.name$());
+			externalBusConnection = factory.createConnection(aqueduct.bus().user(), aqueduct.bus().password());
+			externalBus = externalBusConnection.createSession(false, AUTO_ACKNOWLEDGE);
+			externalBusConnection.start();
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -92,6 +90,7 @@ public class BusPipeManager {
 		Set<String> topics = new HashSet<>();
 		try {
 			if (externalBus == null || ((ActiveMQSession) externalBus).isClosed()) initForeignSession();
+			if (externalBus == null) return topics;
 			MessageConsumer consumer = externalBus.createConsumer(externalBus.createTopic("ActiveMQ.Advisory.Topic"));
 			consumer.setMessageListener(message -> {
 				ActiveMQMessage m = (ActiveMQMessage) message;

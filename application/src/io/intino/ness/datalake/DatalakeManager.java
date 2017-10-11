@@ -57,8 +57,9 @@ public class DatalakeManager {
 	}
 
 	public void stopFeed(Tank tank) {
-		TopicConsumer consumer = bus.consumersOf(tank.feedQN()).get(0);
-		if (consumer != null) consumer.stop();
+		List<TopicConsumer> topicConsumers = bus.consumersOf(tank.feedQN());
+		topicConsumers.forEach(TopicConsumer::stop);
+		topicConsumers.clear();
 	}
 
 	public boolean pipe(Pipe pipe) {
@@ -144,6 +145,10 @@ public class DatalakeManager {
 		manager.start();
 		runningBusPipes.put(aqueduct, manager);
 		logger.info("Bus pipe started: " + aqueduct.name$());
+	}
+
+	public void busManager(BusManager busManager) {
+		this.bus = busManager;
 	}
 
 	public void stopBusPipe(Aqueduct aqueduct) {

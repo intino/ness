@@ -51,24 +51,26 @@ RunConfiguration dev
 	Argument("mqtt_port", "1883")
 
 RunConfiguration pro
-	Argument("ness_store", "$HOME/.ness/store")
-	Argument("ness_datalake", "$HOME/.ness/datalake")
+	Argument("ness_store", "$HOME/ness/store")
+	Argument("ness_datalake", "$HOME/ness/datalake")
+	Argument("broker_store", "$HOME/ness/broker/")
 	Argument("nessie_token", "xoxb-162074419812-gB5oNUwzxGWQ756TrRyu1Ii9")
-	Argument("broker_store", "$HOME/.ness/broker/")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
 
 RunConfiguration ebar-pre-ness
-	Argument("ness_store", "$HOME/.ness/store")
-	Argument("ness_datalake", "$HOME/.ness/datalake")
-	Argument("broker_store", "$HOME/.ness/broker/")
+	Argument("ness_store", "$HOME/ness/store")
+	Argument("ness_datalake", "$HOME/ness/datalake")
+	Argument("broker_store", "$HOME/ness/broker/")
 	Argument("broker_port", "62000")
+	Argument("connector_id", "ebar-ness-pre")
 	Argument("mqtt_port", "1884")
 
 RunConfiguration happysense-pre-ness
-	Argument("ness_store", "$HOME/.ness/store")
-	Argument("ness_datalake", "$HOME/.ness/datalake")
-	Argument("broker_store", "$HOME/.ness/broker/")
+	Argument("ness_store", "$HOME/ness/store")
+	Argument("ness_datalake", "$HOME/ness/datalake")
+	Argument("broker_store", "$HOME/ness/broker/")
+	Argument("connector_id", "happysense-pre-ness")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
 

@@ -24,21 +24,17 @@ import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 class ReflowProcess {
 	private static Logger logger = LoggerFactory.getLogger(ROOT_LOGGER_NAME);
 
-	private final DatalakeManager datalakeManager;
 	private final NessStation station;
 	private final List<Tank> tanks;
 	private final Session session;
 	private final Iterator<Job> jobs;
-	private boolean finished;
 	private Map<String, TopicProducer> producers = new HashMap<>();
 
-	ReflowProcess(DatalakeManager datalakeManager, BusManager bus, List<Tank> tanks, Integer blockSize) {
-		this.datalakeManager = datalakeManager;
+	ReflowProcess(DatalakeManager datalakeManager, BusManager bus, List<Tank> tanks, int blockSize) {
 		this.station = datalakeManager.station();
 		this.session = bus.transactedSession();
 		this.tanks = tanks;
 		this.jobs = createPumping(blockSize);
-		this.finished = false;
 		this.producers = this.tanks.stream().collect(toMap(Tank::qualifiedName, this::createProducer));
 	}
 
@@ -51,7 +47,7 @@ class ReflowProcess {
 		}
 	}
 
-	private Iterator<Job> createPumping(Integer blockSize) {
+	private Iterator<Job> createPumping(int blockSize) {
 		Pumping pumping = station.pump();
 		tanks.forEach(t -> pumping.from(t.qualifiedName())
 				.to(m -> producers.get(t.qualifiedName()).produce(createMessageFor(m.toString()))));
@@ -66,10 +62,6 @@ class ReflowProcess {
 		});
 	}
 
-	boolean finished() {
-		return finished;
-	}
-
 	private void commit() {
 		try {
 			session.commit();
@@ -79,11 +71,9 @@ class ReflowProcess {
 	}
 
 	private void terminateReflow() {
-		// TODO
 		try {
 			commit();
 			session.close();
-			this.finished = true;
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
 		}

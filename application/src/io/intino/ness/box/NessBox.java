@@ -36,7 +36,7 @@ public class NessBox extends AbstractBox {
 		busManager.start();
 		datalakeManager = new DatalakeManager(new FileStation(configuration.args().get("ness_datalake")), busManager);
 		reflowSession = new ReflowSession(this);
-		initAqueducts();
+		startAqueducts();
 		initPipes();
 		busManager().registerConsumer("service.ness.reflow", reflowSession);
 		return this;
@@ -47,6 +47,7 @@ public class NessBox extends AbstractBox {
 	}
 
 	public NessBox restartBusWithoutPersistence() {
+		stopAqueducts();
 		busManager.stop();
 		busManager = new BusManager(this, false);
 		busManager.start();
@@ -57,13 +58,18 @@ public class NessBox extends AbstractBox {
 	public void restartBus() {
 		busManager.stop();
 		busManager = new BusManager(this, true);
+		datalakeManager().busManager(busManager);
 		busManager.start();
 		busManager().registerConsumer("service.ness.reflow", reflowSession);
-
+		startAqueducts();
 	}
 
-	private void initAqueducts() {
+	private void startAqueducts() {
 		for (Aqueduct aqueduct : ness().aqueductList()) datalakeManager.startBusPipe(aqueduct);
+	}
+
+	private void stopAqueducts() {
+		for (Aqueduct aqueduct : ness().aqueductList()) datalakeManager.stopBusPipe(aqueduct);
 	}
 
 	public void close() {

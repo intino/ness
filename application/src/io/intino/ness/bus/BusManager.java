@@ -46,6 +46,9 @@ import static javax.jms.Session.SESSION_TRANSACTED;
 public final class BusManager {
 	private static final Logger logger = LoggerFactory.getLogger(BusManager.class);
 	private static final String NESS = "ness";
+
+	private final String nessID;
+
 	private final NessBox box;
 	private final BrokerService service;
 	private final SimpleAuthenticationPlugin authenticator;
@@ -57,6 +60,7 @@ public final class BusManager {
 
 	public BusManager(NessBox box, boolean persistence) {
 		this.box = box;
+		nessID = box.configuration().args().containsKey("connector_id") ? box.configuration().args().get("connector_id") : "ness";
 		service = new BrokerService();
 		authenticator = new SimpleAuthenticationPlugin(initUsers());
 		configure(persistence);
@@ -72,8 +76,12 @@ public final class BusManager {
 		}
 	}
 
+	public String nessID() {
+		return nessID;
+	}
+
 	public Session nessSession() {
-		if (this.session == null || ((ActiveMQSession) session).isClosed()) initNessSession();
+		if (this.session == null || closedSession()) initNessSession();
 		return session;
 	}
 
@@ -145,7 +153,7 @@ public final class BusManager {
 
 	public ActiveMQDestination createTopic(String name) {
 		try {
-			return (ActiveMQDestination) session.createTopic(name);
+			return (ActiveMQDestination) nessSession().createTopic(name);
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
 			return null;
@@ -155,14 +163,18 @@ public final class BusManager {
 	public void registerConsumer(String feedQN, Consumer consumer) {
 		List<TopicConsumer> consumers = this.consumers.putIfAbsent(feedQN, new ArrayList<>());
 		if (consumers == null) consumers = this.consumers.get(feedQN);
-		TopicConsumer topicConsumer = new TopicConsumer(session, feedQN);
+		TopicConsumer topicConsumer = new TopicConsumer(nessSession(), feedQN);
 		topicConsumer.listen(consumer, NESS + consumers.size() + "-" + feedQN);
 		consumers.add(topicConsumer);
 	}
 
+	private boolean closedSession() {
+		return ((ActiveMQSession) session).isClosed();
+	}
+
 	public TopicProducer registerOrGetProducer(String path) {
 		try {
-			if (!producers.containsKey(path)) producers.put(path, new TopicProducer(session, path));
+			if (!producers.containsKey(path)) producers.put(path, new TopicProducer(nessSession(), path));
 			return producers.get(path);
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
@@ -185,8 +197,11 @@ public final class BusManager {
 	public void stop() {
 		try {
 			consumers.values().forEach(c -> c.forEach(TopicConsumer::stop));
+			consumers.clear();
 			producers.values().forEach(Producer::close);
+			producers.clear();
 			session.close();
+			connection.close();
 			service.stop();
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -213,7 +228,7 @@ public final class BusManager {
 		try {
 			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("vm://ness");
 			connection = connectionFactory.createConnection(NESS, NESS);
-			connection.setClientID(NESS);
+			connection.setClientID(nessID);
 			session = connection.createSession(false, AUTO_ACKNOWLEDGE);
 			startAdvisories();
 			connection.start();

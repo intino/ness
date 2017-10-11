@@ -23,7 +23,8 @@ public class MessageSender {
 
 	public static void send(Session destination, String topic, Message message, Function function) {
 		try {
-			if (!producers.containsKey(topic)) producers.put(topic, new TopicProducer(destination, topic));
+			if (!producers.containsKey(topic) || (producers.get(topic)).isClosed())
+				producers.put(topic, new TopicProducer(destination, topic));
 			TopicProducer producer = producers.get(topic);
 			String messageMapped = function == null ? textFrom(message) : mapToMessage(textFrom(message), map(function));
 			if (!messageMapped.isEmpty()) producer.produce(createMessageFor(messageMapped));
