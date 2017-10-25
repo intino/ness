@@ -3,7 +3,7 @@ package io.intino.ness.graph;
 import io.intino.ness.graph.*;
 
 
-public class Aqueduct extends io.intino.tara.magritte.Layer implements io.intino.tara.magritte.tags.Terminal {
+public class BusPipe extends io.intino.tara.magritte.Layer implements io.intino.tara.magritte.tags.Terminal {
 	protected Direction direction;
 
 	public enum Direction {
@@ -13,7 +13,7 @@ public class Aqueduct extends io.intino.tara.magritte.Layer implements io.intino
 	protected io.intino.ness.graph.Function transformer;
 	protected java.lang.String tankMacro;
 
-	public Aqueduct(io.intino.tara.magritte.Node node) {
+	public BusPipe(io.intino.tara.magritte.Node node) {
 		super(node);
 	}
 
@@ -33,24 +33,24 @@ public class Aqueduct extends io.intino.tara.magritte.Layer implements io.intino
 		return tankMacro;
 	}
 
-	public Aqueduct direction(io.intino.ness.graph.Aqueduct.Direction value) {
+	public BusPipe direction(io.intino.ness.graph.BusPipe.Direction value) {
 		this.direction = value;
-		return (Aqueduct) this;
+		return (BusPipe) this;
 	}
 
-	public Aqueduct bus(io.intino.ness.graph.ExternalBus value) {
+	public BusPipe bus(io.intino.ness.graph.ExternalBus value) {
 		this.bus = value;
-		return (Aqueduct) this;
+		return (BusPipe) this;
 	}
 
-	public Aqueduct transformer(io.intino.ness.graph.Function value) {
+	public BusPipe transformer(io.intino.ness.graph.Function value) {
 		this.transformer = value;
-		return (Aqueduct) this;
+		return (BusPipe) this;
 	}
 
-	public Aqueduct tankMacro(java.lang.String value) {
+	public BusPipe tankMacro(java.lang.String value) {
 		this.tankMacro = value;
-		return (Aqueduct) this;
+		return (BusPipe) this;
 	}
 
 	@Override

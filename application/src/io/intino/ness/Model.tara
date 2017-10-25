@@ -27,7 +27,7 @@ Concept ExternalBus
 	var string user
 	var string password
 
-Concept Aqueduct
+Concept BusPipe
 	var word:{outgoing incoming} direction
 	var ExternalBus bus
 	var Function transformer

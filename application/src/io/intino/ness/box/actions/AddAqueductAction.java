@@ -1,7 +1,7 @@
 package io.intino.ness.box.actions;
 
 import io.intino.ness.box.NessBox;
-import io.intino.ness.graph.Aqueduct;
+import io.intino.ness.graph.BusPipe;
 import io.intino.ness.graph.ExternalBus;
 import io.intino.ness.graph.Function;
 
@@ -22,9 +22,9 @@ public class AddAqueductAction {
 		if (bus == null) return "External Bus not found";
 		Function function = box.ness().functionList(f -> f.name$().equals(functionName)).findFirst().orElse(null);
 		if (function == null) return "Function not found";
-		Aqueduct aqueduct = box.ness().aqueductList(f -> f.name$().equals(name)).findFirst().orElse(null);
-		if (aqueduct != null) return "Aqueduct is already defined";
-		box.ness().create("aqueducts", name).aqueduct(Aqueduct.Direction.valueOf(direction), bus, function, tankMacro).save$();
+		BusPipe busPipe = box.ness().busPipeList(f -> f.name$().equals(name)).findFirst().orElse(null);
+		if (busPipe != null) return "Aqueduct is already defined";
+		box.ness().create("busPipes", name).busPipe(BusPipe.Direction.valueOf(direction), bus, function, tankMacro).save$();
 		return OK;
 	}
 }

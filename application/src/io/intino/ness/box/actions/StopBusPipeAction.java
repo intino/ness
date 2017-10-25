@@ -1,20 +1,20 @@
 package io.intino.ness.box.actions;
 
 import io.intino.ness.box.NessBox;
-import io.intino.ness.graph.Aqueduct;
+import io.intino.ness.graph.BusPipe;
 
 import static io.intino.ness.box.actions.Action.OK;
 
 
-public class StartAqueductAction {
+public class StopBusPipeAction {
 
 	public NessBox box;
 	public String name;
 
 	public String execute() {
-		Aqueduct aqueduct = box.ness().aqueductList(f -> f.name$().equals(name)).findFirst().orElse(null);
+		BusPipe aqueduct = box.ness().busPipeList(f -> f.name$().equals(name)).findFirst().orElse(null);
 		if (aqueduct == null) return "Aqueduct not found";
-		box.datalakeManager().startBusPipe(aqueduct);
+		box.datalakeManager().stopBusPipe(aqueduct);
 		return OK;
 	}
 }

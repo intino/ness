@@ -1,7 +1,7 @@
 package io.intino.ness.box.actions;
 
 import io.intino.ness.box.NessBox;
-import io.intino.ness.graph.Aqueduct;
+import io.intino.ness.graph.BusPipe;
 import io.intino.ness.graph.NessGraph;
 
 import java.util.List;
@@ -16,9 +16,9 @@ public class RemoveAqueductAction {
 	public String name;
 
 	public String execute() {
-		List<Aqueduct> aqueducts = ness().aqueductList(t -> t.name$().equals(name)).collect(toList());
+		List<BusPipe> aqueducts = ness().busPipeList(t -> t.name$().equals(name)).collect(toList());
 		if (aqueducts.isEmpty()) return "Aqueduct not found";
-		for (Aqueduct tank : aqueducts) {
+		for (BusPipe tank : aqueducts) {
 			tank.delete$();
 		}
 		return OK;

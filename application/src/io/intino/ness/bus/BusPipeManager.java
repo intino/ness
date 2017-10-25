@@ -1,7 +1,7 @@
 package io.intino.ness.bus;
 
 import io.intino.konos.jms.TopicConsumer;
-import io.intino.ness.graph.Aqueduct;
+import io.intino.ness.graph.BusPipe;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQSession;
 import org.apache.activemq.command.ActiveMQMessage;
@@ -17,7 +17,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static io.intino.ness.bus.MessageSender.send;
-import static io.intino.ness.graph.Aqueduct.Direction.incoming;
+import static io.intino.ness.graph.BusPipe.Direction.incoming;
 import static java.lang.Thread.sleep;
 import static java.util.stream.Collectors.toList;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
@@ -25,14 +25,14 @@ import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
 public class BusPipeManager {
 	private static final Logger logger = LoggerFactory.getLogger(ROOT_LOGGER_NAME);
-	private final Aqueduct aqueduct;
+	private final BusPipe aqueduct;
 	private Session externalBus;
 	private final List<String> nessTopics;
 	private final List<TopicConsumer> topicConsumers;
 	private final BusManager busManager;
 	private Connection externalBusConnection;
 
-	public BusPipeManager(Aqueduct aqueduct, BusManager busManager) {
+	public BusPipeManager(BusPipe aqueduct, BusManager busManager) {
 		this.aqueduct = aqueduct;
 		this.busManager = busManager;
 		this.nessTopics = busManager.topics();

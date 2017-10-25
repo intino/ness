@@ -1,8 +1,11 @@
 package io.intino.ness.box.jmx;
 
 import io.intino.ness.box.NessBox;
+import io.intino.ness.box.actions.BusPipesAction;
+import io.intino.ness.box.actions.StartBusPipeAction;
+import io.intino.ness.box.actions.StopBusPipeAction;
+
 import java.util.*;
-import java.time.*;
 
 public class Manager implements ManagerMBean {
 
@@ -166,7 +169,7 @@ public class Manager implements ManagerMBean {
 	}
 
 	public java.util.List<String> aqueducts() {
-		io.intino.ness.box.actions.AqueductsAction action = new io.intino.ness.box.actions.AqueductsAction();
+		BusPipesAction action = new BusPipesAction();
 		action.box = box;
 
 		return action.execute();
@@ -191,14 +194,14 @@ public class Manager implements ManagerMBean {
 	}
 
 	public String startAqueduct(String name) {
-		io.intino.ness.box.actions.StartAqueductAction action = new io.intino.ness.box.actions.StartAqueductAction();
+		StartBusPipeAction action = new StartBusPipeAction();
 		action.box = box;
 		action.name = name;
 		return action.execute();
 	}
 
 	public String stopAqueduct(String name) {
-		io.intino.ness.box.actions.StopAqueductAction action = new io.intino.ness.box.actions.StopAqueductAction();
+		StopBusPipeAction action = new StopBusPipeAction();
 		action.box = box;
 		action.name = name;
 		return action.execute();

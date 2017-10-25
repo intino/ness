@@ -4,7 +4,7 @@ import com.ullink.slack.simpleslackapi.SlackSession;
 import io.intino.konos.slack.Bot.MessageProperties;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.box.actions.*;
-import io.intino.ness.graph.Aqueduct;
+import io.intino.ness.graph.BusPipe;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
 
@@ -90,24 +90,24 @@ public class NessieSlack {
 
 
 	public String startAqueduct(MessageProperties properties, String name) {
-		StartAqueductAction action = new StartAqueductAction();
+		StartBusPipeAction action = new StartBusPipeAction();
 		action.box = box;
 		action.name = name;
 		return action.execute();
 	}
 
 	public String stopAqueduct(MessageProperties properties, String name) {
-		StopAqueductAction action = new StopAqueductAction();
+		StopBusPipeAction action = new StopBusPipeAction();
 		action.box = box;
 		action.name = name;
 		return action.execute();
 	}
 
 	public String aqueducts(MessageProperties properties) {
-		List<Aqueduct> aqueducts = box.ness().aqueductList();
+		List<BusPipe> aqueducts = box.ness().busPipeList();
 		if (aqueducts.isEmpty()) return "There aren't aqueducts registered";
 		StringBuilder builder = new StringBuilder();
-		for (Aqueduct aqueduct : aqueducts)
+		for (BusPipe aqueduct : aqueducts)
 			builder.append(aqueduct.name$()).append(": ").append(box.datalakeManager().status(aqueduct) ? " started" : " stopped").append("\n");
 		return builder.toString();
 	}

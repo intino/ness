@@ -10,7 +10,7 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 	private java.util.List<io.intino.ness.graph.Connection> connectionList;
 	private java.util.List<io.intino.ness.graph.User> userList;
 	private java.util.List<io.intino.ness.graph.ExternalBus> externalBusList;
-	private java.util.List<io.intino.ness.graph.Aqueduct> aqueductList;
+	private java.util.List<io.intino.ness.graph.BusPipe> busPipeList;
 	private java.util.List<io.intino.ness.graph.Pipe> pipeList;
 
 	public AbstractGraph(io.intino.tara.magritte.Graph graph) {
@@ -26,7 +26,7 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		this.connectionList = new java.util.ArrayList<>(wrapper.connectionList);
 		this.userList = new java.util.ArrayList<>(wrapper.userList);
 		this.externalBusList = new java.util.ArrayList<>(wrapper.externalBusList);
-		this.aqueductList = new java.util.ArrayList<>(wrapper.aqueductList);
+		this.busPipeList = new java.util.ArrayList<>(wrapper.busPipeList);
 		this.pipeList = new java.util.ArrayList<>(wrapper.pipeList);
 	}
 
@@ -37,7 +37,7 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		connectionList = this.graph.rootList(io.intino.ness.graph.Connection.class);
 		userList = this.graph.rootList(io.intino.ness.graph.User.class);
 		externalBusList = this.graph.rootList(io.intino.ness.graph.ExternalBus.class);
-		aqueductList = this.graph.rootList(io.intino.ness.graph.Aqueduct.class);
+		busPipeList = this.graph.rootList(io.intino.ness.graph.BusPipe.class);
 		pipeList = this.graph.rootList(io.intino.ness.graph.Pipe.class);
 	}
 
@@ -48,7 +48,7 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		if (node.is("Connection")) this.connectionList.add(node.as(io.intino.ness.graph.Connection.class));
 		if (node.is("User")) this.userList.add(node.as(io.intino.ness.graph.User.class));
 		if (node.is("ExternalBus")) this.externalBusList.add(node.as(io.intino.ness.graph.ExternalBus.class));
-		if (node.is("Aqueduct")) this.aqueductList.add(node.as(io.intino.ness.graph.Aqueduct.class));
+		if (node.is("BusPipe")) this.busPipeList.add(node.as(io.intino.ness.graph.BusPipe.class));
 		if (node.is("Pipe")) this.pipeList.add(node.as(io.intino.ness.graph.Pipe.class));
 	}
 
@@ -59,7 +59,7 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		if (node.is("Connection")) this.connectionList.remove(node.as(io.intino.ness.graph.Connection.class));
 		if (node.is("User")) this.userList.remove(node.as(io.intino.ness.graph.User.class));
 		if (node.is("ExternalBus")) this.externalBusList.remove(node.as(io.intino.ness.graph.ExternalBus.class));
-		if (node.is("Aqueduct")) this.aqueductList.remove(node.as(io.intino.ness.graph.Aqueduct.class));
+		if (node.is("BusPipe")) this.busPipeList.remove(node.as(io.intino.ness.graph.BusPipe.class));
 		if (node.is("Pipe")) this.pipeList.remove(node.as(io.intino.ness.graph.Pipe.class));
 	}
 
@@ -87,8 +87,8 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		return externalBusList;
 	}
 
-	public java.util.List<io.intino.ness.graph.Aqueduct> aqueductList() {
-		return aqueductList;
+	public java.util.List<io.intino.ness.graph.BusPipe> busPipeList() {
+		return busPipeList;
 	}
 
 	public java.util.List<io.intino.ness.graph.Pipe> pipeList() {
@@ -135,12 +135,12 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		return externalBusList.get(index);
 	}
 
-	public java.util.stream.Stream<io.intino.ness.graph.Aqueduct> aqueductList(java.util.function.Predicate<io.intino.ness.graph.Aqueduct> filter) {
-		return aqueductList.stream().filter(filter);
+	public java.util.stream.Stream<io.intino.ness.graph.BusPipe> busPipeList(java.util.function.Predicate<io.intino.ness.graph.BusPipe> filter) {
+		return busPipeList.stream().filter(filter);
 	}
 
-	public io.intino.ness.graph.Aqueduct aqueduct(int index) {
-		return aqueductList.get(index);
+	public io.intino.ness.graph.BusPipe busPipe(int index) {
+		return busPipeList.get(index);
 	}
 
 	public java.util.stream.Stream<io.intino.ness.graph.Pipe> pipeList(java.util.function.Predicate<io.intino.ness.graph.Pipe> filter) {
@@ -221,8 +221,8 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 			return newElement;
 		}
 
-		public io.intino.ness.graph.Aqueduct aqueduct(io.intino.ness.graph.Aqueduct.Direction direction, io.intino.ness.graph.ExternalBus bus, io.intino.ness.graph.Function transformer, java.lang.String tankMacro) {
-			io.intino.ness.graph.Aqueduct newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.Aqueduct.class, stash, name).a$(io.intino.ness.graph.Aqueduct.class);
+		public io.intino.ness.graph.BusPipe busPipe(io.intino.ness.graph.BusPipe.Direction direction, io.intino.ness.graph.ExternalBus bus, io.intino.ness.graph.Function transformer, java.lang.String tankMacro) {
+			io.intino.ness.graph.BusPipe newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.BusPipe.class, stash, name).a$(io.intino.ness.graph.BusPipe.class);
 			newElement.core$().set(newElement, "direction", java.util.Collections.singletonList(direction));
 			newElement.core$().set(newElement, "bus", java.util.Collections.singletonList(bus));
 			newElement.core$().set(newElement, "transformer", java.util.Collections.singletonList(transformer));
@@ -259,8 +259,8 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 	    	new java.util.ArrayList<>(AbstractGraph.this.externalBusList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
 	    }
 
-	    public void aqueduct(java.util.function.Predicate<io.intino.ness.graph.Aqueduct> filter) {
-	    	new java.util.ArrayList<>(AbstractGraph.this.aqueductList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
+	    public void busPipe(java.util.function.Predicate<io.intino.ness.graph.BusPipe> filter) {
+	    	new java.util.ArrayList<>(AbstractGraph.this.busPipeList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
 	    }
 
 	    public void pipe(java.util.function.Predicate<io.intino.ness.graph.Pipe> filter) {

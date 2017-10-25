@@ -4,7 +4,7 @@ import io.intino.ness.bus.BusManager;
 import io.intino.ness.datalake.DatalakeManager;
 import io.intino.ness.datalake.FileStation;
 import io.intino.ness.datalake.reflow.ReflowSession;
-import io.intino.ness.graph.Aqueduct;
+import io.intino.ness.graph.BusPipe;
 import io.intino.ness.graph.NessGraph;
 import io.intino.ness.graph.Pipe;
 import io.intino.tara.magritte.Graph;
@@ -65,11 +65,11 @@ public class NessBox extends AbstractBox {
 	}
 
 	private void startAqueducts() {
-		for (Aqueduct aqueduct : ness().aqueductList()) datalakeManager.startBusPipe(aqueduct);
+		for (BusPipe aqueduct : ness().busPipeList()) datalakeManager.startBusPipe(aqueduct);
 	}
 
 	private void stopAqueducts() {
-		for (Aqueduct aqueduct : ness().aqueductList()) datalakeManager.stopBusPipe(aqueduct);
+		for (BusPipe aqueduct : ness().busPipeList()) datalakeManager.stopBusPipe(aqueduct);
 	}
 
 	public void close() {

@@ -5,7 +5,7 @@ import io.intino.ness.bus.BusManager;
 import io.intino.ness.bus.BusPipeManager;
 import io.intino.ness.datalake.NessStation.Drop;
 import io.intino.ness.datalake.NessStation.Feed;
-import io.intino.ness.graph.Aqueduct;
+import io.intino.ness.graph.BusPipe;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Pipe;
 import io.intino.ness.graph.Tank;
@@ -30,7 +30,7 @@ public class DatalakeManager {
 	private NessStation station;
 	private BusManager bus;
 	private List<Job> jobs = new ArrayList<>();
-	private Map<Aqueduct, BusPipeManager> runningBusPipes = new HashMap<>();
+	private Map<BusPipe, BusPipeManager> runningBusPipes = new HashMap<>();
 
 	public DatalakeManager(FileStation station, BusManager bus) {
 		this.station = station;
@@ -140,7 +140,7 @@ public class DatalakeManager {
 		return false;
 	}
 
-	public void startBusPipe(Aqueduct aqueduct) {
+	public void startBusPipe(BusPipe aqueduct) {
 		BusPipeManager manager = new BusPipeManager(aqueduct, bus);
 		manager.start();
 		runningBusPipes.put(aqueduct, manager);
@@ -151,7 +151,7 @@ public class DatalakeManager {
 		this.bus = busManager;
 	}
 
-	public void stopBusPipe(Aqueduct aqueduct) {
+	public void stopBusPipe(BusPipe aqueduct) {
 		BusPipeManager busPipeManager = runningBusPipes.get(aqueduct);
 		if (busPipeManager != null) {
 			busPipeManager.stop();
@@ -159,7 +159,7 @@ public class DatalakeManager {
 		}
 	}
 
-	public boolean status(Aqueduct aqueduct) {
+	public boolean status(BusPipe aqueduct) {
 		return runningBusPipes.get(aqueduct) != null;
 	}
 
