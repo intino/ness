@@ -10,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jms.*;
-import java.util.HashMap;
-import java.util.Map;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
 import static io.intino.ness.datalake.FunctionHelper.map;
@@ -19,15 +17,12 @@ import static io.intino.ness.datalake.FunctionHelper.map;
 public class MessageSender {
 	private static Logger logger = LoggerFactory.getLogger(MessageSender.class);
 
-	private static Map<String, TopicProducer> producers = new HashMap<>();
-
 	public static void send(Session destination, String topic, Message message, Function function) {
 		try {
-			if (!producers.containsKey(topic) || (producers.get(topic)).isClosed())
-				producers.put(topic, new TopicProducer(destination, topic));
-			TopicProducer producer = producers.get(topic);
+			TopicProducer producer = new TopicProducer(destination, topic);
 			String messageMapped = function == null ? textFrom(message) : mapToMessage(textFrom(message), map(function));
 			if (!messageMapped.isEmpty()) producer.produce(createMessageFor(messageMapped));
+			producer.close();
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
 		}

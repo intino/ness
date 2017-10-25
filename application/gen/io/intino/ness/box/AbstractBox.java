@@ -56,9 +56,8 @@ public abstract class AbstractBox extends io.intino.konos.Box {
 
 
 
+
 	}
-
-
 
 
 

@@ -15,8 +15,8 @@ Artifact("io.intino.ness", "1.0.1") ness as Product
 		Compile("io.intino.konos", "konos-jmx", "1.0.1")
 		Compile("io.intino.konos", "konos-scheduler", "1.0.4")
 	Code("io.intino.ness")
-	Model("Proteo", "2.1.4", "2.1.7")
-	Box("Konos", "2.1.4", "2.1.4")
+	Model("Proteo", "2.1.6", "2.1.8")
+	Box("Konos", "2.2.3", "2.2.3")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness") as Runnable("io.intino.ness.box.Main")
 		classpathPrefix = "lib"
 		Parameter("ness_store", "./temp/store")
@@ -42,7 +42,7 @@ Server(cesar = "cesar.pre.intino.io") ebar-pre
 
 Server(cesar = "cesar.pre.intino.io") consul-dev
 
-RunConfiguration dev
+RunConfiguration cesar-dev
 	Argument("ness_store", "./temp/store")
 	Argument("ness_datalake", "./temp/datalake")
 //	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
@@ -50,7 +50,7 @@ RunConfiguration dev
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1883")
 
-RunConfiguration pro
+RunConfiguration cesar-pro
 	Argument("ness_store", "$HOME/ness/store")
 	Argument("ness_datalake", "$HOME/ness/datalake")
 	Argument("broker_store", "$HOME/ness/broker/")

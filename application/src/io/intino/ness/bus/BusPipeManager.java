@@ -46,14 +46,14 @@ public class BusPipeManager {
 			Collection<String> filter = filter(topics, aqueduct.tankMacro());
 			for (String topic : filter) {
 				TopicConsumer consumer = new TopicConsumer(externalBus, topic);
-				consumer.listen(m -> send(busManager.nessSession(), topic, m, aqueduct.transformer()), "ness." + topic);
+				consumer.listen(m -> new Thread(() -> send(busManager.nessSession(), topic, m, aqueduct.transformer())).start(), "ness." + topic);
 				topicConsumers.add(consumer);
 			}
 		} else for (String topic : filter(nessTopics, aqueduct.tankMacro())) {
 			TopicConsumer consumer = new TopicConsumer(busManager.nessSession(), topic);
 			consumer.listen(m -> {
 				if (externalBus == null || ((ActiveMQSession) externalBus).isClosed()) initForeignSession();
-				send(externalBus, topic, m, aqueduct.transformer());
+				new Thread(() -> send(externalBus, topic, m, aqueduct.transformer())).start();
 			});
 			topicConsumers.add(consumer);
 		}
@@ -68,6 +68,7 @@ public class BusPipeManager {
 		try {
 			externalBus.close();
 			externalBusConnection.close();
+			topicConsumers.forEach(TopicConsumer::stop);
 			topicConsumers.clear();
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
