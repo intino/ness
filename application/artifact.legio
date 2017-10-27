@@ -45,6 +45,7 @@ Server(cesar = "cesar.pre.intino.io") consul-dev
 RunConfiguration cesar-dev
 	Argument("ness_store", "./temp/store")
 	Argument("ness_datalake", "./temp/datalake")
+	Argument("connector_id","ness-cesar-pre")
 //	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
 	Argument("broker_store", "./temp/broker/")
 	Argument("broker_port", "63000")

@@ -62,6 +62,10 @@ class ReflowProcess {
 		});
 	}
 
+	public Session getSession() {
+		return session;
+	}
+
 	private void commit() {
 		try {
 			session.commit();

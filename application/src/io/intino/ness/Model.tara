@@ -22,8 +22,9 @@ Concept User
 	var string password
 	var string[] groups
 
-Concept ExternalBus
+Concept ExternalBus is decorable
 	var string originURL
+	var string sessionID
 	var string user
 	var string password
 

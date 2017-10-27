@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import javax.jms.*;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
-import static io.intino.ness.datalake.FunctionHelper.map;
 
 public class MessageSender {
 	private static Logger logger = LoggerFactory.getLogger(MessageSender.class);
@@ -20,7 +19,7 @@ public class MessageSender {
 	public static void send(Session destination, String topic, Message message, Function function) {
 		try {
 			TopicProducer producer = new TopicProducer(destination, topic);
-			String messageMapped = function == null ? textFrom(message) : mapToMessage(textFrom(message), map(function));
+			String messageMapped = function == null ? textFrom(message) : mapToMessage(textFrom(message), function.aClass());
 			if (!messageMapped.isEmpty()) producer.produce(createMessageFor(messageMapped));
 			producer.close();
 		} catch (JMSException e) {

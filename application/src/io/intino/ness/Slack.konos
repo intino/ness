@@ -13,20 +13,20 @@ Service Nessie as SlackBot
 		Request("Creates a function associated to an input tank and output tank. It requires the file of the function") add-function
 		Request("Removes a registered function") remove-function
 			Parameter(String) name
-		Request("Defines an external bus to interact with it using aqueducts") add-external-bus
+		Request("Defines an external bus to interact with it using busPipes") add-external-bus
 			Parameter(String) name
 			Parameter(String) externalBusUrl
 			Parameter(String) user
 			Parameter(String) password
-		Request("Removes a registed aqueduct") remove-external-bus
+		Request("Removes a registed busPipe") remove-external-bus
 			Parameter(String) name
-		Request("Creates a data flow between an external bus and ness. It is necesary to define de direction of the data flow (*incoming* or *outgoing*). Also it is posible to set a conversion function.") add-aqueduct
+		Request("Creates a data flow between an external bus and ness. It is necesary to define de direction of the data flow (*incoming* or *outgoing*). Also it is posible to set a conversion function.") add-busPipe
 			Parameter(String) name
 			Parameter(String) externalBus
 			Parameter(String) direction
 			Parameter(String) functionName
 			Parameter(String) tankMacro
-		Request("Removes a registed aqueduct") remove-aqueduct
+		Request("Removes a registed busPipe") remove-bus-pipe
 			Parameter(String) name
 		Request("Connects source and destination topics") pipes
 	Request("Request all users registered in ness") users
@@ -57,12 +57,12 @@ Service Nessie as SlackBot
 		Parameter(String) tank
 	Request("stops the feed and flow channes of a tank") pause-tank
 		Parameter(String) tank
-	Request("connect out jms topic with a ness tank") start-aqueduct
+	Request("connect out jms topic with a ness tank") start-bus-pipe
 		Parameter(String) name
 
-	Request("connect out jms topic with a ness tank") stop-aqueduct
+	Request("connect out jms topic with a ness tank") stop-bus-pipe
 		Parameter(String) name
-	Request("list of aqueducts and its status") aqueducts
+	Request("list of bus-pipes and its status") bus-pipes
 
 
 

@@ -1,7 +1,6 @@
 package io.intino.ness.datalake;
 
 import io.intino.ness.datalake.compiler.Compiler;
-import io.intino.ness.graph.Function;
 import io.intino.ness.inl.MessageFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,9 +33,4 @@ public class FunctionHelper {
 		}
 	}
 
-	public static MessageFunction map(Function function) {
-		MessageFunction messageFunction = function.aClass() == null ? FunctionHelper.compile(function.qualifiedName(), function.source()) : function.aClass();
-		function.aClass(messageFunction);
-		return messageFunction;
-	}
 }

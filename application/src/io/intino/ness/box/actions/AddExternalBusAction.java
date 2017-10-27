@@ -17,7 +17,8 @@ public class AddExternalBusAction {
 	public String execute() {
 		ExternalBus bus = box.ness().externalBusList(f -> f.name$().equals(name)).findFirst().orElse(null);
 		if (bus != null) return "External Bus is already defined";
-		box.ness().create("external-buses", name).externalBus(externalBusUrl.replaceAll("<|>", ""), user, password).save$();
+		ExternalBus externalBus = box.ness().create("external-buses", name).externalBus(externalBusUrl.replaceAll("<|>", ""), box.busManager().nessID(), user, password);
+		externalBus.save$();
 		return OK;
 	}
 }

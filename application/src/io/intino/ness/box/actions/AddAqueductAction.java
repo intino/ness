@@ -23,7 +23,7 @@ public class AddAqueductAction {
 		Function function = box.ness().functionList(f -> f.name$().equals(functionName)).findFirst().orElse(null);
 		if (function == null) return "Function not found";
 		BusPipe busPipe = box.ness().busPipeList(f -> f.name$().equals(name)).findFirst().orElse(null);
-		if (busPipe != null) return "Aqueduct is already defined";
+		if (busPipe != null) return "Bus pipe is already defined";
 		box.ness().create("busPipes", name).busPipe(BusPipe.Direction.valueOf(direction), bus, function, tankMacro).save$();
 		return OK;
 	}

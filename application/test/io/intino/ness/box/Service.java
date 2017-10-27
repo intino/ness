@@ -2,11 +2,18 @@ package io.intino.ness.box;
 
 import com.google.gson.Gson;
 import io.intino.konos.jms.TopicProducer;
+import io.intino.tara.io.Node;
+import io.intino.tara.io.Stash;
+import io.intino.tara.io.StashDeserializer;
+import io.intino.tara.io.StashSerializer;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jms.JMSException;
 import javax.jms.Session;
+import java.io.File;
+import java.nio.file.Files;
 import java.time.Instant;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
@@ -50,4 +57,13 @@ public class Service {
 		}
 	}
 
+	@Test
+	public void name() throws Exception {
+		Stash stash = StashDeserializer.stashFrom(new File("/Users/oroncal/workspace/ness/application/test/busPipes.stash"));
+		for (Node node : stash.nodes) {
+			node.facets.remove("Aqueduct");
+			node.facets.add("BusPipe");
+		}
+		Files.write(new File("newStash").toPath(), StashSerializer.serialize(stash));
+	}
 }

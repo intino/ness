@@ -213,9 +213,10 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 			return newElement;
 		}
 
-		public io.intino.ness.graph.ExternalBus externalBus(java.lang.String originURL, java.lang.String user, java.lang.String password) {
+		public io.intino.ness.graph.ExternalBus externalBus(java.lang.String originURL, java.lang.String sessionID, java.lang.String user, java.lang.String password) {
 			io.intino.ness.graph.ExternalBus newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.ExternalBus.class, stash, name).a$(io.intino.ness.graph.ExternalBus.class);
 			newElement.core$().set(newElement, "originURL", java.util.Collections.singletonList(originURL));
+			newElement.core$().set(newElement, "sessionID", java.util.Collections.singletonList(sessionID));
 			newElement.core$().set(newElement, "user", java.util.Collections.singletonList(user));
 			newElement.core$().set(newElement, "password", java.util.Collections.singletonList(password));
 			return newElement;

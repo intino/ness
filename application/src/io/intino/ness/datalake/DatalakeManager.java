@@ -140,27 +140,27 @@ public class DatalakeManager {
 		return false;
 	}
 
-	public void startBusPipe(BusPipe aqueduct) {
-		BusPipeManager manager = new BusPipeManager(aqueduct, bus);
+	public void startBusPipe(BusPipe busPipe) {
+		BusPipeManager manager = new BusPipeManager(busPipe, bus);
 		manager.start();
-		runningBusPipes.put(aqueduct, manager);
-		logger.info("Bus pipe started: " + aqueduct.name$());
+		runningBusPipes.put(busPipe, manager);
+		logger.info("Bus pipe started: " + busPipe.name$());
 	}
 
 	public void busManager(BusManager busManager) {
 		this.bus = busManager;
 	}
 
-	public void stopBusPipe(BusPipe aqueduct) {
-		BusPipeManager busPipeManager = runningBusPipes.get(aqueduct);
+	public void stopBusPipe(BusPipe busPipe) {
+		BusPipeManager busPipeManager = runningBusPipes.get(busPipe);
 		if (busPipeManager != null) {
 			busPipeManager.stop();
-			runningBusPipes.remove(aqueduct);
+			runningBusPipes.remove(busPipe);
 		}
 	}
 
-	public boolean status(BusPipe aqueduct) {
-		return runningBusPipes.get(aqueduct) != null;
+	public boolean status(BusPipe busPipe) {
+		return runningBusPipes.get(busPipe) != null;
 	}
 
 	private void init() {

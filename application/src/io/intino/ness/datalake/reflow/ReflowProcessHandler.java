@@ -4,6 +4,7 @@ import io.intino.ness.box.NessBox;
 import io.intino.ness.graph.NessGraph;
 import io.intino.ness.graph.Tank;
 
+import javax.jms.Session;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +28,10 @@ public class ReflowProcessHandler {
 		if (tanks.isEmpty()) return false;
 		reflowProcess.next();
 		return true;
+	}
+
+	public Session session() {
+		return reflowProcess.getSession();
 	}
 
 	public List<Tank> tanks() {
