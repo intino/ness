@@ -69,9 +69,7 @@ public class BusPipeManager {
 	}
 
 	private Thread incomingMessage(String topic, Message m) {
-		return new Thread(() -> {
-			send(busManager.nessSession(), topic, m, busPipe.transformer());
-		});
+		return new Thread(() -> send(busManager.nessSession(), topic, m, busPipe.transformer()));
 	}
 
 	private Thread outgoingMessage(String topic, Message m) {
@@ -107,7 +105,7 @@ public class BusPipeManager {
 	private void checkSession() {
 		if (externalBus.session() == null || ((ActiveMQSession) externalBus.session()).isClosed()) {
 			externalBus.initSession(busManager.nessID());
-			outgoingPipe();
+			incomingPipe();
 		}
 	}
 
