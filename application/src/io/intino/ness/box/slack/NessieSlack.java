@@ -4,6 +4,7 @@ import com.ullink.slack.simpleslackapi.SlackSession;
 import io.intino.konos.slack.Bot.MessageProperties;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.box.actions.*;
+import io.intino.ness.bus.BusPipeManager;
 import io.intino.ness.graph.BusPipe;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
@@ -104,12 +105,19 @@ public class NessieSlack {
 	}
 
 	public String aqueducts(MessageProperties properties) {
-		List<BusPipe> aqueducts = box.ness().busPipeList();
-		if (aqueducts.isEmpty()) return "There aren't aqueducts registered";
+		List<BusPipe> busPipes = box.ness().busPipeList();
+		if (busPipes.isEmpty()) return "There aren't bus pipes registered";
 		StringBuilder builder = new StringBuilder();
-		for (BusPipe aqueduct : aqueducts)
-			builder.append(aqueduct.name$()).append(": ").append(box.datalakeManager().status(aqueduct) ? " started" : " stopped").append("\n");
+		for (BusPipe busPipe : busPipes)
+			builder.append(busPipe.name$()).append(": ").append(isRunning(busPipe) ? " started" : " stopped").append("\n");
 		return builder.toString();
+	}
+
+	private boolean isRunning(BusPipe busPipe) {
+		for (BusPipeManager manager : box.busPipeManagers())
+			if (manager.busPipes().contains(busPipe))
+				return manager.isRunning();
+		return false;
 	}
 
 	public String pump(MessageProperties properties, String functionName, String input, String output) {

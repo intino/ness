@@ -1,7 +1,7 @@
 package io.intino.ness.box.actions;
 
 import io.intino.ness.box.NessBox;
-import io.intino.ness.datalake.DatalakeManager;
+import io.intino.ness.bus.BusPipeManager;
 import io.intino.ness.graph.BusPipe;
 
 
@@ -11,9 +11,22 @@ public class CheckBusPipesAction {
 
 
 	public void execute() {
-		DatalakeManager datalakeManager = box.datalakeManager();
-		for (BusPipe aqueduct : box.ness().busPipeList()) {
-			if (!datalakeManager.status(aqueduct)) datalakeManager.startBusPipe(aqueduct);
+		for (BusPipe busPipe : box.ness().busPipeList()) {
+			if (!isRunning(busPipe)) busPipeManagerOf(busPipe).start(busPipe);
 		}
+	}
+
+	private BusPipeManager busPipeManagerOf(BusPipe busPipe) {
+		for (BusPipeManager manager : box.busPipeManagers())
+			if (manager.busPipes().contains(busPipe))
+				return manager;
+		return null;
+	}
+
+	private boolean isRunning(BusPipe busPipe) {
+		for (BusPipeManager manager : box.busPipeManagers())
+			if (manager.busPipes().contains(busPipe))
+				return manager.isRunning();
+		return false;
 	}
 }

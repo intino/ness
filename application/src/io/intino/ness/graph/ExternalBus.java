@@ -4,23 +4,24 @@ import io.intino.konos.jms.TopicConsumer;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQSession;
+import org.apache.activemq.command.ActiveMQMessage;
+import org.apache.activemq.command.DestinationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jms.Connection;
 import javax.jms.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
+import static java.lang.Thread.sleep;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
 public class ExternalBus extends AbstractExternalBus {
 	private static final Logger logger = LoggerFactory.getLogger(ROOT_LOGGER_NAME);
-
 	private Connection connection;
 	private Session session;
-	private List<TopicConsumer> consumers = new ArrayList<>();
+	private Map<String, TopicConsumer> consumers = new HashMap<>();
 
 	public ExternalBus(io.intino.tara.magritte.Node node) {
 		super(node);
@@ -28,13 +29,16 @@ public class ExternalBus extends AbstractExternalBus {
 
 
 	public Session initSession(String id) {
+		setSession(id);
+		return session != null && !((ActiveMQSession) session).isClosed() ? session : reload();
+	}
+
+	public Session reload() {
 		try {
-			if (session != null && !((ActiveMQSession) session).isClosed()) return session;
-			setSession(id);
 			cleanOldSession();
 			logger.info("session with " + originURL + " reloaded");
 			ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(originURL());
-			factory.setClientID(id);
+			factory.setClientID(sessionID);
 			if (connection == null || ((ActiveMQConnection) this.connection).isClosed())
 				this.connection = factory.createConnection(user(), password());
 			this.session = connection.createSession(false, AUTO_ACKNOWLEDGE);
@@ -47,12 +51,12 @@ public class ExternalBus extends AbstractExternalBus {
 	}
 
 	public Session session() {
-		return session == null ? initSession(sessionID()) : session;
+		return session;
 	}
 
 	public TopicConsumer addConsumer(String topic) {
 		TopicConsumer topicConsumer = new TopicConsumer(session(), topic);
-		consumers.add(topicConsumer);
+		consumers.put(topic, topicConsumer);
 		return topicConsumer;
 	}
 
@@ -74,6 +78,40 @@ public class ExternalBus extends AbstractExternalBus {
 		}
 	}
 
+	public void close() {
+		try {
+			consumers.values().forEach(TopicConsumer::stop);
+			consumers.clear();
+			session().close();
+			connection.close();
+		} catch (JMSException e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+
+	public Collection<String> topics() {
+		Set<String> topics = new HashSet<>();
+		try {
+			if (sessionIsClosed()) reload();
+			MessageConsumer consumer = addConsumer(createTopic("ActiveMQ.Advisory.Topic"));
+			consumer.setMessageListener(message -> {
+				ActiveMQMessage m = (ActiveMQMessage) message;
+				if (m.getDataStructure() instanceof DestinationInfo)
+					topics.add(((DestinationInfo) m.getDataStructure()).getDestination().getPhysicalName());
+			});
+			sleep(3000);
+			consumer.close();
+		} catch (JMSException | InterruptedException e) {
+			logger.error(e.getMessage(), e);
+		}
+		return topics;
+	}
+
+	public boolean sessionIsClosed() {
+		return session != null && ((ActiveMQSession) session).isClosed();
+	}
+
 	private void setSession(String id) {
 		if (sessionID == null) {
 			sessionID(id);
@@ -82,22 +120,15 @@ public class ExternalBus extends AbstractExternalBus {
 	}
 
 	private void cleanOldSession() {
-		for (TopicConsumer consumer : consumers) consumer.stop();
-		consumers.clear();
+		for (TopicConsumer consumer : consumers.values()) consumer.stop();
+		for (String c : consumers.keySet()) consumers.put(c, null);
 		if (session != null) try {
 			session.close();
 		} catch (JMSException e) {
 		}
 	}
 
-	public void close() {
-		try {
-			consumers.forEach(TopicConsumer::stop);
-			consumers.clear();
-			session().close();
-			connection.close();
-		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
-		}
+	public Map<String, TopicConsumer> consumers() {
+		return consumers;
 	}
 }

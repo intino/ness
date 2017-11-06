@@ -1,13 +1,18 @@
 package io.intino.ness.box;
 
 import io.intino.ness.bus.BusManager;
+import io.intino.ness.bus.BusPipeManager;
 import io.intino.ness.datalake.DatalakeManager;
 import io.intino.ness.datalake.FileStation;
 import io.intino.ness.datalake.reflow.ReflowSession;
 import io.intino.ness.graph.BusPipe;
+import io.intino.ness.graph.ExternalBus;
 import io.intino.ness.graph.NessGraph;
 import io.intino.ness.graph.Pipe;
 import io.intino.tara.magritte.Graph;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NessBox extends AbstractBox {
 
@@ -15,6 +20,7 @@ public class NessBox extends AbstractBox {
 	private NessGraph graph;
 	private BusManager busManager;
 	private ReflowSession reflowSession;
+	private List<BusPipeManager> busPipeManagers = new ArrayList<>();
 
 	public NessBox(String[] args) {
 		super(args);
@@ -36,7 +42,7 @@ public class NessBox extends AbstractBox {
 		busManager.start();
 		datalakeManager = new DatalakeManager(new FileStation(configuration.args().get("ness_datalake")), busManager);
 		reflowSession = new ReflowSession(this);
-		startAqueducts();
+		initBusPipeManagers();
 		initPipes();
 		busManager().registerConsumer("service.ness.reflow", reflowSession);
 		return this;
@@ -47,7 +53,7 @@ public class NessBox extends AbstractBox {
 	}
 
 	public NessBox restartBusWithoutPersistence() {
-		stopAqueducts();
+		for (BusPipeManager busPipeManager : busPipeManagers) busPipeManager.stop();
 		busManager.stop();
 		busManager = new BusManager(this, false);
 		busManager.start();
@@ -61,15 +67,17 @@ public class NessBox extends AbstractBox {
 		datalakeManager().busManager(busManager);
 		busManager.start();
 		busManager().registerConsumer("service.ness.reflow", reflowSession);
-		startAqueducts();
+		for (BusPipeManager busPipeManager : busPipeManagers) busPipeManager.start();
 	}
 
-	private void startAqueducts() {
-		for (BusPipe aqueduct : ness().busPipeList()) datalakeManager.startBusPipe(aqueduct);
-	}
+	private void initBusPipeManagers() {
+		for (ExternalBus externalBus : graph.externalBusList()) {
+			BusPipeManager busPipeManager = new BusPipeManager(busManager, externalBus);
+			for (BusPipe busPipe : graph.busPipeList()) if (busPipe.bus().equals(externalBus)) busPipeManager.addPipe(busPipe);
+			busPipeManager.start();
+			busPipeManagers.add(busPipeManager);
+		}
 
-	private void stopAqueducts() {
-		for (BusPipe aqueduct : ness().busPipeList()) datalakeManager.stopBusPipe(aqueduct);
 	}
 
 	public void close() {
@@ -83,6 +91,11 @@ public class NessBox extends AbstractBox {
 
 	public DatalakeManager datalakeManager() {
 		return datalakeManager;
+	}
+
+
+	public List<BusPipeManager> busPipeManagers() {
+		return busPipeManagers;
 	}
 
 	public BusManager busManager() {

@@ -2,10 +2,8 @@ package io.intino.ness.datalake;
 
 import io.intino.konos.jms.TopicConsumer;
 import io.intino.ness.bus.BusManager;
-import io.intino.ness.bus.BusPipeManager;
 import io.intino.ness.datalake.NessStation.Drop;
 import io.intino.ness.datalake.NessStation.Feed;
-import io.intino.ness.graph.BusPipe;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Pipe;
 import io.intino.ness.graph.Tank;
@@ -14,9 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.jms.Session;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static io.intino.konos.jms.Consumer.textFrom;
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
@@ -30,7 +26,6 @@ public class DatalakeManager {
 	private NessStation station;
 	private BusManager bus;
 	private List<Job> jobs = new ArrayList<>();
-	private Map<BusPipe, BusPipeManager> runningBusPipes = new HashMap<>();
 
 	public DatalakeManager(FileStation station, BusManager bus) {
 		this.station = station;
@@ -140,27 +135,8 @@ public class DatalakeManager {
 		return false;
 	}
 
-	public void startBusPipe(BusPipe busPipe) {
-		BusPipeManager manager = new BusPipeManager(busPipe, bus);
-		manager.start();
-		runningBusPipes.put(busPipe, manager);
-		logger.info("Bus pipe started: " + busPipe.name$());
-	}
-
 	public void busManager(BusManager busManager) {
 		this.bus = busManager;
-	}
-
-	public void stopBusPipe(BusPipe busPipe) {
-		BusPipeManager busPipeManager = runningBusPipes.get(busPipe);
-		if (busPipeManager != null) {
-			busPipeManager.stop();
-			runningBusPipes.remove(busPipe);
-		}
-	}
-
-	public boolean status(BusPipe busPipe) {
-		return runningBusPipes.get(busPipe) != null;
 	}
 
 	private void init() {
