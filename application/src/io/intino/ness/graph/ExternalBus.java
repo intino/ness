@@ -33,7 +33,7 @@ public class ExternalBus extends AbstractExternalBus {
 		return session != null && !((ActiveMQSession) session).isClosed() ? session : reload();
 	}
 
-	public Session reload() {
+	public synchronized Session reload() {
 		try {
 			cleanOldSession();
 			logger.info("session with " + originURL + " reloaded");
@@ -50,7 +50,7 @@ public class ExternalBus extends AbstractExternalBus {
 		}
 	}
 
-	public Session session() {
+	public synchronized Session session() {
 		return session;
 	}
 
@@ -120,7 +120,8 @@ public class ExternalBus extends AbstractExternalBus {
 	}
 
 	private void cleanOldSession() {
-		for (TopicConsumer consumer : consumers.values()) consumer.stop();
+		for (TopicConsumer consumer : consumers.values())
+			if (consumer != null) consumer.stop();
 		for (String c : consumers.keySet()) consumers.put(c, null);
 		if (session != null) try {
 			session.close();

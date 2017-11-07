@@ -42,6 +42,7 @@ public class BusPipeManager {
 	}
 
 	public void start(BusPipe pipe) {
+		checkExternalSession(pipe);
 		if (pipe.direction().equals(incoming)) incomingPipe(pipe);
 		else outgoingPipe(pipe);
 		this.running = true;
