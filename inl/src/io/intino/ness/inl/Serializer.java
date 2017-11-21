@@ -100,7 +100,7 @@ public class Serializer {
 	}
 
 	private String serializeItem(Object value) {
-		return "\n" + new Serializer(value, type(), mapping).toInl();
+		return "\n" + (isAttribute(value.getClass()) ? value.toString() : new Serializer(value, type(), mapping).toInl());
 	}
 
 	private boolean isAttribute(Field field) {
