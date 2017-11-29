@@ -28,7 +28,6 @@ public class NessieSlack {
 	}
 
 	public void init(SlackSession session) {
-
 	}
 
 	public String manage(MessageProperties properties) {

@@ -37,7 +37,7 @@ public class ExternalBus extends AbstractExternalBus {
 		try {
 			cleanOldSession();
 			logger.info("session with " + originURL + " reloaded");
-			ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(originURL());
+			ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(originURL().startsWith("failover:") ? originURL() : "failover:(" + originURL() + ")");
 			factory.setClientID(sessionID);
 			if (connection == null || ((ActiveMQConnection) this.connection).isClosed())
 				this.connection = factory.createConnection(user(), password());
@@ -120,7 +120,7 @@ public class ExternalBus extends AbstractExternalBus {
 	}
 
 	private void cleanOldSession() {
-		for (TopicConsumer consumer : consumers.values())
+		if (!sessionIsClosed()) for (TopicConsumer consumer : consumers.values())
 			if (consumer != null) consumer.stop();
 		for (String c : consumers.keySet()) consumers.put(c, null);
 		if (session != null) try {
