@@ -57,13 +57,12 @@ public class Inl_ {
 
 	@Test
 	public void should_serialize_schema() throws Exception {
-		assertEquals(
-				"[AlertModified]\n" +
+		assertEquals("[AlertModified]\n" +
 						"alert: Alerts#bbc15556-244b-45af-97b9-c0f18b1e42be\n" +
 						"active: true\n" +
-						"applyToAllStations: false\n" +
-						"mailingList: " +
-						"\tcambullonero@monentia.es",
+						"mailingList:\n" +
+						"\tcambullonero@monentia.es\n" +
+						"applyToAllStations: false\n",
 				Inl.serialize(new AlertModified().alert("Alerts#bbc15556-244b-45af-97b9-c0f18b1e42be").active(true).mailingList(asList("cambullonero@monentia.es")).applyToAllStations(false)));
 	}
 

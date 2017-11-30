@@ -65,7 +65,8 @@ public class Serializer {
 	}
 
 	private String serializeAttributeValue(Object value) {
-		return value != null ? formatterOf(value).format(value) : "";
+		if (value == null) return "";
+		return value instanceof List ? serializeAttributeValue(toArray((List) value)) : formatterOf(value).format(value);
 	}
 
 	private String separatorFor(String value) {
@@ -76,11 +77,22 @@ public class Serializer {
 		return Accessory.formatters.get(value.getClass());
 	}
 
+	@SuppressWarnings("unchecked")
+	private <T> T[] toArray(List<T> list) {
+		T[] result = (T[]) java.lang.reflect.Array.newInstance(list.get(0).getClass(), list.size());
+		for (int i = 0; i < list.size(); i++) {
+			result[i] = list.get(i);
+		}
+		return result;
+	}
+
 	private String serializeComponents() {
 		StringBuilder result = new StringBuilder();
 		for (Field field : Accessory.fieldsOf(object).asList()) {
 			if (isTransient(field.getModifiers())) continue;
-			if (isAttribute(field.getType())) continue;
+			if (isStatic(field.getModifiers())) continue;
+			if (valueOf(field) == null || isEmpty(field)) continue;
+			if (isAttribute(field)) continue;
 			result.append(serializeComponent(field));
 		}
 		return result.toString();
@@ -100,24 +112,37 @@ public class Serializer {
 	}
 
 	private String serializeItem(Object value) {
-		return "\n" + (isAttribute(value.getClass()) ? value.toString() : new Serializer(value, type(), mapping).toInl());
+		Class<?> aClass = value.getClass();
+		return "\n" + (isPrimitive(aClass) || isArrayOfPrimitives(aClass) ? value.toString() : new Serializer(value, type(), mapping).toInl());
 	}
 
 	private boolean isAttribute(Field field) {
-		return isAttribute(field.getType());
+		Class<?> aClass = field.getType();
+		return isPrimitive(aClass) || isArrayOfPrimitives(aClass) || isListOfPrimitives(field);
 	}
 
-	private boolean isAttribute(Class<?> aClass) {
-		return aClass.getName().startsWith("java.lang") ||
-				aClass.getName().startsWith("java.util.Date") ||
-				aClass.getName().startsWith("java.time") ||
-				aClass.isPrimitive() ||
-				aClass.isArray();
+	private boolean isArrayOfPrimitives(Class<?> aClass) {
+		return aClass.isArray() && isPrimitive(aClass.getDeclaringClass());
+	}
+
+	private boolean isListOfPrimitives(Field field) {
+		return field.getType().isAssignableFrom(List.class) && isPrimitive(field.getGenericType().toString());
+	}
+
+	private boolean isPrimitive(Class<?> aClass) {
+		return isPrimitive(aClass.getName()) || aClass.isPrimitive();
+	}
+
+	private static String[] primitives = {"java.lang", "java.util.Date", "java.time"};
+	private boolean isPrimitive(String className) {
+		if (className.contains("<")) className = className.substring(className.indexOf('<')+1);
+		for (String primitive : primitives) if (className.startsWith(primitive)) return true;
+		return false;
 	}
 
 	private boolean isEmpty(Field field) {
 		Object value = valueOf(field);
-		return value.getClass().isArray() && ((Object[]) value).length == 0;
+		return value != null && value.getClass().isArray() && ((Object[]) value).length == 0;
 	}
 
 
