@@ -22,7 +22,6 @@ public class Inl_ {
 		assertThat(messages.get(0).type(), is("Person"));
 		assertThat(messages.get(0).read("name"), is("Mike"));
 		assertThat(messages.get(0).read("country"), is("USA"));
-
 	}
 
 	@Test
@@ -80,6 +79,11 @@ public class Inl_ {
 		assertNotNull(object);
 	}
 
+	@Test
+	public void should_serialize_schema2() throws Exception {
+		InfrastructureOperation object = new InfrastructureOperation();
+		Inl.serialize(object);
+	}
 
 	public static class Person {
 		private String name;
@@ -92,5 +96,14 @@ public class Inl_ {
 			this.name = name;
 			this.country = country;
 		}
+	}
+
+	public static class InfrastructureOperation {
+		//private final Instant ts;
+		private String operation;
+		private String user = "cesar";
+		private String objectType = "Responsible";
+		private String objectID = "octavioroncal";
+		private String[] parameters = new String[]{"Octavio Roncal", "U0GMBS76K", "octavioroncal@siani.es"};
 	}
 }
