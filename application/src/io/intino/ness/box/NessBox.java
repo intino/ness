@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NessBox extends AbstractBox {
-
+	private static final String REFLOW_READY = "service.ness.reflow.ready";
 	private DatalakeManager datalakeManager;
 	private NessGraph graph;
 	private BusManager busManager;
@@ -44,6 +44,7 @@ public class NessBox extends AbstractBox {
 		reflowSession = new ReflowSession(this);
 		initBusPipeManagers();
 		initPipes();
+		busManager().createQueue(REFLOW_READY);
 		busManager().registerConsumer("service.ness.reflow", reflowSession);
 		return this;
 	}
@@ -52,13 +53,12 @@ public class NessBox extends AbstractBox {
 		for (Pipe pipe : graph.pipeList()) datalakeManager().pipe(pipe);
 	}
 
-	public NessBox restartBusWithoutPersistence() {
+	public void restartBusWithoutPersistence() {
 		for (BusPipeManager busPipeManager : busPipeManagers) busPipeManager.stop();
 		busManager.stop();
 		busManager = new BusManager(this, false);
 		busManager.start();
 		busManager().registerConsumer("service.ness.reflow", reflowSession);
-		return this;
 	}
 
 	public void restartBus() {

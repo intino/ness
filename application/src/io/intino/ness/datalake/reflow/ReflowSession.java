@@ -2,8 +2,7 @@ package io.intino.ness.datalake.reflow;
 
 import com.google.gson.Gson;
 import io.intino.konos.jms.Consumer;
-import io.intino.konos.jms.MessageFactory;
-import io.intino.konos.jms.TopicProducer;
+import io.intino.konos.jms.QueueProducer;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.box.schemas.Reflow;
 import io.intino.ness.graph.Tank;
@@ -15,11 +14,11 @@ import javax.jms.Message;
 import javax.jms.Session;
 
 import static io.intino.konos.jms.Consumer.textFrom;
+import static io.intino.konos.jms.MessageFactory.createMessageFor;
 import static io.intino.ness.box.slack.Helper.findTank;
 
 public class ReflowSession implements Consumer {
 	private static final Logger logger = LoggerFactory.getLogger(ReflowSession.class);
-	private static final String REFLOW_ACK = "service.ness.reflow.ack";
 	private final NessBox box;
 	private ReflowProcessHandler handler;
 	private int blockSize;
@@ -37,25 +36,34 @@ public class ReflowSession implements Consumer {
 			this.blockSize = reflow.blockSize();
 			createSession(reflow);
 		} else if (text.contains("finish")) finish();
-		else if (text.contains("ready")) ready();
-		else next();
+		else if (text.contains("ready") && this.handler != null) {
+			ready(message);
+		} else if (!text.contains("ready") && handler != null) next();
 	}
 
 	private void createSession(Reflow reflow) {
-		logger.info("Reflow session created");
+		logger.info("Shutting down actual session");
 		for (String tank : reflow.tanks()) box.datalakeManager().stopFeed(findTank(box, tank));
 		restartBusWithOutPersistence();
 		this.handler = new ReflowProcessHandler(box, reflow.tanks(), reflow.blockSize());
+		logger.info("Reflow session created");
 	}
 
-	private void ready() {
-		try {
-			Session session = this.handler.session();
-			if (session != null)
-				new TopicProducer(session, REFLOW_ACK).produce(MessageFactory.createMessageFor("ack"));
-		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
-		}
+	private void ready(final Message message) {
+		new Thread(() -> {
+			try {
+				Session session = this.handler.session();
+				if (session != null) {
+					final QueueProducer producer = new QueueProducer(session, message.getJMSReplyTo());
+					producer.produce(createMessageFor("ack"));
+					producer.close();
+					session.commit();
+				}
+				logger.info("Ready to reflow");
+			} catch (JMSException e) {
+				logger.error(e.getMessage(), e);
+			}
+		}).start();
 	}
 
 	private void finish() {
