@@ -53,7 +53,11 @@ public class DatalakeManager {
 
 	public void stopFeed(Tank tank) {
 		List<TopicConsumer> topicConsumers = bus.consumersOf(tank.feedQN());
-		topicConsumers.forEach(TopicConsumer::stop);
+		if (topicConsumers== null) return;
+		topicConsumers.forEach(topicConsumer -> {
+			if (topicConsumer == null) return;
+			topicConsumer.stop();
+		});
 		topicConsumers.clear();
 	}
 

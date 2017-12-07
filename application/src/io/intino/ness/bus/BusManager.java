@@ -160,6 +160,16 @@ public final class BusManager {
 		}
 	}
 
+
+	public ActiveMQDestination createQueue(String name) {
+		try {
+			return (ActiveMQDestination) nessSession().createQueue(name);
+		} catch (JMSException e) {
+			logger.error(e.getMessage(), e);
+			return null;
+		}
+	}
+
 	public void registerConsumer(String feedQN, Consumer consumer) {
 		List<TopicConsumer> consumers = this.consumers.putIfAbsent(feedQN, new ArrayList<>());
 		if (consumers == null) consumers = this.consumers.get(feedQN);
@@ -196,6 +206,7 @@ public final class BusManager {
 
 	public void stop() {
 		try {
+			logger.info("Stopping bus");
 			consumers.values().forEach(c -> c.forEach(TopicConsumer::stop));
 			consumers.clear();
 			producers.values().forEach(Producer::close);

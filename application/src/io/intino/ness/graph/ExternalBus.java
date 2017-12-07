@@ -80,6 +80,7 @@ public class ExternalBus extends AbstractExternalBus {
 
 	public void close() {
 		try {
+			logger.info("closing connection with external bus");
 			consumers.values().forEach(TopicConsumer::stop);
 			consumers.clear();
 			session().close();
@@ -88,7 +89,6 @@ public class ExternalBus extends AbstractExternalBus {
 			logger.error(e.getMessage(), e);
 		}
 	}
-
 
 	public Collection<String> topics() {
 		Set<String> topics = new HashSet<>();

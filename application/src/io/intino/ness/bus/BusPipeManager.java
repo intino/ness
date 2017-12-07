@@ -49,6 +49,7 @@ public class BusPipeManager {
 	}
 
 	public void stop() {
+		logger.info("shutting down bus pipes");
 		internalConsumers.forEach(TopicConsumer::stop);
 		internalConsumers.clear();
 		externalBus.close();
