@@ -1,10 +1,12 @@
 package schemas;
 
+import java.util.List;
+
 public class AlertModified implements java.io.Serializable {
 
 	private String alert = "";
 	private Boolean active = true;
-	private java.util.List<String> mailingList = new java.util.ArrayList<>();
+	private List<String> mailingList = new java.util.ArrayList<>();
 	private Boolean applyToAllStations = true;
 
 	public String alert() {
@@ -15,7 +17,7 @@ public class AlertModified implements java.io.Serializable {
 		return this.active;
 	}
 
-	public java.util.List<String> mailingList() {
+	public List<String> mailingList() {
 		return this.mailingList;
 	}
 
@@ -33,7 +35,7 @@ public class AlertModified implements java.io.Serializable {
 		return this;
 	}
 
-	public AlertModified mailingList(java.util.List<String> mailingList) {
+	public AlertModified mailingList(List<String> mailingList) {
 		this.mailingList = mailingList;
 		return this;
 	}

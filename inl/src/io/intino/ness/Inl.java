@@ -1,18 +1,13 @@
 package io.intino.ness;
 
 import io.intino.ness.inl.*;
-import io.intino.ness.inl.Accessory.Formatter;
-import io.intino.ness.inl.Accessory.Parser;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.intino.ness.inl.Accessory.formatters;
-import static io.intino.ness.inl.Accessory.parsers;
 
 public class Inl {
 

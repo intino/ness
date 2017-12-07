@@ -67,7 +67,7 @@ public class Inl_ {
 	}
 
 	@Test
-	public void should_deserialize_to_Schema() throws Exception {
+	public void should_deserialize_to_schema() throws Exception {
 		String text = "[AlertModified]\n" +
 				"alert: Alerts#e4a80d88-7bd5-4948-bd1d-7b38f47c40c7\n" +
 				"active: true\n" +

@@ -3,6 +3,7 @@ package io.intino.ness.inl;
 import java.lang.reflect.Field;
 import java.util.List;
 
+import static io.intino.ness.inl.Formatters.*;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.lang.reflect.Modifier.isTransient;
 
@@ -73,8 +74,8 @@ public class Serializer {
 		return value.startsWith("\n") ? ":" + value : ": " + value;
 	}
 
-	private Accessory.Formatter formatterOf(Object value) {
-		return Accessory.formatters.get(value.getClass());
+	private Formatter formatterOf(Object value) {
+		return Formatters.get(value.getClass());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -122,7 +123,7 @@ public class Serializer {
 	}
 
 	private boolean isArrayOfPrimitives(Class<?> aClass) {
-		return aClass.isArray() && isPrimitive(aClass.getDeclaringClass());
+		return aClass.isArray() && isPrimitive(aClass.getComponentType());
 	}
 
 	private boolean isListOfPrimitives(Field field) {

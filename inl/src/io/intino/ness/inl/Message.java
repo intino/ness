@@ -70,7 +70,7 @@ public class Message {
             @Override @SuppressWarnings("unchecked")
             public <T> T as(Class<T> type) {
                 String value = valueOf(attribute);
-                return value != null ? (T) Accessory.parsers.get(type).parse(deIndent(value)) : null;
+                return value != null ? (T) Parsers.get(type).parse(deIndent(value)) : null;
             }
         };
     }

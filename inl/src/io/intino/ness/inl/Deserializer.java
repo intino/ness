@@ -1,5 +1,8 @@
 package io.intino.ness.inl;
 
+import io.intino.ness.inl.Message.Attribute;
+import io.intino.ness.inl.Parsers.Parser;
+
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -42,7 +45,7 @@ public class Deserializer {
 
     private <T> T fill(T object) {
         Object scope = object;
-        Message.Attribute attribute = new Message.Attribute();
+        Attribute attribute = new Attribute();
         nextLine();
         while (!isTerminated(object)) {
             if (isMultilineIn(line)) setAttribute(scope, attribute.add(line.substring(1)));
@@ -57,6 +60,12 @@ public class Deserializer {
         return line == null || startBlockOf(object.getClass());
     }
 
+	private void setAttribute(Object object, Attribute attribute) {
+		if (object == null || attribute.value == null || attribute.value.isEmpty()) return;
+		Field field = fieldsOf(object).get(map(attribute.name));
+		setField(field, object, parserOf(field).parse(deIndent(attribute.value)));
+	}
+
     private Object addComponent(Object scope, String path) {
         String[] paths = path.split("\\.");
         for (int i = 1; i < paths.length-1; i++) {
@@ -66,13 +75,17 @@ public class Deserializer {
         return createComponent(paths[paths.length-1], scope);
     }
 
-    private void setAttribute(Object object, Message.Attribute attribute) {
-        if (object == null || attribute.value == null || attribute.value.isEmpty()) return;
-        Field field = fieldsOf(object).get(map(attribute.name));
-        setField(field, object, parserOf(field).parse(deIndent(attribute.value)));
-    }
+	private Object valueOf(Field field, Object object) {
+		try {
+			field.setAccessible(true);
+			return field.get(object);
+		}
+		catch (IllegalAccessException e) {
+			return null;
+		}
+	}
 
-    private String deIndent(String value) {
+	private String deIndent(String value) {
         return value.startsWith("\n") ? value.substring(1) : value;
     }
 
@@ -88,16 +101,6 @@ public class Deserializer {
     private boolean match(Field field, String attribute) {
         return  attribute.equalsIgnoreCase(field.getName()) ||
                 attribute.equalsIgnoreCase(classOf(field).getSimpleName());
-    }
-
-    private Object valueOf(Field field, Object object) {
-        try {
-            field.setAccessible(true);
-            return field.get(object);
-        }
-        catch (IllegalAccessException e) {
-            return null;
-        }
     }
 
     private Object lastItemOf(List list) {
@@ -116,9 +119,8 @@ public class Deserializer {
 
     private Object createComponent(Field field, Object object) {
         if (field == null) return null;
-        if (isList(field)) return createListItem(field, object);
-        return setField(field, object, create(classOf(field)));
-    }
+		return isList(field) ? createListItem(field, object) : setField(field, object, create(classOf(field)));
+	}
 
     @SuppressWarnings("unchecked")
     private Object createListItem(Field field, Object object) {
@@ -147,7 +149,7 @@ public class Deserializer {
         }
     }
 
-    private Field findField(String type, Object object) {
+	private Field findField(String type, Object object) {
         for (Field field : fieldsOf(object).asList()) {
             if (!match(field, type)) continue;
             if (isList(field) || valueOf(field, object) == null) return field;
@@ -174,11 +176,32 @@ public class Deserializer {
         }
     }
 
-    private Parser parserOf(Field field) {
-        return parsers.get(field.getType());
-    }
+	private Parser parserOf(Field field) {
+		return isList(field) ? listParserOf(field.getGenericType().toString()) : Parsers.get(field.getType());
+	}
 
-    public Deserializer map(String from, String to) {
+	private Parser listParserOf(final String name) {
+		return new Parser() {
+			Parser parser = Parsers.get(arrayClass());
+
+			private Class<?> arrayClass() {
+				try {
+					String className = "[L" + name.substring(name.indexOf('<')+1).replace(">","") +  ";";
+					return Class.forName(className);
+				} catch (ClassNotFoundException e) {
+					return null;
+				}
+			}
+
+			@Override
+			public Object parse(String text) {
+				Object[] array = (Object[]) parser.parse(text);
+				return Arrays.asList(array);
+			}
+		};
+	}
+
+	public Deserializer map(String from, String to) {
         mapping.put(from,to);
         return this;
     }
