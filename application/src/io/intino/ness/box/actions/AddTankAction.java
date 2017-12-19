@@ -25,13 +25,12 @@ public class AddTankAction {
 		Tank newTank = ness.create("tanks").tank(tankName.replace(".", "-"));
 		newTank.qualifiedName(tankName);
 		datalake().registerTank(newTank);
-		datalake().feedFlow(newTank);
 		newTank.save$();
 		return OK;
 	}
 
 	private NessGraph ness() {
-		return box.ness();
+		return box.graph();
 	}
 
 	private DatalakeManager datalake() {

@@ -22,6 +22,6 @@ public class RemoveExternalBusAction {
 	}
 
 	private NessGraph ness() {
-		return box.ness();
+		return box.graph();
 	}
 }

@@ -6,12 +6,10 @@ import java.time.*;
 import java.util.*;
 import io.intino.ness.box.schemas.*;
 
-public class AddPipeAction {
+public class StartJmsConnectorsAction {
 
 	public NessBox box;
-	public String from;
-	public String to;
-	public String functionName;
+	public String name;
 
 	public String execute() {
 		return null;

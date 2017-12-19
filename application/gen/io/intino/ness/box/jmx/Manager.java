@@ -1,11 +1,8 @@
 package io.intino.ness.box.jmx;
 
 import io.intino.ness.box.NessBox;
-import io.intino.ness.box.actions.BusPipesAction;
-import io.intino.ness.box.actions.StartBusPipeAction;
-import io.intino.ness.box.actions.StopBusPipeAction;
-
 import java.util.*;
+import java.time.*;
 
 public class Manager implements ManagerMBean {
 
@@ -13,7 +10,7 @@ public class Manager implements ManagerMBean {
 
 	public java.util.List<String> help() {
 		List<String> operations = new ArrayList<>();
-		operations.addAll(java.util.Arrays.asList(new String[]{"java.util.List<String> users(): Request all users registered in ness", "String addUser(String name): Add user to the datalake", "String removeUser(String name): Remove user from ness service", "java.util.List<String> tanks(java.util.List<String> tags): Request all tanks nessy is subscribed filtering by tags", "String resumeTank(String tank): connect feed and flow channes of a tank", "String pauseTank(String tank): stops the feed and flow channes of a tank", "String addTank(String name): Creates a tank", "String removeTank(String name): Removes registered tank", "String renameTank(String tank, String name): Changes name of a tank for a new one", "String pipes(): Connects source and destination topics", "String addPipe(String from, String to, String functionName): Connects source and destination topics real-time, optionaly converting the message with a function", "String removePipes(String origin): Removes a registered function", "java.util.List<String> topics(): Show registered topics", "Boolean removeTopic(String topic): Removes registered topic", "java.util.List<String> functions(): Show all functions registered", "String addFunction(String name, String code): Create a function associated to an input tank and output tank", "String removeFunction(String name): Removes a registered function", "java.util.List<String> externalBuses(): list of external buses", "String addExternalBus(String name, String externalBusUrl, String user, String password): Defines an external bus to interact with it using aqueducts", "String removeExternalBus(String name): Removes a registed aqueduct", "java.util.List<String> aqueducts(): list of aqueducts and its status", "String addAqueduct(String name, String externalBus, String direction, String functionName, String tankMacro): Creates a data flow between an external bus and ness. It is necesary to define de direction of the data flow (*incoming* or *outgoing*). Also it is posible to set a conversion function.", "String removeAqueduct(String name): Removes a registed aqueduct", "String startAqueduct(String name): connect out jms topic with a ness tank", "String stopAqueduct(String name): connect out jms topic with a ness tank", "String seal(String tank): Seals current events of a tank to reservoir", "String migrate(String tank, java.util.List<String> functions): Transforms events of a tank to a evolved tank", "String pump(String functionName, String input, String output): Connect a source and destination tanks through a `function`"}));
+		operations.addAll(java.util.Arrays.asList(new String[]{"java.util.List<String> users(): Request all users registered in ness", "String addUser(String name): Add user to the datalake", "String removeUser(String name): Remove user from ness service", "java.util.List<String> tanks(java.util.List<String> tags): Request all tanks nessy is subscribed filtering by tags", "String resumeTank(String tank): connect feed and flow channes of a tank", "String pauseTank(String tank): stops the feed and flow channes of a tank", "String addTank(String name): Creates a tank", "String removeTank(String name): Removes registered tank", "String renameTank(String tank, String name): Changes name of a tank for a new one", "String pipes(): Connects source and destination topics", "String addPipe(String from, String to, String functionName): Connects source and destination topics real-time, optionaly converting the message with a function", "String removePipes(String origin): Removes a registered function", "java.util.List<String> topics(): Show registered topics", "Boolean removeTopic(String topic): Removes registered topic", "java.util.List<String> functions(): Show all functions registered", "String addFunction(String name, String code): Create a function associated to an input tank and output tank", "String removeFunction(String name): Removes a registered function", "java.util.List<String> externalBuses(): list of external buses", "String addExternalBus(String name, String externalBusUrl, String user, String password): Defines an external bus to interact with it using jms-connectors", "String removeExternalBus(String name): Removes a registed jms connector", "java.util.List<String> jmsConnectors(): list of jms connectors and its status", "String addJmsConnector(String name, String externalBus, String direction, java.util.List<String> topics): Creates a data flow between an external bus and ness. It is necesary to define de direction of the data flow (*incoming* or *outgoing*). Also it is posible to set a conversion function.", "String removeJmsConnector(String name): Removes a registed jms connector", "String startJmsConnectors(String name): connect out jms topic with a ness tank", "String stopJmsConnectors(String name): connect out jms topic with a ness tank", "String seal(String tank): Seals current events of a tank to reservoir", "String pump(String functionName, String input, String output): Connect a source and destination tanks through a `function`"}));
 		return operations;
 	}
 
@@ -168,40 +165,39 @@ public class Manager implements ManagerMBean {
 		return action.execute();
 	}
 
-	public java.util.List<String> aqueducts() {
-		BusPipesAction action = new BusPipesAction();
+	public java.util.List<String> jmsConnectors() {
+		io.intino.ness.box.actions.JmsConnectorsAction action = new io.intino.ness.box.actions.JmsConnectorsAction();
 		action.box = box;
 
 		return action.execute();
 	}
 
-	public String addAqueduct(String name, String externalBus, String direction, String functionName, String tankMacro) {
-		io.intino.ness.box.actions.AddAqueductAction action = new io.intino.ness.box.actions.AddAqueductAction();
+	public String addJmsConnector(String name, String externalBus, String direction, java.util.List<String> topics) {
+		io.intino.ness.box.actions.AddJmsConnectorAction action = new io.intino.ness.box.actions.AddJmsConnectorAction();
 		action.box = box;
 		action.name = name;
 	action.externalBus = externalBus;
 	action.direction = direction;
-	action.functionName = functionName;
-	action.tankMacro = tankMacro;
+	action.topics = topics;
 		return action.execute();
 	}
 
-	public String removeAqueduct(String name) {
-		io.intino.ness.box.actions.RemoveAqueductAction action = new io.intino.ness.box.actions.RemoveAqueductAction();
+	public String removeJmsConnector(String name) {
+		io.intino.ness.box.actions.RemoveJmsConnectorAction action = new io.intino.ness.box.actions.RemoveJmsConnectorAction();
 		action.box = box;
 		action.name = name;
 		return action.execute();
 	}
 
-	public String startAqueduct(String name) {
-		StartBusPipeAction action = new StartBusPipeAction();
+	public String startJmsConnectors(String name) {
+		io.intino.ness.box.actions.StartJmsConnectorsAction action = new io.intino.ness.box.actions.StartJmsConnectorsAction();
 		action.box = box;
 		action.name = name;
 		return action.execute();
 	}
 
-	public String stopAqueduct(String name) {
-		StopBusPipeAction action = new StopBusPipeAction();
+	public String stopJmsConnectors(String name) {
+		io.intino.ness.box.actions.StopJmsConnectorsAction action = new io.intino.ness.box.actions.StopJmsConnectorsAction();
 		action.box = box;
 		action.name = name;
 		return action.execute();
@@ -211,14 +207,6 @@ public class Manager implements ManagerMBean {
 		io.intino.ness.box.actions.SealAction action = new io.intino.ness.box.actions.SealAction();
 		action.box = box;
 		action.tank = tank;
-		return action.execute();
-	}
-
-	public String migrate(String tank, java.util.List<String> functions) {
-		io.intino.ness.box.actions.MigrateAction action = new io.intino.ness.box.actions.MigrateAction();
-		action.box = box;
-		action.tank = tank;
-	action.functions = functions;
 		return action.execute();
 	}
 

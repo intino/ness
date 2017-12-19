@@ -12,7 +12,7 @@ public class UsersAction {
 
 
 	public List<String> execute() {
-		Map<String, List<String>> usersMap = box.busManager().users();
+		Map<String, List<String>> usersMap = box.busService().users();
 		List<String> users = new ArrayList<>();
 		for (String user : usersMap.keySet()) {
 			StringBuilder builder = new StringBuilder().append(user);

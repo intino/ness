@@ -13,20 +13,20 @@ Service Nessie as SlackBot
 		Request("Creates a function associated to an input tank and output tank. It requires the file of the function") add-function
 		Request("Removes a registered function") remove-function
 			Parameter(String) name
-		Request("Defines an external bus to interact with it using busPipes") add-external-bus
+		Request("Defines an external bus to interact with it using jms connectors") add-external-bus
 			Parameter(String) name
 			Parameter(String) externalBusUrl
 			Parameter(String) user
 			Parameter(String) password
-		Request("Removes a registed busPipe") remove-external-bus
+		Request("Removes a registed external buses") remove-external-bus
 			Parameter(String) name
-		Request("Creates a data flow between an external bus and ness. It is necesary to define de direction of the data flow (*incoming* or *outgoing*). Also it is posible to set a conversion function.") add-busPipe
+		Request("Creates a data flow between an external bus and ness. It is necesary to define de direction of the data flow (*incoming* or *outgoing*). Also it is posible to set a conversion function.") add-jmsConnector
 			Parameter(String) name
 			Parameter(String) externalBus
 			Parameter(String) direction
-			Parameter(String) functionName
-			Parameter(String) tankMacro
-		Request("Removes a registed busPipe") remove-bus-pipe
+			Parameter(type = String) topics
+				multiple = true
+		Request("Removes a registed jms connector") remove-jms-connector
 			Parameter(String) name
 		Request("Connects source and destination topics") pipes
 	Request("Request all users registered in ness") users
@@ -41,28 +41,22 @@ Service Nessie as SlackBot
 		Request("Changes name of this tank to new one") rename
 			Parameter(String) name
 		Request("Seals current events of a tank to reservoir") seal
-		Request("Reproduce events of a tank") migrate
-			Parameter(String, true) functions
 	Request("Connect a source and destination tanks through a `function`") pump
 		Parameter(String) functionName
 		Parameter(String) input
 		Parameter(String) output
-	Request ("Connects source and destination topics real-time, optionaly converting the message with a function") add-pipe
-		Parameter(String) from
-		Parameter(String) to
-		Parameter(String) functionName
 	Request ("Reproduce events of the tanks given. 'all' word will reflow all tanks") reflow
 		Parameter(String, true) tanks
 	Request("connect feed and flow channes of a tank") resume-tank
 		Parameter(String) tank
 	Request("stops the feed and flow channes of a tank") pause-tank
 		Parameter(String) tank
-	Request("connect out jms topic with a ness tank") start-bus-pipe
+	Request("connect out jms topic with a ness tank") start-jms-connector
 		Parameter(String) name
 
-	Request("connect out jms topic with a ness tank") stop-bus-pipe
+	Request("connect out jms topic with a ness tank") stop-jms-connector
 		Parameter(String) name
-	Request("list of bus-pipes and its status") bus-pipes
+	Request("list of jms-connectors and its status") jms-connectors
 
 
 

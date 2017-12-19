@@ -15,7 +15,7 @@ public class ResumeTankAction {
 	public String execute() {
 		Tank aTank = Helper.findTank(box, tank);
 		if (aTank == null) return "tank not found";
-		box.datalakeManager().feed(aTank);
+		box.datalakeManager().startTank(aTank);
 		return OK;
 	}
 }

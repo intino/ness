@@ -14,6 +14,6 @@ public class FunctionsAction {
 
 
 	public List<String> execute() {
-		return box.ness().functionList().stream().map(Layer::name$).collect(Collectors.toList());
+		return box.graph().functionList().stream().map(Layer::name$).collect(Collectors.toList());
 	}
 }

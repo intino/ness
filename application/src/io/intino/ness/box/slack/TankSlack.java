@@ -3,13 +3,9 @@ package io.intino.ness.box.slack;
 import io.intino.konos.slack.Bot.MessageProperties;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.box.actions.RenameTankAction;
-import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class TankSlack {
 	private static final String OK = ":ok_hand:";
@@ -43,24 +39,5 @@ public class TankSlack {
 		Tank tank = Helper.findTank(box, properties.context().getObjects()[0]);
 		box.datalakeManager().seal(tank);
 		return OK;
-	}
-
-	public String migrate(MessageProperties properties, String[] args) {
-		List<Function> functions = Arrays.stream(args).map(a -> box.ness().functionList().stream().filter(f -> f.name$().equals(a)).findFirst().orElse(null)).collect(Collectors.toList());
-		if (functions.contains(null)) return "Function " + args[functions.indexOf(null)] + " not found. Please, register it first";
-		Tank tank = Helper.findTank(box, properties.context().getObjects()[0]);
-		String newTankName = nextVersionOf(tank);
-		Tank newTank = box.ness().create("tanks", newTankName).tank(newTankName);
-		try {
-			box.datalakeManager().migrate(tank, newTank, functions);
-		} catch (Exception e) {
-			return "Migration failed: " + e.getMessage();
-		}
-		newTank.save$();
-		return OK;
-	}
-
-	private String nextVersionOf(Tank tank) {
-		return tank.qualifiedName().replace("." + tank.version(), "." + (tank.version() + 1));
 	}
 }

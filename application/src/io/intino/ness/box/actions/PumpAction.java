@@ -12,7 +12,7 @@ public class PumpAction extends Action {
 	public String output;
 
 	public String execute() {
-		Function function = box.ness().functionList(f -> f.name$().equals(functionName)).findFirst().orElse(null);
+		Function function = box.graph().functionList(f -> f.name$().equals(functionName)).findFirst().orElse(null);
 		box.datalakeManager().pump(input, output, function);
 		return OK;
 	}

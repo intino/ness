@@ -1,6 +1,9 @@
 package io.intino.ness.box.actions;
 
 import io.intino.ness.box.NessBox;
+import io.intino.ness.graph.User;
+
+import static java.util.Collections.emptyList;
 
 
 public class AddUserAction {
@@ -9,8 +12,10 @@ public class AddUserAction {
 	public String name;
 
 	public String execute() {
-		String password = box.busManager().addUser(name);
-		if (password == null) return "User already exists";
+		User user = box.graph().userList(u -> u.name$().equals(name)).findFirst().orElse(null);
+		if (user != null) return "User already exists";
+		String password = box.busService().newUser(name);
+		box.graph().create("users", name).user(password, emptyList()).save$();
 		return "User *" + name + "* added with password `" + password + "`";
 
 	}

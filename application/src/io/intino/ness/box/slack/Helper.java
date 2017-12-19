@@ -26,8 +26,8 @@ public class Helper {
 	}
 
 	public static Tank findTank(NessBox box, String name) {
-		List<Tank> topics = box.ness().tankList(t -> t.qualifiedName().equalsIgnoreCase(name)).collect(Collectors.toList());
-		return topics.isEmpty() ? findByPosition(box.ness(), name) : topics.get(0);
+		List<Tank> topics = box.graph().tankList(t -> t.qualifiedName().equalsIgnoreCase(name)).collect(Collectors.toList());
+		return topics.isEmpty() ? findByPosition(box.graph(), name) : topics.get(0);
 	}
 
 	public static boolean isTagged(String[] tags, List<String> topicTags) {

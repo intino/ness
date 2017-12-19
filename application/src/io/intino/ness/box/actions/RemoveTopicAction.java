@@ -9,6 +9,7 @@ public class RemoveTopicAction {
 	public String topic;
 
 	public Boolean execute() {
-		return box.busManager().removeTopic(topic);
+		box.busManager().removeTopic(topic);
+		return true;
 	}
 }

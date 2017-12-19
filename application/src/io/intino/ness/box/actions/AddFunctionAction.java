@@ -18,12 +18,12 @@ public class AddFunctionAction {
 	public String code;
 
 	public String execute() {
-		List<Function> functions = box.ness().functionList(f -> f.name$().equals(name)).collect(toList());
+		List<Function> functions = box.graph().functionList(f -> f.name$().equals(name)).collect(toList());
 		if (!functions.isEmpty()) return "Function name is already defined";
 		String thePackage = packageOf(code);
 		if (code.isEmpty() || !check(thePackage + "." + name, code))
 			return "Code has errors or does not complies with MessageFunction interface";
-		Function function = box.ness().create("functions", name).
+		Function function = box.graph().create("functions", name).
 				function(thePackage + "." + name, code, compile(thePackage + "." + name, code));
 		function.save$();
 		return OK;

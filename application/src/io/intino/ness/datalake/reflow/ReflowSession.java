@@ -43,7 +43,7 @@ public class ReflowSession implements Consumer {
 
 	private void createSession(Reflow reflow) {
 		logger.info("Shutting down actual session");
-		for (String tank : reflow.tanks()) box.datalakeManager().stopFeed(findTank(box, tank));
+		for (String tank : reflow.tanks()) box.datalakeManager().stopTank(findTank(box, tank));
 		restartBusWithOutPersistence();
 		this.handler = new ReflowProcessHandler(box, reflow.tanks(), reflow.blockSize());
 		logger.info("Reflow session created");
@@ -69,7 +69,7 @@ public class ReflowSession implements Consumer {
 	private void finish() {
 		logger.info("Reflow session finished");
 		restart();
-		for (Tank tank : handler.tanks()) box.datalakeManager().feed(tank);
+		for (Tank tank : handler.tanks()) box.datalakeManager().startTank(tank);
 		this.handler = null;
 	}
 

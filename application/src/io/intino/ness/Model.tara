@@ -22,17 +22,16 @@ Concept User
 	var string password
 	var string[] groups
 
-Concept ExternalBus is decorable
+Concept ExternalBus
 	var string originURL
 	var string sessionID
 	var string user
 	var string password
 
-Concept BusPipe
+Concept JMSConnector
 	var word:{outgoing incoming} direction
 	var ExternalBus bus
-	var Function transformer
-	var string tankMacro
+	var string[] topics
 
 Concept Pipe
 	var string origin

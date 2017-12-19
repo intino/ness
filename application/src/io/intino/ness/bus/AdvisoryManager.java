@@ -3,6 +3,8 @@ package io.intino.ness.bus;
 import org.apache.activemq.advisory.AdvisorySupport;
 import org.apache.activemq.broker.Broker;
 import org.apache.activemq.command.ActiveMQDestination;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jms.*;
 import java.util.Arrays;
@@ -12,6 +14,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class AdvisoryManager {
+	private static final Logger logger = LoggerFactory.getLogger(BusManager.class);
+
 	private final Broker broker;
 	private final Session session;
 	private HashMap<String, Info> info = new HashMap<>();
@@ -43,6 +47,18 @@ public class AdvisoryManager {
 		try {
 			return Arrays.stream(broker.getDestinations()).filter(n -> !n.getPhysicalName().contains("ActiveMQ.Advisory")).collect(Collectors.toList());
 		} catch (Exception e) {
+			return Collections.emptyList();
+		}
+	}
+
+	public List<String> topicsInfo() {
+		try {
+			List<ActiveMQDestination> destinations = Arrays.stream(broker.getDestinations()).filter(d -> !d.getPhysicalName().contains("ActiveMQ.Advisory")).collect(Collectors.toList());
+			return destinations.stream().map((d) ->
+					d.getPhysicalName() + " Consumers:" + consumersOf(d) + " Producers:" + producersOf(d) + " Enqueued:" + enqueuedMessageOf(d) +
+							" Enqueued:" + dequeuedMessageOf(d)).collect(Collectors.toList());
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
 			return Collections.emptyList();
 		}
 	}

@@ -27,9 +27,6 @@ public class Tasks {
 			job = newJob(SealTask.class).withIdentity("seal").build();
 			job.getJobDataMap().put("box", box);
 			tasker.scheduleJob(job, newSet(newTrigger().withIdentity("Application#seal").withSchedule(cronSchedule("0 0 0 1/1 * ? *")).build()), true);
-			job = newJob(CheckBusPipesTask.class).withIdentity("checkBusPipes").build();
-			job.getJobDataMap().put("box", box);
-			tasker.scheduleJob(job, newSet(newTrigger().withIdentity("Application#checkBusPipes").withSchedule(cronSchedule("0 0 1 1/1 * ? *")).build()), true);
 			tasker.startSchedules();
 		} catch (Exception e) {
 			logger.severe(e.getMessage());

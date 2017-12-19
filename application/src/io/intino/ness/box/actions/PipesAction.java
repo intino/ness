@@ -10,7 +10,7 @@ public class PipesAction {
 
 	public String execute() {
 		String message = "";
-		for (Pipe p : box.ness().pipeList())
+		for (Pipe p : box.graph().pipeList())
 			message += p.origin() + " -> " + p.destination() + "\n";
 		return message.isEmpty() ? "No pipes registered" : message;
 	}

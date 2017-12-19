@@ -13,7 +13,7 @@ public class SealAction extends Action {
 
 	public String execute() {
 		if (this.tank == null || tank.isEmpty()) {
-			for (Tank tank : box.ness().tankList()) seal(tank);
+			for (Tank tank : box.graph().tankList()) seal(tank);
 			return OK;
 		} else {
 			Tank tank = findTank(box, this.tank);

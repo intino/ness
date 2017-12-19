@@ -14,6 +14,6 @@ public class TanksAction {
 	public java.util.List<String> tags;
 
 	public List<String> execute() {
-		return Helper.sortedTanks(box.ness()).map(Tank::qualifiedName).collect(Collectors.toList());
+		return Helper.sortedTanks(box.graph()).map(Tank::qualifiedName).collect(Collectors.toList());
 	}
 }

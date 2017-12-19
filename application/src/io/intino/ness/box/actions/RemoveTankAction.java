@@ -28,7 +28,7 @@ public class RemoveTankAction {
 	}
 
 	private NessGraph ness() {
-		return box.ness();
+		return box.graph();
 	}
 
 	private DatalakeManager datalake() {

@@ -84,41 +84,37 @@ public interface ManagerMBean {
 	@Parameters({})
 	java.util.List<String> externalBuses();
 
-	@Description("Defines an external bus to interact with it using aqueducts")
+	@Description("Defines an external bus to interact with it using jms-connectors")
 	@Parameters({"name", "externalBusUrl", "user", "password"})
 	String addExternalBus(String name, String externalBusUrl, String user, String password);
 
-	@Description("Removes a registed aqueduct")
+	@Description("Removes a registed jms connector")
 	@Parameters({"name"})
 	String removeExternalBus(String name);
 
-	@Description("list of aqueducts and its status")
+	@Description("list of jms connectors and its status")
 	@Parameters({})
-	java.util.List<String> aqueducts();
+	java.util.List<String> jmsConnectors();
 
 	@Description("Creates a data flow between an external bus and ness. It is necesary to define de direction of the data flow (*incoming* or *outgoing*). Also it is posible to set a conversion function.")
-	@Parameters({"name", "externalBus", "direction", "functionName", "tankMacro"})
-	String addAqueduct(String name, String externalBus, String direction, String functionName, String tankMacro);
+	@Parameters({"name", "externalBus", "direction", "topics"})
+	String addJmsConnector(String name, String externalBus, String direction, java.util.List<String> topics);
 
-	@Description("Removes a registed aqueduct")
+	@Description("Removes a registed jms connector")
 	@Parameters({"name"})
-	String removeAqueduct(String name);
-
-	@Description("connect out jms topic with a ness tank")
-	@Parameters({"name"})
-	String startAqueduct(String name);
+	String removeJmsConnector(String name);
 
 	@Description("connect out jms topic with a ness tank")
 	@Parameters({"name"})
-	String stopAqueduct(String name);
+	String startJmsConnectors(String name);
+
+	@Description("connect out jms topic with a ness tank")
+	@Parameters({"name"})
+	String stopJmsConnectors(String name);
 
 	@Description("Seals current events of a tank to reservoir")
 	@Parameters({"tank"})
 	String seal(String tank);
-
-	@Description("Transforms events of a tank to a evolved tank")
-	@Parameters({"tank", "functions"})
-	String migrate(String tank, java.util.List<String> functions);
 
 	@Description("Connect a source and destination tanks through a `function`")
 	@Parameters({"functionName", "input", "output"})

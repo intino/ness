@@ -9,6 +9,6 @@ public class ToTubAction {
 	public NessBox box;
 
 	public void execute() {
-		box.datalakeManager().seal(box.ness().tankList().toArray(new Tank[0]));
+		box.datalakeManager().seal(box.graph().tankList().toArray(new Tank[0]));
 	}
 }

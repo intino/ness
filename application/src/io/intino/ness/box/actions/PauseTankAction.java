@@ -15,7 +15,7 @@ public class PauseTankAction {
 	public String execute() {
 		Tank aTank = Helper.findTank(box, tank);
 		if (aTank == null) return "tank not found";
-		box.datalakeManager().stopFeed(aTank);
+		box.datalakeManager().stopTank(aTank);
 		return OK;
 	}
 }

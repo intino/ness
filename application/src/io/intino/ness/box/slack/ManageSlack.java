@@ -5,6 +5,8 @@ import io.intino.konos.slack.Bot.MessageProperties;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.box.actions.*;
 
+import java.util.Arrays;
+
 public class ManageSlack {
 
 	private static final String OK = ":ok_hand:";
@@ -78,19 +80,19 @@ public class ManageSlack {
 		return action.execute();
 	}
 
-	public String addAqueduct(MessageProperties properties, String name, String externalBus, String direction, String functionName, String tankMacro) {
-		AddAqueductAction action = new AddAqueductAction();
+	public String addJmsConnector(MessageProperties properties, String name, String externalBus, String direction, String[] args) {
+		String[] topics = Arrays.copyOfRange(args, 3, args.length);
+		AddJmsConnectorAction action = new AddJmsConnectorAction();
 		action.box = box;
 		action.name = name;
 		action.externalBus = externalBus;
 		action.direction = direction;
-		action.functionName = functionName;
-		action.tankMacro = tankMacro;
+		action.topics = Arrays.asList(topics);
 		return action.execute();
 	}
 
-	public String removeAqueduct(MessageProperties properties, String name) {
-		RemoveAqueductAction action = new RemoveAqueductAction();
+	public String removeJmsConnector(MessageProperties properties, String name) {
+		RemoveJmsConnectorAction action = new RemoveJmsConnectorAction();
 		action.box = box;
 		action.name = name;
 		return action.execute();

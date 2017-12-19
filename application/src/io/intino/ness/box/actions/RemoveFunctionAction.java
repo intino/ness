@@ -23,6 +23,6 @@ public class RemoveFunctionAction {
 	}
 
 	private NessGraph ness() {
-		return box.ness();
+		return box.graph();
 	}
 }

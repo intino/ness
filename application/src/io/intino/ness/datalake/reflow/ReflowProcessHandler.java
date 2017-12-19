@@ -19,7 +19,7 @@ public class ReflowProcessHandler {
 	private ReflowProcess reflowProcess;
 
 	ReflowProcessHandler(NessBox box, List<String> tanks, Integer blockSize) {
-		this.graph = box.ness();
+		this.graph = box.graph();
 		this.tanks = collectTanks(tanks);
 		this.reflowProcess = new ReflowProcess(box.datalakeManager(), box.busManager(), this.tanks, blockSize == 0 ? Integer.MAX_VALUE : blockSize);
 	}

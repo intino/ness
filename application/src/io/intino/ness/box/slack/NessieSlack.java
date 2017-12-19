@@ -4,13 +4,13 @@ import com.ullink.slack.simpleslackapi.SlackSession;
 import io.intino.konos.slack.Bot.MessageProperties;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.box.actions.*;
-import io.intino.ness.bus.BusPipeManager;
-import io.intino.ness.graph.BusPipe;
+import io.intino.ness.graph.JMSConnector;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
+import io.intino.ness.graph.User;
+import org.apache.activemq.network.jms.JmsConnector;
 
 import java.util.List;
-import java.util.Map;
 
 import static io.intino.ness.box.slack.Helper.findTank;
 import static java.util.stream.Collectors.toList;
@@ -36,13 +36,10 @@ public class NessieSlack {
 	}
 
 	public String users(MessageProperties properties) {
-		Map<String, List<String>> users = box.busManager().users();
+		List<User> users = box.graph().userList();
 		StringBuilder builder = new StringBuilder();
-		for (String user : users.keySet()) {
-			builder.append(user);
-			List<String> groups = users.get(user);
-			if (!groups.isEmpty()) builder.append(" {").append(String.join(" ", groups)).append("}");
-			builder.append("\n");
+		for (User user : users) {
+			builder.append(user.name$()).append("\n");
 		}
 		String result = builder.toString();
 		return result.isEmpty() ? "There aren't users registered" : result;
@@ -50,7 +47,7 @@ public class NessieSlack {
 
 	public String tanks(MessageProperties properties, String[] tags) {
 		StringBuilder builder = new StringBuilder().append("Tanks: \n");
-		List<Tank> tanks = Helper.sortedTanks(box.ness()).collect(toList());
+		List<Tank> tanks = Helper.sortedTanks(box.graph()).collect(toList());
 		for (int i = 0; i < tanks.size(); i++) {
 			Tank tank = tanks.get(i);
 			if (tags.length == 0 || Helper.isTagged(tags, tank.tags()))
@@ -73,7 +70,7 @@ public class NessieSlack {
 
 	public String functions(MessageProperties properties) {
 		StringBuilder builder = new StringBuilder();
-		List<Function> functions = box.ness().functionList();
+		List<Function> functions = box.graph().functionList();
 		for (int i = 0; i < functions.size(); i++)
 			builder.append(i).append(") ").append(functions.get(i).name$()).append(". Being used on:...TODO\n");
 		String value = builder.toString();
@@ -90,33 +87,39 @@ public class NessieSlack {
 
 
 	public String startAqueduct(MessageProperties properties, String name) {
-		StartBusPipeAction action = new StartBusPipeAction();
+		StartJMSConnectorAction action = new StartJMSConnectorAction();
 		action.box = box;
 		action.name = name;
 		return action.execute();
 	}
 
 	public String stopAqueduct(MessageProperties properties, String name) {
-		StopBusPipeAction action = new StopBusPipeAction();
+		StopJMSConnectorAction action = new StopJMSConnectorAction();
 		action.box = box;
 		action.name = name;
 		return action.execute();
 	}
 
-	public String aqueducts(MessageProperties properties) {
-		List<BusPipe> busPipes = box.ness().busPipeList();
-		if (busPipes.isEmpty()) return "There aren't bus pipes registered";
+	public String jmsConnectors(MessageProperties properties) {
+		List<JMSConnector> JMSConnectors = box.graph().jMSConnectorList();
+		if (JMSConnectors.isEmpty()) return "There aren't bus pipes registered";
 		StringBuilder builder = new StringBuilder();
-		for (BusPipe busPipe : busPipes)
-			builder.append(busPipe.name$()).append(": ").append(isRunning(busPipe) ? " started" : " stopped").append("\n");
+		for (JMSConnector JMSConnector : JMSConnectors)
+			builder.append(JMSConnector.name$()).append(": ").append(isRunning(JMSConnector) ? " started" : " stopped").append("\n");
 		return builder.toString();
 	}
 
-	private boolean isRunning(BusPipe busPipe) {
-		for (BusPipeManager manager : box.busPipeManagers())
-			if (manager.busPipes().contains(busPipe))
-				return manager.isRunning();
-		return false;
+	public String startJmsConnector(MessageProperties properties, String name) {
+		return "";
+	}
+
+	public String stopJmsConnector(MessageProperties properties, String name) {
+		return "";
+	}
+
+	private boolean isRunning(JMSConnector JMSConnector) {
+		JmsConnector jmsConnector = box.busService().jmsConnectors().stream().filter(j -> j.getName().equals(JMSConnector.name$())).findFirst().orElse(null);
+		return jmsConnector.isConnected();
 	}
 
 	public String pump(MessageProperties properties, String functionName, String input, String output) {
@@ -129,7 +132,6 @@ public class NessieSlack {
 		return OK;
 	}
 
-
 	public String resumeTank(MessageProperties properties, String tank) {
 		ResumeTankAction action = new ResumeTankAction();
 		action.box = box;
@@ -141,15 +143,6 @@ public class NessieSlack {
 		PauseTankAction action = new PauseTankAction();
 		action.box = box;
 		action.tank = tank;
-		return action.execute();
-	}
-
-	public String addPipe(MessageProperties properties, String from, String to, String functionName) {
-		AddPipeAction action = new AddPipeAction();
-		action.box = box;
-		action.from = from;
-		action.to = to;
-		action.functionName = functionName;
 		return action.execute();
 	}
 

@@ -11,7 +11,7 @@ public class RemovePipesAction {
 	public String origin;
 
 	public String execute() {
-		box.ness().clear().pipe(p -> p.origin().equals(origin));
+		box.graph().clear().pipe(p -> p.origin().equals(origin));
 		return OK;
 	}
 }
