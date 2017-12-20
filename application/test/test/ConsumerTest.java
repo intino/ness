@@ -1,4 +1,4 @@
-package io.intino.ness.box;
+package test;
 
 import io.intino.konos.jms.TopicConsumer;
 import org.junit.Before;
@@ -15,15 +15,22 @@ import static java.lang.Thread.sleep;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 import static org.apache.activemq.ActiveMQConnection.makeConnection;
 
-public class ConsumerTest2 {
-	private static final Logger logger = LoggerFactory.getLogger(ConsumerTest2.class);
-	private static String url = "tcp://localhost:55056";
+public class ConsumerTest {
+	private static final Logger logger = LoggerFactory.getLogger(ConsumerTest.class);
+	private static String url = "tcp://localhost:63000";
 	private static String user = "consul";
 	private static String password = "volk96e3atir";
 	private Session session;
 	private Connection connection;
 
-	private String topic = "advQ";
+	private String topic = "flow.cesar.infrastructure.operation";
+
+	public ConsumerTest() {
+		try {
+			setUp();
+		} catch (Exception e) {
+		}
+	}
 
 	@Test
 	public void consume() throws Exception {
@@ -31,10 +38,22 @@ public class ConsumerTest2 {
 		sleep(1000000);
 	}
 
+
+	public boolean checkConsume() {
+		try {
+			final boolean[] checked = {false};
+			new TopicConsumer(session, topic).listen(m -> checked[0] = true);
+			Thread.sleep(4000);
+			return checked[0];
+		} catch (InterruptedException e) {
+			return false;
+		}
+	}
+
 	@Before
 	public void setUp() throws Exception {
 		try {
-			connection = makeConnection(url);
+			connection = makeConnection(user, password, url);
 			connection.start();
 			this.session = connection.createSession(false, AUTO_ACKNOWLEDGE);
 		} catch (JMSException e) {

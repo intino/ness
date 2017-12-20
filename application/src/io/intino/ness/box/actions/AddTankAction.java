@@ -27,13 +27,13 @@ public class AddTankAction {
 	}
 
 	private void registerTank(String tankName, NessGraph ness) {
-		Tank newTank = ness.create("tanks").tank(tankName).qualifiedName(tankName);
-		datalake().addTank(newTank);
-		box.busManager().getOrCreateTopic(newTank.feedQN());
-		box.busManager().getOrCreateTopic(newTank.flowQN());
-		box.busManager().getOrCreateTopic(newTank.dropQN());
+		Tank tank = ness.create("tanks").tank(tankName).qualifiedName(tankName);
+		datalake().addTank(tank);
+		box.busManager().getOrCreateTopic(tank.feedQN());
+		box.busManager().getOrCreateTopic(tank.flowQN());
+		box.busManager().getOrCreateTopic(tank.dropQN());
 		resumeTank(tankName);
-		newTank.save$();
+		tank.save$();
 	}
 
 	private void resumeTank(String tankName) {

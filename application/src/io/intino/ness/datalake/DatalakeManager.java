@@ -31,7 +31,6 @@ public class DatalakeManager {
 		if (stream(station.tanks()).anyMatch(t -> t.name().equals(qualifiedName))) station.remove(qualifiedName);
 	}
 
-
 	public void pump(String from, String to, Function function) {
 		try {
 			Valve valve = function == null ? Valve.define() : Valve.define().filter(function.name$(), function.source());

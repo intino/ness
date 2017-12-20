@@ -147,6 +147,10 @@ public class BusService {
 		updateInterceptors();
 	}
 
+	public Map<String, VirtualDestinationInterceptor> pipes() {
+		return pipes;
+	}
+
 	ActiveMQDestination findTopic(String topic) {
 		try {
 			ActiveMQDestination[] destinations = service.getBroker().getDestinations();

@@ -29,11 +29,11 @@ public final class BusManager {
 
 	private final String nessID;
 	private final BusService service;
-	private AdvisoryManager advisoryManager;
 	private final Map<String, TopicProducer> producers = new HashMap<>();
 	private final Map<String, List<TopicConsumer>> consumers = new HashMap<>();
 	private Connection connection;
 	private Session session;
+	private AdvisoryManager advisoryManager;
 
 
 	public BusManager(String nessID, BusService service) {
