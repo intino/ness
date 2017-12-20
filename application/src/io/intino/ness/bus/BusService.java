@@ -1,11 +1,11 @@
 package io.intino.ness.bus;
 
+import io.intino.ness.graph.Tank;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.Broker;
 import org.apache.activemq.broker.BrokerPlugin;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
-import org.apache.activemq.broker.region.Destination;
 import org.apache.activemq.broker.region.DestinationInterceptor;
 import org.apache.activemq.broker.region.policy.ConstantPendingMessageLimitStrategy;
 import org.apache.activemq.broker.region.policy.PolicyEntry;
@@ -14,6 +14,7 @@ import org.apache.activemq.broker.region.virtual.CompositeTopic;
 import org.apache.activemq.broker.region.virtual.VirtualDestination;
 import org.apache.activemq.broker.region.virtual.VirtualDestinationInterceptor;
 import org.apache.activemq.command.ActiveMQDestination;
+import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.activemq.network.jms.InboundTopicBridge;
 import org.apache.activemq.network.jms.JmsConnector;
 import org.apache.activemq.network.jms.OutboundTopicBridge;
@@ -33,6 +34,7 @@ import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 public class BusService {
@@ -48,14 +50,14 @@ public class BusService {
 	private Map<String, VirtualDestinationInterceptor> pipes = new HashMap<>();
 	private File brokerStore;
 
-	public BusService(int brokerPort, int mqttPort, boolean persistant, File brokerStore, Map<String, String> users) {
+	public BusService(int brokerPort, int mqttPort, boolean persistent, File brokerStore, Map<String, String> users, List<Tank> tanks) {
 		this.brokerPort = brokerPort;
 		this.mqttPort = mqttPort;
 		this.brokerStore = brokerStore;
 		this.service = new BrokerService();
 		this.authenticator = new SimpleAuthenticationPlugin(initUsers(users));
 		this.configurationPlugin = new RuntimeConfigurationPlugin();
-		configure(persistant);
+		configure(persistent, tanks);
 	}
 
 	public Map<String, List<String>> users() {
@@ -125,27 +127,24 @@ public class BusService {
 		}
 	}
 
-
-	void pipe(ActiveMQDestination from, ActiveMQDestination to) {
+	public void pipe(String from, String to) {
 		try {
-			CompositeTopic fromVirtualTopic = new CompositeTopic();
-			fromVirtualTopic.setName(from.getPhysicalName());
-			fromVirtualTopic.setForwardTo(Collections.singletonList(to));
-			fromVirtualTopic.setForwardOnly(false);
-			fromVirtualTopic.intercept(destinationOf(from));
-			VirtualDestinationInterceptor interceptor = new VirtualDestinationInterceptor();
-			interceptor.setVirtualDestinations(new VirtualDestination[]{fromVirtualTopic});
-			service.setDestinationInterceptors(new DestinationInterceptor[]{interceptor});
-			pipes.put(from.getQualifiedName() + "#" + to.getQualifiedName(), interceptor);
+			CompositeTopic compositeTopic = new CompositeTopic();
+			compositeTopic.setName(from);
+			compositeTopic.setForwardOnly(false);
+			compositeTopic.setForwardTo(singletonList(new ActiveMQTopic(to)));
+			VirtualDestinationInterceptor newInterceptor = new VirtualDestinationInterceptor();
+			newInterceptor.setVirtualDestinations(new VirtualDestination[]{compositeTopic});
+			pipes.put(from + "#" + to, newInterceptor);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
 
-	void stopPipe(ActiveMQDestination fromTopic, ActiveMQDestination toTopic) {
-		VirtualDestinationInterceptor interceptor = pipes.get(fromTopic.getQualifiedName() + "#" + toTopic.getQualifiedName());
+	void stopPipe(String fromTopic, String toTopic) {
+		VirtualDestinationInterceptor interceptor = pipes.get(fromTopic + "#" + toTopic);
 		if (interceptor == null) return;
-		service.getDestinationInterceptors();
+		updateInterceptors();
 	}
 
 	ActiveMQDestination findTopic(String topic) {
@@ -164,15 +163,6 @@ public class BusService {
 			if (destination != null) service.getBroker().removeDestination(service.getAdminConnectionContext(), destination, 0);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
-		}
-	}
-
-	private Destination destinationOf(ActiveMQDestination mqDestination) {
-		try {
-			return service.getDestination(mqDestination);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return null;
 		}
 	}
 
@@ -202,7 +192,7 @@ public class BusService {
 		return users;
 	}
 
-	private void configure(boolean persistence) {
+	private void configure(boolean persistence, List<Tank> tanks) {
 		try {
 			service.setBrokerName(NESS);
 			if (persistence) {
@@ -212,19 +202,30 @@ public class BusService {
 				service.setPersistent(false);
 				service.setPersistenceAdapter(null);
 			}
-			service.setUseJmx(true);
+			service.setUseJmx(false);
 			service.setUseShutdownHook(true);
 			service.setAdvisorySupport(true);
-			service.setPlugins(new BrokerPlugin[]{authenticator, configurationReload()});
+			service.setPlugins(new BrokerPlugin[]{authenticator, configurationReloadPlugin()});
 			addPolicies();
 			addTCPConnector();
 			addMQTTConnector();
+			initTanks(tanks);
 		} catch (Exception e) {
 			logger.error("Error configuring: " + e.getMessage(), e);
 		}
 	}
 
-	private RuntimeConfigurationPlugin configurationReload() {
+	private void initTanks(List<Tank> tanks) {
+		for (Tank tank : tanks) pipe(tank.feedQN(), tank.flowQN());
+		updateInterceptors();
+	}
+
+	public void updateInterceptors() {
+		final DestinationInterceptor[] interceptors = pipes.values().toArray(new DestinationInterceptor[0]);
+		service.setDestinationInterceptors(interceptors);
+	}
+
+	private RuntimeConfigurationPlugin configurationReloadPlugin() {
 		this.configurationPlugin.setCheckPeriod(1000);
 		return this.configurationPlugin;
 	}

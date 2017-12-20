@@ -4,8 +4,8 @@ import com.ullink.slack.simpleslackapi.SlackSession;
 import io.intino.konos.slack.Bot.MessageProperties;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.box.actions.*;
-import io.intino.ness.graph.JMSConnector;
 import io.intino.ness.graph.Function;
+import io.intino.ness.graph.JMSConnector;
 import io.intino.ness.graph.Tank;
 import io.intino.ness.graph.User;
 import org.apache.activemq.network.jms.JmsConnector;
@@ -86,15 +86,15 @@ public class NessieSlack {
 	}
 
 
-	public String startAqueduct(MessageProperties properties, String name) {
-		StartJMSConnectorAction action = new StartJMSConnectorAction();
+	public String startJmsConnector(MessageProperties properties, String name) {
+		StartJmsConnectorAction action = new StartJmsConnectorAction();
 		action.box = box;
 		action.name = name;
 		return action.execute();
 	}
 
-	public String stopAqueduct(MessageProperties properties, String name) {
-		StopJMSConnectorAction action = new StopJMSConnectorAction();
+	public String stopJmsConnector(MessageProperties properties, String name) {
+		StopJmsConnectorAction action = new StopJmsConnectorAction();
 		action.box = box;
 		action.name = name;
 		return action.execute();
@@ -107,14 +107,6 @@ public class NessieSlack {
 		for (JMSConnector JMSConnector : JMSConnectors)
 			builder.append(JMSConnector.name$()).append(": ").append(isRunning(JMSConnector) ? " started" : " stopped").append("\n");
 		return builder.toString();
-	}
-
-	public String startJmsConnector(MessageProperties properties, String name) {
-		return "";
-	}
-
-	public String stopJmsConnector(MessageProperties properties, String name) {
-		return "";
 	}
 
 	private boolean isRunning(JMSConnector JMSConnector) {
@@ -133,7 +125,7 @@ public class NessieSlack {
 	}
 
 	public String resumeTank(MessageProperties properties, String tank) {
-		ResumeTankAction action = new ResumeTankAction();
+		final ResumeTankAction action = new ResumeTankAction();
 		action.box = box;
 		action.tank = tank;
 		return action.execute();

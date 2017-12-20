@@ -83,10 +83,10 @@ Service Manager as JMX
 	Operation("Removes a registed jms connector") remove-jms-connector
 		Parameter name as Text
 		Response as Text
-	Operation("connect out jms topic with a ness tank") start-jms-connectors
+	Operation("connect out jms topic with a ness tank") start-jms-connector
 		Parameter name as Text
 		Response as Text
-	Operation("connect out jms topic with a ness tank") stop-jms-connectors
+	Operation("connect out jms topic with a ness tank") stop-jms-connector
 		Parameter name as Text
 		Response as Text
 

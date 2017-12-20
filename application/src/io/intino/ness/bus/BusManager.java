@@ -25,7 +25,7 @@ import static javax.jms.Session.SESSION_TRANSACTED;
 
 public final class BusManager {
 	private static final Logger logger = LoggerFactory.getLogger(BusManager.class);
-	private static final String NESS = "graph";
+	private static final String NESS = "ness";
 
 	private final String nessID;
 	private final BusService service;
@@ -67,26 +67,11 @@ public final class BusManager {
 		return true;
 	}
 
-	public boolean pipe(String from, String to) {
-		ActiveMQDestination fromTopic = service.findTopic(from);
-		ActiveMQDestination toTopic = service.findTopic(to);
-		if (from == null) fromTopic = createTopic(from);
-		if (to == null) toTopic = createTopic(to);
-		service.pipe(fromTopic, toTopic);
-		return true;
-	}
-
-	public void stopPipe(String from, String to) {
-		ActiveMQDestination fromTopic = service.findTopic(from);
-		ActiveMQDestination toTopic = service.findTopic(to);
-		if (from == null) fromTopic = createTopic(from);
-		if (to == null) toTopic = createTopic(to);
-		service.stopPipe(fromTopic, toTopic);
-	}
-
-	public ActiveMQDestination createTopic(String name) {
+	public ActiveMQDestination getOrCreateTopic(String name) {
 		try {
-			return (ActiveMQDestination) nessSession().createTopic(name);
+			final Session session = nessSession();
+			final ActiveMQDestination topic = service.findTopic(name);
+			return topic == null ? (ActiveMQDestination) session.createTopic(name) : topic;
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
 			return null;
@@ -141,7 +126,7 @@ public final class BusManager {
 
 	private void initNessSession() {
 		try {
-			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("vm://graph");
+			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("vm://" + NESS);
 			connection = connectionFactory.createConnection(NESS, NESS);
 			connection.setClientID(nessID);
 			session = connection.createSession(false, AUTO_ACKNOWLEDGE);
@@ -164,5 +149,15 @@ public final class BusManager {
 
 	public List<String> topicsInfo() {
 		return advisoryManager.topicsInfo();
+	}
+
+	public void pipe(String feed, String flow) {
+		service.pipe(feed,flow);
+		service.updateInterceptors();
+	}
+
+	public void stopPipe(String feed, String flow) {
+		service.stopPipe(feed, flow);
+		service.updateInterceptors();
 	}
 }

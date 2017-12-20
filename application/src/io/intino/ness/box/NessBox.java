@@ -29,6 +29,7 @@ public class NessBox extends AbstractBox {
 	public NessBox(NessConfiguration configuration) {
 		super(configuration);
 		this.connectorID = configuration.args().containsKey("connector_id") ? configuration.args().get("connector_id") : "ness";
+		this.reflowSession = new ReflowSession(this);
 	}
 
 	@Override
@@ -40,34 +41,24 @@ public class NessBox extends AbstractBox {
 
 	public io.intino.konos.Box open() {
 		super.open();
-		busService = new BusService(brokerPort(), mqttPort(), true, new File(brokerStore()), users());
-		busManager = new BusManager(connectorID, busService);
+		createBus(true);
 		busManager.start();
-		datalakeManager = new DatalakeManager(graph, configuration.args().get("ness_datalake"), busManager, busService);
-		reflowSession = new ReflowSession(this);
-		initBusPipeManagers();
-		busManager().createQueue(REFLOW_READY);
-		busManager().registerConsumer("service.graph.reflow", reflowSession);
+		busManager.createQueue(REFLOW_READY);
+		busManager.registerConsumer("service.graph.reflow", reflowSession);
+		datalakeManager = new DatalakeManager(configuration.args().get("ness_datalake"));
 		return this;
 	}
 
-	public void restartBusWithoutPersistence() {
+	public void restartBus(boolean persistent) {
 		busManager.stop();
-		//TODO
+		createBus(persistent);
 		busManager.start();
 		busManager().registerConsumer("service.graph.reflow", reflowSession);
 	}
 
-	public void restartBus() {
-		busManager.stop();
+	private void createBus(boolean persistent) {
+		busService = new BusService(brokerPort(), mqttPort(), persistent, new File(brokerStore()), users(), graph.tankList());
 		busManager = new BusManager(connectorID, busService);
-		datalakeManager().busManager(busManager);
-		busManager.start();
-		busManager().registerConsumer("service.graph.reflow", reflowSession);
-	}
-
-	private void initBusPipeManagers() {
-
 	}
 
 	private Map<String, String> users() {
@@ -96,15 +87,15 @@ public class NessBox extends AbstractBox {
 		return busService;
 	}
 
-	public int brokerPort() {
+	private int brokerPort() {
 		return Integer.parseInt(configuration().args().get("broker_port"));
 	}
 
-	public String brokerStore() {
+	private String brokerStore() {
 		return configuration().args().get("broker_store");
 	}
 
-	public int mqttPort() {
+	private int mqttPort() {
 		return Integer.parseInt(configuration().args().get("mqtt_port"));
 	}
 }

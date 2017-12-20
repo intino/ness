@@ -106,11 +106,11 @@ public interface ManagerMBean {
 
 	@Description("connect out jms topic with a ness tank")
 	@Parameters({"name"})
-	String startJmsConnectors(String name);
+	String startJmsConnector(String name);
 
 	@Description("connect out jms topic with a ness tank")
 	@Parameters({"name"})
-	String stopJmsConnectors(String name);
+	String stopJmsConnector(String name);
 
 	@Description("Seals current events of a tank to reservoir")
 	@Parameters({"tank"})

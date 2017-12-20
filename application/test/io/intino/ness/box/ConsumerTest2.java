@@ -15,15 +15,15 @@ import static java.lang.Thread.sleep;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 import static org.apache.activemq.ActiveMQConnection.makeConnection;
 
-public class ConsumerTest {
-	private static final Logger logger = LoggerFactory.getLogger(ConsumerTest.class);
-	private static String url = "tcp://localhost:63000";
+public class ConsumerTest2 {
+	private static final Logger logger = LoggerFactory.getLogger(ConsumerTest2.class);
+	private static String url = "tcp://localhost:55056";
 	private static String user = "consul";
 	private static String password = "volk96e3atir";
 	private Session session;
 	private Connection connection;
 
-	private String topic = "flow.cesar.infrastructure.operation";
+	private String topic = "advQ";
 
 	@Test
 	public void consume() throws Exception {
@@ -34,7 +34,7 @@ public class ConsumerTest {
 	@Before
 	public void setUp() throws Exception {
 		try {
-			connection = makeConnection(user, password, url);
+			connection = makeConnection(url);
 			connection.start();
 			this.session = connection.createSession(false, AUTO_ACKNOWLEDGE);
 		} catch (JMSException e) {
