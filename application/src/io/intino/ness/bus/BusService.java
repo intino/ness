@@ -116,6 +116,7 @@ public class BusService {
 	public void start() {
 		try {
 			service.start();
+			service.waitUntilStarted();
 			confBroker = (JavaRuntimeConfigurationBroker) service.getBroker().getAdaptor(JavaRuntimeConfigurationBroker.class);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -203,12 +204,13 @@ public class BusService {
 		try {
 			service.setBrokerName(NESS);
 			if (persistence) {
-				service.setPersistent(true);
+				service.setPersistent(false);
 				service.setPersistenceAdapter(persistenceAdapter());
 			} else {
 				service.setPersistent(false);
 				service.setPersistenceAdapter(null);
 			}
+			service.setRestartAllowed(true);
 			service.setUseJmx(true);
 			service.setUseShutdownHook(true);
 			service.setAdvisorySupport(true);

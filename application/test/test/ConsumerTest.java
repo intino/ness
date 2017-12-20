@@ -43,7 +43,7 @@ public class ConsumerTest {
 		try {
 			final boolean[] checked = {false};
 			new TopicConsumer(session, topic).listen(m -> checked[0] = true);
-			Thread.sleep(6000);
+			Thread.sleep(5000);
 			return checked[0];
 		} catch (InterruptedException e) {
 			return false;
