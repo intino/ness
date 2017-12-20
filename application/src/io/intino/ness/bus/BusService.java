@@ -19,7 +19,7 @@ import org.apache.activemq.network.jms.InboundTopicBridge;
 import org.apache.activemq.network.jms.JmsConnector;
 import org.apache.activemq.network.jms.OutboundTopicBridge;
 import org.apache.activemq.network.jms.SimpleJmsTopicConnector;
-import org.apache.activemq.plugin.RuntimeConfigurationPlugin;
+import org.apache.activemq.plugin.java.JavaRuntimeConfigurationPlugin;
 import org.apache.activemq.security.AuthenticationUser;
 import org.apache.activemq.security.SimpleAuthenticationPlugin;
 import org.apache.activemq.store.kahadb.KahaDBPersistenceAdapter;
@@ -44,7 +44,7 @@ public class BusService {
 	private final BrokerService service;
 	private final int brokerPort;
 	private final int mqttPort;
-	private final RuntimeConfigurationPlugin configurationPlugin;
+	private final JavaRuntimeConfigurationPlugin configurationPlugin;
 	private final SimpleAuthenticationPlugin authenticator;
 
 	private Map<String, VirtualDestinationInterceptor> pipes = new HashMap<>();
@@ -56,7 +56,7 @@ public class BusService {
 		this.brokerStore = brokerStore;
 		this.service = new BrokerService();
 		this.authenticator = new SimpleAuthenticationPlugin(initUsers(users));
-		this.configurationPlugin = new RuntimeConfigurationPlugin();
+		this.configurationPlugin = new JavaRuntimeConfigurationPlugin();
 		configure(persistent, tanks);
 	}
 
@@ -229,8 +229,7 @@ public class BusService {
 		service.setDestinationInterceptors(interceptors);
 	}
 
-	private RuntimeConfigurationPlugin configurationReloadPlugin() {
-		this.configurationPlugin.setCheckPeriod(1000);
+	private JavaRuntimeConfigurationPlugin configurationReloadPlugin() {
 		return this.configurationPlugin;
 	}
 

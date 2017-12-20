@@ -38,7 +38,8 @@ public class ActionTests {
 		action.box = box;
 		action.name = TANK;
 		action.execute();
-		assertEquals(1, graph.tankList().size());
+		Thread.sleep(2000);
+		assertEquals("added to the graph",1, graph.tankList().size());
 		assertNotNull(box.datalakeManager().station().tank(TANK));
 		box.busService().pipes().containsKey(graph.tank(0).feedQN() + "#" + graph.tank(0).flowQN());
 		new Thread(() -> {try {new ProducerTest().produce();} catch (Exception e) {}
