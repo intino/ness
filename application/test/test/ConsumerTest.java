@@ -23,7 +23,7 @@ public class ConsumerTest {
 	private Session session;
 	private Connection connection;
 
-	private String topic = "feed.cesar.infrastructure.operation";
+	private String topic = "flow.cesar.infrastructure.operation";
 
 	public ConsumerTest() {
 		try {
@@ -43,7 +43,7 @@ public class ConsumerTest {
 		try {
 			final boolean[] checked = {false};
 			new TopicConsumer(session, topic).listen(m -> checked[0] = true);
-			Thread.sleep(2000);
+			Thread.sleep(6000);
 			return checked[0];
 		} catch (InterruptedException e) {
 			return false;

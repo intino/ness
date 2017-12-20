@@ -22,17 +22,17 @@ public class AddTankAction {
 		NessGraph ness = ness();
 		List<Tank> tanks = ness.tankList(t -> t.qualifiedName().equals(tankName)).collect(toList());
 		if (!tanks.isEmpty()) return "Tank already exist";
-		registerTank(tankName.replace(".", "-"), ness);
+		registerTank(ness);
 		return OK;
 	}
 
-	private void registerTank(String tankName, NessGraph ness) {
-		Tank tank = ness.create("tanks").tank(tankName).qualifiedName(tankName);
+	private void registerTank(NessGraph ness) {
+		Tank tank = ness.create("tanks").tank(name.replace(".", "-")).qualifiedName(name);
 		datalake().addTank(tank);
 		box.busManager().getOrCreateTopic(tank.feedQN());
 		box.busManager().getOrCreateTopic(tank.flowQN());
 		box.busManager().getOrCreateTopic(tank.dropQN());
-		resumeTank(tankName);
+		resumeTank(name);
 		tank.save$();
 	}
 

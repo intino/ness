@@ -6,7 +6,6 @@ import org.apache.activemq.broker.Broker;
 import org.apache.activemq.broker.BrokerPlugin;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
-import org.apache.activemq.broker.region.DestinationInterceptor;
 import org.apache.activemq.broker.region.policy.ConstantPendingMessageLimitStrategy;
 import org.apache.activemq.broker.region.policy.PolicyEntry;
 import org.apache.activemq.broker.region.policy.PolicyMap;
@@ -19,6 +18,7 @@ import org.apache.activemq.network.jms.InboundTopicBridge;
 import org.apache.activemq.network.jms.JmsConnector;
 import org.apache.activemq.network.jms.OutboundTopicBridge;
 import org.apache.activemq.network.jms.SimpleJmsTopicConnector;
+import org.apache.activemq.plugin.java.JavaRuntimeConfigurationBroker;
 import org.apache.activemq.plugin.java.JavaRuntimeConfigurationPlugin;
 import org.apache.activemq.security.AuthenticationUser;
 import org.apache.activemq.security.SimpleAuthenticationPlugin;
@@ -32,6 +32,7 @@ import java.net.URI;
 import java.security.Principal;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
@@ -45,10 +46,11 @@ public class BusService {
 	private final int brokerPort;
 	private final int mqttPort;
 	private final JavaRuntimeConfigurationPlugin configurationPlugin;
-	private final SimpleAuthenticationPlugin authenticator;
 
+	private final SimpleAuthenticationPlugin authenticator;
 	private Map<String, VirtualDestinationInterceptor> pipes = new HashMap<>();
 	private File brokerStore;
+	private JavaRuntimeConfigurationBroker confBroker;
 
 	public BusService(int brokerPort, int mqttPort, boolean persistent, File brokerStore, Map<String, String> users, List<Tank> tanks) {
 		this.brokerPort = brokerPort;
@@ -114,6 +116,7 @@ public class BusService {
 	public void start() {
 		try {
 			service.start();
+			confBroker = (JavaRuntimeConfigurationBroker) service.getBroker().getAdaptor(JavaRuntimeConfigurationBroker.class);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -206,10 +209,10 @@ public class BusService {
 				service.setPersistent(false);
 				service.setPersistenceAdapter(null);
 			}
-			service.setUseJmx(false);
+			service.setUseJmx(true);
 			service.setUseShutdownHook(true);
 			service.setAdvisorySupport(true);
-			service.setPlugins(new BrokerPlugin[]{authenticator, configurationReloadPlugin()});
+			service.setPlugins(new BrokerPlugin[]{authenticator, configurationPlugin});
 			addPolicies();
 			addTCPConnector();
 			addMQTTConnector();
@@ -225,12 +228,17 @@ public class BusService {
 	}
 
 	public void updateInterceptors() {
-		final DestinationInterceptor[] interceptors = pipes.values().toArray(new DestinationInterceptor[0]);
-		service.setDestinationInterceptors(interceptors);
-	}
-
-	private JavaRuntimeConfigurationPlugin configurationReloadPlugin() {
-		return this.configurationPlugin;
+		try {
+			final VirtualDestinationInterceptor[] interceptors = pipes.values().toArray(new VirtualDestinationInterceptor[0]);
+			service.setDestinationInterceptors(interceptors);
+			if (confBroker == null) return;
+			List<VirtualDestination> destinations = new ArrayList<>();
+			Arrays.stream(interceptors).forEach(i -> Collections.addAll(destinations, i.getVirtualDestinations()));
+			confBroker.setVirtualDestinations(destinations.toArray(new VirtualDestination[0]), true);
+			TimeUnit.SECONDS.sleep(2);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
 	}
 
 	private void addPolicies() {

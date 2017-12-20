@@ -33,18 +33,21 @@ public class ActionTests {
 
 	@Test
 	public void addTankAction() throws Exception {
-		assertEquals(0, graph.tankList().size());
+		assertEquals("shouldn't exists tanks", 0, graph.tankList().size());
 		final AddTankAction action = new AddTankAction();
 		action.box = box;
 		action.name = TANK;
 		action.execute();
-		Thread.sleep(2000);
-		assertEquals("added to the graph",1, graph.tankList().size());
-		assertNotNull(box.datalakeManager().station().tank(TANK));
+		assertEquals("added to the graph", 1, graph.tankList().size());
+		assertNotNull(box.datalakeManager().station().exists(TANK));
 		box.busService().pipes().containsKey(graph.tank(0).feedQN() + "#" + graph.tank(0).flowQN());
-		new Thread(() -> {try {new ProducerTest().produce();} catch (Exception e) {}
-		}).start();
 		new Thread(() -> assertTrue(new ConsumerTest().checkConsume())).start();
+		new Thread(() -> {
+			try {
+				new ProducerTest().produce();
+			} catch (Exception e) {
+			}
+		}).start();
 		Thread.sleep(6000);
 	}
 

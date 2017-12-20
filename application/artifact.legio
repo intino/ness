@@ -16,7 +16,7 @@ Artifact("io.intino.ness", "1.0.1") ness as Product
 		Compile("io.intino.konos", "konos-jmx", "1.0.1")
 		Compile("io.intino.konos", "konos-scheduler", "1.0.4")
 	Code("io.intino.ness")
-	Model("Proteo", "2.1.6", "2.1.8")
+	Model("Proteo", "2.1.6", "2.1.9")
 	Box("Konos", "2.2.3", "2.2.3")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness") as Runnable("io.intino.ness.box.Main")
 		classpathPrefix = "lib"
