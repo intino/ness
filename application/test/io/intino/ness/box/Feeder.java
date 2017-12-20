@@ -51,6 +51,17 @@ public class Feeder {
 		}
 	}
 
+	static Session sessionPre() {
+		try {
+			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://bus.pre.monentia.es:62616");
+			javax.jms.Connection connection = connectionFactory.createConnection("cesar", "ged1*buckers");
+			connection.start();
+			return connection.createSession(false, AUTO_ACKNOWLEDGE);
+		} catch (JMSException e) {
+			logger.error(e.getMessage(), e);
+			return null;
+		}
+	}
 
 	static Session nessSession() {
 		try {
