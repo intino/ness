@@ -16,6 +16,14 @@ public class AddTankAction {
 	public NessBox box;
 	public String name;
 
+	public AddTankAction() {
+	}
+
+	public AddTankAction(NessBox box, String name) {
+		this.box = box;
+		this.name = name;
+	}
+
 	public String execute() {
 		if (name.isEmpty()) return "Tank is empty";
 		String tankName = name.startsWith("feed.") ? name.replaceFirst("feed\\.", "") : name;
@@ -33,6 +41,7 @@ public class AddTankAction {
 		box.busManager().getOrCreateTopic(tank.flowQN());
 		box.busManager().getOrCreateTopic(tank.dropQN());
 		resumeTank(name);
+		tank.running(true);
 		tank.save$();
 	}
 

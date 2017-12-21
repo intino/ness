@@ -15,10 +15,7 @@ import org.slf4j.LoggerFactory;
 import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Session;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 import static javax.jms.Session.SESSION_TRANSACTED;
@@ -100,7 +97,7 @@ public final class BusManager {
 	}
 
 	public List<TopicConsumer> consumersOf(String feedQN) {
-		return consumers.get(feedQN);
+		return consumers.getOrDefault(feedQN, Collections.emptyList());
 	}
 
 	public void stop() {
@@ -152,7 +149,7 @@ public final class BusManager {
 	}
 
 	public void pipe(String feed, String flow) {
-		service.pipe(feed,flow);
+		service.pipe(feed, flow);
 		service.updateInterceptors();
 	}
 

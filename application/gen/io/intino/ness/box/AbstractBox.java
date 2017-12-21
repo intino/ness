@@ -10,7 +10,7 @@ import java.util.logging.Level;
 import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
 
-public abstract class AbstractBox extends io.intino.konos.Box {
+public abstract class AbstractBox extends io.intino.konos.alexandria.Box {
 	private static Logger logger = LoggerFactory.getLogger(ROOT_LOGGER_NAME);
 	protected NessConfiguration configuration;
 	private io.intino.konos.jmx.JMXServer manager;
@@ -34,12 +34,12 @@ public abstract class AbstractBox extends io.intino.konos.Box {
 	}
 
 	@Override
-	public io.intino.konos.Box put(Object o) {
+	public io.intino.konos.alexandria.Box put(Object o) {
 
 		return this;
 	}
 
-	public io.intino.konos.Box open() {
+	public io.intino.konos.alexandria.Box open() {
 		if(owner != null) owner.open();
 		initActivities();
 		initRESTServices();
@@ -111,7 +111,7 @@ public NessieSlackBot nessie() {
 		final java.util.logging.Logger logger = java.util.logging.Logger.getGlobal();
 		final ConsoleHandler handler = new ConsoleHandler();
 		handler.setLevel(Level.INFO);
-		handler.setFormatter(new io.intino.konos.LogFormatter("log"));
+		handler.setFormatter(new io.intino.konos.alexandria.LogFormatter("log"));
 		logger.addHandler(handler);
 	}
 }

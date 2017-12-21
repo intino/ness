@@ -2,7 +2,7 @@ package io.intino.ness.box;
 
 import io.intino.konos.jmx.JMXServer;
 
-import io.intino.konos.Box;
+import io.intino.konos.alexandria.Box;
 import java.util.HashMap;
 import java.util.Map;
 

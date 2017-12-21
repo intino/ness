@@ -33,13 +33,13 @@ public class NessBox extends AbstractBox {
 	}
 
 	@Override
-	public io.intino.konos.Box put(Object o) {
+	public io.intino.konos.alexandria.Box put(Object o) {
 		if (o instanceof Graph) this.graph = ((Graph) o).as(NessGraph.class);
 		return this;
 
 	}
 
-	public io.intino.konos.Box open() {
+	public io.intino.konos.alexandria.Box open() {
 		super.open();
 		createBus(true);
 		busManager.start();

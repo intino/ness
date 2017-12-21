@@ -126,6 +126,7 @@ public class BusService {
 	public void stop() {
 		try {
 			service.stop();
+			service.waitUntilStopped();
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -146,8 +147,8 @@ public class BusService {
 	}
 
 	void stopPipe(String fromTopic, String toTopic) {
-		VirtualDestinationInterceptor interceptor = pipes.get(fromTopic + "#" + toTopic);
-		if (interceptor == null) return;
+		if (!pipes.containsKey(fromTopic + "#" + toTopic)) return;
+		pipes.remove(fromTopic + "#" + toTopic);
 		updateInterceptors();
 	}
 
@@ -225,7 +226,7 @@ public class BusService {
 	}
 
 	private void initTanks(List<Tank> tanks) {
-		for (Tank tank : tanks) pipe(tank.feedQN(), tank.flowQN());
+		tanks.stream().filter(Tank::running).forEach(tank -> pipe(tank.feedQN(), tank.flowQN()));
 		updateInterceptors();
 	}
 

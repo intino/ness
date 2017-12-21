@@ -20,6 +20,7 @@ public class ResumeTankAction {
 		if (aTank == null) return "tank not found";
 		box.busManager().registerConsumer(aTank.feedQN(), message -> drop(aTank, load(textFrom(message))));
 		box.busManager().pipe(aTank.feedQN(), aTank.flowQN());
+		box.restartBus(true);
 		return OK;
 	}
 

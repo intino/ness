@@ -12,6 +12,7 @@ Concept Tank
 	var string dropQN = '"drop." + self.qualifiedName()' is reactive
 	var string[] tags = empty
 	var integer version = @version is reactive
+	var boolean running = false
 
 Concept Connection //TODO find better name
 	var Tank faucet

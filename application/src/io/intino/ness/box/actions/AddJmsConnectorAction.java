@@ -18,6 +18,17 @@ public class AddJmsConnectorAction {
 	public String direction;
 	public List<String> topics;
 
+	public AddJmsConnectorAction() {
+	}
+
+	public AddJmsConnectorAction(NessBox box, String name, String externalBus, String direction, List<String> topics) {
+		this.box = box;
+		this.name = name;
+		this.externalBus = externalBus;
+		this.direction = direction;
+		this.topics = topics;
+	}
+
 	public String execute() {
 		ExternalBus bus = box.graph().externalBusList(f -> f.name$().equals(externalBus)).findFirst().orElse(null);
 		if (bus == null) return "External Bus not found";

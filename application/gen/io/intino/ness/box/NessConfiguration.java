@@ -1,6 +1,6 @@
 package io.intino.ness.box;
 
-public class NessConfiguration extends io.intino.konos.BoxConfiguration {
+public class NessConfiguration extends io.intino.konos.alexandria.BoxConfiguration {
 
 	NessieConfiguration nessieConfiguration;
 

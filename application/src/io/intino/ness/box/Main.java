@@ -1,6 +1,6 @@
 package io.intino.ness.box;
 
-import io.intino.konos.Box;
+import io.intino.konos.alexandria.Box;
 import io.intino.ness.datalake.FunctionHelper;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.NessGraph;
