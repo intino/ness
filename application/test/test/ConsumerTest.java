@@ -45,7 +45,7 @@ public class ConsumerTest {
 		try {
 			final boolean[] checked = {false};
 			new TopicConsumer(session, topic).listen(m -> {
-				System.out.println("received");
+				System.out.println("received message from" + topic);
 				checked[0] = true;
 			});
 			Thread.sleep(3000);

@@ -7,7 +7,6 @@ import io.intino.ness.graph.JMSConnector;
 import java.util.List;
 
 import static io.intino.ness.box.actions.Action.OK;
-import static java.util.Collections.emptyList;
 
 
 public class AddJmsConnectorAction {
@@ -36,12 +35,7 @@ public class AddJmsConnectorAction {
 		if (connector != null) return "JMS Connector is already defined";
 		connector = box.graph().create("jmsConnectors", name).jMSConnector(io.intino.ness.graph.JMSConnector.Direction.valueOf(direction), bus, topics);
 		connector.save$();
-		box.busService().addJMSConnector(connector.name$(),
-				connector.bus().originURL(),
-				connector.bus().user(),
-				connector.bus().password(),
-				!direction.equals("incoming") ? topics : emptyList(),
-				direction.equals("incoming") ? topics : emptyList());
+		box.busService().addJMSConnector(connector);
 		box.restartBus(true);
 		return OK;
 	}

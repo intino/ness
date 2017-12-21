@@ -23,13 +23,14 @@ import static org.junit.Assert.*;
 
 public class ActionTests {
 	private static final String TANK = "cesar.infrastructure.operation";
+	private static final String TANK_FEED = "feed.cesar.infrastructure.operation";
 
 	private NessGraph graph;
 	private NessBox box;
 
 	@Before
 	public void setUp() throws Exception {
-		String[] args = new String[]{"ness_store=../temp/store", "ness_datalake=../temp/datalake", "connector_id", "ness-cesar-pre", "broker_store=../temp/broker/", "broker_port=63000", "mqtt_port=1883"};
+		String[] args = new String[]{"ness_store=../temp/store", "ness_datalake=../temp/datalake", "broker_store=../temp/broker/", "connector_id=ness-cesar-pre", "broker_port=63000", "mqtt_port=1883"};
 		NessConfiguration boxConfiguration = new NessConfiguration(args);
 		graph = new Graph(store(boxConfiguration.args().get("ness_store"))).loadStashes("Ness").as(NessGraph.class);
 		compileFunctions(graph);
@@ -42,7 +43,7 @@ public class ActionTests {
 		new AddTankAction(box, TANK).execute();
 		assertEquals("added to the graph", 1, graph.tankList().size());
 		assertNotNull(box.datalakeManager().station().exists(TANK));
-		box.busService().pipes().containsKey(graph.tank(0).feedQN() + "#" + graph.tank(0).flowQN());
+		assertTrue(box.busService().pipes().containsKey(graph.tank(0).feedQN() + "#" + graph.tank(0).flowQN()));
 		checkProduceAndConsume();
 		waitFinish();
 	}
@@ -65,9 +66,13 @@ public class ActionTests {
 	@Test
 	public void addJmsConnector() throws Exception {
 		addExternalBus();
-		String topic = "feed.cesar.infrastructure.operation";
-		new AddJmsConnectorAction(box, "pre-siani", "pre-siani", "incoming", singletonList(topic)).execute();
-		checkConnectRemote(box.graph().externalBus(0), topic);
+		new AddJmsConnectorAction(box, "pre-siani", "pre-siani", "incoming", singletonList(TANK_FEED)).execute();
+		waitFinish();
+	}
+
+	@Test
+	public void name() throws Exception {
+		checkBridge(box.graph().externalBus(0), TANK_FEED);
 		waitFinish();
 	}
 
@@ -81,7 +86,7 @@ public class ActionTests {
 		checkProduce();
 	}
 
-	private void checkConnectRemote(ExternalBus bus, String topic) {
+	private void checkBridge(ExternalBus bus, String topic) {
 		checkConsume(topic);
 		new Thread(() -> new ProducerTest(bus.originURL(), bus.user(), bus.password(), topic).produce()).start();
 	}
@@ -105,8 +110,8 @@ public class ActionTests {
 	@After
 	public void tearDown() throws Exception {
 		graph.clear().tank(t -> true);
-		graph.clear().externalBus(t -> true);
-		graph.clear().jMSConnector(t -> true);
+//		graph.clear().externalBus(t -> true);
+//		graph.clear().jMSConnector(t -> true);
 		FileSystemUtils.deleteRecursively(new File("../temp/datalake"));
 	}
 

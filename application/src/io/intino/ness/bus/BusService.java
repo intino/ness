@@ -1,5 +1,6 @@
 package io.intino.ness.bus;
 
+import io.intino.ness.graph.JMSConnector;
 import io.intino.ness.graph.Tank;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.Broker;
@@ -35,12 +36,13 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static io.intino.ness.graph.JMSConnector.Direction.incoming;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 public class BusService {
 	private static final Logger logger = LoggerFactory.getLogger(BusService.class);
-	private static final String NESS = "graph";
+	private static final String NESS = "ness";
 
 	private final BrokerService service;
 	private final int brokerPort;
@@ -52,14 +54,14 @@ public class BusService {
 	private File brokerStore;
 	private JavaRuntimeConfigurationBroker confBroker;
 
-	public BusService(int brokerPort, int mqttPort, boolean persistent, File brokerStore, Map<String, String> users, List<Tank> tanks) {
+	public BusService(int brokerPort, int mqttPort, boolean persistent, File brokerStore, Map<String, String> users, List<Tank> tanks, List<JMSConnector> connectors) {
 		this.brokerPort = brokerPort;
 		this.mqttPort = mqttPort;
 		this.brokerStore = brokerStore;
 		this.service = new BrokerService();
 		this.authenticator = new SimpleAuthenticationPlugin(initUsers(users));
 		this.configurationPlugin = new JavaRuntimeConfigurationPlugin();
-		configure(persistent, tanks);
+		configure(persistent, tanks, connectors);
 	}
 
 	public Map<String, List<String>> users() {
@@ -85,18 +87,18 @@ public class BusService {
 		authenticator.getUserPasswords().remove(name);
 	}
 
-	public void addJMSConnector(String name, String foreignURL, String user, String password, List<String> outboundTopics, List<String> inboundTopics) {
+
+	public void addJMSConnector(JMSConnector c) {
 		try {
 			SimpleJmsTopicConnector connector = new SimpleJmsTopicConnector();
-			connector.setName(name);
-			connector.setLocalTopicConnectionFactory(new ActiveMQConnectionFactory(service.getVmConnectorURI()));
-			connector.setOutboundTopicConnectionFactory(new ActiveMQConnectionFactory(foreignURL, user, password));
-			connector.setOutboundUsername(user);
-			connector.setOutboundPassword(password);
-			connector.setOutboundTopicBridges(toOutboundBridges(outboundTopics));
-			connector.setInboundTopicBridges(toInboundBridges(inboundTopics));
+			connector.setName(c.name$());
+			connector.setLocalTopicConnectionFactory(new ActiveMQConnectionFactory("tcp://localdhost:63000"));
+			connector.setOutboundTopicConnectionFactory(new ActiveMQConnectionFactory(c.bus().originURL(), c.bus().user(), c.bus().password()));
+			connector.setOutboundUsername(c.bus().user());
+			connector.setOutboundPassword(c.bus().password());
+			if (c.direction().equals(incoming)) connector.setInboundTopicBridges(toInboundBridges(c.topics()));
+			else connector.setOutboundTopicBridges(toOutboundBridges(c.topics()));
 			service.addJmsConnector(connector);
-			connector.start();
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -211,7 +213,7 @@ public class BusService {
 		return users;
 	}
 
-	private void configure(boolean persistence, List<Tank> tanks) {
+	private void configure(boolean persistence, List<Tank> tanks, List<JMSConnector> connectors) {
 		try {
 			service.setBrokerName(NESS);
 			if (persistence) {
@@ -230,6 +232,7 @@ public class BusService {
 			addTCPConnector();
 			addMQTTConnector();
 			initTanks(tanks);
+			initConnectors(connectors);
 		} catch (Exception e) {
 			logger.error("Error configuring: " + e.getMessage(), e);
 		}
@@ -238,6 +241,10 @@ public class BusService {
 	private void initTanks(List<Tank> tanks) {
 		tanks.stream().filter(Tank::running).forEach(tank -> pipe(tank.feedQN(), tank.flowQN()));
 		updateInterceptors();
+	}
+
+	private void initConnectors(List<JMSConnector> connectors) {
+		for (JMSConnector c : connectors) addJMSConnector(c);
 	}
 
 	public void updateInterceptors() {

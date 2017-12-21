@@ -44,7 +44,7 @@ public class ProducerTest {
 			while (true) {
 				produceMessage();
 				sleep(1000);
-				System.out.println("message sent");
+				System.out.println("message sent to " + topic);
 			}
 		} catch (Exception ignored) {
 		}

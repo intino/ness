@@ -40,8 +40,8 @@ public class AddTankAction {
 		box.busManager().getOrCreateTopic(tank.feedQN());
 		box.busManager().getOrCreateTopic(tank.flowQN());
 		box.busManager().getOrCreateTopic(tank.dropQN());
-		resumeTank(name);
 		tank.running(true);
+		resumeTank(name);
 		tank.save$();
 	}
 

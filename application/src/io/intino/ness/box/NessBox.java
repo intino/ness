@@ -28,7 +28,7 @@ public class NessBox extends AbstractBox {
 
 	public NessBox(NessConfiguration configuration) {
 		super(configuration);
-		this.connectorID = configuration.args().containsKey("connector_id") ? configuration.args().get("connector_id") : "ness";
+		this.connectorID = configuration.args().getOrDefault("connector_id", "ness");
 		this.reflowSession = new ReflowSession(this);
 	}
 
@@ -36,7 +36,6 @@ public class NessBox extends AbstractBox {
 	public io.intino.konos.alexandria.Box put(Object o) {
 		if (o instanceof Graph) this.graph = ((Graph) o).as(NessGraph.class);
 		return this;
-
 	}
 
 	public io.intino.konos.alexandria.Box open() {
@@ -57,7 +56,7 @@ public class NessBox extends AbstractBox {
 	}
 
 	private void createBus(boolean persistent) {
-		busService = new BusService(brokerPort(), mqttPort(), persistent, new File(brokerStore()), users(), graph.tankList());
+		busService = new BusService(brokerPort(), mqttPort(), persistent, new File(brokerStore()), users(), graph.tankList(), graph.jMSConnectorList());
 		busManager = new BusManager(connectorID, busService);
 	}
 
