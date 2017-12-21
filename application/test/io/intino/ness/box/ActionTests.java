@@ -4,6 +4,7 @@ import io.intino.ness.box.actions.AddExternalBusAction;
 import io.intino.ness.box.actions.AddJmsConnectorAction;
 import io.intino.ness.box.actions.AddTankAction;
 import io.intino.ness.box.actions.PauseTankAction;
+import io.intino.ness.graph.ExternalBus;
 import io.intino.ness.graph.NessGraph;
 import io.intino.tara.magritte.Graph;
 import org.junit.After;
@@ -57,22 +58,18 @@ public class ActionTests {
 
 	@Test
 	public void addExternalBus() throws Exception {
-		new AddExternalBusAction(box, "pre-monentia", "tcp://bus.monentia.es/62616", "", "").execute();
+		new AddExternalBusAction(box, "pre-siani", "tcp://bus.siani.es:61616", "cesar", "cesar").execute();
 		assertEquals("added bus to the graph", 1, graph.externalBusList().size());
 	}
 
 	@Test
 	public void addJmsConnector() throws Exception {
 		addExternalBus();
-		new AddJmsConnectorAction(box, "pre-monentia", "pre-monentia", "incoming", singletonList("example")).execute();
-		checkFailsProduceAndConsume();
+		String topic = "feed.cesar.infrastructure.operation";
+		new AddJmsConnectorAction(box, "pre-siani", "pre-siani", "incoming", singletonList(topic)).execute();
+		checkConnectRemote(box.graph().externalBus(0), topic);
 		waitFinish();
 	}
-
-	private void waitFinish() throws InterruptedException {
-		Thread.sleep(3000);
-	}
-
 
 	private void checkFailsProduceAndConsume() {
 		checkFailConsume();
@@ -84,6 +81,15 @@ public class ActionTests {
 		checkProduce();
 	}
 
+	private void checkConnectRemote(ExternalBus bus, String topic) {
+		checkConsume(topic);
+		new Thread(() -> new ProducerTest(bus.originURL(), bus.user(), bus.password(), topic).produce()).start();
+	}
+
+	private void checkConsume(String topic) {
+		new Thread(() -> assertTrue(new ConsumerTest().setTopic(topic).checkConsume())).start();
+	}
+
 	private void checkConsume() {
 		new Thread(() -> assertTrue(new ConsumerTest().checkConsume())).start();
 	}
@@ -93,17 +99,18 @@ public class ActionTests {
 	}
 
 	private void checkProduce() {
-		new Thread(() -> {
-			try {
-				new ProducerTest().produce();
-			} catch (Exception e) {
-			}
-		}).start();
+		new Thread(() -> new ProducerTest().produce()).start();
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		graph.clear().tank(t -> true);
+		graph.clear().externalBus(t -> true);
+		graph.clear().jMSConnector(t -> true);
 		FileSystemUtils.deleteRecursively(new File("../temp/datalake"));
+	}
+
+	private void waitFinish() throws InterruptedException {
+		Thread.sleep(5000);
 	}
 }

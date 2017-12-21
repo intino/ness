@@ -40,8 +40,9 @@ public class AddJmsConnectorAction {
 				connector.bus().originURL(),
 				connector.bus().user(),
 				connector.bus().password(),
-				direction.equals("incoming") ? topics : emptyList(),
-				!direction.equals("incoming") ? topics : emptyList());
+				!direction.equals("incoming") ? topics : emptyList(),
+				direction.equals("incoming") ? topics : emptyList());
+		box.restartBus(true);
 		return OK;
 	}
 }

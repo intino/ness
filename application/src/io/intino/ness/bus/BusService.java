@@ -89,10 +89,12 @@ public class BusService {
 		try {
 			SimpleJmsTopicConnector connector = new SimpleJmsTopicConnector();
 			connector.setName(name);
+			connector.setLocalTopicConnectionFactory(new ActiveMQConnectionFactory(service.getVmConnectorURI()));
+			connector.setOutboundTopicConnectionFactory(new ActiveMQConnectionFactory(foreignURL, user, password));
+			connector.setOutboundUsername(user);
+			connector.setOutboundPassword(password);
 			connector.setOutboundTopicBridges(toOutboundBridges(outboundTopics));
 			connector.setInboundTopicBridges(toInboundBridges(inboundTopics));
-			connector.setOutboundTopicConnectionFactory(new ActiveMQConnectionFactory(foreignURL, user, password));
-			connector.setLocalTopicConnectionFactory(new ActiveMQConnectionFactory(service.getVmConnectorURI()));
 			service.addJmsConnector(connector);
 			connector.start();
 		} catch (Exception e) {
@@ -185,11 +187,19 @@ public class BusService {
 	}
 
 	private OutboundTopicBridge[] toOutboundBridges(List<String> outboundTopics) {
-		return outboundTopics.stream().map(OutboundTopicBridge::new).toArray(OutboundTopicBridge[]::new);
+		return outboundTopics.stream().map(topicName -> {
+			OutboundTopicBridge bridge = new OutboundTopicBridge(topicName);
+			bridge.setLocalTopicName(topicName);
+			return bridge;
+		}).toArray(OutboundTopicBridge[]::new);
 	}
 
 	private InboundTopicBridge[] toInboundBridges(List<String> inboundTopics) {
-		return inboundTopics.stream().map(InboundTopicBridge::new).toArray(InboundTopicBridge[]::new);
+		return inboundTopics.stream().map(topicName -> {
+			InboundTopicBridge bridge = new InboundTopicBridge(topicName);
+			bridge.setLocalTopicName(topicName);
+			return bridge;
+		}).toArray(InboundTopicBridge[]::new);
 	}
 
 	private List<AuthenticationUser> initUsers(Map<String, String> modelUsers) {

@@ -17,21 +17,36 @@ import static org.apache.activemq.ActiveMQConnection.makeConnection;
 
 public class ProducerTest {
 	private static final Logger logger = LoggerFactory.getLogger(ProducerTest.class);
-	private static String url = "tcp://localhost:63000";
-	private static String user = "consul";
-	private static String password = "volk96e3atir";
-	private static String topic = "feed.cesar.infrastructure.operation";
+	private String url = "tcp://localhost:63000";
+	private String user = "consul";
+	private String password = "volk96e3atir";
+	private String topic = "feed.cesar.infrastructure.operation";
 
 	private Session session;
 	private Connection connection;
 
+	public ProducerTest() {
+		initSession();
+	}
+
+
+	public ProducerTest(String url, String user, String password, String topic) {
+		this.url = url;
+		this.user = user;
+		this.password = password;
+		this.topic = topic;
+		initSession();
+	}
 
 	@Test
-	public void produce() throws Exception {
-		while (true) {
-			new TopicProducer(session, topic).produce(createMessageFor("text"));
-			sleep(1000);
-			System.out.println("message sent");
+	public void produce() {
+		try {
+			while (true) {
+				produceMessage();
+				sleep(1000);
+				System.out.println("message sent");
+			}
+		} catch (Exception ignored) {
 		}
 	}
 
@@ -43,20 +58,17 @@ public class ProducerTest {
 		}
 	}
 
-	public ProducerTest() {
-		try {
-			setUp();
-		} catch (Exception e) {
-		}
-	}
-
 	@Before
 	public void setUp() throws Exception {
+		initSession();
+	}
+
+	private void initSession() {
 		try {
 			connection = makeConnection(user, password, url);
 			connection.start();
 			this.session = connection.createSession(false, AUTO_ACKNOWLEDGE);
-		} catch (JMSException e) {
+		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
