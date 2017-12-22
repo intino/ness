@@ -9,6 +9,7 @@ import io.intino.ness.graph.NessGraph;
 import io.intino.tara.magritte.Graph;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.util.FileSystemUtils;
 import test.ConsumerTest;
@@ -38,6 +39,7 @@ public class ActionTests {
 	}
 
 	@Test
+	@Ignore
 	public void addTank() throws Exception {
 		assertEquals("shouldn't exists tanks", 0, graph.tankList().size());
 		new AddTankAction(box, TANK).execute();
@@ -49,6 +51,7 @@ public class ActionTests {
 	}
 
 	@Test
+	@Ignore
 	public void pauseTank() throws Exception {
 		new AddTankAction(box, TANK).execute();
 		assertEquals("added to the graph", 1, graph.tankList().size());
@@ -58,19 +61,22 @@ public class ActionTests {
 	}
 
 	@Test
+	@Ignore
 	public void addExternalBus() throws Exception {
-		new AddExternalBusAction(box, "pre-siani", "tcp://bus.siani.es:61616", "cesar", "cesar").execute();
+		new AddExternalBusAction(box, "pro-monentia", "tcp://bus.monentia.com:61616", "cesar", "trust8&sheet").execute();
 		assertEquals("added bus to the graph", 1, graph.externalBusList().size());
 	}
 
 	@Test
+	@Ignore
 	public void addJmsConnector() throws Exception {
 		addExternalBus();
-		new AddJmsConnectorAction(box, "pre-siani", "pre-siani", "incoming", singletonList(TANK_FEED)).execute();
+		new AddJmsConnectorAction(box, "pro-monentia", "pro-monentia", "incoming", singletonList(TANK_FEED)).execute();
 		waitFinish();
 	}
 
 	@Test
+	@Ignore
 	public void checkJmsConnector() throws Exception {
 		checkBridge(box.graph().externalBus(0), TANK_FEED);
 		waitFinish();
@@ -109,7 +115,7 @@ public class ActionTests {
 
 	@After
 	public void tearDown() throws Exception {
-//		graph.clear().tank(t -> true);
+		graph.clear().tank(t -> true);
 //		graph.clear().externalBus(t -> true);
 //		graph.clear().jMSConnector(t -> true);
 		FileSystemUtils.deleteRecursively(new File("../temp/datalake"));

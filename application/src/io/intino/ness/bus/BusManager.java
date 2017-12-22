@@ -85,11 +85,21 @@ public final class BusManager {
 	}
 
 	public void registerConsumer(String topic, Consumer consumer) {
-		List<TopicConsumer> consumers = this.consumers.putIfAbsent(topic, new ArrayList<>());
-		if (consumers == null) consumers = this.consumers.get(topic);
+		List<TopicConsumer> value = new ArrayList<>();
+		if (!this.consumers.containsKey(topic)) this.consumers.put(topic, value);
+		else value = this.consumers.get(topic);
 		TopicConsumer topicConsumer = new TopicConsumer(nessSession(), topic);
-		topicConsumer.listen(consumer, NESS + consumers.size() + "-" + topic);
-		consumers.add(topicConsumer);
+		topicConsumer.listen(consumer);
+		value.add(topicConsumer);
+	}
+
+	public void registerConsumer(String topic, Consumer consumer, String id) {
+		List<TopicConsumer> value = new ArrayList<>();
+		if (!this.consumers.containsKey(topic)) this.consumers.put(topic, value);
+		else value = this.consumers.get(topic);
+		TopicConsumer topicConsumer = new TopicConsumer(nessSession(), topic);
+		topicConsumer.listen(consumer, id);
+		value.add(topicConsumer);
 	}
 
 	private boolean closedSession() {
@@ -114,7 +124,6 @@ public final class BusManager {
 			logger.error(e.getMessage(), e);
 		}
 	}
-
 
 	private void startAdvisories() throws JMSException {
 		advisoryManager = new AdvisoryManager(service.broker(), session);

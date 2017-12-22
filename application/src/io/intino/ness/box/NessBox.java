@@ -3,8 +3,10 @@ package io.intino.ness.box;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.bus.BusService;
 import io.intino.ness.datalake.DatalakeManager;
+import io.intino.ness.datalake.TankStarter;
 import io.intino.ness.datalake.reflow.ReflowSession;
 import io.intino.ness.graph.NessGraph;
+import io.intino.ness.graph.Tank;
 import io.intino.ness.graph.User;
 import io.intino.tara.magritte.Graph;
 import io.intino.tara.magritte.Layer;
@@ -40,34 +42,43 @@ public class NessBox extends AbstractBox {
 
 	public io.intino.konos.alexandria.Box open() {
 		super.open();
-		createBus(true);
-		busManager.start();
-		busManager.createQueue(REFLOW_READY);
-		busManager.registerConsumer("service.graph.reflow", reflowSession);
 		datalakeManager = new DatalakeManager(configuration.args().get("ness_datalake"));
+		startBus(true);
+		startReflowService();
+		startTanks();
 		return this;
 	}
 
 	public void restartBus(boolean persistent) {
 		busManager.stop();
-		createBus(persistent);
-		busManager.start();
-		busManager().registerConsumer("service.graph.reflow", reflowSession);
-	}
-
-	private void createBus(boolean persistent) {
-		busService = new BusService(brokerPort(), mqttPort(), persistent, new File(brokerStore()), users(), graph.tankList(), graph.jMSConnectorList());
-		busManager = new BusManager(connectorID, busService);
-	}
-
-	private Map<String, String> users() {
-		return graph.userList().stream().collect(Collectors.toMap(Layer::name$, User::password));
+		startBus(persistent);
+		startReflowService();
 	}
 
 	public void close() {
 		super.close();
 		datalakeManager.stop();
 		busManager.stop();
+	}
+
+	private void startBus(boolean persistent) {
+		busService = new BusService(brokerPort(), mqttPort(), persistent, new File(brokerStore()), users(), graph.tankList(), graph.jMSConnectorList());
+		busManager = new BusManager(connectorID, busService);
+		busManager.start();
+	}
+
+	private void startReflowService() {
+		busManager.createQueue(REFLOW_READY);
+		busManager.registerConsumer("service.graph.reflow", reflowSession);
+	}
+
+	private Map<String, String> users() {
+		return graph.userList().stream().collect(Collectors.toMap(Layer::name$, User::password));
+	}
+
+	private void startTanks() {
+		final TankStarter tankStarter = new TankStarter(busManager(), datalakeManager());
+		for (Tank tank : graph.tankList()) tankStarter.start(tank);
 	}
 
 	public NessGraph graph() {

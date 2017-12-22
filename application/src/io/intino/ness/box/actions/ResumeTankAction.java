@@ -2,29 +2,35 @@ package io.intino.ness.box.actions;
 
 import io.intino.ness.box.NessBox;
 import io.intino.ness.box.slack.Helper;
+import io.intino.ness.bus.BusService;
+import io.intino.ness.datalake.TankStarter;
 import io.intino.ness.graph.Tank;
-import io.intino.ness.inl.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static io.intino.konos.jms.Consumer.textFrom;
 import static io.intino.ness.box.actions.Action.OK;
-import static io.intino.ness.inl.Message.load;
 
 
 public class ResumeTankAction {
+	private static final Logger logger = LoggerFactory.getLogger(BusService.class);
 
 	public NessBox box;
 	public String tank;
 
+	public ResumeTankAction() {
+	}
+
+	public ResumeTankAction(NessBox box, String tank) {
+		this.box = box;
+		this.tank = tank;
+	}
+
 	public String execute() {
 		Tank aTank = Helper.findTank(box, tank);
 		if (aTank == null) return "tank not found";
-		box.busManager().registerConsumer(aTank.feedQN(), message -> drop(aTank, load(textFrom(message))));
+		new TankStarter(box.busManager(), box.datalakeManager()).start(aTank);
 		box.busManager().pipe(aTank.feedQN(), aTank.flowQN());
 		box.restartBus(true);
 		return OK;
-	}
-
-	private void drop(Tank aTank, Message message) {
-		box.datalakeManager().station().drop(aTank.qualifiedName()).register(message);
 	}
 }

@@ -92,18 +92,18 @@ public class BusService {
 		try {
 			SimpleJmsTopicConnector connector = new SimpleJmsTopicConnector();
 			connector.setName(c.name$());
-			connector.setLocalTopicConnectionFactory(new ActiveMQConnectionFactory("octavioroncal", "octavioroncal", "tcp://localhost:63000"));
+			connector.setLocalTopicConnectionFactory(new ActiveMQConnectionFactory(NESS, NESS, "vm://ness?waitForStart=1000&create=false"));
 			connector.setOutboundTopicConnectionFactory(new ActiveMQConnectionFactory(c.bus().user(), c.bus().password(), c.bus().originURL()));
 			connector.setOutboundUsername(c.bus().user());
 			connector.setOutboundPassword(c.bus().password());
 			if (c.direction().equals(incoming)) connector.setInboundTopicBridges(toInboundBridges(c.topics()));
 			else connector.setOutboundTopicBridges(toOutboundBridges(c.topics()));
 			service.addJmsConnector(connector);
+			logger.info("Connector with " + c.bus().name$() + " started");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
-
 
 	public List<JmsConnector> jmsConnectors() {
 		return Arrays.asList(service.getJmsBridgeConnectors());
@@ -232,19 +232,19 @@ public class BusService {
 			addPolicies();
 			addTCPConnector();
 			addMQTTConnector();
-			initTanks(tanks);
-			initConnectors(connectors);
+			registerTanks(tanks);
+			registerConnectors(connectors);
 		} catch (Exception e) {
 			logger.error("Error configuring: " + e.getMessage(), e);
 		}
 	}
 
-	private void initTanks(List<Tank> tanks) {
+	private void registerTanks(List<Tank> tanks) {
 		tanks.stream().filter(Tank::running).forEach(tank -> pipe(tank.feedQN(), tank.flowQN()));
 		updateInterceptors();
 	}
 
-	private void initConnectors(List<JMSConnector> connectors) {
+	private void registerConnectors(List<JMSConnector> connectors) {
 		for (JMSConnector c : connectors) addJMSConnector(c);
 	}
 

@@ -1,13 +1,17 @@
 package test;
 
 import io.intino.konos.jms.TopicProducer;
+import io.intino.ness.inl.Message;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jms.Connection;
 import javax.jms.Session;
+import java.time.Instant;
+import java.util.Random;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
 import static java.lang.Thread.sleep;
@@ -24,27 +28,30 @@ public class ProducerTest {
 	private Session session;
 	private Connection connection;
 	private TopicProducer topicProducer;
-
-//	public ProducerTest() {
-//		initSession();
-//	}
-
+	private Random random;
 
 	@Test
+	@Ignore
 	public void produce() {
 		try {
 			while (true) {
-				topicProducer.produce(createMessageFor("text"));
+				produceMessage();
 				sleep(1000);
-				System.out.println("message sent to " + topic);
 			}
 		} catch (Exception ignored) {
 		}
 	}
 
+	private void produceMessage() {
+		final String value = new Message("example.message").write("ts", Instant.now().toString()).write("value", random.nextInt()).toString();
+		topicProducer.produce(createMessageFor(value));
+		System.out.println("message sent to " + topic + " ->  " + value);
+	}
+
 	@Before
 	public void setUp() throws Exception {
 		initSession();
+		random = new Random(2123132);
 	}
 
 	private void initSession() {

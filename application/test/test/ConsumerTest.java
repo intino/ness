@@ -1,5 +1,6 @@
 package test;
 
+import io.intino.konos.jms.Consumer;
 import io.intino.konos.jms.TopicConsumer;
 import org.junit.Before;
 import org.slf4j.Logger;
@@ -18,7 +19,7 @@ public class ConsumerTest {
 	private String url = "tcp://localhost:63000";
 	private String user = "consul";
 	private String password = "volk96e3atir";
-	private String topic = "flow.cesar.infrastructure.operation";
+	private String topic = "feed.cesar.infrastructure.operation";
 	private Session session;
 	private Connection connection;
 
@@ -32,7 +33,7 @@ public class ConsumerTest {
 		try {
 			setUp();
 		} catch (Exception e) {
-			logger.error(e.getMessage(),e);
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -41,13 +42,10 @@ public class ConsumerTest {
 		return this;
 	}
 
-
-	public void consume()  {
+	public void consume() {
 		try {
 			MessageConsumer consumer = this.session.createConsumer(session.createTopic(topic));
-			consumer.setMessageListener(m -> {
-				System.out.println("received message from " + topic);
-			});
+			consumer.setMessageListener(m -> System.out.println(Consumer.textFrom(m)));
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
