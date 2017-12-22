@@ -71,7 +71,7 @@ public class ActionTests {
 	}
 
 	@Test
-	public void name() throws Exception {
+	public void checkJmsConnector() throws Exception {
 		checkBridge(box.graph().externalBus(0), TANK_FEED);
 		waitFinish();
 	}
@@ -88,7 +88,7 @@ public class ActionTests {
 
 	private void checkBridge(ExternalBus bus, String topic) {
 		checkConsume(topic);
-		new Thread(() -> new ProducerTest(bus.originURL(), bus.user(), bus.password(), topic).produce()).start();
+//		new Thread(() -> new ProducerTest(bus.originURL(), bus.user(), bus.password(), topic).produce()).start();
 	}
 
 	private void checkConsume(String topic) {
@@ -109,7 +109,7 @@ public class ActionTests {
 
 	@After
 	public void tearDown() throws Exception {
-		graph.clear().tank(t -> true);
+//		graph.clear().tank(t -> true);
 //		graph.clear().externalBus(t -> true);
 //		graph.clear().jMSConnector(t -> true);
 		FileSystemUtils.deleteRecursively(new File("../temp/datalake"));

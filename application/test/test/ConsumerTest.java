@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
 import javax.jms.Session;
 
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
@@ -19,20 +20,19 @@ public class ConsumerTest {
 	private String password = "volk96e3atir";
 	private String topic = "flow.cesar.infrastructure.operation";
 	private Session session;
-
 	private Connection connection;
 
-	public ConsumerTest(String url, String user, String password, String topic) {
-		this.url = url;
-		this.user = user;
-		this.password = password;
-		this.topic = topic;
+
+	public static void main(String[] args) throws InterruptedException {
+		new ConsumerTest().consume();
+		Thread.sleep(10000000);
 	}
 
 	public ConsumerTest() {
 		try {
 			setUp();
 		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
 		}
 	}
 
@@ -41,11 +41,23 @@ public class ConsumerTest {
 		return this;
 	}
 
+
+	public void consume()  {
+		try {
+			MessageConsumer consumer = this.session.createConsumer(session.createTopic(topic));
+			consumer.setMessageListener(m -> {
+				System.out.println("received message from " + topic);
+			});
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public boolean checkConsume() {
 		try {
 			final boolean[] checked = {false};
 			new TopicConsumer(session, topic).listen(m -> {
-				System.out.println("received message from" + topic);
+				System.out.println("received message from " + topic);
 				checked[0] = true;
 			});
 			Thread.sleep(3000);

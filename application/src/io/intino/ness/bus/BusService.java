@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
 import java.security.Principal;
@@ -57,7 +58,7 @@ public class BusService {
 	public BusService(int brokerPort, int mqttPort, boolean persistent, File brokerStore, Map<String, String> users, List<Tank> tanks, List<JMSConnector> connectors) {
 		this.brokerPort = brokerPort;
 		this.mqttPort = mqttPort;
-		this.brokerStore = brokerStore;
+		this.brokerStore = getCanonicalFile(brokerStore);
 		this.service = new BrokerService();
 		this.authenticator = new SimpleAuthenticationPlugin(initUsers(users));
 		this.configurationPlugin = new JavaRuntimeConfigurationPlugin();
@@ -87,13 +88,12 @@ public class BusService {
 		authenticator.getUserPasswords().remove(name);
 	}
 
-
 	public void addJMSConnector(JMSConnector c) {
 		try {
 			SimpleJmsTopicConnector connector = new SimpleJmsTopicConnector();
 			connector.setName(c.name$());
-			connector.setLocalTopicConnectionFactory(new ActiveMQConnectionFactory("tcp://localdhost:63000"));
-			connector.setOutboundTopicConnectionFactory(new ActiveMQConnectionFactory(c.bus().originURL(), c.bus().user(), c.bus().password()));
+			connector.setLocalTopicConnectionFactory(new ActiveMQConnectionFactory("octavioroncal", "octavioroncal", "tcp://localhost:63000"));
+			connector.setOutboundTopicConnectionFactory(new ActiveMQConnectionFactory(c.bus().user(), c.bus().password(), c.bus().originURL()));
 			connector.setOutboundUsername(c.bus().user());
 			connector.setOutboundPassword(c.bus().password());
 			if (c.direction().equals(incoming)) connector.setInboundTopicBridges(toInboundBridges(c.topics()));
@@ -103,6 +103,7 @@ public class BusService {
 			logger.error(e.getMessage(), e);
 		}
 	}
+
 
 	public List<JmsConnector> jmsConnectors() {
 		return Arrays.asList(service.getJmsBridgeConnectors());
@@ -290,10 +291,20 @@ public class BusService {
 
 	private KahaDBPersistenceAdapter persistenceAdapter() {
 		KahaDBPersistenceAdapter adapter = new KahaDBPersistenceAdapter();
+		adapter.setDirectoryArchive(new File(brokerStore, "archive"));
+		adapter.setIndexDirectory(new File(brokerStore, "index"));
 		adapter.setDirectory(brokerStore);
 		adapter.setBrokerName(NESS);
 		adapter.setBrokerService(service);
 		return adapter;
+	}
+
+	private File getCanonicalFile(File brokerStore) {
+		try {
+			return brokerStore.getCanonicalFile();
+		} catch (IOException e) {
+			return brokerStore;
+		}
 	}
 
 	static final class PasswordGenerator {
