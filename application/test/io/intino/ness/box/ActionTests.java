@@ -16,15 +16,18 @@ import test.ConsumerTest;
 import test.ProducerTest;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 import static io.intino.ness.box.TestHelper.compileFunctions;
 import static io.intino.ness.box.TestHelper.store;
-import static java.util.Collections.singletonList;
 import static org.junit.Assert.*;
 
 public class ActionTests {
 	private static final String TANK = "cesar.infrastructure.operation";
 	private static final String TANK_FEED = "feed.cesar.infrastructure.operation";
+
+	private static List<String> bridgedTanks = Arrays.asList("feed.cesar.infrastructure.operation", "feed.consul.server.status", "feed.consul.server.log", "feed.consul.server.upgrade", "feed.consul.feeder.status", "feed.consul.feeder.log", "feed.consul.feeder.upgrade", "feed.consul.device.status", "feed.consul.device.boot", "feed.consul.device.upgrade", "feed.consul.device.crash", "feed.consul.system.log", "feed.consul.system.statu");
 
 	private NessGraph graph;
 	private NessBox box;
@@ -63,7 +66,7 @@ public class ActionTests {
 	@Test
 	@Ignore
 	public void addExternalBus() throws Exception {
-		new AddExternalBusAction(box, "pro-monentia", "tcp://bus.monentia.com:61616", "cesar", "trust8&sheet").execute();
+		new AddExternalBusAction(box, "cesar-pro", "tcp://bus.monentia.com:63000", "cesar", "bgqd83pri3mk").execute();
 		assertEquals("added bus to the graph", 1, graph.externalBusList().size());
 	}
 
@@ -71,7 +74,7 @@ public class ActionTests {
 	@Ignore
 	public void addJmsConnector() throws Exception {
 		addExternalBus();
-		new AddJmsConnectorAction(box, "pro-monentia", "pro-monentia", "incoming", singletonList(TANK_FEED)).execute();
+		new AddJmsConnectorAction(box, "cesar-pro-connection", "cesar-pro", "incoming", bridgedTanks).execute();
 		waitFinish();
 	}
 
@@ -115,7 +118,7 @@ public class ActionTests {
 
 	@After
 	public void tearDown() throws Exception {
-		graph.clear().tank(t -> true);
+//		graph.clear().tank(t -> true);
 //		graph.clear().externalBus(t -> true);
 //		graph.clear().jMSConnector(t -> true);
 		FileSystemUtils.deleteRecursively(new File("../temp/datalake"));
