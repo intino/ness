@@ -164,6 +164,5 @@ public final class BusManager {
 
 	public void stopPipe(String feed, String flow) {
 		service.stopPipe(feed, flow);
-		service.updateInterceptors();
 	}
 }

@@ -30,7 +30,7 @@ public class ResumeTankAction {
 		if (aTank == null) return "tank not found";
 		new TankStarter(box.busManager(), box.datalakeManager()).start(aTank);
 		box.busManager().pipe(aTank.feedQN(), aTank.flowQN());
-		box.restartBus(true);
+//		box.restartBus(true);
 		aTank.running(true);
 		aTank.save$();
 		return OK;

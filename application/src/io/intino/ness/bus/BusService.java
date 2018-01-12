@@ -255,8 +255,8 @@ public class BusService {
 			if (confBroker == null) return;
 			List<VirtualDestination> destinations = new ArrayList<>();
 			Arrays.stream(interceptors).forEach(i -> Collections.addAll(destinations, i.getVirtualDestinations()));
-			confBroker.setVirtualDestinations(destinations.toArray(new VirtualDestination[0]), true);
-			TimeUnit.SECONDS.sleep(2);
+			confBroker.setVirtualDestinations(destinations.toArray(new VirtualDestination[0]), false);//TODO false?
+//			TimeUnit.SECONDS.sleep(2);TODO
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}

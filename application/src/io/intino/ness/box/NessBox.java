@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class NessBox extends AbstractBox {
-	private static final String REFLOW_READY = "service.graph.reflow.ready";
+	private static final String REFLOW_READY = "service.ness.reflow.ready";
 	private String connectorID;
 	private DatalakeManager datalakeManager;
 	private NessGraph graph;
@@ -69,7 +69,7 @@ public class NessBox extends AbstractBox {
 
 	private void startReflowService() {
 		busManager.createQueue(REFLOW_READY);
-		busManager.registerConsumer("service.graph.reflow", reflowSession);
+		busManager.registerConsumer("service.ness.reflow", reflowSession);
 	}
 
 	private Map<String, String> users() {
