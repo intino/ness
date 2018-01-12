@@ -277,7 +277,7 @@ public class BusService {
 
 	private void addTCPConnector() throws Exception {
 		TransportConnector connector = new TransportConnector();
-		connector.setUri(new URI("tcp://0.0.0.0:" + brokerPort + "?transport.useInactivityMonitor=false"));
+		connector.setUri(new URI("tcp://0.0.0.0:" + brokerPort+"?transport.useKeepAlive=true"));
 		connector.setName("OWireConn");
 		service.addConnector(connector);
 	}

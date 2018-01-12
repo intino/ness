@@ -66,7 +66,7 @@ public class ActionTests {
 	@Test
 	@Ignore
 	public void addExternalBus() throws Exception {
-		new AddExternalBusAction(box, "cesar-pro", "tcp://bus.monentia.com:63000", "cesar", "bgqd83pri3mk").execute();
+		new AddExternalBusAction(box, "monentia-pro", "tcp://bus.monentia.com:61616", "cesar", "trust8&sheet").execute();
 		assertEquals("added bus to the graph", 1, graph.externalBusList().size());
 	}
 
@@ -74,7 +74,7 @@ public class ActionTests {
 	@Ignore
 	public void addJmsConnector() throws Exception {
 		addExternalBus();
-		new AddJmsConnectorAction(box, "cesar-pro-connection", "cesar-pro", "incoming", bridgedTanks).execute();
+		new AddJmsConnectorAction(box, "monentia-pro-connection", "monentia-pro", "incoming", bridgedTanks).execute();
 		waitFinish();
 	}
 

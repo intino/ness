@@ -31,6 +31,8 @@ public class ResumeTankAction {
 		new TankStarter(box.busManager(), box.datalakeManager()).start(aTank);
 		box.busManager().pipe(aTank.feedQN(), aTank.flowQN());
 		box.restartBus(true);
+		aTank.running(true);
+		aTank.save$();
 		return OK;
 	}
 }

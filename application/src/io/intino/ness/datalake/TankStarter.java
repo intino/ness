@@ -19,17 +19,20 @@ public class TankStarter {
 	}
 
 	public void start(Tank tank) {
-		bus.registerConsumer(tank.feedQN(), message -> start(tank, message));
+		bus.registerConsumer(tank.feedQN(), message -> consume(tank, message));
 	}
 
-	private void start(Tank tank, javax.jms.Message message) {
-		start(tank, load(textFrom(message)));
+	private void consume(Tank tank, javax.jms.Message message) {
+		String text = textFrom(message);
+		if (text.contains("created:")) text = text.replace("created:", "ts:");
+		consume(tank, load(text));
 	}
 
-	private void start(io.intino.ness.graph.Tank aTank, Message message) {
+	private void consume(io.intino.ness.graph.Tank aTank, Message message) {
 		try {
 			datalake.station().drop(aTank.qualifiedName()).register(message);
 		} catch (Throwable e) {
+			logger.error("error processing message: " + message.toString());
 			logger.error(e.getMessage(), e);
 		}
 	}

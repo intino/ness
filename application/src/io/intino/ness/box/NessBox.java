@@ -45,7 +45,7 @@ public class NessBox extends AbstractBox {
 		datalakeManager = new DatalakeManager(configuration.args().get("ness_datalake"));
 		startBus(true);
 		startReflowService();
-		startTanks();
+		startDatalakeTanks();
 		return this;
 	}
 
@@ -76,7 +76,7 @@ public class NessBox extends AbstractBox {
 		return graph.userList().stream().collect(Collectors.toMap(Layer::name$, User::password));
 	}
 
-	private void startTanks() {
+	private void startDatalakeTanks() {
 		final TankStarter tankStarter = new TankStarter(busManager(), datalakeManager());
 		for (Tank tank : graph.tankList()) tankStarter.start(tank);
 	}
