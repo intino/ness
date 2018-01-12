@@ -6,7 +6,6 @@ import io.intino.ness.inl.streams.FileMessageOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.UUID;
 
 import static io.intino.ness.datalake.FileTank.Format.zip;
@@ -51,6 +50,7 @@ public class FileTank implements Tank {
 
 
 	private File[] files() {
+		create();
 		File[] files = folder.listFiles(this::isTub);
 		return files != null ? files : new File[0];
 	}
@@ -72,27 +72,27 @@ public class FileTank implements Tank {
 	}
 
 	File[] files(Format format) {
+		create();
 		return folder.listFiles(f -> f.getName().endsWith(format.name()));
 	}
 
 	File fileOf(Message message, Format format) {
+		create();
 		return new File(folder, dayOf(message.ts()) + "." + format.name());
 	}
 
 	File fileOf(Instant instant, Format format) {
+		create();
 		return new File(folder, dayOf(instant.toString()) + "." + format.name());
 	}
 
 	Tank create() {
-		if (folder.mkdirs()) return this;
-		throw new RuntimeException("Tank could not be created");
-	}
-
-	boolean exists() {
-		return folder.exists();
+		if(!folder.exists()) folder.mkdirs();
+		return this;
 	}
 
 	void rename(String newName) {
+		create();
 		if (rename(folder, newName)) return;
 		throw new RuntimeException("Tank could not be renamed");
 	}
@@ -116,6 +116,7 @@ public class FileTank implements Tank {
 	}
 
 	boolean isEmpty() {
+		create();
 		return folder.listFiles() == null;
 	}
 

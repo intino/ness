@@ -56,12 +56,11 @@ public class FileStation implements NessStation {
 
 	@Override
 	public Tank tank(String tank) {
-		return assertNotExists(get(tank)).create();
+		return get(tank).create();
 	}
 
 	@Override
 	public NessStation.Feed feed(String tank) {
-		assertExists(get(tank));
 		Feed feed = new Feed() {
 			@Override
 			public void send(Message message) {
@@ -79,7 +78,6 @@ public class FileStation implements NessStation {
 
 	@Override
 	public NessStation.Drop drop(String tank) {
-		assertExists(get(tank));
 		Drop drop = new Drop() {
 			@Override
 			public void register(Message message) {
@@ -97,13 +95,11 @@ public class FileStation implements NessStation {
 
 	@Override
 	public Pipe pipe(String tank) {
-		assertExists(get(tank));
 		return createPipeFor(tank);
 	}
 
 	@Override
 	public Flow flow(String tank) {
-		assertExists(get(tank));
 		Flow flow = new Flow() {
 			List<Post> posts = new ArrayList<>();
 
@@ -129,7 +125,7 @@ public class FileStation implements NessStation {
 
 	@Override
 	public void remove(String tank) {
-		assertExists(assertIsNotUsed(get(tank))).remove();
+		get(tank).remove();
 	}
 
 	@Override
@@ -161,7 +157,7 @@ public class FileStation implements NessStation {
 
 	@Override
 	public Job seal(String tank) {
-		return createSealTaskFor(assertExists(get(tank)));
+		return createSealTaskFor(get(tank));
 	}
 
 	@Override
@@ -224,12 +220,12 @@ public class FileStation implements NessStation {
 
 	@Override
 	public boolean exists(String tank) {
-		return get(tank).exists();
+		return true;
 	}
 
 	@Override
 	public void rename(String tank, String newName) {
-		assertExists(get(tank)).rename(newName);
+		get(tank).rename(newName);
 	}
 
 	private File[] tankFiles() {
@@ -292,7 +288,6 @@ public class FileStation implements NessStation {
 
 			@Override
 			public Pipe to(String tank) {
-				assertExists(get(tank));
 				assertNotExistsPipeBetween(source, tank);
 				this.target = tank;
 				return this;
@@ -537,7 +532,6 @@ public class FileStation implements NessStation {
 	}
 
 	private Job createSealTaskFor(final FileTank tank) {
-		assertExists(tank);
 		return new Job() {
 			Iterator<File> iterator;
 
@@ -562,6 +556,7 @@ public class FileStation implements NessStation {
 
 			@SuppressWarnings("ResultOfMethodCallIgnored")
 			private void seal(File file) throws IOException {
+				if(!file.exists()) return;
 				MessageInputStream is = FileMessageInputStream.of(setOf(file));
 				FileMessageOutputStream os = FileMessageOutputStream.of(zipOf(file));
 				while (true) {
@@ -581,11 +576,6 @@ public class FileStation implements NessStation {
 		return new FileTank(new File(this.folder, tank));
 	}
 
-	private FileTank assertExists(FileTank tank) {
-		if (!tank.exists()) throw new StationException("Tank " + tank.name() + "  does not exist");
-		return tank;
-	}
-
 	private FileTank assertIsNotUsed(FileTank tank) {
 		String name = tank.name();
 		if (pipesFrom(name).length > 0)
@@ -596,11 +586,6 @@ public class FileStation implements NessStation {
 			throw new StationException("Tank " + tank.name() + " is target of feeds. Remove feeds first");
 		if (flowsFrom(name).length > 0)
 			throw new StationException("Tank " + tank.name() + " is source of flows. Remove flows first");
-		return tank;
-	}
-
-	private FileTank assertNotExists(FileTank tank) {
-		if (tank.exists()) throw new StationException("Tank " + tank.name() + " already exists");
 		return tank;
 	}
 

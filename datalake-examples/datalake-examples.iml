@@ -16,12 +16,12 @@
     <orderEntry type="module" module-name="datalake" />
     <orderEntry type="module" module-name="inl" />
     <orderEntry type="library" name="Legio: org.glassfish.tyrus.bundles:tyrus-standalone-client:1.13" level="project" />
+    <orderEntry type="module" module-name="feeder-framework" />
     <orderEntry type="library" name="Maven: com.github.mpkorstanje:simmetrics-core:4.1.1" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:19.0" level="project" />
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.10" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.10" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.hamcrest:hamcrest-core:1.1" level="project" />
     <orderEntry type="library" name="Maven: com.neovisionaries:nv-websocket-client:2.0" level="project" />
-    <orderEntry type="module" module-name="feeder-framework" />
   </component>
 </module>
