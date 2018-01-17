@@ -56,7 +56,7 @@ class ReflowProcess {
 
 	void next() {
 		if (!jobs.hasNext()) terminateReflow();
-		jobs.next().onTerminate(() -> {
+		else jobs.next().onTerminate(() -> {
 			commit();
 			if (!jobs.hasNext()) terminateReflow();
 		});
