@@ -44,11 +44,34 @@ public final class BusManager {
 		logger.info("JMS service: started!");
 	}
 
+	public void stop() {
+		try {
+			logger.info("Stopping bus");
+			consumers.values().forEach(c -> c.forEach(TopicConsumer::stop));
+			consumers.clear();
+			producers.values().forEach(Producer::close);
+			producers.clear();
+			session.close();
+//			connection.close();
+			session = null;
+			connection = null;
+			service.stop();
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	public void restart(boolean persistent) {
+		service.persistent(persistent);
+		stop();
+		start();
+	}
+
 	public String nessID() {
 		return nessID;
 	}
 
-	public Session nessSession() {
+	private Session nessSession() {
 		if (this.session == null || closedSession()) initNessSession();
 		return session;
 	}
@@ -102,6 +125,12 @@ public final class BusManager {
 		value.add(topicConsumer);
 	}
 
+	public void stopConsumersOf(String topic) {
+		if (!this.consumers.containsKey(topic)) return;
+		this.consumers.get(topic).forEach(TopicConsumer::stop);
+		this.consumers.get(topic).clear();
+	}
+
 	private boolean closedSession() {
 		return ((ActiveMQSession) session).isClosed();
 	}
@@ -110,22 +139,7 @@ public final class BusManager {
 		return consumers.getOrDefault(feedQN, Collections.emptyList());
 	}
 
-	public void stop() {
-		try {
-			logger.info("Stopping bus");
-			consumers.values().forEach(c -> c.forEach(TopicConsumer::stop));
-			consumers.clear();
-			producers.values().forEach(Producer::close);
-			producers.clear();
-			session.close();
-			connection.close();
-			service.stop();
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
-
-	private void startAdvisories() throws JMSException {
+	private void startAdvisories() {
 		advisoryManager = new AdvisoryManager(service.broker(), session);
 		advisoryManager.start();
 	}

@@ -36,8 +36,8 @@ public class TankSlack {
 	}
 
 	public String seal(MessageProperties properties) {
-		Tank tank = Helper.findTank(box, properties.context().getObjects()[0]);
-		box.datalakeManager().seal(tank);
+//		Tank tank = Helper.findTank(box, properties.context().getObjects()[0]);
+//		box.datalakeManager().seal(tank);
 		return OK;
 	}
 }

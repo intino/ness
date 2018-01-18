@@ -21,6 +21,8 @@ public class RemoveTankAction {
 		List<Tank> tanks = wrapper.tankList(t -> t.qualifiedName().equals(name)).collect(toList());
 		if (tanks.isEmpty()) return "Tank not found";
 		for (Tank tank : tanks) {
+			box.busManager().stopConsumersOf(tank.feedQN());
+			box.busManager().stopConsumersOf(tank.dropQN());
 			datalake().removeTank(tank);
 			tank.delete$();
 		}

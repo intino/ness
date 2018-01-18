@@ -12,8 +12,6 @@ import static io.intino.ness.box.actions.Action.OK;
 
 
 public class ResumeTankAction {
-	private static final Logger logger = LoggerFactory.getLogger(BusService.class);
-
 	public NessBox box;
 	public String tank;
 

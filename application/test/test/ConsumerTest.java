@@ -19,7 +19,7 @@ public class ConsumerTest {
 	private String url = "tcp://localhost:63000";
 	private String user = "consul";
 	private String password = "volk96e3atir";
-	private String topic = "feed.cesar.infrastructure.operation";
+	private String topic = "flow.cesar.infrastructure.operation";
 	private Session session;
 	private Connection connection;
 

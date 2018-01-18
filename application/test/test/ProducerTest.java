@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import javax.jms.Connection;
 import javax.jms.Session;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Random;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
@@ -42,8 +43,26 @@ public class ProducerTest {
 		}
 	}
 
+	@Test
+	@Ignore
+	public void produceOld() {
+		try {
+			while (true) {
+				produceOldMessage();
+				sleep(1000);
+			}
+		} catch (Exception ignored) {
+		}
+	}
+
 	private void produceMessage() {
 		final String value = new Message("example.message").write("ts", Instant.now().toString()).write("value", random.nextInt()).toString();
+		topicProducer.produce(createMessageFor(value));
+		System.out.println("message sent to " + topic + " ->  " + value);
+	}
+
+	private void produceOldMessage() {
+		final String value = new Message("example.message").write("ts", Instant.now().minus(2, ChronoUnit.HOURS).toString()).write("value", random.nextInt()).toString();
 		topicProducer.produce(createMessageFor(value));
 		System.out.println("message sent to " + topic + " ->  " + value);
 	}

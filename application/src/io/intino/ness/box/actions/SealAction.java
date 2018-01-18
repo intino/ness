@@ -12,18 +12,10 @@ public class SealAction extends Action {
 	public String tank;
 
 	public String execute() {
-		if (this.tank == null || tank.isEmpty()) {
-			for (Tank tank : box.graph().tankList()) seal(tank);
-			return OK;
-		} else {
-			Tank tank = findTank(box, this.tank);
-			if (tank == null) return "Tank not found";
-			seal(tank);
-			return OK;
-		}
+		return OK;
 	}
 
-	private void seal(Tank tank) {
-		box.datalakeManager().seal(tank);
-	}
+//	private void seal(Tank tank) {
+//		box.datalakeManager().seal(tank);
+//	}
 }

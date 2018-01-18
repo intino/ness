@@ -11,11 +11,11 @@ import static io.intino.ness.inl.Message.load;
 public class TankStarter {
 
 	private BusManager bus;
-	private DatalakeManager datalake;
+	private DatalakeManager datalakeManager;
 
-	public TankStarter(BusManager manager, DatalakeManager datalake) {
+	public TankStarter(BusManager manager, DatalakeManager datalakeManager) {
 		this.bus = manager;
-		this.datalake = datalake;
+		this.datalakeManager = datalakeManager;
 	}
 
 	public void start(Tank tank) {
@@ -30,7 +30,7 @@ public class TankStarter {
 
 	private void consume(io.intino.ness.graph.Tank aTank, Message message) {
 		try {
-			datalake.station().drop(aTank.qualifiedName()).register(message);
+			datalakeManager.drop(aTank, message);
 		} catch (Throwable e) {
 			logger.error("error processing message: " + message.toString());
 			logger.error(e.getMessage(), e);

@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "1.1.0") ness as Product
+Artifact("io.intino.ness", "1.1.1") ness as Product
 	Imports
 		Compile("org.slf4j", "slf4j-log4j12", "1.7.7")
 		Compile("org.apache.activemq", "activemq-broker", "5.15.2")
@@ -8,15 +8,12 @@ Artifact("io.intino.ness", "1.1.0") ness as Product
 		Compile("org.apache.activemq", "activemq-kahadb-store", "5.15.2")
 		Compile("org.apache.activemq", "activemq-jaas", "5.15.2")
 		Compile("org.apache.activemq", "activemq-runtime-config", "5.15.2")
-
-		Compile("io.intino.ness", "datalake", "1.0.5")
-
 		Compile("io.intino.konos", "alexandria-jms", "1.0.11")
 		Compile("io.intino.konos", "alexandria-slack", "1.0.10")
 		Compile("io.intino.konos", "alexandria-jmx", "1.0.1")
 		Compile("io.intino.konos", "alexandria-scheduler", "1.0.4")
 	Code("io.intino.ness")
-	Model("Proteo", "2.1.6", "2.1.9")
+	Model("Proteo", "2.1.6", "2.1.11")
 	Box("Konos", "3.0.1", "3.0.1")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness") as Runnable("io.intino.ness.box.Main")
 		classpathPrefix = "lib"
@@ -26,31 +23,20 @@ Artifact("io.intino.ness", "1.1.0") ness as Product
 		Parameter("mqtt_port", "1883")
 		Parameter("broker_store", "./temp/broker/")
 	Distribution(intino.frameworks, intino.languages)
-	Deployment ness-ebar
-		Dev(server = ebar-pre, runConfiguration = ebar-pre-ness)
-			project = "ebar"
-	Deployment ness-dev
-		tags = "Datalake"
-		Dev(server = consul-dev, runConfiguration = ebar-pre-ness)
-			project = "dev"
-	Deployment ness-happysense
-		Dev(server = happysense-pre, runConfiguration = happysense-pre-ness)
-			project = "happysense"
 
-Server(cesar = "cesar.pre.intino.io") happysense-pre
+	Deployment("Datalake") ness-dev > Dev(server = consul-dev, runConfiguration = ebar-pre-ness, project = "dev")
 
-Server(cesar = "cesar.pre.intino.io") ebar-pre
+	Deployment("Datalake") ness-ebar > Dev(server = ebar-pre, runConfiguration = ebar-pre-ness, project = "ebar")
+	Deployment("Datalake") ness-happysense > Dev(server = happysense-pre, runConfiguration = happysense-pre-ness, project = "happysense")
+	Deployment("Datalake") ness-octana > Dev(server = octana-pre, runConfiguration = octana-pre-ness, project = "octana")
+
+Server(cesar = "cesar.monentia.es") happysense-pre
+
+Server(cesar = "cesar.monentia.es") ebar-pre
+
+Server(cesar = "cesar.monentia.es") octana-pre
 
 Server(cesar = "cesar.pre.intino.io") consul-dev
-
-RunConfiguration cesar-dev
-	Argument("ness_store", "./temp/store")
-	Argument("ness_datalake", "./temp/datalake")
-	Argument("broker_store", "./temp/broker/")
-	Argument("connector_id","ness-cesar-pre")
-//	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
-	Argument("broker_port", "63000")a
-	Argument("mqtt_port", "1883")
 
 RunConfiguration cesar-pro
 	Argument("ness_store", "$HOME/ness/store")
@@ -76,13 +62,30 @@ RunConfiguration happysense-pre-ness
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
 
+RunConfiguration octana-pre-ness
+	Argument("ness_store", "$HOME/ness/store")
+	Argument("ness_datalake", "$HOME/ness/datalake")
+	Argument("broker_store", "$HOME/ness/broker/")
+	Argument("broker_port", "62000")
+	Argument("connector_id", "octana-ness-pre")
+	Argument("mqtt_port", "1884")
+
 RunConfiguration octana-dev-ness
-	Argument("ness_store", "../octana/ness/store")
-	Argument("ness_datalake", "../octana/ness/datalake")
-	Argument("broker_store", "../octana/ness/broker/")
+	Argument("ness_store", "./temp/octana/store")
+	Argument("ness_datalake", "./temp/octana/datalake")
+	Argument("broker_store", "./temp/octana/broker/")
 	Argument("connector_id", "octana-dev-ness")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
+
+RunConfiguration cesar-dev
+	Argument("ness_store", "./temp/store")
+	Argument("ness_datalake", "./temp/datalake")
+	Argument("broker_store", "./temp/broker/")
+	Argument("connector_id","ness-cesar-pre")
+//	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
+	Argument("broker_port", "63000")
+	Argument("mqtt_port", "1883")
 
 
 Repository("intino-maven") intino

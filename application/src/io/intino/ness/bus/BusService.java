@@ -45,24 +45,28 @@ public class BusService {
 	private static final Logger logger = LoggerFactory.getLogger(BusService.class);
 	private static final String NESS = "ness";
 
-	private final BrokerService service;
 	private final int brokerPort;
 	private final int mqttPort;
-	private final JavaRuntimeConfigurationPlugin configurationPlugin;
+	private final boolean persistent;
+	private final File brokerStore;
+	private final Map<String, String> users;
+	private final List<Tank> tanks;
+	private final List<JMSConnector> connectors;
 
-	private final SimpleAuthenticationPlugin authenticator;
+	private JavaRuntimeConfigurationPlugin configurationPlugin;
+	private SimpleAuthenticationPlugin authenticator;
+	private BrokerService service;
 	private Map<String, VirtualDestinationInterceptor> pipes = new HashMap<>();
-	private File brokerStore;
 	private JavaRuntimeConfigurationBroker confBroker;
 
 	public BusService(int brokerPort, int mqttPort, boolean persistent, File brokerStore, Map<String, String> users, List<Tank> tanks, List<JMSConnector> connectors) {
 		this.brokerPort = brokerPort;
 		this.mqttPort = mqttPort;
+		this.persistent = persistent;
 		this.brokerStore = getCanonicalFile(brokerStore);
-		this.service = new BrokerService();
-		this.authenticator = new SimpleAuthenticationPlugin(initUsers(users));
-		this.configurationPlugin = new JavaRuntimeConfigurationPlugin();
-		configure(persistent, tanks, connectors);
+		this.users = users;
+		this.tanks = tanks;
+		this.connectors = connectors;
 	}
 
 	public Map<String, List<String>> users() {
@@ -120,6 +124,10 @@ public class BusService {
 
 	public void start() {
 		try {
+			this.service = new BrokerService();
+			this.authenticator = new SimpleAuthenticationPlugin(initUsers(users));
+			this.configurationPlugin = new JavaRuntimeConfigurationPlugin();
+			configure(persistent, tanks, connectors);
 			service.start();
 			service.waitUntilStarted();
 			confBroker = (JavaRuntimeConfigurationBroker) service.getBroker().getAdaptor(JavaRuntimeConfigurationBroker.class);
@@ -130,8 +138,10 @@ public class BusService {
 
 	public void stop() {
 		try {
-			service.stop();
-			service.waitUntilStopped();
+			if (service != null) {
+				service.stop();
+				service.waitUntilStopped();
+			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -217,13 +227,7 @@ public class BusService {
 	private void configure(boolean persistence, List<Tank> tanks, List<JMSConnector> connectors) {
 		try {
 			service.setBrokerName(NESS);
-			if (persistence) {
-				service.setPersistent(false);
-				service.setPersistenceAdapter(persistenceAdapter());
-			} else {
-				service.setPersistent(false);
-				service.setPersistenceAdapter(null);
-			}
+			persistent(persistence);
 			service.setRestartAllowed(true);
 			service.setUseJmx(true);
 			service.setUseShutdownHook(true);
@@ -236,6 +240,19 @@ public class BusService {
 			registerConnectors(connectors);
 		} catch (Exception e) {
 			logger.error("Error configuring: " + e.getMessage(), e);
+		}
+	}
+
+	void persistent(boolean persistence) {
+		try {
+			if (persistence) {
+				service.setPersistent(false);
+				service.setPersistenceAdapter(persistenceAdapter());
+			} else {
+				service.setPersistent(false);
+				service.setPersistenceAdapter(null);
+			}
+		} catch (IOException ignored) {
 		}
 	}
 
@@ -255,8 +272,7 @@ public class BusService {
 			if (confBroker == null) return;
 			List<VirtualDestination> destinations = new ArrayList<>();
 			Arrays.stream(interceptors).forEach(i -> Collections.addAll(destinations, i.getVirtualDestinations()));
-			confBroker.setVirtualDestinations(destinations.toArray(new VirtualDestination[0]), false);//TODO false?
-//			TimeUnit.SECONDS.sleep(2);TODO
+			confBroker.setVirtualDestinations(destinations.toArray(new VirtualDestination[0]), false);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -277,7 +293,7 @@ public class BusService {
 
 	private void addTCPConnector() throws Exception {
 		TransportConnector connector = new TransportConnector();
-		connector.setUri(new URI("tcp://0.0.0.0:" + brokerPort+"?transport.useKeepAlive=true"));
+		connector.setUri(new URI("tcp://0.0.0.0:" + brokerPort + "?transport.useKeepAlive=true"));
 		connector.setName("OWireConn");
 		service.addConnector(connector);
 	}

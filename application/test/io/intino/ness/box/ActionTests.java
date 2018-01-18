@@ -47,7 +47,7 @@ public class ActionTests {
 		assertEquals("shouldn't exists tanks", 0, graph.tankList().size());
 		new AddTankAction(box, TANK).execute();
 		assertEquals("added to the graph", 1, graph.tankList().size());
-		assertNotNull(box.datalakeManager().station().exists(TANK));
+		assertTrue(new File(box.datalakeManager().getStationDirectory(), TANK).exists());
 		assertTrue(box.busService().pipes().containsKey(graph.tank(0).feedQN() + "#" + graph.tank(0).flowQN()));
 		checkProduceAndConsume();
 		waitFinish();

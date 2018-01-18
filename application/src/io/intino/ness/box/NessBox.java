@@ -43,26 +43,24 @@ public class NessBox extends AbstractBox {
 	public io.intino.konos.alexandria.Box open() {
 		super.open();
 		datalakeManager = new DatalakeManager(configuration.args().get("ness_datalake"));
-		startBus(true);
+		startBus();
 		startReflowService();
 		startDatalakeTanks();
 		return this;
 	}
 
 	public void restartBus(boolean persistent) {
-		busManager.stop();
-		startBus(persistent);
+		busManager.restart(persistent);
 		startReflowService();
 	}
 
 	public void close() {
 		super.close();
-		datalakeManager.stop();
 		busManager.stop();
 	}
 
-	private void startBus(boolean persistent) {
-		busService = new BusService(brokerPort(), mqttPort(), persistent, new File(brokerStore()), users(), graph.tankList(), graph.jMSConnectorList());
+	private void startBus() {
+		busService = new BusService(brokerPort(), mqttPort(), true, new File(brokerStore()), users(), graph.tankList(), graph.jMSConnectorList());
 		busManager = new BusManager(connectorID, busService);
 		busManager.start();
 	}

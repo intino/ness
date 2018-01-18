@@ -24,8 +24,7 @@ Service Nessie as SlackBot
 			Parameter(String) name
 			Parameter(String) externalBus
 			Parameter(String) direction
-			Parameter(type = String) topics
-				multiple = true
+			Parameter(type = String, multiple = true) topics
 		Request("Removes a registed jms connector") remove-jms-connector
 			Parameter(String) name
 		Request("Connects source and destination topics") pipes

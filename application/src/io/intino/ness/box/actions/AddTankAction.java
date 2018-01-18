@@ -44,10 +44,7 @@ public class AddTankAction {
 	}
 
 	private void resumeTank(String tankName) {
-		final ResumeTankAction action = new ResumeTankAction();
-		action.box = box;
-		action.tank = tankName;
-		action.execute();
+		new ResumeTankAction(box, tankName).execute();
 	}
 
 	private NessGraph ness() {

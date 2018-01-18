@@ -13,7 +13,9 @@ public class PumpAction extends Action {
 
 	public String execute() {
 		Function function = box.graph().functionList(f -> f.name$().equals(functionName)).findFirst().orElse(null);
-		box.datalakeManager().pump(input, output, function);
+		if (function == null) return "Function not found";
+		if (box.graph().tank(input) == null || box.graph().tank(output) == null) return "Function not found";
+		box.datalakeManager().pump(box.graph().tank(input), box.graph().tank(output), function);
 		return OK;
 	}
 }
