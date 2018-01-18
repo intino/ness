@@ -13,7 +13,6 @@ import javax.jms.Session;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
@@ -26,17 +25,19 @@ class ReflowProcess {
 	private static Logger logger = LoggerFactory.getLogger(ROOT_LOGGER_NAME);
 
 	private final List<Tank> tanks;
+	private final int blockSize;
 	private DatalakeManager datalakeManager;
 	private final Session session;
 	private final Iterator<Job> jobs;
-	private TopicProducer producers;
+	private TopicProducer producer;
 
 	ReflowProcess(DatalakeManager datalakeManager, BusManager bus, List<Tank> tanks, int blockSize) {
 		this.datalakeManager = datalakeManager;
 		this.session = bus.transactedSession();
 		this.tanks = tanks;
+		this.blockSize = blockSize;
 		this.jobs = createPumping(blockSize);
-		this.producers = createProducer();
+		this.producer = createProducer();
 	}
 
 	private TopicProducer createProducer() {
@@ -52,13 +53,13 @@ class ReflowProcess {
 		if (!jobs.hasNext()) terminateReflow();
 		else jobs.next().onTerminate(() -> {
 			commit();
+			logger.info("Sent " + blockSize + " messages");
 			if (!jobs.hasNext()) terminateReflow();
 		});
 	}
 
 	private Iterator<Job> createPumping(int blockSize) {
 		return new Iterator<Job>() {
-
 			List<TankManager> managers = tanks.stream().map(t -> new TankManager(t.qualifiedName(), datalakeManager.sortedMessagesIterator(t))).collect(Collectors.toList());
 
 			@Override
@@ -69,7 +70,6 @@ class ReflowProcess {
 			@Override
 			public Job next() {
 				return new Job() {
-
 					int messageCounter = 0;
 
 					@Override
@@ -81,7 +81,7 @@ class ReflowProcess {
 					protected boolean step() {
 						if (!flowsAreActive(managers)) return false;
 						TankManager manager = managerWithOldestMessage(managers);
-						producers.produce(createMessageFor(manager.message.toString()));
+						producer.produce(createMessageFor(manager.message.toString()));
 						manager.next();
 						return ++messageCounter < blockSize;
 					}
@@ -133,7 +133,6 @@ class ReflowProcess {
 			logger.error(e.getMessage(), e);
 		}
 	}
-
 
 	static class TankManager {
 		final String source;

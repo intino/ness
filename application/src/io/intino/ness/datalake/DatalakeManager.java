@@ -58,7 +58,8 @@ public class DatalakeManager {
 
 	public Iterator<Message> sortedMessagesIterator(Tank tank) {
 		try {
-			File[] files = requireNonNull(directoryOf(tank).listFiles());
+			File[] files = directoryOf(tank).listFiles();
+			if (files == null) files = new File[0];
 			io.intino.ness.inl.MessageInputStream stream = MessageInputStream.of(files);
 			return new Iterator<Message>() {
 				public boolean hasNext() {
@@ -75,7 +76,7 @@ public class DatalakeManager {
 				};
 
 			};
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			logger.error(e.getMessage(), e);
 			return null;
 		}
