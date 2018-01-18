@@ -34,7 +34,6 @@ import java.net.URI;
 import java.security.Principal;
 import java.security.SecureRandom;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static io.intino.ness.graph.JMSConnector.Direction.incoming;
@@ -245,13 +244,8 @@ public class BusService {
 
 	void persistent(boolean persistence) {
 		try {
-			if (persistence) {
-				service.setPersistent(false);
-				service.setPersistenceAdapter(persistenceAdapter());
-			} else {
-				service.setPersistent(false);
-				service.setPersistenceAdapter(null);
-			}
+			service.setPersistent(persistence);
+			service.setPersistenceAdapter(persistence ? persistenceAdapter() : null);
 		} catch (IOException ignored) {
 		}
 	}
