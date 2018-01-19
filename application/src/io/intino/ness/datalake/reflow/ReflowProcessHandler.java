@@ -43,8 +43,7 @@ public class ReflowProcessHandler {
 		if (tanks.get(0).equalsIgnoreCase("all")) return graph.tankList();
 		for (String tank : tanks) {
 			Tank realTank = findTank(graph, tank);
-			realTanks.add(realTank);
-			if (realTank == null) return emptyList();
+			if (realTank != null) realTanks.add(realTank);
 		}
 		return realTanks;
 	}

@@ -71,9 +71,9 @@ RunConfiguration octana-pre-ness
 	Argument("mqtt_port", "1884")
 
 RunConfiguration octana-dev-ness
-	Argument("ness_store", "./temp/octana/store")
-	Argument("ness_datalake", "./temp/octana/datalake")
-	Argument("broker_store", "./temp/octana/broker/")
+	Argument("ness_store", "../octana/ness/store")
+	Argument("ness_datalake", "../octana/ness/datalake")
+	Argument("broker_store", "../octana/ness/broker/")
 	Argument("connector_id", "octana-dev-ness")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
