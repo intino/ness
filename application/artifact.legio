@@ -13,7 +13,7 @@ Artifact("io.intino.ness", "1.1.1") ness as Product
 		Compile("io.intino.konos", "alexandria-jmx", "1.0.1")
 		Compile("io.intino.konos", "alexandria-scheduler", "1.0.4")
 	Code("io.intino.ness")
-	Model("Proteo", "2.1.6", "2.1.11")
+	Model("Proteo", "2.1.6", "2.1.13")
 	Box("Konos", "3.0.1", "3.0.1")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness") as Runnable("io.intino.ness.box.Main")
 		classpathPrefix = "lib"
@@ -47,9 +47,9 @@ RunConfiguration cesar-pro
 	Argument("mqtt_port", "1884")
 
 RunConfiguration ebar-pre-ness
-	Argument("ness_store", "$HOME/ness/store")
-	Argument("ness_datalake", "$HOME/ness/datalake")
-	Argument("broker_store", "$HOME/ness/broker/")
+	Argument("ness_store", "$HOME/store")
+	Argument("ness_datalake", "$HOME/datalake")
+	Argument("broker_store", "$HOME/broker/")
 	Argument("broker_port", "62000")
 	Argument("connector_id", "ebar-ness-pre")
 	Argument("mqtt_port", "1884")
@@ -71,9 +71,9 @@ RunConfiguration octana-pre-ness
 	Argument("mqtt_port", "1884")
 
 RunConfiguration octana-dev-ness
-	Argument("ness_store", "../octana/ness/store")
-	Argument("ness_datalake", "../octana/ness/datalake")
-	Argument("broker_store", "../octana/ness/broker/")
+	Argument("ness_store", "./temp/octana/store")
+	Argument("ness_datalake", "./temp/octana/datalake")
+	Argument("broker_store", "./temp/octana/broker/")
 	Argument("connector_id", "octana-dev-ness")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")

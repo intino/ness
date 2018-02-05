@@ -12,7 +12,7 @@ Concept Tank
 	var string dropQN = '"drop." + self.qualifiedName()' is reactive
 	var string[] tags = empty
 	var integer version = @version is reactive
-	var boolean running = false
+	var boolean running = true
 
 Concept User
 	var string password

@@ -16,7 +16,6 @@
     <orderEntry type="library" name="Legio: org.slf4j:slf4j-api:1.7.7" level="project" />
     <orderEntry type="library" name="Legio: log4j:log4j:1.2.17" level="project" />
     <orderEntry type="library" name="Legio: org.apache.activemq:activemq-broker:5.15.2" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.activemq:activemq-client:5.15.2" level="project" />
     <orderEntry type="library" name="Legio: org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1" level="project" />
     <orderEntry type="library" name="Legio: org.fusesource.hawtbuf:hawtbuf:1.11" level="project" />
     <orderEntry type="library" name="Legio: org.apache.geronimo.specs:geronimo-j2ee-management_1.1_spec:1.0.1" level="project" />
@@ -31,7 +30,6 @@
     <orderEntry type="library" name="Legio: com.fasterxml.jackson.core:jackson-core:2.6.7" level="project" />
     <orderEntry type="library" name="Legio: org.apache.activemq:activemq-mqtt:5.15.2" level="project" />
     <orderEntry type="library" name="Legio: org.apache.activemq:activeio-core:3.1.4" level="project" />
-    <orderEntry type="library" name="Legio: commons-logging:commons-logging:1.2" level="project" />
     <orderEntry type="library" name="Legio: org.apache.activemq.protobuf:activemq-protobuf:1.1" level="project" />
     <orderEntry type="library" name="Legio: org.fusesource.mqtt-client:mqtt-client:1.14" level="project" />
     <orderEntry type="library" name="Legio: org.fusesource.hawtdispatch:hawtdispatch-transport:1.22" level="project" />
@@ -93,5 +91,12 @@
     <orderEntry type="library" name="Legio: com.esotericsoftware:minlog:1.3.0" level="project" />
     <orderEntry type="library" name="Legio: org.objenesis:objenesis:2.2" level="project" />
     <orderEntry type="library" name="Legio: io.intino.tara:language:1.0.6" level="project" />
+    <orderEntry type="library" name="Legio: org.apache.activemq:activemq-client:5.15.2" level="project" />
+    <orderEntry type="library" name="Legio: org.apache.activemq:activemq-client:5.15.2" level="project" />
+    <orderEntry type="library" name="Legio: commons-logging:commons-logging:1.2" level="project" />
+    <orderEntry type="library" name="Legio: org.apache.activemq:activemq-client:5.15.2" level="project" />
+    <orderEntry type="library" name="Legio: commons-logging:commons-logging:1.2" level="project" />
+    <orderEntry type="library" name="Legio: commons-logging:commons-logging:1.2" level="project" />
+    <orderEntry type="library" name="Legio: org.apache.activemq:activemq-client:5.15.2" level="project" />
   </component>
 </module>
