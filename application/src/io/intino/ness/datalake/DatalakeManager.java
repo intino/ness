@@ -83,7 +83,7 @@ public class DatalakeManager {
 
 	private void append(File inlFile, Message message) {
 		try {
-			if (lastMessageTime.containsKey(inlFile) && parse(message.ts()).isAfter(lastMessageTime.get(inlFile))) {
+			if (lastMessageTime.containsKey(inlFile) && shouldBeAtTheEnd(inlFile, message)) {
 				write(inlFile.toPath(), (message.toString() + "\n\n").getBytes(), APPEND);
 				lastMessageTime.put(inlFile, parse(message.ts()));
 			} else {
@@ -91,9 +91,20 @@ public class DatalakeManager {
 				addMessage(messages, message);
 				save(inlFile, messages);
 			}
+			saveAttachments(inlFile.getParentFile(), message);
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
+	}
+
+	private boolean shouldBeAtTheEnd(File inlFile, Message message) {
+		return parse(message.ts()).isAfter(lastMessageTime.get(inlFile));
+	}
+
+	private void saveAttachments(File directory, Message message) {
+//		for (Attachment attachment : message.attachments()) {
+//			Files.write(new File(directory, attachment.name()).toPath(), attachment.asByteArray());
+//		}
 	}
 
 	private List<Message> loadMessages(File inlFile) throws IOException {
