@@ -113,7 +113,7 @@ public class Loader {
 
 		private Message createMessage(String type, Message owner) {
 			Message message = new Message(type, owner);
-			if (owner != null) owner.components.add(message);
+			if (owner != null) owner.add(message);
 			return message;
 		}
 
@@ -122,13 +122,13 @@ public class Loader {
 			Message result = message;
 			for (int i = 1; i < pathOf(line).length - 1; i++) {
 				assert result != null;
-				result = lastItemOf(result.components);
+				result = lastComponentOf(message);
 			}
 			return result;
 		}
 
-		private Message lastItemOf(List<Message> messages) {
-			return messages.isEmpty() ? null : messages.get(messages.size() - 1);
+		private Message lastComponentOf(Message message) {
+			return message.components().isEmpty() ? null : message.components().get(message.components().size() - 1);
 		}
 
 		private static String typeIn(String line) {

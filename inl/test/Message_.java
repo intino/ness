@@ -12,7 +12,7 @@ public class Message_ {
     private Message message;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         String statusMessage =
                 "[Status]\n" +
                 "battery: 78.0\n" +
@@ -25,7 +25,7 @@ public class Message_ {
     }
 
     @Test
-    public void should_override_and_create_new_attributes() throws Exception {
+    public void should_override_and_create_new_attributes() {
         message.set("battery", 80.0);
         message.set("taps", 100);
         assertThat(message.read("battery").as(Double.class), is(80.0));
@@ -34,7 +34,7 @@ public class Message_ {
     }
 
     @Test
-    public void should_remove_attributes() throws Exception {
+    public void should_remove_attributes() {
         message.remove("battery");
         message.remove("isscreenon");
         assertThat(message.contains("battery"), is(false));
@@ -43,7 +43,7 @@ public class Message_ {
     }
 
     @Test
-    public void should_rename_attributes() throws Exception {
+    public void should_rename_attributes() {
         message
 				.rename("isPlugged", "plugged")
 				.rename("battery", "b");
@@ -54,14 +54,14 @@ public class Message_ {
     }
 
     @Test
-    public void should_change_type() throws Exception {
+    public void should_change_type() {
         message.type("sensor");
         assertThat(message.is("sensor"), is(true));
         assertThat(message.contains("battery"), is(true));
     }
 
     @Test
-    public void should_handle_components() throws Exception {
+    public void should_handle_components() {
         Message message = Message.load(MultipleComponentMessage);
 
         message.remove(message.components("phone").get(0));
@@ -81,7 +81,7 @@ public class Message_ {
     }
 
     @Test
-    public void should_handle_multi_line_attributes() throws Exception {
+    public void should_handle_multi_line_attributes() {
         Message message = new Message("Multiline");
 		message.write("name", "John");
 		message.write("age", 30);
@@ -96,7 +96,7 @@ public class Message_ {
     }
 
     @Test
-    public void should_handle_array_attributes() throws Exception {
+    public void should_handle_array_attributes() {
         Message message = Message.load(MenuWithOnePriceMessage);
         assertThat(message.read("meals").as(String[].class).length, is(4));
         assertThat(message.read("meals").as(String[].class)[0], is("Soup"));
@@ -109,7 +109,7 @@ public class Message_ {
     }
 
     @Test
-    public void should_handle_document_attributes() throws Exception {
+    public void should_handle_document_attributes() {
         Message message = new Message("Document");
         message.set("name","my file");
         message.set("file","png", document(64));
@@ -120,7 +120,7 @@ public class Message_ {
 	}
 
     @Test
-    public void should_handle_document_list_attributes() throws Exception {
+    public void should_handle_document_list_attributes() {
         Message message = new Message("Document");
         message.set("name","my file");
         message.write("file","png", document(20));
@@ -134,13 +134,15 @@ public class Message_ {
 	}
 
 	@Test
-	public void should_load_documents() throws Exception {
+	public void should_load_documents() {
 		String text = "[Document]\n" +
 				"name: my file\n" +
 				"file: @7f7a9352-8b54-465b-8e63-15c7586f01e9.png";
 		Message message = Message.load(text);
-		for (Message.Attachment attachment : message.attachments())
+		for (Message.Attachment attachment : message.attachments()) {
+			attachment.id();
 			attachment.data(document(128));
+		}
 		assertThat(message.attachments().size(), is(1));
 		assertThat(message.attachment(message.get("file")).type(), is("png"));
 		assertThat(message.attachment(message.get("file")).data().length, is(128));

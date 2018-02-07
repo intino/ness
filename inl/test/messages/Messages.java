@@ -2,15 +2,6 @@ package messages;
 
 public class Messages {
 
-    public static String MessageWithComponent =
-        "[Person]\n" +
-        "name: Jose\n" +
-        "money: 50.0\n" +
-        "birthDate: 2016-10-04T10:10:11Z\n" +
-        "\n" +
-        "[Person.Country]\n" +
-        "name: Spain\n";
-
     public static String MessageWithParentClass =
         "[Teacher]\n" +
         "name: Jose\n" +
@@ -76,29 +67,6 @@ public class Messages {
         "[Teacher.Phone.Country]\n" +
         "name: Mexico\n";
 
-    public static String MultiLineMessage =
-        "[Teacher]\n" +
-        "name:\n\tJose\n\tHernandez\n" +
-        "money: 50.0\n" +
-        "birthDate: 2016-10-04T20:10:11Z\n" +
-        "university: ULPGC\n" +
-        "\n" +
-        "[Teacher.Country]\n" +
-        "name: Spain\n" +
-        "\n" +
-        "[Teacher.Phone]\n" +
-        "value: +150512101402\n" +
-        "\n" +
-        "[Teacher.Phone.Country]\n" +
-        "name: USA\n" +
-        "\n" +
-        "[Teacher.Phone]\n" +
-        "value: +521005101402\n" +
-        "\n" +
-        "[Teacher.Phone.Country]\n" +
-        "name: Mexico\n";
-
-
     public static String Stack =
             "java.lang.NullPointerException: Attempt to invoke interface method 'java.lang.Object java.util.List.get(int)' on a null object reference\n" +
                     "    at io.intino.consul.AppService$5.run(AppService.java:154)\n" +
@@ -144,23 +112,6 @@ public class Messages {
     public static String StatusMessage =
         Status1 + "\n" + Status2;
 
-
-    public static String MenuMessage =
-        "[Menu]\n" +
-        "meals:\n" +
-        "\tSoup\n" +
-        "\tLobster\n" +
-        "\tMussels\n" +
-        "\tCake\n" +
-        "prices:\n" +
-        "\t5.0\n" +
-        "\t24.5\n" +
-        "\t8.0\n" +
-        "\t7.0\n" +
-        "availability:\n" +
-        "\ttrue\n" +
-        "\tfalse\n";
-
     public static String MenuWithOnePriceMessage =
             "[Menu]\n" +
             "meals:\n" +
@@ -173,29 +124,6 @@ public class Messages {
             "availability:\n" +
             "\ttrue\n" +
             "\tfalse\n";
-
-    public static String EmptyMenuMessage =
-        "[Menu]\n" +
-        "availability:\n" +
-        "\ttrue\n" +
-        "\tfalse\n";
-
-
-    public static String NullValueMenuMessage =
-        "[Menu]\n" +
-        "meals:\n" +
-        "\tSoup\n" +
-        "\t\0\n" +
-        "\tMussels\n" +
-        "\tCake\n" +
-        "prices:\n" +
-        "\t5.0\n" +
-        "\t\0\n" +
-        "\t8.0\n" +
-        "\t7.0\n" +
-        "availability:\n" +
-        "\ttrue\n" +
-        "\tfalse\n";
 
     private static String indent(String text) {
         return "\t" + text.replaceAll("\\n", "\n\t");

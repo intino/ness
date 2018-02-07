@@ -2,11 +2,8 @@ package io.intino.ness.inl;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-
-import static java.util.Collections.sort;
 
 public interface MessageInputStream {
 
@@ -21,11 +18,19 @@ public interface MessageInputStream {
 	void close() throws IOException;
 
 	class Collection implements MessageInputStream {
+		private final List<Message> messages;
 		private String name;
 		private Iterator<Message> iterator;
 
-		public Collection(Iterator<Message> iterator) {
-			this.iterator = iterator;
+		public static Collection of(MessageInputStream... inputs) throws IOException {
+			List<Message> messages = new ArrayList<>();
+			for (MessageInputStream input : inputs)
+				messages.addAll(MessageReader.readAll(input));
+			return new Collection(messages);
+		}
+
+		private Collection(List<Message> messages) {
+			this.messages = messages;
 		}
 
 		@Override
@@ -40,6 +45,7 @@ public interface MessageInputStream {
 
 		@Override
 		public Message next() {
+			if (iterator == null) iterator = messages.iterator();
 			return iterator.hasNext() ? iterator.next() : null;
 		}
 
@@ -49,7 +55,7 @@ public interface MessageInputStream {
 		}
 
 		@Override
-		public void close() throws IOException {
+		public void close() {
 
 		}
 
@@ -57,36 +63,6 @@ public interface MessageInputStream {
 		public String toString() {
 			return name;
 		}
-	}
-
-	class Sort extends Collection {
-
-		public Sort(Iterator<Message> iterator) {
-			super(iterator);
-		}
-
-		public static MessageInputStream of(MessageInputStream... inputs) throws IOException {
-			List<Message> messages = new ArrayList<>();
-			StringBuilder name = new StringBuilder("sort");
-			for (MessageInputStream input : inputs) {
-				messages.addAll(MessageReader.readAll(input));
-				name.append(":").append(input.name());
-			}
-			sort(messages, byTs());
-			Sort sort = new Sort(messages.iterator());
-			sort.name(name.toString());
-			return sort;
-		}
-
-		private static Comparator<Message> byTs() {
-			return new Comparator<Message>() {
-				@Override
-				public int compare(Message o1, Message o2) {
-					return o1.ts().compareTo(o2.ts());
-				}
-			};
-		}
-
 	}
 
 	class Empty implements MessageInputStream {

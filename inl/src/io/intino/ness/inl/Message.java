@@ -7,14 +7,44 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-import static io.intino.ness.inl.Deserializer.deserialize;
-
 public class Message {
 	private String type;
 	private Message owner;
 	private Map<String, Attribute> attributes;
-	List<Message> components;
+	private List<Message> components;
 	private Map<String, Attachment> attachments;
+
+	public static Message load(String message) {
+		return load(message.getBytes()).attach(attachmentsOf(message));
+	}
+
+	public static Message load(byte[] bytes) {
+		try {
+			return Loader.Inl.of(new ByteArrayInputStream(bytes)).next();
+		} catch (IOException e) {
+			return empty;
+		}
+	}
+
+	public static List<Message> loadList(String text) {
+		return loadList(text.getBytes());
+	}
+
+	public static List<Message> loadList(byte[] bytes) {
+		List<Message> list = new ArrayList<>();
+		try {
+			MessageInputStream inputStream = Loader.Inl.of(new ByteArrayInputStream(bytes));
+			while (true) {
+				Message message = inputStream.next();
+				if (message == null) break;
+				list.add(message);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+
 
 	public Message(String type) {
 		this.type = type;
@@ -40,20 +70,8 @@ public class Message {
 		return type.equalsIgnoreCase(this.type);
 	}
 
-	public <T> T as(Class<T> type) {
-		return deserialize(toString()).next(type);
-	}
-
 	public void type(String type) {
 		this.type = type;
-	}
-
-	public String ts() {
-		return get("ts");
-	}
-
-	public void ts(String ts) {
-		set("ts", ts);
 	}
 
 	public String get(String attribute) {
@@ -124,41 +142,8 @@ public class Message {
 		return write(attribute, "@" + attach(type, content));
 	}
 
-	private String attach(String type, byte[] bytes) {
-		String id = UUID.randomUUID().toString() + "." + type;
-		attachments.put(id.toLowerCase(), new Attachment(id, bytes));
-		return id;
-	}
-
-	private Message attach(List<String> ids) {
-		for (String id : ids)
-			attachments.put(id.toLowerCase(), new Attachment(id,new byte[0]));
-		return this;
-	}
-
-	private void detach(String ids) {
-		for (String id : ids.split("\n"))
-			if (id.contains("@")) attachments.remove(id.substring(1));
-	}
-
-
 	public List<Attachment> attachments() {
 		return new ArrayList<>(attachments.values());
-	}
-
-
-	private byte[] contentOf(InputStream is) {
-		try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-			int length;
-			byte[] data = new byte[16384];
-			while ((length = is.read(data, 0, data.length)) != -1)
-				os.write(data, 0, length);
-			os.flush();
-			return os.toByteArray();
-
-		} catch (IOException e) {
-			return new byte[0];
-		}
 	}
 
 	public Message rename(String attribute, String newName) {
@@ -181,6 +166,10 @@ public class Message {
 
 	private void add(Attribute attribute) {
 		attributes.put(attribute.name.toLowerCase(), attribute);
+	}
+
+	public List<Message> components() {
+		return components == null ? new ArrayList<Message>() : new ArrayList<>(components);
 	}
 
 	public List<Message> components(String type) {
@@ -231,31 +220,21 @@ public class Message {
 		return value != null && value.contains("\n");
 	}
 
-	public static Message load(String message) {
-		return load(message.getBytes()).attach(attachmentsOf(message));
+	private String attach(String type, byte[] bytes) {
+		String id = UUID.randomUUID().toString() + "." + type;
+		attachments.put(id.toLowerCase(), new Attachment(id, bytes));
+		return id;
 	}
 
-	private static List<String> attachmentsOf(String message) {
-		int index;
-		List<String> result = new ArrayList<>();
-		while ((index = message.indexOf('@')) > 0) {
-			message = message.substring(index+1);
-			index = message.contains("\n") ? message.indexOf('\n'): message.length();
-			result.add(message.substring(0,index));
-		}
-		return result;
+	private Message attach(List<String> ids) {
+		for (String id : ids)
+			attachments.put(id.toLowerCase(), new Attachment(id,new byte[0]));
+		return this;
 	}
 
-	public static Message load(byte[] bytes) {
-		try {
-			return Loader.Inl.of(new ByteArrayInputStream(bytes)).next();
-		} catch (IOException e) {
-			return empty;
-		}
-	}
-
-	private List<Message> components() {
-		return components == null ? new ArrayList<Message>() : components;
+	private void detach(String ids) {
+		for (String id : ids.split("\n"))
+			if (id.contains("@")) attachments.remove(id.substring(1));
 	}
 
 	private String path() {
@@ -282,34 +261,31 @@ public class Message {
 	}
 
 	public interface Value {
+
 		<T> T as(Class<T> type);
+
 	}
 	static class Attribute {
 		String name;
 		String value;
-
-		Attribute() {
-		}
-
 		Attribute(String name) {
 			this.name = name;
 		}
-
 		@Override
 		public String toString() {
 			return name + ": " + value;
 		}
-	}
 
+
+	}
 	public static class Attachment {
 		private String id;
-		private byte[] data;
 
+		private byte[] data;
 		private Attachment(String id, byte[] data) {
 			this.id = id;
 			this.data = data;
 		}
-
 		public String id() {
 			return id;
 		}
@@ -322,10 +298,38 @@ public class Message {
 			return data;
 		}
 
+		public void data(InputStream is) {
+			data(Message.contentOf(is));
+		}
+
 		public void data(byte[] data) {
 			this.data = data;
 		}
 	}
 
+	private static byte[] contentOf(InputStream is) {
+		try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+			int length;
+			byte[] data = new byte[16384];
+			while ((length = is.read(data, 0, data.length)) != -1)
+				os.write(data, 0, length);
+			os.flush();
+			return os.toByteArray();
+
+		} catch (IOException e) {
+			return new byte[0];
+		}
+	}
+
+	private static List<String> attachmentsOf(String message) {
+		int index;
+		List<String> result = new ArrayList<>();
+		while ((index = message.indexOf('@')) > 0) {
+			message = message.substring(index+1);
+			index = message.contains("\n") ? message.indexOf('\n'): message.length();
+			result.add(message.substring(0,index));
+		}
+		return result;
+	}
 }
 
