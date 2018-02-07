@@ -42,7 +42,7 @@ public class Inl {
     public static List<Message> load(String text) {
         List<Message> list = new ArrayList<>();
         try {
-            MessageInputStream inputStream = Formats.Inl.of(new ByteArrayInputStream(text.getBytes()));
+            MessageInputStream inputStream = Loader.Inl.of(new ByteArrayInputStream(text.getBytes()));
             while (true) {
                 Message message = inputStream.next();
                 if (message == null) break;

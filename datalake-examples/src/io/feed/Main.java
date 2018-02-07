@@ -6,7 +6,7 @@ import io.intino.ness.datalake.NessStation.Feed;
 import io.intino.ness.datalake.NessStation.Flow;
 import io.intino.ness.datalake.NessStation.Pipe;
 import io.intino.ness.datalake.Valve;
-import io.intino.ness.inl.Formats;
+import io.intino.ness.inl.Loader;
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageInputStream;
 import io.intino.ness.inl.MessageMapper;
@@ -66,7 +66,7 @@ public class Main {
 
     private static MessageInputStream messages() throws URISyntaxException, IOException {
         InputStream stream = classLoader().getResourceAsStream("temperatures.inl");
-        return Formats.Inl.of(stream);
+        return Loader.Inl.of(stream);
     }
 
 
@@ -78,8 +78,8 @@ public class Main {
 
         @Override
         public Message map(Message input) {
-            double value = input.parse("value").as(double.class);
-            input.write("value", value * 9.0/5 + 32);
+            double value = input.read("value").as(double.class);
+            input.set("value", value * 9.0/5 + 32);
             return input;
         }
     }

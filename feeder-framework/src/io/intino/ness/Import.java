@@ -126,7 +126,7 @@ public class Import  {
 			String val;
 			for (int i = 0; i < messages.length; i++) {
 				if (messages[i] == null) continue;
-				val = messages[i].read(attribute);
+				val = messages[i].get(attribute);
 				if (val.compareTo(min) >= 0) continue;
 				index = i;
 				min = val;

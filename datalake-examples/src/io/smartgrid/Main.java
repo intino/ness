@@ -38,14 +38,14 @@ public class Main {
         public Message map(Message input) {
             //http://process.monitorering.no/measureit/files/pdf_datablad/reinhardt/reinhardt_mws9-5_manual.pdf
             Message output = new Message("Weather");
-            output.write("ts", ts(input));
-            output.write("temperature", input.read("TE"));
-            output.write("windDirection", input.read("WR"));
-            output.write("windSpeed", input.read("WG"));
-            output.write("light", input.read("LX"));
-            output.write("radiation", input.read("SO"));
-            output.write("pressure", input.read("DR"));
-            output.write("humidity", input.read("FE"));
+            output.set("ts", ts(input));
+            output.set("temperature", input.get("TE"));
+            output.set("windDirection", input.get("WR"));
+            output.set("windSpeed", input.get("WG"));
+            output.set("light", input.get("LX"));
+            output.set("radiation", input.get("SO"));
+            output.set("pressure", input.get("DR"));
+            output.set("humidity", input.get("FE"));
             return output;
         }
     }
@@ -54,14 +54,14 @@ public class Main {
         @Override
         public Message map(Message input) {
             Message output = new Message("Heater");
-            output.write("ts", ts(input));
-            output.write("energy", input.read("ene"));
-            output.write("vol", input.read("vol"));
-            output.write("inTemp", input.read("vlt"));
-            output.write("outTemp", input.read("rlt"));
-            output.write("building", input.read("bld"));
-            output.write("room", input.read("node"));
-            output.write("roomName", input.read("id"));
+            output.set("ts", ts(input));
+            output.set("energy", input.get("ene"));
+            output.set("vol", input.get("vol"));
+            output.set("inTemp", input.get("vlt"));
+            output.set("outTemp", input.get("rlt"));
+            output.set("building", input.get("bld"));
+            output.set("room", input.get("node"));
+            output.set("roomName", input.get("id"));
             return output;
         }
 
@@ -71,20 +71,20 @@ public class Main {
         @Override
         public Message map(Message input) {
             Message output = new Message("PowerConsumption");
-            output.write("ts", ts(input));
-            output.write("activePower", input.read("Global_active_power"));
-            output.write("reactivePower", input.read("Global_reactive_power"));
-            output.write("intensity", input.read("Global_intensity"));
-            output.write("voltage", input.read("Voltage"));
-            output.write("kitchenPower", input.read("Sub_metering_1"));
-            output.write("laundryPower", input.read("Sub_metering_2"));
-            output.write("hvacPower", input.read("Sub_metering_3"));
+            output.set("ts", ts(input));
+            output.set("activePower", input.get("Global_active_power"));
+            output.set("reactivePower", input.get("Global_reactive_power"));
+            output.set("intensity", input.get("Global_intensity"));
+            output.set("voltage", input.get("Voltage"));
+            output.set("kitchenPower", input.get("Sub_metering_1"));
+            output.set("laundryPower", input.get("Sub_metering_2"));
+            output.set("hvacPower", input.get("Sub_metering_3"));
             return output;
         }
 
         private String ts(Message input) {
-            String[] date = input.read("date").split("/");
-            String time = input.read("time");
+            String[] date = input.get("date").split("/");
+            String time = input.get("time");
             return date[2] + "-" + zero(date[1]) + "-" + zero(date[0]) + "T" + time + "Z";
         }
 
@@ -94,7 +94,7 @@ public class Main {
 
     }
     private static String ts(Message message) {
-        return ts(message.read("Date"),message.read("Time"));
+        return ts(message.get("Date"),message.get("Time"));
     }
 
     private static String ts(String date, String time) {

@@ -45,22 +45,6 @@ public class Accessory {
 		return line.replaceAll("(\\w*)\\s*[:=]\\s*(.*)", "$1:$2");
 	}
 
-	static String unwrap(String text) {
-		return text.startsWith("[") ? text.substring(1, text.length() - 1) : text;
-	}
-
-	static boolean isMultilineIn(String line) {
-		return line.startsWith("\t");
-	}
-
-	static boolean isMessageIn(String line) {
-		return line.startsWith("[");
-	}
-
-	static boolean isAttributeIn(String line) {
-		return line.contains(":");
-	}
-
 	static class FieldQuery {
 		private final Object object;
 
@@ -98,7 +82,7 @@ public class Accessory {
 
 	private static Parsers.Parser instantParserOf(Class<?> instantClass) {
 		try {
-			final Method method = instantClass.getDeclaredMethod("parse", CharSequence.class);
+			final Method method = instantClass.getDeclaredMethod("read", CharSequence.class);
 			return new Parser() {
 				@Override
 				public Object parse(String text) {

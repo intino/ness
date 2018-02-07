@@ -7,9 +7,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.intino.ness.inl.Accessory.*;
 
-public class Formats {
+public class Loader {
 	public static class Inl implements MessageInputStream {
 		private String name;
 		private BufferedReader reader;
@@ -42,14 +41,14 @@ public class Formats {
 		@Override
 		public Message next() throws IOException {
 			if (message == null) return null;
-			Message.Attribute attribute = new Message.Attribute();
+			String attribute = "";
 			Message scope = message;
 			while (true) {
 				String line = nextLine();
 				if (line == null) return swap(null);
-				else if (isMultilineIn(line)) scope.write(attribute.add(line.substring(1)));
-				else if (isAttributeIn(line)) scope.write(attribute = attribute.parse(line));
-				else if (isMessageIn(line)) {
+				else if (isMultilineIn(line)) scope.write(attribute, line.substring(1));
+				else if (isAttributeIn(line)) scope.set(attribute = attributeOf(line), valueOf(line));
+				else if (isHeaderIn(line)) {
 					Message owner = ownerIn(line);
 					Message message = createMessage(typeIn(line), owner);
 					if (owner == null) return swap(message);
@@ -57,6 +56,31 @@ public class Formats {
 				}
 			}
 		}
+
+		private boolean isHeaderIn(String line) {
+			return line.startsWith("[");
+		}
+
+		private String attributeOf(String line) {
+			return line.substring(0, line.indexOf(":"));
+		}
+
+		private String valueOf(String line) {
+			return line.indexOf(":") + 1 < line.length() ? unwrap(line.substring(line.indexOf(":") + 1)) : null;
+		}
+
+		private String unwrap(String value) {
+			return value.startsWith("\"") && value.endsWith("\"") ? value.substring(1, value.length() - 1) : value;
+		}
+
+		private boolean isMultilineIn(String line) {
+			return line.startsWith("\t");
+		}
+
+		static boolean isAttributeIn(String line) {
+			return line.contains(":");
+		}
+
 
 		@Override
 		public boolean hasNext() {
@@ -76,6 +100,15 @@ public class Formats {
 
 		private String nextLine() throws IOException {
 			return normalize(reader.readLine());
+		}
+
+		private String normalize(String line) {
+			if (line == null) return null;
+			if (line.startsWith("\t")) return line;
+			line = line.trim();
+			if (line.isEmpty()) return line;
+			if (line.startsWith("[")) return line;
+			return line.replaceAll("(\\w*)\\s*[:=]\\s*(.*)", "$1:$2");
 		}
 
 		private Message createMessage(String type, Message owner) {
@@ -165,7 +198,7 @@ public class Formats {
 			if (message == null) return null;
 			if (!isOdd(data.length)) return message;
 			for (int i = 0; i < data.length; i += 2)
-				message.write(data[i], data[i + 1]);
+				message.set(data[i], data[i + 1]);
 			return message;
 		}
 
@@ -176,14 +209,14 @@ public class Formats {
 
 	public static class Csv implements MessageInputStream {
 		private String name;
-		protected BufferedReader reader;
-		protected String[] headers;
+		BufferedReader reader;
+		String[] headers;
 
 		public static MessageInputStream of(InputStream is) throws IOException {
 			return new Csv(is);
 		}
 
-		protected Csv(InputStream is) throws IOException {
+		Csv(InputStream is) throws IOException {
 			this.reader = new BufferedReader(new InputStreamReader(is), 65536);
 			this.headers = nextRow();
 		}
@@ -214,7 +247,7 @@ public class Formats {
 			while (data.length == 0);
 			Message message = new Message("");
 			for (int i = 0; i < Math.min(data.length, headers.length); i++)
-				message.write(headers[i].trim(), data[i].trim());
+				message.set(headers[i].trim(), data[i].trim());
 			return message;
 		}
 

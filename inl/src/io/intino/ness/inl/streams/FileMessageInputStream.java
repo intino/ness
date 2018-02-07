@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
 
-import static io.intino.ness.inl.Formats.*;
+import static io.intino.ness.inl.Loader.*;
 import static io.intino.ness.inl.MessageInputStream.Empty;
 import static io.intino.ness.inl.MessageInputStream.Sort;
 import static io.intino.ness.inl.streams.FileMessageInputStream.Format.*;

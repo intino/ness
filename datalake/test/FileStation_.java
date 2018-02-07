@@ -2,7 +2,7 @@ import io.intino.ness.datalake.*;
 import io.intino.ness.datalake.NessStation.Feed;
 import io.intino.ness.datalake.NessStation.Flow;
 import io.intino.ness.datalake.NessStation.Pipe;
-import io.intino.ness.inl.Formats;
+import io.intino.ness.inl.Loader;
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageInputStream;
 import io.intino.ness.inl.MessageMapper;
@@ -309,7 +309,7 @@ public class FileStation_ {
     }
 
     private MessageMapper toFarenheit() {
-        return message -> message.write("value", message.parse("value").as(Double.class)* 9/5.0 + 32);
+        return message -> message.set("value", message.read("value").as(Double.class)* 9/5.0 + 32);
     }
 
     private void feedTemperatures(int init, int finish) throws Exception {
@@ -333,7 +333,7 @@ public class FileStation_ {
 
     private static MessageInputStream messages() throws URISyntaxException, IOException {
         InputStream stream = classLoader().getResourceAsStream("temperatures.inl");
-        return Formats.Inl.of(stream);
+        return Loader.Inl.of(stream);
     }
 
     private static ClassLoader classLoader() {

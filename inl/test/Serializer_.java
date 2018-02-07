@@ -7,6 +7,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import static io.intino.ness.inl.Serializer.serialize;
 import static java.text.DateFormat.DEFAULT;
@@ -98,6 +99,7 @@ public class Serializer_ {
 
 	private Date parse(String s) throws ParseException {
 		DateFormat formatter = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy", Locale.ENGLISH);
+		formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return formatter.parse(s);
 	}
 

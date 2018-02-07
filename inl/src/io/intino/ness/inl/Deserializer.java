@@ -1,6 +1,5 @@
 package io.intino.ness.inl;
 
-import io.intino.ness.inl.Message.Attribute;
 import io.intino.ness.inl.Parsers.Parser;
 
 import java.io.*;
@@ -36,34 +35,63 @@ public class Deserializer {
     }
 
     private boolean startBlockOf(Class type) {
-        return line != null && map(unwrap(line)).equalsIgnoreCase(type.getSimpleName());
+        return line != null && map(unwrapBlock(line)).equalsIgnoreCase(type.getSimpleName());
     }
 
-    private String map(String id) {
+	private String unwrapBlock(String text) {
+		return text.startsWith("[") ? text.substring(1, text.length() - 1) : text;
+	}
+
+	private String unwrap(String value) {
+		return value.startsWith("\"") && value.endsWith("\"") ? value.substring(1, value.length() - 1) : value;
+	}
+
+	private String map(String id) {
         return mapping.get(id);
     }
 
     private <T> T fill(T object) {
         Object scope = object;
-        Attribute attribute = new Attribute();
+        String attribute = "";
+        String value = "";
         nextLine();
         while (!isTerminated(object)) {
-            if (isMultilineIn(line)) setAttribute(scope, attribute.add(line.substring(1)));
-            else if (isMessageIn(line)) scope = addComponent(object, line.substring(1,line.length()-1));
-            else if (isAttributeIn(line)) setAttribute(scope, attribute.parse(line));
+            if (isMultilineIn(line)) setAttribute(scope, attribute, value = (value != null ? value + "\n" : "") + line.substring(1));
+            else if (isHeaderIn(line)) scope = addComponent(object, line.substring(1,line.length()-1));
+            else if (isAttributeIn(line)) setAttribute(scope, attribute = attributeOf(line), value = valueOf(line));
             nextLine();
         }
         return object;
     }
 
-    private boolean isTerminated(Object object) {
+	private String attributeOf(String line) {
+		return line.substring(0, line.indexOf(":"));
+	}
+
+	private String valueOf(String line) {
+		return line.indexOf(":") + 1 < line.length() ? unwrap(line.substring(line.indexOf(":") + 1)) : null;
+	}
+
+	private boolean isMultilineIn(String line) {
+		return line.startsWith("\t");
+	}
+
+	private boolean isHeaderIn(String line) {
+		return line.startsWith("[");
+	}
+
+	private boolean isAttributeIn(String line) {
+		return line.contains(":");
+	}
+
+	private boolean isTerminated(Object object) {
         return line == null || startBlockOf(object.getClass());
     }
 
-	private void setAttribute(Object object, Attribute attribute) {
-		if (object == null || attribute.value == null || attribute.value.isEmpty()) return;
-		Field field = fieldsOf(object).get(map(attribute.name));
-		setField(field, object, parserOf(field).parse(deIndent(attribute.value)));
+	private void setAttribute(Object object, String attribute, String value) {
+		if (object == null || value == null || value.isEmpty()) return;
+		Field field = fieldsOf(object).get(map(attribute));
+		setField(field, object, parserOf(field).parse(deIndent(value)));
 	}
 
     private Object addComponent(Object scope, String path) {

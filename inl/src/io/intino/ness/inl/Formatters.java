@@ -46,7 +46,7 @@ public class Formatters {
 
 	static {
 		dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
-		dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+		//dateFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 
 	static {

@@ -16,12 +16,12 @@ public class Inl_ {
 	private String text = "[Person]\nname: Mike\ncountry: USA\n";
 
 	@Test
-	public void should_load() throws Exception {
+	public void should_load_message() throws Exception {
 		List<Message> messages = Inl.load(text);
 		assertThat(messages.size(), is(1));
 		assertThat(messages.get(0).type(), is("Person"));
-		assertThat(messages.get(0).read("name"), is("Mike"));
-		assertThat(messages.get(0).read("country"), is("USA"));
+		assertThat(messages.get(0).get("name"), is("Mike"));
+		assertThat(messages.get(0).get("country"), is("USA"));
 	}
 
 	@Test
@@ -30,7 +30,7 @@ public class Inl_ {
 	}
 
 	@Test
-	public void should_deserialize() throws Exception {
+	public void should_deserialize_into_class() throws Exception {
 		Person person = Inl.deserialize(text).next(Person.class);
 		assertThat(person.name, is("Mike"));
 		assertThat(person.country, is("USA"));
@@ -71,12 +71,13 @@ public class Inl_ {
 		String text = "[AlertModified]\n" +
 				"alert: Alerts#e4a80d88-7bd5-4948-bd1d-7b38f47c40c7\n" +
 				"active: true\n" +
-				"mailingList: \n" +
+				"mailingList:\n" +
 				"\tjbelizon@monentia.es\n" +
 				"applyToAllStations: false";
 		Message message = Message.load(text);
 		AlertModified object = message.as(AlertModified.class);
 		assertNotNull(object);
+		assertThat(object.mailingList().size(), is(1));
 	}
 
 	@Test
