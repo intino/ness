@@ -17,7 +17,6 @@ import static io.intino.ness.Inl.load;
 import static java.nio.file.Files.write;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.time.Instant.parse;
-import static java.util.Objects.requireNonNull;
 
 
 public class DatalakeManager {
@@ -74,8 +73,7 @@ public class DatalakeManager {
 						logger.error(e.getMessage(), e);
 						return null;
 					}
-				};
-
+				}
 			};
 		} catch (Throwable e) {
 			logger.error(e.getMessage(), e);
@@ -85,13 +83,13 @@ public class DatalakeManager {
 
 	private void append(File inlFile, Message message) {
 		try {
-			if (lastMessageTime.containsKey(inlFile) && lastMessageTime.get(inlFile).isBefore(parse(message.ts()))) {
+			if (lastMessageTime.containsKey(inlFile) && parse(message.ts()).isAfter(lastMessageTime.get(inlFile))) {
 				write(inlFile.toPath(), (message.toString() + "\n\n").getBytes(), APPEND);
+				lastMessageTime.put(inlFile, parse(message.ts()));
 			} else {
 				List<Message> messages = loadMessages(inlFile);
 				addMessage(messages, message);
 				save(inlFile, messages);
-				lastMessageTime.put(inlFile, parse(messages.get(messages.size() - 1).ts()));
 			}
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
