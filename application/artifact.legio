@@ -78,12 +78,12 @@ RunConfiguration octana-dev-ness
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
 
-RunConfiguration cesar-dev
-	Argument("ness_store", "./temp/store")
-	Argument("ness_datalake", "./temp/datalake")
-	Argument("broker_store", "./temp/broker/")
+RunConfiguration local
+	Argument("ness_store", "./temp/happysense/store")
+	Argument("ness_datalake", "./temp/happysense/datalake")
+	Argument("broker_store", "./temp/happysense/broker/")
 	Argument("connector_id", "ness-cesar-pre")
-	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
+//	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1883")
 

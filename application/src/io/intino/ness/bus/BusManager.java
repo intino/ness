@@ -118,7 +118,7 @@ public final class BusManager {
 
 	public TopicProducer getProducer(String topic) {
 		try {
-			if (!this.consumers.containsKey(topic)) this.producers.put(topic, new TopicProducer(nessSession(), topic));
+			if (!this.producers.containsKey(topic)) this.producers.put(topic, new TopicProducer(nessSession(), topic));
 			return this.producers.get(topic);
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);

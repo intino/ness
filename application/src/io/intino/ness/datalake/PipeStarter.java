@@ -40,7 +40,10 @@ public class PipeStarter {
 			final Message transformed = function == null ? message : transform(message, function);
 			if (transformed != null) {
 				final TopicProducer producer = bus.getProducer(tankTo.feedQN());
-				new Thread(() -> producer.produce(MessageFactory.createMessageFor(transformed.toString()))).start();
+				new Thread(() -> {
+					if (producer != null)
+						producer.produce(MessageFactory.createMessageFor(transformed.toString()));
+				}).start();
 			}
 		} catch (Throwable e) {
 			logger.error(e.getMessage(), e);
