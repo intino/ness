@@ -20,9 +20,9 @@ public class AddPipeAction extends Action {
 		if (function == null) return "Function not found";
 		Tank tankFrom = ness().tank(from);
 		if (tankFrom == null) return "Source tank not found";
-		Tank tankTo = ness().tank(from);
+		Tank tankTo = ness().tank(to);
 		if (tankTo == null) return "Destination tank not found";
-		final Pipe pipe = ness().create("Pipes").pipe(tankFrom, tankTo);
+		final Pipe pipe = ness().create("pipes").pipe(tankFrom, tankTo);
 		pipe.transformer(function);
 		new PipeStarter(box.busManager()).start(pipe);
 		pipe.save$();
