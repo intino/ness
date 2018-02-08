@@ -30,6 +30,6 @@ Concept JMSConnector
 	var string[] topics
 
 Concept Pipe
-	var string origin
-	var string destination
+	var Tank origin
+	var Tank destination
 	var Function transformer = empty

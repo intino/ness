@@ -116,6 +116,16 @@ public final class BusManager {
 		value.add(topicConsumer);
 	}
 
+	public TopicProducer getProducer(String topic) {
+		try {
+			if (!this.consumers.containsKey(topic)) this.producers.put(topic, new TopicProducer(nessSession(), topic));
+			return this.producers.get(topic);
+		} catch (JMSException e) {
+			logger.error(e.getMessage(), e);
+			return null;
+		}
+	}
+
 	public void registerConsumer(String topic, Consumer consumer, String id) {
 		List<TopicConsumer> value = new ArrayList<>();
 		if (!this.consumers.containsKey(topic)) this.consumers.put(topic, value);

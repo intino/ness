@@ -205,7 +205,7 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 			return newElement;
 		}
 
-		public io.intino.ness.graph.Pipe pipe(java.lang.String origin, java.lang.String destination) {
+		public io.intino.ness.graph.Pipe pipe(io.intino.ness.graph.Tank origin, io.intino.ness.graph.Tank destination) {
 			io.intino.ness.graph.Pipe newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.Pipe.class, stash, name).a$(io.intino.ness.graph.Pipe.class);
 			newElement.core$().set(newElement, "origin", java.util.Collections.singletonList(origin));
 			newElement.core$().set(newElement, "destination", java.util.Collections.singletonList(destination));

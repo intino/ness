@@ -3,9 +3,11 @@ package io.intino.ness.box;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.bus.BusService;
 import io.intino.ness.datalake.DatalakeManager;
+import io.intino.ness.datalake.PipeStarter;
 import io.intino.ness.datalake.TankStarter;
 import io.intino.ness.datalake.reflow.ReflowSession;
 import io.intino.ness.graph.NessGraph;
+import io.intino.ness.graph.Pipe;
 import io.intino.ness.graph.Tank;
 import io.intino.ness.graph.User;
 import io.intino.tara.magritte.Graph;
@@ -46,6 +48,7 @@ public class NessBox extends AbstractBox {
 		startBus();
 		startReflowService();
 		startDatalakeTanks();
+		startBusPipes();
 		return this;
 	}
 
@@ -77,6 +80,11 @@ public class NessBox extends AbstractBox {
 	private void startDatalakeTanks() {
 		final TankStarter tankStarter = new TankStarter(busManager(), datalakeManager());
 		for (Tank tank : graph.tankList()) tankStarter.start(tank);
+	}
+
+	private void startBusPipes() {
+		final PipeStarter tankStarter = new PipeStarter(busManager());
+		for (Pipe pipe : graph.pipeList()) tankStarter.start(pipe);
 	}
 
 	public NessGraph graph() {

@@ -9,9 +9,9 @@ public class PipesAction {
 	public NessBox box;
 
 	public String execute() {
-		String message = "";
+		StringBuilder message = new StringBuilder();
 		for (Pipe p : box.graph().pipeList())
-			message += p.origin() + " -> " + p.destination() + "\n";
-		return message.isEmpty() ? "No pipes registered" : message;
+			message.append(p.origin()).append(" -> ").append(p.destination()).append("\n");
+		return (message.length() == 0) ? "No pipes registered" : message.toString();
 	}
 }

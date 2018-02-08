@@ -40,7 +40,7 @@ Server(cesar = "cesar.pre.intino.io") consul-dev
 
 RunConfiguration cesar-pro
 	Argument("ness_store", "$HOME/ness/store")
-	Argument("ness_datalake", "$HOME/ness/datalake")
+	Argument("ness_datalake", "$HOME/ness/datalake/")
 	Argument("broker_store", "$HOME/ness/broker/")
 	Argument("nessie_token", "xoxb-162074419812-gB5oNUwzxGWQ756TrRyu1Ii9")
 	Argument("broker_port", "63000")
@@ -48,7 +48,7 @@ RunConfiguration cesar-pro
 
 RunConfiguration ebar-pre-ness
 	Argument("ness_store", "$HOME/store")
-	Argument("ness_datalake", "$HOME/datalake")
+	Argument("ness_datalake", "$HOME/datalake/")
 	Argument("broker_store", "$HOME/broker/")
 	Argument("broker_port", "62000")
 	Argument("connector_id", "ebar-ness-pre")
@@ -56,7 +56,7 @@ RunConfiguration ebar-pre-ness
 
 RunConfiguration happysense-pre-ness
 	Argument("ness_store", "$HOME/store")
-	Argument("ness_datalake", "$HOME/datalake")
+	Argument("ness_datalake", "$HOME/datalake/")
 	Argument("broker_store", "$HOME/broker/")
 	Argument("connector_id", "happysense-pre-ness")
 	Argument("broker_port", "63000")
