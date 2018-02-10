@@ -96,19 +96,6 @@ public class Message_ {
     }
 
     @Test
-    public void should_handle_array_attributes() {
-        Message message = Message.load(MenuWithOnePriceMessage);
-        assertThat(message.read("meals").as(String[].class).length, is(4));
-        assertThat(message.read("meals").as(String[].class)[0], is("Soup"));
-        assertThat(message.read("meals").as(String[].class)[1], is("Lobster"));
-        assertThat(message.read("prices").as(Double[].class).length, is(1));
-        assertThat(message.read("prices").as(Double[].class)[0], is(7.0));
-        assertThat(message.read("availability").as(Boolean[].class).length, is(2));
-        assertThat(message.read("availability").as(Boolean[].class)[0], is(true));
-        assertThat(message.read("availability").as(Boolean[].class)[1], is(false));
-    }
-
-    @Test
     public void should_handle_document_attributes() {
         Message message = new Message("Document");
         message.set("name","my file");
@@ -146,6 +133,18 @@ public class Message_ {
 		assertThat(message.attachments().size(), is(1));
 		assertThat(message.attachment(message.get("file")).type(), is("png"));
 		assertThat(message.attachment(message.get("file")).data().length, is(128));
+	}
+
+
+	@Test
+	public void should_load_documents_and_mail_attributes() {
+		String text = "[Document]\n" +
+				"name: john_doe@gmail.com\n" +
+				"file: @7f7a9352-8b54-465b-8e63-15c7586f01e9.png";
+		Message message = Message.load(text);
+		assertThat(message.attachments().size(), is(1));
+		assertThat(message.attachment(message.get("file")).type(), is("png"));
+		assertThat(message.attachment(message.get("file")).data().length, is(0));
 	}
 
 	private byte[] document(int size) {

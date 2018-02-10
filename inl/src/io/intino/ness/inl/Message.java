@@ -327,9 +327,21 @@ public class Message {
 		while ((index = message.indexOf('@')) > 0) {
 			message = message.substring(index+1);
 			index = message.contains("\n") ? message.indexOf('\n'): message.length();
-			result.add(message.substring(0,index));
+			String value = message.substring(0, index);
+			if (!isUUID(value)) continue;
+			result.add(value);
 		}
 		return result;
+	}
+
+	private static boolean isUUID(String value) {
+		try{
+			if (value.contains(".")) value = value.substring(0,value.lastIndexOf('.'));
+			UUID.fromString(value);
+			return true;
+		} catch (IllegalArgumentException exception){
+			return false;
+		}
 	}
 }
 
