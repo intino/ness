@@ -2,16 +2,16 @@ dsl Legio
 
 Artifact("io.intino.ness", "1.1.1") ness as Product
 	Imports
-		Compile("org.slf4j", "slf4j-log4j12", "1.7.7")
 		Compile("org.apache.activemq", "activemq-broker", "5.15.2")
 		Compile("org.apache.activemq", "activemq-mqtt", "5.15.2")
 		Compile("org.apache.activemq", "activemq-kahadb-store", "5.15.2")
 		Compile("org.apache.activemq", "activemq-jaas", "5.15.2")
 		Compile("org.apache.activemq", "activemq-runtime-config", "5.15.2")
-		Compile("io.intino.konos", "alexandria-jms", "1.0.11")
-		Compile("io.intino.konos", "alexandria-slack", "1.0.10")
-		Compile("io.intino.konos", "alexandria-jmx", "1.0.1")
-		Compile("io.intino.konos", "alexandria-scheduler", "1.0.4")
+		Compile("io.intino.konos", "alexandria-jms", "1.0.12")
+		Compile("io.intino.konos", "alexandria-slack", "1.0.11")
+		Compile("io.intino.konos", "alexandria-jmx", "1.0.2")
+		Compile("io.intino.konos", "alexandria-scheduler", "1.0.5")
+		Compile("org.slf4j", "slf4j-log4j12", "1.7.7")
 	Code("io.intino.ness")
 	Model("Proteo", "2.1.6", "2.1.13")
 	Box("Konos", "3.1.0", "3.1.0")
@@ -25,7 +25,6 @@ Artifact("io.intino.ness", "1.1.1") ness as Product
 	Distribution(intino.frameworks, intino.languages)
 
 	Deployment("Datalake") ness-dev > Dev(server = consul-dev, runConfiguration = ebar-pre-ness, project = "dev")
-
 	Deployment("Datalake") ness-ebar > Dev(server = ebar-pre, runConfiguration = ebar-pre-ness, project = "ebar")
 	Deployment("Datalake") ness-happysense > Dev(server = happysense-pre, runConfiguration = happysense-pre-ness, project = "happysense")
 	Deployment("Datalake") ness-octana > Dev(server = octana-pre, runConfiguration = octana-pre-ness, project = "octana")

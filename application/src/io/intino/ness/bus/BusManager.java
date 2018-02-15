@@ -56,8 +56,7 @@ public final class BusManager {
 			session = null;
 			connection = null;
 			service.stop();
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+		} catch (Throwable e) {
 		}
 	}
 
@@ -162,6 +161,7 @@ public final class BusManager {
 			session = connection.createSession(false, AUTO_ACKNOWLEDGE);
 			startAdvisories();
 			connection.start();
+			logger.info("Ness session inited!");
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
 		}

@@ -9,25 +9,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.intino.ness.box.slack.Helper.findTank;
-import static java.util.Collections.emptyList;
 
 
 public class ReflowProcessHandler {
 
-	private final NessGraph graph;
 	private List<Tank> tanks;
 	private ReflowProcess reflowProcess;
 
 	ReflowProcessHandler(NessBox box, List<String> tanks, Integer blockSize) {
-		this.graph = box.graph();
-		this.tanks = collectTanks(tanks);
+		this.tanks = collectTanks(box.graph(), tanks);
 		this.reflowProcess = new ReflowProcess(box.datalakeManager(), box.busManager(), this.tanks, blockSize == 0 ? Integer.MAX_VALUE : blockSize);
 	}
 
-	boolean next() {
-		if (tanks.isEmpty()) return false;
-		reflowProcess.next();
-		return true;
+	void next() {
+		if (!tanks.isEmpty()) reflowProcess.next();
 	}
 
 	public Session session() {
@@ -38,7 +33,7 @@ public class ReflowProcessHandler {
 		return tanks;
 	}
 
-	private List<Tank> collectTanks(List<String> tanks) {
+	private List<Tank> collectTanks(NessGraph graph, List<String> tanks) {
 		List<Tank> realTanks = new ArrayList<>();
 		if (tanks.get(0).equalsIgnoreCase("all")) return graph.tankList();
 		for (String tank : tanks) {

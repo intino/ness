@@ -1,14 +1,14 @@
 package io.intino.ness.datalake;
 
+import io.intino.konos.alexandria.Inl;
+import io.intino.konos.alexandria.functions.MessageMapper;
 import io.intino.konos.jms.MessageFactory;
 import io.intino.konos.jms.TopicProducer;
-import io.intino.ness.Inl;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Pipe;
 import io.intino.ness.graph.Tank;
 import io.intino.ness.inl.Message;
-import io.intino.ness.inl.MessageMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +41,7 @@ public class PipeStarter {
 			if (transformed != null) {
 				final TopicProducer producer = bus.getProducer(tankTo.feedQN());
 				new Thread(() -> {
-					if (producer != null)
-						producer.produce(MessageFactory.createMessageFor(transformed.toString()));
+					if (producer != null) producer.produce(MessageFactory.createMessageFor(transformed.toString()));
 				}).start();
 			}
 		} catch (Throwable e) {

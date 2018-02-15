@@ -1,11 +1,11 @@
 package io.intino.ness.bus;
 
+import io.intino.konos.alexandria.functions.MessageFunction;
+import io.intino.konos.alexandria.functions.MessageMapper;
+import io.intino.konos.alexandria.functions.Text2TextMapper;
+import io.intino.konos.alexandria.functions.TextMapper;
 import io.intino.konos.jms.TopicProducer;
 import io.intino.ness.graph.Function;
-import io.intino.ness.inl.MessageFunction;
-import io.intino.ness.inl.MessageMapper;
-import io.intino.ness.inl.Text2TextMapper;
-import io.intino.ness.inl.TextMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

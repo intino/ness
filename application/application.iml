@@ -57,14 +57,10 @@
     <orderEntry type="library" name="Legio: org.apache.activemq:activemq-jms-pool:5.15.2" level="project" />
     <orderEntry type="library" name="Legio: org.apache.commons:commons-pool2:2.4.2" level="project" />
     <orderEntry type="library" name="Legio: org.jvnet.jaxb2_commons:jaxb2-basics-runtime:0.6.4" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.konos:alexandria-jms:1.0.11" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.konos:alexandria-core:1.0.0" level="project" />
     <orderEntry type="library" name="Legio: io.intino.cottons:cotton-utils:1.0.0" level="project" />
     <orderEntry type="library" name="Legio: org.apache.tika:tika-core:0.4" level="project" />
     <orderEntry type="library" name="Legio: com.google.code.gson:gson:2.8.0" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.ness:inl:1.0.9" level="project" />
     <orderEntry type="library" name="Legio: com.sun.xml.security:xml-security-impl:1.0" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.konos:alexandria-slack:1.0.10" level="project" />
     <orderEntry type="library" name="Legio: com.ullink.slack:simpleslackapi:0.6.0" level="project" />
     <orderEntry type="library" name="Legio: org.apache.commons:commons-lang3:3.4" level="project" />
     <orderEntry type="library" name="Legio: org.glassfish.tyrus.bundles:tyrus-standalone-client:1.8.3" level="project" />
@@ -76,8 +72,6 @@
     <orderEntry type="library" name="Legio: commons-codec:commons-codec:1.9" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Legio: org.apache.httpcomponents:httpmime:4.4" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Legio: org.threeten:threetenbp:1.3.1" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.konos:alexandria-jmx:1.0.1" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.konos:alexandria-scheduler:1.0.4" level="project" />
     <orderEntry type="library" name="Legio: org.quartz-scheduler:quartz:2.3.0" level="project" />
     <orderEntry type="library" name="Legio: com.mchange:c3p0:0.9.5.2" level="project" />
     <orderEntry type="library" name="Legio: com.mchange:mchange-commons-java:0.2.11" level="project" />
@@ -91,7 +85,13 @@
     <orderEntry type="library" name="Legio: com.esotericsoftware:minlog:1.3.0" level="project" />
     <orderEntry type="library" name="Legio: org.objenesis:objenesis:2.2" level="project" />
     <orderEntry type="library" name="Legio: io.intino.tara:language:1.0.6" level="project" />
-    <orderEntry type="library" name="Legio: commons-logging:commons-logging:1.2" level="project" />
     <orderEntry type="library" name="Legio: org.apache.activemq:activemq-client:5.15.2" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.konos:alexandria-jms:1.0.12" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.konos:alexandria-slack:1.0.11" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.konos:alexandria-jmx:1.0.2" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.konos:alexandria-scheduler:1.0.5" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.konos:alexandria-core:1.0.1" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.ness:inl:1.1.0" level="project" />
+    <orderEntry type="library" name="Legio: commons-logging:commons-logging:1.1.1" level="project" />
   </component>
 </module>

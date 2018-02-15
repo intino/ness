@@ -16,6 +16,8 @@ public class RenameTankAction {
 	public String execute() {
 		Tank tankObject = Helper.findTank(box, tank);
 		if (tankObject == null) return "Please select a tank";
+		tankObject.qualifiedName(name);
+		tankObject.save$();
 		return box.datalakeManager().rename(tankObject, name) ? OK : "Impossible to rename tank";
 	}
 }

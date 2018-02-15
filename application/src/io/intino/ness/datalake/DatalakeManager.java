@@ -1,8 +1,10 @@
 package io.intino.ness.datalake;
 
+import io.intino.konos.alexandria.Inl;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
 import io.intino.ness.inl.Message;
+import org.apache.activemq.util.LRUCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,18 +12,22 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.*;
 
-import static io.intino.ness.Inl.load;
 import static java.nio.file.Files.write;
 import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
 import static java.time.Instant.parse;
+import static java.util.Collections.binarySearch;
+import static java.util.Comparator.comparing;
 
 
 public class DatalakeManager {
 	private static final String INL = ".inl";
 	private Logger logger = LoggerFactory.getLogger(DatalakeManager.class);
+	private Map<File, List<Message>> messages = new LRUCache<>(32);
 
 	public File getStationDirectory() {
 		return stationDirectory;
@@ -30,9 +36,10 @@ public class DatalakeManager {
 	private File stationDirectory;
 	private Map<File, Instant> lastMessageTime = new HashMap<>();
 
-	public DatalakeManager(String stationFolder) {
+	public DatalakeManager(String stationFolder, List<Tank> tanks) {
 		this.stationDirectory = new File(stationFolder);
 		this.stationDirectory.mkdirs();
+		tanks.forEach(this::addTank);
 	}
 
 	public void addTank(Tank tank) {
@@ -40,16 +47,15 @@ public class DatalakeManager {
 	}
 
 	public void removeTank(Tank tank) {
-		String qualifiedName = tank.qualifiedName();
-		new File(stationDirectory, qualifiedName).renameTo(new File(stationDirectory, "old." + qualifiedName));
+		new File(stationDirectory, tank.qualifiedName()).renameTo(new File(stationDirectory, "old." + tank.qualifiedName()));
 	}
 
 	public boolean rename(Tank tank, String name) {
 		return directoryOf(tank).renameTo(new File(stationDirectory, name));
 	}
 
-	public void drop(Tank tank, Message message) {
-		append(inl(directoryOf(tank), message), message);
+	public void drop(Tank tank, Message message, String textMessage) {
+		append(inl(directoryOf(tank), message), message, textMessage);
 	}
 
 	public void pump(Tank from, Tank to, Function function) {
@@ -60,7 +66,9 @@ public class DatalakeManager {
 		try {
 			File[] files = directoryOf(tank).listFiles();
 			if (files == null) files = new File[0];
-			io.intino.ness.inl.MessageInputStream stream = MessageInputStream.of(files);
+			final List<File> fileList = Arrays.asList(files);
+			Collections.sort(fileList);
+			io.intino.ness.inl.MessageInputStream stream = MessageInputStreamBuilder.of(fileList);
 			return new Iterator<Message>() {
 				public boolean hasNext() {
 					return stream.hasNext();
@@ -81,24 +89,49 @@ public class DatalakeManager {
 		}
 	}
 
-	private void append(File inlFile, Message message) {
+	private void append(File inlFile, Message message, String textMessage) {
+		final Instant messageInstant = parse(tsOf(message));
 		try {
-			if (lastMessageTime.containsKey(inlFile) && shouldBeAtTheEnd(inlFile, message)) {
-				write(inlFile.toPath(), (message.toString() + "\n\n").getBytes(), APPEND);
-				lastMessageTime.put(inlFile, parse(message.ts()));
-			} else {
-				List<Message> messages = loadMessages(inlFile);
-				addMessage(messages, message);
-				save(inlFile, messages);
-			}
+			final boolean existFile = lastMessageTime.containsKey(inlFile);
+			if (!existFile) writeAndUpdate(inlFile, message, textMessage, messageInstant, CREATE);
+			else if (shouldBeAtTheEnd(inlFile, messageInstant)) writeAndUpdate(inlFile, message, textMessage, messageInstant, APPEND);
+			else appendMessage(inlFile, message);
 			saveAttachments(inlFile.getParentFile(), message);
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
 
-	private boolean shouldBeAtTheEnd(File inlFile, Message message) {
-		return parse(message.ts()).isAfter(lastMessageTime.get(inlFile));
+	private void writeAndUpdate(File inlFile, Message message, String textMessage, Instant messageInstant, StandardOpenOption create) throws IOException {
+		write(inlFile.toPath(), (textMessage + "\n\n").getBytes(), create);
+		updateCache(inlFile, message, messageInstant);
+	}
+
+	private void updateCache(File inlFile, Message message, Instant messageInstant) {
+		this.messages.putIfAbsent(inlFile, new ArrayList<>());
+		if (this.messages.containsKey(inlFile)) this.messages.get(inlFile).add(message);
+		lastMessageTime.put(inlFile, messageInstant);
+	}
+
+	private void appendMessage(File inlFile, Message message) throws IOException {
+		List<Message> messages = getMessages(inlFile);
+		addMessage(messages, message);
+		save(inlFile, messages);
+	}
+
+	private List<Message> getMessages(File inlFile) throws IOException {
+		List<Message> messages;
+		if (this.messages.containsKey(inlFile)) messages = this.messages.get(inlFile);
+		else {
+			messages = loadMessages(inlFile);
+			this.messages.put(inlFile, messages);
+		}
+		return messages;
+	}
+
+	private boolean shouldBeAtTheEnd(File inlFile, Instant messageInstant) {
+		final Instant lastInstant = lastMessageTime.get(inlFile);
+		return lastInstant == null || messageInstant.isAfter(lastInstant);
 	}
 
 	private void saveAttachments(File directory, Message message) {
@@ -108,11 +141,10 @@ public class DatalakeManager {
 	}
 
 	private List<Message> loadMessages(File inlFile) throws IOException {
-		return !inlFile.exists() ? new ArrayList<>() : load(new String(Files.readAllBytes(inlFile.toPath()), Charset.forName("UTF-8")));
+		return Inl.load(new String(Files.readAllBytes(inlFile.toPath()), Charset.forName("UTF-8")));
 	}
 
 	private void save(File inlFile, List<Message> messages) {
-		if (!inlFile.getParentFile().exists()) inlFile.getParentFile().mkdirs();
 		StringBuilder builder = new StringBuilder();
 		for (Message m : messages) builder.append(m.toString()).append("\n\n");
 		try {
@@ -123,7 +155,11 @@ public class DatalakeManager {
 	}
 
 	private File inl(File tankDirectory, Message message) {
-		return message.ts() == null ? null : new File(tankDirectory, dayOf(message.ts()) + INL);
+		return tsOf(message) == null ? null : new File(tankDirectory, dayOf(tsOf(message)) + INL);
+	}
+
+	private String tsOf(Message message) {
+		return message.get("ts");
 	}
 
 	private static String dayOf(String instant) {
@@ -136,13 +172,13 @@ public class DatalakeManager {
 
 	private void addMessage(List<Message> list, Message element) {
 		if (list.size() == 0) list.add(element);
-		else if (parse(list.get(0).ts()).compareTo(parse(element.ts())) > 0) list.add(0, element);
-		else if (parse(list.get(list.size() - 1).ts()).compareTo(parse(element.ts())) < 0) list.add(list.size(), element);
 		else {
-			int i = 0;
-			while (parse(list.get(i).ts()).compareTo(parse(element.ts())) < 0) i++;
-			list.add(i, element);
+			final int position = findPosition(list, element);
+			list.add(position < 0 ? Math.abs(position) - 1 : position, element);
 		}
 	}
 
+	private int findPosition(List<Message> list, Message element) {
+		return binarySearch(list, element, comparing(m -> parse(tsOf(m))));
+	}
 }

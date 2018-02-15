@@ -1,5 +1,5 @@
+import io.intino.konos.alexandria.Inl;
 import io.intino.konos.jms.TopicProducer;
-import io.intino.ness.Inl;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

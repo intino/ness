@@ -6,7 +6,7 @@ import io.intino.ness.graph.*;
 public class Function extends io.intino.tara.magritte.Layer implements io.intino.tara.magritte.tags.Terminal {
 	protected java.lang.String qualifiedName;
 	protected java.lang.String source;
-	protected io.intino.ness.inl.MessageFunction aClass;
+	protected io.intino.konos.alexandria.functions.MessageFunction aClass;
 
 	public Function(io.intino.tara.magritte.Node node) {
 		super(node);
@@ -20,7 +20,7 @@ public class Function extends io.intino.tara.magritte.Layer implements io.intino
 		return source;
 	}
 
-	public io.intino.ness.inl.MessageFunction aClass() {
+	public io.intino.konos.alexandria.functions.MessageFunction aClass() {
 		return aClass;
 	}
 
@@ -34,7 +34,7 @@ public class Function extends io.intino.tara.magritte.Layer implements io.intino
 		return (Function) this;
 	}
 
-	public Function aClass(io.intino.ness.inl.MessageFunction value) {
+	public Function aClass(io.intino.konos.alexandria.functions.MessageFunction value) {
 		this.aClass = value;
 		return (Function) this;
 	}
@@ -52,7 +52,7 @@ public class Function extends io.intino.tara.magritte.Layer implements io.intino
 		super.load$(name, values);
 		if (name.equalsIgnoreCase("qualifiedName")) this.qualifiedName = io.intino.tara.magritte.loaders.StringLoader.load(values, this).get(0);
 		else if (name.equalsIgnoreCase("source")) this.source = io.intino.tara.magritte.loaders.StringLoader.load(values, this).get(0);
-		else if (name.equalsIgnoreCase("aClass")) this.aClass = io.intino.tara.magritte.loaders.ObjectLoader.load(values,io.intino.ness.inl.MessageFunction.class, this).get(0);
+		else if (name.equalsIgnoreCase("aClass")) this.aClass = io.intino.tara.magritte.loaders.ObjectLoader.load(values,io.intino.konos.alexandria.functions.MessageFunction.class, this).get(0);
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class Function extends io.intino.tara.magritte.Layer implements io.intino
 		super.set$(name, values);
 		if (name.equalsIgnoreCase("qualifiedName")) this.qualifiedName = (java.lang.String) values.get(0);
 		else if (name.equalsIgnoreCase("source")) this.source = (java.lang.String) values.get(0);
-		else if (name.equalsIgnoreCase("aClass")) this.aClass = (io.intino.ness.inl.MessageFunction) values.get(0);
+		else if (name.equalsIgnoreCase("aClass")) this.aClass = (io.intino.konos.alexandria.functions.MessageFunction) values.get(0);
 	}
 
 

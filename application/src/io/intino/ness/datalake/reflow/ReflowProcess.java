@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
 import static java.time.Instant.parse;
-import static java.util.stream.Collectors.toMap;
 import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
 class ReflowProcess {
@@ -73,22 +72,12 @@ class ReflowProcess {
 					int messageCounter = 0;
 
 					@Override
-					protected boolean init() {
-						return true;
-					}
-
-					@Override
 					protected boolean step() {
 						if (!flowsAreActive(managers)) return false;
 						TankManager manager = managerWithOldestMessage(managers);
 						producer.produce(createMessageFor(manager.message.toString()));
 						manager.next();
 						return ++messageCounter < blockSize;
-					}
-
-					@Override
-					public void terminate() {
-						super.terminate();
 					}
 
 					private TankManager managerWithOldestMessage(List<TankManager> managers) {
@@ -105,7 +94,7 @@ class ReflowProcess {
 					}
 
 					private Instant instantOf(io.intino.ness.inl.Message message) {
-						return message != null ? parse(message.ts()) : Instant.MAX;
+						return message != null ? parse(message.get("ts")) : Instant.MAX;
 					}
 				};
 			}
@@ -136,17 +125,17 @@ class ReflowProcess {
 
 	static class TankManager {
 		final String source;
-		private final Iterator<Message> faucet;
+		private final Iterator<Message> iterator;
 		private io.intino.ness.inl.Message message;
 
-		TankManager(String source, Iterator<Message> faucet) {
+		TankManager(String source, Iterator<Message> iterator) {
 			this.source = source;
-			this.faucet = faucet;
+			this.iterator = iterator;
 			next();
 		}
 
 		private void next() {
-			this.message = faucet.next();
+			this.message = iterator.next();
 		}
 	}
 

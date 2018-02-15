@@ -24,13 +24,12 @@ public class TankStarter {
 
 	private void consume(Tank tank, javax.jms.Message message) {
 		String text = textFrom(message);
-		if (text.contains("created:")) text = text.replace("created:", "ts:");
-		consume(tank, load(text));
+		consume(tank, load(text), text);
 	}
 
-	private void consume(io.intino.ness.graph.Tank aTank, Message message) {
+	private void consume(Tank aTank, Message message, String textMessage) {
 		try {
-			datalakeManager.drop(aTank, message);
+			datalakeManager.drop(aTank, message, textMessage);
 		} catch (Throwable e) {
 			logger.error("error processing message: " + message.toString());
 			logger.error(e.getMessage(), e);

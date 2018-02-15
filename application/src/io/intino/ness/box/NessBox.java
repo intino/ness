@@ -44,7 +44,7 @@ public class NessBox extends AbstractBox {
 
 	public io.intino.konos.alexandria.Box open() {
 		super.open();
-		datalakeManager = new DatalakeManager(configuration.args().get("ness_datalake"));
+		datalakeManager = new DatalakeManager(configuration.args().get("ness_datalake"), graph.tankList());
 		startBus();
 		startReflowService();
 		startDatalakeTanks();

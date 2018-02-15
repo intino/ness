@@ -1,7 +1,7 @@
 package io.intino.ness.datalake;
 
+import io.intino.konos.alexandria.functions.MessageFunction;
 import io.intino.ness.datalake.compiler.Compiler;
-import io.intino.ness.inl.MessageFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
