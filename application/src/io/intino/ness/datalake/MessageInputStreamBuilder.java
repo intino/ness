@@ -67,7 +67,7 @@ public class MessageInputStreamBuilder {
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);
 			}
-			return current = currentIndex < streams.size() ? streams.get(currentIndex = ++currentIndex) : null;
+			return current = currentIndex < streams.size() - 1 ? streams.get(currentIndex = ++currentIndex) : null;
 		}
 
 		public String name() {

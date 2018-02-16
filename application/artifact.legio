@@ -65,7 +65,7 @@ RunConfiguration octana-pre-ness
 	Argument("ness_store", "$HOME/store")
 	Argument("ness_datalake", "$HOME/datalake")
 	Argument("broker_store", "$HOME/broker/")
-	Argument("broker_port", "62000")
+	Argument("broker_port", "63000")
 	Argument("connector_id", "octana-ness-pre")
 	Argument("mqtt_port", "1884")
 

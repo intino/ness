@@ -31,28 +31,17 @@ public class ReflowSession implements Consumer {
 	@Override
 	public void consume(Message message) {
 		String text = textFrom(message);
-		if (text.contains("blockSize")) {
-			if (this.handler != null) return;
-			Reflow reflow = new Gson().fromJson(text, Reflow.class);
-			this.blockSize = reflow.blockSize();
-			createSession(reflow);
-		} else if (text.contains("finish")) finish();
-		else if (text.contains("ready") && this.handler != null) {
-			ready(message);
-		} else if (!text.contains("ready") && handler != null) next();
+		if (text.contains("blockSize")) defineReflow(text);
+		else if (text.contains("finish")) finish();
+		else if (text.contains("ready") && this.handler != null) ready(message);
+		else if (!text.contains("ready") && handler != null) next();
 	}
 
-	private void createSession(Reflow reflow) {
-		logger.info("Shutting down actual session");
-		for (String tank : reflow.tanks()) {
-			final PauseTankAction action = new PauseTankAction();
-			action.box = box;
-			action.tank = tank;
-			action.execute();
-		}
-		restartBusWithOutPersistence();
-		this.handler = new ReflowProcessHandler(box, reflow.tanks(), reflow.blockSize());
-		logger.info("Reflow session created");
+	private void defineReflow(String text) {
+		if (this.handler != null) return;
+		Reflow reflow = new Gson().fromJson(text, Reflow.class);
+		this.blockSize = reflow.blockSize();
+		createSession(reflow);
 	}
 
 	private void ready(final Message message) {
@@ -82,6 +71,19 @@ public class ReflowSession implements Consumer {
 			action.execute();
 		}
 		this.handler = null;
+	}
+
+	private void createSession(Reflow reflow) {
+		logger.info("Shutting down actual session");
+		for (String tank : reflow.tanks()) {
+			final PauseTankAction action = new PauseTankAction();
+			action.box = box;
+			action.tank = tank;
+			action.execute();
+		}
+		restartBusWithOutPersistence();
+		this.handler = new ReflowProcessHandler(box, reflow.tanks(), reflow.blockSize());
+		logger.info("Reflow session created");
 	}
 
 	private void next() {

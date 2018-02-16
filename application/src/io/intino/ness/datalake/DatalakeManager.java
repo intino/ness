@@ -64,7 +64,7 @@ public class DatalakeManager {
 
 	public Iterator<Message> sortedMessagesIterator(Tank tank) {
 		try {
-			File[] files = directoryOf(tank).listFiles();
+			File[] files = directoryOf(tank).listFiles((f, n) -> n.endsWith(INL));
 			if (files == null) files = new File[0];
 			final List<File> fileList = Arrays.asList(files);
 			Collections.sort(fileList);
