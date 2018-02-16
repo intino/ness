@@ -118,6 +118,7 @@ class ReflowProcess {
 		try {
 			commit();
 			session.close();
+			logger.info("Reflow finished.");
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
 		}

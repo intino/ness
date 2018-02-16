@@ -10,38 +10,23 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MessageInputStreamBuilder {
 
 	private static Logger logger = LoggerFactory.getLogger(MessageInputStreamBuilder.class);
 
 	public static io.intino.ness.inl.MessageInputStream of(List<File> files) {
-		return new SortedCollectionMessageStream(files.stream().map(MessageInputStreamBuilder::streamOf).collect(Collectors.toList()));
-	}
-
-	private static MessageInputStream streamOf(File file) {
-		try {
-			final MessageInputStream stream = Loader.Inl.of(new FileInputStream(file));
-			stream.name(file.getName());
-			return stream;
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-			return null;
-		}
+		return new SortedCollectionMessageStream(files);
 	}
 
 	static class SortedCollectionMessageStream implements io.intino.ness.inl.MessageInputStream {
-
-		private final List<MessageInputStream> streams;
+		private final List<File> files;
 		private MessageInputStream current;
 		private int currentIndex = 0;
 
-
-		SortedCollectionMessageStream(List<io.intino.ness.inl.MessageInputStream> streams) {
-			super();
-			this.streams = streams;
-			this.current = streams.get(0);
+		SortedCollectionMessageStream(List<File> files) {
+			this.files = files;
+			this.current = files.isEmpty() ? null : streamOf(this.files.get(0));
 		}
 
 		public Message next() throws IOException {
@@ -54,20 +39,31 @@ public class MessageInputStreamBuilder {
 		}
 
 		public boolean hasNext() {
-			return current.hasNext() || currentIndex < streams.size();
+			return current.hasNext() || currentIndex < files.size();
 		}
 
 		public void close() throws IOException {
 			if (current != null) current.close();
 		}
 
-		private MessageInputStream nextStream() {
+		private void nextStream() {
 			try {
 				close();
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);
 			}
-			return current = currentIndex < streams.size() - 1 ? streams.get(currentIndex = ++currentIndex) : null;
+			current = currentIndex < files.size() - 1 ? streamOf(files.get(currentIndex = ++currentIndex)) : null;
+		}
+
+		private static MessageInputStream streamOf(File file) {
+			try {
+				final MessageInputStream stream = Loader.Inl.of(new FileInputStream(file));
+				stream.name(file.getName());
+				return stream;
+			} catch (IOException e) {
+				logger.error(e.getMessage(), e);
+				return null;
+			}
 		}
 
 		public String name() {
@@ -76,5 +72,6 @@ public class MessageInputStreamBuilder {
 
 		public void name(String value) {
 		}
+
 	}
 }
