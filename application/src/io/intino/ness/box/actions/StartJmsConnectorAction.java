@@ -19,6 +19,8 @@ public class StartJmsConnectorAction {
 		if (connector != null && !connector.isConnected()) {
 			try {
 				connector.start();
+				JMSConnector.enabled(true);
+				JMSConnector.save$();
 			} catch (Exception e) {
 			}
 		}

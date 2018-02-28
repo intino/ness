@@ -17,13 +17,14 @@ public class AddPipeAction extends Action {
 
 	public String execute() {
 		Function function = ness().functionList(t -> t.name$().equals(functionName)).findFirst().orElse(null);
-		if (function == null) return "Function not found";
+		if (!functionName.isEmpty()) if (function == null) return "Function not found";
 		Tank tankFrom = ness().tank(from);
-		if (tankFrom == null) return "Source tank not found";
 		Tank tankTo = ness().tank(to);
 		if (tankTo == null) return "Destination tank not found";
-		final Pipe pipe = ness().create("pipes").pipe(tankFrom, tankTo);
-		pipe.transformer(function);
+		final Pipe pipe = ness().create("pipes").pipe(tankTo);
+		if (tankFrom != null) pipe.asTankSource(tankFrom);
+		else pipe.asTopicSource(from);
+		if (function != null) pipe.transformer(function);
 		new PipeStarter(box.busManager()).start(pipe);
 		pipe.save$();
 		return OK;

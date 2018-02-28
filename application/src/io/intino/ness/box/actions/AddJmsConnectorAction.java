@@ -4,6 +4,7 @@ import io.intino.ness.box.NessBox;
 import io.intino.ness.graph.ExternalBus;
 import io.intino.ness.graph.JMSConnector;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static io.intino.ness.box.actions.Action.OK;
@@ -15,12 +16,12 @@ public class AddJmsConnectorAction {
 	public String name;
 	public String externalBus;
 	public String direction;
-	public List<String> topics;
+	public String topics;
 
 	public AddJmsConnectorAction() {
 	}
 
-	public AddJmsConnectorAction(NessBox box, String name, String externalBus, String direction, List<String> topics) {
+	public AddJmsConnectorAction(NessBox box, String name, String externalBus, String direction, String topics) {
 		this.box = box;
 		this.name = name;
 		this.externalBus = externalBus;
@@ -29,6 +30,7 @@ public class AddJmsConnectorAction {
 	}
 
 	public String execute() {
+		List<String> topics = Arrays.asList(this.topics.split(" "));
 		ExternalBus bus = box.graph().externalBusList(f -> f.name$().equals(externalBus)).findFirst().orElse(null);
 		if (bus == null) return "External Bus not found";
 		JMSConnector connector = box.graph().jMSConnectorList(f -> f.name$().equals(name)).findFirst().orElse(null);

@@ -81,7 +81,7 @@ RunConfiguration local
 	Argument("ness_store", "./temp/happysense/store")
 	Argument("ness_datalake", "./temp/happysense/datalake")
 	Argument("broker_store", "./temp/happysense/broker/")
-	Argument("connector_id", "ness-cesar-pre")
+	Argument("connector_id", "ness-happy-pre")
 //	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1883")

@@ -24,14 +24,15 @@ public class TankStarter {
 
 	private void consume(Tank tank, javax.jms.Message message) {
 		String text = textFrom(message);
-		consume(tank, load(text), text);
+		consume(tank, text);
 	}
 
-	private void consume(Tank aTank, Message message, String textMessage) {
+	private void consume(Tank aTank, String textMessage) {
 		try {
+			final Message message = load(textMessage);
 			datalakeManager.drop(aTank, message, textMessage);
 		} catch (Throwable e) {
-			logger.error("error processing message: " + message.toString());
+			logger.error("error processing message: " + textMessage);
 			logger.error(e.getMessage(), e);
 		}
 	}

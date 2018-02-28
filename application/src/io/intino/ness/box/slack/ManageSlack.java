@@ -87,7 +87,7 @@ public class ManageSlack {
 		action.name = name;
 		action.externalBus = externalBus;
 		action.direction = direction;
-		action.topics = Arrays.asList(topics);
+		action.topics = String.join(" ", topics);
 		return action.execute();
 	}
 

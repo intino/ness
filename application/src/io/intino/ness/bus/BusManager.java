@@ -1,4 +1,3 @@
-
 package io.intino.ness.bus;
 
 import io.intino.konos.jms.Consumer;

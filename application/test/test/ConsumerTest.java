@@ -16,10 +16,10 @@ import static org.apache.activemq.ActiveMQConnection.makeConnection;
 
 public class ConsumerTest {
 	private static final Logger logger = LoggerFactory.getLogger(ConsumerTest.class);
-	private String url = "tcp://localhost:63000";
-	private String user = "consul";
-	private String password = "volk96e3atir";
-	private String topic = "flow.cesar.infrastructure.operation";
+	private String url = "tcp://bus.monentia.com:63000";
+	private String user = "cesar";
+	private String password = "bgqd83pri3mk";
+	private String topic = "consul.server.status";
 	private Session session;
 	private Connection connection;
 

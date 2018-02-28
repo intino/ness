@@ -30,6 +30,6 @@ public class AddFunctionAction {
 	}
 
 	private String packageOf(String sourceCode) {
-		return sourceCode.substring(0, sourceCode.indexOf("\n")).replaceAll("package |;", "");
+		return sourceCode.substring(0, sourceCode.indexOf(";")).replaceAll("package |;", "");
 	}
 }

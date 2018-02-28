@@ -96,9 +96,9 @@ public interface ManagerMBean {
 	@Parameters({})
 	java.util.List<String> jmsConnectors();
 
-	@Description("Creates a data flow between an external bus and ness. It is necesary to define de direction of the data flow (*incoming* or *outgoing*). Also it is posible to set a conversion function.")
+	@Description("Creates a data flow between an external bus and ness. It is necesary to define de direction of the data flow (*incoming* or *outgoing*) and topics separated by space. Also it is posible to set a conversion function.")
 	@Parameters({"name", "externalBus", "direction", "topics"})
-	String addJmsConnector(String name, String externalBus, String direction, java.util.List<String> topics);
+	String addJmsConnector(String name, String externalBus, String direction, String topics);
 
 	@Description("Removes a registed jms connector")
 	@Parameters({"name"})
@@ -111,10 +111,6 @@ public interface ManagerMBean {
 	@Description("connect out jms topic with a ness tank")
 	@Parameters({"name"})
 	String stopJmsConnector(String name);
-
-	@Description("Seals current events of a tank to reservoir")
-	@Parameters({"tank"})
-	String seal(String tank);
 
 	@Description("Connect a source and destination tanks through a `function`")
 	@Parameters({"functionName", "input", "output"})

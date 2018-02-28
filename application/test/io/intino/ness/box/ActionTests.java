@@ -74,7 +74,7 @@ public class ActionTests {
 	@Ignore
 	public void addJmsConnector() throws Exception {
 		addExternalBus();
-		new AddJmsConnectorAction(box, "monentia-pro-connection", "monentia-pro", "incoming", bridgedTanks).execute();
+		new AddJmsConnectorAction(box, "monentia-pro-connection", "monentia-pro", "incoming", String.join(" ", bridgedTanks)).execute();
 		waitFinish();
 	}
 

@@ -51,6 +51,7 @@ public class BusService {
 	private final Map<String, String> users;
 	private final List<Tank> tanks;
 	private final List<JMSConnector> connectors;
+	private final List<SimpleJmsTopicConnector> activeMQTopicConnectors;
 
 	private JavaRuntimeConfigurationPlugin configurationPlugin;
 	private SimpleAuthenticationPlugin authenticator;
@@ -66,6 +67,7 @@ public class BusService {
 		this.users = users;
 		this.tanks = tanks;
 		this.connectors = connectors;
+		this.activeMQTopicConnectors = new ArrayList<>();
 	}
 
 	public Map<String, List<String>> users() {
@@ -102,6 +104,7 @@ public class BusService {
 			if (c.direction().equals(incoming)) connector.setInboundTopicBridges(toInboundBridges(c.topics()));
 			else connector.setOutboundTopicBridges(toOutboundBridges(c.topics()));
 			service.addJmsConnector(connector);
+			this.activeMQTopicConnectors.add(connector);
 			logger.info("Connector with " + c.bus().name$() + " started");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -109,7 +112,7 @@ public class BusService {
 	}
 
 	public List<JmsConnector> jmsConnectors() {
-		return Arrays.asList(service.getJmsBridgeConnectors());
+		return new ArrayList<>(this.activeMQTopicConnectors);
 	}
 
 	public List<String> topics() {
@@ -256,7 +259,7 @@ public class BusService {
 	}
 
 	private void registerConnectors(List<JMSConnector> connectors) {
-		for (JMSConnector c : connectors) addJMSConnector(c);
+		connectors.stream().filter(JMSConnector::enabled).forEach(this::addJMSConnector);
 	}
 
 	public void updateInterceptors() {

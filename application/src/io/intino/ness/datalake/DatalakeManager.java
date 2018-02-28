@@ -28,11 +28,6 @@ public class DatalakeManager {
 	private static final String INL = ".inl";
 	private Logger logger = LoggerFactory.getLogger(DatalakeManager.class);
 	private Map<File, List<Message>> messages = new LRUCache<>(32);
-
-	public File getStationDirectory() {
-		return stationDirectory;
-	}
-
 	private File stationDirectory;
 	private Map<File, Instant> lastMessageTime = new HashMap<>();
 
@@ -40,6 +35,10 @@ public class DatalakeManager {
 		this.stationDirectory = new File(stationFolder);
 		this.stationDirectory.mkdirs();
 		tanks.forEach(this::addTank);
+	}
+
+	public File getStationDirectory() {
+		return stationDirectory;
 	}
 
 	public void addTank(Tank tank) {

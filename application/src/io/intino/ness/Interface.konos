@@ -1,6 +1,5 @@
 dsl Konos
 
-Task seal as CronTrigger("0 0 0 1/1 * ? *", "daily starting at 00:00")
 //Task checkBusPipes as CronTrigger("0 0 1 1/1 * ? *", "daily starting at 00:00")
 
 Service Manager as JMX
@@ -74,11 +73,11 @@ Service Manager as JMX
 
 	Operation("list of jms connectors and its status") jms-connectors
 		Response as Text List
-	Operation("Creates a data flow between an external bus and ness. It is necesary to define de direction of the data flow (*incoming* or *outgoing*). Also it is posible to set a conversion function.") add-jms-connector
+	Operation("Creates a data flow between an external bus and ness. It is necesary to define de direction of the data flow (*incoming* or *outgoing*) and topics separated by space. Also it is posible to set a conversion function.") add-jms-connector
 		Parameter name as Text
 		Parameter externalBus as Text
 		Parameter direction as Text
-		Parameter topics as Text List
+		Parameter topics as Text
 		Response as Text
 	Operation("Removes a registed jms connector") remove-jms-connector
 		Parameter name as Text
@@ -90,9 +89,6 @@ Service Manager as JMX
 		Parameter name as Text
 		Response as Text
 
-	Operation("Seals current events of a tank to reservoir") seal
-		Parameter tank as Text
-		Response as Text
 	Operation("Connect a source and destination tanks through a `function`") pump
 		Parameter functionName as Text
 		Parameter input as Text

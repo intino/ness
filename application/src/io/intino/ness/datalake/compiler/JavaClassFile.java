@@ -9,38 +9,38 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 class JavaClassFile extends SimpleJavaFileObject {
-    private ByteArrayOutputStream byteCode;
+	private ByteArrayOutputStream byteCode;
 
-    JavaClassFile(String className, Kind kind) {
-        super(uriOf(className), kind);
-    }
+	JavaClassFile(String className, Kind kind) {
+		super(uriOf(className), kind);
+	}
 
-    @Override
-    public CharSequence getCharContent(boolean ignoreEncodingErrors) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("getCharContent()");
-    }
+	@Override
+	public CharSequence getCharContent(boolean ignoreEncodingErrors) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException("getCharContent()");
+	}
 
-    @Override
-    public InputStream openInputStream() {
-        return new ByteArrayInputStream(byteCode.toByteArray());
-    }
+	@Override
+	public InputStream openInputStream() {
+		return new ByteArrayInputStream(byteCode.toByteArray());
+	}
 
-    @Override
-    public OutputStream openOutputStream() {
-        return byteCode = new ByteArrayOutputStream();
-    }
+	@Override
+	public OutputStream openOutputStream() {
+		return byteCode = new ByteArrayOutputStream();
+	}
 
-    byte[] getByteCode() {
-        return byteCode.toByteArray();
-    }
+	byte[] getByteCode() {
+		return byteCode.toByteArray();
+	}
 
-    private static URI uriOf(String name) {
-        try {
-            return new URI(name);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-    }
+	private static URI uriOf(String name) {
+		try {
+			return new URI(name);
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 
 }

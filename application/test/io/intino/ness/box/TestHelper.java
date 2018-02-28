@@ -20,7 +20,7 @@ public class TestHelper {
 		logger.info("Compiled functions");
 	}
 
-	 static io.intino.tara.magritte.Store store(String directory) {
+	static io.intino.tara.magritte.Store store(String directory) {
 		return new InMemoryFileStore(new File(directory)) {
 			public void writeStash(Stash stash, String path) {
 				stash.language = stash.language == null || stash.language.isEmpty() ? "Ness" : stash.language;

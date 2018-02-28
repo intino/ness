@@ -11,6 +11,7 @@ public class JMSConnector extends io.intino.tara.magritte.Layer implements io.in
 	}
 	protected io.intino.ness.graph.ExternalBus bus;
 	protected java.util.List<java.lang.String> topics = new java.util.ArrayList<>();
+	protected boolean enabled;
 
 	public JMSConnector(io.intino.tara.magritte.Node node) {
 		super(node);
@@ -36,6 +37,10 @@ public class JMSConnector extends io.intino.tara.magritte.Layer implements io.in
 		return topics().stream().filter(predicate).collect(java.util.stream.Collectors.toList());
 	}
 
+	public boolean enabled() {
+		return enabled;
+	}
+
 	public JMSConnector direction(io.intino.ness.graph.JMSConnector.Direction value) {
 		this.direction = value;
 		return (JMSConnector) this;
@@ -46,12 +51,18 @@ public class JMSConnector extends io.intino.tara.magritte.Layer implements io.in
 		return (JMSConnector) this;
 	}
 
+	public JMSConnector enabled(boolean value) {
+		this.enabled = value;
+		return (JMSConnector) this;
+	}
+
 	@Override
 	protected java.util.Map<java.lang.String, java.util.List<?>> variables$() {
 		java.util.Map<String, java.util.List<?>> map = new java.util.LinkedHashMap<>();
 		map.put("direction", new java.util.ArrayList(java.util.Collections.singletonList(this.direction)));
 		map.put("bus", this.bus != null ? new java.util.ArrayList(java.util.Collections.singletonList(this.bus)) : java.util.Collections.emptyList());
 		map.put("topics", this.topics);
+		map.put("enabled", new java.util.ArrayList(java.util.Collections.singletonList(this.enabled)));
 		return map;
 	}
 
@@ -61,6 +72,7 @@ public class JMSConnector extends io.intino.tara.magritte.Layer implements io.in
 		if (name.equalsIgnoreCase("direction")) this.direction = io.intino.tara.magritte.loaders.WordLoader.load(values, Direction.class, this).get(0);
 		else if (name.equalsIgnoreCase("bus")) this.bus = io.intino.tara.magritte.loaders.NodeLoader.load(values, io.intino.ness.graph.ExternalBus.class, this).get(0);
 		else if (name.equalsIgnoreCase("topics")) this.topics = io.intino.tara.magritte.loaders.StringLoader.load(values, this);
+		else if (name.equalsIgnoreCase("enabled")) this.enabled = io.intino.tara.magritte.loaders.BooleanLoader.load(values, this).get(0);
 	}
 
 	@Override
@@ -69,6 +81,7 @@ public class JMSConnector extends io.intino.tara.magritte.Layer implements io.in
 		if (name.equalsIgnoreCase("direction")) this.direction = (Direction) values.get(0);
 		else if (name.equalsIgnoreCase("bus")) this.bus = values.get(0)!= null ? core$().graph().load(((io.intino.tara.magritte.Layer) values.get(0)).core$().id()).as(io.intino.ness.graph.ExternalBus.class) : null;
 		else if (name.equalsIgnoreCase("topics")) this.topics = new java.util.ArrayList<>((java.util.List<java.lang.String>) values);
+		else if (name.equalsIgnoreCase("enabled")) this.enabled = (java.lang.Boolean) values.get(0);
 	}
 
 

@@ -11,7 +11,7 @@ public class RemovePipesAction {
 	public String origin;
 
 	public String execute() {
-		box.graph().clear().pipe(p -> p.origin().equals(origin));
+		box.graph().clear().pipe(p -> p.isTankSource() ? p.asTankSource().origin().feedQN().equals(origin) : p.asTopicSource().origin().equals(origin));
 		return OK;
 	}
 }

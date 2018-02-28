@@ -11,6 +11,8 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 	private java.util.List<io.intino.ness.graph.ExternalBus> externalBusList;
 	private java.util.List<io.intino.ness.graph.JMSConnector> jMSConnectorList;
 	private java.util.List<io.intino.ness.graph.Pipe> pipeList;
+	private java.util.List<io.intino.ness.graph.tanksource.TankSourcePipe> tankSourcePipeList;
+	private java.util.List<io.intino.ness.graph.topicsource.TopicSourcePipe> topicSourcePipeList;
 
 	public AbstractGraph(io.intino.tara.magritte.Graph graph) {
 		this.graph = graph;
@@ -26,6 +28,8 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		this.externalBusList = new java.util.ArrayList<>(wrapper.externalBusList);
 		this.jMSConnectorList = new java.util.ArrayList<>(wrapper.jMSConnectorList);
 		this.pipeList = new java.util.ArrayList<>(wrapper.pipeList);
+		this.tankSourcePipeList = new java.util.ArrayList<>(wrapper.tankSourcePipeList);
+		this.topicSourcePipeList = new java.util.ArrayList<>(wrapper.topicSourcePipeList);
 	}
 
     @Override
@@ -36,6 +40,8 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		externalBusList = this.graph.rootList(io.intino.ness.graph.ExternalBus.class);
 		jMSConnectorList = this.graph.rootList(io.intino.ness.graph.JMSConnector.class);
 		pipeList = this.graph.rootList(io.intino.ness.graph.Pipe.class);
+		tankSourcePipeList = this.graph.rootList(io.intino.ness.graph.tanksource.TankSourcePipe.class);
+		topicSourcePipeList = this.graph.rootList(io.intino.ness.graph.topicsource.TopicSourcePipe.class);
 	}
 
 	@Override
@@ -46,6 +52,8 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		if (node.is("ExternalBus")) this.externalBusList.add(node.as(io.intino.ness.graph.ExternalBus.class));
 		if (node.is("JMSConnector")) this.jMSConnectorList.add(node.as(io.intino.ness.graph.JMSConnector.class));
 		if (node.is("Pipe")) this.pipeList.add(node.as(io.intino.ness.graph.Pipe.class));
+		if (node.is("TankSource#Pipe")) this.tankSourcePipeList.add(node.as(io.intino.ness.graph.tanksource.TankSourcePipe.class));
+		if (node.is("TopicSource#Pipe")) this.topicSourcePipeList.add(node.as(io.intino.ness.graph.topicsource.TopicSourcePipe.class));
 	}
 
 	@Override
@@ -56,6 +64,8 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		if (node.is("ExternalBus")) this.externalBusList.remove(node.as(io.intino.ness.graph.ExternalBus.class));
 		if (node.is("JMSConnector")) this.jMSConnectorList.remove(node.as(io.intino.ness.graph.JMSConnector.class));
 		if (node.is("Pipe")) this.pipeList.remove(node.as(io.intino.ness.graph.Pipe.class));
+		if (node.is("TankSource#Pipe")) this.tankSourcePipeList.remove(node.as(io.intino.ness.graph.tanksource.TankSourcePipe.class));
+		if (node.is("TopicSource#Pipe")) this.topicSourcePipeList.remove(node.as(io.intino.ness.graph.topicsource.TopicSourcePipe.class));
 	}
 
 	public java.net.URL resourceAsMessage$(String language, String key) {
@@ -84,6 +94,14 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 
 	public java.util.List<io.intino.ness.graph.Pipe> pipeList() {
 		return pipeList;
+	}
+
+	public java.util.List<io.intino.ness.graph.tanksource.TankSourcePipe> tankSourcePipeList() {
+		return tankSourcePipeList;
+	}
+
+	public java.util.List<io.intino.ness.graph.topicsource.TopicSourcePipe> topicSourcePipeList() {
+		return topicSourcePipeList;
 	}
 
 	public java.util.stream.Stream<io.intino.ness.graph.Function> functionList(java.util.function.Predicate<io.intino.ness.graph.Function> filter) {
@@ -132,6 +150,22 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 
 	public io.intino.ness.graph.Pipe pipe(int index) {
 		return pipeList.get(index);
+	}
+
+	public java.util.stream.Stream<io.intino.ness.graph.tanksource.TankSourcePipe> tankSourcePipeList(java.util.function.Predicate<io.intino.ness.graph.tanksource.TankSourcePipe> filter) {
+		return tankSourcePipeList.stream().filter(filter);
+	}
+
+	public io.intino.ness.graph.tanksource.TankSourcePipe tankSourcePipe(int index) {
+		return tankSourcePipeList.get(index);
+	}
+
+	public java.util.stream.Stream<io.intino.ness.graph.topicsource.TopicSourcePipe> topicSourcePipeList(java.util.function.Predicate<io.intino.ness.graph.topicsource.TopicSourcePipe> filter) {
+		return topicSourcePipeList.stream().filter(filter);
+	}
+
+	public io.intino.ness.graph.topicsource.TopicSourcePipe topicSourcePipe(int index) {
+		return topicSourcePipeList.get(index);
 	}
 
 	public io.intino.tara.magritte.Graph core$() {
@@ -205,10 +239,21 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 			return newElement;
 		}
 
-		public io.intino.ness.graph.Pipe pipe(io.intino.ness.graph.Tank origin, io.intino.ness.graph.Tank destination) {
+		public io.intino.ness.graph.Pipe pipe(io.intino.ness.graph.Tank destination) {
 			io.intino.ness.graph.Pipe newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.Pipe.class, stash, name).a$(io.intino.ness.graph.Pipe.class);
-			newElement.core$().set(newElement, "origin", java.util.Collections.singletonList(origin));
 			newElement.core$().set(newElement, "destination", java.util.Collections.singletonList(destination));
+			return newElement;
+		}
+
+		public io.intino.ness.graph.tanksource.TankSourcePipe tankSourcePipe(io.intino.ness.graph.Tank origin) {
+			io.intino.ness.graph.tanksource.TankSourcePipe newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.tanksource.TankSourcePipe.class, stash, name).a$(io.intino.ness.graph.tanksource.TankSourcePipe.class);
+			newElement.core$().set(newElement, "origin", java.util.Collections.singletonList(origin));
+			return newElement;
+		}
+
+		public io.intino.ness.graph.topicsource.TopicSourcePipe topicSourcePipe(java.lang.String origin) {
+			io.intino.ness.graph.topicsource.TopicSourcePipe newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.topicsource.TopicSourcePipe.class, stash, name).a$(io.intino.ness.graph.topicsource.TopicSourcePipe.class);
+			newElement.core$().set(newElement, "origin", java.util.Collections.singletonList(origin));
 			return newElement;
 		}
 	}
@@ -236,6 +281,14 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 
 	    public void pipe(java.util.function.Predicate<io.intino.ness.graph.Pipe> filter) {
 	    	new java.util.ArrayList<>(AbstractGraph.this.pipeList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
+	    }
+
+	    public void tankSourcePipe(java.util.function.Predicate<io.intino.ness.graph.tanksource.TankSourcePipe> filter) {
+	    	new java.util.ArrayList<>(AbstractGraph.this.tankSourcePipeList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
+	    }
+
+	    public void topicSourcePipe(java.util.function.Predicate<io.intino.ness.graph.topicsource.TopicSourcePipe> filter) {
+	    	new java.util.ArrayList<>(AbstractGraph.this.topicSourcePipeList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
 	    }
 	}
 }
