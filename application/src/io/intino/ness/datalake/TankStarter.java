@@ -12,28 +12,37 @@ public class TankStarter {
 
 	private BusManager bus;
 	private DatalakeManager datalakeManager;
+	private Tank tank;
 
-	public TankStarter(BusManager manager, DatalakeManager datalakeManager) {
+	public TankStarter(BusManager manager, DatalakeManager datalakeManager, Tank tank) {
 		this.bus = manager;
 		this.datalakeManager = datalakeManager;
+		this.tank = tank;
 	}
 
-	public void start(Tank tank) {
+	public void start() {
 		bus.registerConsumer(tank.feedQN(), message -> consume(tank, message));
 	}
 
 	private void consume(Tank tank, javax.jms.Message message) {
-		String text = textFrom(message);
-		consume(tank, text);
+		new Thread(() -> flow(tank, message)).start();
+		consume(tank, textFrom(message));
+	}
+
+	@SuppressWarnings("ConstantConditions")
+	private void flow(Tank tank, javax.jms.Message message) {
+		bus.getProducer(tank.flowQN()).produce(message);
 	}
 
 	private void consume(Tank aTank, String textMessage) {
+		Message message;
 		try {
-			final Message message = load(textMessage);
-			datalakeManager.drop(aTank, message, textMessage);
+			message = load(textMessage);
 		} catch (Throwable e) {
 			logger.error("error processing message: " + textMessage);
 			logger.error(e.getMessage(), e);
+			return;
 		}
+		datalakeManager.drop(aTank, message, textMessage);
 	}
 }

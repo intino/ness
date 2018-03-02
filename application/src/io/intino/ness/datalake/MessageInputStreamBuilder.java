@@ -9,28 +9,51 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 
 public class MessageInputStreamBuilder {
 
 	private static Logger logger = LoggerFactory.getLogger(MessageInputStreamBuilder.class);
 
-	public static io.intino.ness.inl.MessageInputStream of(List<File> files) {
-		return new SortedCollectionMessageStream(files);
+	public static io.intino.ness.inl.MessageInputStream of(List<File> files, Instant from) {
+		return new SortedCollectionMessageStream(files, from);
 	}
 
 	static class SortedCollectionMessageStream implements io.intino.ness.inl.MessageInputStream {
 		private final List<File> files;
 		private MessageInputStream current;
+		private Message lastMessage;
 		private int currentIndex = 0;
 
-		SortedCollectionMessageStream(List<File> files) {
+		SortedCollectionMessageStream(List<File> files, Instant from) {
 			this.files = files;
 			this.current = files.isEmpty() ? null : streamOf(this.files.get(0));
+			advanceTo(from);
 		}
 
 		public Message next() throws IOException {
 			if (current == null) return null;
+			Message last = lastMessage;
+			lastMessage = loadNext();
+			return last;
+		}
+
+		private void advanceTo(Instant from) {
+			if (current == null) return;
+			try {
+				while (true) {
+					this.lastMessage = loadNext();
+					if (lastMessage == null) return;
+					final Instant ts = Instant.parse(lastMessage.get("ts"));
+					if (ts.equals(from) || ts.isAfter(from)) return;
+				}
+			} catch (IOException e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+
+		private Message loadNext() throws IOException {
 			final Message message = current.next();
 			if (message == null) {
 				nextStream();

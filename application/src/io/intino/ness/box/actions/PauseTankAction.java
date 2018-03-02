@@ -14,7 +14,6 @@ import static io.intino.ness.box.actions.Action.OK;
 
 public class PauseTankAction {
 	private static final Logger logger = LoggerFactory.getLogger(PauseTankAction.class);
-
 	public NessBox box;
 	public String tank;
 
@@ -31,9 +30,7 @@ public class PauseTankAction {
 		if (aTank == null) return "tank not found";
 		List<TopicConsumer> consumers = box.busManager().consumersOf(aTank.feedQN());
 		consumers.forEach(TopicConsumer::stop);
-		box.busManager().stopPipe(aTank.feedQN(), aTank.flowQN());
 		aTank.running(false);
-//		box.restartBus(true);
 		return OK;
 	}
 }

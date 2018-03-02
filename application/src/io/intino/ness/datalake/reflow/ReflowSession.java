@@ -7,13 +7,14 @@ import io.intino.ness.box.NessBox;
 import io.intino.ness.box.actions.PauseTankAction;
 import io.intino.ness.box.actions.ResumeTankAction;
 import io.intino.ness.box.schemas.Reflow;
-import io.intino.ness.graph.Tank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
+
+import java.time.Instant;
 
 import static io.intino.konos.jms.Consumer.textFrom;
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
@@ -61,34 +62,24 @@ public class ReflowSession implements Consumer {
 		}).start();
 	}
 
-	private void finish() {
-		logger.info("Reflow session finished");
-		restart();
-		for (Tank tank : handler.tanks()) {
-			final ResumeTankAction action = new ResumeTankAction();
-			action.box = box;
-			action.tank = tank.qualifiedName();
-			action.execute();
-		}
-		this.handler = null;
-	}
-
 	private void createSession(Reflow reflow) {
 		logger.info("Shutting down actual session");
-		for (String tank : reflow.tanks()) {
-			final PauseTankAction action = new PauseTankAction();
-			action.box = box;
-			action.tank = tank;
-			action.execute();
-		}
+		reflow.tanks().forEach(tank -> new PauseTankAction(box, tank).execute());
 		restartBusWithOutPersistence();
-		this.handler = new ReflowProcessHandler(box, reflow.tanks(), reflow.blockSize());
+		this.handler = new ReflowProcessHandler(box, reflow.tanks(), reflow.from(), reflow.blockSize());
 		logger.info("Reflow session created");
 	}
 
 	private void next() {
 		logger.info("sending next block of " + blockSize + " messages");
 		handler.next();
+	}
+
+	private void finish() {
+		logger.info("Reflow session finished");
+		handler.tanks().forEach(tank -> new ResumeTankAction(box, tank.qualifiedName()).execute());
+//		restart();
+		this.handler = null;
 	}
 
 	private void restartBusWithOutPersistence() {

@@ -27,7 +27,7 @@ import static java.util.Comparator.comparing;
 public class DatalakeManager {
 	private static final String INL = ".inl";
 	private Logger logger = LoggerFactory.getLogger(DatalakeManager.class);
-	private Map<File, List<Message>> messages = new LRUCache<>(32);
+	private Map<File, List<Message>> messagesCache = new LRUCache<>(32);
 	private File stationDirectory;
 	private Map<File, Instant> lastMessageTime = new HashMap<>();
 
@@ -61,13 +61,12 @@ public class DatalakeManager {
 		//TODO
 	}
 
-	public Iterator<Message> sortedMessagesIterator(Tank tank) {
+	public Iterator<Message> sortedMessagesIterator(Tank tank, Instant from) {
 		try {
 			File[] files = directoryOf(tank).listFiles((f, n) -> n.endsWith(INL));
 			if (files == null) files = new File[0];
-			final List<File> fileList = Arrays.asList(files);
-			Collections.sort(fileList);
-			io.intino.ness.inl.MessageInputStream stream = MessageInputStreamBuilder.of(fileList);
+			final List<File> fileList = filter(Arrays.asList(files), from);
+			io.intino.ness.inl.MessageInputStream stream = MessageInputStreamBuilder.of(fileList, from);
 			return new Iterator<Message>() {
 				public boolean hasNext() {
 					return stream.hasNext();
@@ -86,6 +85,14 @@ public class DatalakeManager {
 			logger.error(e.getMessage(), e);
 			return null;
 		}
+	}
+
+	private List<File> filter(List<File> files, Instant from) {
+		if (files.isEmpty()) return files;
+		final String day = dayOf(from.toString());
+		Collections.sort(files);
+		final File bound = files.stream().filter(f -> f.getName().equals(day + INL) || f.getName().compareTo(day) > 0).findFirst().orElse(null);
+		return files.subList(files.indexOf(bound), files.size());
 	}
 
 	private void append(File inlFile, Message message, String textMessage) {
@@ -107,8 +114,8 @@ public class DatalakeManager {
 	}
 
 	private void updateCache(File inlFile, Message message, Instant messageInstant) {
-		this.messages.putIfAbsent(inlFile, new ArrayList<>());
-		if (this.messages.containsKey(inlFile)) this.messages.get(inlFile).add(message);
+		this.messagesCache.putIfAbsent(inlFile, new ArrayList<>());
+		if (this.messagesCache.containsKey(inlFile)) this.messagesCache.get(inlFile).add(message);
 		lastMessageTime.put(inlFile, messageInstant);
 	}
 
@@ -120,11 +127,8 @@ public class DatalakeManager {
 
 	private List<Message> getMessages(File inlFile) throws IOException {
 		List<Message> messages;
-		if (this.messages.containsKey(inlFile)) messages = this.messages.get(inlFile);
-		else {
-			messages = loadMessages(inlFile);
-			this.messages.put(inlFile, messages);
-		}
+		if (this.messagesCache.containsKey(inlFile)) messages = this.messagesCache.get(inlFile);
+		else this.messagesCache.put(inlFile, messages = loadMessages(inlFile));
 		return messages;
 	}
 

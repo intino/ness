@@ -149,26 +149,6 @@ public class BusService {
 		}
 	}
 
-	public void pipe(String from, String to) {
-		try {
-			CompositeTopic compositeTopic = new CompositeTopic();
-			compositeTopic.setName(from);
-			compositeTopic.setForwardOnly(false);
-			compositeTopic.setForwardTo(singletonList(new ActiveMQTopic(to)));
-			VirtualDestinationInterceptor newInterceptor = new VirtualDestinationInterceptor();
-			newInterceptor.setVirtualDestinations(new VirtualDestination[]{compositeTopic});
-			pipes.put(from + "#" + to, newInterceptor);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
-
-	void stopPipe(String fromTopic, String toTopic) {
-		if (!pipes.containsKey(fromTopic + "#" + toTopic)) return;
-		pipes.remove(fromTopic + "#" + toTopic);
-		updateInterceptors();
-	}
-
 	public Map<String, VirtualDestinationInterceptor> pipes() {
 		return pipes;
 	}
@@ -238,7 +218,6 @@ public class BusService {
 			addPolicies();
 			addTCPConnector();
 			addMQTTConnector();
-			registerTanks(tanks);
 			registerConnectors(connectors);
 		} catch (Exception e) {
 			logger.error("Error configuring: " + e.getMessage(), e);
@@ -253,26 +232,8 @@ public class BusService {
 		}
 	}
 
-	private void registerTanks(List<Tank> tanks) {
-		tanks.stream().filter(Tank::running).forEach(tank -> pipe(tank.feedQN(), tank.flowQN()));
-		updateInterceptors();
-	}
-
 	private void registerConnectors(List<JMSConnector> connectors) {
 		connectors.stream().filter(JMSConnector::enabled).forEach(this::addJMSConnector);
-	}
-
-	public void updateInterceptors() {
-		try {
-			final VirtualDestinationInterceptor[] interceptors = pipes.values().toArray(new VirtualDestinationInterceptor[0]);
-			service.setDestinationInterceptors(interceptors);
-			if (confBroker == null) return;
-			List<VirtualDestination> destinations = new ArrayList<>();
-			Arrays.stream(interceptors).forEach(i -> Collections.addAll(destinations, i.getVirtualDestinations()));
-			confBroker.setVirtualDestinations(destinations.toArray(new VirtualDestination[0]), false);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-		}
 	}
 
 	private void addPolicies() {

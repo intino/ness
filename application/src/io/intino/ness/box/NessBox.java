@@ -1,10 +1,10 @@
 package io.intino.ness.box;
 
+import io.intino.ness.box.actions.ResumeTankAction;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.bus.BusService;
 import io.intino.ness.datalake.DatalakeManager;
 import io.intino.ness.datalake.PipeStarter;
-import io.intino.ness.datalake.TankStarter;
 import io.intino.ness.datalake.reflow.ReflowSession;
 import io.intino.ness.graph.NessGraph;
 import io.intino.ness.graph.Pipe;
@@ -47,7 +47,7 @@ public class NessBox extends AbstractBox {
 		datalakeManager = new DatalakeManager(configuration.args().get("ness_datalake"), graph.tankList());
 		startBus();
 		startReflowService();
-		startDatalakeTanks();
+		startTanks();
 		startBusPipes();
 		return this;
 	}
@@ -77,9 +77,8 @@ public class NessBox extends AbstractBox {
 		return graph.userList().stream().collect(Collectors.toMap(Layer::name$, User::password));
 	}
 
-	private void startDatalakeTanks() {
-		final TankStarter tankStarter = new TankStarter(busManager(), datalakeManager());
-		for (Tank tank : graph.tankList()) tankStarter.start(tank);
+	private void startTanks() {
+		for (Tank tank : graph.tankList()) new ResumeTankAction(this, tank.qualifiedName()).execute();
 	}
 
 	private void startBusPipes() {

@@ -24,18 +24,20 @@ class ReflowProcess {
 	private static Logger logger = LoggerFactory.getLogger(ROOT_LOGGER_NAME);
 
 	private final List<Tank> tanks;
+	private final Instant from;
 	private final int blockSize;
 	private DatalakeManager datalakeManager;
 	private final Session session;
 	private final Iterator<Job> jobs;
 	private TopicProducer producer;
 
-	ReflowProcess(DatalakeManager datalakeManager, BusManager bus, List<Tank> tanks, int blockSize) {
+	ReflowProcess(DatalakeManager datalakeManager, BusManager bus, List<Tank> tanks, Instant from, int blockSize) {
 		this.datalakeManager = datalakeManager;
 		this.session = bus.transactedSession();
 		this.tanks = tanks;
+		this.from = from;
 		this.blockSize = blockSize;
-		this.jobs = createPumping(blockSize);
+		this.jobs = createPumper();
 		this.producer = createProducer();
 	}
 
@@ -57,9 +59,9 @@ class ReflowProcess {
 		});
 	}
 
-	private Iterator<Job> createPumping(int blockSize) {
+	private Iterator<Job> createPumper() {
 		return new Iterator<Job>() {
-			List<TankManager> managers = tanks.stream().map(t -> new TankManager(t.qualifiedName(), datalakeManager.sortedMessagesIterator(t))).collect(Collectors.toList());
+			List<TankManager> managers = tanks.stream().map(t -> new TankManager(t.qualifiedName(), datalakeManager.sortedMessagesIterator(t, from))).collect(Collectors.toList());
 
 			@Override
 			public boolean hasNext() {
@@ -71,7 +73,6 @@ class ReflowProcess {
 				return new Job() {
 					int messageCounter = 0;
 
-					@Override
 					protected boolean step() {
 						if (!flowsAreActive(managers)) return false;
 						TankManager manager = managerWithOldestMessage(managers);

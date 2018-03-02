@@ -97,5 +97,5 @@ Service Manager as JMX
 
 Schema Reflow
 	Attribute blockSize as Integer
-	Attribute tanks as List Text
-		multiple = true
+	Attribute from as DateTime
+	Attribute(multiple = true) tanks as List Text

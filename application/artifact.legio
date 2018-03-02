@@ -14,7 +14,7 @@ Artifact("io.intino.ness", "1.1.1") ness as Product
 		Compile("org.slf4j", "slf4j-log4j12", "1.7.7")
 	Code("io.intino.ness")
 	Model("Proteo", "2.1.6", "2.1.13")
-	Box("Konos", "3.1.0", "3.1.0")
+	Box("Konos", "3.4.0", "3.4.0")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness") as Runnable("io.intino.ness.box.Main")
 		classpathPrefix = "lib"
 		Parameter("ness_store", "./temp/store")
@@ -74,6 +74,14 @@ RunConfiguration octana-dev-ness
 	Argument("ness_datalake", "./temp/octana/datalake")
 	Argument("broker_store", "./temp/octana/broker/")
 	Argument("connector_id", "octana-dev-ness")
+	Argument("broker_port", "63000")
+	Argument("mqtt_port", "1884")
+
+RunConfiguration cesar-dev
+	Argument("ness_store", "./temp/cesar/store")
+	Argument("ness_datalake", "./temp/cesar/datalake")
+	Argument("broker_store", "./temp/cesar/broker/")
+	Argument("connector_id", "cesar-dev-ness")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
 

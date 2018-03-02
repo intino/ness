@@ -179,13 +179,4 @@ public final class BusManager {
 	public List<String> topicsInfo() {
 		return advisoryManager.topicsInfo();
 	}
-
-	public void pipe(String feed, String flow) {
-		service.pipe(feed, flow);
-		service.updateInterceptors();
-	}
-
-	public void stopPipe(String feed, String flow) {
-		service.stopPipe(feed, flow);
-	}
 }

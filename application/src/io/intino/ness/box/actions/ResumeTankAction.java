@@ -21,11 +21,12 @@ public class ResumeTankAction {
 	}
 
 	public String execute() {
-		Tank aTank = Helper.findTank(box, tank);
+		return execute(Helper.findTank(box, tank));
+	}
+
+	private String execute(Tank aTank) {
 		if (aTank == null) return "tank not found";
-		new TankStarter(box.busManager(), box.datalakeManager()).start(aTank);
-		box.busManager().pipe(aTank.feedQN(), aTank.flowQN());
-//		box.restartBus(true);
+		new TankStarter(box.busManager(), box.datalakeManager(), aTank).start();
 		aTank.running(true);
 		aTank.save$();
 		return OK;

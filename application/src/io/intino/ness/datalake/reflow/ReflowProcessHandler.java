@@ -5,6 +5,7 @@ import io.intino.ness.graph.NessGraph;
 import io.intino.ness.graph.Tank;
 
 import javax.jms.Session;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,10 +16,12 @@ public class ReflowProcessHandler {
 
 	private List<Tank> tanks;
 	private ReflowProcess reflowProcess;
+	private Instant from;
 
-	ReflowProcessHandler(NessBox box, List<String> tanks, Integer blockSize) {
+	ReflowProcessHandler(NessBox box, List<String> tanks, Instant from, Integer blockSize) {
+		this.from = from;
 		this.tanks = collectTanks(box.graph(), tanks);
-		this.reflowProcess = new ReflowProcess(box.datalakeManager(), box.busManager(), this.tanks, blockSize == 0 ? Integer.MAX_VALUE : blockSize);
+		this.reflowProcess = new ReflowProcess(box.datalakeManager(), box.busManager(), this.tanks, this.from, blockSize == 0 ? Integer.MAX_VALUE : blockSize);
 	}
 
 	void next() {
