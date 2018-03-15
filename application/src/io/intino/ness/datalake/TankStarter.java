@@ -3,12 +3,14 @@ package io.intino.ness.datalake;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.graph.Tank;
 import io.intino.ness.inl.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static io.intino.konos.jms.Consumer.logger;
 import static io.intino.konos.jms.Consumer.textFrom;
 import static io.intino.ness.inl.Message.load;
 
 public class TankStarter {
+	private static final Logger logger = LoggerFactory.getLogger(TankStarter.class);
 
 	private BusManager bus;
 	private DatalakeManager datalakeManager;
@@ -22,10 +24,15 @@ public class TankStarter {
 
 	public void start() {
 		bus.registerConsumer(tank.feedQN(), message -> consume(tank, message));
+		bus.registerConsumer(tank.dropQN(), message -> consumeDrop(tank, message));
 	}
 
 	private void consume(Tank tank, javax.jms.Message message) {
 		new Thread(() -> flow(tank, message)).start();
+		consume(tank, textFrom(message));
+	}
+
+	private void consumeDrop(Tank tank, javax.jms.Message message) {
 		consume(tank, textFrom(message));
 	}
 

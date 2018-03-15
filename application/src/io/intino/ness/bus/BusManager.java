@@ -55,6 +55,7 @@ public final class BusManager {
 			session = null;
 			connection = null;
 			service.stop();
+			logger.info("bus stopped");
 		} catch (Throwable e) {
 		}
 	}

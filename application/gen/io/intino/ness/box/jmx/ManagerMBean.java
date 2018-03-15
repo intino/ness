@@ -48,6 +48,10 @@ public interface ManagerMBean {
 	@Parameters({"tank", "name"})
 	String renameTank(String tank, String name);
 
+	@Description("Changes name of a tank for a new one")
+	@Parameters({})
+	void sortTanks();
+
 	@Description("Connects source and destination topics")
 	@Parameters({})
 	String pipes();

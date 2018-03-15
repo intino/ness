@@ -10,11 +10,8 @@ import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.broker.region.policy.ConstantPendingMessageLimitStrategy;
 import org.apache.activemq.broker.region.policy.PolicyEntry;
 import org.apache.activemq.broker.region.policy.PolicyMap;
-import org.apache.activemq.broker.region.virtual.CompositeTopic;
-import org.apache.activemq.broker.region.virtual.VirtualDestination;
 import org.apache.activemq.broker.region.virtual.VirtualDestinationInterceptor;
 import org.apache.activemq.command.ActiveMQDestination;
-import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.activemq.network.jms.InboundTopicBridge;
 import org.apache.activemq.network.jms.JmsConnector;
 import org.apache.activemq.network.jms.OutboundTopicBridge;
@@ -37,7 +34,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.intino.ness.graph.JMSConnector.Direction.incoming;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 public class BusService {
@@ -126,13 +122,15 @@ public class BusService {
 
 	public void start() {
 		try {
+			logger.info("starting broker...");
 			this.service = new BrokerService();
 			this.authenticator = new SimpleAuthenticationPlugin(initUsers(users));
 			this.configurationPlugin = new JavaRuntimeConfigurationPlugin();
-			configure(persistent, tanks, connectors);
-			service.start();
-			service.waitUntilStarted();
-			confBroker = (JavaRuntimeConfigurationBroker) service.getBroker().getAdaptor(JavaRuntimeConfigurationBroker.class);
+			configure(persistent, connectors);
+			this.service.start();
+			this.service.waitUntilStarted();
+			this.confBroker = (JavaRuntimeConfigurationBroker) service.getBroker().getAdaptor(JavaRuntimeConfigurationBroker.class);
+			logger.info("broker started!");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -206,7 +204,7 @@ public class BusService {
 		return users;
 	}
 
-	private void configure(boolean persistence, List<Tank> tanks, List<JMSConnector> connectors) {
+	private void configure(boolean persistence, List<JMSConnector> connectors) {
 		try {
 			service.setBrokerName(NESS);
 			persistent(persistence);

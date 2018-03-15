@@ -46,15 +46,24 @@ public class NessBox extends AbstractBox {
 		super.open();
 		datalakeManager = new DatalakeManager(configuration.args().get("ness_datalake"), graph.tankList());
 		startBus();
-		startReflowService();
-		startTanks();
-		startBusPipes();
+		startService();
 		return this;
 	}
 
 	public void restartBus(boolean persistent) {
 		busManager.restart(persistent);
+		startService();
+	}
+
+	public void startService() {
 		startReflowService();
+		startTanks();
+		startBusPipes();
+	}
+
+	public void startReflowService() {
+		busManager.createQueue(REFLOW_READY);
+		busManager.registerConsumer("service.ness.reflow", reflowSession);
 	}
 
 	public void close() {
@@ -68,20 +77,15 @@ public class NessBox extends AbstractBox {
 		busManager.start();
 	}
 
-	private void startReflowService() {
-		busManager.createQueue(REFLOW_READY);
-		busManager.registerConsumer("service.ness.reflow", reflowSession);
-	}
-
 	private Map<String, String> users() {
 		return graph.userList().stream().collect(Collectors.toMap(Layer::name$, User::password));
 	}
 
-	private void startTanks() {
+	public void startTanks() {
 		for (Tank tank : graph.tankList()) new ResumeTankAction(this, tank.qualifiedName()).execute();
 	}
 
-	private void startBusPipes() {
+	public void startBusPipes() {
 		final PipeStarter tankStarter = new PipeStarter(busManager());
 		for (Pipe pipe : graph.pipeList()) tankStarter.start(pipe);
 	}

@@ -4,32 +4,29 @@ import io.intino.konos.alexandria.Inl;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
 import io.intino.ness.inl.Message;
-import org.apache.activemq.util.LRUCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
-import static java.nio.file.Files.write;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
-import static java.time.Instant.parse;
-import static java.util.Collections.binarySearch;
-import static java.util.Comparator.comparing;
 
 
 public class DatalakeManager {
 	private static final String INL = ".inl";
+	private static final String ZIP = ".zip";
 	private Logger logger = LoggerFactory.getLogger(DatalakeManager.class);
-	private Map<File, List<Message>> messagesCache = new LRUCache<>(32);
 	private File stationDirectory;
-	private Map<File, Instant> lastMessageTime = new HashMap<>();
 
 	public DatalakeManager(String stationFolder, List<Tank> tanks) {
 		this.stationDirectory = new File(stationFolder);
@@ -55,6 +52,47 @@ public class DatalakeManager {
 
 	public void drop(Tank tank, Message message, String textMessage) {
 		append(inl(directoryOf(tank), message), message, textMessage);
+	}
+
+	public void sort(Tank tank) {
+		try {
+			for (File file : Objects.requireNonNull(directoryOf(tank).listFiles((f, n) -> f.getName().endsWith(INL)))) sort(file);
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	public void sort(Tank tank, Instant day) {
+		try {
+			for (File file : Objects.requireNonNull(directoryOf(tank).listFiles((f, n) -> f.getName().endsWith(INL) && f.getName().equals(dayOf(day.toString()) + INL))))
+				sort(file);
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	private void sort(File file) throws IOException {
+		final List<Message> messages = loadMessages(file);
+		messages.sort(Comparator.comparing(m -> Instant.parse(tsOf(m))));
+		save(file, messages);
+	}
+
+	public void seal(Tank tank) {
+		try {
+			for (File file : Objects.requireNonNull(directoryOf(tank).listFiles((f, n) -> f.getName().endsWith(INL)))) {
+				final byte[] text = readFile(file);
+				ZipOutputStream out = new ZipOutputStream(new FileOutputStream(new File(file.getAbsolutePath().replace(INL, ZIP))));
+				ZipEntry e = new ZipEntry(file.getName());
+				out.putNextEntry(e);
+				out.write(text, 0, text.length);
+				out.closeEntry();
+				out.close();
+				file.delete();
+			}
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
+
 	}
 
 	public void pump(Tank from, Tank to, Function function) {
@@ -96,45 +134,22 @@ public class DatalakeManager {
 	}
 
 	private void append(File inlFile, Message message, String textMessage) {
-		final Instant messageInstant = parse(tsOf(message));
+		write(inlFile, textMessage, inlFile.exists() ? APPEND : CREATE);
+		saveAttachments(inlFile.getParentFile(), message);
+	}
+
+	private void save(File inlFile, List<Message> messages) {
+		StringBuilder builder = new StringBuilder();
+		for (Message m : messages) builder.append(m.toString()).append("\n\n");
+		write(inlFile, builder.toString(), CREATE);
+	}
+
+	private synchronized void write(File inlFile, String textMessage, StandardOpenOption option) {
 		try {
-			final boolean existFile = lastMessageTime.containsKey(inlFile);
-			if (!existFile) writeAndUpdate(inlFile, message, textMessage, messageInstant, CREATE);
-			else if (shouldBeAtTheEnd(inlFile, messageInstant)) writeAndUpdate(inlFile, message, textMessage, messageInstant, APPEND);
-			else appendMessage(inlFile, message);
-			saveAttachments(inlFile.getParentFile(), message);
+			Files.write(inlFile.toPath(), (textMessage + "\n\n").getBytes(), option);
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
-	}
-
-	private void writeAndUpdate(File inlFile, Message message, String textMessage, Instant messageInstant, StandardOpenOption create) throws IOException {
-		write(inlFile.toPath(), (textMessage + "\n\n").getBytes(), create);
-		updateCache(inlFile, message, messageInstant);
-	}
-
-	private void updateCache(File inlFile, Message message, Instant messageInstant) {
-		this.messagesCache.putIfAbsent(inlFile, new ArrayList<>());
-		if (this.messagesCache.containsKey(inlFile)) this.messagesCache.get(inlFile).add(message);
-		lastMessageTime.put(inlFile, messageInstant);
-	}
-
-	private void appendMessage(File inlFile, Message message) throws IOException {
-		List<Message> messages = getMessages(inlFile);
-		addMessage(messages, message);
-		save(inlFile, messages);
-	}
-
-	private List<Message> getMessages(File inlFile) throws IOException {
-		List<Message> messages;
-		if (this.messagesCache.containsKey(inlFile)) messages = this.messagesCache.get(inlFile);
-		else this.messagesCache.put(inlFile, messages = loadMessages(inlFile));
-		return messages;
-	}
-
-	private boolean shouldBeAtTheEnd(File inlFile, Instant messageInstant) {
-		final Instant lastInstant = lastMessageTime.get(inlFile);
-		return lastInstant == null || messageInstant.isAfter(lastInstant);
 	}
 
 	private void saveAttachments(File directory, Message message) {
@@ -144,17 +159,11 @@ public class DatalakeManager {
 	}
 
 	private List<Message> loadMessages(File inlFile) throws IOException {
-		return Inl.load(new String(Files.readAllBytes(inlFile.toPath()), Charset.forName("UTF-8")));
+		return Inl.load(new String(readFile(inlFile), Charset.forName("UTF-8")));
 	}
 
-	private void save(File inlFile, List<Message> messages) {
-		StringBuilder builder = new StringBuilder();
-		for (Message m : messages) builder.append(m.toString()).append("\n\n");
-		try {
-			write(inlFile.toPath(), builder.toString().getBytes());
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
+	private byte[] readFile(File inlFile) throws IOException {
+		return Files.readAllBytes(inlFile.toPath());
 	}
 
 	private File inl(File tankDirectory, Message message) {
@@ -171,17 +180,5 @@ public class DatalakeManager {
 
 	private File directoryOf(Tank tank) {
 		return new File(stationDirectory, tank.qualifiedName());
-	}
-
-	private void addMessage(List<Message> list, Message element) {
-		if (list.size() == 0) list.add(element);
-		else {
-			final int position = findPosition(list, element);
-			list.add(position < 0 ? Math.abs(position) - 1 : position, element);
-		}
-	}
-
-	private int findPosition(List<Message> list, Message element) {
-		return binarySearch(list, element, comparing(m -> parse(tsOf(m))));
 	}
 }

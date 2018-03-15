@@ -28,13 +28,12 @@ Artifact("io.intino.ness", "1.1.1") ness as Product
 	Deployment("Datalake") ness-ebar > Dev(server = ebar-pre, runConfiguration = ebar-pre-ness, project = "ebar")
 	Deployment("Datalake") ness-happysense > Dev(server = happysense-pre, runConfiguration = happysense-pre-ness, project = "happysense")
 	Deployment("Datalake") ness-octana > Dev(server = octana-pre, runConfiguration = octana-pre-ness, project = "octana")
+	Deployment("Datalake") ness-adquiver > Dev(server = adquiver-pre, runConfiguration = adquiver-pre-ness, project = "adquiver")
 
 Server(cesar = "cesar.monentia.es") happysense-pre
-
 Server(cesar = "cesar.monentia.es") ebar-pre
-
 Server(cesar = "cesar.monentia.es") octana-pre
-
+Server(cesar = "cesar.monentia.es") adquiver-pre
 Server(cesar = "cesar.pre.intino.io") consul-dev
 
 RunConfiguration cesar-pro
@@ -69,6 +68,14 @@ RunConfiguration octana-pre-ness
 	Argument("connector_id", "octana-ness-pre")
 	Argument("mqtt_port", "1884")
 
+RunConfiguration adquiver-pre-ness
+	Argument("ness_store", "$HOME/store")
+	Argument("ness_datalake", "$HOME/datalake")
+	Argument("broker_store", "$HOME/broker/")
+	Argument("broker_port", "63000")
+	Argument("connector_id", "adquiver-ness-pre")
+	Argument("mqtt_port", "1884")
+
 RunConfiguration octana-dev-ness
 	Argument("ness_store", "./temp/octana/store")
 	Argument("ness_datalake", "./temp/octana/datalake")
@@ -85,14 +92,24 @@ RunConfiguration cesar-dev
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
 
-RunConfiguration local
+RunConfiguration hs-dev
 	Argument("ness_store", "./temp/happysense/store")
 	Argument("ness_datalake", "./temp/happysense/datalake")
 	Argument("broker_store", "./temp/happysense/broker/")
 	Argument("connector_id", "ness-happy-pre")
 //	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
 	Argument("broker_port", "63000")
-	Argument("mqtt_port", "1883")
+	Argument("mqtt_port", "1884")
+
+RunConfiguration adquiver-dev
+	Argument("ness_store", "./temp/adquiver/store")
+	Argument("ness_datalake", "./temp/adquiver/datalake")
+	Argument("broker_store", "./temp/adquiver/broker/")
+	Argument("connector_id", "ness-adquiver-dev")
+//	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
+	Argument("broker_port", "63000")
+	Argument("mqtt_port", "1884")
+
 
 
 Repository("intino-maven") intino

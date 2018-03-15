@@ -4,16 +4,15 @@ import com.google.gson.Gson;
 import io.intino.konos.jms.Consumer;
 import io.intino.konos.jms.QueueProducer;
 import io.intino.ness.box.NessBox;
-import io.intino.ness.box.actions.PauseTankAction;
-import io.intino.ness.box.actions.ResumeTankAction;
+import io.intino.ness.box.actions.SortTankAction;
 import io.intino.ness.box.schemas.Reflow;
+import io.intino.ness.graph.Tank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
-
 import java.time.Instant;
 
 import static io.intino.konos.jms.Consumer.textFrom;
@@ -64,9 +63,9 @@ public class ReflowSession implements Consumer {
 
 	private void createSession(Reflow reflow) {
 		logger.info("Shutting down actual session");
-		reflow.tanks().forEach(tank -> new PauseTankAction(box, tank).execute());
-		restartBusWithOutPersistence();
+		box.restartBus(false);
 		this.handler = new ReflowProcessHandler(box, reflow.tanks(), reflow.from(), reflow.blockSize());
+		for (Tank tank : this.handler.tanks()) new SortTankAction(box, tank, Instant.now()).execute();
 		logger.info("Reflow session created");
 	}
 
@@ -77,16 +76,7 @@ public class ReflowSession implements Consumer {
 
 	private void finish() {
 		logger.info("Reflow session finished");
-		handler.tanks().forEach(tank -> new ResumeTankAction(box, tank.qualifiedName()).execute());
-//		restart();
 		this.handler = null;
-	}
-
-	private void restartBusWithOutPersistence() {
-		box.restartBus(false);
-	}
-
-	private void restart() {
-		box.restartBus(true);
+		//box.restartBus(true); TODO falla al arrancar con persistencia
 	}
 }
