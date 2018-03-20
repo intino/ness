@@ -26,11 +26,14 @@ Artifact("io.intino.ness", "1.1.1") ness as Product
 
 	Deployment("Datalake") ness-dev > Dev(server = consul-dev, runConfiguration = ebar-pre-ness, project = "dev")
 	Deployment("Datalake") ness-ebar > Dev(server = ebar-pre, runConfiguration = ebar-pre-ness, project = "ebar")
-	Deployment("Datalake") ness-happysense > Dev(server = happysense-pre, runConfiguration = happysense-pre-ness, project = "happysense")
+	Deployment("Datalake") ness-happysense
+		Dev(server = happysense-pre, runConfiguration = happysense-pre-ness, project = "happysense")
+		Pro(server = happysense-pro, runConfiguration = happysense-pro-ness, project = "happysense")
 	Deployment("Datalake") ness-octana > Dev(server = octana-pre, runConfiguration = octana-pre-ness, project = "octana")
 	Deployment("Datalake") ness-adquiver > Dev(server = adquiver-pre, runConfiguration = adquiver-pre-ness, project = "adquiver")
 
 Server(cesar = "cesar.monentia.es") happysense-pre
+Server(cesar = "cesar.monentia.es") happysense-pro
 Server(cesar = "cesar.monentia.es") ebar-pre
 Server(cesar = "cesar.monentia.es") octana-pre
 Server(cesar = "cesar.monentia.es") adquiver-pre
@@ -57,6 +60,14 @@ RunConfiguration happysense-pre-ness
 	Argument("ness_datalake", "$HOME/datalake/")
 	Argument("broker_store", "$HOME/broker/")
 	Argument("connector_id", "happysense-pre-ness")
+	Argument("broker_port", "63000")
+	Argument("mqtt_port", "1884")
+
+RunConfiguration happysense-pro-ness
+	Argument("ness_store", "$HOME/store")
+	Argument("ness_datalake", "$HOME/datalake/")
+	Argument("broker_store", "$HOME/broker/")
+	Argument("connector_id", "happysense-pro-ness")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
 
@@ -96,8 +107,8 @@ RunConfiguration hs-dev
 	Argument("ness_store", "./temp/happysense/store")
 	Argument("ness_datalake", "./temp/happysense/datalake")
 	Argument("broker_store", "./temp/happysense/broker/")
-	Argument("connector_id", "ness-happy-pre")
-//	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
+	Argument("connector_id", "ness-happy-pro")
+	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
 

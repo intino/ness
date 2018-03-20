@@ -48,9 +48,13 @@ public interface ManagerMBean {
 	@Parameters({"tank", "name"})
 	String renameTank(String tank, String name);
 
-	@Description("Changes name of a tank for a new one")
+	@Description("Sort messages of all datalake tanks")
 	@Parameters({})
 	void sortTanks();
+
+	@Description("Sort messages of a tank")
+	@Parameters({"tank"})
+	void sortTank(String tank);
 
 	@Description("Connects source and destination topics")
 	@Parameters({})

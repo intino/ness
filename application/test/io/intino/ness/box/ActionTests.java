@@ -113,7 +113,7 @@ public class ActionTests {
 	}
 
 	private void checkProduce() {
-		new Thread(() -> new ProducerTest().produce()).start();
+		new Thread(() -> new ProducerTest().produceDialogs()).start();
 	}
 
 	@After

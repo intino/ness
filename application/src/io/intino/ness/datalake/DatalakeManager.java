@@ -1,5 +1,6 @@
 package io.intino.ness.datalake;
 
+import com.google.common.collect.ImmutableList;
 import io.intino.konos.alexandria.Inl;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
@@ -15,11 +16,13 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
+import static java.util.Objects.requireNonNull;
 
 
 public class DatalakeManager {
@@ -56,7 +59,7 @@ public class DatalakeManager {
 
 	public void sort(Tank tank) {
 		try {
-			for (File file : Objects.requireNonNull(directoryOf(tank).listFiles((f, n) -> f.getName().endsWith(INL)))) sort(file);
+			for (File file : requireNonNull(directoryOf(tank).listFiles((f, n) -> n.endsWith(INL)))) sort(file);
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -64,7 +67,8 @@ public class DatalakeManager {
 
 	public void sort(Tank tank, Instant day) {
 		try {
-			for (File file : Objects.requireNonNull(directoryOf(tank).listFiles((f, n) -> f.getName().endsWith(INL) && f.getName().equals(dayOf(day.toString()) + INL))))
+			final List<File> inlFiles = Arrays.asList(Objects.requireNonNull(directoryOf(tank).listFiles((f, n) -> n.endsWith(INL))));
+			for (File file : day == null ? inlFiles : inlFiles.stream().filter(f -> f.getName().equals(dayOf(day.toString()) + INL)).collect(Collectors.toList()))
 				sort(file);
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
@@ -79,7 +83,7 @@ public class DatalakeManager {
 
 	public void seal(Tank tank) {
 		try {
-			for (File file : Objects.requireNonNull(directoryOf(tank).listFiles((f, n) -> f.getName().endsWith(INL)))) {
+			for (File file : requireNonNull(directoryOf(tank).listFiles((f, n) -> n.endsWith(INL)))) {
 				final byte[] text = readFile(file);
 				ZipOutputStream out = new ZipOutputStream(new FileOutputStream(new File(file.getAbsolutePath().replace(INL, ZIP))));
 				ZipEntry e = new ZipEntry(file.getName());
@@ -129,8 +133,8 @@ public class DatalakeManager {
 		if (files.isEmpty()) return files;
 		final String day = dayOf(from.toString());
 		Collections.sort(files);
-		final File bound = files.stream().filter(f -> f.getName().equals(day + INL) || f.getName().compareTo(day) > 0).findFirst().orElse(null);
-		return files.subList(files.indexOf(bound), files.size());
+		final File bound = files.stream().filter(f -> f.getName().equals(day + INL) || f.getName().replace(INL, "").compareTo(day) > 0).findFirst().orElse(null);
+		return bound == null || files.isEmpty() ? ImmutableList.of() : files.subList(files.indexOf(bound), files.size());
 	}
 
 	private void append(File inlFile, Message message, String textMessage) {

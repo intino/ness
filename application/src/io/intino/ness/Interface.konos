@@ -1,6 +1,6 @@
 dsl Konos
 
-Task sortTanks as CronTrigger("0 0 0/1 1/1 * ? *", "hourly")
+Task sortTanks as CronTrigger("0 0 4 1/1 * ? *", "daily at 4")
 Task sealTanks as CronTrigger("0 0 4 1/1 * ? *", "daily at 4")
 
 Service Manager as JMX
@@ -32,8 +32,9 @@ Service Manager as JMX
 		Parameter tank as Text
 		Parameter name as Text
 		Response as Text
-	Operation("Changes name of a tank for a new one") sort-tanks
-
+	Operation("Sort messages of all datalake tanks") sort-tanks
+	Operation("Sort messages of a tank") sort-tank
+		Parameter tank as Text
 	Operation("Connects source and destination topics") pipes
 		Response as Text
 	Operation("Connects source and destination topics real-time, optionaly converting the message with a function") add-pipe
