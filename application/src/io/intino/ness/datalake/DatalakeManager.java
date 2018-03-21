@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.util.Objects.requireNonNull;
 
@@ -30,9 +29,11 @@ public class DatalakeManager {
 	private static final String ZIP = ".zip";
 	private Logger logger = LoggerFactory.getLogger(DatalakeManager.class);
 	private File stationDirectory;
+	private final Scale scale;
 
-	public DatalakeManager(String stationFolder, List<Tank> tanks) {
+	public DatalakeManager(String stationFolder, Scale scale, List<Tank> tanks) {
 		this.stationDirectory = new File(stationFolder);
+		this.scale = scale;
 		this.stationDirectory.mkdirs();
 		tanks.forEach(this::addTank);
 	}
@@ -54,7 +55,7 @@ public class DatalakeManager {
 	}
 
 	public void drop(Tank tank, Message message, String textMessage) {
-		append(inl(directoryOf(tank), message), message, textMessage);
+		append(inlFile(directoryOf(tank), message), message, textMessage);
 	}
 
 	public void sort(Tank tank) {
@@ -65,10 +66,10 @@ public class DatalakeManager {
 		}
 	}
 
-	public void sort(Tank tank, Instant day) {
+	public void sort(Tank tank, Instant instant) {
 		try {
 			final List<File> inlFiles = Arrays.asList(Objects.requireNonNull(directoryOf(tank).listFiles((f, n) -> n.endsWith(INL))));
-			for (File file : day == null ? inlFiles : inlFiles.stream().filter(f -> f.getName().equals(dayOf(day.toString()) + INL)).collect(Collectors.toList()))
+			for (File file : instant == null ? inlFiles : inlFiles.stream().filter(f -> f.getName().equals(fileFromInstant(instant) + INL)).collect(Collectors.toList()))
 				sort(file);
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
@@ -96,7 +97,6 @@ public class DatalakeManager {
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
-
 	}
 
 	public void pump(Tank from, Tank to, Function function) {
@@ -131,14 +131,14 @@ public class DatalakeManager {
 
 	private List<File> filter(List<File> files, Instant from) {
 		if (files.isEmpty()) return files;
-		final String day = dayOf(from.toString());
+		final String day = fileFromInstant(from);
 		Collections.sort(files);
 		final File bound = files.stream().filter(f -> f.getName().equals(day + INL) || f.getName().replace(INL, "").compareTo(day) > 0).findFirst().orElse(null);
 		return bound == null || files.isEmpty() ? ImmutableList.of() : files.subList(files.indexOf(bound), files.size());
 	}
 
 	private void append(File inlFile, Message message, String textMessage) {
-		write(inlFile, textMessage, inlFile.exists() ? APPEND : CREATE);
+		write(inlFile, textMessage, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		saveAttachments(inlFile.getParentFile(), message);
 	}
 
@@ -148,7 +148,7 @@ public class DatalakeManager {
 		write(inlFile, builder.toString(), CREATE);
 	}
 
-	private synchronized void write(File inlFile, String textMessage, StandardOpenOption option) {
+	private synchronized void write(File inlFile, String textMessage, StandardOpenOption... option) {
 		try {
 			Files.write(inlFile.toPath(), (textMessage + "\n\n").getBytes(), option);
 		} catch (IOException e) {
@@ -170,16 +170,28 @@ public class DatalakeManager {
 		return Files.readAllBytes(inlFile.toPath());
 	}
 
-	private File inl(File tankDirectory, Message message) {
-		return tsOf(message) == null ? null : new File(tankDirectory, dayOf(tsOf(message)) + INL);
+	private File inlFile(File tankDirectory, Message message) {
+		return tsOf(message) == null ? null : new File(tankDirectory, fileFromInstant(tsOf(message)) + INL);
 	}
 
 	private String tsOf(Message message) {
 		return message.get("ts");
 	}
 
+	private String fileFromInstant(Instant instant) {
+		return fileFromInstant(instant.toString());
+	}
+
+	private String fileFromInstant(String instant) {
+		return scale.equals(Scale.Day) ? dayOf(instant) : hourOf(instant);
+	}
+
 	private static String dayOf(String instant) {
 		return instant.replace("-", "").substring(0, 8);
+	}
+
+	private static String hourOf(String instant) {
+		return dayOf(instant) + instant.substring(instant.indexOf("T") + 1, instant.indexOf(":"));
 	}
 
 	private File directoryOf(Tank tank) {

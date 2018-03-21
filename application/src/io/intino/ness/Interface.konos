@@ -1,7 +1,6 @@
 dsl Konos
 
-Task sortTanks as CronTrigger("0 0 4 1/1 * ? *", "daily at 4")
-Task sealTanks as CronTrigger("0 0 4 1/1 * ? *", "daily at 4")
+//Task sealTanks as CronTrigger("0 0 4 1/1 * ? *", "daily at 4")
 
 Service Manager as JMX
 	Operation("Request all users registered in ness") users

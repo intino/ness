@@ -1,15 +1,15 @@
 dsl Legio
 
-Artifact("io.intino.ness", "1.1.1") ness as Product
+Artifact("io.intino.ness", "1.2.0") ness as Product
 	Imports
 		Compile("org.apache.activemq", "activemq-broker", "5.15.2")
 		Compile("org.apache.activemq", "activemq-mqtt", "5.15.2")
 		Compile("org.apache.activemq", "activemq-kahadb-store", "5.15.2")
 		Compile("org.apache.activemq", "activemq-jaas", "5.15.2")
 		Compile("org.apache.activemq", "activemq-runtime-config", "5.15.2")
-		Compile("io.intino.konos", "alexandria-jms", "1.0.12")
+		Compile("io.intino.konos", "alexandria-jms", "1.0.13")
 		Compile("io.intino.konos", "alexandria-slack", "1.0.11")
-		Compile("io.intino.konos", "alexandria-jmx", "1.0.2")
+		Compile("io.intino.konos", "alexandria-jmx", "1.0.3")
 		Compile("io.intino.konos", "alexandria-scheduler", "1.0.5")
 		Compile("org.slf4j", "slf4j-log4j12", "1.7.7")
 	Code("io.intino.ness")
@@ -85,6 +85,7 @@ RunConfiguration adquiver-pre-ness
 	Argument("broker_store", "$HOME/broker/")
 	Argument("broker_port", "63000")
 	Argument("connector_id", "adquiver-ness-pre")
+	Argument("scale", "Hour")
 	Argument("mqtt_port", "1884")
 
 RunConfiguration octana-dev-ness
@@ -117,6 +118,7 @@ RunConfiguration adquiver-dev
 	Argument("ness_datalake", "./temp/adquiver/datalake")
 	Argument("broker_store", "./temp/adquiver/broker/")
 	Argument("connector_id", "ness-adquiver-dev")
+	Argument("scale", "Hour")
 //	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")

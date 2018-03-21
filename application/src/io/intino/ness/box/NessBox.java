@@ -5,6 +5,7 @@ import io.intino.ness.bus.BusManager;
 import io.intino.ness.bus.BusService;
 import io.intino.ness.datalake.DatalakeManager;
 import io.intino.ness.datalake.PipeStarter;
+import io.intino.ness.datalake.Scale;
 import io.intino.ness.datalake.reflow.ReflowSession;
 import io.intino.ness.graph.NessGraph;
 import io.intino.ness.graph.Pipe;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 public class NessBox extends AbstractBox {
 	private static final String REFLOW_READY = "service.ness.reflow.ready";
+	private Scale scale = Scale.Day;
 	private String connectorID;
 	private DatalakeManager datalakeManager;
 	private NessGraph graph;
@@ -34,6 +36,7 @@ public class NessBox extends AbstractBox {
 		super(configuration);
 		this.connectorID = configuration.args().getOrDefault("connector_id", "ness");
 		this.reflowSession = new ReflowSession(this);
+		this.scale = configuration.args().containsKey("scale") ? Scale.valueOf(configuration.args().get("scale")) : Scale.Day;
 	}
 
 	@Override
@@ -44,7 +47,7 @@ public class NessBox extends AbstractBox {
 
 	public io.intino.konos.alexandria.Box open() {
 		super.open();
-		datalakeManager = new DatalakeManager(configuration.args().get("ness_datalake"), graph.tankList());
+		this.datalakeManager = new DatalakeManager(configuration.args().get("ness_datalake"), scale, graph.tankList());
 		startBus();
 		startService();
 		return this;
@@ -55,13 +58,13 @@ public class NessBox extends AbstractBox {
 		startService();
 	}
 
-	public void startService() {
+	private void startService() {
 		startReflowService();
 		startTanks();
 		startBusPipes();
 	}
 
-	public void startReflowService() {
+	private void startReflowService() {
 		busManager.createQueue(REFLOW_READY);
 		busManager.registerConsumer("service.ness.reflow", reflowSession);
 	}
