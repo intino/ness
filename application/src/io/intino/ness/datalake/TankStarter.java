@@ -23,17 +23,17 @@ public class TankStarter {
 	}
 
 	public void start() {
-		bus.registerConsumer(tank.feedQN(), message -> consume(tank, message));
-		bus.registerConsumer(tank.dropQN(), message -> consumeDrop(tank, message));
+		bus.registerConsumer(tank.feedQN(), message -> feed(tank, message));
+		bus.registerConsumer(tank.dropQN(), message -> drop(tank, message));
 	}
 
-	private void consume(Tank tank, javax.jms.Message message) {
+	private void feed(Tank tank, javax.jms.Message message) {
 		new Thread(() -> flow(tank, message)).start();
-		consume(tank, textFrom(message));
+		drop(tank, textFrom(message));
 	}
 
-	private void consumeDrop(Tank tank, javax.jms.Message message) {
-		consume(tank, textFrom(message));
+	private void drop(Tank tank, javax.jms.Message message) {
+		drop(tank, textFrom(message));
 	}
 
 	@SuppressWarnings("ConstantConditions")
@@ -41,7 +41,7 @@ public class TankStarter {
 		bus.getProducer(tank.flowQN()).produce(message);
 	}
 
-	private void consume(Tank aTank, String textMessage) {
+	private void drop(Tank aTank, String textMessage) {
 		Message message;
 		try {
 			message = load(textMessage);

@@ -15,6 +15,7 @@ public abstract class AbstractBox extends io.intino.konos.alexandria.Box {
 	protected NessConfiguration configuration;
 	private io.intino.konos.jmx.JMXServer manager;
 	private io.intino.konos.slack.Bot nessie;
+	private io.intino.konos.scheduling.KonosTasker tasker = new io.intino.konos.scheduling.KonosTasker();
 
 	public AbstractBox(String[] args) {
 		this(new NessConfiguration(args));
@@ -66,7 +67,9 @@ public NessieSlackBot nessie() {
 
 
 
-
+	public io.intino.konos.scheduling.KonosTasker tasker() {
+		return this.tasker;
+	}
 
 	private void initRESTServices() {
 
@@ -101,7 +104,7 @@ public NessieSlackBot nessie() {
 	}
 
 	private void initTasks() {
-
+		Tasks.init(this.tasker, (NessBox) this);
 	}
 
 	private void initLogger() {

@@ -11,6 +11,7 @@ public class Tank extends io.intino.tara.magritte.Layer implements io.intino.tar
 	protected java.util.List<java.lang.String> tags = new java.util.ArrayList<>();
 	protected io.intino.tara.magritte.Expression<java.lang.Integer> version;
 	protected boolean running;
+	protected java.util.List<java.lang.String> sorted = new java.util.ArrayList<>();
 
 	public Tank(io.intino.tara.magritte.Node node) {
 		super(node);
@@ -50,6 +51,18 @@ public class Tank extends io.intino.tara.magritte.Layer implements io.intino.tar
 
 	public boolean running() {
 		return running;
+	}
+
+	public java.util.List<java.lang.String> sorted() {
+		return sorted;
+	}
+
+	public java.lang.String sorted(int index) {
+		return sorted.get(index);
+	}
+
+	public java.util.List<java.lang.String> sorted(java.util.function.Predicate<java.lang.String> predicate) {
+		return sorted().stream().filter(predicate).collect(java.util.stream.Collectors.toList());
 	}
 
 	public Tank qualifiedName(java.lang.String value) {
@@ -92,6 +105,7 @@ public class Tank extends io.intino.tara.magritte.Layer implements io.intino.tar
 		map.put("tags", this.tags);
 		map.put("version", new java.util.ArrayList(java.util.Collections.singletonList(this.version)));
 		map.put("running", new java.util.ArrayList(java.util.Collections.singletonList(this.running)));
+		map.put("sorted", this.sorted);
 		return map;
 	}
 
@@ -105,6 +119,7 @@ public class Tank extends io.intino.tara.magritte.Layer implements io.intino.tar
 		else if (name.equalsIgnoreCase("tags")) this.tags = io.intino.tara.magritte.loaders.StringLoader.load(values, this);
 		else if (name.equalsIgnoreCase("version")) this.version = io.intino.tara.magritte.loaders.FunctionLoader.load(values, this, io.intino.tara.magritte.Expression.class).get(0);
 		else if (name.equalsIgnoreCase("running")) this.running = io.intino.tara.magritte.loaders.BooleanLoader.load(values, this).get(0);
+		else if (name.equalsIgnoreCase("sorted")) this.sorted = io.intino.tara.magritte.loaders.StringLoader.load(values, this);
 	}
 
 	@Override
@@ -117,6 +132,7 @@ public class Tank extends io.intino.tara.magritte.Layer implements io.intino.tar
 		else if (name.equalsIgnoreCase("tags")) this.tags = new java.util.ArrayList<>((java.util.List<java.lang.String>) values);
 		else if (name.equalsIgnoreCase("version")) this.version = io.intino.tara.magritte.loaders.FunctionLoader.load(values.get(0), this, io.intino.tara.magritte.Expression.class);
 		else if (name.equalsIgnoreCase("running")) this.running = (java.lang.Boolean) values.get(0);
+		else if (name.equalsIgnoreCase("sorted")) this.sorted = new java.util.ArrayList<>((java.util.List<java.lang.String>) values);
 	}
 
 

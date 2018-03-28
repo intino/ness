@@ -215,8 +215,9 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 			return newElement;
 		}
 
-		public io.intino.ness.graph.User user(java.lang.String password, java.util.List<java.lang.String> groups) {
+		public io.intino.ness.graph.User user(java.lang.String name, java.lang.String password, java.util.List<java.lang.String> groups) {
 			io.intino.ness.graph.User newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.graph.User.class, stash, name).a$(io.intino.ness.graph.User.class);
+			newElement.core$().set(newElement, "name", java.util.Collections.singletonList(name));
 			newElement.core$().set(newElement, "password", java.util.Collections.singletonList(password));
 			newElement.core$().set(newElement, "groups", groups);
 			return newElement;

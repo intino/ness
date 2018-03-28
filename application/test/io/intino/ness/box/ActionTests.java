@@ -33,7 +33,7 @@ public class ActionTests {
 	private NessBox box;
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		String[] args = new String[]{"ness_store=../temp/store", "ness_datalake=../temp/datalake", "broker_store=../temp/broker/", "connector_id=ness-cesar-pre", "broker_port=63000", "mqtt_port=1883"};
 		NessConfiguration boxConfiguration = new NessConfiguration(args);
 		graph = new Graph(store(boxConfiguration.args().get("ness_store"))).loadStashes("Ness").as(NessGraph.class);

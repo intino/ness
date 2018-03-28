@@ -13,8 +13,10 @@ Concept Tank
 	var string[] tags = empty
 	var integer version = @version is reactive
 	var boolean running = true
+	var string[] sorted = empty
 
 Concept User
+	var string name
 	var string password
 	var string[] groups
 

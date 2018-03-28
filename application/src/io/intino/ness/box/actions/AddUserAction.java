@@ -12,10 +12,10 @@ public class AddUserAction {
 	public String name;
 
 	public String execute() {
-		User user = box.graph().userList(u -> u.name$().equals(name)).findFirst().orElse(null);
+		User user = box.graph().userList(u -> u.name().equals(name)).findFirst().orElse(null);
 		if (user != null) return "User already exists";
 		String password = box.busService().newUser(name);
-		box.graph().create("users", name).user(password, emptyList()).save$();
+		box.graph().create("users").user(name, password, emptyList()).save$();
 		return "User *" + name + "* added with password `" + password + "`";
 
 	}

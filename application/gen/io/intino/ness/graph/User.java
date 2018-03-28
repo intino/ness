@@ -4,11 +4,16 @@ import io.intino.ness.graph.*;
 
 
 public class User extends io.intino.tara.magritte.Layer implements io.intino.tara.magritte.tags.Terminal {
+	protected java.lang.String name;
 	protected java.lang.String password;
 	protected java.util.List<java.lang.String> groups = new java.util.ArrayList<>();
 
 	public User(io.intino.tara.magritte.Node node) {
 		super(node);
+	}
+
+	public java.lang.String name() {
+		return name;
 	}
 
 	public java.lang.String password() {
@@ -27,6 +32,11 @@ public class User extends io.intino.tara.magritte.Layer implements io.intino.tar
 		return groups().stream().filter(predicate).collect(java.util.stream.Collectors.toList());
 	}
 
+	public User name(java.lang.String value) {
+		this.name = value;
+		return (User) this;
+	}
+
 	public User password(java.lang.String value) {
 		this.password = value;
 		return (User) this;
@@ -35,6 +45,7 @@ public class User extends io.intino.tara.magritte.Layer implements io.intino.tar
 	@Override
 	protected java.util.Map<java.lang.String, java.util.List<?>> variables$() {
 		java.util.Map<String, java.util.List<?>> map = new java.util.LinkedHashMap<>();
+		map.put("name", new java.util.ArrayList(java.util.Collections.singletonList(this.name)));
 		map.put("password", new java.util.ArrayList(java.util.Collections.singletonList(this.password)));
 		map.put("groups", this.groups);
 		return map;
@@ -43,14 +54,16 @@ public class User extends io.intino.tara.magritte.Layer implements io.intino.tar
 	@Override
 	protected void load$(java.lang.String name, java.util.List<?> values) {
 		super.load$(name, values);
-		if (name.equalsIgnoreCase("password")) this.password = io.intino.tara.magritte.loaders.StringLoader.load(values, this).get(0);
+		if (name.equalsIgnoreCase("name")) this.name = io.intino.tara.magritte.loaders.StringLoader.load(values, this).get(0);
+		else if (name.equalsIgnoreCase("password")) this.password = io.intino.tara.magritte.loaders.StringLoader.load(values, this).get(0);
 		else if (name.equalsIgnoreCase("groups")) this.groups = io.intino.tara.magritte.loaders.StringLoader.load(values, this);
 	}
 
 	@Override
 	protected void set$(java.lang.String name, java.util.List<?> values) {
 		super.set$(name, values);
-		if (name.equalsIgnoreCase("password")) this.password = (java.lang.String) values.get(0);
+		if (name.equalsIgnoreCase("name")) this.name = (java.lang.String) values.get(0);
+		else if (name.equalsIgnoreCase("password")) this.password = (java.lang.String) values.get(0);
 		else if (name.equalsIgnoreCase("groups")) this.groups = new java.util.ArrayList<>((java.util.List<java.lang.String>) values);
 	}
 

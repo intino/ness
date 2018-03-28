@@ -12,7 +12,6 @@ import io.intino.ness.graph.Pipe;
 import io.intino.ness.graph.Tank;
 import io.intino.ness.graph.User;
 import io.intino.tara.magritte.Graph;
-import io.intino.tara.magritte.Layer;
 
 import java.io.File;
 import java.util.Map;
@@ -81,7 +80,7 @@ public class NessBox extends AbstractBox {
 	}
 
 	private Map<String, String> users() {
-		return graph.userList().stream().collect(Collectors.toMap(Layer::name$, User::password));
+		return graph.userList().stream().collect(Collectors.toMap(user -> user.name() == null ? user.name$() : user.name(), User::password));
 	}
 
 	public void startTanks() {

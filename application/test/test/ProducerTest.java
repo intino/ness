@@ -1,5 +1,6 @@
 package test;
 
+import io.intino.konos.alexandria.Inl;
 import io.intino.konos.jms.TopicProducer;
 import io.intino.ness.inl.Message;
 import org.junit.Before;
@@ -10,8 +11,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.jms.Connection;
 import javax.jms.Session;
+import java.io.File;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
@@ -22,9 +27,9 @@ import static org.apache.activemq.ActiveMQConnection.makeConnection;
 public class ProducerTest {
 	private static final Logger logger = LoggerFactory.getLogger(ProducerTest.class);
 	private String url = "tcp://localhost:63000";
-	private String user = "consul";
-	private String password = "volk96e3atir";
-	private String topic = "feed.cesar.infrastructure.operation";
+	private String user = "happysense-pre";
+	private String password = "vhqpp7n6u5f2";
+	private String topic = "scala.happysense.dialogs";
 
 	private Session session;
 	private Connection connection;
@@ -33,12 +38,22 @@ public class ProducerTest {
 
 	@Test
 	@Ignore
-	public void produce() {
+	public void produceDialogs() {
 		try {
-			while (true) {
-				produceMessage();
-				sleep(1000);
-			}
+			final List<Message> messages = Inl.load(new String(Files.readAllBytes(new File("/Users/oroncal/workspace/ness/application/test/dialogs.inl").toPath())));
+			messages.sort(Comparator.comparing(m -> Instant.parse(m.get("instant"))));
+			messages.forEach(this::produceMessage);
+		} catch (Exception ignored) {
+		}
+	}
+
+	@Test
+	@Ignore
+	public void produceSurveys() {
+		try {
+			final List<Message> messages = Inl.load(new String(Files.readAllBytes(new File("/Users/oroncal/workspace/ness/application/test/surveys.inl").toPath())));
+			messages.sort(Comparator.comparing(m -> Instant.parse(m.get("ts"))));
+			messages.forEach(this::produceMessage);
 		} catch (Exception ignored) {
 		}
 	}
@@ -53,6 +68,11 @@ public class ProducerTest {
 			}
 		} catch (Exception ignored) {
 		}
+	}
+
+	private void produceMessage(Message message) {
+		topicProducer.produce(createMessageFor(message.toString()));
+//		System.out.println("message sent to " + topic + " -> " + message.get("ts"));
 	}
 
 	private void produceMessage() {

@@ -35,7 +35,7 @@ public class Feeder {
 	}
 
 	private static String message() {
-		return Inl.serialize(new ExampleMessage(java.util.UUID.randomUUID().toString(), Math.random() * 60));
+		return Inl.toMessage(new ExampleMessage(java.util.UUID.randomUUID().toString(), Math.random() * 60)).toString();
 	}
 
 	public static class ExampleMessage {

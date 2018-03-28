@@ -12,7 +12,7 @@ public class RemoveUserAction {
 	public String name;
 
 	public String execute() {
-		User user = box.graph().userList(u -> u.name$().equals(name)).findFirst().orElse(null);
+		User user = box.graph().userList(u -> u.name().equals(name)).findFirst().orElse(null);
 		if (user == null) return "User not found";
 		user.delete$();
 		box.busService().removeUser(name);

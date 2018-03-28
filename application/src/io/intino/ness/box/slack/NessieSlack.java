@@ -38,9 +38,7 @@ public class NessieSlack {
 	public String users(MessageProperties properties) {
 		List<User> users = box.graph().userList();
 		StringBuilder builder = new StringBuilder();
-		for (User user : users) {
-			builder.append(user.name$()).append("\n");
-		}
+		for (User user : users) builder.append(user.name()).append("\n");
 		String result = builder.toString();
 		return result.isEmpty() ? "There aren't users registered" : result;
 	}

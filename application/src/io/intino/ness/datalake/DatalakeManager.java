@@ -1,6 +1,6 @@
 package io.intino.ness.datalake;
 
-import com.google.common.collect.ImmutableList;
+import com.google.code.externalsorting.ExternalSort;
 import io.intino.konos.alexandria.Inl;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static io.intino.ness.datalake.MessageSaver.append;
+import static io.intino.ness.datalake.MessageSaver.save;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.util.Objects.requireNonNull;
 
@@ -27,7 +29,7 @@ import static java.util.Objects.requireNonNull;
 public class DatalakeManager {
 	private static final String INL = ".inl";
 	private static final String ZIP = ".zip";
-	private Logger logger = LoggerFactory.getLogger(DatalakeManager.class);
+	private static Logger logger = LoggerFactory.getLogger(DatalakeManager.class);
 	private File stationDirectory;
 	private final Scale scale;
 
@@ -55,12 +57,17 @@ public class DatalakeManager {
 	}
 
 	public void drop(Tank tank, Message message, String textMessage) {
-		append(inlFile(directoryOf(tank), message), message, textMessage);
+		final File inlFile = inlFile(directoryOf(tank), message);
+		append(inlFile, message, textMessage);
+		if (tank.sorted().contains(inlFile.getName())) tank.sorted().remove(inlFile.getName());
 	}
 
 	public void sort(Tank tank) {
 		try {
-			for (File file : requireNonNull(directoryOf(tank).listFiles((f, n) -> n.endsWith(INL)))) sort(file);
+			for (File file : requireNonNull(directoryOf(tank).listFiles((f, n) -> n.endsWith(INL) && !tank.sorted().contains(n)))) {
+				sort(file);
+				addSorted(tank, file);
+			}
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -69,17 +76,33 @@ public class DatalakeManager {
 	public void sort(Tank tank, Instant instant) {
 		try {
 			final List<File> inlFiles = Arrays.asList(Objects.requireNonNull(directoryOf(tank).listFiles((f, n) -> n.endsWith(INL))));
-			for (File file : instant == null ? inlFiles : inlFiles.stream().filter(f -> f.getName().equals(fileFromInstant(instant) + INL)).collect(Collectors.toList()))
+			for (File file : instant == null ? inlFiles : inlFiles.stream().filter(f -> f.getName().equals(fileFromInstant(instant) + INL)).collect(Collectors.toList())) {
 				sort(file);
+				addSorted(tank, file);
+			}
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
 
 	private void sort(File file) throws IOException {
+		if ((file.length() / 1024) > 100) externalSort(file);
 		final List<Message> messages = loadMessages(file);
-		messages.sort(Comparator.comparing(m -> Instant.parse(tsOf(m))));
+		messages.sort(messageComparator());
 		save(file, messages);
+	}
+
+	private void externalSort(File file) {
+		new MessageExternalSorter(file).sort();
+	}
+
+	private Comparator<Message> messageComparator() {
+		return Comparator.comparing(m -> Instant.parse(tsOf(m)));
+	}
+
+	private void addSorted(Tank tank, File file) {
+		tank.sorted().add(file.getName());
+		tank.save$();
 	}
 
 	public void seal(Tank tank) {
@@ -134,32 +157,7 @@ public class DatalakeManager {
 		final String day = fileFromInstant(from);
 		Collections.sort(files);
 		final File bound = files.stream().filter(f -> f.getName().equals(day + INL) || f.getName().replace(INL, "").compareTo(day) > 0).findFirst().orElse(null);
-		return bound == null || files.isEmpty() ? ImmutableList.of() : files.subList(files.indexOf(bound), files.size());
-	}
-
-	private void append(File inlFile, Message message, String textMessage) {
-		write(inlFile, textMessage, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-		saveAttachments(inlFile.getParentFile(), message);
-	}
-
-	private void save(File inlFile, List<Message> messages) {
-		StringBuilder builder = new StringBuilder();
-		for (Message m : messages) builder.append(m.toString()).append("\n\n");
-		write(inlFile, builder.toString(), CREATE);
-	}
-
-	private synchronized void write(File inlFile, String textMessage, StandardOpenOption... option) {
-		try {
-			Files.write(inlFile.toPath(), (textMessage + "\n\n").getBytes(), option);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
-
-	private void saveAttachments(File directory, Message message) {
-//		for (Attachment attachment : message.attachments()) {
-//			Files.write(new File(directory, attachment.name()).toPath(), attachment.asByteArray());
-//		}
+		return bound == null || files.isEmpty() ? Collections.emptyList() : files.subList(files.indexOf(bound), files.size());
 	}
 
 	private List<Message> loadMessages(File inlFile) throws IOException {
