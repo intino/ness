@@ -208,6 +208,7 @@ public class BusService {
 		try {
 			service.setBrokerName(NESS);
 			persistent(persistence);
+			service.setDataDirectory(new File(brokerStore, "activemq-data").getAbsolutePath());
 			service.setRestartAllowed(true);
 			service.setUseJmx(true);
 			service.setUseShutdownHook(true);

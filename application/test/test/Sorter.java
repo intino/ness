@@ -9,9 +9,7 @@ public class Sorter {
 
 
 	@Test
-	public void sort() throws InterruptedException {
-		Thread.sleep(5000);
-
+	public void sort() {
 		final long x = System.currentTimeMillis();
 		new MessageExternalSorter(new File("/Users/oroncal/workspace/ness/application/temp/2018021821.inl")).sort();
 		System.out.print(((System.currentTimeMillis() - x) / 1000) + " sg");
