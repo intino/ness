@@ -10,7 +10,7 @@ Artifact("io.intino.ness", "1.2.0") ness as Product
 		Compile("io.intino.konos", "alexandria-jms", "1.0.13")
 		Compile("io.intino.konos", "alexandria-slack", "1.0.11")
 		Compile("io.intino.konos", "alexandria-jmx", "1.0.3")
-		Compile("io.intino.konos", "alexandria-scheduler", "1.0.5")
+		Compile("io.intino.konos", "alexandria-scheduler", "1.0.6")
 		Compile("org.slf4j", "slf4j-log4j12", "1.7.7")
 	Code("io.intino.ness")
 	Model("Proteo", "2.1.6", "2.1.13")

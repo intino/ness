@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 
+import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 
 class MessageSaver {
@@ -17,7 +18,7 @@ class MessageSaver {
 	private static Logger logger = LoggerFactory.getLogger(MessageSaver.class);
 
 	static void append(File inlFile, Message message, String textMessage) {
-		write(inlFile, textMessage, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+		write(inlFile, textMessage, CREATE, APPEND);
 		saveAttachments(inlFile.getParentFile(), message);
 	}
 

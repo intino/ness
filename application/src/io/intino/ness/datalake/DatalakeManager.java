@@ -1,6 +1,5 @@
 package io.intino.ness.datalake;
 
-import com.google.code.externalsorting.ExternalSort;
 import io.intino.konos.alexandria.Inl;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.Tank;
@@ -13,7 +12,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,7 +20,6 @@ import java.util.zip.ZipOutputStream;
 
 import static io.intino.ness.datalake.MessageSaver.append;
 import static io.intino.ness.datalake.MessageSaver.save;
-import static java.nio.file.StandardOpenOption.CREATE;
 import static java.util.Objects.requireNonNull;
 
 
