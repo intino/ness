@@ -5,6 +5,7 @@ import io.intino.ness.inl.MessageInputStream;
 import io.intino.ness.inl.streams.FileMessageInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.FileSystemUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,11 +82,19 @@ public class MessageExternalSorter {
 			temporalFile.next();
 			temporalFile = temporalFileWithOldestMessage(temporalFiles);
 		}
+		replace(temp);
+	}
+
+	private void replace(File temp) {
+		if (file.delete()) {
+			temp.renameTo(file.getAbsoluteFile());
+			FileSystemUtils.deleteRecursively(directory);
+		}
 	}
 
 	private void write(File temp, Message message) {
 		try {
-			Files.write(temp.toPath(), (message.toString()+ SEPARATOR).getBytes(), CREATE, APPEND);
+			Files.write(temp.toPath(), (message.toString() + SEPARATOR).getBytes(), CREATE, APPEND);
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}

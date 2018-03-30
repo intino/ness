@@ -56,14 +56,17 @@ public class DatalakeManager {
 	public void drop(Tank tank, Message message, String textMessage) {
 		final File inlFile = inlFile(directoryOf(tank), message);
 		append(inlFile, message, textMessage);
-		if (tank.sorted().contains(inlFile.getName())) tank.sorted().remove(inlFile.getName());
+		if (tank.sorted().contains(inlFile.getName())) {
+			tank.sorted().remove(inlFile.getName());
+			tank.save$();
+		}
 	}
 
 	public void sort(Tank tank) {
 		try {
 			for (File file : requireNonNull(directoryOf(tank).listFiles((f, n) -> n.endsWith(INL) && !tank.sorted().contains(n)))) {
 				sort(file);
-				addSorted(tank, file);
+				markAsSorted(tank, file);
 			}
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
@@ -75,7 +78,7 @@ public class DatalakeManager {
 			final List<File> inlFiles = Arrays.asList(Objects.requireNonNull(directoryOf(tank).listFiles((f, n) -> n.endsWith(INL))));
 			for (File file : instant == null ? inlFiles : inlFiles.stream().filter(f -> f.getName().equals(fileFromInstant(instant) + INL)).collect(Collectors.toList())) {
 				sort(file);
-				addSorted(tank, file);
+				markAsSorted(tank, file);
 			}
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
@@ -83,21 +86,21 @@ public class DatalakeManager {
 	}
 
 	private void sort(File file) throws IOException {
-		if ((file.length() / 1024) > 100) externalSort(file);
+		if (inMb(file.length()) > 50) new MessageExternalSorter(file).sort();
 		final List<Message> messages = loadMessages(file);
 		messages.sort(messageComparator());
 		save(file, messages);
 	}
 
-	private void externalSort(File file) {
-		new MessageExternalSorter(file).sort();
+	private long inMb(long length) {
+		return length / (1024 * 1024);
 	}
 
 	private Comparator<Message> messageComparator() {
 		return Comparator.comparing(m -> Instant.parse(tsOf(m)));
 	}
 
-	private void addSorted(Tank tank, File file) {
+	private void markAsSorted(Tank tank, File file) {
 		tank.sorted().add(file.getName());
 		tank.save$();
 	}
