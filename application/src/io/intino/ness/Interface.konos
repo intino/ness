@@ -35,6 +35,7 @@ Service Manager as JMX
 	Operation("Sort messages of all datalake tanks") sort-tanks
 	Operation("Sort messages of a tank") sort-tank
 		Parameter tank as Text
+	Operation("Clear sort registry") clearSorts
 	Operation("Connects source and destination topics") pipes
 		Response as Text
 	Operation("Connects source and destination topics real-time, optionaly converting the message with a function") add-pipe
@@ -61,7 +62,6 @@ Service Manager as JMX
 	Operation("Removes a registered function") remove-function
 		Parameter name as Text
 		Response as Text
-
 	Operation("list of external buses") external-buses
 		Response as Text List
 	Operation("Defines an external bus to interact with it using jms-connectors") add-external-bus

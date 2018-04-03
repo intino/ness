@@ -56,6 +56,10 @@ public interface ManagerMBean {
 	@Parameters({"tank"})
 	void sortTank(String tank);
 
+	@Description("Clear sort registry")
+	@Parameters({})
+	void clearSorts();
+
 	@Description("Connects source and destination topics")
 	@Parameters({})
 	String pipes();

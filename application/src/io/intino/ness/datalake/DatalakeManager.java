@@ -64,7 +64,7 @@ public class DatalakeManager {
 
 	public void sort(Tank tank) {
 		try {
-			for (File file : requireNonNull(directoryOf(tank).listFiles((f, n) -> n.endsWith(INL) && !tank.sorted().contains(n)))) {
+			for (File file : requireNonNull(directoryOf(tank).listFiles((f, n) -> n.endsWith(INL) && !tank.sorted().contains(n) && !isCurrentFile(n)))) {
 				sort(file);
 				markAsSorted(tank, file);
 			}
@@ -75,7 +75,7 @@ public class DatalakeManager {
 
 	public void sort(Tank tank, Instant instant) {
 		try {
-			final List<File> inlFiles = Arrays.asList(Objects.requireNonNull(directoryOf(tank).listFiles((f, n) -> n.endsWith(INL))));
+			final List<File> inlFiles = Arrays.asList(Objects.requireNonNull(directoryOf(tank).listFiles((f, n) -> n.endsWith(INL) && !isCurrentFile(n))));
 			for (File file : instant == null ? inlFiles : inlFiles.stream().filter(f -> f.getName().equals(fileFromInstant(instant) + INL)).collect(Collectors.toList())) {
 				sort(file);
 				markAsSorted(tank, file);
@@ -174,6 +174,10 @@ public class DatalakeManager {
 
 	private String tsOf(Message message) {
 		return message.get("ts");
+	}
+
+	private boolean isCurrentFile(String file) {
+		return (fileFromInstant(Instant.now()) + INL).equals(file);
 	}
 
 	private String fileFromInstant(Instant instant) {

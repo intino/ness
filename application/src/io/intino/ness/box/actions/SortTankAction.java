@@ -24,6 +24,6 @@ public class SortTankAction {
 	}
 
 	public void execute() {
-		box.datalakeManager().sort(Helper.findTank(box, tank), day);
+//		box.datalakeManager().sort(Helper.findTank(box, tank), day);
 	}
 }

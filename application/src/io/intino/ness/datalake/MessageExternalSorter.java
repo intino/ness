@@ -26,11 +26,14 @@ public class MessageExternalSorter {
 	private static Logger logger = LoggerFactory.getLogger(MessageExternalSorter.class);
 
 	private File file;
-	private final File directory;
+	private final File tankDirectory;
+	private final File tempDirectory;
 
 	public MessageExternalSorter(File file) {
 		this.file = file;
-		this.directory = this.file.getParentFile();
+		this.tankDirectory = this.file.getParentFile();
+		this.tempDirectory = new File(tankDirectory, this.file.getName().replace(INL, ""));
+		tempDirectory.mkdirs();
 	}
 
 	public void sort() {
@@ -38,7 +41,7 @@ public class MessageExternalSorter {
 			final MessageInputStream stream = FileMessageInputStream.of(file);
 			List<File> files = processBatches(stream);
 			stream.close();
-			sort(files);
+			replace(sortAndMerge(files));
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -64,17 +67,15 @@ public class MessageExternalSorter {
 	}
 
 	private File processBatch(List<Message> messages, int batch) {
-		final File temp = new File(directory, this.file.getName().replace(INL, ""));
 		messages.sort(messageComparator());
-		temp.mkdirs();
-		File inlFile = new File(temp, batch + INL);
+		File inlFile = new File(tempDirectory, batch + INL);
 		MessageSaver.save(inlFile, messages);
 		messages.clear();
 		return inlFile;
 	}
 
-	private void sort(List<File> files) {
-		File temp = new File(directory, "temp" + INL);
+	private File sortAndMerge(List<File> files) {
+		File temp = new File(tankDirectory, "temp" + INL);
 		List<TemporalFile> temporalFiles = files.stream().map(TemporalFile::new).collect(Collectors.toList());
 		TemporalFile temporalFile = temporalFileWithOldestMessage(temporalFiles);
 		while (tempsAreActive(temporalFiles)) {
@@ -82,13 +83,13 @@ public class MessageExternalSorter {
 			temporalFile.next();
 			temporalFile = temporalFileWithOldestMessage(temporalFiles);
 		}
-		replace(temp);
+		return temp;
 	}
 
 	private void replace(File temp) {
 		if (file.delete()) {
 			temp.renameTo(file.getAbsoluteFile());
-			FileSystemUtils.deleteRecursively(directory);
+			FileSystemUtils.deleteRecursively(tempDirectory);
 		}
 	}
 
