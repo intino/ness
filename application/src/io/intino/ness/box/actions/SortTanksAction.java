@@ -8,6 +8,6 @@ public class SortTanksAction {
 	public NessBox box;
 
 	public void execute() {
-//		box.graph().tankList().forEach(tank -> box.datalakeManager().sort(tank));
+		box.graph().tankList().forEach(tank -> box.datalakeManager().sort(tank));
 	}
 }
