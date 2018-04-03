@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.time.Instant.parse;
 
 public class MessageExternalSorter {
@@ -69,7 +70,7 @@ public class MessageExternalSorter {
 	private File processBatch(List<Message> messages, int batch) {
 		messages.sort(messageComparator());
 		File inlFile = new File(tempDirectory, batch + INL);
-		MessageSaver.save(inlFile, messages);
+		MessageSaver.save(inlFile, messages, CREATE, TRUNCATE_EXISTING);
 		messages.clear();
 		return inlFile;
 	}

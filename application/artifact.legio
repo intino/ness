@@ -89,9 +89,9 @@ RunConfiguration adquiver-pre-ness
 	Argument("mqtt_port", "1884")
 
 RunConfiguration octana-dev-ness
-	Argument("ness_store", "./temp/octana/store")
-	Argument("ness_datalake", "./temp/octana/datalake")
-	Argument("broker_store", "./temp/octana/broker/")
+	Argument("ness_store", "../octana/ness/store/")
+	Argument("ness_datalake", "../octana/ness/datalake/")
+	Argument("broker_store", "../octana/ness/broker/")
 	Argument("connector_id", "octana-dev-ness")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
@@ -117,6 +117,16 @@ RunConfiguration adquiver-dev
 	Argument("ness_store", "./temp/adquiver/store")
 	Argument("ness_datalake", "./temp/adquiver/datalake")
 	Argument("broker_store", "./temp/adquiver/broker/")
+	Argument("connector_id", "ness-adquiver-dev")
+	Argument("scale", "Hour")
+//	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
+	Argument("broker_port", "63000")
+	Argument("mqtt_port", "1884")
+
+RunConfiguration adquiver-dev-je
+	Argument("ness_store", "../adquiver/temp/store")
+	Argument("ness_datalake", "../adquiver/temp/datalake/")
+	Argument("broker_store", "../adquiver/temp/broker/")
 	Argument("connector_id", "ness-adquiver-dev")
 	Argument("scale", "Hour")
 //	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")

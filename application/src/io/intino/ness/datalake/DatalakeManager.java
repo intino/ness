@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,6 +21,8 @@ import java.util.zip.ZipOutputStream;
 
 import static io.intino.ness.datalake.MessageSaver.append;
 import static io.intino.ness.datalake.MessageSaver.save;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.util.Objects.requireNonNull;
 
 
@@ -68,6 +71,7 @@ public class DatalakeManager {
 				sort(file);
 				markAsSorted(tank, file);
 			}
+			logger.info("sorted " + tank.qualifiedName());
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -86,10 +90,13 @@ public class DatalakeManager {
 	}
 
 	private void sort(File file) throws IOException {
+		logger.info("sorting " + file.getPath());
 		if (inMb(file.length()) > 50) new MessageExternalSorter(file).sort();
-		final List<Message> messages = loadMessages(file);
-		messages.sort(messageComparator());
-		save(file, messages);
+		else {
+			final List<Message> messages = loadMessages(file);
+			messages.sort(messageComparator());
+			save(file, messages, CREATE, TRUNCATE_EXISTING);
+		}
 	}
 
 	private long inMb(long length) {
