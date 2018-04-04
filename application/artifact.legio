@@ -134,18 +134,6 @@ RunConfiguration adquiver-dev-je
 	Argument("mqtt_port", "1884")
 
 
-RunConfiguration adquiver-dev-je-test
-	Argument("ness_store", "../adquiver/temp/store_")
-	Argument("ness_datalake", "../adquiver/temp/datalake_/")
-	Argument("broker_store", "../adquiver/temp/broker_/")
-	Argument("connector_id", "ness-adquiver-dev")
-	Argument("scale", "Hour")
-//	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
-	Argument("broker_port", "63000")
-	Argument("mqtt_port", "1884")
-
-
-
 Repository("intino-maven") intino
 	Release("https://artifactory.intino.io/artifactory/releases")
 	Release("https://artifactory.intino.io/artifactory/release-frameworks") frameworks

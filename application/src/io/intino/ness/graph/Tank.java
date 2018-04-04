@@ -44,7 +44,7 @@ public class Tank extends AbstractTank {
 				currentFile = inlFile;
 				writer = new BufferedWriter(new FileWriter(inlFile, true));
 			}
-			writer.write(textMessage);
+			writer.write(textMessage + "\n\n");
 			saveAttachments(inlFile.getParentFile(), message);
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
