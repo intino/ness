@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.FileSystemUtils;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
@@ -16,7 +18,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.time.Instant.parse;
@@ -25,10 +26,9 @@ public class MessageExternalSorter {
 	private static final String INL = ".inl";
 	private static String SEPARATOR = "\n\n";
 	private static Logger logger = LoggerFactory.getLogger(MessageExternalSorter.class);
-
-	private File file;
 	private final File tankDirectory;
 	private final File tempDirectory;
+	private File file;
 
 	public MessageExternalSorter(File file) {
 		this.file = file;
@@ -68,21 +68,29 @@ public class MessageExternalSorter {
 	}
 
 	private File processBatch(List<Message> messages, int batch) {
-		messages.sort(messageComparator());
 		File inlFile = new File(tempDirectory, batch + INL);
-		MessageSaver.save(inlFile, messages, CREATE, TRUNCATE_EXISTING);
-		messages.clear();
+		try {
+			messages.sort(messageComparator());
+			Files.write(inlFile.toPath(), DatalakeManager.toString(messages).getBytes(), CREATE, TRUNCATE_EXISTING);
+			messages.clear();
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
 		return inlFile;
 	}
 
 	private File sortAndMerge(List<File> files) {
 		File temp = new File(tankDirectory, "temp" + INL);
-		List<TemporalFile> temporalFiles = files.stream().map(TemporalFile::new).collect(Collectors.toList());
-		TemporalFile temporalFile = temporalFileWithOldestMessage(temporalFiles);
-		while (tempsAreActive(temporalFiles)) {
-			write(temp, temporalFile.message);
-			temporalFile.next();
-			temporalFile = temporalFileWithOldestMessage(temporalFiles);
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(temp))) {
+			List<TemporalFile> temporalFiles = files.stream().map(TemporalFile::new).collect(Collectors.toList());
+			TemporalFile temporalFile = temporalFileWithOldestMessage(temporalFiles);
+			while (tempsAreActive(temporalFiles)) {
+				writer.write(temporalFile.message.toString() + SEPARATOR);
+				temporalFile.next();
+				temporalFile = temporalFileWithOldestMessage(temporalFiles);
+			}
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
 		}
 		return temp;
 	}
@@ -91,14 +99,6 @@ public class MessageExternalSorter {
 		if (file.delete()) {
 			temp.renameTo(file.getAbsoluteFile());
 			FileSystemUtils.deleteRecursively(tempDirectory);
-		}
-	}
-
-	private void write(File temp, Message message) {
-		try {
-			Files.write(temp.toPath(), (message.toString() + SEPARATOR).getBytes(), CREATE, APPEND);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -113,6 +113,24 @@ public class MessageExternalSorter {
 			}
 		}
 		return temporalFile;
+	}
+
+	private Comparator<Message> messageComparator() {
+		return Comparator.comparing(m -> Instant.parse(tsOf(m)));
+	}
+
+	private String tsOf(Message message) {
+		return message.get("ts");
+	}
+
+	private Instant instantOf(io.intino.ness.inl.Message message) {
+		return message != null ? parse(tsOf(message)) : Instant.MAX;
+	}
+
+	private boolean tempsAreActive(List<TemporalFile> files) {
+		for (TemporalFile file : files)
+			if (file.message != null) return true;
+		return false;
 	}
 
 	static class TemporalFile {
@@ -137,24 +155,5 @@ public class MessageExternalSorter {
 				logger.error(e.getMessage(), e);
 			}
 		}
-	}
-
-	private Comparator<Message> messageComparator() {
-		return Comparator.comparing(m -> Instant.parse(tsOf(m)));
-	}
-
-	private String tsOf(Message message) {
-		return message.get("ts");
-	}
-
-	private Instant instantOf(io.intino.ness.inl.Message message) {
-		return message != null ? parse(tsOf(message)) : Instant.MAX;
-	}
-
-
-	private boolean tempsAreActive(List<TemporalFile> files) {
-		for (TemporalFile file : files)
-			if (file.message != null) return true;
-		return false;
 	}
 }

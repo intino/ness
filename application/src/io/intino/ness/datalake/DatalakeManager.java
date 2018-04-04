@@ -12,17 +12,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static io.intino.ness.datalake.MessageSaver.append;
-import static io.intino.ness.datalake.MessageSaver.save;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.util.Objects.requireNonNull;
 
 
@@ -30,14 +25,28 @@ public class DatalakeManager {
 	private static final String INL = ".inl";
 	private static final String ZIP = ".zip";
 	private static Logger logger = LoggerFactory.getLogger(DatalakeManager.class);
-	private File stationDirectory;
 	private final Scale scale;
+	private File stationDirectory;
 
 	public DatalakeManager(String stationFolder, Scale scale, List<Tank> tanks) {
 		this.stationDirectory = new File(stationFolder);
 		this.scale = scale;
 		this.stationDirectory.mkdirs();
 		tanks.forEach(this::addTank);
+	}
+
+	private static String dayOf(String instant) {
+		return instant.replace("-", "").substring(0, 8);
+	}
+
+	private static String hourOf(String instant) {
+		return dayOf(instant) + instant.substring(instant.indexOf("T") + 1, instant.indexOf(":"));
+	}
+
+	public static String toString(List<Message> messages) {
+		StringBuilder builder = new StringBuilder();
+		for (Message m : messages) builder.append(m.toString()).append("\n\n");
+		return builder.toString();
 	}
 
 	public File getStationDirectory() {
@@ -58,7 +67,7 @@ public class DatalakeManager {
 
 	public void drop(Tank tank, Message message, String textMessage) {
 		final File inlFile = inlFile(directoryOf(tank), message);
-		append(inlFile, message, textMessage);
+		tank.append(inlFile, message, textMessage);
 		if (tank.sorted().contains(inlFile.getName())) {
 			tank.sorted().remove(inlFile.getName());
 			tank.save$();
@@ -68,7 +77,7 @@ public class DatalakeManager {
 	public void sort(Tank tank) {
 		try {
 			for (File file : requireNonNull(directoryOf(tank).listFiles((f, n) -> n.endsWith(INL) && !tank.sorted().contains(n) && !isCurrentFile(n)))) {
-				sort(file);
+				sort(tank, file);
 				markAsSorted(tank, file);
 			}
 			logger.info("sorted " + tank.qualifiedName());
@@ -81,7 +90,7 @@ public class DatalakeManager {
 		try {
 			final List<File> inlFiles = Arrays.asList(Objects.requireNonNull(directoryOf(tank).listFiles((f, n) -> n.endsWith(INL) && !isCurrentFile(n))));
 			for (File file : instant == null ? inlFiles : inlFiles.stream().filter(f -> f.getName().equals(fileFromInstant(instant) + INL)).collect(Collectors.toList())) {
-				sort(file);
+				sort(tank, file);
 				markAsSorted(tank, file);
 			}
 		} catch (IOException e) {
@@ -89,13 +98,13 @@ public class DatalakeManager {
 		}
 	}
 
-	private void sort(File file) throws IOException {
+	private void sort(Tank tank, File file) throws IOException {
 		logger.info("sorting " + file.getPath());
 		if (inMb(file.length()) > 50) new MessageExternalSorter(file).sort();
 		else {
 			final List<Message> messages = loadMessages(file);
 			messages.sort(messageComparator());
-			save(file, messages, CREATE, TRUNCATE_EXISTING);
+			tank.overwrite(file, messages);
 		}
 	}
 
@@ -193,14 +202,6 @@ public class DatalakeManager {
 
 	private String fileFromInstant(String instant) {
 		return scale.equals(Scale.Day) ? dayOf(instant) : hourOf(instant);
-	}
-
-	private static String dayOf(String instant) {
-		return instant.replace("-", "").substring(0, 8);
-	}
-
-	private static String hourOf(String instant) {
-		return dayOf(instant) + instant.substring(instant.indexOf("T") + 1, instant.indexOf(":"));
 	}
 
 	private File directoryOf(Tank tank) {

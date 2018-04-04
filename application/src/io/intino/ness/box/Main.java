@@ -1,9 +1,9 @@
 package io.intino.ness.box;
 
-import io.intino.konos.alexandria.Box;
 import io.intino.ness.datalake.FunctionHelper;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.NessGraph;
+import io.intino.ness.graph.Tank;
 import io.intino.tara.io.Stash;
 import io.intino.tara.magritte.Graph;
 import io.intino.tara.magritte.stores.InMemoryFileStore;
@@ -19,8 +19,11 @@ public class Main {
 		NessConfiguration boxConfiguration = new NessConfiguration(args);
 		Graph graph = new Graph(store(boxConfiguration.args().get("ness_store"))).loadStashes("Ness");
 		compileFunctions(graph);
-		Box box = new NessBox(boxConfiguration).put(graph).open();
-		Runtime.getRuntime().addShutdownHook(new Thread(box::close));
+		NessBox box = (NessBox) new NessBox(boxConfiguration).put(graph).open();
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			box.close();
+			box.graph().tankList().forEach(Tank::terminate);
+		}));
 	}
 
 	private static void compileFunctions(Graph graph) {
