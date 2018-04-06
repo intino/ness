@@ -76,6 +76,7 @@ public class DatalakeManager {
 
 	public void sort(Tank tank) {
 		try {
+			tank.flush();
 			for (File file : requireNonNull(directoryOf(tank).listFiles((f, n) -> n.endsWith(INL) && !tank.sorted().contains(n) && !isCurrentFile(n)))) {
 				sort(tank, file);
 				markAsSorted(tank, file);
@@ -99,7 +100,7 @@ public class DatalakeManager {
 	}
 
 	private void sort(Tank tank, File file) throws IOException {
-		logger.info("sorting " + file.getPath());
+		logger.info("sorting " + tank.qualifiedName() + " " + file.getName());
 		if (inMb(file.length()) > 50) new MessageExternalSorter(file).sort();
 		else {
 			final List<Message> messages = loadMessages(file);
@@ -113,7 +114,11 @@ public class DatalakeManager {
 	}
 
 	private Comparator<Message> messageComparator() {
-		return Comparator.comparing(m -> Instant.parse(tsOf(m)));
+		return Comparator.comparing(m -> {
+			final String text = tsOf(m);
+			if (text == null) logger.error("ts is null for message: " + m.toString());
+			return Instant.parse(text);
+		});
 	}
 
 	private void markAsSorted(Tank tank, File file) {

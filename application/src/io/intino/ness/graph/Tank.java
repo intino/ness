@@ -58,4 +58,12 @@ public class Tank extends AbstractTank {
 			logger.error(e.getMessage(), e);
 		}
 	}
+
+	public void flush() {
+		try {
+			if (writer != null) writer.flush();
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
 }
