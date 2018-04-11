@@ -1,0 +1,29 @@
+dsl Proteo
+
+Concept Pipe
+	var string origin
+	var string destination
+	var Function transformer = empty
+
+Concept Function
+	var string qualifiedName
+	var string source
+	var object:io.intino.konos.alexandria.functions.MessageFunction aClass is volatile
+
+Concept User
+	var string name
+	var string password
+	var string[] groups
+
+Concept ExternalBus
+	var string originURL
+	var string sessionID
+	var string user
+	var string password
+
+Concept JMSConnector
+	var word:{outgoing incoming} direction
+	var ExternalBus bus
+	var string[] topics
+	var boolean enabled = true
+

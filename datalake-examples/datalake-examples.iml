@@ -13,7 +13,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="datalake" />
+    <orderEntry type="module" module-name="datalake_old" />
     <orderEntry type="module" module-name="inl" />
     <orderEntry type="module" module-name="feeder-framework" />
     <orderEntry type="library" name="Maven: com.github.mpkorstanje:simmetrics-core:4.1.1" level="project" />
