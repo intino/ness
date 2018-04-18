@@ -181,7 +181,7 @@ public class Tank extends AbstractTank {
 				final List<File> fileList = filter(Arrays.asList(files), from);
 				MessageInputStream stream = MessageInputStreamBuilder.of(fileList, from);
 				return new Iterator<Message>() {
-					Message last = next();
+					Message last = stream.next();
 
 					public boolean hasNext() {
 						return last != null;
@@ -189,6 +189,7 @@ public class Tank extends AbstractTank {
 
 					public Message next() {
 						try {
+							Message result = last;
 							last = stream.next();
 							if (last == null) {
 								try {
@@ -197,7 +198,7 @@ public class Tank extends AbstractTank {
 									e.printStackTrace();
 								}
 							}
-							return last;
+							return result;
 						} catch (IOException e) {
 							Tank.logger.error(e.getMessage(), e);
 							return null;
