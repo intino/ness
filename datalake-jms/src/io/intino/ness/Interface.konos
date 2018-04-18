@@ -98,6 +98,8 @@ Service Manager as JMX
 		Parameter output as Text
 		Response as Text
 
+	Operation(description = "Stops datalake service saving current information") stop
+
 Schema Reflow
 	Attribute blockSize as Integer
 	Attribute from as DateTime

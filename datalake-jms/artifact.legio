@@ -15,7 +15,7 @@ Artifact("io.intino.ness", "2.0.0") ness as Product
 		Compile("org.slf4j", "slf4j-log4j12", "1.7.7")
 	Code("io.intino.ness")
 	Model("Proteo", "2.1.8", "2.1.16")
-	Box("Konos", "3.6.3", "3.6.3")
+	Box("Konos", "3.6.6", "3.6.6")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness") as Runnable("io.intino.ness.box.Main")
 		classpathPrefix = "lib"
 		Parameter("ness_store", "./temp/store")
@@ -92,7 +92,7 @@ RunConfiguration cesar-dev
 RunConfiguration hs-dev
 	Argument("workspace", "./temp/happysense/")
 	Argument("connector_id", "ness-happy-pro")
-	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
+//	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
 

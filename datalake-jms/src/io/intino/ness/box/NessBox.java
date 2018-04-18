@@ -78,7 +78,6 @@ public class NessBox extends AbstractBox {
 
 	public void close() {
 		datalake().tankList().forEach(Tank::terminate);
-		logger.info("tanks terminated");
 		super.close();
 		busManager.stop();
 	}

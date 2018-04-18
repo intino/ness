@@ -54,6 +54,7 @@ public class Tank extends AbstractTank {
 	public void drop(Message message) {
 		final File inlFile = inlFile(directory(), message);
 		append(inlFile, message, message.toString());
+		flush();
 	}
 
 	public void sort() {
