@@ -1,11 +1,5 @@
-datalake/local/
-out/
-.idea/workspace.xml
-.idea/libraries/
 *.conf
-*.class
 datalake-examples/local.store/legacy.frac.Well/
-tgs/
 datalake-examples/target/
 datalake-examples/local.legacy/wells
 activemq-data

@@ -1,0 +1,119 @@
+dsl Legio
+
+Artifact("io.intino.ness", "2.0.0") ness as Product
+	Imports
+		Compile("io.intino.ness", "datalake", "1.0.0")
+		Compile("io.intino.konos", "alexandria-jms", "1.0.13")
+		Compile("io.intino.konos", "alexandria-slack", "1.0.11")
+		Compile("io.intino.konos", "alexandria-jmx", "1.0.3")
+		Compile("io.intino.konos", "alexandria-scheduler", "1.0.6")
+		Compile("org.apache.activemq", "activemq-broker", "5.15.2")
+		Compile("org.apache.activemq", "activemq-mqtt", "5.15.2")
+		Compile("org.apache.activemq", "activemq-kahadb-store", "5.15.2")
+		Compile("org.apache.activemq", "activemq-jaas", "5.15.2")
+		Compile("org.apache.activemq", "activemq-runtime-config", "5.15.2")
+		Compile("org.slf4j", "slf4j-log4j12", "1.7.7")
+	Code("io.intino.ness")
+	Model("Proteo", "2.1.8", "2.1.16")
+	Box("Konos", "3.6.6", "3.6.6")
+	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness") as Runnable("io.intino.ness.box.Main")
+		classpathPrefix = "lib"
+		Parameter("ness_store", "./temp/store")
+		Parameter("ness_datalake", "./temp/store/datalake")
+		Parameter("broker_port", "61616")
+		Parameter("mqtt_port", "1883")
+		Parameter("broker_store", "./temp/broker/")
+	Distribution(intino.frameworks, intino.languages)
+
+	Deployment("Datalake") ness-dev > Dev(server = consul-dev, runConfiguration = ebar-pre-ness, project = "dev")
+	Deployment("Datalake") ness-ebar > Dev(server = ebar-pre, runConfiguration = ebar-pre-ness, project = "ebar")
+	Deployment("Datalake") ness-happysense
+		Dev(server = happysense-pre, runConfiguration = happysense-pre-ness, project = "happysense")
+		Pro(server = happysense-pro, runConfiguration = happysense-pro-ness, project = "happysense")
+	Deployment("Datalake") ness-octana > Dev(server = octana-pre, runConfiguration = octana-pre-ness, project = "octana")
+	Deployment("Datalake") ness-adquiver > Dev(server = adquiver-pre, runConfiguration = adquiver-pre-ness, project = "adquiver")
+
+Server(cesar = "cesar.monentia.es") happysense-pre
+Server(cesar = "cesar.monentia.es") happysense-pro
+Server(cesar = "cesar.monentia.es") ebar-pre
+Server(cesar = "cesar.monentia.es") octana-pre
+Server(cesar = "cesar.monentia.es") adquiver-pre
+Server(cesar = "cesar.pre.intino.io") consul-dev
+
+RunConfiguration cesar-pro
+	Argument("workspace", "$HOME/ness/")
+	Argument("nessie_token", "xoxb-162074419812-gB5oNUwzxGWQ756TrRyu1Ii9")
+	Argument("broker_port", "63000")
+	Argument("mqtt_port", "1884")
+
+RunConfiguration ebar-pre-ness
+	Argument("workspace", "$HOME/")
+	Argument("broker_port", "62000")
+	Argument("connector_id", "ebar-ness-pre")
+	Argument("mqtt_port", "1884")
+
+RunConfiguration happysense-pre-ness
+	Argument("workspace", "$HOME/")
+	Argument("connector_id", "happysense-pre-ness")
+	Argument("broker_port", "63000")
+	Argument("mqtt_port", "1884")
+
+RunConfiguration happysense-pro-ness
+	Argument("workspace", "$HOME/")
+	Argument("connector_id", "happysense-pro-ness")
+	Argument("broker_port", "63000")
+	Argument("mqtt_port", "1884")
+
+RunConfiguration octana-pre-ness
+	Argument("workspace", "$HOME/")
+	Argument("broker_port", "63000")
+	Argument("connector_id", "octana-ness-pre")
+	Argument("mqtt_port", "1884")
+
+RunConfiguration adquiver-pre-ness
+	Argument("workspace", "$HOME/")
+	Argument("broker_port", "63000")
+	Argument("connector_id", "adquiver-ness-pre")
+	Argument("scale", "Hour")
+	Argument("mqtt_port", "1884")
+
+RunConfiguration octana-dev-ness
+	Argument("workspace", "../octana/ness/store")
+	Argument("connector_id", "octana-dev-ness")
+	Argument("broker_port", "63000")
+	Argument("mqtt_port", "1884")
+
+RunConfiguration cesar-dev
+	Argument("workspace", "./temp/cesar/")
+	Argument("connector_id", "cesar-dev-ness")
+	Argument("broker_port", "63000")
+	Argument("mqtt_port", "1884")
+
+RunConfiguration hs-dev
+	Argument("workspace", "./temp/happysense/")
+	Argument("connector_id", "ness-happy-pro")
+//	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
+	Argument("broker_port", "63000")
+	Argument("mqtt_port", "1884")
+
+RunConfiguration adquiver-dev
+	Argument("workspace", "./temp/adquiver/")
+	Argument("connector_id", "ness-adquiver-dev")
+	Argument("scale", "Hour")
+//	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
+	Argument("broker_port", "63000")
+	Argument("mqtt_port", "1884")
+
+RunConfiguration adquiver-dev-je
+	Argument("workspace", "../adquiver/temp/")
+	Argument("connector_id", "ness-adquiver-dev")
+	Argument("scale", "Hour")
+//	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
+	Argument("broker_port", "63000")
+	Argument("mqtt_port", "1884")
+
+
+Repository("intino-maven") intino
+	Release("https://artifactory.intino.io/artifactory/releases")
+	Release("https://artifactory.intino.io/artifactory/release-frameworks") frameworks
+	Language("https://artifactory.intino.io/artifactory/release-languages") languages

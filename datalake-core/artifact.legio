@@ -1,0 +1,16 @@
+dsl Legio
+
+Artifact(groupId = "io.intino.ness", version = "1.0.0") datalake as Product
+	Model("Proteo", "2.1.8", "2.1.16")
+	Imports
+		Compile(groupId = "io.intino.konos", artifactId = "alexandria-core", version = "LATEST")
+		Compile(groupId = "commons-io", artifactId = "commons-io", version = "2.4")
+
+		Test(groupId = "junit", artifactId = "junit", version = "LATEST")
+	Code(targetPackage = "io.intino.ness.datalake")
+	Package(mode = ModulesAndLibrariesLinkedByManifest)
+	Distribution(intino.frameworks, intino.languages)
+Repository("intino-maven") intino
+	Release("https://artifactory.intino.io/artifactory/releases")
+	Release("https://artifactory.intino.io/artifactory/release-frameworks") frameworks
+	Language("https://artifactory.intino.io/artifactory/release-languages") languages

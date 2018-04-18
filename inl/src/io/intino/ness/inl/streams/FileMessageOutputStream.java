@@ -38,6 +38,4 @@ public class FileMessageOutputStream implements MessageOutputStream {
         os.closeEntry();
         os.close();
     }
-
-
 }

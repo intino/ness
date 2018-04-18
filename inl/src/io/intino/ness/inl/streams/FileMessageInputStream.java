@@ -1,6 +1,7 @@
 package io.intino.ness.inl.streams;
 
 import io.intino.ness.inl.MessageInputStream;
+import io.intino.ness.inl.MessageInputStream.Collection;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,17 +11,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
 
-import static io.intino.ness.inl.Formats.*;
+import static io.intino.ness.inl.Loader.*;
 import static io.intino.ness.inl.MessageInputStream.Empty;
-import static io.intino.ness.inl.MessageInputStream.Sort;
 import static io.intino.ness.inl.streams.FileMessageInputStream.Format.*;
 
 public class FileMessageInputStream {
 
 	public static MessageInputStream of(File file) throws IOException {
 		Format format = formatOf(file);
-
-		if (format == inl) return name(Sort.of(Inl.of(streamOf(file))), file);
+		if (format == inl) return name(Inl.of(streamOf(file)), file);
 		if (format == inz) return name(Inl.of(streamOf(file)), file);
 		if (format == csv) return name(Csv.of(streamOf(file)), file);
 		if (format == tsv) return name(Tsv.of(streamOf(file)), file);
@@ -28,15 +27,15 @@ public class FileMessageInputStream {
 		return new Empty();
 	}
 
-	private static MessageInputStream name(MessageInputStream inputStream, File file) {
-		inputStream.name(file.getName());
-		return inputStream;
-	}
-
 	public static MessageInputStream of(File... files) throws IOException {
 		MessageInputStream[] inputStreams = new MessageInputStream[files.length];
 		for (int i = 0; i < files.length; i++) inputStreams[i] = of(files[i]);
-		return Sort.of(inputStreams);
+		return Collection.of(inputStreams);
+	}
+
+	private static MessageInputStream name(MessageInputStream inputStream, File file) {
+		inputStream.name(file.getName());
+		return inputStream;
 	}
 
 	private static InputStream streamOf(File file) throws IOException {
