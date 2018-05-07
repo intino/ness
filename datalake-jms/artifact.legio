@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "2.0.0") ness as Product
+Artifact("io.intino.ness", "2.0.1") Ness as Product
 	Imports
 		Compile("io.intino.ness", "datalake", "1.0.0")
 		Compile("io.intino.konos", "alexandria-jms", "1.0.13")
@@ -14,19 +14,17 @@ Artifact("io.intino.ness", "2.0.0") ness as Product
 		Compile("org.apache.activemq", "activemq-runtime-config", "5.15.2")
 		Compile("org.slf4j", "slf4j-log4j12", "1.7.7")
 	Code("io.intino.ness")
-	Model("Proteo", "2.1.8", "2.1.16")
+	Model("Proteo", "2.1.8", "2.2.0")
 	Box("Konos", "3.6.6", "3.6.6")
-	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness") as Runnable("io.intino.ness.box.Main")
-		classpathPrefix = "lib"
-		Parameter("ness_store", "./temp/store")
-		Parameter("ness_datalake", "./temp/store/datalake")
-		Parameter("broker_port", "61616")
-		Parameter("mqtt_port", "1883")
-		Parameter("broker_store", "./temp/broker/")
+	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib") as Runnable("io.intino.ness.box.Main")
+		Parameter("workspace", "./temp/ness/")
+		Parameter("connector_id", "id")
+		Parameter("broker_port", "63000")
+		Parameter("mqtt_port", "1884")
+		Parameter("configurationModel", "Configuration")
 	Distribution(intino.frameworks, intino.languages)
 
 	Deployment("Datalake") ness-dev > Dev(server = consul-dev, runConfiguration = ebar-pre-ness, project = "dev")
-	Deployment("Datalake") ness-ebar > Dev(server = ebar-pre, runConfiguration = ebar-pre-ness, project = "ebar")
 	Deployment("Datalake") ness-happysense
 		Dev(server = happysense-pre, runConfiguration = happysense-pre-ness, project = "happysense")
 		Pro(server = happysense-pro, runConfiguration = happysense-pro-ness, project = "happysense")
@@ -35,7 +33,6 @@ Artifact("io.intino.ness", "2.0.0") ness as Product
 
 Server(cesar = "cesar.monentia.es") happysense-pre
 Server(cesar = "cesar.monentia.es") happysense-pro
-Server(cesar = "cesar.monentia.es") ebar-pre
 Server(cesar = "cesar.monentia.es") octana-pre
 Server(cesar = "cesar.monentia.es") adquiver-pre
 Server(cesar = "cesar.pre.intino.io") consul-dev

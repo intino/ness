@@ -1,9 +1,9 @@
 package io.intino.ness.box;
 
 import io.intino.ness.datalake.FunctionHelper;
+import io.intino.ness.datalake.graph.DatalakeGraph;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.NessGraph;
-import io.intino.ness.datalake.graph.Tank;
 import io.intino.tara.magritte.Graph;
 import io.intino.tara.magritte.stores.InMemoryFileStore;
 import org.slf4j.Logger;
@@ -17,9 +17,16 @@ public class Main {
 	public static void main(String[] args) {
 		NessConfiguration boxConfiguration = new NessConfiguration(args);
 		final NessBox box = new NessBox(boxConfiguration);
-		Graph graph = new Graph(store(box.storeDirectory())).loadStashes("Datalake", "Ness");
+		Graph graph = new Graph(store(box.storeDirectory())).loadStashes("Ness");
+		if (box.configuration.args().containsKey("configurationModel"))
+			graph.loadStashes(box.configuration.args().get("configurationModel"));
+
+		final DatalakeGraph datalakeGraph = new Graph(store(box.storeDirectory())).loadStashes("Datalake").as(DatalakeGraph.class);
+		graph.as(NessGraph.class).tankList().forEach(t -> datalakeGraph.add(t.qualifiedName()));
+		datalakeGraph.core$().save("tanks");
+
 		compileFunctions(graph);
-		box.put(graph).open();
+		box.put(graph.as(NessGraph.class)).put(datalakeGraph).open();
 		Runtime.getRuntime().addShutdownHook(new Thread(box::close));
 	}
 

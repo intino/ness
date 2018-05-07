@@ -47,10 +47,9 @@ public class NessBox extends AbstractBox {
 
 	@Override
 	public io.intino.konos.alexandria.Box put(Object o) {
-		if (o instanceof Graph) {
-			this.graph = ((Graph) o).as(NessGraph.class);
+		if (o instanceof NessGraph) this.graph = ((Graph) o).as(NessGraph.class);
+		if (o instanceof DatalakeGraph)
 			this.datalake = ((Graph) o).as(DatalakeGraph.class).directory(new File(datalakeDirectory())).scale(scale);
-		}
 		return this;
 	}
 
