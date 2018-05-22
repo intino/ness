@@ -99,8 +99,10 @@ Service Manager as JMX
 
 	Operation(description = "Stops datalake service saving current information") stop
 
-Schema Reflow
+Schema ReflowConfiguration
 	Attribute blockSize as Integer
+	Attribute cleanStore as Bool
+		defaultValue = true
 	Schema Tank
 		Attribute name as Text
 		Attribute from as DateTime

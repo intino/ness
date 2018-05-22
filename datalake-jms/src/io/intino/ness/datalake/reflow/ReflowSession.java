@@ -7,7 +7,7 @@ import io.intino.ness.box.NessBox;
 import io.intino.ness.box.actions.PauseTankAction;
 import io.intino.ness.box.actions.ResumeTankAction;
 import io.intino.ness.box.actions.SortTankAction;
-import io.intino.ness.box.schemas.Reflow;
+import io.intino.ness.box.schemas.ReflowConfiguration;
 import io.intino.ness.datalake.graph.AbstractTank;
 import io.intino.ness.datalake.graph.Tank;
 import org.apache.activemq.command.ActiveMQDestination;
@@ -67,7 +67,7 @@ public class ReflowSession implements Consumer {
 
 	private void defineReflow(String text) {
 		if (this.handler != null) return;
-		Reflow reflow = new Gson().fromJson(text, Reflow.class);
+		ReflowConfiguration reflow = new Gson().fromJson(text, ReflowConfiguration.class);
 		this.blockSize = reflow.blockSize();
 		createSession(reflow);
 	}
@@ -88,7 +88,7 @@ public class ReflowSession implements Consumer {
 		}).start();
 	}
 
-	private void createSession(Reflow reflow) {
+	private void createSession(ReflowConfiguration reflow) {
 		logger.info("Shutting down actual session");
 		box.restartBus(false);
 		pauseTanks();
@@ -125,7 +125,7 @@ public class ReflowSession implements Consumer {
 		}
 	}
 
-	private Map<Tank, Instant> collectTanks(List<Reflow.Tank> tanks) {
-		return tanks.stream().collect(toMap(t -> findTank(box.datalake(), t.name()), Reflow.Tank::from));
+	private Map<Tank, Instant> collectTanks(List<ReflowConfiguration.Tank> tanks) {
+		return tanks.stream().collect(toMap(t -> findTank(box.datalake(), t.name()), ReflowConfiguration.Tank::from));
 	}
 }
