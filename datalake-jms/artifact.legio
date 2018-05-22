@@ -28,6 +28,7 @@ Artifact("io.intino.ness", "2.0.1") Ness as Product
 	Parameter("workspace", "./temp/ness/")
 	Parameter("connector_id", "id")
 	Parameter("broker_port", "63000")
+	Parameter("scale", "Day")
 	Parameter("mqtt_port", "1884")
 	Parameter("configurationModel", "Configuration")
 	Parameter(name = "slackToken")
