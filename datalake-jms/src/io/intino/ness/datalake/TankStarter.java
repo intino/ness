@@ -5,7 +5,10 @@ import io.intino.ness.datalake.graph.Tank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jms.Message;
+
 import static io.intino.konos.jms.Consumer.textFrom;
+import static io.intino.ness.datalake.MessageTranslator.toInlMessage;
 
 public class TankStarter {
 	private static final Logger logger = LoggerFactory.getLogger(TankStarter.class);
@@ -23,21 +26,21 @@ public class TankStarter {
 		bus.registerConsumer(tank.dropQN(), message -> drop(tank, message));
 	}
 
-	private void feed(Tank tank, javax.jms.Message message) {
+	private void feed(Tank tank, Message message) {
 		new Thread(() -> flow(tank, message)).start();
-		drop(tank, textFrom(message));
+		drop(tank, toInlMessage(message));
 	}
 
-	private void drop(Tank tank, javax.jms.Message message) {
-		drop(tank, textFrom(message));
+	private void drop(Tank tank, Message message) {
+		drop(tank, toInlMessage(message));
 	}
 
 	@SuppressWarnings("ConstantConditions")
-	private void flow(Tank tank, javax.jms.Message message) {
+	private void flow(Tank tank, Message message) {
 		bus.getTopicProducer(tank.flowQN()).produce(message);
 	}
 
-	private void drop(Tank tank, String text) {
-		tank.drop(text);
+	private void drop(Tank tank, io.intino.ness.inl.Message message) {
+		tank.drop(message);
 	}
 }

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static java.time.Instant.parse;
 import static java.util.stream.Collectors.toList;
@@ -19,8 +20,8 @@ public class ReflowMessageInputStream implements MessageInputStream {
 
 	private final List<TankInputStream> streams;
 
-	public ReflowMessageInputStream(List<Tank> tanks, Instant from) {
-		this.streams = tanks.stream().map(t -> new TankInputStream(t.qualifiedName(), t.sortedMessagesIterator(from))).collect(toList());
+	public ReflowMessageInputStream(Map<Tank, Instant> tanks) {
+		this.streams = tanks.keySet().stream().map(t -> new TankInputStream(t.qualifiedName(), t.sortedMessagesIterator(tanks.get(t)))).collect(toList());
 	}
 
 	@Override

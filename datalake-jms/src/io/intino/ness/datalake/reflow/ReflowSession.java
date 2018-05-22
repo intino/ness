@@ -20,13 +20,14 @@ import javax.jms.Session;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.intino.konos.jms.Consumer.textFrom;
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
 import static io.intino.ness.box.slack.Helper.findTank;
+import static java.util.stream.Collectors.toMap;
 
 public class ReflowSession implements Consumer {
 	private static final Logger logger = LoggerFactory.getLogger(ReflowSession.class);
@@ -43,12 +44,12 @@ public class ReflowSession implements Consumer {
 	@Override
 	public void consume(Message message) {
 		String text = textFrom(message);
-		if (text.contains("quickReflow")) quickReflow(message);
-		if (text.contains("startQuickReflow")) startQuickReflow(message);
 		if (text.contains("blockSize")) defineReflow(text);
-		else if (text.contains("finish")) finish();
+		else if (text.contains("quickReflow")) quickReflow(message);
+		else if (text.contains("startQuickReflow")) startQuickReflow(message);
 		else if (text.contains("ready") && this.handler != null) ready(message);
 		else if (!text.contains("ready") && handler != null) next();
+		else if (text.contains("finish")) finish();
 	}
 
 	private void startQuickReflow(Message message) {
@@ -91,12 +92,13 @@ public class ReflowSession implements Consumer {
 		logger.info("Shutting down actual session");
 		box.restartBus(false);
 		pauseTanks();
-		final List<Tank> tanks = collectTanks(reflow.tanks());
+		final Map<Tank, Instant> tanks = collectTanks(reflow.tankList());
 		this.session = box.busManager().transactedSession();
-		this.handler = new ReflowProcess(session, tanks, reflow.from(), reflow.blockSize());
-		for (Tank tank : tanks) new SortTankAction(box, tank, Instant.now()).execute();
+		this.handler = new ReflowProcess(session, tanks, reflow.blockSize());
+		for (Tank tank : tanks.keySet()) new SortTankAction(box, tank, Instant.now()).execute();
 		logger.info("Reflow session created");
 	}
+
 
 	private void next() {
 		logger.info("sending next block of " + blockSize + " messages");
@@ -123,13 +125,7 @@ public class ReflowSession implements Consumer {
 		}
 	}
 
-	private List<Tank> collectTanks(List<String> tanks) {
-		List<Tank> realTanks = new ArrayList<>();
-		if (tanks.get(0).equalsIgnoreCase("all")) return box.datalake().tankList();
-		for (String tank : tanks) {
-			Tank realTank = findTank(box.datalake(), tank);
-			if (realTank != null) realTanks.add(realTank);
-		}
-		return realTanks;
+	private Map<Tank, Instant> collectTanks(List<Reflow.Tank> tanks) {
+		return tanks.stream().collect(toMap(t -> findTank(box.datalake(), t.name()), Reflow.Tank::from));
 	}
 }

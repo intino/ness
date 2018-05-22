@@ -1,6 +1,8 @@
 package test;
 
 import io.intino.konos.alexandria.Inl;
+import io.intino.konos.datalake.Datalake;
+import io.intino.konos.datalake.Ness;
 import io.intino.konos.jms.TopicProducer;
 import io.intino.ness.inl.Message;
 import org.junit.Before;
@@ -29,12 +31,24 @@ public class ProducerTest {
 	private String url = "tcp://localhost:63000";
 	private String user = "happysense-pre";
 	private String password = "vhqpp7n6u5f2";
-	private String topic = "scala.happysense.dialogs";
+	private String topic = "v4.dialog";
 
 	private Session session;
 	private Connection connection;
 	private TopicProducer topicProducer;
 	private Random random;
+
+
+	@Test
+	public void sendAttachment() {
+		final Ness ness = new Ness(url, user, password, "");
+		ness.connect();
+		final Datalake.Tank tank = ness.add(topic);
+		final Message message = new Message("dialog").set("name", "dialog1");
+		message.set("ts", Instant.now().toString());
+		message.set("value", "txt", "example".getBytes());
+		tank.drop(message);
+	}
 
 	@Test
 	@Ignore

@@ -10,7 +10,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 import java.time.Instant;
-import java.util.List;
+import java.util.Map;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
 import static org.slf4j.Logger.ROOT_LOGGER_NAME;
@@ -25,10 +25,10 @@ public class ReflowProcess {
 	private final TopicProducer producer;
 	private int count = 0;
 
-	ReflowProcess(Session session, List<Tank> tanks, Instant from, Integer blockSize) {
+	ReflowProcess(Session session, Map<Tank, Instant> tanks, Integer blockSize) {
 		this.session = session;
 		this.blockSize = blockSize == 0 ? Integer.MAX_VALUE : blockSize;
-		this.stream = new ReflowMessageInputStream(tanks, from);
+		this.stream = new ReflowMessageInputStream(tanks);
 		this.producer = createProducer();
 	}
 

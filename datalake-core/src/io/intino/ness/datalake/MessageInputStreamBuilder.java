@@ -1,6 +1,5 @@
 package io.intino.ness.datalake;
 
-import io.intino.ness.inl.Loader;
 import io.intino.ness.inl.Message;
 import io.intino.ness.inl.MessageInputStream;
 import io.intino.ness.inl.streams.FileMessageInputStream;
@@ -8,10 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
+
+import static io.intino.ness.datalake.AttachmentLoader.loadAttachments;
 
 public class MessageInputStreamBuilder {
 
@@ -58,7 +58,10 @@ public class MessageInputStreamBuilder {
 			final Message message = current.next();
 			if (message == null) {
 				nextStream();
-				return current == null ? null : current.next();
+				final Message next = current == null ? null : current.next();
+				if (next == null) return null;
+				loadAttachments(new File(current.name()), next);
+				return next;
 			} else return message;
 		}
 
@@ -82,7 +85,7 @@ public class MessageInputStreamBuilder {
 		private static MessageInputStream streamOf(File file) {
 			try {
 				final MessageInputStream stream = FileMessageInputStream.of(file);
-				stream.name(file.getName());
+				stream.name(file.getPath());
 				return stream;
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);
