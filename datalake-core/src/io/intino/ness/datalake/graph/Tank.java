@@ -39,6 +39,28 @@ public class Tank extends AbstractTank {
 		super(node);
 	}
 
+	private static void saveAttachments(File inlFile, Message message) {
+		try {
+			final File directory = new File(inlFile.getParentFile(), inlFile.getName().replace(INL, ""));
+			directory.mkdir();
+			for (Message.Attachment attachment : message.attachments()) {
+				File file = new File(directory, attachment.id());
+				if (file.exists()) continue;
+				Files.write(file.toPath(), attachment.data());
+			}
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	private static String dayOf(String instant) {
+		return instant.replace("-", "").substring(0, 8);
+	}
+
+	private static String hourOf(String instant) {
+		return dayOf(instant) + instant.substring(instant.indexOf("T") + 1, instant.indexOf(":"));
+	}
+
 	public Tank init() {
 		directory().mkdirs();
 		return this;
@@ -112,17 +134,6 @@ public class Tank extends AbstractTank {
 		super.delete$();
 	}
 
-	private static void saveAttachments(File inlFile, Message message) {
-		try {
-			final File directory = new File(inlFile.getParentFile(), inlFile.getName().replace(INL, ""));
-			directory.mkdir();
-			for (Message.Attachment attachment : message.attachments())
-				Files.write(new File(directory, attachment.id()).toPath(), attachment.data());
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
-
 	public void flush() {
 		try {
 			if (writer != null) writer.flush();
@@ -192,14 +203,6 @@ public class Tank extends AbstractTank {
 		Collections.sort(files);
 		final File bound = files.stream().filter(f -> f.getName().equals(day + INL) || f.getName().replace(INL, "").compareTo(day) > 0).findFirst().orElse(null);
 		return bound == null || files.isEmpty() ? Collections.emptyList() : files.subList(files.indexOf(bound), files.size());
-	}
-
-	private static String dayOf(String instant) {
-		return instant.replace("-", "").substring(0, 8);
-	}
-
-	private static String hourOf(String instant) {
-		return dayOf(instant) + instant.substring(instant.indexOf("T") + 1, instant.indexOf(":"));
 	}
 
 	public void rename(String name) {
