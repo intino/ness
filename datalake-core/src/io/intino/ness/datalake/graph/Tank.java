@@ -41,8 +41,7 @@ public class Tank extends AbstractTank {
 
 	private static void saveAttachments(File inlFile, Message message) {
 		try {
-			final File directory = new File(inlFile.getParentFile(), inlFile.getName().replace(INL, ""));
-			directory.mkdir();
+			final File directory = attachmentsFolder(inlFile);
 			for (Message.Attachment attachment : message.attachments()) {
 				File file = new File(directory, attachment.id());
 				if (file.exists()) continue;
@@ -51,6 +50,10 @@ public class Tank extends AbstractTank {
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
+	}
+
+	private static File attachmentsFolder(File inlFile) {
+		return new File(inlFile.getParentFile(), inlFile.getName().replace(INL, ""));
 	}
 
 	private static String dayOf(String instant) {
@@ -160,6 +163,7 @@ public class Tank extends AbstractTank {
 				if (writer != null) writer.close();
 				if (!file.exists()) file.createNewFile();
 				currentFile = file;
+				attachmentsFolder(file).mkdirs();
 				writer = new BufferedWriter(new FileWriter(file, true));
 			}
 			writer.write(textMessage + "\n\n");
