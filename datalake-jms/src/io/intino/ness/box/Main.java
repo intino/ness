@@ -4,6 +4,7 @@ import io.intino.ness.datalake.FunctionHelper;
 import io.intino.ness.datalake.graph.DatalakeGraph;
 import io.intino.ness.graph.Function;
 import io.intino.ness.graph.NessGraph;
+import io.intino.tara.io.Stash;
 import io.intino.tara.magritte.Graph;
 import io.intino.tara.magritte.stores.InMemoryFileStore;
 import org.slf4j.Logger;
@@ -37,6 +38,12 @@ public class Main {
 	}
 
 	private static io.intino.tara.magritte.Store store(String directory) {
-		return new InMemoryFileStore(new File(directory));
+		return new InMemoryFileStore(new File(directory)){
+			@Override
+			public void writeStash(Stash stash, String path) {
+				stash.language = "Ness";
+				super.writeStash(stash, path);
+			}
+		};
 	}
 }
