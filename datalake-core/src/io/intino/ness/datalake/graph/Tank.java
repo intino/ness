@@ -120,6 +120,10 @@ public class Tank extends AbstractTank {
 				out.write(text, 0, text.length);
 				out.closeEntry();
 				out.close();
+				if(currentFile != null && currentFile.getName().equalsIgnoreCase(file.getName())) {
+					currentFile = null;
+					writer.close();
+				}
 				file.delete();
 			}
 		} catch (IOException e) {
@@ -189,7 +193,11 @@ public class Tank extends AbstractTank {
 		if (tsOf(message) == null) return null;
 		else {
 			final String instant = fileFromInstant(tsOf(message));
-			return new File(tankDirectory, instant + ZIP).exists() ? new File(tankDirectory, instant + ZIP) : new File(tankDirectory, instant + INL);
+			String inlFilename = instant + INL;
+			if(currentFile != null && currentFile.getName().equals(inlFilename)) return currentFile;
+			return new File(tankDirectory, instant + ZIP).exists() ?
+					new File(tankDirectory, instant + ZIP) :
+					new File(tankDirectory, inlFilename);
 		}
 	}
 
