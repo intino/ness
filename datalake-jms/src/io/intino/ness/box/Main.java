@@ -19,15 +19,15 @@ public class Main {
 		NessConfiguration boxConfiguration = new NessConfiguration(args);
 		final NessBox box = new NessBox(boxConfiguration);
 		Graph graph = new Graph(store(box.storeDirectory())).loadStashes("Ness");
-		if (box.configuration.args().containsKey("configurationModel"))
+		if (box.configuration.args().containsKey("configurationModel") && !box.configuration.args().get("configurationModel").isEmpty())
 			graph.loadStashes(box.configuration.args().get("configurationModel"));
-
 		final DatalakeGraph datalakeGraph = new Graph(store(box.storeDirectory())).loadStashes("Datalake").as(DatalakeGraph.class);
+		box.put(graph.as(NessGraph.class)).put(datalakeGraph);
 		graph.as(NessGraph.class).tankList().forEach(t -> datalakeGraph.add(t.qualifiedName()));
 		datalakeGraph.core$().save("tanks");
 
 		compileFunctions(graph);
-		box.put(graph.as(NessGraph.class)).put(datalakeGraph).open();
+		box.open();
 		Runtime.getRuntime().addShutdownHook(new Thread(box::close));
 	}
 

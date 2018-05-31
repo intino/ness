@@ -30,7 +30,7 @@ Artifact("io.intino.ness", "2.0.1") Ness as Product
 	Parameter("broker_port", "63000")
 	Parameter("scale", "Day")
 	Parameter("mqtt_port", "1884")
-	Parameter("configurationModel", "Configuration")
+	Parameter("configurationModel", "")
 	Parameter(name = "slackToken")
 
 Server(cesar = "cesar.monentia.es") happysense-pre
@@ -99,6 +99,7 @@ RunConfiguration hs-dev
 //	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
+	Argument(name = "slackToken", value = "")
 
 RunConfiguration adquiver-dev
 	Argument("workspace", "./temp/adquiver/")
