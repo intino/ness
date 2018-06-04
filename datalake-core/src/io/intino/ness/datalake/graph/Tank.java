@@ -42,6 +42,7 @@ public class Tank extends AbstractTank {
 	private static void saveAttachments(File inlFile, Message message) {
 		try {
 			final File directory = attachmentsFolder(inlFile);
+			if (!directory.exists()) directory.mkdirs();
 			for (Message.Attachment attachment : message.attachments()) {
 				File file = new File(directory, attachment.id());
 				if (file.exists()) continue;
@@ -120,7 +121,7 @@ public class Tank extends AbstractTank {
 				out.write(text, 0, text.length);
 				out.closeEntry();
 				out.close();
-				if(currentFile != null && currentFile.getName().equalsIgnoreCase(file.getName())) {
+				if (currentFile != null && currentFile.getName().equalsIgnoreCase(file.getName())) {
 					currentFile = null;
 					writer.close();
 				}
@@ -167,7 +168,6 @@ public class Tank extends AbstractTank {
 				if (writer != null) writer.close();
 				if (!file.exists()) file.createNewFile();
 				currentFile = file;
-				attachmentsFolder(file).mkdirs();
 				writer = new BufferedWriter(new FileWriter(file, true));
 			}
 			writer.write(textMessage + "\n\n");
@@ -194,7 +194,7 @@ public class Tank extends AbstractTank {
 		else {
 			final String instant = fileFromInstant(tsOf(message));
 			String inlFilename = instant + INL;
-			if(currentFile != null && currentFile.getName().equals(inlFilename)) return currentFile;
+			if (currentFile != null && currentFile.getName().equals(inlFilename)) return currentFile;
 			return new File(tankDirectory, instant + ZIP).exists() ?
 					new File(tankDirectory, instant + ZIP) :
 					new File(tankDirectory, inlFilename);

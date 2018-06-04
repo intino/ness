@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact(groupId = "io.intino.ness", version = "1.0.1") datalake as Product
+Artifact(groupId = "io.intino.ness", version = "1.0.2") datalake as Product
 	Model("Proteo", "2.1.8", "2.2.4")
 	Imports
 		Compile(groupId = "io.intino.konos", artifactId = "alexandria-core", version = "1.0.3")
