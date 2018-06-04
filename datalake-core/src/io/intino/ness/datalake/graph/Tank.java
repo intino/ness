@@ -9,7 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,20 +22,47 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static io.intino.ness.datalake.AttachmentLoader.loadAttachments;
 import static io.intino.ness.inl.Message.load;
+import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("ALL")
 public class Tank extends AbstractTank {
 	public static final String INL = ".inl";
 	private static final String ZIP = ".zip";
-
 	private static Logger logger = LoggerFactory.getLogger(Tank.class);
 	private File currentFile = null;
 	private Writer writer = null;
 
 	public Tank(io.intino.tara.magritte.Node node) {
 		super(node);
+	}
+
+	private static void saveAttachments(File inlFile, Message message) {
+		try {
+			final File directory = attachmentsFolder(inlFile);
+			if (!directory.exists()) directory.mkdirs();
+			for (Message.Attachment attachment : message.attachments()) {
+				File file = new File(directory, attachment.id());
+				if (file.exists()) continue;
+				Files.write(file.toPath(), attachment.data());
+			}
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	private static File attachmentsFolder(File inlFile) {
+		return new File(inlFile.getParentFile(), inlFile.getName().replace(INL, ""));
+	}
+
+	private static String dayOf(String instant) {
+		return instant.replace("-", "").substring(0, 8);
+	}
+
+	private static String hourOf(String instant) {
+		return dayOf(instant) + instant.substring(instant.indexOf("T") + 1, instant.indexOf(":"));
 	}
 
 	public Tank init() {
@@ -45,16 +76,31 @@ public class Tank extends AbstractTank {
 			message = load(textMessage);
 		} catch (Throwable e) {
 			logger.error("error processing message: " + textMessage);
-			logger.error(e.getMessage(), e);
 			return;
 		}
 		drop(message);
 	}
 
 	public void drop(Message message) {
-		final File inlFile = inlFile(directory(), message);
-		append(inlFile, message, message.toString());
+		File file = destinationFile(directory(), message);
+		if (file == null) {
+			logger.error("impossible to drop message:\n " + message.toString());
+			return;
+		}
+		if (file.getName().endsWith(ZIP)) file = unzip(file);
+		append(file, message, message.toString());
 		flush();
+	}
+
+	private File unzip(File file) {
+		File newFile = new File(file.getName().replace(ZIP, INL));
+		try (FileSystem zipfs = FileSystems.newFileSystem(URI.create("jar:" + file.toURI().toString()), emptyMap())) {
+			Files.copy(zipfs.getPath("/" + newFile.getName()), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+		}
+		file.delete();
+		return newFile;
 	}
 
 	public void sort() {
@@ -67,7 +113,7 @@ public class Tank extends AbstractTank {
 
 	public void seal() {
 		try {
-			for (File file : requireNonNull(directory().listFiles((f, n) -> n.endsWith(INL)))) {
+			for (File file : requireNonNull(directory().listFiles((f, n) -> n.endsWith(INL) && !isCurrent(n)))) {
 				final byte[] text = readFile(file);
 				ZipOutputStream out = new ZipOutputStream(new FileOutputStream(new File(file.getAbsolutePath().replace(INL, ZIP))));
 				ZipEntry e = new ZipEntry(file.getName());
@@ -75,6 +121,10 @@ public class Tank extends AbstractTank {
 				out.write(text, 0, text.length);
 				out.closeEntry();
 				out.close();
+				if (currentFile != null && currentFile.getName().equalsIgnoreCase(file.getName())) {
+					currentFile = null;
+					writer.close();
+				}
 				file.delete();
 			}
 		} catch (IOException e) {
@@ -82,16 +132,14 @@ public class Tank extends AbstractTank {
 		}
 	}
 
+	private boolean isCurrent(String fileName) {
+		return (fileFromInstant(Instant.now()) + INL).equals(fileName);
+	}
+
 	@Override
 	public void delete$() {
 		directory().renameTo(new File(graph().core$().as(DatalakeGraph.class).directory(), "old." + qualifiedName()));
 		super.delete$();
-	}
-
-	private static void saveAttachments(File directory, Message message) {
-//		for (Attachment attachment : message.attachments()) {
-//			Files.write(new File(directory, attachment.name()).toPath(), attachment.asByteArray());
-//		}
 	}
 
 	public void flush() {
@@ -114,16 +162,16 @@ public class Tank extends AbstractTank {
 		return new SortedMessagesIterator().iterator(from);
 	}
 
-	private void append(File inlFile, Message message, String textMessage) {
+	private void append(File file, Message message, String textMessage) {
 		try {
-			if (writer == null || !currentFile.equals(inlFile)) {
+			if (writer == null || !currentFile.equals(file)) {
 				if (writer != null) writer.close();
-				if (!inlFile.exists()) inlFile.createNewFile();
-				currentFile = inlFile;
-				writer = new BufferedWriter(new FileWriter(inlFile, true));
+				if (!file.exists()) file.createNewFile();
+				currentFile = file;
+				writer = new BufferedWriter(new FileWriter(file, true));
 			}
 			writer.write(textMessage + "\n\n");
-			saveAttachments(inlFile.getParentFile(), message);
+			saveAttachments(file, message);
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -141,8 +189,16 @@ public class Tank extends AbstractTank {
 		return Files.readAllBytes(inlFile.toPath());
 	}
 
-	private File inlFile(File tankDirectory, Message message) {
-		return tsOf(message) == null ? null : new File(tankDirectory, fileFromInstant(tsOf(message)) + INL);
+	private File destinationFile(File tankDirectory, Message message) {
+		if (tsOf(message) == null) return null;
+		else {
+			final String instant = fileFromInstant(tsOf(message));
+			String inlFilename = instant + INL;
+			if (currentFile != null && currentFile.getName().equals(inlFilename)) return currentFile;
+			return new File(tankDirectory, instant + ZIP).exists() ?
+					new File(tankDirectory, instant + ZIP) :
+					new File(tankDirectory, inlFilename);
+		}
 	}
 
 	private String tsOf(Message message) {
@@ -161,26 +217,16 @@ public class Tank extends AbstractTank {
 		return bound == null || files.isEmpty() ? Collections.emptyList() : files.subList(files.indexOf(bound), files.size());
 	}
 
-	private static String dayOf(String instant) {
-		return instant.replace("-", "").substring(0, 8);
-	}
-
-	private static String hourOf(String instant) {
-		return dayOf(instant) + instant.substring(instant.indexOf("T") + 1, instant.indexOf(":"));
-	}
-
 	public void rename(String name) {
 		directory().renameTo(new File(graph().directory(), name));
 	}
 
 	public class SortedMessagesIterator {
-
 		public Iterator<Message> iterator(Instant from) {
 			try {
 				File[] files = directory().listFiles((f, n) -> n.endsWith(Tank.INL) || n.endsWith(Tank.ZIP));
 				if (files == null) files = new File[0];
-				final List<File> fileList = filter(Arrays.asList(files), from);
-				MessageInputStream stream = MessageInputStreamBuilder.of(fileList, from);
+				MessageInputStream stream = MessageInputStreamBuilder.of(filter(Arrays.asList(files), from), from);
 				return new Iterator<Message>() {
 					Message last = stream.next();
 
@@ -191,23 +237,17 @@ public class Tank extends AbstractTank {
 					public Message next() {
 						try {
 							Message result = last;
-							last = stream.next();
-							if (last == null) {
-								try {
-									stream.close();
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
-							}
+							last = loadAttachments(new File(stream.name()), stream.next());
+							if (last == null) stream.close();
 							return result;
 						} catch (IOException e) {
-							Tank.logger.error(e.getMessage(), e);
+							logger.error(e.getMessage(), e);
 							return null;
 						}
 					}
 				};
 			} catch (Throwable e) {
-				Tank.logger.error(e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 				return null;
 			}
 		}

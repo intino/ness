@@ -1,11 +1,11 @@
 dsl Legio
 
-Artifact("io.intino.ness", "2.0.0") ness as Product
+Artifact("io.intino.ness", "2.0.2") Ness as Product
 	Imports
-		Compile("io.intino.ness", "datalake", "1.0.0")
-		Compile("io.intino.konos", "alexandria-jms", "1.0.13")
-		Compile("io.intino.konos", "alexandria-slack", "1.0.11")
-		Compile("io.intino.konos", "alexandria-jmx", "1.0.3")
+		Compile("io.intino.ness", "datalake", "1.0.2")
+		Compile("io.intino.konos", "alexandria-jms", "1.0.14")
+		Compile("io.intino.konos", "alexandria-slack", "1.0.12")
+		Compile("io.intino.konos", "alexandria-jmx", "1.0.4")
 		Compile("io.intino.konos", "alexandria-scheduler", "1.0.6")
 		Compile("org.apache.activemq", "activemq-broker", "5.15.2")
 		Compile("org.apache.activemq", "activemq-mqtt", "5.15.2")
@@ -13,29 +13,28 @@ Artifact("io.intino.ness", "2.0.0") ness as Product
 		Compile("org.apache.activemq", "activemq-jaas", "5.15.2")
 		Compile("org.apache.activemq", "activemq-runtime-config", "5.15.2")
 		Compile("org.slf4j", "slf4j-log4j12", "1.7.7")
+		Test("io.intino.konos", "alexandria-ness-accessor", "2.1.1")
 	Code("io.intino.ness")
-	Model("Proteo", "2.1.8", "2.1.16")
-	Box("Konos", "3.6.6", "3.6.6")
-	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness") as Runnable("io.intino.ness.box.Main")
-		classpathPrefix = "lib"
-		Parameter("ness_store", "./temp/store")
-		Parameter("ness_datalake", "./temp/store/datalake")
-		Parameter("broker_port", "61616")
-		Parameter("mqtt_port", "1883")
-		Parameter("broker_store", "./temp/broker/")
+	Model("Proteo", "2.1.8", "2.2.4")
+	Box("Konos", "4.0.5", "4.0.5")
+	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib") as Runnable("io.intino.ness.box.Main")
 	Distribution(intino.frameworks, intino.languages)
-
-	Deployment("Datalake") ness-dev > Dev(server = consul-dev, runConfiguration = ebar-pre-ness, project = "dev")
-	Deployment("Datalake") ness-ebar > Dev(server = ebar-pre, runConfiguration = ebar-pre-ness, project = "ebar")
+	Deployment("Datalake") ness-dev > Pre(server = consul-dev, runConfiguration = ebar-pre-ness, project = "dev")
 	Deployment("Datalake") ness-happysense
-		Dev(server = happysense-pre, runConfiguration = happysense-pre-ness, project = "happysense")
+		Pre(server = happysense-pre, runConfiguration = happysense-pre-ness, project = "happysense")
 		Pro(server = happysense-pro, runConfiguration = happysense-pro-ness, project = "happysense")
-	Deployment("Datalake") ness-octana > Dev(server = octana-pre, runConfiguration = octana-pre-ness, project = "octana")
-	Deployment("Datalake") ness-adquiver > Dev(server = adquiver-pre, runConfiguration = adquiver-pre-ness, project = "adquiver")
+	Deployment("Datalake") ness-octana > Pre(server = octana-pre, runConfiguration = octana-pre-ness, project = "octana")
+	Deployment("Datalake") ness-adquiver > Pre(server = adquiver-pre, runConfiguration = adquiver-pre-ness, project = "adquiver")
+	Parameter("workspace", "./temp/ness/")
+	Parameter("connector_id", "id")
+	Parameter("broker_port", "63000")
+	Parameter("scale", "Day")
+	Parameter("mqtt_port", "1884")
+	Parameter("configurationModel", "")
+	Parameter(name = "slackToken")
 
 Server(cesar = "cesar.monentia.es") happysense-pre
 Server(cesar = "cesar.monentia.es") happysense-pro
-Server(cesar = "cesar.monentia.es") ebar-pre
 Server(cesar = "cesar.monentia.es") octana-pre
 Server(cesar = "cesar.monentia.es") adquiver-pre
 Server(cesar = "cesar.pre.intino.io") consul-dev
@@ -44,31 +43,35 @@ RunConfiguration cesar-pro
 	Argument("workspace", "$HOME/ness/")
 	Argument("nessie_token", "xoxb-162074419812-gB5oNUwzxGWQ756TrRyu1Ii9")
 	Argument("broker_port", "63000")
-	Argument("mqtt_port", "1884")
+
 
 RunConfiguration ebar-pre-ness
 	Argument("workspace", "$HOME/")
 	Argument("broker_port", "62000")
 	Argument("connector_id", "ebar-ness-pre")
 	Argument("mqtt_port", "1884")
+	Argument(name = "slackToken", value = "")
 
 RunConfiguration happysense-pre-ness
 	Argument("workspace", "$HOME/")
 	Argument("connector_id", "happysense-pre-ness")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
+	Argument(name = "slackToken", value = "")
 
 RunConfiguration happysense-pro-ness
 	Argument("workspace", "$HOME/")
 	Argument("connector_id", "happysense-pro-ness")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
+	Argument(name = "slackToken", value = "")
 
 RunConfiguration octana-pre-ness
 	Argument("workspace", "$HOME/")
 	Argument("broker_port", "63000")
 	Argument("connector_id", "octana-ness-pre")
 	Argument("mqtt_port", "1884")
+	Argument(name = "slackToken", value = "")
 
 RunConfiguration adquiver-pre-ness
 	Argument("workspace", "$HOME/")
@@ -76,6 +79,7 @@ RunConfiguration adquiver-pre-ness
 	Argument("connector_id", "adquiver-ness-pre")
 	Argument("scale", "Hour")
 	Argument("mqtt_port", "1884")
+	Argument(name = "slackToken", value = "")
 
 RunConfiguration octana-dev-ness
 	Argument("workspace", "../octana/ness/store")
@@ -95,6 +99,7 @@ RunConfiguration hs-dev
 //	Argument("nessie_token", "xoxb-209378438610-DdpW0JlB8BeTAGv5PsXLNkyK")
 	Argument("broker_port", "63000")
 	Argument("mqtt_port", "1884")
+	Argument(name = "slackToken", value = "")
 
 RunConfiguration adquiver-dev
 	Argument("workspace", "./temp/adquiver/")

@@ -8,11 +8,28 @@ import java.io.InputStream;
 import java.util.*;
 
 public class Message {
+	public static Message empty = new Message("");
 	private String type;
 	private Message owner;
 	private Map<String, Attribute> attributes;
 	private List<Message> components;
 	private Map<String, Attachment> attachments;
+
+	public Message(String type) {
+		this.type = type;
+		this.owner = null;
+		this.attributes = new LinkedHashMap<>();
+		this.attachments = new HashMap<>();
+		this.components = null;
+	}
+
+	Message(String type, Message owner) {
+		this.type = type;
+		this.owner = owner;
+		this.attributes = new LinkedHashMap<>();
+		this.attachments = new HashMap<>();
+		this.components = new ArrayList<>();
+	}
 
 	public static Message load(String message) {
 		return load(message.getBytes()).attach(attachmentsOf(message));
@@ -45,21 +62,45 @@ public class Message {
 		return list;
 	}
 
-
-	public Message(String type) {
-		this.type = type;
-		this.owner = null;
-		this.attributes = new LinkedHashMap<>();
-		this.attachments = new HashMap<>();
-		this.components = null;
+	private static String indent(String text) {
+		return "\n\t" + text.replaceAll("\\n", "\n\t");
 	}
 
-	Message(String type, Message owner) {
-		this.type = type;
-		this.owner = owner;
-		this.attributes = new LinkedHashMap<>();
-		this.attachments = new HashMap<>();
-		this.components = new ArrayList<>();
+	private static byte[] contentOf(InputStream is) {
+		try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+			int length;
+			byte[] data = new byte[16384];
+			while ((length = is.read(data, 0, data.length)) != -1)
+				os.write(data, 0, length);
+			os.flush();
+			return os.toByteArray();
+
+		} catch (IOException e) {
+			return new byte[0];
+		}
+	}
+
+	private static List<String> attachmentsOf(String message) {
+		int index;
+		List<String> result = new ArrayList<>();
+		while ((index = message.indexOf('@')) > 0) {
+			message = message.substring(index + 1);
+			index = message.contains("\n") ? message.indexOf('\n') : message.length();
+			String value = message.substring(0, index);
+			if (!isUUID(value)) continue;
+			result.add(value);
+		}
+		return result;
+	}
+
+	private static boolean isUUID(String value) {
+		try {
+			if (value.contains(".")) value = value.substring(0, value.lastIndexOf('.'));
+			UUID.fromString(value);
+			return true;
+		} catch (IllegalArgumentException exception) {
+			return false;
+		}
 	}
 
 	public String type() {
@@ -80,7 +121,8 @@ public class Message {
 
 	public Value read(final String attribute) {
 		return new Value() {
-			@Override @SuppressWarnings("unchecked")
+			@Override
+			@SuppressWarnings("unchecked")
 			public <T> T as(Class<T> type) {
 				String value = use(attribute).value;
 				return value != null ? (T) Parsers.get(type).parse(value) : null;
@@ -110,9 +152,18 @@ public class Message {
 		return set(attribute, type, contentOf(is));
 	}
 
+	public Message set(String attribute, String id, String type, InputStream is) {
+		return set(attribute, id, type, contentOf(is));
+	}
+
 	public Message set(String attribute, String type, byte[] content) {
 		if (attributes.containsKey(attribute)) detach(get(attribute));
 		return set(attribute, "@" + attach(type, content));
+	}
+
+	public Message set(String attribute, String id, String type, byte[] content) {
+		if (attributes.containsKey(attribute)) detach(get(attribute));
+		return set(attribute, "@" + attach(id, type, content));
 	}
 
 	public Message write(String attribute, String value) {
@@ -158,7 +209,6 @@ public class Message {
 		return this;
 	}
 
-
 	private Attribute use(String attribute) {
 		if (!contains(attribute)) add(new Attribute(attribute));
 		return attributes.get(attribute.toLowerCase());
@@ -195,7 +245,6 @@ public class Message {
 		components.remove(component);
 	}
 
-
 	public void remove(List<Message> components) {
 		this.components.removeAll(components);
 	}
@@ -212,10 +261,6 @@ public class Message {
 		return attribute.name + ":" + (isMultiline(attribute.value) ? indent(attribute.value) : " " + attribute.value);
 	}
 
-	private static String indent(String text) {
-		return "\n\t" + text.replaceAll("\\n", "\n\t");
-	}
-
 	private boolean isMultiline(String value) {
 		return value != null && value.contains("\n");
 	}
@@ -226,9 +271,14 @@ public class Message {
 		return id;
 	}
 
+	private String attach(String id, String type, byte[] bytes) {
+		attachments.put(id.toLowerCase(), new Attachment(id, bytes));
+		return id;
+	}
+
 	private Message attach(List<String> ids) {
 		for (String id : ids)
-			attachments.put(id.toLowerCase(), new Attachment(id,new byte[0]));
+			attachments.put(id.toLowerCase(), new Attachment(id, new byte[0]));
 		return this;
 	}
 
@@ -240,8 +290,6 @@ public class Message {
 	private String path() {
 		return owner != null ? owner.path() + "." + type : type;
 	}
-
-	public static Message empty = new Message("");
 
 	public int length() {
 		return toString().length();
@@ -265,12 +313,15 @@ public class Message {
 		<T> T as(Class<T> type);
 
 	}
+
 	static class Attribute {
 		String name;
 		String value;
+
 		Attribute(String name) {
 			this.name = name;
 		}
+
 		@Override
 		public String toString() {
 			return name + ": " + value;
@@ -278,20 +329,23 @@ public class Message {
 
 
 	}
+
 	public static class Attachment {
 		private String id;
 
 		private byte[] data;
+
 		private Attachment(String id, byte[] data) {
 			this.id = id;
 			this.data = data;
 		}
+
 		public String id() {
 			return id;
 		}
 
 		public String type() {
-			return id.substring(id.lastIndexOf('.')+1);
+			return id.substring(id.lastIndexOf('.') + 1);
 		}
 
 		public byte[] data() {
@@ -304,43 +358,6 @@ public class Message {
 
 		public void data(byte[] data) {
 			this.data = data;
-		}
-	}
-
-	private static byte[] contentOf(InputStream is) {
-		try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-			int length;
-			byte[] data = new byte[16384];
-			while ((length = is.read(data, 0, data.length)) != -1)
-				os.write(data, 0, length);
-			os.flush();
-			return os.toByteArray();
-
-		} catch (IOException e) {
-			return new byte[0];
-		}
-	}
-
-	private static List<String> attachmentsOf(String message) {
-		int index;
-		List<String> result = new ArrayList<>();
-		while ((index = message.indexOf('@')) > 0) {
-			message = message.substring(index+1);
-			index = message.contains("\n") ? message.indexOf('\n'): message.length();
-			String value = message.substring(0, index);
-			if (!isUUID(value)) continue;
-			result.add(value);
-		}
-		return result;
-	}
-
-	private static boolean isUUID(String value) {
-		try{
-			if (value.contains(".")) value = value.substring(0,value.lastIndexOf('.'));
-			UUID.fromString(value);
-			return true;
-		} catch (IllegalArgumentException exception){
-			return false;
 		}
 	}
 }

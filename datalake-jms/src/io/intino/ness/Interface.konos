@@ -1,6 +1,6 @@
 dsl Konos
 
-Task sealTanks as CronTrigger("0 0 4 1/1 * ? *", "daily at 4")
+//Task sealTanks as CronTrigger("0 0 4 1/1 * ? *", "daily at 4")
 
 Service Manager as JMX
 	Operation("Request all users registered in ness") users
@@ -12,8 +12,7 @@ Service Manager as JMX
 		Parameter name as Text
 		Response as Text
 
-	Operation("Request all tanks nessy is subscribed filtering by tags") tanks
-		Parameter tags as Text List
+	Operation("Request tank names") tanks
 		Response as Text List
 	Operation("connect feed and flow channes of a tank") resume-tank
 		Parameter tank as Text
@@ -100,7 +99,10 @@ Service Manager as JMX
 
 	Operation(description = "Stops datalake service saving current information") stop
 
-Schema Reflow
+Schema ReflowConfiguration
 	Attribute blockSize as Integer
-	Attribute from as DateTime
-	Attribute(multiple = true) tanks as List Text
+	Attribute cleanStore as Bool
+		defaultValue = true
+	Schema Tank
+		Attribute name as Text
+		Attribute from as DateTime

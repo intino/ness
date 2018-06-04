@@ -3,10 +3,6 @@ package io.intino.ness.box.slack;
 import io.intino.konos.slack.Bot.MessageProperties;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.box.actions.RenameTankAction;
-import io.intino.ness.box.actions.SealTanksAction;
-import io.intino.ness.datalake.graph.Tank;
-
-import java.util.Collections;
 
 public class TankSlack {
 	private static final String OK = ":ok_hand:";

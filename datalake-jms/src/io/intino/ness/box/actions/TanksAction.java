@@ -7,11 +7,9 @@ import io.intino.ness.datalake.graph.Tank;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 public class TanksAction {
 
 	public NessBox box;
-	public java.util.List<String> tags;
 
 	public List<String> execute() {
 		return Helper.sortedTanks(box.datalake()).map(Tank::qualifiedName).collect(Collectors.toList());

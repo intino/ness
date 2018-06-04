@@ -15,7 +15,7 @@ public class AddUserAction {
 		User user = box.nessGraph().userList(u -> u.name().equals(name)).findFirst().orElse(null);
 		if (user != null) return "User already exists";
 		String password = box.busService().newUser(name);
-		box.nessGraph().create("users").user(name, password, emptyList()).save$();
+		box.nessGraph().create("users").user(name, password).save$();
 		return "User *" + name + "* added with password `" + password + "`";
 
 	}

@@ -139,13 +139,13 @@ public class MessageExternalSorter {
 
 	static class TemporalFile {
 		final String source;
-		private MessageInputStream iterator;
+		private MessageInputStream stream;
 		private Message message;
 
 		TemporalFile(File file) {
 			this.source = file.getName();
 			try {
-				this.iterator = FileMessageInputStream.of(file);
+				this.stream = FileMessageInputStream.of(file);
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);
 			}
@@ -154,7 +154,7 @@ public class MessageExternalSorter {
 
 		private void next() {
 			try {
-				this.message = iterator.next();
+				this.message = AttachmentLoader.loadAttachments(new File(stream.name()), stream.next());
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);
 			}

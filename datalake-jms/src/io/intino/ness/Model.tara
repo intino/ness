@@ -13,7 +13,6 @@ Concept Function
 Concept User
 	var string name
 	var string password
-	var string[] groups
 
 Concept ExternalBus
 	var string originURL
@@ -27,3 +26,5 @@ Concept JMSConnector
 	var string[] topics
 	var boolean enabled = true
 
+Concept Tank
+	var string qualifiedName

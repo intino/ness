@@ -1,6 +1,6 @@
 dsl Konos
 
-Service Nessie as SlackBot
+Service Nessie as SlackBot(token = "{slackToken}")
 	Request("Enter in the management area to add/remove tanks or users and other management actions") manage
 		Request("Add user to the datalake") add-user
 			Parameter(String) name
