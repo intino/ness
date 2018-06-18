@@ -47,22 +47,6 @@ public class ManageSlack {
 		return action.execute();
 	}
 
-	public String addFunction(MessageProperties properties) {
-		Bot.BotFile file = properties.file();
-		AddFunctionAction action = new AddFunctionAction();
-		action.box = box;
-		action.name = file.name().replace(".java", "");
-		action.code = file.textContent();
-		return action.execute();
-	}
-
-	public String removeFunction(MessageProperties properties, String name) {
-		RemoveFunctionAction action = new RemoveFunctionAction();
-		action.box = box;
-		action.name = name;
-		return action.execute();
-	}
-
 	public Object addExternalBus(MessageProperties properties, String name, String externalBusUrl, String user, String password) {
 		AddExternalBusAction action = new AddExternalBusAction();
 		action.box = box;

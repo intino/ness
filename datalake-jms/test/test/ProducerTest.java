@@ -40,6 +40,7 @@ public class ProducerTest {
 
 
 	@Test
+	@Ignore
 	public void sendAttachment() {
 		final Ness ness = new Ness(url, user, password, "");
 		ness.connect();

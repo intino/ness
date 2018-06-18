@@ -3,12 +3,7 @@ dsl Proteo
 Concept Pipe
 	var string origin
 	var string destination
-	var Function transformer = empty
-
-Concept Function
-	var string qualifiedName
-	var string source
-	var object:io.intino.konos.alexandria.functions.MessageFunction aClass is volatile
+	var object:io.intino.konos.alexandria.functions.MessageFunction transformer = empty
 
 Concept User
 	var string name

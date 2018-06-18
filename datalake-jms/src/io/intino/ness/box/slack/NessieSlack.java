@@ -5,7 +5,6 @@ import io.intino.konos.slack.Bot.MessageProperties;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.box.actions.*;
 import io.intino.ness.datalake.graph.Tank;
-import io.intino.ness.graph.Function;
 import io.intino.ness.graph.JMSConnector;
 import io.intino.ness.graph.User;
 import org.apache.activemq.network.jms.JmsConnector;
@@ -64,15 +63,6 @@ public class NessieSlack {
 		return builder.toString();
 	}
 
-	public String functions(MessageProperties properties) {
-		StringBuilder builder = new StringBuilder();
-		List<Function> functions = box.nessGraph().functionList();
-		for (int i = 0; i < functions.size(); i++)
-			builder.append(i).append(") ").append(functions.get(i).name$()).append(". Being used on:...TODO\n");
-		String value = builder.toString();
-		return value.isEmpty() ? "There aren't functions registered yet" : value;
-	}
-
 	public String tank(MessageProperties properties, String name) {
 		Tank tank = findTank(box.datalake(), name);
 		if (tank == null) return "tank not found";
@@ -80,7 +70,6 @@ public class NessieSlack {
 		properties.context().objects(name);
 		return "Selected " + tank.qualifiedName();
 	}
-
 
 	public String startJmsConnector(MessageProperties properties, String name) {
 		StartJmsConnectorAction action = new StartJmsConnectorAction();
@@ -110,10 +99,9 @@ public class NessieSlack {
 		return jmsConnector.isConnected();
 	}
 
-	public String pump(MessageProperties properties, String functionName, String input, String output) {
+	public String pump(MessageProperties properties, String input, String output) {
 		PumpAction action = new PumpAction();
 		action.box = box;
-		action.functionName = functionName;
 		action.input = input;
 		action.output = output;
 		action.execute();
