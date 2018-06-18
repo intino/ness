@@ -20,7 +20,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.intino.ness.box.TestHelper.compileFunctions;
 import static io.intino.ness.box.TestHelper.store;
 import static org.junit.Assert.*;
 
@@ -40,7 +39,6 @@ public class ActionTests {
 		NessConfiguration boxConfiguration = new NessConfiguration(args);
 		datalake = new Graph(store(boxConfiguration.args().get("ness_store"))).loadStashes("Ness").as(DatalakeGraph.class);
 		ness = datalake.a$(NessGraph.class);
-		compileFunctions(ness);
 		box = (NessBox) new NessBox(boxConfiguration).put(datalake.core$()).open();
 	}
 

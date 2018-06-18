@@ -154,7 +154,8 @@ public class MessageExternalSorter {
 
 		private void next() {
 			try {
-				this.message = AttachmentLoader.loadAttachments(new File(stream.name()), stream.next());
+				this.message = stream.next();
+				if(message != null) AttachmentLoader.loadAttachments(new File(stream.name()), this.message);
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);
 			}

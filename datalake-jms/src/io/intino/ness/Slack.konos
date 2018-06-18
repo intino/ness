@@ -10,9 +10,6 @@ Service Nessie as SlackBot(token = "{slackToken}")
 			Parameter(String) name
 		Request("Removes registered tank") remove-tank
 			Parameter(String) name
-		Request("Creates a function associated to an input tank and output tank. It requires the file of the function") add-function
-		Request("Removes a registered function") remove-function
-			Parameter(String) name
 		Request("Defines an external bus to interact with it using jms connectors") add-external-bus
 			Parameter(String) name
 			Parameter(String) externalBusUrl
@@ -30,14 +27,12 @@ Service Nessie as SlackBot(token = "{slackToken}")
 		Request("Connects source and destination topics") pipes
 	Request("Request all users registered in ness") users
 	Request("Request all tanks nessy is subscribed filtering by tags") tanks
-	Request("Show all functions registered") functions
 	Request("Show registered topics") topics
 	Request("Select a tank to operate with") tank
 		Parameter(String) name
 		Request("Changes name of this tank to new one") rename
 			Parameter(String) name
 	Request("Connect a source and destination tanks through a `function`") pump
-		Parameter(String) functionName
 		Parameter(String) input
 		Parameter(String) output
 	Request ("Reproduce events of the tanks given. 'all' word will reflow all tanks") reflow
