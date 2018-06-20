@@ -39,24 +39,6 @@ public class Tank extends AbstractTank {
 		super(node);
 	}
 
-	private static void saveAttachments(File inlFile, Message message) {
-		try {
-			final File directory = attachmentsFolder(inlFile);
-			if (!directory.exists()) directory.mkdirs();
-			for (Message.Attachment attachment : message.attachments()) {
-				File file = new File(directory, attachment.id());
-				if (file.exists()) continue;
-				Files.write(file.toPath(), attachment.data());
-			}
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
-
-	private static File attachmentsFolder(File inlFile) {
-		return new File(inlFile.getParentFile(), inlFile.getName().replace(INL, ""));
-	}
-
 	private static String dayOf(String instant) {
 		return instant.replace("-", "").substring(0, 8);
 	}
@@ -90,6 +72,21 @@ public class Tank extends AbstractTank {
 		if (file.getName().endsWith(ZIP)) file = unzip(file);
 		append(file, message, message.toString());
 		flush();
+	}
+
+	private void append(File file, Message message, String textMessage) {
+		try {
+			if (writer == null || !currentFile.equals(file)) {
+				if (writer != null) writer.close();
+				if (!file.exists()) file.createNewFile();
+				currentFile = file;
+				writer = new BufferedWriter(new FileWriter(file, true));
+			}
+			writer.write(textMessage + "\n\n");
+			saveAttachments(file, message);
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
 	}
 
 	private File unzip(File file) {
@@ -132,6 +129,25 @@ public class Tank extends AbstractTank {
 		}
 	}
 
+	private void saveAttachments(File inlFile, Message message) {
+		if(message.attachments().isEmpty()) return;
+		try {
+			final File directory = attachmentsFolder(inlFile);
+			if (!directory.exists()) directory.mkdirs();
+			for (Message.Attachment attachment : message.attachments()) {
+				File file = new File(directory, attachment.id());
+				if (file.exists()) continue;
+				Files.write(file.toPath(), attachment.data());
+			}
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	private File attachmentsFolder(File inlFile) {
+		return new File(inlFile.getParentFile(), inlFile.getName().replace(INL, ""));
+	}
+
 	private boolean isCurrent(String fileName) {
 		return (fileFromInstant(Instant.now()) + INL).equals(fileName);
 	}
@@ -160,21 +176,6 @@ public class Tank extends AbstractTank {
 
 	public Iterator<Message> sortedMessagesIterator(Instant from) {
 		return new SortedMessagesIterator().iterator(from);
-	}
-
-	private void append(File file, Message message, String textMessage) {
-		try {
-			if (writer == null || !currentFile.equals(file)) {
-				if (writer != null) writer.close();
-				if (!file.exists()) file.createNewFile();
-				currentFile = file;
-				writer = new BufferedWriter(new FileWriter(file, true));
-			}
-			writer.write(textMessage + "\n\n");
-			saveAttachments(file, message);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
 	}
 
 	public File directory() {
