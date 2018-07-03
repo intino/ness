@@ -130,7 +130,7 @@ public class Tank extends AbstractTank {
 	}
 
 	private void saveAttachments(File inlFile, Message message) {
-		if(message.attachments().isEmpty()) return;
+		if (message.attachments().isEmpty()) return;
 		try {
 			final File directory = attachmentsFolder(inlFile);
 			if (!directory.exists()) directory.mkdirs();
@@ -229,17 +229,18 @@ public class Tank extends AbstractTank {
 				if (files == null) files = new File[0];
 				MessageInputStream stream = MessageInputStreamBuilder.of(filter(Arrays.asList(files), from), from);
 				return new Iterator<Message>() {
-					Message last = stream.next();
+					Message next = stream.next();
 
 					public boolean hasNext() {
-						return last != null;
+						return next != null;
 					}
 
 					public Message next() {
 						try {
-							Message result = last;
-							last = loadAttachments(new File(stream.name()), stream.next());
-							if (last == null) stream.close();
+							Message result = next;
+							next = stream.next();
+							if (next == null) stream.close();
+							loadAttachments(new File(stream.name()), next);
 							return result;
 						} catch (IOException e) {
 							logger.error(e.getMessage(), e);
