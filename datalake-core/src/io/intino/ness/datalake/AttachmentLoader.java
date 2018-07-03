@@ -14,16 +14,14 @@ public class AttachmentLoader {
 
 	private static Logger logger = LoggerFactory.getLogger(AttachmentLoader.class);
 
-	public static Message loadAttachments(File inlFile, Message message) {
+	public static void loadAttachments(File inlFile, Message message) {
 		final File directory = attachmentDirectoryOf(inlFile);
 		try {
 			for (Message.Attachment attachment : message.attachments())
 				attachment.data(Files.readAllBytes(new File(directory, attachment.id()).toPath()));
-			return message;
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
-		return message;
 	}
 
 	private static File attachmentDirectoryOf(File file) {

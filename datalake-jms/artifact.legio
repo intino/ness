@@ -1,8 +1,8 @@
 dsl Legio
 
-Artifact("io.intino.ness", "2.1.0") Ness as Product
+Artifact("io.intino.ness", "2.1.1") Ness as Product
 	Imports
-		Compile("io.intino.ness", "datalake", "1.0.3")
+		Compile("io.intino.ness", "datalake", "1.0.4")
 		Compile("io.intino.konos", "alexandria-jms", "1.0.14")
 		Compile("io.intino.konos", "alexandria-slack", "1.0.12")
 		Compile("io.intino.konos", "alexandria-jmx", "1.0.4")
@@ -26,18 +26,6 @@ Artifact("io.intino.ness", "2.1.0") Ness as Product
 	Parameter("mqtt_port", "1884")
 	Parameter("configurationModel", "")
 	Parameter(name = "slackToken")
-
-Server(cesar = "cesar.monentia.es") happysense-pre
-Server(cesar = "cesar.monentia.es") happysense-pro
-Server(cesar = "cesar.monentia.es") octana-pre
-Server(cesar = "cesar.monentia.es") adquiver-pre
-Server(cesar = "cesar.pre.intino.io") consul-dev
-
-RunConfiguration cesar-pro
-	Argument("workspace", "$HOME/ness/")
-	Argument("nessie_token", "xoxb-162074419812-gB5oNUwzxGWQ756TrRyu1Ii9")
-	Argument("broker_port", "63000")
-
 
 Repository("intino-maven") intino
 	Release("https://artifactory.intino.io/artifactory/releases")
