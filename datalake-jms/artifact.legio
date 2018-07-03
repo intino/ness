@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "2.1.0") Ness as Product
+Artifact("io.intino.ness", "2.1.1") Ness as Product
 	Imports
 		Compile("io.intino.ness", "datalake", "1.0.4")
 		Compile("io.intino.konos", "alexandria-jms", "1.0.14")
