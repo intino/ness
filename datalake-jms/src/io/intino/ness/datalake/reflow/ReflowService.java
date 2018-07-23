@@ -29,19 +29,18 @@ import static io.intino.konos.jms.MessageFactory.createMessageFor;
 import static io.intino.ness.box.slack.Helper.findTank;
 import static java.util.stream.Collectors.toMap;
 
-public class ReflowSession implements Consumer {
-	private static final Logger logger = LoggerFactory.getLogger(ReflowSession.class);
+public class ReflowService implements Consumer {
+	private static final Logger logger = LoggerFactory.getLogger(ReflowService.class);
 	private final NessBox box;
 	private ReflowProcess handler;
 	private int blockSize;
 	private Session session;
 	private List<Tank> pausedTanks;
 
-	public ReflowSession(NessBox box) {
+	public ReflowService(NessBox box) {
 		this.box = box;
 	}
 
-	@Override
 	public void consume(Message message) {
 		String text = textFrom(message);
 		if (text.contains("blockSize")) defineReflow(text);

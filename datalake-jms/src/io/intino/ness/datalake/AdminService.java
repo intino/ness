@@ -11,27 +11,34 @@ import java.util.stream.Collectors;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
 
-public class AdminSession implements Consumer {
+public class AdminService implements Consumer {
 	private final NessBox box;
 
-	public AdminSession(NessBox box) {
+	public AdminService(NessBox box) {
 		this.box = box;
 	}
 
 	@Override
 	public void consume(Message message) {
 		String text = Consumer.textFrom(message);
-		if (text.contains("tanks"))
+		if (text.startsWith("tanks"))
 			replyTo(message, String.join(";", box.nessGraph().tankList().stream().map(Tank::qualifiedName).collect(Collectors.toList())));
+		else if (text.startsWith("batch")) {
+			final String[] split = text.split(":");
+			final io.intino.ness.datalake.graph.Tank tank = box.datalake().tank(split[1]);
+			tank.batch(Integer.parseInt(split[2]));
+		} else if (text.startsWith("endbatch")) {
+			final String[] split = text.split(":");
+			final io.intino.ness.datalake.graph.Tank tank = box.datalake().tank(split[1]);
+			tank.endBatch();
+		}
 	}
-
 
 	private void replyTo(Message request, String reply) {
 		try {
 			box.busManager().getQueueProducer(((ActiveMQDestination) request.getJMSReplyTo()).getPhysicalName()).produce(createMessageFor(reply));
 		} catch (JMSException e) {
 			logger.error(e.getMessage(), e);
-
 		}
 	}
 }

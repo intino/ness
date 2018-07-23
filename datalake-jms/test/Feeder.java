@@ -39,7 +39,7 @@ public class Feeder {
 	}
 
 	public static class ExampleMessage {
-		Instant created = Instant.now();
+		Instant ts = Instant.now();
 		String user;
 		double value;
 

@@ -3,13 +3,13 @@ package io.intino.ness.box;
 import io.intino.ness.box.actions.ResumeTankAction;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.bus.BusService;
-import io.intino.ness.datalake.AdminSession;
+import io.intino.ness.datalake.AdminService;
 import io.intino.ness.datalake.PipeStarter;
 import io.intino.ness.datalake.Scale;
 import io.intino.ness.datalake.graph.AbstractTank;
 import io.intino.ness.datalake.graph.DatalakeGraph;
 import io.intino.ness.datalake.graph.Tank;
-import io.intino.ness.datalake.reflow.ReflowSession;
+import io.intino.ness.datalake.reflow.ReflowService;
 import io.intino.ness.graph.NessGraph;
 import io.intino.ness.graph.Pipe;
 import io.intino.ness.graph.User;
@@ -29,8 +29,8 @@ public class NessBox extends AbstractBox {
 	private NessGraph graph;
 	private BusManager busManager;
 	private BusService busService;
-	private ReflowSession reflowSession;
-	private AdminSession adminSession;
+	private ReflowService reflowService;
+	private AdminService adminService;
 
 	public NessBox(String[] args) {
 		super(args);
@@ -39,8 +39,8 @@ public class NessBox extends AbstractBox {
 	public NessBox(NessConfiguration configuration) {
 		super(configuration);
 		this.connectorID = configuration.args().getOrDefault("connector_id", "ness");
-		this.reflowSession = new ReflowSession(this);
-		this.adminSession = new AdminSession(this);
+		this.reflowService = new ReflowService(this);
+		this.adminService = new AdminService(this);
 		this.scale = configuration.args().containsKey("scale") ? Scale.valueOf(configuration.args().get("scale")) : Scale.Day;
 	}
 
@@ -71,11 +71,11 @@ public class NessBox extends AbstractBox {
 	}
 
 	private void startReflowService() {
-		busManager.registerConsumer(SERVICE_NESS_REFLOW, reflowSession);
+		busManager.registerConsumer(SERVICE_NESS_REFLOW, reflowService);
 	}
 
 	private void startAdminService() {
-		busManager.registerConsumer(SERVICE_NESS_ADMIN, adminSession);
+		busManager.registerConsumer(SERVICE_NESS_ADMIN, adminService);
 	}
 
 	public void close() {
