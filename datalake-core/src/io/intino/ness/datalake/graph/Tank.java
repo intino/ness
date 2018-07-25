@@ -285,7 +285,7 @@ public class Tank extends AbstractTank {
 							Message result = next;
 							next = stream.next();
 							if (next == null) stream.close();
-							loadAttachments(new File(stream.name()), next);
+							else loadAttachments(new File(stream.name()), next);
 							return result;
 						} catch (IOException e) {
 							logger.error(e.getMessage(), e);

@@ -13,6 +13,8 @@ import io.intino.ness.datalake.reflow.ReflowService;
 import io.intino.ness.graph.NessGraph;
 import io.intino.ness.graph.Pipe;
 import io.intino.ness.graph.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Map;
@@ -79,6 +81,7 @@ public class NessBox extends AbstractBox {
 	}
 
 	public void close() {
+		LoggerFactory.getLogger(Tank.class).info("Shutting down datalake...");
 		datalake().tankList().forEach(Tank::terminate);
 		super.close();
 		busManager.stop();
