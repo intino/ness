@@ -64,7 +64,7 @@ public class Tank extends AbstractTank {
 		this.batch = false;
 	}
 
-	public void drop(String textMessage) {
+	public void put(String textMessage) {
 		Message message;
 		try {
 			message = load(textMessage);
@@ -72,10 +72,10 @@ public class Tank extends AbstractTank {
 			logger.error("error processing message: " + textMessage);
 			return;
 		}
-		drop(message);
+		put(message);
 	}
 
-	public void drop(Message message) {
+	public void put(Message message) {
 		if (batch) {
 			final String key = fileFromInstant(tsOf(message));
 			batchQueue.putIfAbsent(key, new ArrayList<>());
@@ -90,9 +90,10 @@ public class Tank extends AbstractTank {
 
 	private void saveBatch() {
 		for (String ts : batchQueue.keySet()) {
+			final List<Message> messages = batchQueue.get(ts);
+			if (messages.isEmpty()) continue;
 			File file = fileOf(ts);
 			if (file.getName().endsWith(ZIP)) file = unzip(file);
-			final List<Message> messages = batchQueue.get(ts);
 			append(file, String.join("\n\n", messages.stream().map(m -> m.toString()).collect(toList())));
 			saveAttachments(file, messages);
 			flush();
@@ -103,7 +104,7 @@ public class Tank extends AbstractTank {
 	private void save(Message message) {
 		File file = destinationFile(message);
 		if (file == null) {
-			logger.error("impossible to drop message:\n " + message.toString());
+			logger.error("impossible to put message:\n " + message.toString());
 			return;
 		}
 		if (file.getName().endsWith(ZIP)) file = unzip(file);

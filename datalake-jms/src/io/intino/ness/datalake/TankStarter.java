@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.jms.Message;
 
-import static io.intino.konos.jms.Consumer.textFrom;
 import static io.intino.ness.datalake.MessageTranslator.toInlMessage;
 
 public class TankStarter {
@@ -23,16 +22,16 @@ public class TankStarter {
 
 	public void start() {
 		bus.registerConsumer(tank.feedQN(), message -> feed(tank, message));
-		bus.registerConsumer(tank.dropQN(), message -> drop(tank, message));
+		bus.registerConsumer(tank.putQN(), message -> put(tank, message));
 	}
 
 	private void feed(Tank tank, Message message) {
 		new Thread(() -> flow(tank, message)).start();
-		drop(tank, toInlMessage(message));
+		put(tank, toInlMessage(message));
 	}
 
-	private void drop(Tank tank, Message message) {
-		drop(tank, toInlMessage(message));
+	private void put(Tank tank, Message message) {
+		put(tank, toInlMessage(message));
 	}
 
 	@SuppressWarnings("ConstantConditions")
@@ -40,7 +39,7 @@ public class TankStarter {
 		bus.getTopicProducer(tank.flowQN()).produce(message);
 	}
 
-	private void drop(Tank tank, io.intino.ness.inl.Message message) {
-		tank.drop(message);
+	private void put(Tank tank, io.intino.ness.inl.Message message) {
+		tank.put(message);
 	}
 }

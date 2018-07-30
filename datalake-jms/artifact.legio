@@ -17,7 +17,7 @@ Artifact("io.intino.ness", "2.3.1") Ness as Product
 	Code("io.intino.ness")
 	Model("Proteo", "2.1.8", "2.3.1")
 	Box("Konos", "4.1.2", "4.1.2")
-	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib") as Runnable("io.intino.ness.box.Main")
+	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true) as Runnable("io.intino.ness.box.Main")
 	Distribution(intino.frameworks, intino.languages)
 	Parameter("workspace", "./temp/ness/")
 	Parameter("connector_id", "id")

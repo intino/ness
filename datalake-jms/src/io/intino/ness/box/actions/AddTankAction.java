@@ -37,7 +37,7 @@ public class AddTankAction {
 		final Tank tank = datalake().add(name);
 		box.busManager().getOrCreateTopic(tank.feedQN());
 		box.busManager().getOrCreateTopic(tank.flowQN());
-		box.busManager().getOrCreateTopic(tank.dropQN());
+		box.busManager().getOrCreateTopic(tank.putQN());
 		resumeTank(name);
 	}
 

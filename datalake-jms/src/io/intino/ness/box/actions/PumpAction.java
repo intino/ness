@@ -30,7 +30,7 @@ public class PumpAction extends Action {
 		while (!iterator.hasNext()) {
 			Message next = iterator.next();
 			next = pipe.transformer() != null && pipe.transformer() instanceof MessageMapper ? ((MessageMapper) pipe.transformer()).map(next) : next;
-			if (next != null) to.drop(next);
+			if (next != null) to.put(next);
 		}
 	}
 }
