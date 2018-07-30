@@ -7,7 +7,6 @@ import io.intino.ness.datalake.graph.Tank;
 
 import static io.intino.ness.box.actions.Action.OK;
 
-
 public class ResumeTankAction {
 	public NessBox box;
 	public String tank;
@@ -22,12 +21,12 @@ public class ResumeTankAction {
 
 	public String execute() {
 		final Tank tank = Helper.findTank(box.datalake(), this.tank);
-		io.intino.ness.graph.Tank jmsTank = Helper.findTank(box.nessGraph(), this.tank);
 		if (tank == null) return "tank not found";
-		return execute(tank, jmsTank);
+		return execute(tank);
 	}
 
-	public String execute(Tank tank, io.intino.ness.graph.Tank jmsTank) {
+	public String execute(Tank tank) {
+		io.intino.ness.graph.Tank jmsTank = Helper.findTank(box.nessGraph(), tank.qualifiedName());
 		new TankStarter(box.busManager(), tank).start();
 		tank.active(true);
 		jmsTank.active(true);

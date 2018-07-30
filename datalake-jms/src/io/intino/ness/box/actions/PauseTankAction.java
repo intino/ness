@@ -9,7 +9,6 @@ import java.util.List;
 
 import static io.intino.ness.box.actions.Action.OK;
 
-
 public class PauseTankAction {
 	public NessBox box;
 	public String tank;
@@ -24,12 +23,12 @@ public class PauseTankAction {
 
 	public String execute() {
 		Tank datalakeTank = Helper.findTank(box.datalake(), tank);
-		io.intino.ness.graph.Tank jmsTank = Helper.findTank(box.nessGraph(), tank);
 		if (datalakeTank == null) return "tank not found";
-		return execute(datalakeTank, jmsTank);
+		return execute(datalakeTank);
 	}
 
-	public String execute(Tank aTank, io.intino.ness.graph.Tank jmsTank) {
+	public String execute(Tank aTank) {
+		io.intino.ness.graph.Tank jmsTank = Helper.findTank(box.nessGraph(), aTank.qualifiedName());
 		List<TopicConsumer> consumers = box.busManager().consumersOf(aTank.feedQN());
 		consumers.forEach(TopicConsumer::stop);
 		aTank.active(false);
