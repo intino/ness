@@ -22,14 +22,17 @@ public class ResumeTankAction {
 
 	public String execute() {
 		final Tank tank = Helper.findTank(box.datalake(), this.tank);
+		io.intino.ness.graph.Tank jmsTank = Helper.findTank(box.nessGraph(), this.tank);
 		if (tank == null) return "tank not found";
-		return execute(tank);
+		return execute(tank, jmsTank);
 	}
 
-	public String execute(Tank tank) {
+	public String execute(Tank tank, io.intino.ness.graph.Tank jmsTank) {
 		new TankStarter(box.busManager(), tank).start();
 		tank.active(true);
+		jmsTank.active(true);
 		tank.save$();
+		jmsTank.save$();
 		return OK;
 	}
 }

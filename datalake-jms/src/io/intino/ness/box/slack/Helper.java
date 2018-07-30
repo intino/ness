@@ -2,6 +2,7 @@ package io.intino.ness.box.slack;
 
 import io.intino.ness.datalake.graph.DatalakeGraph;
 import io.intino.ness.datalake.graph.Tank;
+import io.intino.ness.graph.NessGraph;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -11,7 +12,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,6 +22,11 @@ public class Helper {
 	public static Tank findTank(DatalakeGraph graph, String name) {
 		List<Tank> topics = graph.tankList(t -> t.qualifiedName().equalsIgnoreCase(name)).collect(Collectors.toList());
 		return topics.isEmpty() ? findByPosition(graph, name) : topics.get(0);
+	}
+
+	public static io.intino.ness.graph.Tank findTank(NessGraph graph, String name) {
+		final List<io.intino.ness.graph.Tank> tanks = graph.tankList(t -> t.qualifiedName().equalsIgnoreCase(name)).collect(Collectors.toList());
+		return tanks.isEmpty() ? null : tanks.get(0);
 	}
 
 	private static Tank findByPosition(DatalakeGraph ness, String name) {
