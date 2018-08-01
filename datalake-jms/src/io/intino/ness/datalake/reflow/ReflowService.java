@@ -94,7 +94,7 @@ public class ReflowService implements Consumer {
 		final Map<Tank, Instant> tanks = collectTanks(reflow.tankList());
 		this.session = box.busManager().transactedSession();
 		this.handler = new ReflowProcess(session, tanks, reflow.blockSize());
-		for (Tank tank : tanks.keySet()) new SortTankAction(box, tank, Instant.now()).execute();
+		for (Tank tank : tanks.keySet()) new SortTankAction(box, tank, Instant.now()).syncronousExecute();
 		logger.info("Reflow session created");
 	}
 

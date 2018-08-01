@@ -48,7 +48,7 @@ public class ProducerTest {
 		final Message message = new Message("dialog").set("name", "dialog1");
 		message.set("ts", Instant.now().toString());
 		message.set("value", "txt", "example".getBytes());
-		tank.drop(message);
+		tank.put(message);
 	}
 
 	@Test

@@ -14,7 +14,7 @@ public class SortTankAction {
 	public Instant from;
 
 	public SortTankAction() {
-		from = Instant.MIN;
+		from = null;
 	}
 
 	public SortTankAction(NessBox box, Tank tank, Instant day) {
@@ -24,6 +24,10 @@ public class SortTankAction {
 	}
 
 	public void execute() {
+		new Thread(this::syncronousExecute).start();
+	}
+
+	public void syncronousExecute() {
 		Helper.findTank(box.datalake(), this.tank).sort(from);
 	}
 }

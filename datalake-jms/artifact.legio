@@ -1,8 +1,8 @@
 dsl Legio
 
-Artifact("io.intino.ness", "2.3.1") Ness as Product
+Artifact("io.intino.ness", "2.3.2") Ness as Product
 	Imports
-		Compile("io.intino.ness", "datalake", "[1.1.0,2.0.0)")
+		Compile("io.intino.ness", "datalake", "[1.1.0, 2.0.0)")
 		Compile("io.intino.konos", "alexandria-jms", "1.0.14")
 		Compile("io.intino.konos", "alexandria-slack", "1.0.12")
 		Compile("io.intino.konos", "alexandria-jmx", "1.0.4")
@@ -13,7 +13,7 @@ Artifact("io.intino.ness", "2.3.1") Ness as Product
 		Compile("org.apache.activemq", "activemq-jaas", "5.15.2")
 		Compile("org.apache.activemq", "activemq-runtime-config", "5.15.2")
 		Compile("org.slf4j", "slf4j-log4j12", "1.7.7")
-		Test("io.intino.konos", "alexandria-ness-accessor", "2.4.0")
+		Test("io.intino.konos", "alexandria-ness-accessor", "2.4.3")
 	Code("io.intino.ness")
 	Model("Proteo", "2.1.8", "2.3.1")
 	Box("Konos", "4.1.2", "4.1.2")

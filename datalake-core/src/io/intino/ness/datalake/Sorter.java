@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 import static io.intino.ness.datalake.graph.Tank.INL;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
-import static java.util.Objects.requireNonNull;
 
 public class Sorter {
 	private static Logger logger = LoggerFactory.getLogger(Sorter.class);
@@ -32,12 +31,8 @@ public class Sorter {
 	}
 
 	public void sort() {
-		try {
-			tank.flush();
-			for (File file : requireNonNull(tank.directory().listFiles((f, n) -> n.endsWith(INL) && !isCurrentFile(n)))) sort(file);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
+		tank.flush();
+		sort((Instant) null);
 	}
 
 	public void sort(Instant instant) {
@@ -54,13 +49,13 @@ public class Sorter {
 		logger.info("sorting " + tank.qualifiedName() + " " + file.getName());
 		if (inMb(file.length()) > 50) new MessageExternalSorter(file).sort();
 		else {
-			final List<Message> messages = loadMessages(file);
-			messages.sort(messageComparator());
-			overwrite(file, messages);
+			final Message[] array = loadMessages(file).toArray(new Message[0]);
+			new TimSort<Message>().doSort(array, messageComparator());
+			overwrite(file, array);
 		}
 	}
 
-	private void overwrite(File file, List<Message> messages) {
+	private void overwrite(File file, Message[] messages) {
 		try {
 			Files.write(file.toPath(), toString(messages).getBytes(), CREATE, TRUNCATE_EXISTING);
 		} catch (IOException e) {
@@ -68,16 +63,13 @@ public class Sorter {
 		}
 	}
 
-	private static String toString(List<Message> messages) {
-		StringBuilder builder = new StringBuilder();
-		for (Message m : messages) builder.append(m.toString()).append("\n\n");
-		return builder.toString();
+	public static String toString(Message[] messages) {
+		return String.join("\n\n", Arrays.stream(messages).map(Message::toString).toArray(String[]::new));
 	}
 
 	private List<Message> loadMessages(File inlFile) throws IOException {
 		return Inl.load(new String(readFile(inlFile), Charset.forName("UTF-8")));
 	}
-
 
 	private byte[] readFile(File inlFile) throws IOException {
 		return Files.readAllBytes(inlFile.toPath());
