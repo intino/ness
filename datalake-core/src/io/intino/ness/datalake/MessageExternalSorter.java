@@ -11,7 +11,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,13 +18,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static io.intino.ness.datalake.Sorter.SEPARATOR;
 import static java.time.Instant.parse;
 
 public class MessageExternalSorter {
 	private static final String INL = ".inl";
-	private static String SEPARATOR = "\n\n";
 	private static Logger logger = LoggerFactory.getLogger(MessageExternalSorter.class);
 	private final File tankDirectory;
 	private final File tempDirectory;
@@ -59,7 +56,7 @@ public class MessageExternalSorter {
 			if (next == null) break;
 			current.add(next);
 			bytes += next.toString().length();
-			if (inMb(bytes) >= 50) {
+			if (inMb(bytes) >= 30) {
 				batches.add(processBatch(current, batch++));
 				bytes = 0;
 			}
@@ -71,10 +68,11 @@ public class MessageExternalSorter {
 	private File processBatch(List<Message> messages, int batch) {
 		File inlFile = new File(tempDirectory, batch + INL);
 		try {
-			TimSort sorter = new TimSort();
-			final Message[] list = messages.toArray(new Message[0]);
-			sorter.doSort(list, messageComparator());
-			Files.write(inlFile.toPath(), toString(messages).getBytes(), CREATE, TRUNCATE_EXISTING);
+			TimSort<Message> sorter = new TimSort<>();
+			final Message[] sortedMessages = sorter.doSort(messages.toArray(new Message[0]), messageComparator());
+			BufferedWriter writer = new BufferedWriter(new FileWriter(inlFile));
+			for (Message message : sortedMessages) writer.write(message.toString() + SEPARATOR);
+			writer.close();
 			messages.clear();
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);

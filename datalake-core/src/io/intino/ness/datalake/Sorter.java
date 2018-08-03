@@ -6,7 +6,9 @@ import io.intino.ness.inl.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -18,11 +20,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.intino.ness.datalake.graph.Tank.INL;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
 public class Sorter {
 	private static Logger logger = LoggerFactory.getLogger(Sorter.class);
+	static String SEPARATOR = "\n\n";
 
 	private Tank tank;
 
@@ -38,7 +39,7 @@ public class Sorter {
 	public void sort(Instant instant) {
 		try {
 			final List<File> inlFiles = Arrays.asList(Objects.requireNonNull(tank.directory().listFiles((f, n) -> n.endsWith(INL) && !isCurrentFile(n))));
-			for (File file : instant == null ? inlFiles : inlFiles.stream().filter(f -> f.getName().equals(tank.fileFromInstant(instant) + INL)).collect(Collectors.toList()))
+			for (File file : instant == null ? inlFiles : inlFiles.stream().filter(f -> f.getName().equals(tank.fileFromInstant(instant) + INL)).sorted(Comparator.comparing(File::getName)).collect(Collectors.toList()))
 				sort(file);
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
@@ -47,24 +48,19 @@ public class Sorter {
 
 	private void sort(File file) throws IOException {
 		logger.info("sorting " + tank.qualifiedName() + " " + file.getName());
-		if (inMb(file.length()) > 50) new MessageExternalSorter(file).sort();
-		else {
-			final Message[] array = loadMessages(file).toArray(new Message[0]);
-			new TimSort<Message>().doSort(array, messageComparator());
-			overwrite(file, array);
-		}
+		if (inMb(file.length()) > 30) new MessageExternalSorter(file).sort();
+		else overwrite(file, new TimSort<Message>().doSort(loadMessages(file).toArray(new Message[0]), messageComparator()));
 	}
 
 	private void overwrite(File file, Message[] messages) {
 		try {
-			Files.write(file.toPath(), toString(messages).getBytes(), CREATE, TRUNCATE_EXISTING);
+			file.delete();
+			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+			for (Message message : messages) writer.write(message.toString() + SEPARATOR);
+			writer.close();
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
-	}
-
-	public static String toString(Message[] messages) {
-		return String.join("\n\n", Arrays.stream(messages).map(Message::toString).toArray(String[]::new));
 	}
 
 	private List<Message> loadMessages(File inlFile) throws IOException {

@@ -67,8 +67,9 @@ class TimSort<T> {
 	}
 
 
-	public void doSort(T[] list, Comparator<T> c) {
+	public T[] doSort(T[] list, Comparator<T> c) {
 		doSort(list, c, 0, list.length);
+		return list;
 	}
 
 	public void doSort(T[] a, Comparator<T> c, int lo, int hi) {
