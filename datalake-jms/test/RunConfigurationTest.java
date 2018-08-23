@@ -60,7 +60,6 @@ public class RunConfigurationTest {
 		return Inl.toMessage(new Feeder.ExampleMessage(java.util.UUID.randomUUID().toString(), Math.random() * 60)).toString();
 	}
 
-
 	private static Session nessSession() {
 		try {
 			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:63000");

@@ -202,9 +202,8 @@ public class BusService {
 	private List<AuthenticationUser> initUsers(Map<String, String> modelUsers) {
 		ArrayList<AuthenticationUser> users = new ArrayList<>();
 		users.add(new AuthenticationUser(NESS, NESS, "admin"));
-		users.add(new AuthenticationUser("octavioroncal", "octavioroncal", "admin"));
 		for (Map.Entry<String, String> entry : modelUsers.entrySet())
-			users.add(new AuthenticationUser(entry.getKey(), entry.getValue(), ""));
+			users.add(new AuthenticationUser(entry.getKey(), entry.getValue(), "users"));
 		return users;
 	}
 

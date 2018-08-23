@@ -29,9 +29,9 @@ import static org.apache.activemq.ActiveMQConnection.makeConnection;
 public class ProducerTest {
 	private static final Logger logger = LoggerFactory.getLogger(ProducerTest.class);
 	private String url = "tcp://localhost:63000";
-	private String user = "happysense-pre";
-	private String password = "vhqpp7n6u5f2";
-	private String topic = "v4.dialog";
+	private String user = "test";
+	private String password = "test";
+	private String topic = "consul.serverstatus";
 
 	private Session session;
 	private Connection connection;
@@ -45,10 +45,10 @@ public class ProducerTest {
 		final Ness ness = new Ness(url, user, password, "");
 		ness.connect();
 		final Datalake.Tank tank = ness.add(topic);
-		final Message message = new Message("dialog").set("name", "dialog1");
+		final Message message = new Message("status").set("name", "dialog1");
 		message.set("ts", Instant.now().toString());
 		message.set("value", "txt", "example".getBytes());
-		tank.put(message);
+		tank.feed(message);
 	}
 
 	@Test

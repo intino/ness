@@ -47,14 +47,22 @@ public class Loader {
 				String line = nextLine();
 				if (line == null) return swap(null);
 				else if (isMultilineIn(line)) scope.write(attribute, line.substring(1));
-				else if (isAttributeIn(line)) scope.set(attribute = attributeOf(line), valueOf(line));
-				else if (isHeaderIn(line)) {
+				else if (isAttributeIn(line)) {
+					String value = valueOf(line);
+					scope.set(attribute = attributeOf(line), value);
+					if (value != null && isAttachment(value))
+						scope.attach(value.substring(1), value.contains(".") ? value.split("\\.")[1] : "", new byte[0]);
+				} else if (isHeaderIn(line)) {
 					Message owner = ownerIn(line);
 					Message message = createMessage(typeIn(line), owner);
 					if (owner == null) return swap(message);
 					else scope = message;
 				}
 			}
+		}
+
+		private boolean isAttachment(String value) {
+			return value.startsWith("@");
 		}
 
 		private boolean isHeaderIn(String line) {

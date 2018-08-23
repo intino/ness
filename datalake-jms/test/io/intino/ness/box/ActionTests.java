@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.util.FileSystemUtils;
-import test.ConsumerTest;
 import test.ProducerTest;
 
 import java.io.File;
@@ -21,7 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static io.intino.ness.box.TestHelper.store;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ActionTests {
 	private static final String TANK = "cesar.infrastructure.operation";
@@ -102,15 +102,12 @@ public class ActionTests {
 	}
 
 	private void checkConsume(String topic) {
-		new Thread(() -> assertTrue(new ConsumerTest().setTopic(topic).checkConsume())).start();
 	}
 
 	private void checkConsume() {
-		new Thread(() -> assertTrue(new ConsumerTest().checkConsume())).start();
 	}
 
 	private void checkFailConsume() {
-		new Thread(() -> assertFalse(new ConsumerTest().checkConsume())).start();
 	}
 
 	private void checkProduce() {
