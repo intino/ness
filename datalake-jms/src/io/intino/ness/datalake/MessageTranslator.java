@@ -30,7 +30,7 @@ public class MessageTranslator {
 				for (String id : attachments.keySet()) {
 					byte[] array = new byte[attachments.get(id)];
 					((BytesMessage) message).readBytes(array, attachments.get(id));
-					result.attachment(id).data(array);
+					findAttachment(result, id).data(array);
 				}
 				return result;
 			} else return Message.load(((TextMessage) message).getText());
@@ -38,6 +38,16 @@ public class MessageTranslator {
 			logger.error(e.getMessage(), e);
 			return null;
 		}
+	}
+
+	private static Message.Attachment findAttachment(Message message, String id) {
+		Message.Attachment attachment = message.attachment(id);
+		if (attachment != null) return attachment;
+		for (Message component : message.components()) {
+			attachment = findAttachment(component, id);
+			if (attachment != null) return attachment;
+		}
+		return null;
 	}
 
 	public static javax.jms.Message fromInlMessage(Message message) {

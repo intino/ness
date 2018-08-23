@@ -2,7 +2,6 @@ package io.intino.ness.box.actions;
 
 import io.intino.ness.box.NessBox;
 import io.intino.ness.datalake.graph.DatalakeGraph;
-import io.intino.ness.graph.NessGraph;
 import io.intino.ness.datalake.graph.Tank;
 
 import java.util.List;
@@ -21,7 +20,7 @@ public class RemoveTankAction {
 		if (tanks.isEmpty()) return "Tank not found";
 		for (Tank tank : tanks) {
 			box.busManager().stopConsumersOf(tank.feedQN());
-			box.busManager().stopConsumersOf(tank.dropQN());
+			box.busManager().stopConsumersOf(tank.putQN());
 			datalake().remove(tank);
 		}
 		return OK;

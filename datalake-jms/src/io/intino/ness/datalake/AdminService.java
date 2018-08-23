@@ -2,14 +2,16 @@ package io.intino.ness.datalake;
 
 import io.intino.konos.jms.Consumer;
 import io.intino.ness.box.NessBox;
+import io.intino.ness.graph.NessGraph;
 import io.intino.ness.graph.Tank;
+import io.intino.ness.graph.User;
 import org.apache.activemq.command.ActiveMQDestination;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-import java.util.stream.Collectors;
 
 import static io.intino.konos.jms.MessageFactory.createMessageFor;
+import static java.util.stream.Collectors.joining;
 
 public class AdminService implements Consumer {
 	private final NessBox box;
@@ -21,8 +23,10 @@ public class AdminService implements Consumer {
 	@Override
 	public void consume(Message message) {
 		String text = Consumer.textFrom(message);
-		if (text.startsWith("tanks"))
-			replyTo(message, String.join(";", box.nessGraph().tankList().stream().map(Tank::qualifiedName).collect(Collectors.toList())));
+		NessGraph nessGraph = box.nessGraph();
+		if (text.startsWith("users")) replyTo(message, nessGraph.userList().stream().map(User::name).collect(joining(",")));
+		else if (text.startsWith("tanks"))
+			replyTo(message, nessGraph.tankList().stream().map(Tank::qualifiedName).collect(joining(";")));
 		else if (text.startsWith("batch")) {
 			final String[] split = text.split(":");
 			final io.intino.ness.datalake.graph.Tank tank = box.datalake().tank(split[1]);

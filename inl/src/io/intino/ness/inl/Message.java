@@ -32,7 +32,7 @@ public class Message {
 	}
 
 	public static Message load(String message) {
-		return load(message.getBytes()).attach(attachmentsOf(message));
+		return load(message.getBytes());
 	}
 
 	public static Message load(byte[] bytes) {
@@ -265,13 +265,13 @@ public class Message {
 		return value != null && value.contains("\n");
 	}
 
-	private String attach(String type, byte[] bytes) {
+	String attach(String type, byte[] bytes) {
 		String id = UUID.randomUUID().toString() + "." + type;
 		attachments.put(id.toLowerCase(), new Attachment(id, bytes));
 		return id;
 	}
 
-	private String attach(String id, String type, byte[] bytes) {
+	String attach(String id, String type, byte[] bytes) {
 		attachments.put(id.toLowerCase(), new Attachment(id, bytes));
 		return id;
 	}

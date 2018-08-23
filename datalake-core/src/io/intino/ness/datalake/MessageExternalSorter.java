@@ -11,26 +11,24 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static io.intino.ness.datalake.Sorter.SEPARATOR;
 import static java.time.Instant.parse;
 
 public class MessageExternalSorter {
 	private static final String INL = ".inl";
-	private static String SEPARATOR = "\n\n";
 	private static Logger logger = LoggerFactory.getLogger(MessageExternalSorter.class);
 	private final File tankDirectory;
 	private final File tempDirectory;
 	private File file;
 
-	public MessageExternalSorter(File file) {
+	MessageExternalSorter(File file) {
 		this.file = file;
 		this.tankDirectory = this.file.getParentFile();
 		this.tempDirectory = new File(tankDirectory, this.file.getName().replace(INL, ""));
@@ -51,16 +49,16 @@ public class MessageExternalSorter {
 	private List<File> processBatches(MessageInputStream stream) throws IOException {
 		List<File> batches = new ArrayList<>();
 		List<Message> current = new ArrayList<>();
-		int i = 0;
 		int batch = 1;
+		int bytes = 0;
 		while (true) {
 			Message next = stream.next();
 			if (next == null) break;
 			current.add(next);
-			i++;
-			if (i == 50000) {
+			bytes += next.toString().length();
+			if (inMb(bytes) >= 30) {
 				batches.add(processBatch(current, batch++));
-				i = 0;
+				bytes = 0;
 			}
 		}
 		if (!current.isEmpty()) batches.add(processBatch(current, batch++));
@@ -70,8 +68,11 @@ public class MessageExternalSorter {
 	private File processBatch(List<Message> messages, int batch) {
 		File inlFile = new File(tempDirectory, batch + INL);
 		try {
-			messages.sort(messageComparator());
-			Files.write(inlFile.toPath(), toString(messages).getBytes(), CREATE, TRUNCATE_EXISTING);
+			TimSort<Message> sorter = new TimSort<>();
+			final Message[] sortedMessages = sorter.doSort(messages.toArray(new Message[0]), messageComparator());
+			BufferedWriter writer = new BufferedWriter(new FileWriter(inlFile));
+			for (Message message : sortedMessages) writer.write(message.toString() + SEPARATOR);
+			writer.close();
 			messages.clear();
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
@@ -119,11 +120,11 @@ public class MessageExternalSorter {
 		return temporalFile;
 	}
 
-	private Comparator<Message> messageComparator() {
+	private static Comparator<Message> messageComparator() {
 		return Comparator.comparing(m -> Instant.parse(tsOf(m)));
 	}
 
-	private String tsOf(Message message) {
+	private static String tsOf(Message message) {
 		return message.get("ts");
 	}
 
@@ -155,17 +156,24 @@ public class MessageExternalSorter {
 		private void next() {
 			try {
 				this.message = stream.next();
-				if(message != null) AttachmentLoader.loadAttachments(new File(stream.name()), this.message);
+				if (message != null) AttachmentLoader.loadAttachments(new File(stream.name()), this.message);
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);
 			}
 		}
 	}
 
-
 	public static String toString(List<Message> messages) {
 		StringBuilder builder = new StringBuilder();
-		for (Message m : messages) builder.append(m.toString()).append("\n\n");
+		for (Message m : messages) builder.append(m.toString()).append(SEPARATOR);
 		return builder.toString();
+	}
+
+	public static String toString(Message[] messages) {
+		return String.join(SEPARATOR, Arrays.stream(messages).map(Message::toString).toArray(String[]::new));
+	}
+
+	private long inMb(long length) {
+		return length / (1024 * 1024);
 	}
 }
