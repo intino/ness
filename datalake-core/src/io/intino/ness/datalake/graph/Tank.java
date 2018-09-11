@@ -49,6 +49,10 @@ public class Tank extends AbstractTank {
 		return dayOf(instant) + instant.substring(instant.indexOf("T") + 1, instant.indexOf(":"));
 	}
 
+	private static String monthOf(String instant) {
+		return instant.replace("-", "").substring(0, 6);
+	}
+
 	public Tank init() {
 		directory().mkdirs();
 		return this;
@@ -253,7 +257,9 @@ public class Tank extends AbstractTank {
 	}
 
 	private String fileFromInstant(String instant) {
-		return graph().scale().equals(Scale.Day) ? dayOf(instant) : hourOf(instant);
+		if (graph().scale().equals(Scale.Day)) return dayOf(instant);
+		if (graph().scale().equals(Scale.Month)) return monthOf(instant);
+		else return hourOf(instant);
 	}
 
 	private List<File> filter(List<File> files, Instant from) {
