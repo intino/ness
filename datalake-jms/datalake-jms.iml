@@ -94,6 +94,6 @@
     <orderEntry type="library" name="Legio: io.intino.ness:inl:1.1.1" level="project" />
     <orderEntry type="library" name="Legio: io.intino.konos:alexandria-jms:1.0.15" level="project" />
     <orderEntry type="library" scope="TEST" name="Legio: io.intino.konos:alexandria-ness-accessor:2.4.8" level="project" />
-    <orderEntry type="library" scope="TEST" name="Legio: io.intino.ness:datalake:1.1.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Legio: io.intino.ness:datalake:1.1.5" level="project" />
   </component>
 </module>
