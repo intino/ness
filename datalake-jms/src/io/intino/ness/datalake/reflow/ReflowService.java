@@ -105,9 +105,9 @@ public class ReflowService implements Consumer {
 	}
 
 	private void finish() {
-		logger.info("Reflow session finished");
-		this.handler = null;
 		pausedTanks.forEach(t -> new ResumeTankAction(box, t.qualifiedName()).execute(t));
+		this.handler = null;
+		logger.info("Reflow session finished");
 //		if(box.busService().isPersistent()) box.restartBus(true); TODO falla al arrancar con persistencia
 	}
 
