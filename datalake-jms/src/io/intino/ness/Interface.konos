@@ -91,3 +91,4 @@ Schema ReflowConfiguration
 	Schema Tank
 		Attribute name as Text
 		Attribute from as DateTime
+		Attribute to as DateTime

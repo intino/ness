@@ -220,8 +220,12 @@ public class Tank extends AbstractTank {
 		}
 	}
 
-	public Iterator<Message> sortedMessagesIterator(Instant from) {
-		return new SortedMessagesIterator().iterator(from);
+	public Iterator<Message> sortedMessagesIterator(Instant from, Instant to) {
+		return new SortedMessagesIterator().iterator(from, to);
+	}
+
+	public Iterator<Message> sortedMessagesIterator(Map.Entry<Instant, Instant> range) {
+		return new SortedMessagesIterator().iterator(range.getKey(), range.getValue());
 	}
 
 	public File directory() {
@@ -275,7 +279,7 @@ public class Tank extends AbstractTank {
 	}
 
 	public class SortedMessagesIterator {
-		public Iterator<Message> iterator(Instant from) {
+		public Iterator<Message> iterator(Instant from, Instant to) {
 			try {
 				File[] files = directory().listFiles((f, n) -> n.endsWith(Tank.INL) || n.endsWith(Tank.ZIP));
 				if (files == null) files = new File[0];
@@ -292,7 +296,10 @@ public class Tank extends AbstractTank {
 							Message result = next;
 							next = stream.next();
 							if (next == null) stream.close();
-							else loadAttachments(new File(stream.name()), next);
+							else if (Instant.parse(tsOf(next)).isAfter(to)) {
+								stream.close();
+								return next = null;
+							} else loadAttachments(new File(stream.name()), next);
 							return result;
 						} catch (IOException e) {
 							logger.error(e.getMessage(), e);

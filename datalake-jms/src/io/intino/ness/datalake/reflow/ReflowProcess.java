@@ -25,7 +25,7 @@ public class ReflowProcess {
 	private final TopicProducer producer;
 	private int count = 0;
 
-	ReflowProcess(Session session, Map<Tank, Instant> tanks, Integer blockSize) {
+	ReflowProcess(Session session, Map<Tank, Map.Entry<Instant, Instant>> tanks, Integer blockSize) {
 		this.session = session;
 		this.blockSize = blockSize == 0 ? Integer.MAX_VALUE : blockSize;
 		this.stream = new ReflowMessageInputStream(tanks);

@@ -20,7 +20,7 @@ public class ReflowMessageInputStream implements MessageInputStream {
 
 	private final List<TankInputStream> streams;
 
-	public ReflowMessageInputStream(Map<Tank, Instant> tanks) {
+	public ReflowMessageInputStream(Map<Tank, Map.Entry<Instant, Instant>> tanks) {
 		this.streams = tanks.keySet().stream().map(t -> new TankInputStream(t.qualifiedName(), t.sortedMessagesIterator(tanks.get(t)))).collect(toList());
 	}
 

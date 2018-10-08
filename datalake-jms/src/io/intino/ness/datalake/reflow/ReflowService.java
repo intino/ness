@@ -20,6 +20,7 @@ import javax.jms.Session;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -91,13 +92,12 @@ public class ReflowService implements Consumer {
 		logger.info("Shutting down actual session");
 		box.restartBus(false);
 		pauseTanks();
-		final Map<Tank, Instant> tanks = collectTanks(reflow.tankList());
+		final Map<Tank, Map.Entry<Instant, Instant>> tanks = collectTanks(reflow.tankList());
 		this.session = box.busManager().transactedSession();
 		this.handler = new ReflowProcess(session, tanks, reflow.blockSize());
 		for (Tank tank : tanks.keySet()) new SortTankAction(box, tank, Instant.now()).syncronousExecute();
 		logger.info("Reflow session created");
 	}
-
 
 	private void next() {
 		logger.info("sending next block of " + blockSize + " messages");
@@ -124,7 +124,11 @@ public class ReflowService implements Consumer {
 		}
 	}
 
-	private Map<Tank, Instant> collectTanks(List<ReflowConfiguration.Tank> tanks) {
-		return tanks.stream().collect(toMap(t -> findTank(box.datalake(), t.name()), ReflowConfiguration.Tank::from));
+	private Map<Tank, Map.Entry<Instant, Instant>> collectTanks(List<ReflowConfiguration.Tank> tanks) {
+		return tanks.stream().collect(toMap(tank -> findTank(box.datalake(), tank.name()), this::timeRange, (a, b) -> b));
+	}
+
+	private Map.Entry<Instant, Instant> timeRange(ReflowConfiguration.Tank tank) {
+		return new SimpleEntry<>(tank.from(), tank.to());
 	}
 }

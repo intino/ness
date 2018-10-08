@@ -26,7 +26,7 @@ public class PumpAction extends Action {
 	}
 
 	private void pump(Pipe pipe, Tank from, Tank to) {
-		final Iterator<Message> iterator = from.sortedMessagesIterator(Instant.MIN);
+		final Iterator<Message> iterator = from.sortedMessagesIterator(Instant.MIN, Instant.MAX);
 		while (!iterator.hasNext()) {
 			Message next = iterator.next();
 			next = pipe.transformer() != null && pipe.transformer() instanceof MessageMapper ? ((MessageMapper) pipe.transformer()).map(next) : next;
