@@ -93,7 +93,6 @@
     <orderEntry type="library" name="Legio: io.intino.ness:inl:1.1.1" level="project" />
     <orderEntry type="library" name="Legio: io.intino.konos:alexandria-jms:1.0.15" level="project" />
     <orderEntry type="library" scope="TEST" name="Legio: io.intino.konos:alexandria-ness-accessor:2.4.8" level="project" />
-    <orderEntry type="library" scope="TEST" name="Legio: io.intino.ness:datalake:1.1.5" level="project" />
     <orderEntry type="library" name="Legio: io.intino.konos:alexandria-rest:2.2.4" level="project" />
     <orderEntry type="library" name="Legio: com.sparkjava:spark-core:2.7.2" level="project" />
     <orderEntry type="library" name="Legio: org.eclipse.jetty:jetty-server:9.4.8.v20171121" level="project" />
@@ -114,5 +113,6 @@
     <orderEntry type="library" name="Legio: commons-codec:commons-codec:1.10" level="project" />
     <orderEntry type="library" name="Legio: org.bouncycastle:bcmail-jdk15:1.45" level="project" />
     <orderEntry type="library" name="Legio: org.bouncycastle:bcprov-jdk15:1.45" level="project" />
+    <orderEntry type="library" scope="TEST" name="Legio: io.intino.ness:datalake:1.1.6" level="project" />
   </component>
 </module>
