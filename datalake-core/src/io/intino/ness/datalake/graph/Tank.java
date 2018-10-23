@@ -296,7 +296,7 @@ public class Tank extends AbstractTank {
 							Message result = next;
 							next = stream.next();
 							if (next == null) stream.close();
-							else if (Instant.parse(tsOf(next)).isAfter(to)) {
+							else if (!Instant.MAX.equals(to) && Instant.parse(tsOf(next)).isAfter(to)) {
 								stream.close();
 								return next = null;
 							} else loadAttachments(new File(stream.name()), next);
