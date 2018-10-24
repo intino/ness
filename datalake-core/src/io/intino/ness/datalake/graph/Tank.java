@@ -92,6 +92,10 @@ public class Tank extends AbstractTank {
 		} else save(message);
 	}
 
+	public void putBulk(Map<String, String> bulkMessages) {
+		for (String instant : bulkMessages.keySet()) append(fileOf(instant), bulkMessages.get(instant));
+	}
+
 	private void saveBatch() {
 		for (String ts : batchQueue.keySet()) {
 			final List<Message> messages = batchQueue.get(ts);
