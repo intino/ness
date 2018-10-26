@@ -7,6 +7,7 @@
       <sourceFolder url="file://$MODULE_DIR$/gen" isTestSource="false" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/res" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/test-res" type="java-test-resource" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -91,9 +92,9 @@
     <orderEntry type="library" name="Legio: io.intino.tara:language:1.0.9" level="project" />
     <orderEntry type="library" name="Legio: io.intino.konos:alexandria-core:1.0.4" level="project" />
     <orderEntry type="library" name="Legio: io.intino.ness:inl:1.1.1" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.konos:alexandria-jms:1.0.15" level="project" />
     <orderEntry type="library" scope="TEST" name="Legio: io.intino.konos:alexandria-ness-accessor:2.4.8" level="project" />
-    <orderEntry type="library" scope="TEST" name="Legio: io.intino.ness:datalake:1.1.6" level="project" />
     <orderEntry type="library" name="Legio: commons-codec:commons-codec:1.9" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.konos:alexandria-jms:1.0.16" level="project" />
+    <orderEntry type="library" scope="TEST" name="Legio: io.intino.ness:datalake:1.1.7" level="project" />
   </component>
 </module>

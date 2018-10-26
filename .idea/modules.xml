@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/datalake-core/datalake-core.iml" filepath="$PROJECT_DIR$/datalake-core/datalake-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/datalake-jms/datalake-jms.iml" filepath="$PROJECT_DIR$/datalake-jms/datalake-jms.iml" />
       <module fileurl="file://$PROJECT_DIR$/inl/inl.iml" filepath="$PROJECT_DIR$/inl/inl.iml" />
+      <module fileurl="file://$PROJECT_DIR$/set-store/set-store.iml" filepath="$PROJECT_DIR$/set-store/set-store.iml" />
     </modules>
   </component>
 </project>
