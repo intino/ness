@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 public interface SetStore {
 
@@ -29,6 +28,8 @@ public interface SetStore {
 	void seal(); //TODO hace falta?
 
 	interface Tank {
+		String name();
+
 		Tub tub(Instant instant);
 
 		List<Tub> tubs(Instant from, Instant to);
@@ -38,6 +39,10 @@ public interface SetStore {
 		List<Set> setsOf(Instant from, Instant to, SetFilter filter);
 
 		interface Tub {
+			String name();
+
+			Tank tank();
+
 			Instant instant();
 
 			Set set(String set);
@@ -51,9 +56,11 @@ public interface SetStore {
 
 				Tub tub();
 
-				Stream<Long> content();
+				SetStream content();
 
 				List<Variable> variables();
+
+				Variable variable(String name);
 
 				void define(Variable variable);
 
@@ -68,9 +75,13 @@ public interface SetStore {
 
 	}
 
-	interface Variable {
-		String name();
+	class Variable {
+		public String name;
+		public String value;
 
-		String value();
+		public Variable(String name, String value) {
+			this.name = name;
+			this.value = value;
+		}
 	}
 }

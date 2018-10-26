@@ -1,7 +1,6 @@
 package io.intino.ness.setstore.file;
 
 import io.intino.konos.TripleStore;
-import io.intino.ness.setstore.Scale;
 import io.intino.ness.setstore.SetStore;
 import io.intino.ness.setstore.SetStore.Tank;
 import io.intino.ness.setstore.SetStore.Variable;
@@ -9,14 +8,15 @@ import io.intino.sezzet.operators.FileReader;
 import io.intino.sezzet.operators.LongStream;
 import io.intino.sezzet.operators.SetStream;
 import io.intino.sezzet.operators.Union;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sun.misc.IOUtils;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import static io.intino.ness.setstore.file.FileSetStore.*;
 import static io.intino.ness.setstore.file.FileSetTank.tripleStoreMap;
@@ -28,14 +28,23 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
 public class FileSetTub implements Tank.Tub {
+	public static final Logger LOGGER = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 	private final File tub;
 	private final Instant instant;
-	private final Scale scale;
+	private final FileSetTank tank;
 
-	public FileSetTub(File tub, Instant instant, Scale scale) {
+	public FileSetTub(File tub, Instant instant, FileSetTank tank) {
 		this.tub = tub;
 		this.instant = instant;
-		this.scale = scale;
+		this.tank = tank;
+	}
+
+	public String name() {
+		return tank.scale().tag(instant);
+	}
+
+	public Tank tank() {
+		return this.tank;
 	}
 
 	@Override
@@ -46,7 +55,7 @@ public class FileSetTub implements Tank.Tub {
 	@Override
 	public List<Set> sets() {
 		File[] files = tub.listFiles((f, n) -> n.endsWith(SetExt));
-		return files != null ? stream(files).sorted().map(f -> new FileSet(f, triplestore())).collect(toList()) : emptyList();
+		return files != null ? stream(files).sorted().map(this::newFileSet).collect(toList()) : emptyList();
 	}
 
 	@Override
@@ -57,27 +66,21 @@ public class FileSetTub implements Tank.Tub {
 	@Override
 	public Set set(String set) {
 		File file = new File(tub, set + SetExt);
-		return file.exists() ? new FileSet(file, triplestore()) : null;
+		return file.exists() ? newFileSet(file) : null;
 	}
 
-	private TripleStore triplestore() {
-		String tank = tub.getParentFile().getName();
-		String id = tank + scale.tag(instant);
-		if (!tripleStoreMap.containsKey(id)) {
-			File file = new File(tub, tank + InfoExt);
-			if (!file.exists()) return null;
-			tripleStoreMap.put(id, new TripleStore(file));
-		}
-		return tripleStoreMap.get(id);
+	private FileSet newFileSet(File file) {
+		return new FileSet(file, this);
 	}
 
 	public static class FileSet implements Set {
 		private final File file;
-		private final TripleStore variables;
+		private final FileSetTub tub;
+		private TripleStore variables;
 
-		public FileSet(File file, TripleStore variables) {
+		public FileSet(File file, FileSetTub tub) {
 			this.file = file;
-			this.variables = variables;
+			this.tub = tub;
 		}
 
 		public String name() {
@@ -86,40 +89,47 @@ public class FileSetTub implements Tank.Tub {
 
 		@Override
 		public Tank.Tub tub() {
-			return null;
+			return this.tub;
 		}
 
 		@Override
-		public Stream<Long> content() {
-			return null;
+		public SetStream content() {
+			return new FileReader(file);
+		}
+
+		private TripleStore triplestore() {
+			return this.variables != null ? variables : (variables = createTriplestore());
 		}
 
 		public InputStream inputStream() {
 			try {
 				return new FileInputStream(file);
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				LOGGER.error(e.getMessage(), e);
 				return null;
 			}
 		}
 
 		public List<Variable> variables() {
 			if (variables == null) return null;
-//			variables.all()
-//			List<String[]> list = variables.matches(set, variable).collect(Collectors.toList());
-//			return !list.isEmpty() ? list.get(0)[2] : null;
-			return Collections.emptyList();//TODO
+			return variables.matches(name()).map(a -> new Variable(a[1], a[2])).collect(toList());
+		}
+
+		public Variable variable(String name) {
+			if (variables == null) return null;
+			List<String[]> list = variables.matches(name(), name).collect(Collectors.toList());
+			return !list.isEmpty() ? new Variable(list.get(0)[1], list.get(0)[2]) : null;
 		}
 
 		@Override
 		public void define(Variable variable) {
-			variables.put(name(), variable.name(), variable.value());
 			try {
-				variables.save();
+				triplestore().put(name(), variable.name, variable.value);
+				triplestore().save();
 			} catch (IOException e) {
+				LOGGER.error(e.getMessage(), e);
 			}
 		}
-
 
 		@Override
 		public void append(long... ids) {
@@ -129,19 +139,39 @@ public class FileSetTub implements Tank.Tub {
 				write(toWrite, tempFile);
 				Files.move(tempFile.toPath(), file.toPath());
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOGGER.error(e.getMessage(), e);
 			}
 		}
 
 		@Override
 		public void append(InputStream stream) {
-			file.getParentFile().mkdirs();
+			File tank = file.getParentFile();
+			tank.mkdirs();
 			try {
 				Files.write(file.toPath(), IOUtils.readFully(stream, -1, true), APPEND, CREATE);
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOGGER.error(e.getMessage(), e);
 			}
-			//tripleStoreMap.remove(tank + scale.tag(instant));TODO
+			tripleStoreMap.remove(tank + tub.name());
+		}
+
+		private TripleStore createTriplestore() {
+			FileSetTank tank = tub.tank;
+			String id = tank.name() + tank.scale().tag(tub.instant);
+			if (!tripleStoreMap.containsKey(id)) {
+				File file = new File(this.file.getParentFile(), tank.name() + InfoExt);
+				if (!file.exists()) newFile(file);
+				tripleStoreMap.put(id, new TripleStore(file));
+			}
+			return tripleStoreMap.get(id);
+		}
+
+		private void newFile(File file) {
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+				LOGGER.error(e.getMessage(), e);
+			}
 		}
 	}
 

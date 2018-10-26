@@ -1,6 +1,6 @@
+import io.intino.ness.setstore.session.SessionFileReader;
+import io.intino.ness.setstore.session.SessionFileWriter;
 import io.intino.sezzet.operators.SetStream;
-import io.intino.sezzet.session.SessionFileReader;
-import io.intino.sezzet.session.SessionFileWriter;
 import org.junit.After;
 import org.junit.Test;
 

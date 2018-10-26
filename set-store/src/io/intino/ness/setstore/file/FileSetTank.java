@@ -26,8 +26,17 @@ public class FileSetTank implements SetStore.Tank {
 		this.scale = scale;
 	}
 
+	@Override
+	public String name() {
+		return directory.getName();
+	}
+
+	Scale scale() {
+		return scale;
+	}
+
 	public Tub tub(Instant instant) {
-		return new FileSetTub(new File(directory, scale.tag(instant)), instant, scale);
+		return new FileSetTub(new File(directory, scale.tag(instant)), instant, this);
 	}
 
 	@Override

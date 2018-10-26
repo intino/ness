@@ -1,6 +1,7 @@
-import io.intino.sezzet.SezzetStore;
-import io.intino.sezzet.model.graph.rules.Scale;
-import io.intino.sezzet.session.SessionFileWriter;
+import io.intino.ness.setstore.Scale;
+import io.intino.ness.setstore.SetStore;
+import io.intino.ness.setstore.file.FileSetStore;
+import io.intino.ness.setstore.session.SessionFileWriter;
 import org.junit.After;
 import org.junit.Test;
 
@@ -26,7 +27,7 @@ public class SealTest {
 	public void create_session_and_seal_it() {
 		try {
 			Instant instant = Instant.parse("2018-09-01T00:00:00Z");
-			SezzetStore store = new SezzetStore(new File("temp"), Scale.Month);
+			SetStore store = new FileSetStore(new File("temp"), Scale.Month);
 			SessionFileWriter session = store.createSession(instant);
 			for (int i = 0; i < 20; i++) session.add("tank1", "set1", i);
 			for (int i = 0; i < 20; i++) session.add("tank1", "set2", i);
