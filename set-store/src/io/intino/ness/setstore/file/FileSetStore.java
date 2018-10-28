@@ -45,21 +45,21 @@ public class FileSetStore implements SetStore {
 		return scale;
 	}
 
-	@Override
+
+	//TODO old
 	public SessionFileWriter createSession(Instant instant) {
 		return new SessionFileWriter(sessionFile(instant), instant, false);
 	}
 
-	@Override
+	//TODO old
 	public void seal() {
 		SessionSealer.seal(stageFolder());
 	}
 
-	@Override
-	public File storeSegment(Instant instant, String segment, SetStream stream) {
+
+	public File storeSegment(String segment, Timetag timetag, SetStream stream) {
 		try {
-			String instantTag = Instant.now().toString().substring(0, 19).replace(":", "").replace("-", "");
-			File file = new File(segmentFolder(), instantTag + "/" + segment + SegmentExt);
+			File file = new File(segmentFolder(), timetag.toString() + "/" + segment + SegmentExt);
 			write(stream, file);
 			return file;
 		} catch (IOException e) {

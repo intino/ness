@@ -14,7 +14,6 @@ import sun.misc.IOUtils;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,17 +29,17 @@ import static java.util.stream.Collectors.toList;
 public class FileSetTub implements Tank.Tub {
 	public static final Logger LOGGER = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 	private final File tub;
-	private final Instant instant;
+	private final Timetag timetag;
 	private final FileSetTank tank;
 
-	public FileSetTub(File tub, Instant instant, FileSetTank tank) {
+	public FileSetTub(File tub, Timetag timetag, FileSetTank tank) {
 		this.tub = tub;
-		this.instant = instant;
+		this.timetag = timetag;
 		this.tank = tank;
 	}
 
 	public String name() {
-		return tank.scale().tag(instant);
+		return timetag.toString();
 	}
 
 	public Tank tank() {
@@ -48,8 +47,8 @@ public class FileSetTub implements Tank.Tub {
 	}
 
 	@Override
-	public Instant instant() {
-		return instant;
+	public Timetag timetag() {
+		return timetag;
 	}
 
 	@Override
@@ -85,6 +84,11 @@ public class FileSetTub implements Tank.Tub {
 
 		public String name() {
 			return file.getName().replace(SetExt, "");
+		}
+
+		@Override
+		public int size() {
+			return (int) (file.length() / 8);
 		}
 
 		@Override
@@ -132,9 +136,17 @@ public class FileSetTub implements Tank.Tub {
 		}
 
 		@Override
-		public void append(long... ids) {
+		public void put(long... ids) {
+			writeStream(file.exists() ? new Union(asList(new FileReader(file), new LongStream(ids))) : new LongStream(ids));
+		}
+
+		@Override
+		public void put(List<Long> ids) {
+			writeStream(file.exists() ? new Union(asList(new FileReader(file), new LongStream(ids))) : new LongStream(ids));
+		}
+
+		private void writeStream(SetStream toWrite) {
 			try {
-				SetStream toWrite = file.exists() ? new Union(asList(new FileReader(file), new LongStream(ids))) : new LongStream(ids);
 				File tempFile = new File(file + TempExt);
 				write(toWrite, tempFile);
 				Files.move(tempFile.toPath(), file.toPath());
@@ -143,8 +155,7 @@ public class FileSetTub implements Tank.Tub {
 			}
 		}
 
-		@Override
-		public void append(InputStream stream) {
+		public void put(InputStream stream) {
 			File tank = file.getParentFile();
 			tank.mkdirs();
 			try {
@@ -157,7 +168,7 @@ public class FileSetTub implements Tank.Tub {
 
 		private TripleStore createTriplestore() {
 			FileSetTank tank = tub.tank;
-			String id = tank.name() + tank.scale().tag(tub.instant);
+			String id = tank.name() + tub.timetag.toString();
 			if (!tripleStoreMap.containsKey(id)) {
 				File file = new File(this.file.getParentFile(), tank.name() + InfoExt);
 				if (!file.exists()) newFile(file);

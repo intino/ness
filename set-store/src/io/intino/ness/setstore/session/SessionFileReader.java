@@ -4,6 +4,7 @@ package io.intino.ness.setstore.session;
 import io.intino.sezzet.operators.SetStream;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +51,7 @@ public class SessionFileReader {
 		int size = stream.readInt();
 		byte[] bytes = new byte[size];
 		stream.read(bytes);
-		return new String(bytes, "UTF-8");
+		return new String(bytes, StandardCharsets.UTF_8);
 	}
 
 	public List<Chunk> chunks() {

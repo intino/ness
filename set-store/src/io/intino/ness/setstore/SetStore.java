@@ -1,49 +1,48 @@
 package io.intino.ness.setstore;
 
-
 import io.intino.ness.setstore.SetStore.Tank.Tub.Set;
-import io.intino.ness.setstore.session.SessionFileWriter;
 import io.intino.sezzet.operators.SetStream;
 
 import java.io.File;
-import java.io.InputStream;
 import java.time.Instant;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public interface SetStore {
-
 	Scale scale();
 
 	List<Tank> tanks();
 
 	Tank tank(String name);
 
-	SessionFileWriter createSession(Instant instant);
-
-	//void commitSession(Session session) TODO
-
-	File storeSegment(Instant instant, String segment, SetStream stream);//TODO remove?
-
-	void seal(); //TODO hace falta?
+	File storeSegment(String segment, Timetag tag, SetStream stream);
 
 	interface Tank {
 		String name();
 
-		Tub tub(Instant instant);
+		List<Tub> tubs();
 
-		List<Tub> tubs(Instant from, Instant to);
+		Tub first();
 
-		List<Set> setsOf(Instant from, Instant to);
+		Tub last();
 
-		List<Set> setsOf(Instant from, Instant to, SetFilter filter);
+		Tub on(Timetag tag);
+
+		Stream<Tub> tubs(int count);
+
+		List<Tub> tubs(Timetag from, Timetag to);
+
+		List<Set> setsOf(Timetag from, Timetag to);
+
+		List<Set> setsOf(Timetag from, Timetag to, SetFilter filter);
 
 		interface Tub {
 			String name();
 
 			Tank tank();
 
-			Instant instant();
+			Timetag timetag();
 
 			Set set(String set);
 
@@ -54,6 +53,8 @@ public interface SetStore {
 			interface Set {
 				String name();
 
+				int size();
+
 				Tub tub();
 
 				SetStream content();
@@ -62,17 +63,13 @@ public interface SetStore {
 
 				Variable variable(String name);
 
+				void put(long... ids);
+
+				void put(List<Long> stream);
+
 				void define(Variable variable);
-
-				void append(long... ids);
-
-				void append(InputStream stream);
 			}
 		}
-	}
-
-	interface SetFilter extends Predicate<Set> {
-
 	}
 
 	class Variable {
@@ -83,5 +80,41 @@ public interface SetStore {
 			this.name = name;
 			this.value = value;
 		}
+	}
+
+	class Timetag {
+		private final Instant instant;
+		private final Scale scale;
+		private final String tag;
+
+		public Timetag(Instant instant, Scale scale) {
+			this.instant = instant;
+			this.scale = scale;
+			this.tag = scale.tag(instant);
+		}
+
+		public String value() {
+			return tag;
+		}
+
+		Timetag next() {
+			return new Timetag(scale.plus(instant), scale);
+		}
+
+		Timetag before() {
+			return new Timetag(scale.minus(instant), scale);
+		}
+
+		Instant toInstant() {
+			return instant;
+		}
+
+		@Override
+		public String toString() {
+			return tag;
+		}
+	}
+
+	interface SetFilter extends Predicate<Set> {
 	}
 }
