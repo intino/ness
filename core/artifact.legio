@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "1.2.0") core
+Artifact("io.intino.ness", "1.0.0") core
 	Imports
 		Compile("io.intino.alexandria", "zim", "1.0.0")
 		Compile("io.intino.alexandria", "zet", "1.0.0")
@@ -8,9 +8,8 @@ Artifact("io.intino.ness", "1.2.0") core
 		Test("junit", "junit", "LATEST")
 		Test("org.assertj", "assertj-core", "3.11.1")
 	Code("io.intino.ness.datalake")
-	Package(mode = ModulesAndLibrariesLinkedByManifest, attachSources = true)
-	Distribution(intino.frameworks, intino.languages)
+	Package(ModulesAndLibrariesLinkedByManifest, attachSources = true)
+	Distribution(intino.release)
 Repository("intino-maven") intino
 	Release("https://artifactory.intino.io/artifactory/releases")
-	Release("https://artifactory.intino.io/artifactory/release-frameworks") frameworks
-	Language("https://artifactory.intino.io/artifactory/release-languages") languages
+	Release("https://artifactory.intino.io/artifactory/release-libraries") release
