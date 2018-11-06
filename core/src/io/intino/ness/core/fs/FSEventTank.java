@@ -43,5 +43,4 @@ public class FSEventTank implements Datalake.EventStore.Tank {
 	private Timetag timetagOf(File file) {
 		return new Timetag(file.getName().replace(EventExtension, ""));
 	}
-
 }

@@ -2,7 +2,7 @@ package io.intino.ness.box.actions;
 
 import io.intino.ness.box.NessBox;
 import io.intino.ness.box.slack.Helper;
-import io.intino.ness.datalake.graph.Tank;
+import io.intino.ness.core.Datalake;
 
 import java.time.Instant;
 
@@ -18,7 +18,7 @@ public class SortTankAction {
 		from = null;
 	}
 
-	public SortTankAction(NessBox box, Tank tank, Instant instant) {
+	public SortTankAction(NessBox box, Datalake.EventStore.Tank tank, Instant instant) {
 		this.box = box;
 		this.tank = tank.qualifiedName();
 		this.from = instant;

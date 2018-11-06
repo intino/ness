@@ -2,13 +2,13 @@ dsl Legio
 
 Artifact("io.intino.ness", "2.3.5") Ness as Product
 	Model("Proteo", "2.1.9", "2.3.3")
-	Box("Konos", "4.2.3", "4.2.3")
+	Box("Konos", "5.0.0", "5.0.0")
 	Imports
-		Compile("io.intino.ness", "datalake", "[1.1.0, 2.0.0)")
-		Compile("io.intino.konos", "alexandria-jms", "1.0.16")
-		Compile("io.intino.konos", "alexandria-slack", "1.0.12")
-		Compile("io.intino.konos", "alexandria-jmx", "1.0.4")
-		Compile("io.intino.konos", "alexandria-scheduler", "1.0.6")
+		Compile("io.intino.ness", "core", "[1.0.0, 2.0.0)")
+		Compile("io.intino.alexandria", "jms", "1.0.0")
+		Compile("io.intino.alexandria", "slack", "1.0.0")
+		Compile("io.intino.alexandria", "jmx", "1.0.0")
+		Compile("io.intino.alexandria", "scheduler", "1.0.0")
 		Compile("org.apache.activemq", "activemq-broker", "5.15.2")
 		Compile("org.apache.activemq", "activemq-mqtt", "5.15.2")
 		Compile("org.apache.activemq", "activemq-kahadb-store", "5.15.2")

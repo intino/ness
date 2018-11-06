@@ -1,8 +1,7 @@
 package io.intino.ness.datalake.reflow;
 
-import io.intino.konos.jms.TopicProducer;
-import io.intino.ness.datalake.ReflowMessageInputStream;
-import io.intino.ness.datalake.graph.Tank;
+import io.intino.alexandria.jms.TopicProducer;
+import io.intino.ness.core.Datalake.EventStore.Tank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +11,7 @@ import javax.jms.Session;
 import java.time.Instant;
 import java.util.Map;
 
-import static io.intino.konos.jms.MessageFactory.createMessageFor;
+import static io.intino.alexandria.jms.MessageFactory.createMessageFor;
 import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
 

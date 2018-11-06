@@ -1,7 +1,5 @@
 package io.intino.ness.box.slack;
 
-import io.intino.ness.datalake.graph.DatalakeGraph;
-import io.intino.ness.datalake.graph.Tank;
 import io.intino.ness.graph.NessGraph;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;

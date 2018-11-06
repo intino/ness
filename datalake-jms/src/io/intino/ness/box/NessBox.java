@@ -1,20 +1,18 @@
 package io.intino.ness.box;
 
+import io.intino.alexandria.logger.Logger;
 import io.intino.ness.box.actions.ResumeTankAction;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.bus.BusService;
+import io.intino.ness.core.Datalake;
+import io.intino.ness.core.Scale;
+import io.intino.ness.core.fs.FSDatalake;
 import io.intino.ness.datalake.AdminService;
 import io.intino.ness.datalake.PipeStarter;
-import io.intino.ness.core.Scale;
-import io.intino.ness.datalake.graph.AbstractTank;
-import io.intino.ness.datalake.graph.DatalakeGraph;
-import io.intino.ness.datalake.graph.Tank;
 import io.intino.ness.datalake.reflow.ReflowService;
 import io.intino.ness.graph.NessGraph;
 import io.intino.ness.graph.Pipe;
 import io.intino.ness.graph.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Map;
@@ -27,7 +25,7 @@ public class NessBox extends AbstractBox {
 	private static final String SERVICE_NESS_ADMIN = "service.ness.admin";
 	private Scale scale = Scale.Day;
 	private String connectorID;
-	private DatalakeGraph datalake;
+	private Datalake datalake;
 	private NessGraph graph;
 	private BusManager busManager;
 	private BusService busService;
@@ -44,12 +42,12 @@ public class NessBox extends AbstractBox {
 		this.reflowService = new ReflowService(this);
 		this.adminService = new AdminService(this);
 		this.scale = configuration.args().containsKey("scale") ? Scale.valueOf(configuration.args().get("scale")) : Scale.Day;
+		this.datalake = new FSDatalake(new File(datalakeDirectory()));
 	}
 
 	@Override
 	public io.intino.konos.alexandria.Box put(Object o) {
 		if (o instanceof NessGraph) this.graph = (NessGraph) o;
-		if (o instanceof DatalakeGraph) this.datalake = ((DatalakeGraph) o).directory(new File(datalakeDirectory())).scale(scale);
 		return this;
 	}
 
@@ -81,8 +79,8 @@ public class NessBox extends AbstractBox {
 	}
 
 	public void close() {
-		LoggerFactory.getLogger(Tank.class).info("Shutting down datalake...");
-		datalake().tankList().forEach(Tank::terminate);
+		Logger.info("Shutting down datalake...");
+//		this.datalake.eventStore().tanks().forEach(Tank::terminate);
 		super.close();
 		busManager.stop();
 	}
@@ -98,8 +96,7 @@ public class NessBox extends AbstractBox {
 	}
 
 	private void startTanks() {
-		for (Tank tank : datalake.tankList().stream().filter(AbstractTank::active).collect(Collectors.toList()))
-			new ResumeTankAction(this, tank.qualifiedName()).execute();
+		datalake.eventStore().tanks().forEach(t -> new ResumeTankAction(this, t.name()).execute());
 	}
 
 	private void startBusPipes() {

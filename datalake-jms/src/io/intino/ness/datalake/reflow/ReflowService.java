@@ -1,15 +1,14 @@
 package io.intino.ness.datalake.reflow;
 
 import com.google.gson.Gson;
-import io.intino.konos.jms.Consumer;
-import io.intino.konos.jms.QueueProducer;
+import io.intino.alexandria.jms.Consumer;
+import io.intino.alexandria.jms.QueueProducer;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.box.actions.PauseTankAction;
 import io.intino.ness.box.actions.ResumeTankAction;
 import io.intino.ness.box.actions.SortTankAction;
 import io.intino.ness.box.schemas.ReflowConfiguration;
-import io.intino.ness.datalake.graph.AbstractTank;
-import io.intino.ness.datalake.graph.Tank;
+import io.intino.ness.core.Datalake.EventStore.Tank;
 import org.apache.activemq.command.ActiveMQDestination;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static io.intino.konos.jms.Consumer.textFrom;
-import static io.intino.konos.jms.MessageFactory.createMessageFor;
+import static io.intino.alexandria.jms.Consumer.textFrom;
+import static io.intino.alexandria.jms.MessageFactory.createMessageFor;
 import static io.intino.ness.box.slack.Helper.findTank;
 import static java.util.stream.Collectors.toMap;
 
