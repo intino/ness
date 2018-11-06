@@ -30,7 +30,7 @@ public class FSDatalake implements Datalake {
 	public Connection connection() {
 		return new Connection() {
 			@Override
-			public void connect() {
+			public void connect(String... args) {
 			}
 
 			@Override

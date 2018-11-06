@@ -23,7 +23,7 @@ public interface Datalake {
 	void seal();
 
 	interface Connection {
-		void connect();
+		void connect(String... args);
 
 		void disconnect();
 	}
