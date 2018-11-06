@@ -5,7 +5,7 @@ import io.intino.ness.bus.BusManager;
 import io.intino.ness.bus.BusService;
 import io.intino.ness.datalake.AdminService;
 import io.intino.ness.datalake.PipeStarter;
-import io.intino.ness.datalake.Scale;
+import io.intino.ness.core.Scale;
 import io.intino.ness.datalake.graph.AbstractTank;
 import io.intino.ness.datalake.graph.DatalakeGraph;
 import io.intino.ness.datalake.graph.Tank;
