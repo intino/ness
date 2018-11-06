@@ -1,7 +1,6 @@
 package io.intino.ness.core.fs;
 
 import io.intino.alexandria.inl.Message;
-import io.intino.alexandria.zim.ZimReader;
 import io.intino.alexandria.zim.ZimStream;
 import io.intino.alexandria.zim.ZimStream.Merge;
 import io.intino.ness.core.Datalake;
@@ -57,11 +56,8 @@ public class FSEventStore implements Datalake.EventStore {
 
 	@Override
 	public Subscription subscribe(Tank tank) {
-		return new Subscription() {
-			@Override
-			public void using(MessageHandler... messageHandlers) {
-				//TODO
-			}
+		return (clientId, messageHandlers) -> {
+
 		};
 	}
 

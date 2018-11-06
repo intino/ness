@@ -49,7 +49,11 @@ public interface Datalake {
 		}
 
 		interface Subscription {
-			void using(MessageHandler... messageHandlers);
+			default void using(MessageHandler... messageHandlers) {
+				using(null, messageHandlers);
+			}
+
+			void using(String clientId, MessageHandler... messageHandlers);
 		}
 
 		interface Reflow {
