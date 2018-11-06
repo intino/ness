@@ -38,6 +38,8 @@ public interface Datalake {
 
 		Subscription subscribe(Tank tank);
 
+		void unsubscribe(Tank tank);
+
 		interface Tank {
 
 			String name();

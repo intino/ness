@@ -1,9 +1,10 @@
-package io.intino.ness.core.fs;
+package io.intino.ness.core.tcp;
 
 import io.intino.alexandria.inl.Message;
 import io.intino.alexandria.zim.ZimStream;
 import io.intino.alexandria.zim.ZimStream.Merge;
 import io.intino.ness.core.Datalake;
+import io.intino.ness.core.fs.FS;
 
 import java.io.File;
 import java.util.Arrays;
@@ -11,23 +12,23 @@ import java.util.stream.Stream;
 
 import static io.intino.alexandria.zim.ZimReader.ZimExtension;
 
-public class FSEventStore implements Datalake.EventStore {
+public class TCPEventStore implements Datalake.EventStore {
 	public static final String EventExtension = ZimExtension;
 	public static final String SessionExtension = ".inl";
 	private File root;
 
-	public FSEventStore(File root) {
+	public TCPEventStore(File root) {
 		this.root = root;
 	}
 
 	@Override
 	public Stream<Tank> tanks() {
-		return FS.foldersIn(root).map(FSEventTank::new);
+		return FS.foldersIn(root).map(TCPEventTank::new);
 	}
 
 	@Override
 	public Tank tank(String name) {
-		return new FSEventTank(new File(root, name));
+		return new TCPEventTank(new File(root, name));
 	}
 
 	@Override
@@ -63,7 +64,6 @@ public class FSEventStore implements Datalake.EventStore {
 
 	@Override
 	public void unsubscribe(Tank tank) {
-		//TODO
 	}
 
 	private static class ReflowBlock {
