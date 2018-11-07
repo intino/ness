@@ -18,7 +18,7 @@ public interface Datalake {
 
 	SetStore setStore();
 
-	void push(Stage stage);
+	void push(Stream<Blob> stage);
 
 	void seal();
 

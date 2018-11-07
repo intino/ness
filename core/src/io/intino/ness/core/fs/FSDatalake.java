@@ -3,13 +3,13 @@ package io.intino.ness.core.fs;
 import io.intino.alexandria.logger.Logger;
 import io.intino.ness.core.Blob;
 import io.intino.ness.core.Datalake;
-import io.intino.ness.core.Stage;
 import io.intino.ness.core.sessions.EventSessionManager;
 import io.intino.ness.core.sessions.SetSessionManager;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.stream.Stream;
 
 import static java.time.Instant.now;
 
@@ -50,8 +50,8 @@ public class FSDatalake implements Datalake {
 	}
 
 	@Override
-	public void push(Stage stage) {
-		stage.blobs().forEach(this::process);
+	public void push(Stream<Blob> blobs) {
+		blobs.forEach(this::process);
 	}
 
 	private void process(Blob blob) {
