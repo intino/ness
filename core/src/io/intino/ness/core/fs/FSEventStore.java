@@ -63,7 +63,6 @@ public class FSEventStore implements Datalake.EventStore {
 
 	@Override
 	public void unsubscribe(Tank tank) {
-		//TODO
 	}
 
 	private static class ReflowBlock {
@@ -89,16 +88,17 @@ public class FSEventStore implements Datalake.EventStore {
 		}
 
 		private void terminate(int reflowedMessages) {
-			Arrays.stream(messageHandlers).forEach(mh -> mh.handle(controlMessage(reflowedMessages)));
+			Arrays.stream(messageHandlers)
+					.filter(m -> m instanceof ReflowHandler)
+					.map(m -> (ReflowHandler)m)
+					.forEach(m -> terminate(m, reflowedMessages));
 		}
 
-		private Message controlMessage(int processedMessagesCount) {
-			return new Message(type()).set("count", processedMessagesCount);
+		private void terminate(ReflowHandler reflowHandler, int reflowedMessages) {
+			if (is.hasNext()) reflowHandler.onBlock(reflowedMessages);
+			else reflowHandler.onFinish(reflowedMessages);
 		}
 
-		private String type() {
-			return is.hasNext() ? "endBlock" : "endReflow";
-		}
 	}
 
 }

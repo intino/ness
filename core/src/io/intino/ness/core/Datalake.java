@@ -72,6 +72,12 @@ public interface Datalake {
 			void handle(Message message);
 		}
 
+		interface ReflowHandler {
+			void onBlock(int reflowedMessages);
+
+			void onFinish(int reflowedMessages);
+		}
+
 	}
 
 	interface SetStore {
