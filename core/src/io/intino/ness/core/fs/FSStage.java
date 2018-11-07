@@ -8,7 +8,6 @@ import java.io.*;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
-import static java.util.UUID.randomUUID;
 import static java.util.stream.Stream.empty;
 
 public class FSStage implements Stage {
@@ -34,9 +33,9 @@ public class FSStage implements Stage {
 	}
 
 	@Override
-	public OutputStream start(String name, Blob.Type type) {
+	public OutputStream start(String prefix, Blob.Type type) {
 		try {
-			return new FileOutputStream(fileOf(name, type));
+			return new FileOutputStream(fileOf(prefix, type));
 		} catch (FileNotFoundException e) {
 			return null;
 		}
@@ -57,15 +56,15 @@ public class FSStage implements Stage {
 	}
 
 	private File fileOf(Blob.Type type) {
-		return new File(root, randomName(type));
+		return new File(root, withExtension(name(), type));
 	}
 
 	private File fileOf(String name, Blob.Type type) {
-		return new File(root, name + randomName(type));
+		return new File(root, withExtension(name(name), type));
 	}
 
-	private String randomName(Blob.Type type) {
-		return "#" + randomUUID().toString() + extensionOf(type);
+	private String withExtension(String name, Blob.Type type) {
+		return name + extensionOf(type);
 	}
 
 	private boolean blobs(File dir, String name) {
