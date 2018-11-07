@@ -40,7 +40,7 @@ public class FSSetTank implements Datalake.SetStore.Tank {
 
 	@Override
 	public Stream<Tub> tubs(int count) {
-		return null;
+		return FS.foldersIn(root, FS.Sort.Reversed).map(f -> (Tub) new FSSetTub(f)).limit(count);
 	}
 
 	@Override
