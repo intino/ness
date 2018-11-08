@@ -7,8 +7,11 @@ import io.intino.alexandria.zim.ZimStream;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
+import static java.util.stream.Stream.empty;
 
 public interface Datalake {
 
@@ -179,19 +182,30 @@ public interface Datalake {
 			public static class TankHistogram<T> {
 				private final Axis<T> axis;
 				private final Map<T, Integer> data;
+				private final SetStore.Tank.Tub tub;
 
 				public TankHistogram(Axis axis, SetStore.Tank.Tub tub) {
 					this.axis = axis;
 					this.data = new HashMap<>();
-					this.initData(tub);
+					this.tub = tub;
 				}
 
 				public Stream<Point> points() {
+					return points(Optional.ofNullable(tub).map(Tank.Tub::sets).orElse(empty()));
+				}
+
+				public Stream<Point> points(SetStore.SetFilter filter) {
+					return points(Optional.ofNullable(tub).map(t -> t.sets(filter)).orElse(empty()));
+				}
+
+				private Stream<Point> points(Stream<Tank.Tub.Set> sets) {
+					fillDataWith(sets);
 					return data.keySet().stream().sorted(axis.sorting()).map(this::pointOf);
 				}
 
-				private void initData(SetStore.Tank.Tub tub) {
-					tub.sets().forEach(this::put);
+				private void fillDataWith(Stream<Tank.Tub.Set> sets) {
+					data.clear();
+					sets.forEach(this::put);
 				}
 
 				private Point<T> pointOf(T item) {
