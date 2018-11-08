@@ -2,10 +2,9 @@ package io.intino.ness.core.sessions;
 
 import io.intino.alexandria.TripleStore;
 import io.intino.alexandria.logger.Logger;
-import io.intino.alexandria.zet.SourceZetStream;
+import io.intino.alexandria.zet.ZetReader;
 import io.intino.alexandria.zet.ZetStream;
 import io.intino.ness.core.Blob;
-import io.intino.ness.core.fs.FS;
 import io.intino.ness.core.fs.FSSetStore;
 
 import java.io.File;
@@ -108,7 +107,7 @@ public class SetSessionManager {
 			List<ZetStream> streams = chunksOf(readers, fingerprint);
 			File setFile = filepath(fingerprint);
 			File tempFile = File.createTempFile(fingerprint.toString(), SetExtension);
-			if (setFile.exists()) streams.add(new SourceZetStream(setFile));
+			if (setFile.exists()) streams.add(new ZetReader(setFile));
 			FSSetStore.write(new ZetStream.Union(streams), tempFile);
 			Files.move(tempFile.toPath(), setFile.toPath(), REPLACE_EXISTING);
 		} catch (IOException e) {

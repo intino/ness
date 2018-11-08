@@ -45,7 +45,6 @@ public class ExternalSorter {
 		try {
 			final ZimStream stream = new ZimReader(file);
 			List<File> files = processBatches(stream);
-			stream.close();
 			replace(sortAndMerge(files));
 		} catch (IOException e) {
 			Logger.error(e);
@@ -98,7 +97,6 @@ public class ExternalSorter {
 				temporalFile.next();
 				temporalFile = temporalFileWithOldestMessage(temporalFiles);
 			}
-			temporalFiles.forEach(t -> t.close());
 		} catch (IOException e) {
 			Logger.error(e);
 		}
@@ -158,9 +156,6 @@ public class ExternalSorter {
 			this.message = stream.next();
 		}
 
-		public void close() {
-			stream.close();
-		}
 	}
 }
 
