@@ -1,7 +1,7 @@
 import io.intino.alexandria.inl.Message;
 import io.intino.alexandria.zet.ZetStream;
+import io.intino.alexandria.zim.ZimBuilder;
 import io.intino.alexandria.zim.ZimReader;
-import io.intino.alexandria.zim.ZimWriter;
 import io.intino.ness.core.Scale;
 import io.intino.ness.core.Timetag;
 import io.intino.ness.core.sessions.Fingerprint;
@@ -38,15 +38,13 @@ public class EventSessionManager_ {
 		ZimReader zimReader = new ZimReader(file);
 		assertEquals(message(instant, 0).toString(), zimReader.next().toString());
 		assertFalse(zimReader.hasNext());
-		zimReader.close();
 	}
 
 	@Test
 	public void should_create_an_event_session_and_merge_when_sealing_it() throws IOException {
-		ZimWriter writer = new ZimWriter(new File("temp/events/tank1/201809.zim"));
+		ZimBuilder writer = new ZimBuilder(new File("temp/events/tank1/201809.zim"));
 		Instant instant = Instant.parse("2018-09-09T00:00:00Z");
-		writer.write(message(instant, -1));
-		writer.close();
+		writer.put(message(instant, -1));
 		createSessionAndSeal();
 		File file = new File("temp/events/tank1/201809" + EventExtension);
 		assertTrue(file.exists());
@@ -54,7 +52,6 @@ public class EventSessionManager_ {
 		assertEquals(message(instant, -1).toString(), zimReader.next().toString());
 		assertEquals(message(Instant.parse("2018-09-10T00:00:00Z"), 0).toString(), zimReader.next().toString());
 		assertFalse(zimReader.hasNext());
-		zimReader.close();
 	}
 
 	private void createSessionAndSeal() {

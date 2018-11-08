@@ -1,10 +1,10 @@
 package io.intino.ness.core.sessions;
 
 import io.intino.alexandria.logger.Logger;
+import io.intino.alexandria.zim.ZimBuilder;
 import io.intino.alexandria.zim.ZimReader;
 import io.intino.alexandria.zim.ZimStream;
 import io.intino.alexandria.zim.ZimStream.Merge;
-import io.intino.alexandria.zim.ZimWriter;
 import io.intino.ness.core.Blob;
 import io.intino.ness.core.fs.ExternalSorter;
 import io.intino.ness.core.fs.FS;
@@ -37,10 +37,8 @@ public class EventSessionManager {
 		ZimStream stream = !zimFile.exists() ? reader(sessionFile) : Merge.of(reader(sessionFile), reader(zimFile));
 		File tempFile = tempFile();
 		try {
-			ZimWriter writer = new ZimWriter(tempFile);
-			while (stream.hasNext()) writer.write(stream.next());
-			stream.close();
-			writer.close();
+			ZimBuilder builder = new ZimBuilder(tempFile);
+			builder.put(stream);
 			Files.move(tempFile.toPath(), zimFile.toPath(), REPLACE_EXISTING);
 		} catch (IOException e) {
 			Logger.error(e);

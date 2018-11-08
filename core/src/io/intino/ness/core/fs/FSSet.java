@@ -1,6 +1,6 @@
 package io.intino.ness.core.fs;
 
-import io.intino.alexandria.zet.SourceZetStream;
+import io.intino.alexandria.zet.ZetReader;
 import io.intino.alexandria.zet.ZetStream;
 import io.intino.ness.core.Datalake;
 import io.intino.ness.core.Datalake.SetStore.Variable;
@@ -36,7 +36,7 @@ public class FSSet implements Datalake.SetStore.Tank.Tub.Set {
 
 	@Override
 	public ZetStream content() {
-		return new SourceZetStream(file);
+		return new ZetReader(file);
 	}
 
 	@Override

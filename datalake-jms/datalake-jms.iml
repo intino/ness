@@ -116,5 +116,7 @@
     <orderEntry type="library" name="Legio: io.intino.alexandria:zim:1.0.0" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:zet:1.0.0" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:triplestore:1.0.0" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.tara:magritte:2.1.8" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.tara:language:1.0.8" level="project" />
   </component>
 </module>
