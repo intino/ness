@@ -13,15 +13,11 @@ import org.junit.After;
 import org.junit.Test;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import static io.intino.ness.core.fs.FSSetStore.MetadataFilename;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static junit.framework.TestCase.assertNull;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -93,13 +89,13 @@ public class SetSessionManager_ {
 		writer.close();
 
 		SetSessionFileReader reader = new SetSessionFileReader(file);
-		assertEquals(2, reader.chunks().size());
-		assertEquals(1, reader.chunks(Fingerprint.of("tank", timetag, "set")).size());
-		ZetStream stream = reader.chunks(Fingerprint.of("tank", timetag, "set")).get(0).stream();
+		assertEquals(2, reader.chunks().count());
+		assertEquals(1, reader.chunks(Fingerprint.of("tank", timetag, "set")).count());
+		ZetStream stream = reader.chunks(Fingerprint.of("tank", timetag, "set")).findFirst().get().stream();
 		for (int i = 0; i < 20; i++) assertEquals((long) i, stream.next());
 		assertFalse(stream.hasNext());
-		assertEquals(1, reader.chunks(Fingerprint.of("sets/tank2", timetag, "set2")).size());
-		stream = reader.chunks(Fingerprint.of("sets/tank2", timetag, "set2")).get(0).stream();
+		assertEquals(1, reader.chunks(Fingerprint.of("sets/tank2", timetag, "set2")).count());
+		stream = reader.chunks(Fingerprint.of("sets/tank2", timetag, "set2")).findFirst().get().stream();
 		for (int i = 0; i < 20; i++) assertEquals((long) i, stream.next());
 		assertFalse(stream.hasNext());
 

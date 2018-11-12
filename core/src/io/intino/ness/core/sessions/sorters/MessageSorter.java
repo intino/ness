@@ -14,7 +14,7 @@ import java.util.List;
 
 public class MessageSorter {
 	private static Logger logger = LoggerFactory.getLogger(MessageSorter.class);
-	static String SEPARATOR = "\n\n";
+	static String SEPARATOR = "\n";
 	private final File file;
 
 

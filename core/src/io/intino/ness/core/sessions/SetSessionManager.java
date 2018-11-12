@@ -165,7 +165,7 @@ public class SetSessionManager {
 	private List<ZetStream> chunksOf(List<SetSessionFileReader> readers, Fingerprint fingerprint) {
 		return readers.stream()
 				.map(r -> r.chunks(fingerprint))
-				.flatMap(Collection::stream)
+				.flatMap(r -> r)
 				.map(SetSessionFileReader.Chunk::stream)
 				.collect(toList());
 	}
@@ -173,7 +173,7 @@ public class SetSessionManager {
 	private Set<Fingerprint> distinctChunks(List<SetSessionFileReader> readers) {
 		return readers.stream()
 				.map(SetSessionFileReader::chunks)
-				.flatMap(Collection::stream)
+				.flatMap(r -> r)
 				.map(SetSessionFileReader.Chunk::fingerprint)
 				.collect(Collectors.toSet());
 	}
