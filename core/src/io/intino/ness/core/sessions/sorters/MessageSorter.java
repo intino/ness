@@ -40,7 +40,7 @@ public class MessageSorter {
 	}
 
 	private List<Message> loadMessages(File inlFile) {
-		ArrayList list = new ArrayList();
+		List<Message> list = new ArrayList<>();
 		try {
 			InlReader inlReader = new InlReader(new FileInputStream(inlFile));
 			Message message;
@@ -48,6 +48,7 @@ public class MessageSorter {
 				list.add(message);
 			}
 		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
 		}
 		return list;
 	}
