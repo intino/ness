@@ -3,8 +3,8 @@ package io.intino.ness.core.sessions;
 import io.intino.alexandria.zim.ZimBuilder;
 import io.intino.alexandria.zim.ZimReader;
 import io.intino.ness.core.Blob;
-import io.intino.ness.core.fs.ExternalSorter;
 import io.intino.ness.core.fs.FS;
+import io.intino.ness.core.sessions.sorters.MessageSorter;
 
 import java.io.File;
 import java.util.stream.Stream;
@@ -68,7 +68,7 @@ public class EventSessionManager {
 		}
 
 		private static File sort(File file) {
-			return new ExternalSorter(file).sort();
+			return new MessageSorter(file).sort();
 		}
 
 	}

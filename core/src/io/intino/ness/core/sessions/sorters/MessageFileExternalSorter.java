@@ -1,4 +1,4 @@
-package io.intino.ness.core.fs;
+package io.intino.ness.core.sessions.sorters;
 
 import io.intino.alexandria.inl.Message;
 import io.intino.alexandria.logger.Logger;
@@ -15,14 +15,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 
-public class ExternalSorter {
+public class MessageFileExternalSorter {
 	private static final String ZIM = ".zim";
 	private static String SEPARATOR = "\n";
 	private final File tankDirectory;
 	private final File tempDirectory;
 	private File file;
 
-	public ExternalSorter(File file) {
+	public MessageFileExternalSorter(File file) {
 		this.file = file;
 		this.tankDirectory = this.file.getParentFile();
 		this.tempDirectory = createTemporalFolder();
