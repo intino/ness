@@ -13,7 +13,7 @@ import static io.intino.alexandria.zim.ZimReader.ZimExtension;
 
 public class FSEventStore implements Datalake.EventStore {
 	public static final String EventExtension = ZimExtension;
-	public static final String SessionExtension = ".inl";
+	public static final String SessionExtension = ".event.blob";
 	private File root;
 
 	public FSEventStore(File root) {

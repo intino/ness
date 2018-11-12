@@ -1,14 +1,18 @@
 package io.intino.ness.core.sessions;
 
 import io.intino.alexandria.logger.Logger;
-import io.intino.ness.core.Timetag;
 import io.intino.alexandria.zet.ZetStream;
+import io.intino.ness.core.Timetag;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.stream.Collectors.toList;
 
 public class SetSessionFileReader {
@@ -19,8 +23,28 @@ public class SetSessionFileReader {
 	private final List<Chunk> chunks = new ArrayList<>();
 
 	public SetSessionFileReader(File file) throws IOException {
-		this.file = file;
-		readStructure(file);
+		this.file = unzip(file);
+		this.readStructure(this.file);
+	}
+
+	private File unzip(File file) throws IOException {
+		File target = tempFile();
+		Files.copy(inputStreamOf(file), target.toPath(), REPLACE_EXISTING);
+		return target;
+	}
+
+	private File tempFile() throws IOException {
+		File temp = File.createTempFile("blob", "blob");
+		temp.deleteOnExit();
+		return temp;
+	}
+
+	private BufferedOutputStream outputStreamOf(File temp) throws FileNotFoundException {
+		return new BufferedOutputStream(new FileOutputStream(temp));
+	}
+
+	private GZIPInputStream inputStreamOf(File file) throws IOException {
+		return new GZIPInputStream(new BufferedInputStream(new FileInputStream(file)));
 	}
 
 	@SuppressWarnings("InfiniteLoopStatement")

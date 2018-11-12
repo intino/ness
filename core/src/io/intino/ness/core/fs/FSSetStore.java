@@ -1,9 +1,8 @@
 package io.intino.ness.core.fs;
 
 import io.intino.ness.core.Datalake;
-import io.intino.alexandria.zet.ZetStream;
 
-import java.io.*;
+import java.io.File;
 import java.util.stream.Stream;
 
 public class FSSetStore implements Datalake.SetStore {
@@ -15,13 +14,6 @@ public class FSSetStore implements Datalake.SetStore {
 	public FSSetStore(File root) {
 		this.root = root;
 		this.root.mkdirs();
-	}
-
-	public static void write(ZetStream stream, File file) throws IOException {
-		file.getParentFile().mkdirs();
-		DataOutputStream dataStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
-		while (stream.hasNext()) dataStream.writeLong(stream.next());
-		dataStream.close();
 	}
 
 	@Override

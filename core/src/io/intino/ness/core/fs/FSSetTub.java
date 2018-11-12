@@ -30,7 +30,7 @@ public class FSSetTub implements Datalake.SetStore.Tank.Tub {
 
 	@Override
 	public Stream<Set> sets() {
-		return FS.filesIn(root, f->f.getName().endsWith(FSSetStore.SetExtension)).map(FSSet::new);
+		return FS.filesIn(root, f -> f.getName().endsWith(FSSetStore.SetExtension)).map(FSSet::new);
 	}
 
 	@Override

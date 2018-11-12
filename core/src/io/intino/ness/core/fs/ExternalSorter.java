@@ -2,28 +2,22 @@ package io.intino.ness.core.fs;
 
 import io.intino.alexandria.inl.Message;
 import io.intino.alexandria.logger.Logger;
+import io.intino.alexandria.zim.ZimBuilder;
 import io.intino.alexandria.zim.ZimReader;
 import io.intino.alexandria.zim.ZimStream;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
-import static java.time.Instant.parse;
-import static java.util.stream.Collectors.joining;
+import java.util.zip.GZIPOutputStream;
 
 public class ExternalSorter {
-	private static final String INL = ".inl";
-	private static String SEPARATOR = "\n\n";
+	private static final String ZIM = ".zim";
+	private static String SEPARATOR = "\n";
 	private final File tankDirectory;
 	private final File tempDirectory;
 	private File file;
@@ -31,14 +25,24 @@ public class ExternalSorter {
 	public ExternalSorter(File file) {
 		this.file = file;
 		this.tankDirectory = this.file.getParentFile();
-		this.tempDirectory = new File(tankDirectory, this.file.getName().replace(INL, ""));
-		tempDirectory.mkdirs();
+		this.tempDirectory = createTemporalFolder();
 	}
 
 	private static void deleteDirectory(File directoryToBeDeleted) {
 		File[] allContents = directoryToBeDeleted.listFiles();
 		if (allContents != null) for (File file : allContents) deleteDirectory(file);
 		directoryToBeDeleted.delete();
+	}
+
+	private File createTemporalFolder() {
+		try {
+			return Files.createTempDirectory("externalsorter").toFile();
+		} catch (IOException e) {
+			Logger.error(e);
+			File externalSorter = new File("externalsorter");
+			externalSorter.mkdirs();
+			return externalSorter;
+		}
 	}
 
 	public File sort() {
@@ -72,24 +76,17 @@ public class ExternalSorter {
 	}
 
 	private File processBatch(List<Message> messages, int batch) {
-		File inlFile = new File(tempDirectory, batch + INL);
-		try {
-			messages.sort(messageComparator());
-			Files.write(inlFile.toPath(), toString(messages).getBytes(), CREATE, TRUNCATE_EXISTING);
-			messages.clear();
-		} catch (IOException e) {
-			Logger.error(e.getMessage(), e);
-		}
-		return inlFile;
+		File batchFile = new File(tempDirectory, batch + ZIM);
+		messages.sort(messageComparator());
+		new ZimBuilder(batchFile).put(messages);
+		messages.clear();
+		return batchFile;
 	}
 
-	private String toString(List<Message> messages) {
-		return messages.stream().map(Message::toString).collect(joining(SEPARATOR));
-	}
 
 	private File sortAndMerge(List<File> files) {
-		File temp = new File(tankDirectory, "temp" + INL);
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(temp))) {
+		File temp = new File(tankDirectory, "temp" + ZIM);
+		try (BufferedWriter writer = new BufferedWriter(zipWriter(temp))) {
 			List<TemporalFile> temporalFiles = files.stream().map(TemporalFile::new).collect(Collectors.toList());
 			TemporalFile temporalFile = temporalFileWithOldestMessage(temporalFiles);
 			while (tempsAreActive(temporalFiles)) {
@@ -103,6 +100,10 @@ public class ExternalSorter {
 		return temp;
 	}
 
+	private OutputStreamWriter zipWriter(File temp) throws IOException {
+		return new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(temp)));
+	}
+
 	private void replace(File temp) {
 		if (file.delete()) {
 			temp.renameTo(file.getAbsoluteFile());
@@ -111,6 +112,7 @@ public class ExternalSorter {
 	}
 
 	private TemporalFile temporalFileWithOldestMessage(List<TemporalFile> managers) {
+		if (managers.isEmpty()) return null;
 		Instant reference = instantOf(managers.get(0).message);
 		TemporalFile temporalFile = managers.get(0);
 		for (int i = 1; i < managers.size(); i++) {
@@ -124,15 +126,11 @@ public class ExternalSorter {
 	}
 
 	private Comparator<Message> messageComparator() {
-		return Comparator.comparing(m -> Instant.parse(tsOf(m)));
-	}
-
-	private String tsOf(Message message) {
-		return message.get("ts");
+		return Comparator.comparing(m -> m.asEvent().instant());
 	}
 
 	private Instant instantOf(Message message) {
-		return message != null ? parse(tsOf(message)) : Instant.MAX;
+		return message != null ? message.asEvent().instant() : Instant.MAX;
 	}
 
 	private boolean tempsAreActive(List<TemporalFile> files) {

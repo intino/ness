@@ -1,10 +1,10 @@
 dsl Legio
 
-Artifact("io.intino.ness", "1.0.0") core
+Artifact("io.intino.ness", "1.0.1") core
 	Imports
-		Compile("io.intino.alexandria", "zim", "1.0.0")
-		Compile("io.intino.alexandria", "zet", "1.0.0")
-		Compile("io.intino.alexandria", "triplestore", "1.0.0")
+		Compile("io.intino.alexandria", "zim", "1.0.1")
+		Compile("io.intino.alexandria", "zet", "1.0.1")
+		Compile("io.intino.alexandria", "triplestore", "1.0.1")
 		Test("junit", "junit", "LATEST")
 		Test("org.assertj", "assertj-core", "3.11.1")
 	Code("io.intino.ness.datalake")

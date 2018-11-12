@@ -1,5 +1,6 @@
 package io.intino.ness.core.fs;
 
+import io.intino.alexandria.zet.Zet;
 import io.intino.alexandria.zet.ZetReader;
 import io.intino.alexandria.zet.ZetStream;
 import io.intino.ness.core.Datalake;
@@ -31,7 +32,7 @@ public class FSSet implements Datalake.SetStore.Tank.Tub.Set {
 
 	@Override
 	public int size() {
-		return (int) (file.length() / Long.BYTES);
+		return Integer.parseInt(variable("_size_").value);
 	}
 
 	@Override

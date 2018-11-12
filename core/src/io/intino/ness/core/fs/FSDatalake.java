@@ -18,6 +18,7 @@ public class FSDatalake implements Datalake {
 	private static final String SetStoreFolder = "sets";
 	private static final String StageFolder = "stage";
 	private static final String TreatedFolder = "treated";
+	public static final String BlobExtension = ".blob";
 
 	private File root;
 
@@ -55,8 +56,10 @@ public class FSDatalake implements Datalake {
 	}
 
 	private void process(Blob blob) {
-		if (blob.type() == Blob.Type.event) EventSessionManager.push(stageFolder(), blob);
-		else SetSessionManager.push(blob, stageFolder());
+		if (blob.type() == Blob.Type.event)
+			EventSessionManager.push(stageFolder(), blob);
+		if (blob.type() == Blob.Type.set || blob.type() == Blob.Type.setMetadata)
+			SetSessionManager.push(blob, stageFolder());
 	}
 
 	@Override
@@ -69,7 +72,7 @@ public class FSDatalake implements Datalake {
 	private void moveToTreated() {
 		File treatedFolder = new File(treatedFolder(), sealDateFolderName());
 		treatedFolder.mkdirs();
-		FS.filesIn(treatedFolder(), File::isFile).forEach(f -> move(f, treatedFolder));
+		FS.filesIn(stageFolder(), File::isFile).forEach(f -> move(f, treatedFolder));
 	}
 
 	private void move(File stageFile, File treatedFolder) {

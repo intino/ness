@@ -1,29 +1,30 @@
 package io.intino.ness.core.sessions;
 
-import io.intino.alexandria.TripleStore;
 import io.intino.alexandria.logger.Logger;
+import io.intino.alexandria.triplestore.FileTripleStore;
+import io.intino.alexandria.triplestore.MemoryTripleStore;
+import io.intino.alexandria.triplestore.TripleStore;
 import io.intino.alexandria.zet.ZetReader;
 import io.intino.alexandria.zet.ZetStream;
 import io.intino.ness.core.Blob;
-import io.intino.ness.core.fs.FSSetStore;
+import io.intino.ness.core.fs.FSDatalake;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import static io.intino.ness.core.fs.FS.copyInto;
 import static io.intino.ness.core.fs.FSSetStore.MetadataFilename;
 import static io.intino.ness.core.fs.FSSetStore.SetExtension;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Arrays.asList;
-import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 
 public class SetSessionManager {
-	private static final String BlobExtension = ".blob";
 	private final List<File> files;
 	private final File storeFolder;
 
@@ -41,20 +42,20 @@ public class SetSessionManager {
 	}
 
 	private static List<File> blobsOf(File stageFolder) {
-		File[] files = stageFolder.listFiles(f -> f.getName().endsWith(BlobExtension));
+		File[] files = stageFolder.listFiles(f -> f.getName().endsWith(FSDatalake.BlobExtension));
 		return files != null ? asList(files) : Collections.emptyList();
 	}
 
 	private static File fileFor(Blob blob, File parentFolder) {
-		return new File(parentFolder, randomName(blob));
+		return new File(parentFolder, filename(blob));
 	}
 
-	private static String randomName(Blob blob) {
-		return randomUUID().toString() + "." + blob.type() + BlobExtension;
+	private static String filename(Blob blob) {
+		return blob.name() + FSDatalake.BlobExtension;
 	}
 
 	private static String extensionOf(Blob.Type type) {
-		return "." + type.name() + BlobExtension;
+		return "." + type.name() + FSDatalake.BlobExtension;
 	}
 
 	private void seal() {
@@ -63,14 +64,14 @@ public class SetSessionManager {
 	}
 
 	private void sealSetMetadataSessions() {
-		Map<String, TripleStore> map = new HashMap<>();
+		Map<String, FileTripleStore> map = new HashMap<>();
 		loadSetMetadataSessions()
 				.flatMap(TripleStore::all)
 				.forEach(s -> processTriple(s, map));
-		map.values().forEach(TripleStore::save);
+		map.values().forEach(FileTripleStore::save);
 	}
 
-	private void processTriple(String[] triple, Map<String, TripleStore> map) {
+	private void processTriple(String[] triple, Map<String, FileTripleStore> map) {
 		Fingerprint fingerprint = new Fingerprint(triple[0]);
 		tripleStoreFor(metadataPathOf(fingerprint), map).put(fingerprint.set(), triple[1], triple[2]);
 	}
@@ -79,9 +80,9 @@ public class SetSessionManager {
 		return fingerprint.tank() + "/" + fingerprint.timetag();
 	}
 
-	private TripleStore tripleStoreFor(String path, Map<String, TripleStore> map) {
+	private TripleStore tripleStoreFor(String path, Map<String, FileTripleStore> map) {
 		if (!map.containsKey(path))
-			map.put(path, new TripleStore(metadataFileOf(path)));
+			map.put(path, new FileTripleStore(metadataFileOf(path)));
 		return map.get(path);
 	}
 
@@ -89,10 +90,19 @@ public class SetSessionManager {
 		return new File(storeFolder, path + "/" + MetadataFilename);
 	}
 
-	private Stream<TripleStore> loadSetMetadataSessions() {
+	private Stream<MemoryTripleStore> loadSetMetadataSessions() {
 		return files.parallelStream()
 				.filter(f -> f.getName().endsWith(extensionOf(Blob.Type.setMetadata)))
-				.map(TripleStore::new);
+				.map(f -> new MemoryTripleStore(zipStreamOf(f)));
+	}
+
+	private InputStream zipStreamOf(File file) {
+		try {
+			return new GZIPInputStream(new BufferedInputStream(new FileInputStream(file)));
+		} catch (IOException e) {
+			Logger.error(e);
+			return null;
+		}
 	}
 
 	private void sealSetSessions() {
@@ -108,12 +118,32 @@ public class SetSessionManager {
 			File setFile = filepath(fingerprint);
 			File tempFile = File.createTempFile(fingerprint.toString(), SetExtension);
 			if (setFile.exists()) streams.add(new ZetReader(setFile));
-			FSSetStore.write(new ZetStream.Union(streams), tempFile);
+			int count = write(new ZetStream.Union(streams), tempFile);
+			writeSizeInMetadata(fingerprint, count);
 			Files.move(tempFile.toPath(), setFile.toPath(), REPLACE_EXISTING);
 		} catch (IOException e) {
 			Logger.error(e);
 		}
 	}
+
+	private void writeSizeInMetadata(Fingerprint fingerprint, int count) throws FileNotFoundException {
+		TripleStore.Builder builder = new TripleStore.Builder(new FileOutputStream(metadataFileOf(metadataPathOf(fingerprint)), true));
+		builder.put(fingerprint.set(), "_size_", count);
+		builder.close();
+	}
+
+	private int write(ZetStream.Union stream, File file) throws IOException {
+		file.getParentFile().mkdirs();
+		DataOutputStream dataStream = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(file))));
+		int count = 0;
+		while (stream.hasNext()) {
+			dataStream.writeLong(stream.next());
+			count++;
+		}
+		dataStream.close();
+		return count;
+	}
+
 
 	private List<SetSessionFileReader> loadSetSessions() {
 		return files.parallelStream().filter(f -> f.getName().endsWith(extensionOf(Blob.Type.set))).map(f -> {

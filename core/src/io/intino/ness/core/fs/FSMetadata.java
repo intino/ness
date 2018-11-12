@@ -1,6 +1,7 @@
 package io.intino.ness.core.fs;
 
-import io.intino.alexandria.TripleStore;
+import io.intino.alexandria.triplestore.FileTripleStore;
+import io.intino.alexandria.triplestore.TripleStore;
 
 import java.io.File;
 import java.util.HashMap;
@@ -29,7 +30,7 @@ public class FSMetadata {
 	}
 
 	private static void openMetadataTripleStoreOf(FSSet set) {
-		TripleStore tripleStore = new TripleStore(metadataFileOf(set));
+		FileTripleStore tripleStore = new FileTripleStore(metadataFileOf(set));
 		tripleStores.put(tripleStore.file(), tripleStore);
 	}
 
