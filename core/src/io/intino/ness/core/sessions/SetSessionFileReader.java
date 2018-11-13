@@ -7,13 +7,12 @@ import io.intino.ness.core.Timetag;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static java.util.stream.Collectors.toList;
 
 public class SetSessionFileReader {
 
@@ -71,14 +70,13 @@ public class SetSessionFileReader {
 		return new String(bytes, StandardCharsets.UTF_8);
 	}
 
-	public List<Chunk> chunks() {
-		return chunks;
+	public Stream<Chunk> chunks() {
+		return chunks.stream();
 	}
 
-	public List<Chunk> chunks(Fingerprint fingerprint) {
+	public Stream<Chunk> chunks(Fingerprint fingerprint) {
 		return chunks.stream()
-				.filter(c -> c.fingerprint.equals(fingerprint))
-				.collect(toList());
+				.filter(c -> c.fingerprint.equals(fingerprint));
 	}
 
 	public class Chunk {

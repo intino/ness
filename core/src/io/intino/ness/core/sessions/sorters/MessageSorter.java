@@ -12,7 +12,7 @@ import java.util.List;
 
 
 public class MessageSorter {
-	static String SEPARATOR = "\n\n";
+	static String SEPARATOR = "\n";
 	private final File file;
 
 	public MessageSorter(File file) {
