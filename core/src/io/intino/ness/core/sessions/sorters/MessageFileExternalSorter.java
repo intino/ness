@@ -46,17 +46,13 @@ public class MessageFileExternalSorter {
 	}
 
 	public File sort() {
-		try {
-			final ZimStream stream = new ZimReader(file);
-			List<File> files = processBatches(stream);
-			replace(sortAndMerge(files));
-		} catch (IOException e) {
-			Logger.error(e);
-		}
+		final ZimStream stream = new ZimReader(file);
+		List<File> files = processBatches(stream);
+		replace(sortAndMerge(files));
 		return file;
 	}
 
-	private List<File> processBatches(ZimStream stream) throws IOException {
+	private List<File> processBatches(ZimStream stream) {
 		List<File> batches = new ArrayList<>();
 		List<Message> current = new ArrayList<>();
 		int i = 0;
