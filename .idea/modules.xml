@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/datalake-jms/datalake-jms.iml" filepath="$PROJECT_DIR$/datalake-jms/datalake-jms.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ness/ness.iml" filepath="$PROJECT_DIR$/ness/ness.iml" />
     </modules>
   </component>
 </project>
