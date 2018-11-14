@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.util.FileSystemUtils;
-import test.ProducerTest;
 
 import java.io.File;
 import java.util.Arrays;
@@ -110,7 +109,6 @@ public class ActionTests {
 	}
 
 	private void checkProduce() {
-		new Thread(() -> new ProducerTest().produceDialogs()).start();
 	}
 
 	@After

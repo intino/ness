@@ -1,7 +1,7 @@
 dsl Legio
 
-Artifact("io.intino.ness", "2.3.5") Ness as Product
-	Model("Proteo", "2.1.9", "2.3.3")
+Artifact("io.intino.ness", "3.0.0") Ness as Product
+	Model("Proteo", "2.1.11", "2.3.5")
 	Box("Konos", "5.0.0")
 	Imports
 		Compile("io.intino.ness", "core", "[1.0.0, 2.0.0)")

@@ -13,7 +13,6 @@ import static java.lang.Thread.sleep;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 
 public class Feeder {
-
 	private static final Logger logger = LoggerFactory.getLogger(Feeder.class);
 
 	public static void main(String[] args) throws JMSException {

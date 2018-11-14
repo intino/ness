@@ -96,7 +96,7 @@ public class NessBox extends AbstractBox {
 	}
 
 	private void startTanks() {
-		datalake.eventStore().tanks().forEach(t -> new ResumeTankAction(this, t.name()).execute());
+		graph.tankList().forEach(t -> new ResumeTankAction(this, t.name()).execute());
 	}
 
 	private void startBusPipes() {

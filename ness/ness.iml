@@ -67,8 +67,6 @@
     <orderEntry type="library" name="Legio: commons-logging:commons-logging:1.2" level="project" />
     <orderEntry type="module" module-name="core" />
     <orderEntry type="library" name="Legio: org.slf4j:slf4j-api:1.7.25" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.tara:magritte:2.1.9" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.tara:language:1.0.9" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:jms:1.0.0" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:exceptions:1.0.0" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:json:1.0.0" level="project" />
@@ -111,5 +109,7 @@
     <orderEntry type="library" name="Legio: io.intino.alexandria:slack-framework:1.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Legio: io.intino.alexandria:ness-accessor:1.0.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Legio: io.intino.ness:core:1.0.2" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.tara:magritte:2.1.11" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.tara:language:1.0.11" level="project" />
   </component>
 </module>

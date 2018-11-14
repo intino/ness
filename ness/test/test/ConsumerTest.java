@@ -1,7 +1,7 @@
 package test;
 
 import io.intino.alexandria.nessaccessor.NessAccessor;
-import io.intino.alexandria.nessaccessor.tcp.TcpDatalake;
+import io.intino.alexandria.nessaccessor.tcp.TCPDatalake;
 import io.intino.ness.core.Datalake;
 import org.junit.Before;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ public class ConsumerTest {
 	@Before
 	public void setUp() {
 		try {
-			accessor = new NessAccessor(new TcpDatalake(url, user, password, "test-consumer"));
+			accessor = new NessAccessor(new TCPDatalake(url, user, password, "test-consumer"));
 			accessor.connection().connect();
 			tank = accessor.eventStore().tank(tankName);
 			accessor.eventStore().subscribe(tank).using("test-consumer", m -> System.out.println(m.toString()));
