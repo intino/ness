@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "1.0.1") core
+Artifact("io.intino.ness", "1.0.2") core
 	Imports
 		Compile("io.intino.alexandria", "zim", "1.0.1")
 		Compile("io.intino.alexandria", "zet", "1.0.1")

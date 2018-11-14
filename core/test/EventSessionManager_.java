@@ -13,10 +13,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.time.Instant;
 import java.util.stream.Stream;
-import java.util.zip.GZIPInputStream;
 
 import static io.intino.ness.core.fs.FSEventStore.EventExtension;
 import static org.junit.Assert.*;
@@ -43,7 +41,7 @@ public class EventSessionManager_ {
 	}
 
 	@Test
-	public void should_create_an_event_session_and_merge_when_sealing_it() throws IOException {
+	public void should_create_an_event_session_and_merge_when_sealing_it() {
 		ZimBuilder writer = new ZimBuilder(new File("temp/events/tank1/201809.zim"));
 		Instant instant = Instant.parse("2018-09-09T00:00:00Z");
 		writer.put(message(instant, -1));

@@ -90,7 +90,7 @@ public class FSEventStore implements Datalake.EventStore {
 		private void terminate(int reflowedMessages) {
 			Arrays.stream(messageHandlers)
 					.filter(m -> m instanceof ReflowHandler)
-					.map(m -> (ReflowHandler)m)
+					.map(m -> (ReflowHandler) m)
 					.forEach(m -> terminate(m, reflowedMessages));
 		}
 
