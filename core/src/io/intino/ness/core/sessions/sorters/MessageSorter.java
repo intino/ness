@@ -23,7 +23,7 @@ public class MessageSorter {
 	}
 
 	public File sort() {
-		if (inMb(file.length()) > 30) new MessageFileExternalSorter(file).sort();
+		if (inMb(file.length()) > 3) new MessageFileExternalSorter(file).sort();
 		else overwrite(file, new MessageTimSort<Message>().doSort(loadMessages(file).toArray(new Message[0]), messageComparator()));
 		return file;
 	}

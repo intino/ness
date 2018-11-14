@@ -7,7 +7,6 @@ Artifact("io.intino.ness", "1.0.1") core
 		Compile("io.intino.alexandria", "triplestore", "1.0.1")
 		Test("junit", "junit", "LATEST")
 		Test("org.assertj", "assertj-core", "3.11.1")
-	Code("io.intino.ness.datalake")
 	Package(ModulesAndLibrariesLinkedByManifest, attachSources = true)
 	Distribution(intino.release)
 
