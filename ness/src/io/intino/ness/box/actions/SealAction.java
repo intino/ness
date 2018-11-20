@@ -4,9 +4,8 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.ness.box.NessBox;
 
 
-public class SealTanksAction {
+public class SealAction {
 
-	public Boolean disableSort = false;
 	public NessBox box;
 
 	public void execute() {

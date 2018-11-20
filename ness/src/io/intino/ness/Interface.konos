@@ -1,6 +1,6 @@
 dsl Konos
 
-Task sealTanks as CronTrigger("0 0 4 1/1 * ? *", "daily at 4")
+Task seal as CronTrigger("0 0 4 1/1 * ? *", "daily at 4")
 
 Service Manager as JMX
 	Operation("Request all users registered in ness") users
@@ -30,7 +30,7 @@ Service Manager as JMX
 		Parameter tank as Text
 		Parameter name as Text
 		Response as Text
-	Operation("Seal messages of all datalake tanks") seal-tanks
+	Operation("Seal messages of all datalake tanks") seal
 	Operation("Connects source and destination topics") pipes
 		Response as Text
 	Operation("Removes a registered function") remove-pipes

@@ -5,7 +5,7 @@ import io.intino.tara.magritte.stores.InMemoryFileStore;
 
 import java.io.File;
 
-public class TestHelper {
+class TestHelper {
 
 	static io.intino.tara.magritte.Store store(String directory) {
 		return new InMemoryFileStore(new File(directory)) {

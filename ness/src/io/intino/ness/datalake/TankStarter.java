@@ -6,26 +6,22 @@ import io.intino.ness.bus.BusManager;
 import io.intino.ness.core.Datalake.EventStore.Tank;
 import io.intino.ness.core.Scale;
 import io.intino.ness.core.fs.FSDatalake;
-import io.intino.ness.core.fs.FSStage;
+import io.intino.ness.core.memory.MemoryStage;
 import io.intino.ness.core.sessions.EventSession;
 
 import javax.jms.Message;
-import java.io.File;
 import java.time.Instant;
 
 import static io.intino.ness.datalake.MessageTranslator.toInlMessage;
 
 public class TankStarter {
-
 	private final FSDatalake datalake;
-	private final File stageDirectory;
 	private final BusManager bus;
 	private final Tank tank;
 	private final Scale scale;
 
 	public TankStarter(NessBox box, Tank tank) {
 		this.datalake = box.datalake();
-		this.stageDirectory = new File(box.datalakeStageDirectory());
 		this.bus = box.busManager();
 		this.scale = box.scale();
 		this.tank = tank;
@@ -55,10 +51,11 @@ public class TankStarter {
 	}
 
 	private void send(Tank tank, io.intino.alexandria.inl.Message message) {
-		FSStage stage = new FSStage(stageDirectory);
+		MemoryStage stage = new MemoryStage();
 		EventSession session = stage.createEventSession();
 		session.put(tank.name(), Utils.timetag(Instant.parse(message.get("ts")), scale), message);
 		session.close();
 		datalake.push(stage.blobs());
+		stage.clear();
 	}
 }
