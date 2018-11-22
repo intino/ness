@@ -1,5 +1,7 @@
 package io.intino.ness.core;
 
+import io.intino.alexandria.Scale;
+import io.intino.alexandria.Timetag;
 import io.intino.alexandria.inl.Message;
 import io.intino.alexandria.zet.ZetStream;
 import io.intino.alexandria.zim.ZimStream;

@@ -1,8 +1,8 @@
 package io.intino.ness.core.sessions;
 
+import io.intino.alexandria.Timetag;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.zet.ZetStream;
-import io.intino.ness.core.Timetag;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

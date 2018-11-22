@@ -1,6 +1,7 @@
 package io.intino.ness.core.sessions;
 
-import io.intino.ness.core.Timetag;
+
+import io.intino.alexandria.Timetag;
 
 public class Fingerprint {
 

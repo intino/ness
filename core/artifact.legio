@@ -1,10 +1,11 @@
 dsl Legio
 
-Artifact("io.intino.ness", "1.0.2") core
+Artifact("io.intino.ness", "1.0.3") core
 	Imports
-		Compile("io.intino.alexandria", "zim", "1.0.1")
+		Compile("io.intino.alexandria", "zim", "1.0.3")
 		Compile("io.intino.alexandria", "zet", "1.0.1")
 		Compile("io.intino.alexandria", "triplestore", "1.0.1")
+		Compile("io.intino.alexandria", "primitives", "1.0.1")
 		Test("junit", "junit", "LATEST")
 		Test("org.assertj", "assertj-core", "3.11.1")
 	Package(ModulesAndLibrariesLinkedByManifest, attachSources = true)

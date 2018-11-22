@@ -118,6 +118,7 @@ public class MessageFileExternalSorter {
 				temporalFile = managers.get(i);
 			}
 		}
+
 		return temporalFile;
 	}
 

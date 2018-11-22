@@ -1,9 +1,9 @@
 package io.intino.ness.core.fs;
 
+import io.intino.alexandria.Timetag;
 import io.intino.alexandria.zim.ZimReader;
 import io.intino.alexandria.zim.ZimStream;
 import io.intino.ness.core.Datalake;
-import io.intino.ness.core.Timetag;
 
 import java.io.File;
 import java.util.function.Predicate;

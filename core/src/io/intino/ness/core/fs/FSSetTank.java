@@ -1,8 +1,8 @@
 package io.intino.ness.core.fs;
 
+import io.intino.alexandria.Scale;
+import io.intino.alexandria.Timetag;
 import io.intino.ness.core.Datalake;
-import io.intino.ness.core.Scale;
-import io.intino.ness.core.Timetag;
 
 import java.io.File;
 import java.time.LocalDateTime;

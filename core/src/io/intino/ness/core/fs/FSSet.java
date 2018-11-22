@@ -1,11 +1,10 @@
 package io.intino.ness.core.fs;
 
-import io.intino.alexandria.zet.Zet;
+import io.intino.alexandria.Timetag;
 import io.intino.alexandria.zet.ZetReader;
 import io.intino.alexandria.zet.ZetStream;
 import io.intino.ness.core.Datalake;
 import io.intino.ness.core.Datalake.SetStore.Variable;
-import io.intino.ness.core.Timetag;
 
 import java.io.File;
 import java.util.stream.Stream;

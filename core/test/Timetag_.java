@@ -1,10 +1,10 @@
-import io.intino.ness.core.Timetag;
+import io.intino.alexandria.Timetag;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
 
-import static io.intino.ness.core.Scale.*;
+import static io.intino.alexandria.Scale.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class Timetag_ {
