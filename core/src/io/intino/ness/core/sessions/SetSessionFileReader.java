@@ -28,7 +28,9 @@ public class SetSessionFileReader {
 
 	private File unzip(File file) throws IOException {
 		File target = tempFile();
-		Files.copy(inputStreamOf(file), target.toPath(), REPLACE_EXISTING);
+		InputStream stream = inputStreamOf(file);
+		Files.copy(stream, target.toPath(), REPLACE_EXISTING);
+		stream.close();
 		return target;
 	}
 
@@ -36,10 +38,6 @@ public class SetSessionFileReader {
 		File temp = File.createTempFile("blob", "blob");
 		temp.deleteOnExit();
 		return temp;
-	}
-
-	private BufferedOutputStream outputStreamOf(File temp) throws FileNotFoundException {
-		return new BufferedOutputStream(new FileOutputStream(temp));
 	}
 
 	private GZIPInputStream inputStreamOf(File file) throws IOException {

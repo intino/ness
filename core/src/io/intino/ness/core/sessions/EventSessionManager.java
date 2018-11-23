@@ -29,7 +29,7 @@ public class EventSessionManager {
 	}
 
 	public static void seal(File eventStageFolder, File eventStoreFolder) {
-		eventSessionBlobs(eventStageFolder)
+		eventSessionBlobs(eventStageFolder).parallel()
 				.forEach(f -> new Sealer(eventStoreFolder).seal(f));
 	}
 

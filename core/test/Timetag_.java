@@ -1,4 +1,5 @@
 import io.intino.alexandria.Timetag;
+import io.intino.alexandria.zet.Zet;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -53,4 +54,5 @@ public class Timetag_ {
 		assertThat(Timetag.of("201801").previous()).isEqualTo(Timetag.of("201712"));
 		assertThat(Timetag.of("20180228").previous()).isEqualTo(Timetag.of("20180227"));
 	}
+
 }

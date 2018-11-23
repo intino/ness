@@ -49,7 +49,7 @@ public class SetSessionManager_ {
 		assertTrue(new File("temp/sets/tank1/201809/set2.zet").exists());
 		assertTrue(new File("temp/sets/tank2/201809/set1.zet").exists());
 		assertTrue(new File("temp/sets/tank2/201809/set2.zet").exists());
-		assertEquals(0, new File("temp/stage/").listFiles(f -> f.getName().endsWith(".blob")).length);
+		assertEquals(0, FS.filesIn(new File("temp/stage/"), f -> f.getName().endsWith(".blob")).count());
 	}
 
 	private Stream<Blob> blobs() {
