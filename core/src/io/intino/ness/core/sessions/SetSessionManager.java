@@ -6,6 +6,7 @@ import io.intino.alexandria.triplestore.MemoryTripleStore;
 import io.intino.alexandria.triplestore.TripleStore;
 import io.intino.alexandria.zet.ZetReader;
 import io.intino.alexandria.zet.ZetStream;
+import io.intino.alexandria.zet.ZetWriter;
 import io.intino.ness.core.Blob;
 import io.intino.ness.core.fs.FSDatalake;
 
@@ -15,7 +16,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import static io.intino.ness.core.fs.FS.copyInto;
 import static io.intino.ness.core.fs.FSSetStore.MetadataFilename;
@@ -118,32 +118,12 @@ public class SetSessionManager {
 			File setFile = filepath(fingerprint);
 			File tempFile = File.createTempFile(fingerprint.toString(), SetExtension);
 			if (setFile.exists()) streams.add(new ZetReader(setFile));
-			int count = write(new ZetStream.Union(streams), tempFile);
-			writeSizeInMetadata(fingerprint, count);
+			new ZetWriter(tempFile).write(new ZetStream.Union(streams));
 			Files.move(tempFile.toPath(), setFile.toPath(), REPLACE_EXISTING);
 		} catch (IOException e) {
 			Logger.error(e);
 		}
 	}
-
-	private void writeSizeInMetadata(Fingerprint fingerprint, int count) throws FileNotFoundException {
-		TripleStore.Builder builder = new TripleStore.Builder(new FileOutputStream(metadataFileOf(metadataPathOf(fingerprint)), true));
-		builder.put(fingerprint.set(), "_size_", count);
-		builder.close();
-	}
-
-	private int write(ZetStream.Union stream, File file) throws IOException {
-		file.getParentFile().mkdirs();
-		DataOutputStream dataStream = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(file))));
-		int count = 0;
-		while (stream.hasNext()) {
-			dataStream.writeLong(stream.next());
-			count++;
-		}
-		dataStream.close();
-		return count;
-	}
-
 
 	private List<SetSessionFileReader> loadSetSessions() {
 		return files.parallelStream().filter(f -> f.getName().endsWith(extensionOf(Blob.Type.set))).map(f -> {
