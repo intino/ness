@@ -1,12 +1,15 @@
 package io.intino.ness.core.fs;
 
 import io.intino.alexandria.Timetag;
+import io.intino.alexandria.logger.Logger;
+import io.intino.alexandria.zet.ZFile;
 import io.intino.alexandria.zet.ZetReader;
 import io.intino.alexandria.zet.ZetStream;
 import io.intino.ness.core.Datalake;
 import io.intino.ness.core.Datalake.SetStore.Variable;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.stream.Stream;
 
 public class FSSet implements Datalake.SetStore.Tank.Tub.Set {
@@ -31,7 +34,12 @@ public class FSSet implements Datalake.SetStore.Tank.Tub.Set {
 
 	@Override
 	public int size() {
-		return Integer.parseInt(variable("_size_").value);
+		try {
+			return (int) new ZFile(file).size();
+		} catch (IOException e) {
+			Logger.error(e);
+			return 0;
+		}
 	}
 
 	@Override

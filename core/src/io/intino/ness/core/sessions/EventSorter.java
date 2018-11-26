@@ -1,6 +1,9 @@
 package io.intino.ness.core.sessions;
 
+import io.intino.alexandria.logger.Logger;
+
 import java.io.*;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,7 +24,7 @@ public class EventSorter {
 		this.tuples = new ArrayList<>();
 	}
 
-	public void sort() throws IOException {
+	void sort() throws IOException {
 		read();
 		tuples.sort(Comparator.comparing(t -> t[0]));
 		write(outputStream());
@@ -31,11 +34,11 @@ public class EventSorter {
 		read();
 		tuples.sort(Comparator.comparing(t -> t[0]));
 		write(outputStream(destination));
+		Files.delete(temp.toPath());
 	}
 
 	private void read() throws IOException {
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream()));
-			 BufferedWriter writer = new BufferedWriter(new FileWriter(temp))) {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream())); BufferedWriter writer = new BufferedWriter(new FileWriter(temp))) {
 			int offset = 0;
 			int size = 0;
 			Instant instant = null;
@@ -57,14 +60,9 @@ public class EventSorter {
 
 	private void write(OutputStream output) throws IOException {
 		try (RandomAccessFile input = new RandomAccessFile(temp, "r")) {
-			byte[] bytes = new byte[0];
-			for (long[] t : tuples) {
-				bytes = bytesOf(input, t);
-				write(output, bytes);
-			}
+			for (long[] t : tuples) write(output, bytesOf(input, t));
 			output.flush();
 			output.close();
-			String string = new String(bytes);
 		}
 	}
 
@@ -72,7 +70,7 @@ public class EventSorter {
 		try {
 			output.write(bytes);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Logger.error(e);
 		}
 	}
 
@@ -88,7 +86,7 @@ public class EventSorter {
 		try {
 			return read(accessFile, (int) (tuple[1] >> 32), new byte[(int) tuple[1]]);
 		} catch (IOException e) {
-			//Logger.log(e); TODO
+			Logger.error(e);
 			return new byte[0];
 		}
 	}

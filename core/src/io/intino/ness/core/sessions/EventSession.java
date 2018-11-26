@@ -25,6 +25,10 @@ public class EventSession {
 		this.stage = stage;
 	}
 
+	public void put(String tank, Timetag timetag, Message... messages) {
+		put(tank, timetag, Arrays.stream(messages));
+	}
+
 	public void put(String tank, Timetag timetag, Stream<Message> messages) {
 		put(writerOf(tank, timetag), messages);
 	}
@@ -53,10 +57,6 @@ public class EventSession {
 			Logger.error(e);
 			return null;
 		}
-	}
-
-	public void put(String tank, Timetag timetag, Message... messages) {
-		put(tank, timetag, Arrays.stream(messages));
 	}
 
 	public void close() {
