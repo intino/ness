@@ -1,10 +1,10 @@
 package io.intino.ness.datalake;
 
+import io.intino.alexandria.Scale;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.box.Utils;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.core.Datalake.EventStore.Tank;
-import io.intino.ness.core.Scale;
 import io.intino.ness.core.fs.FSDatalake;
 import io.intino.ness.core.memory.MemoryStage;
 import io.intino.ness.core.sessions.EventSession;

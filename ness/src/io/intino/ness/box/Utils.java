@@ -1,9 +1,9 @@
 package io.intino.ness.box;
 
+import io.intino.alexandria.Scale;
+import io.intino.alexandria.Timetag;
 import io.intino.ness.core.Datalake;
 import io.intino.ness.core.Datalake.EventStore.Tank;
-import io.intino.ness.core.Scale;
-import io.intino.ness.core.Timetag;
 import io.intino.ness.graph.NessGraph;
 
 import java.time.Instant;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.intino.ness.core.Timetag.of;
+import static io.intino.alexandria.Timetag.of;
 import static java.time.LocalDateTime.ofInstant;
 import static java.time.ZoneOffset.UTC;
 

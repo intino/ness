@@ -1,11 +1,11 @@
 package io.intino.ness.box;
 
+import io.intino.alexandria.Scale;
 import io.intino.alexandria.core.Box;
 import io.intino.alexandria.logger.Logger;
 import io.intino.ness.box.actions.ResumeTankAction;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.bus.BusService;
-import io.intino.ness.core.Scale;
 import io.intino.ness.core.fs.FSDatalake;
 import io.intino.ness.datalake.AdminService;
 import io.intino.ness.datalake.PipeStarter;

@@ -1,11 +1,11 @@
 package io.intino.ness.datalake.reflow;
 
+import io.intino.alexandria.Scale;
+import io.intino.alexandria.Timetag;
 import io.intino.alexandria.jms.TopicProducer;
 import io.intino.ness.core.Datalake;
 import io.intino.ness.core.Datalake.EventStore;
 import io.intino.ness.core.Datalake.EventStore.Tank;
-import io.intino.ness.core.Scale;
-import io.intino.ness.core.Timetag;
 import io.intino.ness.datalake.reflow.ReflowProcess.ReflowMessageHandler.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
