@@ -64,30 +64,27 @@ public class SetSessionManager {
 	}
 
 	private void sealSetMetadataSessions() {
-		Map<String, FileTripleStore> map = new HashMap<>();
+		Map<File, FileTripleStore> map = new HashMap<>();
 		loadSetMetadataSessions()
 				.flatMap(TripleStore::all)
 				.forEach(s -> processTriple(s, map));
 		map.values().forEach(FileTripleStore::save);
 	}
 
-	private void processTriple(String[] triple, Map<String, FileTripleStore> map) {
+	private void processTriple(String[] triple, Map<File, FileTripleStore> map) {
 		Fingerprint fingerprint = new Fingerprint(triple[0]);
-		tripleStoreFor(metadataPathOf(fingerprint), map).put(fingerprint.set(), triple[1], triple[2]);
+		tripleStoreFor(metadataFileOf(fingerprint), map).put(fingerprint.set(), triple[1], triple[2]);
 	}
 
-	private String metadataPathOf(Fingerprint fingerprint) {
-		return fingerprint.tank() + "/" + fingerprint.timetag();
+	private File metadataFileOf(Fingerprint fingerprint) {
+		File file = new File(storeFolder, fingerprint.tank() + "/" + fingerprint.timetag() + "/" + MetadataFilename);
+		file.getParentFile().mkdirs();
+		return file;
 	}
 
-	private TripleStore tripleStoreFor(String path, Map<String, FileTripleStore> map) {
-		if (!map.containsKey(path))
-			map.put(path, new FileTripleStore(metadataFileOf(path)));
-		return map.get(path);
-	}
-
-	private File metadataFileOf(String path) {
-		return new File(storeFolder, path + "/" + MetadataFilename);
+	private TripleStore tripleStoreFor(File file, Map<File, FileTripleStore> map) {
+		if (!map.containsKey(file)) map.put(file, new FileTripleStore(file));
+		return map.get(file);
 	}
 
 	private Stream<MemoryTripleStore> loadSetMetadataSessions() {
@@ -137,9 +134,9 @@ public class SetSessionManager {
 	}
 
 	private File filepath(Fingerprint fingerprint) {
-		File output = new File(storeFolder, fingerprint + SetExtension);
-		output.getParentFile().mkdirs();
-		return output;
+		File file = new File(storeFolder, fingerprint + SetExtension);
+		file.getParentFile().mkdirs();
+		return file;
 	}
 
 	private List<ZetStream> chunksOf(List<SetSessionFileReader> readers, Fingerprint fingerprint) {
