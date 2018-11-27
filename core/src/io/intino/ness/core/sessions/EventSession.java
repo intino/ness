@@ -3,7 +3,7 @@ package io.intino.ness.core.sessions;
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.inl.Message;
 import io.intino.alexandria.logger.Logger;
-import io.intino.ness.core.Stage;
+import io.intino.ness.core.BlobHandler;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -19,10 +19,10 @@ import static io.intino.ness.core.Blob.Type.event;
 
 public class EventSession {
 	private final Map<Fingerprint, BufferedWriter> writers = new HashMap<>();
-	private io.intino.ness.core.Stage stage;
+	private BlobHandler blobHandler;
 
-	public EventSession(Stage stage) {
-		this.stage = stage;
+	public EventSession(BlobHandler blobHandler) {
+		this.blobHandler = blobHandler;
 	}
 
 	public void put(String tank, Timetag timetag, Message... messages) {
@@ -47,7 +47,7 @@ public class EventSession {
 	}
 
 	private BufferedWriter createWriter(Fingerprint fingerprint) {
-		return new BufferedWriter(new OutputStreamWriter(zipStream(stage.start(fingerprint.name(), event))));
+		return new BufferedWriter(new OutputStreamWriter(zipStream(blobHandler.start(fingerprint.name(), event))));
 	}
 
 	private GZIPOutputStream zipStream(OutputStream outputStream) {

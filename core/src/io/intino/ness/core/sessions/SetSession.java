@@ -4,8 +4,8 @@ import io.intino.alexandria.Timetag;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.triplestore.MemoryTripleStore;
 import io.intino.ness.core.Blob;
+import io.intino.ness.core.BlobHandler;
 import io.intino.ness.core.Datalake;
-import io.intino.ness.core.Stage;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -19,13 +19,13 @@ public class SetSession {
 	private final int maxSize;
 	private int count = 0;
 
-	public SetSession(Stage stage) {
-		this(stage, 1000000);
+	public SetSession(BlobHandler blobHandler) {
+		this(blobHandler, 1000000);
 	}
 
-	public SetSession(Stage stage, int autoFlushSize) {
-		this.writer = new SetSessionFileWriter(zipStream(stage.start(Blob.Type.set)));
-		this.tripleStore = new MemoryTripleStore.Builder(zipStream(stage.start(Blob.Type.setMetadata)));
+	public SetSession(BlobHandler blobHandler, int autoFlushSize) {
+		this.writer = new SetSessionFileWriter(zipStream(blobHandler.start(Blob.Type.set)));
+		this.tripleStore = new MemoryTripleStore.Builder(zipStream(blobHandler.start(Blob.Type.setMetadata)));
 		this.maxSize = autoFlushSize;
 	}
 

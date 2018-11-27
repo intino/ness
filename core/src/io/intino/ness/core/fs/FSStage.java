@@ -2,15 +2,19 @@ package io.intino.ness.core.fs;
 
 import io.intino.alexandria.logger.Logger;
 import io.intino.ness.core.Blob;
+import io.intino.ness.core.BlobHandler;
 import io.intino.ness.core.Stage;
+import io.intino.ness.core.sessions.EventSession;
+import io.intino.ness.core.sessions.SetSession;
 
 import java.io.*;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
+import static java.util.UUID.randomUUID;
 import static java.util.stream.Stream.empty;
 
-public class FSStage implements Stage {
+public class FSStage implements Stage, BlobHandler {
 	private static final String BlobExtension = ".blob";
 	private final File root;
 
@@ -33,17 +37,33 @@ public class FSStage implements Stage {
 		try {
 			return new FileOutputStream(fileOf(prefix, type));
 		} catch (IOException e) {
+			Logger.error(e);
 			return null;
 		}
 	}
 
-	public Stream<Blob> blobs() {
-		return files().map(FileBlob::new);
+	@Override
+	public SetSession createSetSession() {
+		return new SetSession(this);
+	}
+
+	@Override
+	public SetSession createSetSession(int autoFlushSize) {
+		return new SetSession(this, autoFlushSize);
+	}
+
+	@Override
+	public EventSession createEventSession() {
+		return new EventSession(this);
 	}
 
 	@Override
 	public void clear() {
 		files().forEach(File::delete);
+	}
+
+	public Stream<Blob> blobs() {
+		return files().map(FileBlob::new);
 	}
 
 	private Stream<File> files() {
@@ -52,11 +72,15 @@ public class FSStage implements Stage {
 	}
 
 	private File fileOf(String name, Blob.Type type) {
-		return new File(root, withExtension(name(name), type));
+		return new File(root, filename(name, type));
 	}
 
-	private String withExtension(String name, Blob.Type type) {
-		return name + extensionOf(type);
+	private String filename(String name, Blob.Type type) {
+		return name + suffix() + extensionOf(type);
+	}
+
+	private String suffix() {
+		return "#" + randomUUID().toString();
 	}
 
 	private boolean blobs(File dir, String name) {
