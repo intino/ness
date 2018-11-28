@@ -35,7 +35,7 @@ public class FSStage implements Stage, BlobHandler {
 	@Override
 	public OutputStream start(String prefix, Blob.Type type) {
 		try {
-			return new FileOutputStream(fileOf(prefix, type));
+			return new BufferedOutputStream(new FileOutputStream(fileOf(prefix, type)));
 		} catch (IOException e) {
 			Logger.error(e);
 			return null;

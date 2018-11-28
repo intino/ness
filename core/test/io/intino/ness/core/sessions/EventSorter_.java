@@ -1,4 +1,5 @@
-import io.intino.ness.core.sessions.EventSorter;
+package io.intino.ness.core.sessions;
+
 import org.junit.Test;
 
 import java.io.File;

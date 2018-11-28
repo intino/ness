@@ -1,5 +1,5 @@
-import io.intino.alexandria.zet.Zet;
-import io.intino.alexandria.zet.ZetBuilder;
+package io.intino.ness.core;
+
 import io.intino.alexandria.zet.ZetStream;
 
 import java.io.*;

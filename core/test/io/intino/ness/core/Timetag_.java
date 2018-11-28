@@ -1,5 +1,6 @@
+package io.intino.ness.core;
+
 import io.intino.alexandria.Timetag;
-import io.intino.alexandria.zet.Zet;
 import org.junit.Before;
 import org.junit.Test;
 

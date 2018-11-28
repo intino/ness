@@ -25,12 +25,10 @@ public class EventSorter {
 	}
 
 	void sort() throws IOException {
-		read();
-		tuples.sort(Comparator.comparing(t -> t[0]));
-		write(outputStream());
+		sort(file);
 	}
 
-	public void sort(File destination) throws IOException {
+	void sort(File destination) throws IOException {
 		read();
 		tuples.sort(Comparator.comparing(t -> t[0]));
 		write(outputStream(destination));

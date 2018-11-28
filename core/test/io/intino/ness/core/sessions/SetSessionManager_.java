@@ -1,3 +1,5 @@
+package io.intino.ness.core.sessions;
+
 import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.logger.Logger;
@@ -6,9 +8,6 @@ import io.intino.ness.core.Blob;
 import io.intino.ness.core.Datalake;
 import io.intino.ness.core.fs.FS;
 import io.intino.ness.core.fs.FSDatalake;
-import io.intino.ness.core.sessions.Fingerprint;
-import io.intino.ness.core.sessions.SetSessionFileReader;
-import io.intino.ness.core.sessions.SetSessionFileWriter;
 import org.junit.After;
 import org.junit.Test;
 
