@@ -20,7 +20,9 @@ public class EventSorter {
 
 	public EventSorter(File file) throws IOException {
 		this.file = file;
-		this.temp = File.createTempFile("event", ".inl");
+		File tempDirectory = new File(file.getParentFile(), "tmp");
+		tempDirectory.mkdirs();
+		this.temp = File.createTempFile("event", ".inl", tempDirectory);
 		this.tuples = new ArrayList<>();
 	}
 
@@ -29,10 +31,18 @@ public class EventSorter {
 	}
 
 	void sort(File destination) throws IOException {
-		read();
-		tuples.sort(Comparator.comparing(t -> t[0]));
-		write(outputStream(destination));
-		Files.delete(temp.toPath());
+		try {
+			read();
+			tuples.sort(Comparator.comparing(t -> t[0]));
+			write(outputStream(destination));
+			Files.delete(temp.toPath());
+		} catch (IOException io) {
+			if (temp.exists()) {
+				Logger.warn("Deleting inl temporal file " + file.getAbsolutePath());
+				Files.delete(temp.toPath());
+			}
+			throw io;
+		}
 	}
 
 	private void read() throws IOException {

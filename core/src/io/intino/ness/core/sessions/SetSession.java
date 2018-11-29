@@ -29,15 +29,6 @@ public class SetSession {
 		this.maxSize = autoFlushSize;
 	}
 
-	private OutputStream zipStream(OutputStream outputStream) {
-		try {
-			return new GZIPOutputStream(outputStream);
-		} catch (IOException e) {
-			Logger.error(e);
-			return null;
-		}
-	}
-
 	public void put(String tank, Timetag timetag, String set, Stream<Long> ids) {
 		ids.forEach(i -> writer.add(tank, timetag, set, i));
 		if (count++ >= maxSize) doFlush();
@@ -51,10 +42,6 @@ public class SetSession {
 		tripleStore.put(Fingerprint.of(tank, timetag, set).toString(), variable.name, variable.value);
 	}
 
-	private void doFlush() {
-		flush();
-	}
-
 	public void flush() {
 		writer.flush();
 		count = 0;
@@ -63,6 +50,19 @@ public class SetSession {
 	public void close() {
 		writer.close();
 		tripleStore.close();
+	}
+
+	private OutputStream zipStream(OutputStream outputStream) {
+		try {
+			return new GZIPOutputStream(outputStream);
+		} catch (IOException e) {
+			Logger.error(e);
+			return null;
+		}
+	}
+
+	private void doFlush() {
+		flush();
 	}
 
 }

@@ -26,18 +26,25 @@ public class SetSessionFileReader {
 		this.readStructure(this.file);
 	}
 
+	public Stream<Chunk> chunks() {
+		return chunks.stream();
+	}
+
+	public Stream<Chunk> chunks(Fingerprint fingerprint) {
+		return chunks.stream()
+				.filter(c -> c.fingerprint.equals(fingerprint));
+	}
+
 	private File unzip(File file) throws IOException {
-		File target = tempFile();
+		File tempFile = tempFile();
 		InputStream stream = inputStreamOf(file);
-		Files.copy(stream, target.toPath(), REPLACE_EXISTING);
+		Files.copy(stream, tempFile.toPath(), REPLACE_EXISTING);
 		stream.close();
-		return target;
+		return tempFile;
 	}
 
 	private File tempFile() throws IOException {
-		File temp = File.createTempFile("blob", "blob");
-		temp.deleteOnExit();
-		return temp;
+		return File.createTempFile("blob", "blob");
 	}
 
 	private GZIPInputStream inputStreamOf(File file) throws IOException {
@@ -66,15 +73,6 @@ public class SetSessionFileReader {
 		byte[] bytes = new byte[size];
 		stream.read(bytes);
 		return new String(bytes, StandardCharsets.UTF_8);
-	}
-
-	public Stream<Chunk> chunks() {
-		return chunks.stream();
-	}
-
-	public Stream<Chunk> chunks(Fingerprint fingerprint) {
-		return chunks.stream()
-				.filter(c -> c.fingerprint.equals(fingerprint));
 	}
 
 	public class Chunk {

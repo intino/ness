@@ -16,6 +16,6 @@ public interface Stage {
 
 	EventSession createEventSession();
 
-	void clear();
+	void discard();
 
 }
