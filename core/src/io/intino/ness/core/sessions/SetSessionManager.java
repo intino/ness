@@ -22,6 +22,7 @@ import static io.intino.ness.core.fs.FSSetStore.MetadataFilename;
 import static io.intino.ness.core.fs.FSSetStore.SetExtension;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 public class SetSessionManager {
@@ -102,11 +103,18 @@ public class SetSessionManager {
 		}
 	}
 
-	private void sealSetSessions() {
-		List<SetSessionFileReader> readers = loadSetSessions();
-		Set<Fingerprint> distinctChunks = distinctChunks(readers);
-		Logger.trace("Sets to seal " + distinctChunks.size());
-		distinctChunks.parallelStream().forEach(distinctChunk -> process(distinctChunk, readers));
+	private void sealSetSessions() { // TODO think about backing to previous way?
+		files.stream().filter(f -> f.getName().endsWith(extensionOf(Blob.Type.set))).forEach(f -> {
+			try {
+				List<SetSessionFileReader> readers = singletonList(new SetSessionFileReader(f));
+				Set<Fingerprint> distinctChunks = distinctChunks(readers);
+				Logger.trace("Sets to seal " + distinctChunks.size());
+				distinctChunks.parallelStream().forEach(distinctChunk -> process(distinctChunk, readers));
+				readers.forEach(SetSessionFileReader::close);
+			} catch (IOException e) {
+				Logger.error(e);
+			}
+		});
 	}
 
 	private void process(Fingerprint fingerprint, List<SetSessionFileReader> readers) {
@@ -120,17 +128,6 @@ public class SetSessionManager {
 		} catch (IOException e) {
 			Logger.error(e);
 		}
-	}
-
-	private List<SetSessionFileReader> loadSetSessions() {
-		return files.parallelStream().filter(f -> f.getName().endsWith(extensionOf(Blob.Type.set))).map(f -> {
-			try {
-				return new SetSessionFileReader(f);
-			} catch (IOException e) {
-				Logger.error(e);
-				return null;
-			}
-		}).collect(toList());
 	}
 
 	private File filepath(Fingerprint fingerprint) {

@@ -75,6 +75,10 @@ public class SetSessionFileReader {
 		return new String(bytes, StandardCharsets.UTF_8);
 	}
 
+	public void close() {
+		file.delete();
+	}
+
 	public class Chunk {
 		private final Fingerprint fingerprint;
 		long position;

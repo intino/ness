@@ -41,7 +41,7 @@ public class SetSessionManager_ {
 		datalake.push(blobs());
 		datalake.seal();
 		assertTrue(new File("temp/sets/tank1/201809/" + MetadataFilename).exists());
-		assertEquals(2, datalake.setStore().tank("tank1").on(timetag).set("set1").variables().count());
+		assertEquals(1, datalake.setStore().tank("tank1").on(timetag).set("set1").variables().count());
 		assertEquals("10", datalake.setStore().tank("tank1").on(timetag).set("set1").variable("var").value);
 
 		assertTrue(new File("temp/sets/tank1/201809/set1.zet").exists());
