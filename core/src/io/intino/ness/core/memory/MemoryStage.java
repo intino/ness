@@ -50,7 +50,7 @@ public class MemoryStage implements Stage, BlobHandler {
 	}
 
 	@Override
-	public void discard() {
+	public void clear() {
 		streams.clear();
 	}
 

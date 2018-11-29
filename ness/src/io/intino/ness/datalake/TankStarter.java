@@ -56,6 +56,6 @@ public class TankStarter {
 		session.put(tank.name(), Utils.timetag(Instant.parse(message.get("ts")), scale), message);
 		session.close();
 		datalake.push(stage.blobs());
-		stage.discard();
+		stage.clear();
 	}
 }

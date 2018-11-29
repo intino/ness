@@ -8,23 +8,19 @@ import io.intino.ness.core.sessions.EventSession;
 import io.intino.ness.core.sessions.SetSession;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Stream.empty;
 
 public class FSStage implements Stage, BlobHandler {
 	private static final String BlobExtension = ".blob";
 	private final File root;
-	List<File> blobs;
 
 	public FSStage(File root) {
 		this.root = root;
 		this.root.mkdirs();
-		this.blobs = new ArrayList<>();
 	}
 
 	private static String extensionOf(Blob.Type type) {
@@ -39,9 +35,7 @@ public class FSStage implements Stage, BlobHandler {
 	@Override
 	public OutputStream start(String prefix, Blob.Type type) {
 		try {
-			File file = fileOf(prefix, type);
-			blobs.add(file);
-			return new BufferedOutputStream(new FileOutputStream(file));
+			return new BufferedOutputStream(new FileOutputStream(fileOf(prefix, type)));
 		} catch (IOException e) {
 			Logger.error(e);
 			return null;
@@ -64,18 +58,17 @@ public class FSStage implements Stage, BlobHandler {
 	}
 
 	@Override
-	public void discard() {
-		blobs.stream().map(File::toPath).forEach(path -> {
-			try {
-				Files.delete(path);
-			} catch (IOException e) {
-				Logger.error(e);
-			}
-		});
+	public void clear() {
+		files().forEach(File::delete);
 	}
 
 	public Stream<Blob> blobs() {
-		return blobs.stream().map(FileBlob::new);
+		return files().map(FileBlob::new);
+	}
+
+	private Stream<File> files() {
+		File[] files = root.listFiles(this::blobs);
+		return files == null ? empty() : stream(files);
 	}
 
 	private File fileOf(String name, Blob.Type type) {
@@ -88,6 +81,10 @@ public class FSStage implements Stage, BlobHandler {
 
 	private String suffix() {
 		return "#" + randomUUID().toString();
+	}
+
+	private boolean blobs(File dir, String name) {
+		return name.endsWith(BlobExtension);
 	}
 
 	private static class FileBlob implements Blob {
