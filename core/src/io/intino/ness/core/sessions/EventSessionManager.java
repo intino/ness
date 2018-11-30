@@ -3,11 +3,15 @@ package io.intino.ness.core.sessions;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.zim.ZimBuilder;
 import io.intino.alexandria.zim.ZimReader;
+import io.intino.alexandria.zim.ZimStream;
 import io.intino.ness.core.Blob;
 import io.intino.ness.core.fs.FS;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.intino.ness.core.fs.FS.copyInto;
@@ -29,8 +33,11 @@ public class EventSessionManager {
 		return blob.name() + BlobExtension;
 	}
 
-	public static void seal(File eventStageFolder, File eventStoreFolder) {
-		eventSessionBlobs(eventStageFolder).sorted().parallel().forEach(blob -> new Sealer(eventStoreFolder).seal(blob));
+	public static void seal(File stageFolder, File eventStoreFolder, File tempFolder) {
+		eventSessionBlobs(stageFolder)
+				.collect(Collectors.groupingBy(Sealer::fingerprintOf)).entrySet()
+				.parallelStream().sorted(Comparator.comparing(t -> t.getKey().toString()))
+				.forEach(e -> new Sealer(eventStoreFolder, tempFolder).seal(e.getKey(), e.getValue()));
 	}
 
 	private static Stream<File> eventSessionBlobs(File eventStageFolder) {
@@ -42,16 +49,17 @@ public class EventSessionManager {
 	}
 
 	private static class Sealer {
+		private final File eventStoreFolder;
+		private final File tempFolder;
 
-		private File eventStoreFolder;
-
-		public Sealer(File eventStoreFolder) {
+		public Sealer(File eventStoreFolder, File tempFolder) {
 			this.eventStoreFolder = eventStoreFolder;
+			this.tempFolder = tempFolder;
 		}
 
-		private static File sort(File file) {
+		private File sort(File file) {
 			try {
-				new EventSorter(file).sort();
+				new EventSorter(file, tempFolder).sort();
 				return file;
 			} catch (IOException e) {
 				Logger.error(e);
@@ -59,30 +67,31 @@ public class EventSessionManager {
 			}
 		}
 
-		public void seal(File file) {
-			seal(datalakeFile(file), sessionFile(file));
-		}
-
-		private File sessionFile(File file) {
-			return sort(file);
-		}
-
-		private void seal(File datalakeFile, File sessionFile) {
-			new ZimBuilder(datalakeFile).put(reader(sessionFile));
-		}
-
-		private File datalakeFile(File file) {
-			File zimFile = new File(eventStoreFolder, fingerprintOf(file).toString() + EventExtension);
-			zimFile.getParentFile().mkdirs();
-			return zimFile;
-		}
-
-		private Fingerprint fingerprintOf(File file) {
+		private static Fingerprint fingerprintOf(File file) {
 			return new Fingerprint(cleanedNameOf(file));
 		}
 
-		private String cleanedNameOf(File file) {
+		private static String cleanedNameOf(File file) {
 			return file.getName().substring(0, file.getName().indexOf("#")).replace("-", "/").replace(SessionExtension, "");
+		}
+
+		public void seal(Fingerprint fingerprint, List<File> files) {
+			seal(datalakeFile(fingerprint), files);
+			//FIXME seal(datalakeFile(file), sort(file));  asemed culpable
+		}
+
+		private void seal(File datalakeFile, List<File> files) {
+			new ZimBuilder(datalakeFile).put(zimStreamOf(files));
+		}
+
+		private ZimStream.Merge zimStreamOf(List<File> files) {
+			return ZimStream.Merge.of(files.stream().map(EventSessionManager::reader).toArray(ZimStream[]::new));
+		}
+
+		private File datalakeFile(Fingerprint fingerprint) {
+			File zimFile = new File(eventStoreFolder, fingerprint.toString() + EventExtension);
+			zimFile.getParentFile().mkdirs();
+			return zimFile;
 		}
 	}
 

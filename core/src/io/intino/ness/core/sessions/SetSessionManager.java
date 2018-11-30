@@ -22,24 +22,25 @@ import static io.intino.ness.core.fs.FSSetStore.MetadataFilename;
 import static io.intino.ness.core.fs.FSSetStore.SetExtension;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 public class SetSessionManager {
 	private final List<File> files;
-	private final File storeFolder;
+	private final File setStoreFolder;
+	private final File tempFolder;
 
-	private SetSessionManager(List<File> files, File storeFolder) {
+	private SetSessionManager(List<File> files, File setStoreFolder, File tempFolder) {
 		this.files = files;
-		this.storeFolder = storeFolder;
+		this.setStoreFolder = setStoreFolder;
+		this.tempFolder = tempFolder;
 	}
 
 	public static void push(Blob blob, File stageFolder) {
 		copyInto(fileFor(blob, stageFolder), blob.inputStream());
 	}
 
-	public static void seal(File stageFolder, File storeFolder) {
-		new SetSessionManager(blobsOf(stageFolder), storeFolder).seal();
+	public static void seal(File stageFolder, File setStoreFolder, File tempFolder) {
+		new SetSessionManager(blobsOf(stageFolder), setStoreFolder, tempFolder).seal();
 	}
 
 	private static List<File> blobsOf(File stageFolder) {
@@ -78,7 +79,7 @@ public class SetSessionManager {
 	}
 
 	private File metadataFileOf(Fingerprint fingerprint) {
-		File file = new File(storeFolder, fingerprint.tank() + "/" + fingerprint.timetag() + "/" + MetadataFilename);
+		File file = new File(setStoreFolder, fingerprint.tank() + "/" + fingerprint.timetag() + "/" + MetadataFilename);
 		file.getParentFile().mkdirs();
 		return file;
 	}
@@ -103,40 +104,54 @@ public class SetSessionManager {
 		}
 	}
 
-	private void sealSetSessions() { // TODO think about backing to previous way?
-		files.stream().filter(f -> f.getName().endsWith(extensionOf(Blob.Type.set))).forEach(f -> {
-			try {
-				List<SetSessionFileReader> readers = singletonList(new SetSessionFileReader(f));
-				Set<Fingerprint> distinctChunks = distinctChunks(readers);
-				Logger.trace("Sets to seal " + distinctChunks.size());
-				distinctChunks.parallelStream().forEach(distinctChunk -> process(distinctChunk, readers));
-				readers.forEach(SetSessionFileReader::close);
-			} catch (IOException e) {
-				Logger.error(e);
-			}
-		});
+	private void sealSetSessions() {
+		List<SetSessionFileReader> readers = setSessionReaders();
+		fingerPrintsIn(readers).parallelStream().forEach(fp -> seal(fp, readers));
+		close(readers);
 	}
 
-	private void process(Fingerprint fingerprint, List<SetSessionFileReader> readers) {
+	private void close(List<SetSessionFileReader> readers) {
+		readers.forEach(SetSessionFileReader::close);
+	}
+
+	private List<SetSessionFileReader> setSessionReaders() {
+		return setBlobs().map(this::setSessionReader).collect(toList());
+	}
+
+	private SetSessionFileReader setSessionReader(File file) {
 		try {
-			List<ZetStream> streams = chunksOf(readers, fingerprint);
-			File setFile = filepath(fingerprint);
-			File tempFile = File.createTempFile(fingerprint.toString(), SetExtension);
-			if (setFile.exists()) streams.add(new ZetReader(setFile));
-			new ZetWriter(tempFile).write(new ZetStream.Union(streams));
+			return new SetSessionFileReader(file, this.tempFolder);
+		} catch (IOException e) {
+			Logger.error(e);
+			return null;
+		}
+	}
+
+	private void seal(Fingerprint fingerprint, List<SetSessionFileReader> readers) {
+		try {
+			File setFile = fileOf(fingerprint);
+			File tempFile = union(fingerprint, readers);
 			Files.move(tempFile.toPath(), setFile.toPath(), REPLACE_EXISTING);
 		} catch (IOException e) {
 			Logger.error(e);
 		}
 	}
 
-	private File filepath(Fingerprint fingerprint) {
-		File file = new File(storeFolder, fingerprint + SetExtension);
-		file.getParentFile().mkdirs();
-		return file;
+	private File union(Fingerprint fingerprint, List<SetSessionFileReader> readers) throws IOException {
+		File tempFile = File.createTempFile(fingerprint.toString(), SetExtension, tempFolder);
+		new ZetWriter(tempFile).write(new ZetStream.Union(zetStreamsOf(fingerprint, readers)));
+		return tempFile;
 	}
 
-	private List<ZetStream> chunksOf(List<SetSessionFileReader> readers, Fingerprint fingerprint) {
+	private List<ZetStream> zetStreamsOf(Fingerprint fingerprint, List<SetSessionFileReader> readers) {
+		List<ZetStream> streams = collectZetStreams(fingerprint, readers);
+		File setFile = fileOf(fingerprint);
+		if (setFile.exists()) streams.add(new ZetReader(setFile));
+		return streams;
+	}
+
+
+	private List<ZetStream> collectZetStreams(Fingerprint fingerprint, List<SetSessionFileReader> readers) {
 		return readers.stream()
 				.map(r -> r.chunks(fingerprint))
 				.flatMap(r -> r)
@@ -144,7 +159,17 @@ public class SetSessionManager {
 				.collect(toList());
 	}
 
-	private Set<Fingerprint> distinctChunks(List<SetSessionFileReader> readers) {
+	private Stream<File> setBlobs() {
+		return files.stream().filter(f -> f.getName().endsWith(extensionOf(Blob.Type.set)));
+	}
+
+	private File fileOf(Fingerprint fingerprint) {
+		File file = new File(setStoreFolder, fingerprint + SetExtension);
+		file.getParentFile().mkdirs();
+		return file;
+	}
+
+	private Set<Fingerprint> fingerPrintsIn(List<SetSessionFileReader> readers) {
 		return readers.stream()
 				.map(SetSessionFileReader::chunks)
 				.flatMap(r -> r)

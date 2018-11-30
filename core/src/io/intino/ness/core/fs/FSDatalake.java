@@ -9,6 +9,7 @@ import io.intino.ness.core.sessions.SetSessionManager;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
@@ -21,6 +22,7 @@ public class FSDatalake implements Datalake {
 	private static final String SetStoreFolder = "sets";
 	private static final String StageFolder = "stage";
 	private static final String TreatedFolder = "treated";
+	private static final String TempFolder = "temp";
 	private File root;
 
 	public FSDatalake(File root) {
@@ -66,7 +68,9 @@ public class FSDatalake implements Datalake {
 	@Override
 	public void seal() {
 		try {
-			Executors.newFixedThreadPool(2).invokeAll(asList(this::sealEvents, this::sealSets));
+			ExecutorService service = Executors.newFixedThreadPool(2);
+			service.invokeAll(asList(this::sealEvents, this::sealSets));
+			service.shutdown();
 			moveToTreated();
 		} catch (InterruptedException e) {
 			Logger.error(e);
@@ -74,12 +78,12 @@ public class FSDatalake implements Datalake {
 	}
 
 	private boolean sealSets() {
-		SetSessionManager.seal(stageFolder(), setStoreFolder());
+		SetSessionManager.seal(stageFolder(), setStoreFolder(), tempFolder());
 		return true;
 	}
 
 	private boolean sealEvents() {
-		EventSessionManager.seal(stageFolder(), eventStoreFolder());
+		EventSessionManager.seal(stageFolder(), eventStoreFolder(), tempFolder());
 		return true;
 	}
 
@@ -105,6 +109,7 @@ public class FSDatalake implements Datalake {
 		eventStoreFolder().mkdirs();
 		setStoreFolder().mkdirs();
 		stageFolder().mkdirs();
+		tempFolder().mkdirs();
 		treatedFolder().mkdirs();
 	}
 
@@ -118,6 +123,10 @@ public class FSDatalake implements Datalake {
 
 	private File stageFolder() {
 		return new File(root, StageFolder);
+	}
+
+	private File tempFolder() {
+		return new File(root, TempFolder);
 	}
 
 	private File treatedFolder() {

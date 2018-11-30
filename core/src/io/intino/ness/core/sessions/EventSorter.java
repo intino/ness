@@ -18,11 +18,9 @@ public class EventSorter {
 	private final File temp;
 	private final List<long[]> tuples;
 
-	public EventSorter(File file) throws IOException {
+	public EventSorter(File file, File tempFolder) throws IOException {
 		this.file = file;
-		File tempDirectory = new File(file.getParentFile(), "tmp");
-		tempDirectory.mkdirs();
-		this.temp = File.createTempFile("event", ".inl", tempDirectory);
+		this.temp = File.createTempFile("event", ".inl", tempFolder);
 		this.tuples = new ArrayList<>();
 	}
 

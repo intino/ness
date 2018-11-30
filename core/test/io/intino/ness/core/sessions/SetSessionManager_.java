@@ -79,23 +79,24 @@ public class SetSessionManager_ {
 
 	@Test
 	public void should_write_and_read_several_records() throws IOException {
-		File file = new File("temp/test.setfs");
+		File file = new File("temp/test.zet");
 		file.getParentFile().mkdirs();
 		Timetag timetag = new Timetag(LocalDateTime.now(), Scale.Month);
 		SetSessionFileWriter writer = new SetSessionFileWriter(new GZIPOutputStream(new FileOutputStream(file)));
-		for (int i = 0; i < 20; i++) writer.add("tank", timetag, "set", i);
-		for (int i = 0; i < 20; i++) writer.add("sets/tank2", timetag, "set2", i);
+		for (int i = 0; i < 20; i++) writer.add("tank1", timetag, "set1", i);
+		for (int i = 0; i < 20; i++) writer.add("tank1", timetag, "set2", i);
+		for (int i = 0; i < 30; i++) writer.add("tank2", timetag, "set3", i);
 		writer.close();
 
-		SetSessionFileReader reader = new SetSessionFileReader(file);
-		assertEquals(2, reader.chunks().count());
-		assertEquals(1, reader.chunks(Fingerprint.of("tank", timetag, "set")).count());
-		ZetStream stream = reader.chunks(Fingerprint.of("tank", timetag, "set")).findFirst().get().stream();
+		SetSessionFileReader reader = new SetSessionFileReader(file, new File("temp"));
+		assertEquals(3, reader.chunks().count());
+		assertEquals(1, reader.chunks(Fingerprint.of("tank1", timetag, "set1")).count());
+		ZetStream stream = reader.chunks(Fingerprint.of("tank1", timetag, "set1")).findFirst().get().stream();
 		for (int i = 0; i < 20; i++) assertEquals((long) i, stream.next());
 		assertFalse(stream.hasNext());
-		assertEquals(1, reader.chunks(Fingerprint.of("sets/tank2", timetag, "set2")).count());
-		stream = reader.chunks(Fingerprint.of("sets/tank2", timetag, "set2")).findFirst().get().stream();
-		for (int i = 0; i < 20; i++) assertEquals((long) i, stream.next());
+		assertEquals(1, reader.chunks(Fingerprint.of("tank2", timetag, "set3")).count());
+		stream = reader.chunks(Fingerprint.of("tank2", timetag, "set3")).findFirst().get().stream();
+		for (int i = 0; i < 30; i++) assertEquals((long) i, stream.next());
 		assertFalse(stream.hasNext());
 
 	}

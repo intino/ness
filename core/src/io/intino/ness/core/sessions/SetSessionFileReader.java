@@ -15,15 +15,14 @@ import java.util.zip.GZIPInputStream;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class SetSessionFileReader {
-
-	private static final int LONG_SIZE = 8;
-	private static final int INT_SIZE = 4;
 	private final File file;
-	private final List<Chunk> chunks = new ArrayList<>();
+	private final File tempFolder;
+	private final List<Chunk> chunks;
 
-	public SetSessionFileReader(File file) throws IOException {
+	public SetSessionFileReader(File file, File tempFolder) throws IOException {
+		this.tempFolder = tempFolder;
 		this.file = unzip(file);
-		this.readStructure(this.file);
+		this.chunks = chunksIn(this.file);
 	}
 
 	public Stream<Chunk> chunks() {
@@ -31,43 +30,47 @@ public class SetSessionFileReader {
 	}
 
 	public Stream<Chunk> chunks(Fingerprint fingerprint) {
-		return chunks.stream()
-				.filter(c -> c.fingerprint.equals(fingerprint));
+		return chunks.stream().filter(c -> c.fingerprint.equals(fingerprint));
 	}
 
 	private File unzip(File file) throws IOException {
-		File tempFile = tempFile();
-		InputStream stream = inputStreamOf(file);
-		Files.copy(stream, tempFile.toPath(), REPLACE_EXISTING);
-		stream.close();
+		File tempFile = tempFile(file.getName());
+		try (InputStream inputStream = gzipInputStreamOf(file)) {
+			Files.copy(inputStream, tempFile.toPath(), REPLACE_EXISTING);
+		}
 		return tempFile;
 	}
 
-	private File tempFile() throws IOException {
-		return File.createTempFile("blob", "blob");
+	private File tempFile(String name) throws IOException {
+		return File.createTempFile(name.substring(0, name.indexOf(".")), ".chunks", tempFolder);
 	}
 
-	private GZIPInputStream inputStreamOf(File file) throws IOException {
+	private GZIPInputStream gzipInputStreamOf(File file) throws IOException {
 		return new GZIPInputStream(new BufferedInputStream(new FileInputStream(file)));
 	}
 
+	private List<Chunk> chunksIn(File file) throws IOException {
+		List<Chunk> chunks = new ArrayList<>();
+		fill(chunks, file);
+		return chunks;
+	}
+
 	@SuppressWarnings("InfiniteLoopStatement")
-	private void readStructure(File file) throws IOException {
+	private void fill(List<Chunk> result, File file) throws IOException {
 		try (DataInputStream stream = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
-			long pos = 0;
+			long position = 0;
 			while (true) {
 				Fingerprint fingerprint = new Fingerprint(readString(stream));
-				int idSize = stream.readInt();
-				stream.skipBytes(idSize * LONG_SIZE);
-				pos += INT_SIZE + fingerprint.size() + INT_SIZE;
-				chunks.add(new Chunk(fingerprint, idSize, pos));
-				pos += idSize * LONG_SIZE;
+				position += Integer.BYTES + fingerprint.size() + Integer.BYTES;
+				Chunk chunk = new Chunk(fingerprint, position, stream.readInt());
+				position += chunk.size * Long.BYTES;
+				stream.skipBytes(chunk.size * Long.BYTES);
+				result.add(chunk);
 			}
 		} catch (EOFException ignored) {
 		}
 	}
 
-	@SuppressWarnings("ResultOfMethodCallIgnored")
 	private String readString(DataInputStream stream) throws IOException {
 		int size = stream.readInt();
 		byte[] bytes = new byte[size];
@@ -81,13 +84,13 @@ public class SetSessionFileReader {
 
 	public class Chunk {
 		private final Fingerprint fingerprint;
-		long position;
-		private int idSize;
+		private final long position;
+		private final int size;
 
-		Chunk(Fingerprint fingerprint, int idSize, long position) {
+		Chunk(Fingerprint fingerprint, long position, int size) {
 			this.fingerprint = fingerprint;
-			this.idSize = idSize;
 			this.position = position;
+			this.size = size;
 		}
 
 		public Fingerprint fingerprint() {
@@ -108,12 +111,10 @@ public class SetSessionFileReader {
 
 		public ZetStream stream() {
 			try {
-				RandomAccessFile access = new RandomAccessFile(file, "r");
-				access.seek(position);
-				DataInputStream stream = new DataInputStream(new BufferedInputStream(new FileInputStream(access.getFD())));
 				return new ZetStream() {
-					int count = 0;
-					long current = -1;
+					private DataInputStream inputStream = inputStream();
+					private int count = 0;
+					private long current = -1;
 
 					@Override
 					public long current() {
@@ -125,7 +126,7 @@ public class SetSessionFileReader {
 						try {
 							if (!hasNext()) return current = -1;
 							count++;
-							return current = stream.readLong();
+							return current = inputStream.readLong();
 						} catch (EOFException e) {
 							return -1;
 						} catch (IOException e) {
@@ -136,16 +137,28 @@ public class SetSessionFileReader {
 
 					@Override
 					public boolean hasNext() {
-						boolean hasNext = count < idSize;
+						boolean hasNext = count < size;
 						if (!hasNext) {
 							try {
-								access.close();
-								stream.close();
+								inputStream.close();
 							} catch (IOException e) {
 								Logger.error(e);
 							}
 						}
 						return hasNext;
+					}
+
+					private DataInputStream inputStream() throws IOException {
+						return new DataInputStream(new ByteArrayInputStream(buffer()));
+					}
+
+					private byte[] buffer() throws IOException {
+						try (RandomAccessFile access = new RandomAccessFile(file, "r")) {
+							byte[] buffer = new byte[Long.BYTES * size];
+							access.seek(position);
+							access.read(buffer);
+							return buffer;
+						}
 					}
 				};
 			} catch (IOException e) {
