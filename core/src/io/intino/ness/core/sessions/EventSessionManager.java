@@ -35,26 +35,39 @@ public class EventSessionManager {
 
 	public static void seal(File stageFolder, File eventStoreFolder, File tempFolder) {
 		eventSessionBlobs(stageFolder)
-				.collect(Collectors.groupingBy(Sealer::fingerprintOf)).entrySet()
+				.collect(Collectors.groupingBy(EventSessionManager::fingerprintOf)).entrySet()
 				.parallelStream().sorted(Comparator.comparing(t -> t.getKey().toString()))
 				.forEach(e -> new Sealer(eventStoreFolder, tempFolder).seal(e.getKey(), e.getValue()));
 	}
 
 	private static Stream<File> eventSessionBlobs(File eventStageFolder) {
-		return FS.filesIn(eventStageFolder, f -> f.getName().endsWith(SessionExtension) && f.length() > 0f);
+		return FS.allFilesIn(eventStageFolder, f -> f.getName().endsWith(SessionExtension) && f.length() > 0f);
 	}
 
 	private static ZimReader reader(File zimFile) {
 		return new ZimReader(zimFile);
 	}
 
+	private static Fingerprint fingerprintOf(File file) {
+		return new Fingerprint(cleanedNameOf(file));
+	}
+
+	private static String cleanedNameOf(File file) {
+		return file.getName().substring(0, file.getName().indexOf("#")).replace("-", "/").replace(SessionExtension, "");
+	}
+
 	private static class Sealer {
 		private final File eventStoreFolder;
 		private final File tempFolder;
 
-		public Sealer(File eventStoreFolder, File tempFolder) {
+		Sealer(File eventStoreFolder, File tempFolder) {
 			this.eventStoreFolder = eventStoreFolder;
 			this.tempFolder = tempFolder;
+		}
+
+		public void seal(Fingerprint fingerprint, List<File> files) {
+			seal(datalakeFile(fingerprint), files);
+			//FIXME seal(datalakeFile(file), sort(file));  asemed culpable
 		}
 
 		private File sort(File file) {
@@ -65,19 +78,6 @@ public class EventSessionManager {
 				Logger.error(e);
 				return null;
 			}
-		}
-
-		private static Fingerprint fingerprintOf(File file) {
-			return new Fingerprint(cleanedNameOf(file));
-		}
-
-		private static String cleanedNameOf(File file) {
-			return file.getName().substring(0, file.getName().indexOf("#")).replace("-", "/").replace(SessionExtension, "");
-		}
-
-		public void seal(Fingerprint fingerprint, List<File> files) {
-			seal(datalakeFile(fingerprint), files);
-			//FIXME seal(datalakeFile(file), sort(file));  asemed culpable
 		}
 
 		private void seal(File datalakeFile, List<File> files) {
@@ -94,5 +94,4 @@ public class EventSessionManager {
 			return zimFile;
 		}
 	}
-
 }

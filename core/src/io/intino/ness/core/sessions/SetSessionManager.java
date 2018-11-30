@@ -8,11 +8,15 @@ import io.intino.alexandria.zet.ZetReader;
 import io.intino.alexandria.zet.ZetStream;
 import io.intino.alexandria.zet.ZetWriter;
 import io.intino.ness.core.Blob;
+import io.intino.ness.core.fs.FS;
 import io.intino.ness.core.fs.FSDatalake;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
@@ -21,7 +25,6 @@ import static io.intino.ness.core.fs.FS.copyInto;
 import static io.intino.ness.core.fs.FSSetStore.MetadataFilename;
 import static io.intino.ness.core.fs.FSSetStore.SetExtension;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
 public class SetSessionManager {
@@ -44,8 +47,7 @@ public class SetSessionManager {
 	}
 
 	private static List<File> blobsOf(File stageFolder) {
-		File[] files = stageFolder.listFiles(f -> f.getName().endsWith(FSDatalake.BlobExtension));
-		return files != null ? asList(files) : Collections.emptyList();
+		return FS.allFilesIn(stageFolder, f -> f.getName().endsWith(FSDatalake.BlobExtension)).collect(Collectors.toList());
 	}
 
 	private static File fileFor(Blob blob, File parentFolder) {
