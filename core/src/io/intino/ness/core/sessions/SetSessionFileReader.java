@@ -29,7 +29,7 @@ public class SetSessionFileReader {
 
 	public List<ZetStream> streamsOf(Fingerprint fingerprint) {
 		List<ZetStream> zetStreams = new ArrayList<>();
-		for (Chunk chunk : chunks.get(fingerprint)) zetStreams.add(chunk.stream());
+		for (Chunk chunk : chunks.getOrDefault(fingerprint, Collections.emptyList())) zetStreams.add(chunk.stream());
 		return zetStreams;
 	}
 

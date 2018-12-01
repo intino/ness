@@ -28,6 +28,8 @@ public class SetSessionManager {
 	private final List<File> files;
 	private final File setStoreFolder;
 	private final File tempFolder;
+	private int count = 1;
+	private int size;
 
 	private SetSessionManager(List<File> files, File setStoreFolder, File tempFolder) {
 		this.files = files;
@@ -106,13 +108,12 @@ public class SetSessionManager {
 	private void sealSetSessions() {
 		List<SetSessionFileReader> readers = setSessionReaders();
 		Set<Fingerprint> fingerprints = fingerPrintsIn(readers);
-		final int[] count = {0};
-		int size = fingerprints.size();
+		size = fingerprints.size();
 		System.out.println("Fingerprints: " + fingerprints.size());
 		fingerprints.parallelStream().forEach(fp -> {
-			System.out.println(((count[0] * 100) / size) + "%: " + fp.toString());
+			System.out.println(((count * 100) / size) + "%");
 			seal(fp, readers);
-			count[0]++;
+			count++;
 		});
 		close(readers);
 	}
@@ -137,16 +138,16 @@ public class SetSessionManager {
 	private void seal(Fingerprint fingerprint, List<SetSessionFileReader> readers) {
 		try {
 			File setFile = fileOf(fingerprint);
-			File tempFile = union(fingerprint, readers);
+			File tempFile = join(fingerprint, readers);
 			Files.move(tempFile.toPath(), setFile.toPath(), REPLACE_EXISTING);
 		} catch (IOException e) {
 			Logger.error(e);
 		}
 	}
 
-	private File union(Fingerprint fingerprint, List<SetSessionFileReader> readers) throws IOException {
+	private File join(Fingerprint fingerprint, List<SetSessionFileReader> readers) throws IOException {
 		File tempFile = File.createTempFile(fingerprint.toString(), SetExtension, tempFolder);
-		new ZetWriter(tempFile).write(new ZetStream.Union(zetStreamsOf(fingerprint, readers)));
+		new ZetWriter(tempFile).write(new ZetStream.Join(zetStreamsOf(fingerprint, readers)));
 		return tempFile;
 	}
 
