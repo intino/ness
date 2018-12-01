@@ -7,9 +7,7 @@ import io.intino.alexandria.zet.ZetStream;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -17,7 +15,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 public class SetSessionFileReader {
 	private final File file;
 	private final File tempFolder;
-	private final List<Chunk> chunks;
+	private final Map<Fingerprint, List<Chunk>> chunks;
 
 	public SetSessionFileReader(File file, File tempFolder) throws IOException {
 		this.tempFolder = tempFolder;
@@ -25,12 +23,14 @@ public class SetSessionFileReader {
 		this.chunks = chunksIn(this.file);
 	}
 
-	public Stream<Chunk> chunks() {
-		return chunks.stream();
+	public Set<Fingerprint> fingerprints() {
+		return chunks.keySet();
 	}
 
-	public Stream<Chunk> chunks(Fingerprint fingerprint) {
-		return chunks.stream().filter(c -> c.fingerprint.equals(fingerprint));
+	public List<ZetStream> streamsOf(Fingerprint fingerprint) {
+		List<ZetStream> zetStreams = new ArrayList<>();
+		for (Chunk chunk : chunks.get(fingerprint)) zetStreams.add(chunk.stream());
+		return zetStreams;
 	}
 
 	private File unzip(File file) throws IOException {
@@ -49,14 +49,14 @@ public class SetSessionFileReader {
 		return new GZIPInputStream(new BufferedInputStream(new FileInputStream(file)));
 	}
 
-	private List<Chunk> chunksIn(File file) throws IOException {
-		List<Chunk> chunks = new ArrayList<>();
+	private Map<Fingerprint, List<Chunk>> chunksIn(File file) throws IOException {
+		Map<Fingerprint, List<Chunk>> chunks = new HashMap<>();
 		fill(chunks, file);
 		return chunks;
 	}
 
 	@SuppressWarnings("InfiniteLoopStatement")
-	private void fill(List<Chunk> result, File file) throws IOException {
+	private void fill(Map<Fingerprint, List<Chunk>> chunks, File file) throws IOException {
 		try (DataInputStream stream = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
 			long position = 0;
 			while (true) {
@@ -65,7 +65,8 @@ public class SetSessionFileReader {
 				Chunk chunk = new Chunk(fingerprint, position, stream.readInt());
 				position += chunk.size * Long.BYTES;
 				stream.skipBytes(chunk.size * Long.BYTES);
-				result.add(chunk);
+				if (!chunks.containsKey(fingerprint)) chunks.put(fingerprint, new ArrayList<>());
+				chunks.get(fingerprint).add(chunk);
 			}
 		} catch (EOFException ignored) {
 		}

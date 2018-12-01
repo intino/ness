@@ -89,13 +89,13 @@ public class SetSessionManager_ {
 		writer.close();
 
 		SetSessionFileReader reader = new SetSessionFileReader(file, new File("temp"));
-		assertEquals(3, reader.chunks().count());
-		assertEquals(1, reader.chunks(Fingerprint.of("tank1", timetag, "set1")).count());
-		ZetStream stream = reader.chunks(Fingerprint.of("tank1", timetag, "set1")).findFirst().get().stream();
+		assertEquals(3, reader.fingerprints().size());
+		assertEquals(1, reader.streamsOf(Fingerprint.of("tank1", timetag, "set1")).size());
+		ZetStream stream = reader.streamsOf(Fingerprint.of("tank1", timetag, "set1")).get(0);
 		for (int i = 0; i < 20; i++) assertEquals((long) i, stream.next());
 		assertFalse(stream.hasNext());
-		assertEquals(1, reader.chunks(Fingerprint.of("tank2", timetag, "set3")).count());
-		stream = reader.chunks(Fingerprint.of("tank2", timetag, "set3")).findFirst().get().stream();
+		assertEquals(1, reader.streamsOf(Fingerprint.of("tank2", timetag, "set3")).size());
+		stream = reader.streamsOf(Fingerprint.of("tank2", timetag, "set3")).get(0);
 		for (int i = 0; i < 30; i++) assertEquals((long) i, stream.next());
 		assertFalse(stream.hasNext());
 

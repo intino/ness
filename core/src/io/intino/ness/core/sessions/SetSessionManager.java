@@ -13,10 +13,7 @@ import io.intino.ness.core.fs.FSDatalake;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
@@ -108,7 +105,15 @@ public class SetSessionManager {
 
 	private void sealSetSessions() {
 		List<SetSessionFileReader> readers = setSessionReaders();
-		fingerPrintsIn(readers).parallelStream().forEach(fp -> seal(fp, readers));
+		Set<Fingerprint> fingerprints = fingerPrintsIn(readers);
+		final int[] count = {0};
+		int size = fingerprints.size();
+		System.out.println("Fingerprints: " + fingerprints.size());
+		fingerprints.parallelStream().forEach(fp -> {
+			System.out.println(((count[0] * 100) / size) + "%: " + fp.toString());
+			seal(fp, readers);
+			count[0]++;
+		});
 		close(readers);
 	}
 
@@ -154,11 +159,9 @@ public class SetSessionManager {
 
 
 	private List<ZetStream> collectZetStreams(Fingerprint fingerprint, List<SetSessionFileReader> readers) {
-		return readers.stream()
-				.map(r -> r.chunks(fingerprint))
-				.flatMap(r -> r)
-				.map(SetSessionFileReader.Chunk::stream)
-				.collect(toList());
+		List<ZetStream> list = new ArrayList<>();
+		for (SetSessionFileReader reader : readers) list.addAll(reader.streamsOf(fingerprint));
+		return list;
 	}
 
 	private Stream<File> setBlobs() {
@@ -172,11 +175,9 @@ public class SetSessionManager {
 	}
 
 	private Set<Fingerprint> fingerPrintsIn(List<SetSessionFileReader> readers) {
-		return readers.stream()
-				.map(SetSessionFileReader::chunks)
-				.flatMap(r -> r)
-				.map(SetSessionFileReader.Chunk::fingerprint)
-				.collect(Collectors.toSet());
+		Set<Fingerprint> set = new HashSet<>();
+		for (SetSessionFileReader reader : readers) set.addAll(reader.fingerprints());
+		return set;
 	}
 
 }
