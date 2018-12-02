@@ -41,7 +41,7 @@ public class EventSessionManager {
 	}
 
 	private static Stream<File> eventSessionBlobs(File eventStageFolder) {
-		return FS.allFilesIn(eventStageFolder, f -> f.getName().endsWith(SessionExtension) && f.length() > 0f);
+		return FS.filesIn(eventStageFolder, f -> f.getName().endsWith(SessionExtension) && f.length() > 0f);
 	}
 
 	private static ZimReader reader(File zimFile) {

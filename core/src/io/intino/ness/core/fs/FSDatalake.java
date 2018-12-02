@@ -15,7 +15,6 @@ import static java.time.Instant.now;
 
 public class FSDatalake implements Datalake {
 	public static final String BlobExtension = ".blob";
-	private static final String IgnoredBlobExtesion = ".ignore";
 	private static final String EventStoreFolder = "events";
 	private static final String SetStoreFolder = "sets";
 	private static final String StageFolder = "stage";
@@ -81,7 +80,7 @@ public class FSDatalake implements Datalake {
 	private void moveToTreated() {
 		File treatedFolder = new File(treatedFolder(), sealDateFolderName());
 		treatedFolder.mkdirs();
-		FS.allFilesIn(stageFolder(), file -> file.isFile() && !file.getName().endsWith(IgnoredBlobExtesion)).forEach(f -> move(f, treatedFolder));
+		FS.filesIn(stageFolder(), File::isFile).forEach(f -> move(f, treatedFolder));
 	}
 
 	private void move(File stageFile, File treatedFolder) {

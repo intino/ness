@@ -51,7 +51,7 @@ public class FS {
 		List<File> files = new ArrayList<>();
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
 			for (Path entry : stream)
-				if (Files.isDirectory(entry)) files.addAll(allFilesIn(entry, filter));
+				if (Files.isDirectory(entry) && filter.accept(entry.toFile())) files.addAll(allFilesIn(entry, filter));
 				else if (filter.accept(entry.toFile())) files.add(entry.toFile());
 		} catch (IOException e) {
 			Logger.error(e);

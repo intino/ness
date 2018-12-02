@@ -45,11 +45,11 @@ public class SetSessionManager {
 	}
 
 	private static List<File> blobsOf(File stageFolder) {
-		return FS.allFilesIn(stageFolder, f -> f.getName().endsWith(FSDatalake.BlobExtension)).collect(Collectors.toList());
+		return FS.filesIn(stageFolder, f -> f.getName().endsWith(FSDatalake.BlobExtension)).collect(Collectors.toList());
 	}
 
-	private static File fileFor(Blob blob, File parentFolder) {
-		return new File(parentFolder, filename(blob));
+	private static File fileFor(Blob blob, File stageFolger) {
+		return new File(stageFolger, filename(blob));
 	}
 
 	private static String filename(Blob blob) {
