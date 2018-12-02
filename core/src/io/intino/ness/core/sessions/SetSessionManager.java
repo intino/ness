@@ -16,7 +16,6 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.zip.GZIPInputStream;
 
 import static io.intino.ness.core.fs.FS.copyInto;
 import static io.intino.ness.core.fs.FSSetStore.MetadataFilename;
@@ -93,12 +92,12 @@ public class SetSessionManager {
 	private Stream<MemoryTripleStore> loadSetMetadataSessions() {
 		return files.parallelStream()
 				.filter(f -> f.getName().endsWith(extensionOf(Blob.Type.setMetadata)))
-				.map(f -> new MemoryTripleStore(zipStreamOf(f)));
+				.map(f -> new MemoryTripleStore(inputStreamOf(f)));
 	}
 
-	private InputStream zipStreamOf(File file) {
+	private InputStream inputStreamOf(File file) {
 		try {
-			return new GZIPInputStream(new BufferedInputStream(new FileInputStream(file)));
+			return new BufferedInputStream(new FileInputStream(file));
 		} catch (IOException e) {
 			Logger.error(e);
 			return null;
@@ -109,9 +108,9 @@ public class SetSessionManager {
 		List<SetSessionFileReader> readers = setSessionReaders();
 		Set<Fingerprint> fingerprints = fingerPrintsIn(readers);
 		size = fingerprints.size();
-		System.out.println("Fingerprints: " + fingerprints.size());
+		Logger.info("Fingerprints: " + fingerprints.size());
 		fingerprints.parallelStream().forEach(fp -> {
-			System.out.println(((count * 100) / size) + "%");
+			if (count % 10000 == 0) Logger.info(((count * 100.) / size) + "%");
 			seal(fp, readers);
 			count++;
 		});
@@ -128,7 +127,7 @@ public class SetSessionManager {
 
 	private SetSessionFileReader setSessionReader(File file) {
 		try {
-			return new SetSessionFileReader(file, this.tempFolder);
+			return new SetSessionFileReader(file);
 		} catch (IOException e) {
 			Logger.error(e);
 			return null;

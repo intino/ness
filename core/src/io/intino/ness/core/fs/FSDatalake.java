@@ -9,12 +9,9 @@ import io.intino.ness.core.sessions.SetSessionManager;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 import static java.time.Instant.now;
-import static java.util.Arrays.asList;
 
 public class FSDatalake implements Datalake {
 	public static final String BlobExtension = ".blob";
@@ -68,24 +65,17 @@ public class FSDatalake implements Datalake {
 
 	@Override
 	public void seal() {
-		try {
-			ExecutorService service = Executors.newFixedThreadPool(2);
-			service.invokeAll(asList(this::sealEvents, this::sealSets));
-			service.shutdown();
-			moveToTreated();
-		} catch (InterruptedException e) {
-			Logger.error(e);
-		}
+		sealEvents();
+		sealSets();
+		moveToTreated();
 	}
 
-	private boolean sealSets() {
+	private void sealSets() {
 		SetSessionManager.seal(stageFolder(), setStoreFolder(), tempFolder());
-		return true;
 	}
 
-	private boolean sealEvents() {
+	private void sealEvents() {
 		EventSessionManager.seal(stageFolder(), eventStoreFolder(), tempFolder());
-		return true;
 	}
 
 	private void moveToTreated() {

@@ -2,24 +2,18 @@ package io.intino.ness.core.sessions;
 
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.logger.Logger;
+import io.intino.alexandria.zet.ZInputStream;
 import io.intino.alexandria.zet.ZetStream;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.*;
-import java.util.zip.GZIPInputStream;
-
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class SetSessionFileReader {
 	private final File file;
-	private final File tempFolder;
 	private final Map<Fingerprint, List<Chunk>> chunks;
 
-	public SetSessionFileReader(File file, File tempFolder) throws IOException {
-		this.tempFolder = tempFolder;
-		this.file = unzip(file);
+	public SetSessionFileReader(File file) throws IOException {
+		this.file = file;
 		this.chunks = chunksIn(this.file);
 	}
 
@@ -33,22 +27,6 @@ public class SetSessionFileReader {
 		return zetStreams;
 	}
 
-	private File unzip(File file) throws IOException {
-		File tempFile = tempFile(file.getName());
-		try (InputStream inputStream = gzipInputStreamOf(file)) {
-			Files.copy(inputStream, tempFile.toPath(), REPLACE_EXISTING);
-		}
-		return tempFile;
-	}
-
-	private File tempFile(String name) throws IOException {
-		return File.createTempFile(name.substring(0, name.indexOf(".")), ".chunks", tempFolder);
-	}
-
-	private GZIPInputStream gzipInputStreamOf(File file) throws IOException {
-		return new GZIPInputStream(new BufferedInputStream(new FileInputStream(file)));
-	}
-
 	private Map<Fingerprint, List<Chunk>> chunksIn(File file) throws IOException {
 		Map<Fingerprint, List<Chunk>> chunks = new HashMap<>();
 		fill(chunks, file);
@@ -60,23 +38,37 @@ public class SetSessionFileReader {
 		try (DataInputStream stream = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
 			long position = 0;
 			while (true) {
-				Fingerprint fingerprint = new Fingerprint(readString(stream));
-				position += Integer.BYTES + fingerprint.size() + Integer.BYTES;
-				Chunk chunk = new Chunk(fingerprint, position, stream.readInt());
-				position += chunk.size * Long.BYTES;
-				stream.skipBytes(chunk.size * Long.BYTES);
-				if (!chunks.containsKey(fingerprint)) chunks.put(fingerprint, new ArrayList<>());
-				chunks.get(fingerprint).add(chunk);
+				byte[] fingerprint = readData(stream);
+				int size = skipData(stream);
+				position += fingerprint.length + size + Integer.BYTES * 2;
+
+				Chunk chunk = chunkOf(fingerprint, position - size, size);
+				if (!chunks.containsKey(chunk.fingerprint)) chunks.put(chunk.fingerprint, new ArrayList<>());
+				chunks.get(chunk.fingerprint).add(chunk);
 			}
 		} catch (EOFException ignored) {
 		}
 	}
 
-	private String readString(DataInputStream stream) throws IOException {
+	private Chunk chunkOf(byte[] fingerprint, long position, int size) {
+		return chunkOf(new Fingerprint(new String(fingerprint)), position, size);
+	}
+
+	private Chunk chunkOf(Fingerprint fingerprint, long position, int size) {
+		return new Chunk(fingerprint, position, size);
+	}
+
+	private byte[] readData(DataInputStream stream) throws IOException {
 		int size = stream.readInt();
-		byte[] bytes = new byte[size];
-		stream.read(bytes);
-		return new String(bytes, StandardCharsets.UTF_8);
+		byte[] data = new byte[size];
+		stream.read(data);
+		return data;
+	}
+
+	private int skipData(DataInputStream stream) throws IOException {
+		int size = stream.readInt();
+		stream.skipBytes(size);
+		return size;
 	}
 
 	public void close() {
@@ -94,10 +86,6 @@ public class SetSessionFileReader {
 			this.size = size;
 		}
 
-		public Fingerprint fingerprint() {
-			return fingerprint;
-		}
-
 		public String tank() {
 			return fingerprint.tank();
 		}
@@ -113,7 +101,7 @@ public class SetSessionFileReader {
 		public ZetStream stream() {
 			try {
 				return new ZetStream() {
-					private DataInputStream inputStream = inputStream();
+					private ZInputStream inputStream = inputStream();
 					private int count = 0;
 					private long current = -1;
 
@@ -138,7 +126,7 @@ public class SetSessionFileReader {
 
 					@Override
 					public boolean hasNext() {
-						boolean hasNext = count < size;
+						boolean hasNext = count < inputStream.size();
 						if (!hasNext) {
 							try {
 								inputStream.close();
@@ -149,13 +137,13 @@ public class SetSessionFileReader {
 						return hasNext;
 					}
 
-					private DataInputStream inputStream() throws IOException {
-						return new DataInputStream(new ByteArrayInputStream(buffer()));
+					private ZInputStream inputStream() throws IOException {
+						return new ZInputStream(new ByteArrayInputStream(buffer()));
 					}
 
 					private byte[] buffer() throws IOException {
 						try (RandomAccessFile access = new RandomAccessFile(file, "r")) {
-							byte[] buffer = new byte[Long.BYTES * size];
+							byte[] buffer = new byte[size];
 							access.seek(position);
 							access.read(buffer);
 							return buffer;
@@ -167,6 +155,5 @@ public class SetSessionFileReader {
 				return null;
 			}
 		}
-
 	}
 }
