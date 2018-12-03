@@ -114,11 +114,6 @@ public class SetSessionManager {
 			seal(fp, readers);
 			count++;
 		});
-		close(readers);
-	}
-
-	private void close(List<SetSessionFileReader> readers) {
-		readers.forEach(SetSessionFileReader::close);
 	}
 
 	private List<SetSessionFileReader> setSessionReaders() {

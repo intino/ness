@@ -70,6 +70,10 @@ public class FSStage implements Stage, BlobHandler {
 		return FS.allFilesIn(root, this::blobs);
 	}
 
+	private boolean blobs(File file) {
+		return !file.getName().endsWith(IgnoreExtension) && (file.isDirectory() || file.getName().endsWith(BlobExtension));
+	}
+
 	private File fileOf(String name, Blob.Type type) {
 		return new File(root, filename(name, type));
 	}
@@ -80,10 +84,6 @@ public class FSStage implements Stage, BlobHandler {
 
 	private String suffix() {
 		return "#" + randomUUID().toString();
-	}
-
-	private boolean blobs(File file) {
-		return !file.getName().endsWith(IgnoreExtension) && (file.isDirectory() || file.getName().endsWith(BlobExtension));
 	}
 
 	private static class FileBlob implements Blob {

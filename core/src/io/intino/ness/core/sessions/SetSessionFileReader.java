@@ -71,10 +71,6 @@ public class SetSessionFileReader {
 		return size;
 	}
 
-	public void close() {
-		file.delete();
-	}
-
 	public class Chunk {
 		private final Fingerprint fingerprint;
 		private final long position;

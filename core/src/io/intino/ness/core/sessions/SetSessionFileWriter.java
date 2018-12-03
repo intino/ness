@@ -52,7 +52,6 @@ public class SetSessionFileWriter {
 		}
 	}
 
-
 	private void write(byte[] data) throws IOException {
 		stream.writeInt(data.length);
 		stream.write(data);
