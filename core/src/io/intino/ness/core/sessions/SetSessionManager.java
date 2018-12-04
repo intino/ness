@@ -132,16 +132,17 @@ public class SetSessionManager {
 	private void seal(Fingerprint fingerprint, List<SetSessionFileReader> readers) {
 		try {
 			File setFile = fileOf(fingerprint);
-			File tempFile = join(fingerprint, readers);
+			File tempFile = merge(fingerprint, readers);
 			Files.move(tempFile.toPath(), setFile.toPath(), REPLACE_EXISTING);
 		} catch (IOException e) {
 			Logger.error(e);
 		}
 	}
 
-	private File join(Fingerprint fingerprint, List<SetSessionFileReader> readers) throws IOException {
+	private File merge(Fingerprint fingerprint, List<SetSessionFileReader> readers) throws IOException {
 		File tempFile = File.createTempFile(fingerprint.toString(), SetExtension, tempFolder);
-		new ZetWriter(tempFile).write(new ZetStream.Join(zetStreamsOf(fingerprint, readers)));
+		List<ZetStream> streams = zetStreamsOf(fingerprint, readers);
+		new ZetWriter(tempFile).write(streams.size() == 1 ? streams.get(0) : new ZetStream.Merge(streams));
 		return tempFile;
 	}
 

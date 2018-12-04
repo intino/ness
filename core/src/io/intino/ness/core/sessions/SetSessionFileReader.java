@@ -2,7 +2,7 @@ package io.intino.ness.core.sessions;
 
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.logger.Logger;
-import io.intino.alexandria.zet.ZInputStream;
+import io.intino.alexandria.zet.ZetReader;
 import io.intino.alexandria.zet.ZetStream;
 
 import java.io.*;
@@ -96,59 +96,23 @@ public class SetSessionFileReader {
 
 		public ZetStream stream() {
 			try {
-				return new ZetStream() {
-					private ZInputStream inputStream = inputStream();
-					private int count = 0;
-					private long current = -1;
-
-					@Override
-					public long current() {
-						return current;
-					}
-
-					@Override
-					public long next() {
-						try {
-							if (!hasNext()) return current = -1;
-							count++;
-							return current = inputStream.readLong();
-						} catch (EOFException e) {
-							return -1;
-						} catch (IOException e) {
-							Logger.error(e);
-							return -1;
-						}
-					}
-
-					@Override
-					public boolean hasNext() {
-						boolean hasNext = count < inputStream.size();
-						if (!hasNext) {
-							try {
-								inputStream.close();
-							} catch (IOException e) {
-								Logger.error(e);
-							}
-						}
-						return hasNext;
-					}
-
-					private ZInputStream inputStream() throws IOException {
-						return new ZInputStream(new ByteArrayInputStream(buffer()));
-					}
-
-					private byte[] buffer() throws IOException {
-						try (RandomAccessFile access = new RandomAccessFile(file, "r")) {
-							byte[] buffer = new byte[size];
-							access.seek(position);
-							access.read(buffer);
-							return buffer;
-						}
-					}
-				};
+				return new ZetReader(inputStream());
 			} catch (IOException e) {
 				Logger.error(e);
 				return null;
+			}
+		}
+
+		private ByteArrayInputStream inputStream() throws IOException {
+			return new ByteArrayInputStream(buffer());
+		}
+
+		private byte[] buffer() throws IOException {
+			try (RandomAccessFile access = new RandomAccessFile(file, "r")) {
+				byte[] buffer = new byte[size];
+				access.seek(position);
+				access.read(buffer);
+				return buffer;
 			}
 		}
 	}
