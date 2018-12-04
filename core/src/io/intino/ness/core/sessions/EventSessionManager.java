@@ -36,8 +36,8 @@ public class EventSessionManager {
 	public static void seal(File stageFolder, File eventStoreFolder, File tempFolder) {
 		eventSessionBlobs(stageFolder)
 				.collect(Collectors.groupingBy(EventSessionManager::fingerprintOf)).entrySet()
-				.parallelStream().sorted(Comparator.comparing(t -> t.getKey().toString()))
-				.forEach(e -> new Sealer(eventStoreFolder, tempFolder).seal(e.getKey(), e.getValue()));
+				.stream().sorted(Comparator.comparing(t -> t.getKey().toString()))
+				.parallel().forEach(e -> new Sealer(eventStoreFolder, tempFolder).seal(e.getKey(), e.getValue()));
 	}
 
 	private static Stream<File> eventSessionBlobs(File eventStageFolder) {
