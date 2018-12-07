@@ -66,14 +66,14 @@ public class SetSessionManager {
 	}
 
 	private void sealSetMetadataSessions() {
-		Map<File, FileTripleStore> map = new HashMap<>();
+		Map<File, FileTripleStore.Builder> map = new HashMap<>();
 		loadSetMetadataSessions()
 				.flatMap(TripleStore::all)
 				.forEach(s -> processTriple(s, map));
-		map.values().forEach(FileTripleStore::save);
+		map.values().forEach(FileTripleStore.Builder::close);
 	}
 
-	private void processTriple(String[] triple, Map<File, FileTripleStore> map) {
+	private void processTriple(String[] triple, Map<File, TripleStore.Builder> map) {
 		Fingerprint fingerprint = new Fingerprint(triple[0]);
 		tripleStoreFor(metadataFileOf(fingerprint), map).put(fingerprint.set(), triple[1], triple[2]);
 	}
@@ -84,8 +84,14 @@ public class SetSessionManager {
 		return file;
 	}
 
-	private TripleStore tripleStoreFor(File file, Map<File, FileTripleStore> map) {
-		if (!map.containsKey(file)) map.put(file, new FileTripleStore(file));
+	private TripleStore.Builder tripleStoreFor(File file, Map<File, TripleStore.Builder> map) {
+		if (!map.containsKey(file)) {
+			try {
+				map.put(file, new FileTripleStore.Builder(new FileOutputStream(file, true)));
+			} catch (FileNotFoundException e) {
+				Logger.error(e);
+			}
+		}
 		return map.get(file);
 	}
 
