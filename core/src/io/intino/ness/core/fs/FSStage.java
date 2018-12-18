@@ -12,10 +12,10 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Stream.empty;
 
 public class FSStage implements Stage, BlobHandler {
 	private static final String BlobExtension = ".blob";
+	private static final String IgnoreExtension = ".ignore";
 	private final File root;
 
 	public FSStage(File root) {
@@ -67,8 +67,11 @@ public class FSStage implements Stage, BlobHandler {
 	}
 
 	private Stream<File> files() {
-		File[] files = root.listFiles(this::blobs);
-		return files == null ? empty() : stream(files);
+		return FS.allFilesIn(root, this::blobs);
+	}
+
+	private boolean blobs(File file) {
+		return !file.getName().endsWith(IgnoreExtension) && (file.isDirectory() || file.getName().endsWith(BlobExtension));
 	}
 
 	private File fileOf(String name, Blob.Type type) {
@@ -81,10 +84,6 @@ public class FSStage implements Stage, BlobHandler {
 
 	private String suffix() {
 		return "#" + randomUUID().toString();
-	}
-
-	private boolean blobs(File dir, String name) {
-		return name.endsWith(BlobExtension);
 	}
 
 	private static class FileBlob implements Blob {

@@ -2,11 +2,9 @@ package io.intino.ness.core.sessions;
 
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.logger.Logger;
+import io.intino.alexandria.zet.ZOutputStream;
 
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.*;
 
 public class SetSessionFileWriter {
@@ -33,7 +31,7 @@ public class SetSessionFileWriter {
 		chunks.get(fingerprint).add(id);
 	}
 
-	public void flush()  {
+	public void flush() {
 		try {
 			chunks.forEach(this::write);
 			chunks.clear();
@@ -45,18 +43,29 @@ public class SetSessionFileWriter {
 
 	private void write(Fingerprint fingerprint, List<Long> ids) {
 		try {
-			stream.writeInt(fingerprint.size());
-			stream.writeBytes(fingerprint.toString());
-			stream.writeInt(ids.size());
 			Collections.sort(ids);
-			for (long id : ids) stream.writeLong(id);
+			write(fingerprint.toString().getBytes());
+			write(dataOf(ids));
 			stream.flush();
 		} catch (IOException e) {
 			Logger.error(e);
 		}
 	}
 
-	public void close()  {
+	private void write(byte[] data) throws IOException {
+		stream.writeInt(data.length);
+		stream.write(data);
+	}
+
+	private byte[] dataOf(List<Long> ids) throws IOException {
+		ByteArrayOutputStream data = new ByteArrayOutputStream();
+		ZOutputStream outputStream = new ZOutputStream(data);
+		for (long id : ids) outputStream.writeLong(id);
+		outputStream.close();
+		return data.toByteArray();
+	}
+
+	public void close() {
 		try {
 			chunks.forEach(this::write);
 			chunks.clear();

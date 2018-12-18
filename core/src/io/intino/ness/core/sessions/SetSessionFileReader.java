@@ -2,96 +2,84 @@ package io.intino.ness.core.sessions;
 
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.logger.Logger;
+import io.intino.alexandria.zet.ZetReader;
 import io.intino.alexandria.zet.ZetStream;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-import java.util.zip.GZIPInputStream;
-
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import java.util.*;
 
 public class SetSessionFileReader {
-
-	private static final int LONG_SIZE = 8;
-	private static final int INT_SIZE = 4;
 	private final File file;
-	private final List<Chunk> chunks = new ArrayList<>();
+	private final Map<Fingerprint, List<Chunk>> chunks;
 
 	public SetSessionFileReader(File file) throws IOException {
-		this.file = unzip(file);
-		this.readStructure(this.file);
+		this.file = file;
+		this.chunks = chunksIn(this.file);
 	}
 
-	public Stream<Chunk> chunks() {
-		return chunks.stream();
+	public Set<Fingerprint> fingerprints() {
+		return chunks.keySet();
 	}
 
-	public Stream<Chunk> chunks(Fingerprint fingerprint) {
-		return chunks.stream()
-				.filter(c -> c.fingerprint.equals(fingerprint));
+	public List<ZetStream> streamsOf(Fingerprint fingerprint) {
+		List<ZetStream> zetStreams = new ArrayList<>();
+		for (Chunk chunk : chunks.getOrDefault(fingerprint, Collections.emptyList())) zetStreams.add(chunk.stream());
+		return zetStreams;
 	}
 
-	private File unzip(File file) throws IOException {
-		File tempFile = tempFile();
-		InputStream stream = inputStreamOf(file);
-		Files.copy(stream, tempFile.toPath(), REPLACE_EXISTING);
-		stream.close();
-		return tempFile;
-	}
-
-	private File tempFile() throws IOException {
-		return File.createTempFile("blob", "blob");
-	}
-
-	private GZIPInputStream inputStreamOf(File file) throws IOException {
-		return new GZIPInputStream(new BufferedInputStream(new FileInputStream(file)));
+	private Map<Fingerprint, List<Chunk>> chunksIn(File file) throws IOException {
+		Map<Fingerprint, List<Chunk>> chunks = new HashMap<>();
+		fill(chunks, file);
+		return chunks;
 	}
 
 	@SuppressWarnings("InfiniteLoopStatement")
-	private void readStructure(File file) throws IOException {
+	private void fill(Map<Fingerprint, List<Chunk>> chunks, File file) throws IOException {
 		try (DataInputStream stream = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
-			long pos = 0;
+			long position = 0;
 			while (true) {
-				Fingerprint fingerprint = new Fingerprint(readString(stream));
-				int idSize = stream.readInt();
-				stream.skipBytes(idSize * LONG_SIZE);
-				pos += INT_SIZE + fingerprint.size() + INT_SIZE;
-				chunks.add(new Chunk(fingerprint, idSize, pos));
-				pos += idSize * LONG_SIZE;
+				byte[] fingerprint = readData(stream);
+				int size = skipData(stream);
+				position += fingerprint.length + size + Integer.BYTES * 2;
+
+				Chunk chunk = chunkOf(fingerprint, position - size, size);
+				if (!chunks.containsKey(chunk.fingerprint)) chunks.put(chunk.fingerprint, new ArrayList<>());
+				chunks.get(chunk.fingerprint).add(chunk);
 			}
 		} catch (EOFException ignored) {
 		}
 	}
 
-	@SuppressWarnings("ResultOfMethodCallIgnored")
-	private String readString(DataInputStream stream) throws IOException {
-		int size = stream.readInt();
-		byte[] bytes = new byte[size];
-		stream.read(bytes);
-		return new String(bytes, StandardCharsets.UTF_8);
+	private Chunk chunkOf(byte[] fingerprint, long position, int size) {
+		return chunkOf(new Fingerprint(new String(fingerprint)), position, size);
 	}
 
-	public void close() {
-		file.delete();
+	private Chunk chunkOf(Fingerprint fingerprint, long position, int size) {
+		return new Chunk(fingerprint, position, size);
+	}
+
+	private byte[] readData(DataInputStream stream) throws IOException {
+		int size = stream.readInt();
+		byte[] data = new byte[size];
+		stream.read(data);
+		return data;
+	}
+
+	private int skipData(DataInputStream stream) throws IOException {
+		int size = stream.readInt();
+		stream.skipBytes(size);
+		return size;
 	}
 
 	public class Chunk {
 		private final Fingerprint fingerprint;
-		long position;
-		private int idSize;
+		private final long position;
+		private final int size;
 
-		Chunk(Fingerprint fingerprint, int idSize, long position) {
+		Chunk(Fingerprint fingerprint, long position, int size) {
 			this.fingerprint = fingerprint;
-			this.idSize = idSize;
 			this.position = position;
-		}
-
-		public Fingerprint fingerprint() {
-			return fingerprint;
+			this.size = size;
 		}
 
 		public String tank() {
@@ -108,51 +96,24 @@ public class SetSessionFileReader {
 
 		public ZetStream stream() {
 			try {
-				RandomAccessFile access = new RandomAccessFile(file, "r");
-				access.seek(position);
-				DataInputStream stream = new DataInputStream(new BufferedInputStream(new FileInputStream(access.getFD())));
-				return new ZetStream() {
-					int count = 0;
-					long current = -1;
-
-					@Override
-					public long current() {
-						return current;
-					}
-
-					@Override
-					public long next() {
-						try {
-							if (!hasNext()) return current = -1;
-							count++;
-							return current = stream.readLong();
-						} catch (EOFException e) {
-							return -1;
-						} catch (IOException e) {
-							Logger.error(e);
-							return -1;
-						}
-					}
-
-					@Override
-					public boolean hasNext() {
-						boolean hasNext = count < idSize;
-						if (!hasNext) {
-							try {
-								access.close();
-								stream.close();
-							} catch (IOException e) {
-								Logger.error(e);
-							}
-						}
-						return hasNext;
-					}
-				};
+				return new ZetReader(inputStream());
 			} catch (IOException e) {
 				Logger.error(e);
 				return null;
 			}
 		}
 
+		private ByteArrayInputStream inputStream() throws IOException {
+			return new ByteArrayInputStream(buffer());
+		}
+
+		private byte[] buffer() throws IOException {
+			try (RandomAccessFile access = new RandomAccessFile(file, "r")) {
+				byte[] buffer = new byte[size];
+				access.seek(position);
+				access.read(buffer);
+				return buffer;
+			}
+		}
 	}
 }
