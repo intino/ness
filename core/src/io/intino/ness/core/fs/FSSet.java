@@ -35,7 +35,7 @@ public class FSSet implements Datalake.SetStore.Tank.Tub.Set {
 	@Override
 	public int size() {
 		try {
-			return (int) new ZFile(file).size();
+			return file.exists() ? (int) new ZFile(file).size() : 0;
 		} catch (IOException e) {
 			Logger.error(e);
 			return 0;
