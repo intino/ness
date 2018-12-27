@@ -1,8 +1,0 @@
-dsl Proteo
-
-Concept Tank is decorable
-	var string qualifiedName
-	var string feedQN = '"feed." + self.qualifiedName()' is reactive
-	var string flowQN = '"flow." + self.qualifiedName()' is reactive
-	var string putQN = '"put." + self.qualifiedName()' is reactive
-	var boolean active = true

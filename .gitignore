@@ -1,5 +1,2 @@
-*.conf
-datalake-examples/local.store/legacy.frac.Well/
-datalake-examples/target/
-datalake-examples/local.legacy/wells
+datalake-examples/*
 activemq-data
