@@ -18,6 +18,7 @@ import static io.intino.ness.core.fs.FS.copyInto;
 import static io.intino.ness.core.fs.FSDatalake.BlobExtension;
 import static io.intino.ness.core.fs.FSEventStore.EventExtension;
 import static io.intino.ness.core.fs.FSEventStore.SessionExtension;
+import static java.util.Collections.singletonList;
 
 public class EventSessionManager {
 
@@ -66,8 +67,8 @@ public class EventSessionManager {
 		}
 
 		public void seal(Fingerprint fingerprint, List<File> files) {
-			seal(datalakeFile(fingerprint), files);
-			//FIXME seal(datalakeFile(file), sort(file));  asemed culpable
+//			seal(datalakeFile(fingerprint), files);
+			for (File file : files) seal(datalakeFile(fingerprint), singletonList(sort(file)));  // FIXME asemed culpable
 		}
 
 		private File sort(File file) {

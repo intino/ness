@@ -1,7 +1,7 @@
 dsl Legio
 
 Artifact("io.intino.ness", "3.0.0") Ness as Product
-	Model("Proteo", "2.1.11", "2.3.5")
+	Model("Proteo", "2.1.11", "2.3.7")
 	Box("Konos", "5.0.0")
 	Imports
 		Compile("io.intino.ness", "core", "[1.0.0, 2.0.0)")
@@ -25,10 +25,10 @@ Artifact("io.intino.ness", "3.0.0") Ness as Product
 	Parameter("workspace", "./temp/ness/")
 	Parameter("connector_id", "id")
 	Parameter("broker_port", "63000")
-	Parameter("scale", "Day")
+	Parameter("scale")
 	Parameter("mqtt_port", "1884")
-	Parameter("configurationModel", "")
-	Parameter(name = "slackToken", "")
+	Parameter("configurationModel")
+	Parameter("slackToken", "")
 
 Repository("intino-maven") intino
 	Release("https://artifactory.intino.io/artifactory/releases")
@@ -36,3 +36,4 @@ Repository("intino-maven") intino
 	Language("https://artifactory.intino.io/artifactory/release-languages") languages
 
 RunConfiguration dev
+	Argument(name = "scale", value = "Day")

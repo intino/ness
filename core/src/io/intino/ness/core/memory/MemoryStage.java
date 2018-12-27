@@ -1,18 +1,17 @@
 package io.intino.ness.core.memory;
 
+import io.intino.alexandria.logger.Logger;
 import io.intino.ness.core.Blob;
 import io.intino.ness.core.BlobHandler;
 import io.intino.ness.core.Stage;
 import io.intino.ness.core.sessions.EventSession;
 import io.intino.ness.core.sessions.SetSession;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
 
 import static java.util.UUID.randomUUID;
 
@@ -70,7 +69,12 @@ public class MemoryStage implements Stage, BlobHandler {
 
 					@Override
 					public InputStream inputStream() {
-						return new ByteArrayInputStream(s.toByteArray());
+						try {
+							return new GZIPInputStream(new ByteArrayInputStream(s.toByteArray()));
+						} catch (IOException e) {
+							Logger.error(e);
+							return new ByteArrayInputStream(new byte[]{});
+						}
 					}
 				});
 	}
