@@ -96,7 +96,10 @@ public class NessBox extends AbstractBox {
 	}
 
 	private void startTanks() {
-		graph.tankList().forEach(t -> new ResumeTankAction(this, t.name()).execute());
+		graph.tankList().forEach(t -> {
+			new File(datalakeDirectory(), t.name()).mkdirs();
+			new ResumeTankAction(this, t.name()).execute();
+		});
 	}
 
 	private void startBusPipes() {
