@@ -21,6 +21,7 @@
     <orderEntry type="library" name="Legio: io.intino.alexandria:triplestore:1.0.3" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:primitives:1.0.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Legio: junit:junit:4.13-beta-1" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.alexandria:inl:1.0.0" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:zim:1.0.4" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:inl:1.0.4" level="project" />
   </component>
 </module>
