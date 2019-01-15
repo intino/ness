@@ -50,7 +50,7 @@ public class ReflowService implements Consumer {
 
 	private void quickReflow(Message message) {
 		try {
-			replyTo(message, "file://" + new File(box.workspace()).getCanonicalPath());
+			replyTo(message, "file://" + new File(box.datalakeDirectory() + "/events").getCanonicalPath());
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
