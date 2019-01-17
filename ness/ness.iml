@@ -102,13 +102,13 @@
     <orderEntry type="library" name="Legio: io.intino.alexandria:slack-framework:1.0.0" level="project" />
     <orderEntry type="library" name="Legio: io.intino.tara:magritte:2.1.11" level="project" />
     <orderEntry type="library" name="Legio: io.intino.tara:language:1.0.11" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.alexandria:primitives:1.0.1" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:zim:1.0.3" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:inl:1.0.3" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.alexandria:triplestore:1.0.2" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:zet:1.0.2" level="project" />
-    <orderEntry type="library" scope="TEST" name="Legio: io.intino.alexandria:ness-accessor:1.0.4" level="project" />
-    <orderEntry type="library" scope="TEST" name="Legio: io.intino.ness:core:1.0.4" level="project" />
     <orderEntry type="library" scope="TEST" name="Legio: commons-io:commons-io:2.6" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:triplestore:1.0.3" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:primitives:1.0.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Legio: io.intino.alexandria:ness-accessor:1.0.8" level="project" />
+    <orderEntry type="library" scope="TEST" name="Legio: io.intino.ness:core:1.0.7" level="project" />
   </component>
 </module>
