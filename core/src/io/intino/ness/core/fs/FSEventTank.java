@@ -35,6 +35,7 @@ public class FSEventTank implements Datalake.EventStore.Tank {
 
 	private ZimStream[] zimStreams(Predicate<Timetag> filter) {
 		return FS.filesIn(root, f -> f.getName().endsWith(EventExtension))
+				.sorted()
 				.filter(f -> filter.test(timetagOf(f)))
 				.map(ZimReader::new)
 				.toArray(ZimStream[]::new);
