@@ -35,8 +35,8 @@ public class ReflowService implements Consumer {
 
 	public void consume(Message message) {
 		String text = textFrom(message);
-		if (text.contains("blockSize")) defineReflow(text);
-		else if (text.contains("quickReflow")) quickReflow(message);
+		if (text.contains("blockSize")) startReflow(text);
+		else if (text.contains("quickReflow")) quickReflowInfo(message);
 		else if (text.contains("startQuickReflow")) startQuickReflow(message);
 		else if (text.contains("ready") && this.handler != null) ready(message);
 		else if (!text.contains("ready") && handler != null) next();
@@ -45,10 +45,18 @@ public class ReflowService implements Consumer {
 
 	private void startQuickReflow(Message message) {
 		pauseTanks();
+		box.datalake().seal();
 		replyTo(message, "ack");
 	}
 
-	private void quickReflow(Message message) {
+	private void startReflow(String text) {
+		if (this.handler != null) return;
+		ReflowConfiguration reflow = new Gson().fromJson(text, ReflowConfiguration.class);
+		this.blockSize = reflow.blockSize();
+		createSession(reflow);
+	}
+
+	private void quickReflowInfo(Message message) {
 		try {
 			replyTo(message, "file://" + new File(box.datalakeDirectory() + "/events").getCanonicalPath());
 		} catch (IOException e) {
@@ -56,11 +64,14 @@ public class ReflowService implements Consumer {
 		}
 	}
 
-	private void defineReflow(String text) {
-		if (this.handler != null) return;
-		ReflowConfiguration reflow = new Gson().fromJson(text, ReflowConfiguration.class);
-		this.blockSize = reflow.blockSize();
-		createSession(reflow);
+	private void createSession(ReflowConfiguration configuration) {
+		logger.info("Shutting down actual session");
+		box.restartBus(false);
+		pauseTanks();
+		this.session = box.busManager().transactedSession();
+		box.datalake().seal();
+		this.handler = new ReflowProcess(session, box.datalake(), box.scale(), configuration);
+		logger.info("Reflow session created");
 	}
 
 	private void ready(final Message message) {
@@ -79,26 +90,20 @@ public class ReflowService implements Consumer {
 		}).start();
 	}
 
-	private void createSession(ReflowConfiguration configuration) {
-		logger.info("Shutting down actual session");
-		box.restartBus(false);
-		pauseTanks();
-		this.session = box.busManager().transactedSession();
-		box.datalake().seal();
-		this.handler = new ReflowProcess(session, box.datalake(), box.scale(), configuration);
-		logger.info("Reflow session created");
-	}
-
 	private void next() {
 		logger.info("sending next block of " + blockSize + " messages");
 		handler.next();
 	}
 
 	private void finish() {
-		pausedTanks.forEach(t -> new ResumeTankAction(box, t.name()).execute());
+		resumeTanks();
 		this.handler = null;
 		logger.info("Reflow session finished");
 //		if(box.busService().isPersistent()) box.restartBus(true); TODO falla al arrancar con persistencia
+	}
+
+	private void resumeTanks() {
+		pausedTanks.forEach(t -> new ResumeTankAction(box, t.name()).execute());
 	}
 
 	private void pauseTanks() {

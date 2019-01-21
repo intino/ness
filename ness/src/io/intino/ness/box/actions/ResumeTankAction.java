@@ -2,7 +2,7 @@ package io.intino.ness.box.actions;
 
 import io.intino.ness.box.NessBox;
 import io.intino.ness.core.Datalake;
-import io.intino.ness.datalake.TankStarter;
+import io.intino.ness.datalake.TankWriter;
 
 import static io.intino.ness.box.Utils.findTank;
 import static io.intino.ness.box.actions.Action.OK;
@@ -27,7 +27,7 @@ public class ResumeTankAction {
 
 	public String execute(Datalake.EventStore.Tank tank) {
 		io.intino.ness.graph.Tank jmsTank = findTank(box.graph(), tank.name());
-		new TankStarter(box, tank).start();
+		new TankWriter(box, tank).start();
 		jmsTank.active(true);
 		jmsTank.save$();
 		return OK;

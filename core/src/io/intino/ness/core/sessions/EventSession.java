@@ -59,6 +59,14 @@ public class EventSession {
 		}
 	}
 
+	public void flush() {
+		try {
+			for (BufferedWriter w : writers.values()) w.flush();
+		} catch (IOException e) {
+			Logger.error(e);
+		}
+	}
+
 	public void close() {
 		try {
 			for (BufferedWriter w : writers.values()) w.close();
