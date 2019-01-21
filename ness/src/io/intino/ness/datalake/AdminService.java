@@ -25,7 +25,10 @@ public class AdminService implements Consumer {
 		String text = Consumer.textFrom(message);
 		NessGraph nessGraph = box.graph();
 		if (text.startsWith("users")) replyTo(message, nessGraph.userList().stream().map(User::name).collect(joining(",")));
-		else if (text.startsWith("tanks"))
+		if (text.startsWith("seal")) {
+			box.datalake().seal();
+			replyTo(message, "sealed");
+		} else if (text.startsWith("tanks"))
 			replyTo(message, nessGraph.tankList().stream().map(Tank::name).collect(joining(";")));
 	}
 

@@ -18,13 +18,13 @@ public class TankWriter {
 	private final BusManager bus;
 	private final Tank tank;
 	private final Scale scale;
-	private final EventSession session;
+	private final File stage;
 
 	public TankWriter(NessBox box, Tank tank) {
 		this.bus = box.busManager();
 		this.scale = box.scale();
 		this.tank = tank;
-		this.session = new FSStage(new File(box.datalakeStageDirectory())).createEventSession();
+		this.stage = new File(box.datalakeStageDirectory());
 	}
 
 	public void start() {
@@ -51,7 +51,8 @@ public class TankWriter {
 	}
 
 	private void save(Tank tank, io.intino.alexandria.inl.Message message) {
+		EventSession session = new FSStage(stage).createEventSession();
 		session.put(tank.name(), Utils.timetag(Instant.parse(message.get("ts")), scale), message);
-		session.flush();
+		session.close();
 	}
 }
