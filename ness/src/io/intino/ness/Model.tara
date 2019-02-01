@@ -5,6 +5,10 @@ Concept Pipe
 	var string destination
 	var object:io.intino.ness.core.functions.MessageFunction transformer = empty
 
+Concept Filter
+	var Tank tank
+	var object:io.intino.ness.core.functions.MessageFilter filter = empty
+
 Concept User
 	var string name
 	var string password
