@@ -1,5 +1,6 @@
 package io.intino.ness.bus;
 
+import io.intino.alexandria.logger.Logger;
 import io.intino.ness.graph.JMSConnector;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.Broker;
@@ -20,8 +21,6 @@ import org.apache.activemq.plugin.java.JavaRuntimeConfigurationPlugin;
 import org.apache.activemq.security.AuthenticationUser;
 import org.apache.activemq.security.SimpleAuthenticationPlugin;
 import org.apache.activemq.store.kahadb.KahaDBPersistenceAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +35,6 @@ import static io.intino.ness.graph.JMSConnector.Direction.incoming;
 import static java.util.stream.Collectors.toList;
 
 public class BusService {
-	private static final Logger logger = LoggerFactory.getLogger(BusService.class);
 	private static final String NESS = "ness";
 
 	private final int brokerPort;
@@ -98,9 +96,9 @@ public class BusService {
 			else connector.setOutboundTopicBridges(toOutboundBridges(c.topics()));
 			service.addJmsConnector(connector);
 			this.activeMQTopicConnectors.add(connector);
-			logger.info("Connector with " + c.bus().name$() + " started");
+			Logger.info("Connector with " + c.bus().name$() + " started");
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -119,7 +117,7 @@ public class BusService {
 
 	public void start() {
 		try {
-			logger.info("starting broker...");
+			Logger.info("starting broker...");
 			this.service = new BrokerService();
 			this.authenticator = new SimpleAuthenticationPlugin(initUsers(users));
 			this.configurationPlugin = new JavaRuntimeConfigurationPlugin();
@@ -127,9 +125,9 @@ public class BusService {
 			this.service.start();
 			this.service.waitUntilStarted();
 			this.confBroker = (JavaRuntimeConfigurationBroker) service.getBroker().getAdaptor(JavaRuntimeConfigurationBroker.class);
-			logger.info("broker started!");
+			Logger.info("broker started!");
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -144,7 +142,7 @@ public class BusService {
 				service.waitUntilStopped();
 			}
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -158,7 +156,7 @@ public class BusService {
 			if (destinations == null) return null;
 			return Arrays.stream(destinations).filter(d -> d.getPhysicalName().equals(topic)).findFirst().orElse(null);
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 			return null;
 		}
 	}
@@ -167,7 +165,7 @@ public class BusService {
 		try {
 			if (destination != null) service.getBroker().removeDestination(service.getAdminConnectionContext(), destination, 0);
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -175,7 +173,7 @@ public class BusService {
 		try {
 			return service.getBroker();
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 			return null;
 		}
 	}
@@ -219,7 +217,7 @@ public class BusService {
 			addMQTTConnector();
 			registerConnectors(connectors);
 		} catch (Exception e) {
-			logger.error("Error configuring: " + e.getMessage(), e);
+			Logger.error("Error configuring: " + e.getMessage(), e);
 		}
 	}
 

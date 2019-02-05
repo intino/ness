@@ -3,12 +3,11 @@ package io.intino.ness.datalake.reflow;
 import com.google.gson.Gson;
 import io.intino.alexandria.jms.Consumer;
 import io.intino.alexandria.jms.QueueProducer;
+import io.intino.alexandria.logger.Logger;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.box.actions.PauseTankAction;
 import io.intino.ness.box.actions.ResumeTankAction;
 import org.apache.activemq.command.ActiveMQDestination;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -22,7 +21,6 @@ import static io.intino.alexandria.jms.Consumer.textFrom;
 import static io.intino.alexandria.jms.MessageFactory.createMessageFor;
 
 public class ReflowService implements Consumer {
-	private static final Logger logger = LoggerFactory.getLogger(ReflowService.class);
 	private final NessBox box;
 	private ReflowProcess handler;
 	private int blockSize;
@@ -60,18 +58,18 @@ public class ReflowService implements Consumer {
 		try {
 			replyTo(message, "file://" + new File(box.datalakeDirectory() + "/events").getCanonicalPath());
 		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 		}
 	}
 
 	private void createSession(ReflowConfiguration configuration) {
-		logger.info("Shutting down actual session");
+		Logger.info("Shutting down actual session");
 		box.restartBus(false);
 		pauseTanks();
 		this.session = box.busManager().transactedSession();
 		box.datalake().seal();
 		this.handler = new ReflowProcess(session, box.datalake(), box.scale(), configuration);
-		logger.info("Reflow session created");
+		Logger.info("Reflow session created");
 	}
 
 	private void ready(final Message message) {
@@ -83,22 +81,22 @@ public class ReflowService implements Consumer {
 					producer.close();
 					session.commit();
 				}
-				logger.info("Ready to reflow");
+				Logger.info("Ready to reflow");
 			} catch (JMSException e) {
-				logger.error(e.getMessage(), e);
+				Logger.error(e.getMessage(), e);
 			}
 		}).start();
 	}
 
 	private void next() {
-		logger.info("sending next block of " + blockSize + " messages");
+		Logger.info("sending next block of " + blockSize + " messages");
 		handler.next();
 	}
 
 	private void finish() {
 		resumeTanks();
 		this.handler = null;
-		logger.info("Reflow session finished");
+		Logger.info("Reflow session finished");
 //		if(box.busService().isPersistent()) box.restartBus(true); TODO falla al arrancar con persistencia
 	}
 
@@ -115,7 +113,7 @@ public class ReflowService implements Consumer {
 		try {
 			box.busManager().getQueueProducer(((ActiveMQDestination) request.getJMSReplyTo()).getPhysicalName()).produce(createMessageFor(reply));
 		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 		}
 	}
 }

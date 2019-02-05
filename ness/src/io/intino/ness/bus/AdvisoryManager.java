@@ -1,10 +1,9 @@
 package io.intino.ness.bus;
 
+import io.intino.alexandria.logger.Logger;
 import org.apache.activemq.advisory.AdvisorySupport;
 import org.apache.activemq.broker.Broker;
 import org.apache.activemq.command.ActiveMQDestination;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.jms.*;
 import java.util.Arrays;
@@ -14,8 +13,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class AdvisoryManager {
-	private static final Logger logger = LoggerFactory.getLogger(BusManager.class);
-
 	private final Broker broker;
 	private final Session session;
 	private HashMap<String, Info> info = new HashMap<>();
@@ -39,7 +36,7 @@ public class AdvisoryManager {
 				});
 			}
 		} catch (JMSException e) {
-			e.printStackTrace();
+			Logger.error(e);
 		}
 	}
 
@@ -58,7 +55,7 @@ public class AdvisoryManager {
 					d.getPhysicalName() + " Consumers:" + consumersOf(d) + " Producers:" + producersOf(d) + " Enqueued:" + enqueuedMessageOf(d) +
 							" Enqueued:" + dequeuedMessageOf(d)).collect(Collectors.toList());
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 			return Collections.emptyList();
 		}
 	}

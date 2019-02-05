@@ -3,9 +3,8 @@ package io.intino.ness.datalake;
 
 import io.intino.alexandria.inl.Message;
 import io.intino.alexandria.jms.MessageFactory;
+import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.zim.ZimReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
@@ -17,7 +16,6 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.toMap;
 
 public class MessageTranslator {
-	private static Logger logger = LoggerFactory.getLogger(MessageTranslator.class);
 
 	private static String ATTACHMENT_IDS = "__attachment-ids__";
 	private static String ATTACHMENT_SIZES = "__attachment-sizes__";
@@ -36,7 +34,7 @@ public class MessageTranslator {
 				return result;
 			} else return readMessage(((TextMessage) message).getText());
 		} catch (Throwable e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 			return null;
 		}
 	}
@@ -71,7 +69,7 @@ public class MessageTranslator {
 			final String[] sizes = message.getStringProperty(ATTACHMENT_SIZES).split(",");
 			return IntStream.range(0, ids.length).boxed().collect(toMap(i -> ids[i], i -> Integer.parseInt(sizes[i])));
 		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 			return Collections.emptyMap();
 		}
 	}
@@ -80,7 +78,7 @@ public class MessageTranslator {
 		try {
 			result.setStringProperty(MESSAGE, message.toString());
 		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -90,7 +88,7 @@ public class MessageTranslator {
 			bytesMessage.setStringProperty(ATTACHMENT_SIZES, String.join(",", message.attachments().stream().map(a -> a.data().length + "").toArray(String[]::new)));
 			for (Message.Attachment attachment : message.attachments()) bytesMessage.writeBytes(attachment.data());
 		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package io.intino.ness.datalake;
 
 import io.intino.alexandria.jms.Consumer;
+import io.intino.alexandria.logger.Logger;
 import io.intino.ness.box.NessBox;
 import io.intino.ness.graph.NessGraph;
 import io.intino.ness.graph.Tank;
@@ -36,7 +37,7 @@ public class AdminService implements Consumer {
 		try {
 			box.busManager().getQueueProducer(((ActiveMQDestination) request.getJMSReplyTo()).getPhysicalName()).produce(createMessageFor(reply));
 		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 		}
 	}
 }

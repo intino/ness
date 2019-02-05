@@ -1,8 +1,7 @@
 import io.intino.alexandria.inl.Inl;
 import io.intino.alexandria.jms.TopicProducer;
+import io.intino.alexandria.logger.Logger;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.jms.JMSException;
 import javax.jms.Session;
@@ -13,7 +12,6 @@ import static java.lang.Thread.sleep;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 
 public class Feeder {
-	private static final Logger logger = LoggerFactory.getLogger(Feeder.class);
 
 	public static void main(String[] args) throws JMSException {
 		Session session = sessionPre();
@@ -55,7 +53,7 @@ public class Feeder {
 			connection.start();
 			return connection.createSession(false, AUTO_ACKNOWLEDGE);
 		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 			return null;
 		}
 	}
@@ -67,7 +65,7 @@ public class Feeder {
 			connection.start();
 			return connection.createSession(false, AUTO_ACKNOWLEDGE);
 		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 			return null;
 		}
 	}

@@ -2,11 +2,10 @@ package test;
 
 import io.intino.alexandria.inl.Message;
 import io.intino.alexandria.jms.TopicProducer;
+import io.intino.alexandria.logger.Logger;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.jms.Connection;
 import javax.jms.Session;
@@ -19,7 +18,6 @@ import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 import static org.apache.activemq.ActiveMQConnection.makeConnection;
 
 public class RemoteProducerTest {
-	private static final Logger logger = LoggerFactory.getLogger(RemoteProducerTest.class);
 	private final String url = "tcp://bus.siani.es:61616";
 	private final String user = "cesar";
 	private final String password = "cesar";
@@ -65,7 +63,7 @@ public class RemoteProducerTest {
 			this.session = connection.createSession(false, AUTO_ACKNOWLEDGE);
 			this.topicProducer = new TopicProducer(session, topic);
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 		}
 	}
 }

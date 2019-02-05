@@ -3,19 +3,17 @@ package io.intino.ness.datalake;
 import io.intino.alexandria.inl.Message;
 import io.intino.alexandria.jms.MessageFactory;
 import io.intino.alexandria.jms.TopicProducer;
+import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.zim.ZimReader;
 import io.intino.ness.bus.BusManager;
 import io.intino.ness.core.functions.MessageFunction;
 import io.intino.ness.core.functions.MessageMapper;
 import io.intino.ness.graph.Pipe;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static io.intino.alexandria.jms.Consumer.textFrom;
 
 
 public class PipeStarter {
-	private static final Logger logger = LoggerFactory.getLogger(PipeStarter.class);
 
 	private BusManager bus;
 
@@ -36,7 +34,7 @@ public class PipeStarter {
 			String toSend = transform(message, function);
 			if (toSend != null && !toSend.isEmpty()) send(destination, toSend);
 		} catch (Throwable e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 		}
 	}
 

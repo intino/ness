@@ -1,14 +1,12 @@
 package test;
 
+import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.nessaccessor.NessAccessor;
 import io.intino.alexandria.nessaccessor.tcp.TCPDatalake;
 import io.intino.ness.core.Datalake;
 import org.junit.Before;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ConsumerTest {
-	private static final Logger logger = LoggerFactory.getLogger(ConsumerTest.class);
 	private String url = "tcp://localhost:63000";
 	private String user = "test";
 	private String password = "test";
@@ -34,7 +32,7 @@ public class ConsumerTest {
 			tank = accessor.eventStore().tank(tankName);
 			accessor.eventStore().subscribe(tank).using("test-consumer", m -> System.out.println(m.toString()));
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 		}
 	}
 }

@@ -1,12 +1,11 @@
 package io.intino.ness.bus;
 
 import io.intino.alexandria.jms.*;
+import io.intino.alexandria.logger.Logger;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQSession;
 import org.apache.activemq.command.ActiveMQDestination;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
@@ -17,7 +16,6 @@ import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 import static javax.jms.Session.SESSION_TRANSACTED;
 
 public final class BusManager {
-	private static final Logger logger = LoggerFactory.getLogger(BusManager.class);
 	private static final String NESS = "ness";
 
 	private final String nessID;
@@ -37,12 +35,12 @@ public final class BusManager {
 	public void start() {
 		service.start();
 		initNessSession();
-		logger.info("JMS service: started!");
+		Logger.info("JMS service: started!");
 	}
 
 	public void stop() {
 		try {
-			logger.info("Stopping bus");
+			Logger.info("Stopping bus");
 			consumers.values().forEach(c -> c.forEach(TopicConsumer::stop));
 			consumers.clear();
 			producers.values().forEach(Producer::close);
@@ -52,7 +50,7 @@ public final class BusManager {
 			session = null;
 			connection = null;
 			service.stop();
-			logger.info("bus stopped");
+			Logger.info("bus stopped");
 		} catch (Throwable e) {
 		}
 	}
@@ -89,7 +87,7 @@ public final class BusManager {
 			final ActiveMQDestination topic = service.findTopic(name);
 			return topic == null ? (ActiveMQDestination) session.createTopic(name) : topic;
 		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 			return null;
 		}
 	}
@@ -98,7 +96,7 @@ public final class BusManager {
 		try {
 			return (ActiveMQDestination) nessSession().createQueue(name);
 		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 			return null;
 		}
 	}
@@ -117,7 +115,7 @@ public final class BusManager {
 			if (!this.producers.containsKey(topic)) this.producers.put(topic, new TopicProducer(nessSession(), topic));
 			return (TopicProducer) this.producers.get(topic);
 		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 			return null;
 		}
 	}
@@ -128,7 +126,7 @@ public final class BusManager {
 			if (!this.producers.containsKey(destination)) this.producers.put(destination, new QueueProducer(nessSession(), destination));
 			return (QueueProducer) this.producers.get(destination);
 		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 			return null;
 		}
 	}
@@ -169,9 +167,9 @@ public final class BusManager {
 			session = connection.createSession(false, AUTO_ACKNOWLEDGE);
 			startAdvisories();
 			connection.start();
-			logger.info("Ness session inited!");
+			Logger.info("Ness session inited!");
 		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -180,7 +178,7 @@ public final class BusManager {
 			if (((ActiveMQConnection) connection).isTransportFailed()) initNessSession();
 			return connection.createSession(true, SESSION_TRANSACTED);
 		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 			return null;
 		}
 	}

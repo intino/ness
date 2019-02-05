@@ -3,12 +3,11 @@ package io.intino.ness.datalake.reflow;
 import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.jms.TopicProducer;
+import io.intino.alexandria.logger.Logger;
 import io.intino.ness.core.Datalake;
 import io.intino.ness.core.Datalake.EventStore;
 import io.intino.ness.core.Datalake.EventStore.Tank;
 import io.intino.ness.datalake.reflow.ReflowProcess.ReflowMessageHandler.Callback;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -21,12 +20,10 @@ import java.util.function.Consumer;
 
 import static io.intino.alexandria.jms.MessageFactory.createMessageFor;
 import static io.intino.ness.box.Utils.timetag;
-import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
 
 class ReflowProcess {
 	private static final String FLOW_PATH = "flow.ness.reflow";
-	private static Logger logger = LoggerFactory.getLogger(ROOT_LOGGER_NAME);
 	private final Datalake datalake;
 	private final Scale scale;
 	private final ReflowConfiguration configuration;
@@ -81,16 +78,16 @@ class ReflowProcess {
 		try {
 			session.close();
 		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 		}
 	}
 
 	private void commit() {
 		try {
 			session.commit();
-			logger.info("Commited " + configuration.blockSize() + " messages");
+			Logger.info("Commited " + configuration.blockSize() + " messages");
 		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 
 		}
 	}
@@ -99,7 +96,7 @@ class ReflowProcess {
 		try {
 			return new TopicProducer(session, FLOW_PATH);
 		} catch (JMSException e) {
-			logger.error(e.getMessage(), e);
+			Logger.error(e.getMessage(), e);
 			return null;
 		}
 	}
