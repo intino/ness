@@ -2,26 +2,26 @@ package io.intino.ness.core.sessions;
 
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.triplestore.MemoryTripleStore;
-import io.intino.ness.core.Blob;
-import io.intino.ness.core.BlobHandler;
 import io.intino.ness.core.Datalake;
+import io.intino.ness.core.Fingerprint;
+import io.intino.ness.core.Session;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
 
 public class SetSession {
-	private final SetSessionFileWriter writer;
+	private final SetSessionWriter writer;
 	private final MemoryTripleStore.Builder tripleStore;
 	private final int maxSize;
 	private int count = 0;
 
-	public SetSession(BlobHandler blobHandler) {
-		this(blobHandler, 1000000);
+	public SetSession(SessionHandler.Provider provider, SetSessionWriter writer) {
+		this(provider, writer, 1000000);
 	}
 
-	public SetSession(BlobHandler blobHandler, int autoFlushSize) {
-		this.writer = new SetSessionFileWriter(blobHandler.start(Blob.Type.set));
-		this.tripleStore = new MemoryTripleStore.Builder(blobHandler.start(Blob.Type.setMetadata));
+	public SetSession(SessionHandler.Provider provider, SetSessionWriter writer, int autoFlushSize) {
+		this.writer = writer;
+		this.tripleStore = new MemoryTripleStore.Builder(provider.outputStream(Session.Type.setMetadata));
 		this.maxSize = autoFlushSize;
 	}
 

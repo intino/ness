@@ -3,7 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ness/ness.iml" filepath="$PROJECT_DIR$/ness/ness.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-local/core-local.iml" filepath="$PROJECT_DIR$/core-local/core-local.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-remote/core-remote.iml" filepath="$PROJECT_DIR$/core-remote/core-remote.iml" />
+      <module fileurl="file://$PROJECT_DIR$/service-jms/service-jms.iml" filepath="$PROJECT_DIR$/service-jms/service-jms.iml" />
     </modules>
   </component>
 </project>

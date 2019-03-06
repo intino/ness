@@ -16,6 +16,10 @@ import java.util.stream.Stream;
 import static java.util.stream.Stream.empty;
 
 public interface Datalake {
+	String EventStoreFolder = "events";
+	String SetStoreFolder = "sets";
+	String StageFolder = "stage";
+	String SessionsFolder = "../datalake.sessions";
 
 	Connection connection();
 
@@ -23,7 +27,7 @@ public interface Datalake {
 
 	SetStore setStore();
 
-	void push(Stream<Blob> stage);
+	void push(Stream<Session> sessions);
 
 	void seal();
 

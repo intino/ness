@@ -1,20 +1,11 @@
 package io.intino.ness.core;
 
-import io.intino.ness.core.sessions.EventSession;
-import io.intino.ness.core.sessions.SetSession;
-
 import java.util.stream.Stream;
 
-
 public interface Stage {
+	Stream<Session> sessions();
 
-	Stream<Blob> blobs();
-
-	SetSession createSetSession();
-
-	SetSession createSetSession(int autoFlushSize);
-
-	EventSession createEventSession();
+	void push(Stream<Session> sessions);
 
 	void clear();
 }

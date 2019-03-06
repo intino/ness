@@ -1,0 +1,13 @@
+dsl Legio
+
+Artifact("io.intino.ness", "1.0.0") core-remote
+	Imports
+		Compile("io.intino.ness", "core", "1.0.0")
+		Compile("org.apache.hadoop", "hadoop-client", "2.6.0")
+		Test("junit", "junit", "LATEST")
+		Test("org.assertj", "assertj-core", "3.11.1")
+	Package(ModulesAndLibrariesLinkedByManifest, attachSources = true)
+	Distribution(intino.release)
+
+Repository("intino-maven") intino
+	Release("https://artifactory.intino.io/artifactory/release-libraries") release
