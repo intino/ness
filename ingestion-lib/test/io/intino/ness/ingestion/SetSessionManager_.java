@@ -24,7 +24,7 @@ public class SetSessionManager_ {
 		FileSessionManager fileSessionManager = new FileSessionManager(new FileDatalake(new File("temp/datalake")), new File("temp/session"));
 		fileSessionManager.push(handler.sessions());
 		fileSessionManager.seal();
-		ZetReader reader = new ZetReader(new File("temp/datalake/sets/tank1/" + timetag.value() + "/0.zetx"));
+		ZetReader reader = new ZetReader(new File("temp/datalake/sets/tank1/" + timetag.value() + "/0.zet"));
 		for (int i = 1; i < 30; i++)
 			TestCase.assertEquals(reader.next(), i);
 	}
