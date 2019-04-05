@@ -1,0 +1,12 @@
+dsl Legio
+
+Artifact(groupId = "io.intino.ness", version = "1.0.0") ingestion-lib
+	Imports
+		Compile ("io.intino.ness", "datalake", "1.0.0")
+		Test(groupId = "junit", artifactId = "junit", version = "LATEST")
+
+	Package(mode = ModulesAndLibrariesLinkedByManifest)
+
+Repository(identifier = "intino-maven")
+	Language(url = "https://artifactory.intino.io/artifactory/releases")
+	Release(url = "https://artifactory.intino.io/artifactory/releases")
