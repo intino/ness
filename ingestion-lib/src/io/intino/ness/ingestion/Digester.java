@@ -17,7 +17,6 @@ public class Digester {
 		this.stage = new FileStage(datalake.stageFolder(), sessionsFolder);
 	}
 
-
 	public void push(Stream<Session> sessions) {
 		stage.push(sessions);
 	}

@@ -5,14 +5,13 @@ import io.intino.alexandria.Timetag;
 import io.intino.alexandria.zet.ZetStream;
 import io.intino.alexandria.zim.ZimStream;
 
-import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public interface Datalake {
 	String EventStoreFolder = "events";
 	String SetStoreFolder = "sets";
-	String StageFolder = "sets";
+	String StageFolder = "stage";
 
 
 	EventStore eventStore();
