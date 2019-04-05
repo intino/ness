@@ -2,13 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/api/api.iml" filepath="$PROJECT_DIR$/api/api.iml" />
       <module fileurl="file://$PROJECT_DIR$/columnar/columnar.iml" filepath="$PROJECT_DIR$/columnar/columnar.iml" />
-      <module fileurl="file://$PROJECT_DIR$/core-activemq/core-activemq.iml" filepath="$PROJECT_DIR$/core-activemq/core-activemq.iml" />
       <module fileurl="file://$PROJECT_DIR$/datalake/datalake.iml" filepath="$PROJECT_DIR$/datalake/datalake.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ingestion-lib/ingestion-lib.iml" filepath="$PROJECT_DIR$/ingestion-lib/ingestion-lib.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ingestion-service/ingestion-service.iml" filepath="$PROJECT_DIR$/ingestion-service/ingestion-service.iml" />
-      <module fileurl="file://$PROJECT_DIR$/kernel-hadoop/kernel-hadoop.iml" filepath="$PROJECT_DIR$/kernel-hadoop/kernel-hadoop.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ingestion-lib/ingestion-lib.iml" filepath="$PROJECT_DIR$/ingestion-lib/ingestion-lib.iml" group="ingestion"/>
+      <module fileurl="file://$PROJECT_DIR$/ingestion-service/ingestion-service.iml" filepath="$PROJECT_DIR$/ingestion-service/ingestion-service.iml" group="ingestion"/>
+      <module fileurl="file://$PROJECT_DIR$/kernel-hadoop/kernel-hadoop.iml" filepath="$PROJECT_DIR$/kernel-hadoop/kernel-hadoop.iml" group="ingestion" />
     </modules>
   </component>
 </project>

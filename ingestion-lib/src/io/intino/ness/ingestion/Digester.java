@@ -9,7 +9,7 @@ public class Digester {
 
 	private final File sessionsFolder;
 	private final FileStage stage;
-	FileDatalake datalake;
+	private final FileDatalake datalake;
 
 	public Digester(FileDatalake datalake, File sessionsFolder) {
 		this.datalake = datalake;
@@ -28,7 +28,6 @@ public class Digester {
 		stage.clear();
 	}
 
-
 	private void sealSets() {
 		SetSessionManager.seal(datalake.stageFolder(), datalake.setStoreFolder(), tempFolder());
 	}
@@ -37,9 +36,7 @@ public class Digester {
 		EventSessionManager.seal(datalake.stageFolder(), datalake.eventStoreFolder(), tempFolder());
 	}
 
-
 	private File tempFolder() {
 		return new File(this.sessionsFolder, "temp");
 	}
-
 }
