@@ -41,7 +41,7 @@ public class SetSessionManager_ {
 	public void should_create_and_seal_set_session() {
 		SessionHandler handler = new SessionHandler();
 		SetSession session = handler.createSetSession();
-		for (int i = 0; i < 30; i++) {
+		for (int i = 1; i < 30; i++) {
 			LocalDateTime now = LocalDateTime.of(2019, 02, 28, 16, 15 + i);
 			session.put("tank1", new Timetag(now, Scale.Hour), "0", i);
 		}
@@ -50,7 +50,7 @@ public class SetSessionManager_ {
 		digester.push(handler.sessions());
 		digester.seal();
 		ZetReader reader = new ZetReader(new File("temp/datalake/sets/tank1/2019022816/0.zim"));
-		for (int i = 0; i < 30; i++) TestCase.assertEquals(reader.next(), i);
+		for (int i = 1; i < 30; i++) TestCase.assertEquals(reader.next(), i);
 	}
 
 	@After
