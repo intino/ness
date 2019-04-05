@@ -5,9 +5,7 @@ import io.intino.alexandria.Timetag;
 import io.intino.alexandria.jms.TopicProducer;
 import io.intino.alexandria.logger.Logger;
 import io.intino.ness.datalake.Datalake;
-import io.intino.ness.datalake.Datalake.EventStore;
 import io.intino.ness.datalake.Datalake.EventStore.Tank;
-import io.intino.ness.datalake.file.eventsourcing.EventPump;
 import io.intino.ness.triton.datalake.reflow.ReflowProcess.ReflowMessageHandler.Callback;
 
 import javax.jms.JMSException;
@@ -20,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 import static io.intino.alexandria.jms.MessageFactory.createMessageFor;
+import static io.intino.ness.datalake.file.eventsourcing.EventPump.*;
 import static io.intino.ness.triton.box.Utils.timetag;
 
 
@@ -30,7 +29,7 @@ class ReflowProcess {
 	private final ReflowConfiguration configuration;
 	private final Session session;
 	private final TopicProducer producer;
-	private final EventStore.Reflow reflow;
+	private final Reflow reflow;
 	private int count = 0;
 
 	ReflowProcess(Session session, Datalake datalake, Scale scale, ReflowConfiguration configuration) {
@@ -40,7 +39,7 @@ class ReflowProcess {
 		this.configuration = configuration;
 		this.producer = createProducer();
 		Map<Tank, Entry<Timetag, Timetag>> timetags = collectTimetags();
-		this.reflow = this.datalake.eventStore().reflow(new EventStore.Reflow.Filter() {
+		this.reflow = eventPump().reflow(new Reflow.Filter() {
 			@Override
 			public boolean allow(Tank tank) {
 				return timetags.containsKey(tank);
@@ -51,6 +50,10 @@ class ReflowProcess {
 				return timetags.containsKey(tank);
 			}
 		});
+	}
+
+	private EventPump eventPump() {
+		return new EventPump();
 	}
 
 	void next() {
@@ -116,11 +119,11 @@ class ReflowProcess {
 		return new AbstractMap.SimpleEntry<>(from, to);
 	}
 
-	private EventPump.EventHandler reflowHandler(Consumer<io.intino.alexandria.inl.Message> handler, Callback onBlock, Callback onFinish) {
+	private EventHandler reflowHandler(Consumer<io.intino.alexandria.inl.Message> handler, Callback onBlock, Callback onFinish) {
 		return new ReflowMessageHandler(handler, onBlock, onFinish);
 	}
 
-	public static class ReflowMessageHandler implements EventPump.EventHandler, EventPump.ReflowHandler {
+	public static class ReflowMessageHandler implements EventHandler, ReflowHandler {
 
 		private final Consumer<io.intino.alexandria.inl.Message> consumer;
 		private final Callback onBlock;

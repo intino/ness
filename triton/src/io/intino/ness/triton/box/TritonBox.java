@@ -3,22 +3,24 @@ package io.intino.ness.triton.box;
 import io.intino.alexandria.Scale;
 import io.intino.alexandria.core.Box;
 import io.intino.alexandria.logger.Logger;
+import io.intino.ness.datalake.Datalake;
 import io.intino.ness.datalake.file.FileDatalake;
+import io.intino.ness.datalake.hadoop.HadoopConnection;
 import io.intino.ness.datalake.hadoop.HadoopDatalake;
+import io.intino.ness.datalake.hadoop.HadoopSessionManager;
+import io.intino.ness.ingestion.SessionManager;
 import io.intino.ness.triton.box.actions.ResumeTankAction;
 import io.intino.ness.triton.bus.BusManager;
 import io.intino.ness.triton.bus.BusService;
 import io.intino.ness.triton.datalake.AdminService;
 import io.intino.ness.triton.datalake.PipeStarter;
 import io.intino.ness.triton.datalake.reflow.ReflowService;
-import io.intino.ness.triton.graph.Datalake;
-import io.intino.ness.triton.graph.NessGraph;
 import io.intino.ness.triton.graph.Pipe;
+import io.intino.ness.triton.graph.TritonGraph;
 import io.intino.ness.triton.graph.User;
+import org.apache.hadoop.fs.Path;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -30,12 +32,13 @@ public class TritonBox extends AbstractBox {
 	private static final String SERVICE_NESS_ADMIN = "service.ness.admin";
 	private Scale scale = Scale.Day;
 	private String connectorID;
-	private io.intino.ness.datalake.Datalake datalake;
-	private NessGraph graph;
+	private Datalake datalake;
+	private TritonGraph graph;
 	private BusManager busManager;
 	private BusService busService;
 	private ReflowService reflowService;
 	private AdminService adminService;
+	private SessionManager sessionManager;
 
 	public TritonBox(String[] args) {
 		super(args);
@@ -51,7 +54,7 @@ public class TritonBox extends AbstractBox {
 
 	@Override
 	public Box put(Object o) {
-		if (o instanceof NessGraph) this.graph = (NessGraph) o;
+		if (o instanceof TritonGraph) this.graph = (TritonGraph) o;
 		return this;
 	}
 
@@ -74,11 +77,10 @@ public class TritonBox extends AbstractBox {
 				Logger.error("Remote persistence is defined but no parameter 'remotePersistence'");
 				return;
 			}
-			try {
-				this.datalake = new HadoopDatalake(configuration.get("remote_datalake_url"), configuration.get("remote_datalake_user"), configuration.get("remote_datalake_password"));
-			} catch (IOException | URISyntaxException e) {
-				Logger.error(e);
-			}
+			HadoopConnection connection = new HadoopConnection(configuration.get("remote_datalake_url"), configuration.get("remote_datalake_user"), configuration.get("remote_datalake_password"));
+			connection.connect();
+			this.datalake = new HadoopDatalake(connection.fs());
+			this.sessionManager = new HadoopSessionManager((HadoopDatalake) datalake, connection.fs(), new Path(connection.fs().getWorkingDirectory(), "sessions"));
 		} else {
 			this.datalake = new FileDatalake(new File(workspace() + separator + "datalake"));
 		}
@@ -131,7 +133,11 @@ public class TritonBox extends AbstractBox {
 		return datalake;
 	}
 
-	public NessGraph graph() {
+	public SessionManager sessionManager() {
+		return sessionManager;
+	}
+
+	public TritonGraph graph() {
 		return this.graph;
 	}
 

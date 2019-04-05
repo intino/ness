@@ -3,7 +3,7 @@ package io.intino.ness.triton.box.actions;
 import io.intino.ness.triton.box.TritonBox;
 import io.intino.ness.triton.datalake.Probes;
 import io.intino.ness.triton.graph.Datalake.Tank;
-import io.intino.ness.triton.graph.NessGraph;
+import io.intino.ness.triton.graph.TritonGraph;
 
 import java.util.List;
 
@@ -24,8 +24,8 @@ public class AddTankAction {
 	public String execute() {
 		if (name.isEmpty()) return "Tank is empty";
 		String tankName = name.startsWith("feed.") ? name.replaceFirst("feed\\.", "") : name;
-		NessGraph nessGraph = box.graph();
-		List<Tank> tanks = nessGraph.datalake().tankList(t -> t.name().equals(tankName));
+		TritonGraph tritonGraph = box.graph();
+		List<Tank> tanks = tritonGraph.datalake().tankList(t -> t.name().equals(tankName));
 		if (!tanks.isEmpty()) return "Tank already exist";
 		registerTank();
 		return Action.OK;

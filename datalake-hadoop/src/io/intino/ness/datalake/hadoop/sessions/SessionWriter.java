@@ -1,7 +1,7 @@
 package io.intino.ness.datalake.hadoop.sessions;
 
 import io.intino.alexandria.logger.Logger;
-import io.intino.ness.core.Session;
+import io.intino.ness.ingestion.Session;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;

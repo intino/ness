@@ -38,7 +38,6 @@
     <orderEntry type="library" name="Legio: com.thoughtworks.paranamer:paranamer:2.3" level="project" />
     <orderEntry type="library" name="Legio: org.xerial.snappy:snappy-java:1.0.4.1" level="project" />
     <orderEntry type="library" name="Legio: com.google.protobuf:protobuf-java:2.5.0" level="project" />
-    <orderEntry type="library" name="Legio: com.google.code.gson:gson:2.2.4" level="project" />
     <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-auth:2.6.0" level="project" />
     <orderEntry type="library" name="Legio: org.apache.httpcomponents:httpclient:4.2.5" level="project" />
     <orderEntry type="library" name="Legio: org.apache.httpcomponents:httpcore:4.2.5" level="project" />
@@ -78,13 +77,24 @@
     <orderEntry type="library" name="Legio: org.codehaus.jackson:jackson-xc:1.9.13" level="project" />
     <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-mapreduce-client-jobclient:2.6.0" level="project" />
     <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-annotations:2.6.0" level="project" />
-    <orderEntry type="library" name="Legio: org.slf4j:slf4j-api:1.7.5" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:logger:2.0.0" level="project" />
-    <orderEntry type="module" module-name="core" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:zim:1.0.5" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:inl:1.0.4" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:primitives:1.0.2" level="project" />
     <orderEntry type="library" name="Legio: eu.medsea.mimeutil:mime-util:2.1.1" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:zet:1.0.4" level="project" />
+    <orderEntry type="module" module-name="ingestion-lib" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:triplestore:1.0.3" level="project" />
+    <orderEntry type="library" name="Legio: com.sun.xml.security:xml-security-impl:1.0" level="project" />
+    <orderEntry type="library" name="Legio: com.google.code.gson:gson:2.8.0" level="project" />
+    <orderEntry type="library" name="Legio: org.apache.activemq:activemq-client:5.15.2" level="project" />
+    <orderEntry type="library" name="Legio: org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1" level="project" />
+    <orderEntry type="library" name="Legio: org.fusesource.hawtbuf:hawtbuf:1.11" level="project" />
+    <orderEntry type="library" name="Legio: org.apache.geronimo.specs:geronimo-j2ee-management_1.1_spec:1.0.1" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:jms:1.0.1" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:exceptions:1.0.0" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:json:1.0.0" level="project" />
+    <orderEntry type="library" name="Legio: org.slf4j:slf4j-api:1.7.25" level="project" />
+    <orderEntry type="module" module-name="datalake" />
   </component>
 </module>

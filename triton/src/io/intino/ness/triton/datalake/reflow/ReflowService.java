@@ -45,7 +45,7 @@ public class ReflowService implements Consumer {
 
 	private void startQuickReflow(Message message) {
 		pauseTanks();
-		box.datalake().seal();
+		box.sessionManager().seal();
 		replyTo(message, "ack");
 	}
 
@@ -70,7 +70,7 @@ public class ReflowService implements Consumer {
 		box.restartBus(false);
 		pauseTanks();
 		this.session = box.busManager().transactedSession();
-		box.datalake().seal();
+		box.sessionManager().seal();
 		this.handler = new ReflowProcess(session, box.datalake(), box.scale(), configuration);
 		Logger.info("Reflow session created");
 	}

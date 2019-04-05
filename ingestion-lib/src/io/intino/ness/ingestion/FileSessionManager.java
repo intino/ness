@@ -5,13 +5,12 @@ import io.intino.ness.datalake.file.FileDatalake;
 import java.io.File;
 import java.util.stream.Stream;
 
-public class Digester {
-
+public class FileSessionManager implements SessionManager {
 	private final File sessionsFolder;
 	private final FileStage stage;
 	private final FileDatalake datalake;
 
-	public Digester(FileDatalake datalake, File sessionsFolder) {
+	public FileSessionManager(FileDatalake datalake, File sessionsFolder) {
 		this.datalake = datalake;
 		this.sessionsFolder = sessionsFolder;
 		this.stage = new FileStage(datalake.stageFolder(), sessionsFolder);
@@ -36,6 +35,8 @@ public class Digester {
 	}
 
 	private File tempFolder() {
-		return new File(this.sessionsFolder, "temp");
+		File temp = new File(this.sessionsFolder, "temp");
+		temp.mkdir();
+		return temp;
 	}
 }

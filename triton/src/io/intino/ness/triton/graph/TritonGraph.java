@@ -8,7 +8,5 @@ public class TritonGraph extends AbstractGraph {
 		super(graph);
 	}
 
-	public TritonGraph(io.intino.tara.magritte.Graph graph, TritonGraph wrapper) {
-		super(graph, wrapper);
-	}
+
 }

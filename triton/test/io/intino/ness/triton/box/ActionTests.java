@@ -6,7 +6,7 @@ import io.intino.ness.triton.box.actions.AddTankAction;
 import io.intino.ness.triton.box.actions.PauseTankAction;
 import io.intino.ness.triton.datalake.Probes;
 import io.intino.ness.triton.graph.ExternalBus;
-import io.intino.ness.triton.graph.NessGraph;
+import io.intino.ness.triton.graph.TritonGraph;
 import io.intino.tara.magritte.Graph;
 import org.junit.After;
 import org.junit.Before;
@@ -29,25 +29,25 @@ public class ActionTests {
 	private static List<String> bridgedTanks = Arrays.asList("feed.cesar.infrastructure.operation", "feed.consul.server.status", "feed.consul.server.log", "feed.consul.server.upgrade", "feed.consul.feeder.status", "feed.consul.feeder.log", "feed.consul.feeder.upgrade", "feed.consul.device.status", "feed.consul.device.boot", "feed.consul.device.upgrade", "feed.consul.device.crash", "feed.consul.system.log", "feed.consul.system.statu");
 
 	private TritonBox box;
-	private NessGraph nessGraph;
+	private TritonGraph tritonGraph;
 
 	@Before
 	public void setUp() {
 		String[] args = new String[]{"workspace=../temp/workspace", "ness_datalake=../temp/datalake", "broker_store=../temp/broker/", "connector_id=ness-cesar-pre", "broker_port=63000", "mqtt_port=1883"};
-		NessConfiguration boxConfiguration = new NessConfiguration(args);
-		nessGraph = new Graph(store(boxConfiguration.args().get("workspace"))).loadStashes("Ness").as(NessGraph.class);
-		box = (TritonBox) new TritonBox(boxConfiguration).put(nessGraph).open();
-		nessGraph = box.graph();
+		TritonConfiguration boxConfiguration = new TritonConfiguration(args);
+		tritonGraph = new Graph(store(boxConfiguration.args().get("workspace"))).loadStashes("Ness").as(TritonGraph.class);
+		box = (TritonBox) new TritonBox(boxConfiguration).put(tritonGraph).open();
+		tritonGraph = box.graph();
 	}
 
 	@Test
 	@Ignore
 	public void addTank() throws Exception {
-		assertEquals("shouldn't exists tanks", 0, nessGraph.tankList().size());
+		assertEquals("shouldn't exists tanks", 0, tritonGraph.tankList().size());
 		new AddTankAction(box, TANK).execute();
-		assertEquals("added to the graph", 1, nessGraph.tankList().size());
+		assertEquals("added to the graph", 1, tritonGraph.tankList().size());
 		assertTrue(new File(box.datalakeDirectory(), TANK).exists());
-		assertTrue(box.busService().pipes().containsKey(Probes.feed(nessGraph.tank(0)) + "#" + Probes.flow(nessGraph.tank(0))));
+		assertTrue(box.busService().pipes().containsKey(Probes.feed(tritonGraph.tank(0)) + "#" + Probes.flow(tritonGraph.tank(0))));
 		checkProduceAndConsume();
 		waitFinish();
 	}
@@ -56,7 +56,7 @@ public class ActionTests {
 	@Ignore
 	public void pauseTank() throws Exception {
 		new AddTankAction(box, TANK).execute();
-		assertEquals("added to the graph", 1, nessGraph.tankList().size());
+		assertEquals("added to the graph", 1, tritonGraph.tankList().size());
 		new PauseTankAction(box, TANK).execute();
 		checkFailsProduceAndConsume();
 		waitFinish();
@@ -66,7 +66,7 @@ public class ActionTests {
 	@Ignore
 	public void addExternalBus() {
 		new AddExternalBusAction(box, "monentia-pro", "tcp://bus.monentia.com:61616", "cesar", "trust8&sheet").execute();
-		assertEquals("added bus to the graph", 1, nessGraph.externalBusList().size());
+		assertEquals("added bus to the graph", 1, tritonGraph.externalBusList().size());
 	}
 
 	@Test

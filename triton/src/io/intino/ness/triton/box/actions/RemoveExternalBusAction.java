@@ -2,7 +2,7 @@ package io.intino.ness.triton.box.actions;
 
 import io.intino.ness.triton.box.TritonBox;
 import io.intino.ness.triton.graph.ExternalBus;
-import io.intino.ness.triton.graph.NessGraph;
+import io.intino.ness.triton.graph.TritonGraph;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class RemoveExternalBusAction {
 		return Action.OK;
 	}
 
-	private NessGraph ness() {
+	private TritonGraph ness() {
 		return box.graph();
 	}
 }

@@ -32,9 +32,9 @@ public class SetSessionManager_ {
 			session.put("tank1", new Timetag(now, Scale.Hour), "0", i);
 		}
 		session.close();
-		Digester digester = new Digester(new FileDatalake(new File("temp/datalake")), new File("temp/session"));
-		digester.push(handler.sessions());
-		digester.seal();
+		FileSessionManager fileSessionManager = new FileSessionManager(new FileDatalake(new File("temp/datalake")), new File("temp/session"));
+		fileSessionManager.push(handler.sessions());
+		fileSessionManager.seal();
 		ZetReader reader = new ZetReader(new File("temp/datalake/sets/tank1/2019022816/0.zim"));
 		for (int i = 1; i < 30; i++) TestCase.assertEquals(reader.next(), i);
 	}

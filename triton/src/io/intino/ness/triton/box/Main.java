@@ -1,6 +1,6 @@
 package io.intino.ness.triton.box;
 
-import io.intino.ness.triton.graph.NessGraph;
+import io.intino.ness.triton.graph.TritonGraph;
 import io.intino.tara.io.Stash;
 import io.intino.tara.magritte.Graph;
 import io.intino.tara.magritte.stores.InMemoryFileStore;
@@ -14,8 +14,8 @@ public class Main {
 		Graph graph = new Graph(store(box.storeDirectory())).loadStashes("Ness");
 		if (box.configuration.args().containsKey("configurationModel") && !box.configuration.args().get("configurationModel").isEmpty())
 			graph.loadStashes(box.configuration.args().get("configurationModel"));
-		box.put(graph.as(NessGraph.class));
-		graph.as(NessGraph.class).datalake().tankList().forEach(t -> box.datalake().eventStore().tank(t.name()));
+		box.put(graph.as(TritonGraph.class));
+		graph.as(TritonGraph.class).datalake().tankList().forEach(t -> box.datalake().eventStore().tank(t.name()));
 		box.open();
 		Runtime.getRuntime().addShutdownHook(new Thread(box::close));
 	}

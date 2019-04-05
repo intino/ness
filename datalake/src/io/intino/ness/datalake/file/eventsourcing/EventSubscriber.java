@@ -1,6 +1,7 @@
 package io.intino.ness.datalake.file.eventsourcing;
 
 import io.intino.ness.datalake.Datalake;
+import io.intino.ness.datalake.file.eventsourcing.EventPump.EventHandler;
 
 public interface EventSubscriber {
 
@@ -17,10 +18,10 @@ public interface EventSubscriber {
 	}
 
 	interface Subscription {
-		default void using(EventPump.EventHandler... eventHandlers) {
+		default void using(EventHandler... eventHandlers) {
 			using(null, eventHandlers);
 		}
 
-		void using(String clientId, EventPump.EventHandler... eventHandlers);
+		void using(String clientId, EventHandler... eventHandlers);
 	}
 }

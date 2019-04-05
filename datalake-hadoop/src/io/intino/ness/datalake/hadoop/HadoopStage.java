@@ -1,9 +1,9 @@
 package io.intino.ness.datalake.hadoop;
 
 import io.intino.alexandria.logger.Logger;
-import io.intino.ness.core.Session;
-import io.intino.ness.core.Stage;
 import io.intino.ness.datalake.hadoop.sessions.SessionWriter;
+import io.intino.ness.ingestion.Session;
+import io.intino.ness.ingestion.Stage;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -12,20 +12,20 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static java.time.Instant.now;
+import static java.util.Arrays.stream;
 
 public class HadoopStage implements Stage {
 	private final FileSystem fs;
 	private final Path path;
 	private final Path sessions;
 
-	HadoopStage(FileSystem fs, Path path, Path sessions) {
+	HadoopStage(FileSystem fs, Path stagePath, Path sessionsPath) {
 		this.fs = fs;
-		this.path = path;
-		this.sessions = sessions;
+		this.path = stagePath;
+		this.sessions = sessionsPath;
 	}
 
 	public Path path() {
@@ -46,7 +46,7 @@ public class HadoopStage implements Stage {
 	public void clear() {
 		try {
 			Path destination = new Path(sessions, sealDateFolderName());
-			Arrays.stream(fs.listStatus(destination, this::isFile)).forEach(f -> move(f, destination));
+			stream(fs.listStatus(destination, this::isFile)).forEach(f -> move(f, destination));
 		} catch (IOException e) {
 			Logger.error(e);
 		}

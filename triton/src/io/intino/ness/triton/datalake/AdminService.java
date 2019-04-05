@@ -4,7 +4,7 @@ import io.intino.alexandria.jms.Consumer;
 import io.intino.alexandria.logger.Logger;
 import io.intino.ness.triton.box.TritonBox;
 import io.intino.ness.triton.graph.Datalake;
-import io.intino.ness.triton.graph.NessGraph;
+import io.intino.ness.triton.graph.TritonGraph;
 import io.intino.ness.triton.graph.User;
 import org.apache.activemq.command.ActiveMQDestination;
 
@@ -24,13 +24,13 @@ public class AdminService implements Consumer {
 	@Override
 	public void consume(Message message) {
 		String text = Consumer.textFrom(message);
-		NessGraph nessGraph = box.graph();
-		if (text.startsWith("users")) replyTo(message, nessGraph.userList().stream().map(User::name).collect(joining(",")));
+		TritonGraph tritonGraph = box.graph();
+		if (text.startsWith("users")) replyTo(message, tritonGraph.userList().stream().map(User::name).collect(joining(",")));
 		if (text.startsWith("seal")) {
-			box.datalake().seal();
+			box.sessionManager().seal();
 			replyTo(message, "sealed");
 		} else if (text.startsWith("tanks"))
-			replyTo(message, nessGraph.datalake().tankList().stream().map(Datalake.Tank::name).collect(joining(";")));
+			replyTo(message, tritonGraph.datalake().tankList().stream().map(Datalake.Tank::name).collect(joining(";")));
 	}
 
 	private void replyTo(Message request, String reply) {

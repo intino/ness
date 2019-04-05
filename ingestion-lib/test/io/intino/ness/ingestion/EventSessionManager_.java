@@ -19,12 +19,6 @@ import static junit.framework.TestCase.assertEquals;
 
 public class EventSessionManager_ {
 
-	private static void deleteDirectory(File directoryToBeDeleted) {
-		File[] allContents = directoryToBeDeleted.listFiles();
-		if (allContents != null) for (File file : allContents) deleteDirectory(file);
-		directoryToBeDeleted.delete();
-	}
-
 	@Test
 	public void should_create_an_event_session() {
 		SessionHandler handler = new SessionHandler();
@@ -37,9 +31,9 @@ public class EventSessionManager_ {
 			session.put("tank1", new Timetag(now, Scale.Hour), message);
 		}
 		session.close();
-		Digester digester = new Digester(new FileDatalake(new File("temp/datalake")), new File("temp/session"));
-		digester.push(handler.sessions());
-		digester.seal();
+		FileSessionManager fileSessionManager = new FileSessionManager(new FileDatalake(new File("temp/datalake")), new File("temp/session"));
+		fileSessionManager.push(handler.sessions());
+		fileSessionManager.seal();
 		ZimReader reader = new ZimReader(new File("temp/datalake/events/tank1/2019022816.zim"));
 		for (int i = 0; i < 30; i++) {
 			Message next = reader.next();
@@ -48,8 +42,8 @@ public class EventSessionManager_ {
 		}
 	}
 
-	//TODO: merge with existing event files
 
+	//TODO: merge with existing event files
 	private Message message(Instant instant, int index) {
 		return new Message("tank1").set("ts", instant.toString()).set("entries", index);
 	}
@@ -57,6 +51,12 @@ public class EventSessionManager_ {
 	@After
 	public void tearDown() {
 		deleteDirectory(new File("temp"));
+	}
+
+	private void deleteDirectory(File directoryToBeDeleted) {
+		File[] allContents = directoryToBeDeleted.listFiles();
+		if (allContents != null) for (File file : allContents) deleteDirectory(file);
+		directoryToBeDeleted.delete();
 	}
 
 }

@@ -9,7 +9,7 @@ Artifact("io.intino.ness", "1.0.0") triton as Product
 		Compile("io.intino.alexandria", "jmx", "1.0.1")
 		Compile("io.intino.alexandria", "logger", "2.0.0")
 		Compile("io.intino.alexandria", "logger4j", "1.0.0")
-
+		Compile("io.intino.ness", "datalake-hadoop","1.0.0")
 		Compile("io.intino.ness", "datalake", "1.0.0")
 
 		Compile("org.apache.activemq", "activemq-broker", "5.15.2")

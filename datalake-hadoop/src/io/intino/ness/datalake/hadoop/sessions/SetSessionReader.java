@@ -3,7 +3,7 @@ package io.intino.ness.datalake.hadoop.sessions;
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.zet.ZetReader;
 import io.intino.alexandria.zet.ZetStream;
-import io.intino.ness.core.Fingerprint;
+import io.intino.ness.ingestion.Fingerprint;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;

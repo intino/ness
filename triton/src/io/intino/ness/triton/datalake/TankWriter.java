@@ -2,9 +2,9 @@ package io.intino.ness.triton.datalake;
 
 import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
-import io.intino.ness.core.Fingerprint;
-import io.intino.ness.core.Session;
 import io.intino.ness.datalake.Datalake.EventStore.Tank;
+import io.intino.ness.ingestion.Fingerprint;
+import io.intino.ness.ingestion.Session;
 import io.intino.ness.triton.box.TritonBox;
 import io.intino.ness.triton.box.Utils;
 import io.intino.ness.triton.bus.BusManager;
@@ -52,7 +52,7 @@ public class TankWriter {
 	}
 
 	private void save(Tank tank, io.intino.alexandria.inl.Message message) {
-		box.datalake().push(Stream.of(new TemporalSession(tank, timetag(message), message)));
+		box.sessionManager().push(Stream.of(new TemporalSession(tank, timetag(message), message)));
 	}
 
 	private Timetag timetag(io.intino.alexandria.inl.Message message) {

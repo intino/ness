@@ -2,7 +2,7 @@ package io.intino.ness.triton.box.actions;
 
 import io.intino.ness.triton.box.TritonBox;
 import io.intino.ness.triton.graph.JMSConnector;
-import io.intino.ness.triton.graph.NessGraph;
+import io.intino.ness.triton.graph.TritonGraph;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ public class RemoveJmsConnectorAction {
 		return Action.OK;
 	}
 
-	private NessGraph ness() {
+	private TritonGraph ness() {
 		return box.graph();
 	}
 
