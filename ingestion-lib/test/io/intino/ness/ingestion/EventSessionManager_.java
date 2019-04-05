@@ -48,6 +48,8 @@ public class EventSessionManager_ {
 		}
 	}
 
+	//TODO: merge with existing event files
+
 	private Message message(Instant instant, int index) {
 		return new Message("tank1").set("ts", instant.toString()).set("entries", index);
 	}
