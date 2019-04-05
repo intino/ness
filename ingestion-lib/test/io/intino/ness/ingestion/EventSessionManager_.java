@@ -1,21 +1,16 @@
 package io.intino.ness.ingestion;
 
+import io.intino.alexandria.Scale;
+import io.intino.alexandria.Timetag;
 import io.intino.alexandria.inl.Message;
-import io.intino.alexandria.logger.Logger;
-import io.intino.alexandria.zim.ZimBuilder;
-import io.intino.alexandria.zim.ZimReader;
+import io.intino.ness.datalake.FileDatalake;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.Instant;
-import java.util.stream.Stream;
-
-import static org.junit.Assert.*;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 public class EventSessionManager_ {
 
@@ -27,52 +22,16 @@ public class EventSessionManager_ {
 
 	@Test
 	public void should_create_an_event_session() {
-		deleteDirectory(new File("temp"));
-		Instant instant = Instant.parse("2018-09-10T00:00:00Z");
-		File file = new File("temp/events/tank1/201809" + ZimReader.ZimExtension);
-		assertTrue(file.exists());
-		ZimReader zimReader = new ZimReader(file);
-		assertEquals(message(instant, 0).toString(), zimReader.next().toString());
-		assertFalse(zimReader.hasNext());
-	}
-
-	@Test
-	public void should_create_an_event_session_and_merge_when_sealing_it() {
-		ZimBuilder writer = new ZimBuilder(new File("temp/events/tank1/201809.zim"));
-		Instant instant = Instant.parse("2018-09-09T00:00:00Z");
-		writer.put(message(instant, -1));
-		File file = new File("temp/events/tank1/201809" + ZimReader.ZimExtension);
-		assertTrue(file.exists());
-		ZimReader zimReader = new ZimReader(file);
-		assertEquals(message(instant, -1).toString(), zimReader.next().toString());
-		assertEquals(message(Instant.parse("2018-09-10T00:00:00Z"), 0).toString(), zimReader.next().toString());
-		assertFalse(zimReader.hasNext());
-	}
-
-	private Stream<Session> sessions() {
-		return FS.filesIn(new File("test-res/eventstage"), f -> true)
-				.map(file -> new Session() {
-					@Override
-					public String name() {
-						String name = file.getName();
-						return name.substring(0, name.lastIndexOf("."));
-					}
-
-					@Override
-					public Type type() {
-						return Type.event;
-					}
-
-					@Override
-					public InputStream inputStream() {
-						try {
-							return new FileInputStream(file);
-						} catch (IOException e) {
-							Logger.error(e);
-							return null;
-						}
-					}
-				});
+		SessionHandler handler = new SessionHandler();
+		EventSession session = handler.createEventSession();
+		for (int i = 0; i < 100; i++) {
+			LocalDateTime now = LocalDateTime.now();
+			session.put("tank1", new Timetag(now, Scale.Day), message(now.toInstant(ZoneOffset.UTC), i));
+		}
+		session.close();
+		Digester digester = new Digester(new FileDatalake(new File("temp/datalake")), new File("temp/session"));
+		digester.push(handler.sessions());
+		digester.seal();
 	}
 
 	private Message message(Instant instant, int index) {
