@@ -5,7 +5,6 @@ import io.intino.alexandria.inl.Message;
 import io.intino.ness.datalake.Datalake;
 
 public interface EventPump {
-
 	Reflow reflow(Reflow.Filter filter);
 
 	interface Reflow {

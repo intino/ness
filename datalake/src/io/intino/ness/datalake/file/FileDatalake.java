@@ -13,7 +13,9 @@ public class FileDatalake implements Datalake {
 	}
 
 	private void checkStore() {
-		//TODO
+		setStoreFolder().mkdirs();
+		eventStoreFolder().mkdirs();
+		stageFolder().mkdirs();
 	}
 
 	@Override

@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.intino.ness.ingestion.SessionHandler.SessionExtension;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.stream.Collectors.toList;
 
@@ -40,7 +41,7 @@ public class SetSessionManager {
 	}
 
 	private static List<File> sessionsOf(File stageFolder) {
-		return FS.filesIn(stageFolder, f -> f.getName().endsWith(SessionHandler.SessionExtension)).collect(Collectors.toList());
+		return FS.filesIn(stageFolder, f -> f.getName().endsWith(SessionExtension)).collect(Collectors.toList());
 	}
 
 	private static File fileFor(Session session, File stageFolder) {
@@ -48,12 +49,12 @@ public class SetSessionManager {
 	}
 
 	private static String filename(Session session) {
-		return session.name() + SessionHandler.SessionExtension;
+		return session.name() + SessionExtension;
 	}
 
 
 	private static String extensionOf(Session.Type type) {
-		return "." + type.name() + SessionHandler.SessionExtension;
+		return "." + type.name() + SessionExtension;
 	}
 
 	private void seal() {

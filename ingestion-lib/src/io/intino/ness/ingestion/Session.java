@@ -3,8 +3,8 @@ package io.intino.ness.ingestion;
 import java.io.InputStream;
 
 public interface Session {
-	String SessionExtension = ".blob";
-	String EventSessionExtension = ".event.blob";
+	String SessionExtension = ".session";
+	String EventSessionExtension = ".event.session";
 	String name();
 
 	Type type();
