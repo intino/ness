@@ -7,6 +7,7 @@ import io.intino.alexandria.triplestore.TripleStore;
 import io.intino.alexandria.zet.ZetReader;
 import io.intino.alexandria.zet.ZetStream;
 import io.intino.alexandria.zet.ZetWriter;
+import io.intino.ness.datalake.file.FileSetStore;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -14,8 +15,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.intino.ness.datalake.FileSetStore.MetadataFilename;
-import static io.intino.ness.datalake.FileSetStore.SetExtension;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.stream.Collectors.toList;
 
@@ -76,7 +75,7 @@ public class SetSessionManager {
 	}
 
 	private File metadataFileOf(Fingerprint fingerprint) {
-		File file = new File(setStoreFolder, fingerprint.tank() + "/" + fingerprint.timetag() + "/" + MetadataFilename);
+		File file = new File(setStoreFolder, fingerprint.tank() + "/" + fingerprint.timetag() + "/" + FileSetStore.MetadataFilename);
 		file.getParentFile().mkdirs();
 		return file;
 	}
@@ -142,7 +141,7 @@ public class SetSessionManager {
 	}
 
 	private File merge(Fingerprint fingerprint, List<SetSessionFileReader> readers) throws IOException {
-		File tempFile = File.createTempFile(fingerprint.toString(), SetExtension, tempFolder);
+		File tempFile = File.createTempFile(fingerprint.toString(), FileSetStore.SetExtension, tempFolder);
 		List<ZetStream> streams = zetStreamsOf(fingerprint, readers);
 		new ZetWriter(tempFile).write(streams.size() == 1 ? streams.get(0) : new ZetStream.Merge(streams));
 		return tempFile;
@@ -167,7 +166,7 @@ public class SetSessionManager {
 	}
 
 	private File fileOf(Fingerprint fingerprint) {
-		File file = new File(setStoreFolder, fingerprint + SetExtension);
+		File file = new File(setStoreFolder, fingerprint + FileSetStore.SetExtension);
 		file.getParentFile().mkdirs();
 		return file;
 	}

@@ -3,10 +3,11 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/columnar/columnar.iml" filepath="$PROJECT_DIR$/columnar/columnar.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/datalake/datalake.iml" filepath="$PROJECT_DIR$/datalake/datalake.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ingestion-lib/ingestion-lib.iml" filepath="$PROJECT_DIR$/ingestion-lib/ingestion-lib.iml" group="ingestion"/>
-      <module fileurl="file://$PROJECT_DIR$/ingestion-service/ingestion-service.iml" filepath="$PROJECT_DIR$/ingestion-service/ingestion-service.iml" group="ingestion"/>
-      <module fileurl="file://$PROJECT_DIR$/kernel-hadoop/kernel-hadoop.iml" filepath="$PROJECT_DIR$/kernel-hadoop/kernel-hadoop.iml" group="ingestion" />
+      <module fileurl="file://$PROJECT_DIR$/datalake-hadoop/datalake-hadoop.iml" filepath="$PROJECT_DIR$/datalake-hadoop/datalake-hadoop.iml" group="ingestion" />
+      <module fileurl="file://$PROJECT_DIR$/ingestion-lib/ingestion-lib.iml" filepath="$PROJECT_DIR$/ingestion-lib/ingestion-lib.iml" group="ingestion" />
+      <module fileurl="file://$PROJECT_DIR$/triton/ingestion-service.iml" filepath="$PROJECT_DIR$/triton/ingestion-service.iml" group="ingestion" />
     </modules>
   </component>
 </project>

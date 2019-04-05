@@ -1,15 +1,11 @@
 package io.intino.ness.ingestion;
 
 import io.intino.alexandria.logger.Logger;
-import io.intino.ness.ingestion.Session.Type;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.util.stream.Stream;
 
-import static io.intino.ness.ingestion.FS.copyInto;
-import static io.intino.ness.ingestion.Session.EventSessionExtension;
-import static io.intino.ness.ingestion.Session.SessionExtension;
 import static java.time.Instant.now;
 import static java.util.Arrays.stream;
 
@@ -36,7 +32,7 @@ class FileStage implements Stage {
 	}
 
 	private void push(Session session, File stageFolder) {
-		copyInto(fileFor(session, stageFolder), session.inputStream());
+		FS.copyInto(fileFor(session, stageFolder), session.inputStream());
 	}
 
 	private File fileFor(Session session, File stageFolder) {
@@ -44,7 +40,7 @@ class FileStage implements Stage {
 	}
 
 	private String filename(Session session) {
-		return session.name() + (session.type() == Type.event ? EventSessionExtension : SessionExtension);
+		return session.name() + (session.type() == Session.Type.event ? Session.EventSessionExtension : Session.SessionExtension);
 	}
 
 	private void move(File stageFile, File treatedFolder) {
@@ -68,7 +64,7 @@ class FileStage implements Stage {
 	}
 
 	private boolean sessions(File file) {
-		return file.isDirectory() || file.getName().endsWith(SessionExtension);
+		return file.isDirectory() || file.getName().endsWith(Session.SessionExtension);
 	}
 
 	private static class FileSession implements Session {

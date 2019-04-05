@@ -1,6 +1,6 @@
 package io.intino.ness.ingestion;
 
-import io.intino.ness.datalake.FileDatalake;
+import io.intino.ness.datalake.file.FileDatalake;
 
 import java.io.File;
 import java.util.stream.Stream;

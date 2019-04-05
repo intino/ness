@@ -1,6 +1,5 @@
 package io.intino.ness.ingestion;
 
-import io.intino.ness.ingestion.EventSorter;
 import org.junit.Ignore;
 import org.junit.Test;
 

@@ -4,7 +4,7 @@ import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.inl.Message;
 import io.intino.alexandria.zim.ZimReader;
-import io.intino.ness.datalake.FileDatalake;
+import io.intino.ness.datalake.file.FileDatalake;
 import org.junit.After;
 import org.junit.Test;
 

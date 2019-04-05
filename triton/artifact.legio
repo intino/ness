@@ -1,0 +1,42 @@
+dsl Legio
+
+Artifact("io.intino.ness", "1.0.0") triton as Product
+	Model("Proteo", "2.1.12", "2.3.8")
+	Box("Konos", "5.0.9")
+	Imports
+		Compile("io.intino.alexandria", "scheduler-framework", "1.0.0")
+		Compile("io.intino.alexandria", "slack-framework", "1.0.0")
+		Compile("io.intino.alexandria", "jmx", "1.0.1")
+		Compile("io.intino.alexandria", "logger", "2.0.0")
+		Compile("io.intino.alexandria", "logger4j", "1.0.0")
+
+		Compile("io.intino.ness", "datalake", "1.0.0")
+
+		Compile("org.apache.activemq", "activemq-broker", "5.15.2")
+		Compile("org.apache.activemq", "activemq-mqtt", "5.15.2")
+		Compile("org.apache.activemq", "activemq-kahadb-store", "5.15.2")
+		Compile("org.apache.activemq", "activemq-jaas", "5.15.2")
+		Compile("org.apache.activemq", "activemq-runtime-config", "5.15.2")
+
+	Code("io.intino.ness.triton")
+	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true) as Runnable("io.intino.ness.triton.box.Main")
+	Distribution(intino.frameworks, intino.languages)
+	Parameter("workspace", "./temp/ness/")
+	Parameter("connector_id", "id")
+	Parameter("broker_port", "63000")
+	Parameter("mqtt_port", "1884")
+	Parameter("remote_datalake_url","")
+	Parameter("remote_datalake_user","")
+	Parameter("remote_datalake_password","")
+	Parameter("scale")
+	Parameter("configurationModel")
+	Parameter("remotePersistence", "")
+	Parameter("slackToken")
+
+Repository("intino-maven") intino
+	Release("https://artifactory.intino.io/artifactory/releases")
+	Release("https://artifactory.intino.io/artifactory/release-frameworks") frameworks
+	Language("https://artifactory.intino.io/artifactory/release-languages") languages
+
+RunConfiguration dev
+	Argument(name = "scale", value = "Day")

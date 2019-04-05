@@ -4,6 +4,7 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.zim.ZimBuilder;
 import io.intino.alexandria.zim.ZimReader;
 import io.intino.alexandria.zim.ZimStream;
+import io.intino.ness.datalake.file.FileEventStore;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,9 +13,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static io.intino.ness.datalake.FileEventStore.EventExtension;
-import static io.intino.ness.ingestion.Session.EventSessionExtension;
 
 public class EventSessionManager {
 
@@ -26,7 +24,7 @@ public class EventSessionManager {
 	}
 
 	private static Stream<File> eventSessions(File eventStageFolder) {
-		return FS.filesIn(eventStageFolder, f -> f.getName().endsWith(EventSessionExtension) && f.length() > 0f);
+		return FS.filesIn(eventStageFolder, f -> f.getName().endsWith(Session.EventSessionExtension) && f.length() > 0f);
 	}
 
 	private static ZimReader reader(File zimFile) {
@@ -38,7 +36,7 @@ public class EventSessionManager {
 	}
 
 	private static String cleanedNameOf(File file) {
-		return file.getName().substring(0, file.getName().indexOf("#")).replace("-", "/").replace(EventSessionExtension, "");
+		return file.getName().substring(0, file.getName().indexOf("#")).replace("-", "/").replace(Session.EventSessionExtension, "");
 	}
 
 	private static class Sealer {
@@ -73,7 +71,7 @@ public class EventSessionManager {
 		}
 
 		private File datalakeFile(Fingerprint fingerprint) {
-			File zimFile = new File(eventStoreFolder, fingerprint.toString() + EventExtension);
+			File zimFile = new File(eventStoreFolder, fingerprint.toString() + FileEventStore.EventExtension);
 			zimFile.getParentFile().mkdirs();
 			return zimFile;
 		}

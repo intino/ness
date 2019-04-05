@@ -2,28 +2,14 @@ package io.intino.ness.ingestion;
 
 import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
-import io.intino.alexandria.inl.Message;
-import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.zet.ZetReader;
-import io.intino.alexandria.zet.ZetStream;
-import io.intino.alexandria.zim.ZimReader;
-import io.intino.ness.datalake.FileDatalake;
-import io.intino.ness.datalake.FileSetStore;
+import io.intino.ness.datalake.file.FileDatalake;
 import junit.framework.TestCase;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.File;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 public class SetSessionManager_ {
 

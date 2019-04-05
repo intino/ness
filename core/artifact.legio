@@ -1,0 +1,11 @@
+dsl Legio
+
+Artifact("io.intino.ness", "1.0.0") core
+	Imports
+		Compile("io.intino.alexandria", "zim", "1.0.5")
+		Compile("io.intino.alexandria", "zet", "1.0.4")
+	Package(mode = ModulesAndLibrariesLinkedByManifest)
+	Distribution(intino.release)
+
+Repository("intino-maven") intino
+	Release("https://artifactory.intino.io/artifactory/release-libraries") release
