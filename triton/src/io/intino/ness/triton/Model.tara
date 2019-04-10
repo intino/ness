@@ -1,13 +1,5 @@
 dsl Proteo
 
-Concept Pipe
-	var string origin
-	var string destination
-	var object:io.intino.ness.core.functions.MessageFunction transformer = empty
-
-Concept Filter
-	var Datalake.Tank tank
-	var object:io.intino.ness.core.functions.MessageFilter filter = empty
 
 Concept User
 	var string name
@@ -25,9 +17,6 @@ Concept JMSConnector
 	var string[] topics
 	var boolean enabled = true
 
-
-Concept:{1..1} Datalake
-	var word:{Local Remote} persistence
-	Concept Tank
-		var string name
-		var boolean active = true
+Concept Tank
+	var string name
+	var word:{Event Set} type

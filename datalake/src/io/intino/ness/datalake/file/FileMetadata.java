@@ -41,6 +41,4 @@ public class FileMetadata {
 	private static File tubFolderOf(File file) {
 		return file.getParentFile();
 	}
-
-
 }

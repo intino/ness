@@ -1,9 +1,9 @@
 dsl Legio
 
-Artifact(groupId = "io.intino.ness", version = "1.0.0") ingestion-lib
+Artifact(groupId = "org.example", version = "1.0.0") mirror-client as Platform
+	Model(language = "Verso", version = "LATEST", sdk = "LATEST")
+	Box(language = "Konos", version = "LATEST", sdk = "LATEST")
 	Imports
-		Compile ("io.intino.ness", "datalake", "1.0.0")
-		Compile ("io.intino.alexandria", "mapp", "1.0.0")
 		Test(groupId = "junit", artifactId = "junit", version = "LATEST")
 
 	Package(mode = ModulesAndLibrariesLinkedByManifest)

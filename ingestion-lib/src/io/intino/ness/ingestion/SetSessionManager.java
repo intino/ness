@@ -114,8 +114,14 @@ public class SetSessionManager {
 		fingerprints.parallelStream().forEach(fp -> {
 			if (count % 10000 == 0) Logger.info(((count * 100.) / size) + "%");
 			seal(fp, readers);
+			deleteIndex(fp);
 			count++;
 		});
+	}
+
+	private void deleteIndex(Fingerprint fp) {
+		File file = new File(fileOf(fp).getParent(), FileSetStore.IndexFileName);
+		if (file.exists()) file.delete();
 	}
 
 	private List<SetSessionFileReader> setSessionReaders() {

@@ -6,6 +6,8 @@
       <module fileurl="file://$PROJECT_DIR$/datalake/datalake.iml" filepath="$PROJECT_DIR$/datalake/datalake.iml" />
       <module fileurl="file://$PROJECT_DIR$/datalake-hadoop/datalake-hadoop.iml" filepath="$PROJECT_DIR$/datalake-hadoop/datalake-hadoop.iml" group="ingestion" />
       <module fileurl="file://$PROJECT_DIR$/ingestion-lib/ingestion-lib.iml" filepath="$PROJECT_DIR$/ingestion-lib/ingestion-lib.iml" group="ingestion" />
+      <module fileurl="file://$PROJECT_DIR$/mirror-client/mirror-client.iml" filepath="$PROJECT_DIR$/mirror-client/mirror-client.iml" group="mirroring" />
+      <module fileurl="file://$PROJECT_DIR$/mirror-service/mirror-service.iml" filepath="$PROJECT_DIR$/mirror-service/mirror-service.iml" group="mirroring" />
       <module fileurl="file://$PROJECT_DIR$/triton/triton.iml" filepath="$PROJECT_DIR$/triton/triton.iml" group="ingestion" />
     </modules>
   </component>

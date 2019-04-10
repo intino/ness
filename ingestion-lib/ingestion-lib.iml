@@ -7,7 +7,6 @@
       <sourceFolder url="file://$MODULE_DIR$/gen" isTestSource="false" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/res" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/test-res" type="java-test-resource" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -16,7 +15,6 @@
     <orderEntry type="module" module-name="datalake" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:primitives:1.0.2" level="project" />
     <orderEntry type="library" name="Legio: eu.medsea.mimeutil:mime-util:2.1.1" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.alexandria:triplestore:1.0.3" level="project" />
     <orderEntry type="library" name="Legio: com.sun.xml.security:xml-security-impl:1.0" level="project" />
     <orderEntry type="library" name="Legio: com.google.code.gson:gson:2.8.0" level="project" />
     <orderEntry type="library" name="Legio: org.apache.activemq:activemq-client:5.15.2" level="project" />
@@ -31,5 +29,7 @@
     <orderEntry type="library" name="Legio: io.intino.alexandria:exceptions:1.0.0" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:json:1.0.0" level="project" />
     <orderEntry type="library" name="Legio: org.slf4j:slf4j-api:1.7.25" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:mapp:1.0.0" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:triplestore:1.0.3" level="project" />
   </component>
 </module>

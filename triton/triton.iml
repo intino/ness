@@ -68,7 +68,6 @@
     <orderEntry type="library" name="Legio: io.intino.alexandria:exceptions:1.0.0" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:json:1.0.0" level="project" />
     <orderEntry type="library" name="Legio: com.ullink.slack:simpleslackapi:0.6.0" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.commons:commons-lang3:3.4" level="project" />
     <orderEntry type="library" name="Legio: org.glassfish.tyrus:tyrus-client:1.8.3" level="project" />
     <orderEntry type="library" name="Legio: org.glassfish.tyrus:tyrus-core:1.8.3" level="project" />
     <orderEntry type="library" name="Legio: org.glassfish.tyrus:tyrus-spi:1.8.3" level="project" />
@@ -94,7 +93,6 @@
     <orderEntry type="library" name="Legio: org.quartz-scheduler:quartz-jobs:2.2.1" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:scheduler-framework:1.0.0" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:slack-framework:1.0.0" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.alexandria:triplestore:1.0.3" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:primitives:1.0.2" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:inl:1.0.4" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:core-framework:1.0.1" level="project" />
@@ -116,11 +114,9 @@
     <orderEntry type="library" name="Legio: xmlenc:xmlenc:0.52" level="project" />
     <orderEntry type="library" name="Legio: commons-httpclient:commons-httpclient:3.1" level="project" />
     <orderEntry type="library" name="Legio: commons-io:commons-io:2.4" level="project" />
-    <orderEntry type="library" name="Legio: commons-collections:commons-collections:3.2.1" level="project" />
     <orderEntry type="library" name="Legio: commons-lang:commons-lang:2.6" level="project" />
     <orderEntry type="library" name="Legio: commons-configuration:commons-configuration:1.6" level="project" />
     <orderEntry type="library" name="Legio: commons-digester:commons-digester:1.8" level="project" />
-    <orderEntry type="library" name="Legio: commons-beanutils:commons-beanutils:1.7.0" level="project" />
     <orderEntry type="library" name="Legio: commons-beanutils:commons-beanutils-core:1.8.0" level="project" />
     <orderEntry type="library" name="Legio: org.codehaus.jackson:jackson-core-asl:1.9.13" level="project" />
     <orderEntry type="library" name="Legio: org.codehaus.jackson:jackson-mapper-asl:1.9.13" level="project" />
@@ -165,5 +161,12 @@
     <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-mapreduce-client-jobclient:2.6.0" level="project" />
     <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-annotations:2.6.0" level="project" />
     <orderEntry type="module" module-name="ingestion-lib" />
+    <orderEntry type="library" name="Legio: com.opencsv:opencsv:4.1" level="project" />
+    <orderEntry type="library" name="Legio: org.apache.commons:commons-lang3:3.6" level="project" />
+    <orderEntry type="library" name="Legio: org.apache.commons:commons-text:1.1" level="project" />
+    <orderEntry type="library" name="Legio: commons-beanutils:commons-beanutils:1.9.3" level="project" />
+    <orderEntry type="library" name="Legio: commons-collections:commons-collections:3.2.2" level="project" />
+    <orderEntry type="library" name="Legio: org.siani.itrules:itrules:1.9.3" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:triplestore:1.0.4" level="project" />
   </component>
 </module>

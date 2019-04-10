@@ -5,9 +5,13 @@ import io.intino.ness.datalake.Datalake;
 import java.io.File;
 import java.util.stream.Stream;
 
+import static io.intino.alexandria.zim.ZimReader.ZimExtension;
+
 public class FileSetStore implements Datalake.SetStore {
 	public static final String SetExtension = ".zet";
 	public static final String MetadataFilename = ".metadata";
+	public static final String IndexFileName = ".mapp";
+
 
 	private final File root;
 

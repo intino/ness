@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/test-res" type="java-test-resource" />
+      <excludeFolder url="file://$MODULE_DIR$/temp" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -16,7 +17,6 @@
     <orderEntry type="library" name="Legio: io.intino.alexandria:primitives:1.0.2" level="project" />
     <orderEntry type="library" name="Legio: eu.medsea.mimeutil:mime-util:2.1.1" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:logger:2.0.0" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.alexandria:triplestore:1.0.3" level="project" />
     <orderEntry type="library" name="Legio: com.sun.xml.security:xml-security-impl:1.0" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:jms:1.0.1" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:exceptions:1.0.0" level="project" />
@@ -29,5 +29,7 @@
     <orderEntry type="library" name="Legio: org.apache.geronimo.specs:geronimo-j2ee-management_1.1_spec:1.0.1" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:zim:1.0.5" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:zet:1.0.4" level="project" />
+    <orderEntry type="module" module-name="columnar" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:triplestore:1.0.3" level="project" />
   </component>
 </module>

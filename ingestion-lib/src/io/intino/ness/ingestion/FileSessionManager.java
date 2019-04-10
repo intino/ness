@@ -23,7 +23,12 @@ public class FileSessionManager implements SessionManager {
 	public void seal() {
 		sealEvents();
 		sealSets();
+		makeSetIndexes();
 		stage.clear();
+	}
+
+	private void makeSetIndexes() {
+		new SetIndexer(datalake.setStoreFolder()).make();
 	}
 
 	private void sealSets() {
