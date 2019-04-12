@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "1.0.0") datalake-hadoop
+Artifact("io.intino.ness", "2.0.0") datalake-hdfs
 	Imports
 		Compile("org.apache.hadoop", "hadoop-client", "2.6.0")
 		Compile("io.intino.alexandria", "logger", "2.0.0")

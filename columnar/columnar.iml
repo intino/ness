@@ -31,8 +31,13 @@
     <orderEntry type="library" name="Legio: commons-beanutils:commons-beanutils:1.9.3" level="project" />
     <orderEntry type="library" name="Legio: commons-logging:commons-logging:1.2" level="project" />
     <orderEntry type="library" name="Legio: commons-collections:commons-collections:3.2.2" level="project" />
-    <orderEntry type="library" scope="TEST" name="Legio: junit:junit:4.13-beta-1" level="project" />
     <orderEntry type="library" name="Legio: org.siani.itrules:itrules:1.9.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Legio: commons-io:commons-io:2.6" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:zet:1.0.4" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:logger:2.0.0" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:assa:1.0.1" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:triplestore:1.0.4" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:primitives:1.0.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Legio: junit:junit:4.13-beta-2" level="project" />
   </component>
 </module>

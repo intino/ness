@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "1.0.0") triton as Product(productLanguage="triton")
+Artifact("io.intino.ness", "2.0.0") triton as Product()//productLanguage="triton"
 	Model("Proteo", "2.1.12", "2.3.8")
 	Box("Konos", "5.0.9")
 	Imports

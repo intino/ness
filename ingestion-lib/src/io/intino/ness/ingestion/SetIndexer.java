@@ -18,7 +18,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
@@ -75,8 +74,8 @@ public class SetIndexer {
 					}
 
 					@Override
-					public List<String> value() {
-						return singletonList(zet.name);
+					public String value() {
+						return zet.name;
 					}
 				};
 			}

@@ -104,7 +104,7 @@
     <orderEntry type="library" name="Legio: log4j:log4j:1.2.17" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:logger4j:1.0.0" level="project" />
     <orderEntry type="library" name="Legio: org.slf4j:slf4j-log4j12:1.7.25" level="project" />
-    <orderEntry type="module" module-name="datalake-hadoop" />
+    <orderEntry type="module" module-name="datalake-hdfs" />
     <orderEntry type="library" name="Legio: io.intino.tara:magritte:2.1.12" level="project" />
     <orderEntry type="library" name="Legio: io.intino.tara:language:1.0.12" level="project" />
     <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-client:2.6.0" level="project" />

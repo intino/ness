@@ -37,7 +37,7 @@ public class SetSessionManager_ {
 		assertEquals(mapp.size(), 30);
 		MappStream.Item next = new MappReader(indexFile).next();
 		assertEquals(1, next.key());
-		assertEquals("0", next.value().get(0));
+		assertEquals("0", next.value());
 	}
 
 	@After
