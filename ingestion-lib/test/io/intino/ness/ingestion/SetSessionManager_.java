@@ -23,9 +23,9 @@ public class SetSessionManager_ {
 		SessionHandler handler = new SessionHandler(new File("localstage"));
 		LocalDateTime dateTime = LocalDateTime.of(2019, 2, 28, 16, 15);
 		Timetag timetag = new Timetag(dateTime, Scale.Hour);
-//		SetSession session = handler.createSetSession();
-//		for (int i = 1; i < 31; i++) session.put("tank1", timetag, "0", i);
-//		session.close();
+		SetSession session = handler.createSetSession();
+		for (int i = 1; i < 31; i++) session.put("tank1", timetag, "0", i);
+		session.close();
 
 		FileSessionManager fileSessionManager = new FileSessionManager(new FileDatalake(new File("temp/datalake")), new File("temp/session"));
 		fileSessionManager.push(handler.sessions());

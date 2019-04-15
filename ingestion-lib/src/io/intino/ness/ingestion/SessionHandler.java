@@ -22,6 +22,7 @@ public class SessionHandler {
 	}
 
 	public SessionHandler(File root) {
+		root.mkdirs();
 		this.root = root;
 	}
 
