@@ -124,7 +124,7 @@ public class SessionHandler {
 		}
 
 		private String filename(String name, Session.Type type) {
-			return name + suffix() + extensionOf(type);
+			return name + extensionOf(type);
 		}
 
 		private String suffix() {

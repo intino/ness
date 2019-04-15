@@ -21,7 +21,7 @@ public class EventSessionManager_ {
 
 	@Test
 	public void should_create_an_event_session() {
-		SessionHandler handler = new SessionHandler();
+		SessionHandler handler = new SessionHandler(new File("temp/events"));
 		EventSession session = handler.createEventSession();
 		List<Message> messageList = new ArrayList<>();
 		for (int i = 0; i < 30; i++) {
