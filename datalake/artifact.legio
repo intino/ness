@@ -5,6 +5,7 @@ Artifact("io.intino.ness", "2.0.0") datalake
 		Compile("io.intino.alexandria", "jms", "1.0.1")
 		Compile("io.intino.alexandria", "zim", "1.0.5")
 		Compile("io.intino.alexandria", "zet", "1.0.4")
+		Compile("io.intino.alexandria", "mapp", "1.0.0")
 		Compile("io.intino.alexandria", "triplestore", "1.0.3")
 		Compile("io.intino.alexandria", "primitives", "1.0.2")
 		Test("junit", "junit", "LATEST")

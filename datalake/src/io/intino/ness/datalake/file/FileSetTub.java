@@ -2,14 +2,17 @@ package io.intino.ness.datalake.file;
 
 import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
+import io.intino.alexandria.logger.Logger;
+import io.intino.alexandria.mapp.Mapp;
 import io.intino.ness.datalake.Datalake;
-import io.intino.ness.datalake.Datalake.SetStore.Index;
 import io.intino.ness.datalake.Datalake.SetStore.Set;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static io.intino.ness.datalake.file.FileSetStore.IndexFileName;
 import static io.intino.ness.datalake.file.FileSetStore.SetExtension;
 
 public class FileSetTub implements Datalake.SetStore.Tub {
@@ -34,8 +37,18 @@ public class FileSetTub implements Datalake.SetStore.Tub {
 	}
 
 	@Override
-	public Index index() {
-		return new FileSetIndex(root);
+	public Mapp index() {
+		try {
+			if (!indexFile().exists()) return null;
+			return new Mapp(indexFile());
+		} catch (IOException e) {
+			Logger.error(e);
+			return null;
+		}
+	}
+
+	private File indexFile() {
+		return new File(root, IndexFileName);
 	}
 
 	@Override

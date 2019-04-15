@@ -2,6 +2,7 @@ package io.intino.ness.datalake;
 
 import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
+import io.intino.alexandria.mapp.Mapp;
 import io.intino.alexandria.zet.ZetStream;
 import io.intino.alexandria.zim.ZimStream;
 
@@ -60,7 +61,7 @@ public interface Datalake {
 
 			Scale scale();
 
-			Index index();
+			Mapp index();
 
 			Set set(String set);
 
@@ -83,15 +84,6 @@ public interface Datalake {
 			Variable variable(String name);
 		}
 
-		interface Index {
-			String find(long id);
-
-			Stream<Entry> entries();
-			class Entry {
-				public long id;
-				public String set;
-			}
-		}
 
 		class Variable {
 			public final String name;
