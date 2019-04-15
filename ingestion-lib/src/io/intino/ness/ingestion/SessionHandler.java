@@ -3,8 +3,11 @@ package io.intino.ness.ingestion;
 import io.intino.alexandria.logger.Logger;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.UUID.randomUUID;
@@ -41,7 +44,7 @@ public class SessionHandler {
 	}
 
 	public Stream<Session> sessions() {
-		return sessions.stream()
+		return (sessions.isEmpty() ? loadFileSessions() : sessions).stream()
 				.map(s -> new Session() {
 					@Override
 					public String name() {
@@ -58,6 +61,32 @@ public class SessionHandler {
 						return s.inputStream();
 					}
 				});
+	}
+
+	private List<PrivateSession> loadFileSessions() {
+		return sessionFiles()
+				.map(f -> new PrivateSession(name(f), typeOf(f), new FileSessionData(f))).collect(Collectors.toList());
+	}
+
+	private Stream<File> sessionFiles() {
+		try {
+			if (this.root == null) return Stream.empty();
+			return Files.walk(root.toPath())
+					.filter(path -> Files.isRegularFile(path) && path.toFile().getName().endsWith(SessionExtension))
+					.map(Path::toFile);
+		} catch (IOException e) {
+			Logger.error(e);
+			return Stream.empty();
+		}
+	}
+
+	private String name(File f) {
+		return f.getName().substring(0, f.getName().indexOf("#"));
+	}
+
+	private Session.Type typeOf(File f) {
+		String[] split = f.getName().split("\\.");
+		return Session.Type.valueOf(split[split.length - 2]);
 	}
 
 	private interface SessionData {
@@ -85,8 +114,8 @@ public class SessionHandler {
 			return session.outputStream();
 		}
 
-		private PrivateSession session(String prefix, Session.Type type) {
-			return new PrivateSession(prefix, type, root == null ? new MemorySessionData() : new FileSessionData(fileOf(prefix, type)));
+		private PrivateSession session(String name, Session.Type type) {
+			return new PrivateSession(name, type, root == null ? new MemorySessionData() : new FileSessionData(fileOf(name, type)));
 		}
 
 		private File fileOf(String name, Session.Type type) {

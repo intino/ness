@@ -125,7 +125,7 @@ public class SetSessionManager {
 	}
 
 	private List<SetSessionFileReader> setSessionReaders() {
-		return setBlobs().map(this::setSessionReader).collect(toList());
+		return setSessions().map(this::setSessionReader).collect(toList());
 	}
 
 	private SetSessionFileReader setSessionReader(File file) {
@@ -168,7 +168,7 @@ public class SetSessionManager {
 		return list;
 	}
 
-	private Stream<File> setBlobs() {
+	private Stream<File> setSessions() {
 		return files.stream().filter(f -> f.getName().endsWith(extensionOf(Session.Type.set)));
 	}
 

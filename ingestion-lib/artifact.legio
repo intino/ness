@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact(groupId = "io.intino.ness", version = "1.0.0") ingestion-lib
+Artifact(groupId = "io.intino.ness", version = "2.0.0") ingestion-lib
 	Imports
 		Compile ("io.intino.ness", "datalake", "2.0.0")
 		Compile ("io.intino.alexandria", "mapp", "1.0.0")
@@ -10,6 +10,4 @@ Artifact(groupId = "io.intino.ness", version = "1.0.0") ingestion-lib
 	Distribution(intino.release)
 
 Repository(identifier = "intino-maven") intino
-	Language(url = "https://artifactory.intino.io/artifactory/releases")
-	Release(url = "https://artifactory.intino.io/artifactory/releases")
 	Release(url = "https://artifactory.intino.io/artifactory/release-libraries") release

@@ -10,6 +10,8 @@ import java.io.File;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static io.intino.ness.datalake.file.FileSetStore.SetExtension;
+
 public class FileSetTub implements Datalake.SetStore.Tub {
 	private final File root;
 
@@ -38,13 +40,12 @@ public class FileSetTub implements Datalake.SetStore.Tub {
 
 	@Override
 	public Set set(String set) {
-		//TODO
-		return null;
+		return new FileSet(new File(this.root, set + SetExtension));
 	}
 
 	@Override
 	public Stream<Set> sets() {
-		return FS.filesIn(root, f -> f.getName().endsWith(FileSetStore.SetExtension)).map(FileSet::new);
+		return FS.filesIn(root, f -> f.getName().endsWith(SetExtension)).map(FileSet::new);
 	}
 
 	@Override

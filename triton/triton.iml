@@ -107,66 +107,8 @@
     <orderEntry type="module" module-name="datalake-hdfs" />
     <orderEntry type="library" name="Legio: io.intino.tara:magritte:2.1.12" level="project" />
     <orderEntry type="library" name="Legio: io.intino.tara:language:1.0.12" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-client:2.6.0" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-common:2.6.0" level="project" />
-    <orderEntry type="library" name="Legio: commons-cli:commons-cli:1.2" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.commons:commons-math3:3.1.1" level="project" />
-    <orderEntry type="library" name="Legio: xmlenc:xmlenc:0.52" level="project" />
-    <orderEntry type="library" name="Legio: commons-httpclient:commons-httpclient:3.1" level="project" />
-    <orderEntry type="library" name="Legio: commons-io:commons-io:2.4" level="project" />
-    <orderEntry type="library" name="Legio: commons-lang:commons-lang:2.6" level="project" />
-    <orderEntry type="library" name="Legio: commons-configuration:commons-configuration:1.6" level="project" />
-    <orderEntry type="library" name="Legio: commons-digester:commons-digester:1.8" level="project" />
-    <orderEntry type="library" name="Legio: commons-beanutils:commons-beanutils-core:1.8.0" level="project" />
-    <orderEntry type="library" name="Legio: org.codehaus.jackson:jackson-core-asl:1.9.13" level="project" />
-    <orderEntry type="library" name="Legio: org.codehaus.jackson:jackson-mapper-asl:1.9.13" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.avro:avro:1.7.4" level="project" />
-    <orderEntry type="library" name="Legio: com.thoughtworks.paranamer:paranamer:2.3" level="project" />
-    <orderEntry type="library" name="Legio: org.xerial.snappy:snappy-java:1.0.4.1" level="project" />
-    <orderEntry type="library" name="Legio: com.google.protobuf:protobuf-java:2.5.0" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-auth:2.6.0" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.directory.server:apacheds-kerberos-codec:2.0.0-M15" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.directory.server:apacheds-i18n:2.0.0-M15" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.directory.api:api-asn1-api:1.0.0-M20" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.directory.api:api-util:1.0.0-M20" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.curator:curator-framework:2.6.0" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.curator:curator-client:2.6.0" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.curator:curator-recipes:2.6.0" level="project" />
-    <orderEntry type="library" name="Legio: com.google.code.findbugs:jsr305:1.3.9" level="project" />
-    <orderEntry type="library" name="Legio: org.htrace:htrace-core:3.0.4" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.zookeeper:zookeeper:3.4.6" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.commons:commons-compress:1.4.1" level="project" />
-    <orderEntry type="library" name="Legio: org.tukaani:xz:1.0" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-hdfs:2.6.0" level="project" />
-    <orderEntry type="library" name="Legio: org.mortbay.jetty:jetty-util:6.1.26" level="project" />
-    <orderEntry type="library" name="Legio: io.netty:netty:3.6.2.Final" level="project" />
-    <orderEntry type="library" name="Legio: xerces:xercesImpl:2.9.1" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-mapreduce-client-app:2.6.0" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-mapreduce-client-common:2.6.0" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-yarn-client:2.6.0" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-yarn-server-common:2.6.0" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-mapreduce-client-shuffle:2.6.0" level="project" />
-    <orderEntry type="library" name="Legio: org.fusesource.leveldbjni:leveldbjni-all:1.8" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-yarn-api:2.6.0" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-mapreduce-client-core:2.6.0" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-yarn-common:2.6.0" level="project" />
-    <orderEntry type="library" name="Legio: javax.xml.bind:jaxb-api:2.2.2" level="project" />
-    <orderEntry type="library" name="Legio: javax.xml.stream:stax-api:1.0-2" level="project" />
-    <orderEntry type="library" name="Legio: javax.activation:activation:1.1" level="project" />
-    <orderEntry type="library" name="Legio: javax.servlet:servlet-api:2.5" level="project" />
-    <orderEntry type="library" name="Legio: com.sun.jersey:jersey-core:1.9" level="project" />
-    <orderEntry type="library" name="Legio: com.sun.jersey:jersey-client:1.9" level="project" />
-    <orderEntry type="library" name="Legio: org.codehaus.jackson:jackson-jaxrs:1.9.13" level="project" />
-    <orderEntry type="library" name="Legio: org.codehaus.jackson:jackson-xc:1.9.13" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-mapreduce-client-jobclient:2.6.0" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-annotations:2.6.0" level="project" />
     <orderEntry type="module" module-name="ingestion-lib" />
-    <orderEntry type="library" name="Legio: com.opencsv:opencsv:4.1" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.commons:commons-lang3:3.6" level="project" />
-    <orderEntry type="library" name="Legio: org.apache.commons:commons-text:1.1" level="project" />
-    <orderEntry type="library" name="Legio: commons-beanutils:commons-beanutils:1.9.3" level="project" />
-    <orderEntry type="library" name="Legio: commons-collections:commons-collections:3.2.2" level="project" />
-    <orderEntry type="library" name="Legio: org.siani.itrules:itrules:1.9.3" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.alexandria:triplestore:1.0.4" level="project" />
+    <orderEntry type="library" name="Legio: org.apache.commons:commons-lang3:3.4" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:triplestore:1.0.3" level="project" />
   </component>
 </module>
