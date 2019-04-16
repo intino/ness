@@ -11,6 +11,7 @@ import io.intino.ness.datalake.file.FileSetStore;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,6 +21,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.stream.Collectors.toList;
 
 public class SetSessionManager {
+	private static final DecimalFormat FORMATTER = new DecimalFormat("#.##");
 	private final List<File> files;
 	private final File setStoreFolder;
 	private final File tempFolder;
@@ -112,7 +114,7 @@ public class SetSessionManager {
 		Set<Fingerprint> fingerprints = fingerPrintsIn(readers);
 		size = fingerprints.size();
 		fingerprints.parallelStream().forEach(fp -> {
-			if (count % 10000 == 0) Logger.info(((count * 100.) / size) + "%");
+			if (count % 10000 == 0) Logger.info(FORMATTER.format((count * 100.) / size));
 			seal(fp, readers);
 			deleteIndex(fp);
 			count++;

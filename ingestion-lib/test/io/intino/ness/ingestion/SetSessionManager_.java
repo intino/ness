@@ -43,7 +43,7 @@ public class SetSessionManager_ {
 
 	@After
 	public void tearDown() {
-//		deleteDirectory(new File("temp"));
+		deleteDirectory(new File("temp"));
 	}
 
 	private void deleteDirectory(File directoryToBeDeleted) {

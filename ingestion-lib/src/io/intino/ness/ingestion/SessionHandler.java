@@ -49,7 +49,7 @@ public class SessionHandler {
 				.map(s -> new Session() {
 					@Override
 					public String name() {
-						return s.name() + "." + s.type();
+						return s.name();
 					}
 
 					@Override
@@ -82,7 +82,7 @@ public class SessionHandler {
 	}
 
 	private String name(File f) {
-		return f.getName().substring(0, f.getName().indexOf("#"));
+		return f.getName().replace(typeOf(f).equals(Session.Type.event) ? Session.EventSessionExtension : Session.SessionExtension, "");
 	}
 
 	private Session.Type typeOf(File f) {

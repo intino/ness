@@ -27,7 +27,7 @@ import static junit.framework.TestCase.assertEquals;
 public class SessionManagerTests {
 
 	@Test
-	public void should_create_an_event_session() throws IOException {
+	public void should_create_a_session() throws IOException {
 		SessionHandler handler = new SessionHandler(new File("temp/events"));
 		List<Message> messageList = createEvents(handler);
 		Timetag timetag = createSets(handler);
