@@ -114,7 +114,7 @@ public class SetSessionManager {
 		Set<Fingerprint> fingerprints = fingerPrintsIn(readers);
 		size = fingerprints.size();
 		fingerprints.parallelStream().forEach(fp -> {
-			if (count % 10000 == 0) Logger.info(FORMATTER.format((count * 100.) / size));
+			if (count % 10000 == 0) Logger.info(FORMATTER.format((count * 100.) / size) + "%");
 			seal(fp, readers);
 			deleteIndex(fp);
 			count++;
