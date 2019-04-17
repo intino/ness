@@ -3,7 +3,7 @@ package io.intino.ness.triton.datalake;
 import io.intino.alexandria.jms.Consumer;
 import io.intino.alexandria.logger.Logger;
 import io.intino.ness.triton.box.TritonBox;
-import io.intino.ness.triton.graph.Datalake;
+import io.intino.ness.triton.graph.Tank;
 import io.intino.ness.triton.graph.TritonGraph;
 import io.intino.ness.triton.graph.User;
 import org.apache.activemq.command.ActiveMQDestination;
@@ -30,7 +30,7 @@ public class AdminService implements Consumer {
 			box.sessionManager().seal();
 			replyTo(message, "sealed");
 		} else if (text.startsWith("tanks"))
-			replyTo(message, tritonGraph.datalake().tankList().stream().map(Datalake.Tank::name).collect(joining(";")));
+			replyTo(message, tritonGraph.tankList().stream().map(Tank::name).collect(joining(";")));
 	}
 
 	private void replyTo(Message request, String reply) {

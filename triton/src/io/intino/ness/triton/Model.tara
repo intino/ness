@@ -17,6 +17,9 @@ Concept JMSConnector
 	var string[] topics
 	var boolean enabled = true
 
-Concept Tank
+Concept:{1..1} Persistence
+	var word:{Local Remote} value
+
+Concept:{1..*} Tank
 	var string name
 	var word:{Event Set} type

@@ -13,9 +13,7 @@ import io.intino.ness.triton.box.actions.ResumeTankAction;
 import io.intino.ness.triton.bus.BusManager;
 import io.intino.ness.triton.bus.BusService;
 import io.intino.ness.triton.datalake.AdminService;
-import io.intino.ness.triton.datalake.PipeStarter;
 import io.intino.ness.triton.datalake.reflow.ReflowService;
-import io.intino.ness.triton.graph.Pipe;
 import io.intino.ness.triton.graph.TritonGraph;
 import io.intino.ness.triton.graph.User;
 import org.apache.hadoop.fs.Path;
@@ -24,7 +22,7 @@ import java.io.File;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static io.intino.ness.triton.graph.Datalake.Persistence.Remote;
+import static io.intino.ness.triton.graph.Persistence.Value.Remote;
 import static java.io.File.separator;
 
 public class TritonBox extends AbstractBox {
@@ -72,7 +70,7 @@ public class TritonBox extends AbstractBox {
 	}
 
 	private void initDatalake() {
-		if (graph.datalake().persistence().equals(Remote)) {
+		if (graph.persistence().value().equals(Remote)) {
 			if (configuration.get("remotePersistence") == null) {
 				Logger.error("Remote persistence is defined but no parameter 'remotePersistence'");
 				return;
@@ -88,7 +86,6 @@ public class TritonBox extends AbstractBox {
 
 	private void startService() {
 		startTanks();
-		startBusPipes();
 		startReflowService();
 		startAdminService();
 	}
@@ -119,15 +116,11 @@ public class TritonBox extends AbstractBox {
 	}
 
 	private void startTanks() {
-		graph.datalake().tankList().forEach(t -> {
+		graph.tankList().forEach(t -> {
 			new ResumeTankAction(this, t.name()).execute();
 		});
 	}
 
-	private void startBusPipes() {
-		final PipeStarter tankStarter = new PipeStarter(busManager());
-		for (Pipe pipe : graph.pipeList()) tankStarter.start(pipe);
-	}
 
 	public Datalake datalake() {
 		return datalake;
