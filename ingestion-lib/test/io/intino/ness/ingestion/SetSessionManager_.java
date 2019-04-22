@@ -20,7 +20,7 @@ public class SetSessionManager_ {
 
 	@Test
 	public void should_create_and_seal_set_session() throws IOException {
-		SessionHandler handler = new SessionHandler(new File("localstage"));
+		SessionHandler handler = new SessionHandler(new File("temp/localstage"));
 		LocalDateTime dateTime = LocalDateTime.of(2019, 2, 28, 16, 15);
 		Timetag timetag = new Timetag(dateTime, Scale.Hour);
 		SetSession session = handler.createSetSession();

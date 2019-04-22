@@ -40,7 +40,7 @@ class FileStage implements Stage {
 	}
 
 	private String filename(Session session) {
-		return session.name() + (session.type() == Session.Type.event ? Session.EventSessionExtension : Session.SessionExtension);
+		return session.name() + "." + session.type() + Session.SessionExtension;
 	}
 
 	private void move(File stageFile, File treatedFolder) {

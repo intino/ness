@@ -28,12 +28,13 @@ public class SessionManagerTests {
 
 	@Test
 	public void should_create_a_session() throws IOException {
-		SessionHandler handler = new SessionHandler(new File("temp/events"));
+		File localStage = new File("temp/localstage");
+		SessionHandler handler = new SessionHandler(localStage);
 		List<Message> messageList = createEvents(handler);
 		Timetag timetag = createSets(handler);
 
 		FileSessionManager fileSessionManager = new FileSessionManager(new FileDatalake(new File("temp/datalake")), new File("temp/session"));
-		fileSessionManager.push(handler.sessions());
+		fileSessionManager.push(new SessionHandler(localStage).sessions());
 		fileSessionManager.seal();
 
 		checkEvents(messageList);
