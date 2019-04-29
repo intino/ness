@@ -3,11 +3,12 @@ package io.intino.ness.datalake.file;
 import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.logger.Logger;
-import io.intino.alexandria.mapp.Mapp;
+import io.intino.alexandria.mapp.MappReader;
 import io.intino.ness.datalake.Datalake;
 import io.intino.ness.datalake.Datalake.SetStore.Set;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -37,10 +38,10 @@ public class FileSetTub implements Datalake.SetStore.Tub {
 	}
 
 	@Override
-	public Mapp index() {
+	public MappReader index() {
 		try {
 			if (!indexFile().exists()) return null;
-			return new Mapp(indexFile());
+			return new MappReader(this.root.getParentFile().getName() + "-" + name(), new FileInputStream(indexFile()));
 		} catch (IOException e) {
 			Logger.error(e);
 			return null;
