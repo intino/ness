@@ -31,12 +31,6 @@ Service Manager as JMX
 		Parameter name as Text
 		Response as Text
 	Operation("Seal messages of all datalake tanks") seal
-	Operation("Connects source and destination topics") pipes
-		Response as Text
-	Operation("Removes a registered function") remove-pipes
-		Parameter origin as Text
-		Response as Text
-
 	Operation("Show registered topics") topics
 		Response as Text List
 	Operation("Removes registered topic") remove-topic

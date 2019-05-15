@@ -1,6 +1,5 @@
 dsl Proteo
 
-
 Concept User
 	var string name
 	var string password
