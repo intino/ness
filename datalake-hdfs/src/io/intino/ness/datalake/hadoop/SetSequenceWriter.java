@@ -11,7 +11,7 @@ import org.apache.hadoop.io.Text;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class SetSequenceWriter {
+class SetSequenceWriter {
 	private final FileSystem fs;
 	private final String path;
 

@@ -1,6 +1,7 @@
 package io.intino.ness.datalake.file.eventsourcing;
 
 import io.intino.alexandria.jms.TopicConsumer;
+import io.intino.alexandria.logger.Logger;
 import io.intino.ness.datalake.Datalake.EventStore.Tank;
 
 import java.util.HashMap;
@@ -38,7 +39,14 @@ public class JmsEventSubscriber implements EventSubscriber {
 	}
 
 	private void handle(javax.jms.Message message, EventPump.EventHandler[] messageHandlers) {
-		for (EventPump.EventHandler handler : messageHandlers) handler.handle(JmsMessageTranslator.toInlMessage(message));
+		for (EventPump.EventHandler handler : messageHandlers) {
+			try {
+				handler.handle(JmsMessageTranslator.toInlMessage(message));
+
+			} catch (Throwable e) {
+				Logger.error(e);
+			}
+		}
 	}
 
 	private String flowProbe(String name) {

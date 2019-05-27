@@ -51,7 +51,7 @@ public class SessionSealer {
 			FileInputFormat.addInputPath(job, stage.path());
 			job.setInputFormatClass(SequenceFileInputFormat.class);
 			FileOutputFormat.setOutputPath(job, sets);
-			job.setMapperClass(BlobMapper.class);
+			job.setMapperClass(SessionMapper.class);
 			job.setCombinerClass(ChunksCombiner.class);
 			job.setReducerClass(BlobReducer.class);
 			job.setOutputKeyClass(Text.class);
@@ -71,7 +71,7 @@ public class SessionSealer {
 		}
 	}
 
-	public static class BlobMapper extends Mapper<Text, BytesWritable, Text, BytesWritable> {
+	public static class SessionMapper extends Mapper<Text, BytesWritable, Text, BytesWritable> {
 
 		private final BytesWritable zet = new BytesWritable();
 
@@ -82,7 +82,7 @@ public class SessionSealer {
 			if (key.toString().startsWith(Session.Type.event.name())) {
 				mapEventBlob(value.getBytes());
 			} else {
-				Map<String, byte[]> fingerprintMap = mapSetBlobToZetStreams(value.getBytes());
+				Map<String, byte[]> fingerprintMap = mapSetSessionsToZetStreams(value.getBytes());
 				for (String fp : fingerprintMap.keySet()) {
 					fingerprint.set(fp);
 					byte[] bytes = fingerprintMap.get(fp);
@@ -92,7 +92,7 @@ public class SessionSealer {
 			}
 		}
 
-		private Map<String, byte[]> mapSetBlobToZetStreams(byte[] bytes) {
+		private Map<String, byte[]> mapSetSessionsToZetStreams(byte[] bytes) {
 			try {
 				SetSessionReader reader = new SetSessionReader(bytes);
 				Map<String, byte[]> chunks = new HashMap<>();

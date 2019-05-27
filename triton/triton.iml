@@ -93,13 +93,10 @@
     <orderEntry type="library" name="Legio: org.quartz-scheduler:quartz-jobs:2.2.1" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:scheduler-framework:1.0.0" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:slack-framework:1.0.0" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.alexandria:primitives:1.0.2" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.alexandria:inl:1.0.4" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:core-framework:1.0.1" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:logger:2.0.0" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:jms:1.0.1" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:jmx:1.0.1" level="project" />
-    <orderEntry type="library" name="Legio: io.intino.alexandria:zim:1.0.5" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:zet:1.0.4" level="project" />
     <orderEntry type="library" name="Legio: log4j:log4j:1.2.17" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:logger4j:1.0.0" level="project" />
@@ -166,5 +163,8 @@
     <orderEntry type="library" name="Legio: org.codehaus.jackson:jackson-xc:1.9.13" level="project" />
     <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-mapreduce-client-jobclient:2.6.0" level="project" />
     <orderEntry type="library" name="Legio: org.apache.hadoop:hadoop-annotations:2.6.0" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:primitives:1.0.3" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:zim:1.0.6" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:inl:2.0.0" level="project" />
   </component>
 </module>

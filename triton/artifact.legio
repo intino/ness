@@ -1,7 +1,7 @@
 dsl Legio
 
 Artifact("io.intino.ness", "2.0.0") triton as Product()//productLanguage="triton"
-	Model("Proteo", "2.1.12", "2.3.10")
+	Model("Proteo", "2.1.12", "2.3.8")
 	Box("Konos", "5.0.9")
 	Imports
 		Compile("io.intino.alexandria", "scheduler-framework", "1.0.0")

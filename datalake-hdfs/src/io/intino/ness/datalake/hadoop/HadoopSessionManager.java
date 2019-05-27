@@ -15,12 +15,12 @@ public class HadoopSessionManager implements SessionManager {
 	private final Path sessionsPath;
 	private final HadoopDatalake datalake;
 
-	public HadoopSessionManager(HadoopDatalake datalake, FileSystem fs, Path sessionsPath) {
+	public HadoopSessionManager(HadoopDatalake datalake, FileSystem fs, Path treatedSessionsPath) {
 		this.datalake = datalake;
 		this.fs = fs;
-		this.sessionsPath = sessionsPath;
-		mkdirs(sessionsPath);
-		this.stage = new HadoopStage(fs, datalake.stagePath(), sessionsPath);
+		this.sessionsPath = treatedSessionsPath;
+		mkdirs(treatedSessionsPath);
+		this.stage = new HadoopStage(fs, datalake.stagePath(), treatedSessionsPath);
 	}
 
 	private void mkdirs(Path sessionsPath) {

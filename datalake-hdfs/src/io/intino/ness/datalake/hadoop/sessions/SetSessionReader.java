@@ -13,10 +13,10 @@ import java.util.*;
 
 public class SetSessionReader {
 	private final Map<Fingerprint, List<Chunk>> chunks;
-	private final byte[] blob;
+	private final byte[] session;
 
-	public SetSessionReader(byte[] blob) throws IOException {
-		this.blob = blob;
+	public SetSessionReader(byte[] session) throws IOException {
+		this.session = session;
 		this.chunks = chunks();
 	}
 
@@ -38,7 +38,7 @@ public class SetSessionReader {
 
 	@SuppressWarnings("InfiniteLoopStatement")
 	private void fill(Map<Fingerprint, List<Chunk>> chunks) throws IOException {
-		try (DataInputStream stream = new DataInputStream(new BufferedInputStream(new ByteArrayInputStream(blob)))) {
+		try (DataInputStream stream = new DataInputStream(new BufferedInputStream(new ByteArrayInputStream(session)))) {
 			long position = 0;
 			while (true) {
 				byte[] fingerprint = readData(stream);
@@ -105,7 +105,7 @@ public class SetSessionReader {
 		}
 
 		private byte[] buffer() {
-			return Arrays.copyOfRange(blob, (int) position, (int) position + size);
+			return Arrays.copyOfRange(session, (int) position, (int) position + size);
 		}
 	}
 }
