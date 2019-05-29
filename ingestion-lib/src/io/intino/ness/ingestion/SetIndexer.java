@@ -33,13 +33,12 @@ public class SetIndexer {
 	}
 
 	public void processTubs(File tank) {
-		for (File tub : requireNonNull(tank.listFiles(File::isDirectory)))
-			if (!new File(tub, FileSetStore.IndexFileName).exists()) makeIndex(tub);
+		stream(requireNonNull(tank.listFiles(File::isDirectory))).filter(tub -> !new File(tub, FileSetStore.IndexFileName).exists()).parallel().forEach(this::makeIndex);
 	}
 
-	private void makeIndex(File tub) {
-		File destinationFile = new File(tub, FileSetStore.IndexFileName);
-		List<Zet> zets = streamOf(tub);
+	private void makeIndex(File timetag) {
+		File destinationFile = new File(timetag, FileSetStore.IndexFileName);
+		List<Zet> zets = streamOf(timetag);
 		MappBuilder builder = new MappBuilder(zets.stream().map(z -> z.name).collect(toList()));
 		builder.put(MappStream.Merge.of(zets.stream().map(this::mappStream).collect(toList())));
 		try {
