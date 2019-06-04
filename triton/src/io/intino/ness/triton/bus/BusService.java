@@ -10,8 +10,11 @@ import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.broker.region.policy.ConstantPendingMessageLimitStrategy;
 import org.apache.activemq.broker.region.policy.PolicyEntry;
 import org.apache.activemq.broker.region.policy.PolicyMap;
+import org.apache.activemq.broker.region.virtual.CompositeTopic;
+import org.apache.activemq.broker.region.virtual.VirtualDestination;
 import org.apache.activemq.broker.region.virtual.VirtualDestinationInterceptor;
 import org.apache.activemq.command.ActiveMQDestination;
+import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.activemq.network.jms.InboundTopicBridge;
 import org.apache.activemq.network.jms.JmsConnector;
 import org.apache.activemq.network.jms.OutboundTopicBridge;
@@ -32,6 +35,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.intino.ness.triton.graph.JMSConnector.Direction.incoming;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 public class BusService {
@@ -146,6 +150,27 @@ public class BusService {
 		}
 	}
 
+
+	public void pipe(String from, String to) {
+		try {
+			CompositeTopic compositeTopic = new CompositeTopic();
+			compositeTopic.setName(from);
+			compositeTopic.setForwardOnly(false);
+			compositeTopic.setForwardTo(singletonList(new ActiveMQTopic(to)));
+			VirtualDestinationInterceptor newInterceptor = new VirtualDestinationInterceptor();
+			newInterceptor.setVirtualDestinations(new VirtualDestination[]{compositeTopic});
+			pipes.put(from + "#" + to, newInterceptor);
+		} catch (Exception e) {
+			Logger.error(e.getMessage(), e);
+		}
+	}
+
+	void stopPipe(String fromTopic, String toTopic) {
+		if (!pipes.containsKey(fromTopic + "#" + toTopic)) return;
+		pipes.remove(fromTopic + "#" + toTopic);
+		updateInterceptors();
+	}
+
 	public Map<String, VirtualDestinationInterceptor> pipes() {
 		return pipes;
 	}
@@ -231,6 +256,19 @@ public class BusService {
 
 	private void registerConnectors(List<JMSConnector> connectors) {
 		connectors.stream().filter(JMSConnector::enabled).forEach(this::addJMSConnector);
+	}
+
+	public void updateInterceptors() {
+		try {
+			final VirtualDestinationInterceptor[] interceptors = pipes.values().toArray(new VirtualDestinationInterceptor[0]);
+			service.setDestinationInterceptors(interceptors);
+			if (confBroker == null) return;
+			List<VirtualDestination> destinations = new ArrayList<>();
+			Arrays.stream(interceptors).forEach(i -> Collections.addAll(destinations, i.getVirtualDestinations()));
+			confBroker.setVirtualDestinations(destinations.toArray(new VirtualDestination[0]), false);
+		} catch (Exception e) {
+			Logger.error(e.getMessage(), e);
+		}
 	}
 
 	private void addPolicies() {

@@ -23,3 +23,7 @@ Concept:{1..*} Tank
 	var string name
 	var word:{Event Set} type
 	var boolean active = true
+
+Concept Pipe
+	var string origin
+	var string destination
