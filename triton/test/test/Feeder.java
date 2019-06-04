@@ -1,3 +1,5 @@
+package test;
+
 import io.intino.alexandria.inl.MessageBuilder;
 import io.intino.alexandria.jms.TopicProducer;
 import io.intino.alexandria.logger.Logger;
@@ -14,19 +16,20 @@ import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 public class Feeder {
 
 	public static void main(String[] args) throws JMSException {
-		Session session = sessionLocal();
-		start(new TopicProducer(session, "feed.consul.serverstatus"));
+		start(new TopicProducer(sessionLocal(), "feed.consul.server.status"));
 	}
 
 	private static void start(TopicProducer producer) {
 		new Thread(() -> {
-			while (true)
+			while (true) {
+				producer.produce(createMessageFor(message()));
+				System.out.println("sent!");
 				try {
-					producer.produce(createMessageFor(message()));
-					System.out.println("sent!");
-					sleep(1000);
-				} catch (InterruptedException ignored) {
+					sleep(5000);
+				} catch (InterruptedException e) {
+					Logger.error(e);
 				}
+			}
 		}).start();
 	}
 

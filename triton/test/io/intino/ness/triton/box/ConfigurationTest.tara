@@ -16,3 +16,15 @@ User(name = "test", password = "test")
 
 
 Persistence(value = Local)
+
+
+Pipe("feed.consul.system.status", "feed.consul.processstatus")
+Pipe("feed.consul.system.log", "feed.consul.processlog")
+Pipe("feed.consul.device.crash", "feed.consul.devicecrash")
+Pipe("feed.consul.device.upgrade", "feed.consul.deviceupgrade")
+Pipe("feed.consul.device.boot", "feed.consul.deviceboot")
+Pipe("feed.consul.device.status", "feed.consul.devicestatus")
+Pipe("feed.consul.server.upgrade", "feed.consul.serverupgrade")
+Pipe("feed.consul.server.log", "feed.consul.serverlog")
+Pipe("feed.consul.server.status", "feed.consul.serverstatus")
+Pipe("feed.cesar.infrastructure.operation", "feed.cesar.infrastructureoperation")

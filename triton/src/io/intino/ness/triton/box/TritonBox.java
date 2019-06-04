@@ -12,9 +12,11 @@ import io.intino.ness.ingestion.FileSessionManager;
 import io.intino.ness.ingestion.SessionManager;
 import io.intino.ness.triton.box.actions.ResumeTankAction;
 import io.intino.ness.triton.bus.BusManager;
+import io.intino.ness.triton.bus.BusPipe;
 import io.intino.ness.triton.bus.BusService;
 import io.intino.ness.triton.datalake.AdminService;
 import io.intino.ness.triton.datalake.reflow.ReflowService;
+import io.intino.ness.triton.graph.Pipe;
 import io.intino.ness.triton.graph.TritonGraph;
 import io.intino.ness.triton.graph.User;
 import org.apache.hadoop.fs.Path;
@@ -39,6 +41,7 @@ public class TritonBox extends AbstractBox {
 	private AdminService adminService;
 	private SessionManager sessionManager;
 	private File temporalSessionDirectory;
+	private BusPipe busPipe;
 
 	public TritonBox(String[] args) {
 		super(args);
@@ -88,8 +91,13 @@ public class TritonBox extends AbstractBox {
 
 	private void startService() {
 		startTanks();
+		startPipes();
 		startReflowService();
 		startAdminService();
+	}
+
+	private void startPipes() {
+		for (Pipe pipe : graph.pipeList()) busPipe.start(pipe);
 	}
 
 	private void startReflowService() {
@@ -102,7 +110,6 @@ public class TritonBox extends AbstractBox {
 
 	public void close() {
 		Logger.info("Shutting down datalake...");
-//		this.datalake.eventStore().tanks().forEach(Tank::terminate);
 		super.close();
 		busManager.stop();
 	}
@@ -131,10 +138,6 @@ public class TritonBox extends AbstractBox {
 		return temporalSessionDirectory;
 	}
 
-	public File treatedSessions() {
-		return new File(datalakeDirectory(), "treated");
-	}
-
 	String storeDirectory() {
 		return workspace() + separator + "store";
 	}
@@ -143,6 +146,8 @@ public class TritonBox extends AbstractBox {
 		busService = new BusService(brokerPort(), mqttPort(), true, new File(brokerDirectory()), users(), graph.jMSConnectorList());
 		busManager = new BusManager(connectorID, busService);
 		busManager.start();
+		busPipe = new BusPipe(busManager);
+
 	}
 
 	private Map<String, String> users() {
@@ -154,7 +159,6 @@ public class TritonBox extends AbstractBox {
 			new ResumeTankAction(this, t.name()).execute();
 		});
 	}
-
 
 	private String workspace() {
 		return configuration().args().get("workspace");
