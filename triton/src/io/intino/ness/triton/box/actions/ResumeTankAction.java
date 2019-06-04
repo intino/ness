@@ -3,7 +3,6 @@ package io.intino.ness.triton.box.actions;
 import io.intino.ness.datalake.Datalake.EventStore.Tank;
 import io.intino.ness.triton.box.TritonBox;
 import io.intino.ness.triton.datalake.TankWriter;
-import io.intino.ness.triton.graph.Datalake;
 
 import static io.intino.ness.triton.box.Utils.findTank;
 
@@ -26,10 +25,10 @@ public class ResumeTankAction {
 	}
 
 	public String execute(Tank tank) {
-		Datalake.Tank jmsTank = findTank(box.graph(), tank.name());
+		io.intino.ness.triton.graph.Tank graphTank = findTank(box.graph(), tank.name());
 		new TankWriter(box, tank).register();
-		jmsTank.active(true);
-		jmsTank.save$();
+		graphTank.active(true);
+		graphTank.save$();
 		return Action.OK;
 	}
 }

@@ -8,7 +8,8 @@ import io.intino.ness.datalake.file.FileDatalake;
 import io.intino.ness.triton.box.TritonBox;
 import io.intino.ness.triton.box.actions.PauseTankAction;
 import io.intino.ness.triton.box.actions.ResumeTankAction;
-import io.intino.ness.triton.graph.Datalake;
+import io.intino.ness.triton.box.actions.SealAction;
+import io.intino.ness.triton.graph.Tank;
 import org.apache.activemq.command.ActiveMQDestination;
 
 import javax.jms.JMSException;
@@ -27,7 +28,7 @@ public class ReflowService implements Consumer {
 	private ReflowProcess handler;
 	private int blockSize;
 	private Session session;
-	private List<Datalake.Tank> pausedTanks;
+	private List<Tank> pausedTanks;
 
 	public ReflowService(TritonBox box) {
 		this.box = box;
@@ -45,7 +46,7 @@ public class ReflowService implements Consumer {
 
 	private void startQuickReflow(Message message) {
 		pauseTanks();
-		box.sessionManager().seal();
+		new SealAction(box).execute();
 		replyTo(message, "ack");
 	}
 
@@ -70,7 +71,7 @@ public class ReflowService implements Consumer {
 		box.restartBus(false);
 		pauseTanks();
 		this.session = box.busManager().transactedSession();
-		box.sessionManager().seal();
+		new SealAction(box).execute();
 		this.handler = new ReflowProcess(session, box.datalake(), box.scale(), configuration);
 		Logger.info("Reflow session created");
 	}
@@ -108,7 +109,7 @@ public class ReflowService implements Consumer {
 	}
 
 	private void pauseTanks() {
-		this.pausedTanks = box.graph().datalake().tankList().stream().filter(Datalake.Tank::active).collect(Collectors.toList());
+		this.pausedTanks = box.graph().tankList().stream().filter(Tank::active).collect(Collectors.toList());
 		this.pausedTanks.forEach(t -> new PauseTankAction(box, t.name()).execute());
 	}
 

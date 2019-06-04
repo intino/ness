@@ -8,6 +8,7 @@ import io.intino.ness.datalake.file.FileDatalake;
 import io.intino.ness.datalake.hadoop.HadoopConnection;
 import io.intino.ness.datalake.hadoop.HadoopDatalake;
 import io.intino.ness.datalake.hadoop.HadoopSessionManager;
+import io.intino.ness.ingestion.FileSessionManager;
 import io.intino.ness.ingestion.SessionManager;
 import io.intino.ness.triton.box.actions.ResumeTankAction;
 import io.intino.ness.triton.bus.BusManager;
@@ -37,6 +38,7 @@ public class TritonBox extends AbstractBox {
 	private ReflowService reflowService;
 	private AdminService adminService;
 	private SessionManager sessionManager;
+	private File temporalSessionDirectory;
 
 	public TritonBox(String[] args) {
 		super(args);
@@ -48,6 +50,8 @@ public class TritonBox extends AbstractBox {
 		this.reflowService = new ReflowService(this);
 		this.adminService = new AdminService(this);
 		this.scale = configuration.args().containsKey("scale") ? Scale.valueOf(configuration.args().get("scale")) : Scale.Day;
+		temporalSessionDirectory = new File(workspace(), "temporal_session");
+		temporalSessionDirectory.mkdirs();
 	}
 
 	@Override
@@ -70,18 +74,16 @@ public class TritonBox extends AbstractBox {
 	}
 
 	private void initDatalake() {
-		if (graph.persistence().value().equals(Remote)) {
-			if (configuration.get("remotePersistence") == null) {
-				Logger.error("Remote persistence is defined but no parameter 'remotePersistence'");
-				return;
-			}
+		if (graph.persistence() != null && graph.persistence().value().equals(Remote)) {
 			HadoopConnection connection = new HadoopConnection(configuration.get("remote_datalake_url"), configuration.get("remote_datalake_user"), configuration.get("remote_datalake_password"));
 			connection.connect();
 			this.datalake = new HadoopDatalake(connection.fs());
 			this.sessionManager = new HadoopSessionManager((HadoopDatalake) datalake, connection.fs(), new Path(connection.fs().getWorkingDirectory(), "sessions"));
 		} else {
-			this.datalake = new FileDatalake(new File(workspace() + separator + "datalake"));
+			this.datalake = new FileDatalake(new File(datalakeDirectory()));
+			this.sessionManager = new FileSessionManager((FileDatalake) datalake, new File(workspace(), "temp/session"));
 		}
+		graph.tankList().forEach(t -> datalake.eventStore().tank(t.name()));
 	}
 
 	private void startService() {
@@ -105,23 +107,6 @@ public class TritonBox extends AbstractBox {
 		busManager.stop();
 	}
 
-	private void startBus() {
-		busService = new BusService(brokerPort(), mqttPort(), true, new File(brokerDirectory()), users(), graph.jMSConnectorList());
-		busManager = new BusManager(connectorID, busService);
-		busManager.start();
-	}
-
-	private Map<String, String> users() {
-		return graph.userList().stream().collect(Collectors.toMap(user -> user.name() == null ? user.name$() : user.name(), User::password));
-	}
-
-	private void startTanks() {
-		graph.tankList().forEach(t -> {
-			new ResumeTankAction(this, t.name()).execute();
-		});
-	}
-
-
 	public Datalake datalake() {
 		return datalake;
 	}
@@ -142,16 +127,45 @@ public class TritonBox extends AbstractBox {
 		return busService;
 	}
 
-	public String workspace() {
-		return configuration().args().get("workspace");
+	public File temporalSession() {
+		return temporalSessionDirectory;
 	}
 
-	public String storeDirectory() {
+	public File treatedSessions() {
+		return new File(datalakeDirectory(), "treated");
+	}
+
+	String storeDirectory() {
 		return workspace() + separator + "store";
+	}
+
+	private void startBus() {
+		busService = new BusService(brokerPort(), mqttPort(), true, new File(brokerDirectory()), users(), graph.jMSConnectorList());
+		busManager = new BusManager(connectorID, busService);
+		busManager.start();
+	}
+
+	private Map<String, String> users() {
+		return graph.userList().stream().collect(Collectors.toMap(user -> user.name() == null ? user.name$() : user.name(), User::password));
+	}
+
+	private void startTanks() {
+		graph.tankList().forEach(t -> {
+			new ResumeTankAction(this, t.name()).execute();
+		});
+	}
+
+
+	private String workspace() {
+		return configuration().args().get("workspace");
 	}
 
 	private String brokerDirectory() {
 		return workspace() + separator + "broker";
+	}
+
+	private String datalakeDirectory() {
+		return workspace() + separator + "datalake";
 	}
 
 	private int brokerPort() {

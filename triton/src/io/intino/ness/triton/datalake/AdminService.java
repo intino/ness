@@ -3,6 +3,7 @@ package io.intino.ness.triton.datalake;
 import io.intino.alexandria.jms.Consumer;
 import io.intino.alexandria.logger.Logger;
 import io.intino.ness.triton.box.TritonBox;
+import io.intino.ness.triton.box.actions.SealAction;
 import io.intino.ness.triton.graph.Tank;
 import io.intino.ness.triton.graph.TritonGraph;
 import io.intino.ness.triton.graph.User;
@@ -27,7 +28,7 @@ public class AdminService implements Consumer {
 		TritonGraph tritonGraph = box.graph();
 		if (text.startsWith("users")) replyTo(message, tritonGraph.userList().stream().map(User::name).collect(joining(",")));
 		if (text.startsWith("seal")) {
-			box.sessionManager().seal();
+			new SealAction(box).execute();
 			replyTo(message, "sealed");
 		} else if (text.startsWith("tanks"))
 			replyTo(message, tritonGraph.tankList().stream().map(Tank::name).collect(joining(";")));

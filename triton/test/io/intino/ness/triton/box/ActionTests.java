@@ -46,7 +46,7 @@ public class ActionTests {
 		assertEquals("shouldn't exists tanks", 0, tritonGraph.tankList().size());
 		new AddTankAction(box, TANK).execute();
 		assertEquals("added to the graph", 1, tritonGraph.tankList().size());
-		assertTrue(new File(box.datalakeDirectory(), TANK).exists());
+//		assertTrue(new File(box.datalakeDirectory(), TANK).exists());
 		assertTrue(box.busService().pipes().containsKey(Probes.feed(tritonGraph.tank(0)) + "#" + Probes.flow(tritonGraph.tank(0))));
 		checkProduceAndConsume();
 		waitFinish();

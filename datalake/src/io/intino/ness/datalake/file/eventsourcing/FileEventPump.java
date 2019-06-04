@@ -29,6 +29,10 @@ public class FileEventPump implements EventPump {
 						.toArray(ZimStream[]::new);
 			}
 
+			public boolean hasNext() {
+				return is.hasNext();
+			}
+
 			@Override
 			public void next(int blockSize, EventHandler... eventHandlers) {
 				new ReflowBlock(is, eventHandlers).reflow(blockSize);

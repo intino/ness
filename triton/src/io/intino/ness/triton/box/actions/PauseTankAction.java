@@ -3,11 +3,11 @@ package io.intino.ness.triton.box.actions;
 import io.intino.alexandria.jms.TopicConsumer;
 import io.intino.ness.datalake.Datalake.EventStore.Tank;
 import io.intino.ness.triton.box.TritonBox;
-import io.intino.ness.triton.box.Utils;
 import io.intino.ness.triton.datalake.Probes;
-import io.intino.ness.triton.graph.Datalake;
 
 import java.util.List;
+
+import static io.intino.ness.triton.box.Utils.findTank;
 
 public class PauseTankAction {
 	public TritonBox box;
@@ -22,13 +22,13 @@ public class PauseTankAction {
 	}
 
 	public String execute() {
-		Tank datalakeTank = Utils.findTank(box.datalake(), tank);
+		Tank datalakeTank = findTank(box.datalake(), tank);
 		if (datalakeTank == null) return "tank not found";
 		return execute(datalakeTank);
 	}
 
 	public String execute(Tank aTank) {
-		Datalake.Tank jmsTank = Utils.findTank(box.graph(), aTank.name());
+		io.intino.ness.triton.graph.Tank jmsTank = findTank(box.graph(), aTank.name());
 		List<TopicConsumer> consumers = box.busManager().consumersOf(Probes.feed(aTank));
 		consumers.forEach(TopicConsumer::stop);
 		jmsTank.active(false);

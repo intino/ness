@@ -1,7 +1,6 @@
 package io.intino.ness.datalake.file.eventsourcing;
 
 import io.intino.ness.datalake.Datalake;
-import io.intino.ness.datalake.file.eventsourcing.EventPump.EventHandler;
 
 public interface EventSubscriber {
 

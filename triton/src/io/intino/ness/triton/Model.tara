@@ -22,3 +22,4 @@ Concept:{1..1} Persistence
 Concept:{1..*} Tank
 	var string name
 	var word:{Event Set} type
+	var boolean active = true

@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact(groupId = "io.intino.ness", version = "2.0.0") mirror-client
+Artifact(groupId = "io.intino.ness", version = "1.0.0") mirror-client
 	Imports
 		Test(groupId = "junit", artifactId = "junit", version = "LATEST")
 

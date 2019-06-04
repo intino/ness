@@ -6,6 +6,7 @@ import io.intino.alexandria.jms.TopicProducer;
 import io.intino.alexandria.logger.Logger;
 import io.intino.ness.datalake.Datalake;
 import io.intino.ness.datalake.Datalake.EventStore.Tank;
+import io.intino.ness.datalake.file.eventsourcing.EventHandler;
 import io.intino.ness.triton.datalake.reflow.ReflowProcess.ReflowMessageHandler.Callback;
 
 import javax.jms.JMSException;
@@ -18,7 +19,7 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 import static io.intino.alexandria.jms.MessageFactory.createMessageFor;
-import static io.intino.ness.datalake.file.eventsourcing.EventPump.*;
+import static io.intino.ness.datalake.file.eventsourcing.EventPump.Reflow;
 import static io.intino.ness.triton.box.Utils.timetag;
 
 
@@ -123,7 +124,7 @@ class ReflowProcess {
 		return new ReflowMessageHandler(handler, onBlock, onFinish);
 	}
 
-	public static class ReflowMessageHandler implements EventHandler, ReflowHandler {
+	public static class ReflowMessageHandler implements EventHandler, io.intino.ness.datalake.file.eventsourcing.EventPump.ReflowHandler {
 
 		private final Consumer<io.intino.alexandria.inl.Message> consumer;
 		private final Callback onBlock;

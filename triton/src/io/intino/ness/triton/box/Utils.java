@@ -3,11 +3,11 @@ package io.intino.ness.triton.box;
 import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
 import io.intino.ness.datalake.Datalake.EventStore.Tank;
-import io.intino.ness.triton.graph.Datalake;
 import io.intino.ness.triton.graph.TritonGraph;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.intino.alexandria.Timetag.of;
@@ -19,8 +19,8 @@ public class Utils {
 		return datalake.eventStore().tank(name);
 	}
 
-	public static Datalake.Tank findTank(TritonGraph graph, String name) {
-		final List<Datalake.Tank> tanks = graph.datalake().tankList(t -> t.name().equalsIgnoreCase(name));
+	public static io.intino.ness.triton.graph.Tank findTank(TritonGraph graph, String name) {
+		final List<io.intino.ness.triton.graph.Tank> tanks = graph.tankList(t -> t.name().equalsIgnoreCase(name)).collect(Collectors.toList());
 		return tanks.isEmpty() ? null : tanks.get(0);
 	}
 

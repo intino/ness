@@ -24,7 +24,6 @@ Service Nessie as SlackBot(token = "{slackToken}")
 			Parameter(type = String, multiple = true) topics
 		Request("Removes a registed jms connector") remove-jms-connector
 			Parameter(String) name
-		Request("Connects source and destination topics") pipes
 	Request("Request all users registered in ness") users
 	Request("Request all tanks nessy is subscribed filtering by tags") tanks
 	Request("Show registered topics") topics

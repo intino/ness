@@ -1,7 +1,6 @@
 package io.intino.ness.datalake.file.eventsourcing;
 
 import io.intino.alexandria.Timetag;
-import io.intino.alexandria.inl.Message;
 import io.intino.ness.datalake.Datalake;
 
 public interface EventPump {
@@ -9,6 +8,8 @@ public interface EventPump {
 
 	interface Reflow {
 		void next(int blockSize, EventHandler... eventHandlers);
+
+		boolean hasNext();
 
 		interface Filter {
 			boolean allow(Datalake.EventStore.Tank tank);
@@ -23,7 +24,4 @@ public interface EventPump {
 		void onFinish(int reflowedMessages);
 	}
 
-	interface EventHandler {
-		void handle(Message message);
-	}
 }

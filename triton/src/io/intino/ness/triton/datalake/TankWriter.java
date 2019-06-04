@@ -1,31 +1,31 @@
 package io.intino.ness.triton.datalake;
 
-import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
+import io.intino.alexandria.logger.Logger;
 import io.intino.ness.datalake.Datalake.EventStore.Tank;
-import io.intino.ness.ingestion.Fingerprint;
-import io.intino.ness.ingestion.Session;
 import io.intino.ness.triton.box.TritonBox;
 import io.intino.ness.triton.box.Utils;
 import io.intino.ness.triton.bus.BusManager;
 
 import javax.jms.Message;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.time.Instant;
-import java.util.stream.Stream;
 
 public class TankWriter {
 	private final BusManager bus;
 	private final Tank tank;
-	private final Scale scale;
 	private final TritonBox box;
+	private final File temporalSession;
 
 	public TankWriter(TritonBox box, Tank tank) {
 		this.box = box;
 		this.bus = box.busManager();
-		this.scale = box.scale();
 		this.tank = tank;
+		this.temporalSession = box.temporalSession();
+
 	}
 
 	public void register() {
@@ -52,36 +52,18 @@ public class TankWriter {
 	}
 
 	private void save(Tank tank, io.intino.alexandria.inl.Message message) {
-		box.sessionManager().push(Stream.of(new TemporalSession(tank, timetag(message), message)));
+		try {
+			Files.write(destination(tank, message).toPath(), (message.toString() + "\n\n").getBytes(), StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+		} catch (IOException e) {
+			Logger.error(e);
+		}
+	}
+
+	private File destination(Tank tank, io.intino.alexandria.inl.Message message) {
+		return new File(temporalSession, tank.name() + "#" + timetag(message).value() + ".inl");
 	}
 
 	private Timetag timetag(io.intino.alexandria.inl.Message message) {
-		return Utils.timetag(Instant.parse(message.get("ts")), scale);
-	}
-
-	private static class TemporalSession implements Session {
-
-		private final io.intino.alexandria.inl.Message message;
-		private final Fingerprint fingerprint;
-
-		public TemporalSession(Tank tank, Timetag timetag, io.intino.alexandria.inl.Message message) {
-			this.fingerprint = Fingerprint.of(tank.name(), timetag);
-			this.message = message;
-		}
-
-		@Override
-		public String name() {
-			return fingerprint.name();
-		}
-
-		@Override
-		public Type type() {
-			return Type.event;
-		}
-
-		@Override
-		public InputStream inputStream() {
-			return new ByteArrayInputStream(message.toString().getBytes());
-		}
+		return Utils.timetag(Instant.parse(message.get("ts").data()), box.scale());
 	}
 }

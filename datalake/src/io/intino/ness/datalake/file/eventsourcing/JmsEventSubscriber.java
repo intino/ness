@@ -38,8 +38,8 @@ public class JmsEventSubscriber implements EventSubscriber {
 		if (topicConsumer != null) topicConsumer.stop();
 	}
 
-	private void handle(javax.jms.Message message, EventPump.EventHandler[] messageHandlers) {
-		for (EventPump.EventHandler handler : messageHandlers) {
+	private void handle(javax.jms.Message message, EventHandler[] messageHandlers) {
+		for (EventHandler handler : messageHandlers) {
 			try {
 				handler.handle(JmsMessageTranslator.toInlMessage(message));
 

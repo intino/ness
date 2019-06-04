@@ -1,7 +1,7 @@
 package io.intino.ness.triton.box.actions;
 
 import io.intino.ness.triton.box.TritonBox;
-import io.intino.ness.triton.graph.Datalake.Tank;
+import io.intino.ness.triton.graph.Tank;
 
 import java.util.List;
 
@@ -12,6 +12,6 @@ public class TanksAction {
 	public TritonBox box;
 
 	public List<String> execute() {
-		return box.graph().datalake().tankList().stream().map(Tank::name).sorted(String.CASE_INSENSITIVE_ORDER).collect(toList());
+		return box.graph().tankList().stream().map(Tank::name).sorted(String.CASE_INSENSITIVE_ORDER).collect(toList());
 	}
 }
