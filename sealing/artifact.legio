@@ -1,0 +1,14 @@
+dsl Legio
+
+Artifact("io.intino.ness", "1.0.0") sealing
+	Imports
+		Compile("io.intino.alexandria", "mapp", "1.0.0")
+		Compile("io.intino.ness", "datalake", "2.0.0")
+		Compile("io.intino.ness", "core", "2.0.0")
+		Test("io.intino.ness", "ingestion", "1.0.0")
+		Test("junit", "junit", "LATEST")
+	Package(mode = ModulesAndLibrariesLinkedByManifest)
+
+Repository(identifier = "intino-maven")
+	Language(url = "https://artifactory.intino.io/artifactory/releases")
+	Release(url = "https://artifactory.intino.io/artifactory/releases")

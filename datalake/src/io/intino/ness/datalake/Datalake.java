@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 public interface Datalake {
 	String EventStoreFolder = "events";
 	String SetStoreFolder = "sets";
-	String StageFolder = "stage";
 
 	EventStore eventStore();
 

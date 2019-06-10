@@ -1,0 +1,11 @@
+dsl Legio
+
+Artifact("io.intino.ness", "1.0.0") mirror-service
+	Imports
+		Test(groupId = "junit", artifactId = "junit", version = "LATEST")
+
+	Package(mode = ModulesAndLibrariesLinkedByManifest)
+
+Repository(identifier = "intino-maven")
+	Language(url = "https://artifactory.intino.io/artifactory/releases")
+	Release(url = "https://artifactory.intino.io/artifactory/releases")

@@ -15,7 +15,6 @@ public class FileDatalake implements Datalake {
 	private void checkStore() {
 		setStoreFolder().mkdirs();
 		eventStoreFolder().mkdirs();
-		stageFolder().mkdirs();
 	}
 
 	@Override
@@ -39,9 +38,4 @@ public class FileDatalake implements Datalake {
 	public File setStoreFolder() {
 		return new File(root, SetStoreFolder);
 	}
-
-	public File stageFolder() {
-		return new File(root, StageFolder);
-	}
-
 }
