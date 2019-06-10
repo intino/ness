@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module io.intino.tara.isTaraModule="true" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/gen" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/res" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" scope="TEST" name="Legio: junit:junit:4.13-beta-3" level="project" />
+    <orderEntry type="library" scope="TEST" name="Legio: org.hamcrest:hamcrest-core:1.3" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:mapp:1.0.0" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:logger:2.0.0" level="project" />
+    <orderEntry type="module" module-name="datalake" />
+    <orderEntry type="library" name="Legio: eu.medsea.mimeutil:mime-util:2.1.1" level="project" />
+    <orderEntry type="library" name="Legio: com.sun.xml.security:xml-security-impl:1.0" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:jms:1.0.1" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:exceptions:1.0.0" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:json:1.0.0" level="project" />
+    <orderEntry type="library" name="Legio: com.google.code.gson:gson:2.8.0" level="project" />
+    <orderEntry type="library" name="Legio: org.apache.activemq:activemq-client:5.15.2" level="project" />
+    <orderEntry type="library" name="Legio: org.slf4j:slf4j-api:1.7.25" level="project" />
+    <orderEntry type="library" name="Legio: org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1" level="project" />
+    <orderEntry type="library" name="Legio: org.fusesource.hawtbuf:hawtbuf:1.11" level="project" />
+    <orderEntry type="library" name="Legio: org.apache.geronimo.specs:geronimo-j2ee-management_1.1_spec:1.0.1" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:zet:1.0.4" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:triplestore:1.0.3" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:primitives:1.0.3" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:zim:1.0.6" level="project" />
+    <orderEntry type="library" name="Legio: io.intino.alexandria:inl:2.0.0" level="project" />
+    <orderEntry type="module" module-name="core" />
+    <orderEntry type="module" module-name="ingestion" />
+  </component>
+</module>
