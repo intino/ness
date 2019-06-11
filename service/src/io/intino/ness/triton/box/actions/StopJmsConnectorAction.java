@@ -1,7 +1,7 @@
 package io.intino.ness.triton.box.actions;
 
 import io.intino.ness.triton.box.ServiceBox;
-import io.intino.ness.triton.graph.JMSConnector;
+import io.intino.ness.triton.graph.JmsService;
 import org.apache.activemq.network.jms.JmsConnector;
 
 public class StopJmsConnectorAction {
@@ -10,14 +10,15 @@ public class StopJmsConnectorAction {
 	public String name;
 
 	public String execute() {
-		JMSConnector JMSConnector = box.graph().jMSConnectorList(f -> f.name$().equals(name)).findFirst().orElse(null);
-		if (JMSConnector == null) return "JMS connector not found";
-		JmsConnector connector = box.busService().jmsConnectors().stream().filter(j -> j.getName().equals(JMSConnector.name$())).findFirst().orElse(null);
+		if (box.graph().jmsService() == null) return "Jms Service inactive";
+		JmsService.JmsConnector JmsConnector = box.graph().jmsService().jmsConnectorList().stream().filter(f -> f.name$().equals(name)).findFirst().orElse(null);
+		if (JmsConnector == null) return "Jms connector not found";
+		JmsConnector connector = box.busService().jmsConnectors().stream().filter(j -> j.getName().equals(JmsConnector.name$())).findFirst().orElse(null);
 		if (connector != null && connector.isConnected()) {
 			try {
 				connector.stop();
-				JMSConnector.enabled(false);
-				JMSConnector.save$();
+				JmsConnector.enabled(false);
+				JmsConnector.save$();
 			} catch (Exception e) {
 			}
 		}

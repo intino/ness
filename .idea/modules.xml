@@ -2,12 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/datalake/datalake.iml" filepath="$PROJECT_DIR$/datalake/datalake.iml" />
       <module fileurl="file://$PROJECT_DIR$/dump/dump.iml" filepath="$PROJECT_DIR$/dump/dump.iml" />
       <module fileurl="file://$PROJECT_DIR$/ingestion/ingestion.iml" filepath="$PROJECT_DIR$/ingestion/ingestion.iml" />
       <module fileurl="file://$PROJECT_DIR$/sealing/sealing.iml" filepath="$PROJECT_DIR$/sealing/sealing.iml" />
       <module fileurl="file://$PROJECT_DIR$/service/service.iml" filepath="$PROJECT_DIR$/service/service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/session/session.iml" filepath="$PROJECT_DIR$/session/session.iml" />
     </modules>
   </component>
 </project>

@@ -3,10 +3,10 @@ package io.intino.ness.triton.box;
 import io.intino.alexandria.Scale;
 import io.intino.alexandria.core.Box;
 import io.intino.alexandria.logger.Logger;
-import io.intino.ness.SessionManager;
 import io.intino.ness.datalake.Datalake;
 import io.intino.ness.datalake.file.FileDatalake;
 import io.intino.ness.sealing.FileSessionManager;
+import io.intino.ness.sealing.SessionManager;
 import io.intino.ness.triton.box.actions.ResumeTankAction;
 import io.intino.ness.triton.bus.BusManager;
 import io.intino.ness.triton.bus.BusPipe;
@@ -64,8 +64,13 @@ public class ServiceBox extends AbstractBox {
 	public Box open() {
 		super.open();
 		initDatalake();
-		startBus();
-		startService();
+		if (graph.jmsService() != null) {
+			busService = new BusService(brokerPort(), mqttPort(), true, new File(brokerDirectory()), users(), graph.jmsService().jmsConnectorList());
+			busManager = new BusManager(connectorID, busService);
+			busManager.start();
+			busPipe = new BusPipe(busManager);
+			startService();
+		}
 		return this;
 	}
 
@@ -133,17 +138,16 @@ public class ServiceBox extends AbstractBox {
 		return temporalSessionDirectory;
 	}
 
-	String storeDirectory() {
+	public File adaptersFolder() {
+		File adapters = new File(workspace(), "adapters");
+		adapters.mkdirs();
+		return adapters;
+	}
+
+	String storeFolder() {
 		return workspace() + separator + "store";
 	}
 
-	private void startBus() {
-		busService = new BusService(brokerPort(), mqttPort(), true, new File(brokerDirectory()), users(), graph.jMSConnectorList());
-		busManager = new BusManager(connectorID, busService);
-		busManager.start();
-		busPipe = new BusPipe(busManager);
-
-	}
 
 	private Map<String, String> users() {
 		return graph.userList().stream().collect(Collectors.toMap(user -> user.name() == null ? user.name$() : user.name(), User::password));
@@ -155,7 +159,7 @@ public class ServiceBox extends AbstractBox {
 		});
 	}
 
-	private String workspace() {
+	public String workspace() {
 		return configuration().args().get("workspace");
 	}
 

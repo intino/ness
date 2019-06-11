@@ -2,7 +2,7 @@ package io.intino.ness.triton.box.actions;
 
 import io.intino.ness.triton.box.ServiceBox;
 import io.intino.ness.triton.graph.ExternalBus;
-import io.intino.ness.triton.graph.JMSConnector;
+import io.intino.ness.triton.graph.JmsService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,14 +28,15 @@ public class AddJmsConnectorAction {
 	}
 
 	public String execute() {
+		if (box.graph().jmsService() == null) return "Jms Service inactive";
 		List<String> topics = Arrays.asList(this.topics.split(" "));
 		ExternalBus bus = box.graph().externalBusList(f -> f.name$().equals(externalBus)).findFirst().orElse(null);
 		if (bus == null) return "External Bus not found";
-		JMSConnector connector = box.graph().jMSConnectorList(f -> f.name$().equals(name)).findFirst().orElse(null);
-		if (connector != null) return "JMS Connector is already defined";
-		connector = box.graph().create("jmsConnectors", name).jMSConnector(JMSConnector.Direction.valueOf(direction), bus, topics);
+		JmsService.JmsConnector connector = box.graph().jmsService().jmsConnectorList().stream().filter(s -> s.name$().equals(name)).findFirst().orElse(null);
+		if (connector != null) return "Jms Connector is already defined";
+		connector = box.graph().jmsService().create(name).jmsConnector(JmsService.JmsConnector.Direction.valueOf(direction), bus, topics);
 		connector.save$();
-		box.busService().addJMSConnector(connector);
+		box.busService().addJmsConnector(connector);
 		box.restartBus(true);
 		return Action.OK;
 	}

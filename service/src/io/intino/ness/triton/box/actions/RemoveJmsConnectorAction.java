@@ -1,12 +1,10 @@
 package io.intino.ness.triton.box.actions;
 
 import io.intino.ness.triton.box.ServiceBox;
-import io.intino.ness.triton.graph.JMSConnector;
+import io.intino.ness.triton.graph.JmsService.JmsConnector;
 import io.intino.ness.triton.graph.TritonGraph;
 
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 
 public class RemoveJmsConnectorAction {
@@ -15,9 +13,10 @@ public class RemoveJmsConnectorAction {
 	public String name;
 
 	public String execute() {
-		List<JMSConnector> aqueducts = ness().jMSConnectorList(t -> t.name$().equals(name)).collect(toList());
-		if (aqueducts.isEmpty()) return "Aqueduct not found";
-		for (JMSConnector tank : aqueducts) tank.delete$();
+		if (box.graph().jmsService() == null) return "Jms Service inactive";
+		List<JmsConnector> connectors = ness().jmsService().jmsConnectorList(t -> t.name$().equals(name));
+		if (connectors.isEmpty()) return "Jms Connector not found";
+		for (JmsConnector tank : connectors) tank.delete$();
 		return Action.OK;
 	}
 

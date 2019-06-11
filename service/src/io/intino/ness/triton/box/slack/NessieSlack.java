@@ -7,7 +7,7 @@ import io.intino.ness.triton.box.ServiceBox;
 import io.intino.ness.triton.box.Utils;
 import io.intino.ness.triton.box.actions.StartJmsConnectorAction;
 import io.intino.ness.triton.box.actions.StopJmsConnectorAction;
-import io.intino.ness.triton.graph.JMSConnector;
+import io.intino.ness.triton.graph.JmsService;
 import io.intino.ness.triton.graph.User;
 import org.apache.activemq.network.jms.JmsConnector;
 
@@ -84,11 +84,13 @@ public class NessieSlack {
 	}
 
 	public String jmsConnectors(MessageProperties properties) {
-		List<JMSConnector> JMSConnectors = box.graph().jMSConnectorList();
-		if (JMSConnectors.isEmpty()) return "There aren't bus pipes registered";
+		JmsService jmsService = box.graph().jmsService();
+		if (jmsService == null) return "There aren't bus pipes registered";
+		List<JmsService.JmsConnector> JmsConnectors = jmsService.jmsConnectorList();
+		if (JmsConnectors.isEmpty()) return "There aren't bus pipes registered";
 		StringBuilder builder = new StringBuilder();
-		for (JMSConnector JMSConnector : JMSConnectors)
-			builder.append(JMSConnector.name$()).append(": ").append(isRunning(JMSConnector) ? " started" : " stopped").append("\n");
+		for (JmsService.JmsConnector JmsConnector : JmsConnectors)
+			builder.append(JmsConnector.name$()).append(": ").append(isRunning(JmsConnector) ? " started" : " stopped").append("\n");
 		return builder.toString();
 	}
 
@@ -96,8 +98,8 @@ public class NessieSlack {
 		return "";
 	}
 
-	private boolean isRunning(JMSConnector JMSConnector) {
-		JmsConnector jmsConnector = box.busService().jmsConnectors().stream().filter(j -> j.getName().equals(JMSConnector.name$())).findFirst().orElse(null);
+	private boolean isRunning(JmsService.JmsConnector JmsConnector) {
+		JmsConnector jmsConnector = box.busService().jmsConnectors().stream().filter(j -> j.getName().equals(JmsConnector.name$())).findFirst().orElse(null);
 		return jmsConnector.isConnected();
 	}
 

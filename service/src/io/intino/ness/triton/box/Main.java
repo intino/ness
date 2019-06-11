@@ -10,7 +10,7 @@ import java.io.File;
 public class Main {
 	public static void main(String[] args) {
 		final ServiceBox box = new ServiceBox(new ServiceConfiguration(args));
-		Graph graph = new Graph(store(box.storeDirectory())).loadStashes("Triton");
+		Graph graph = new Graph(store(box.storeFolder())).loadStashes("Triton");
 		if (box.configuration.args().containsKey("configurationModel") && !box.configuration.args().get("configurationModel").isEmpty())
 			graph.loadStashes(box.configuration.args().get("configurationModel"));
 		box.put(graph.as(TritonGraph.class)).open();

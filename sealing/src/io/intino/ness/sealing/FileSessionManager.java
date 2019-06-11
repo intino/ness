@@ -1,6 +1,5 @@
 package io.intino.ness.sealing;
 
-import io.intino.ness.SessionManager;
 import io.intino.ness.datalake.file.FileDatalake;
 
 import java.io.File;

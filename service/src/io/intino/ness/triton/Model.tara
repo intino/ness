@@ -4,26 +4,40 @@ Concept User
 	var string name
 	var string password
 
+Concept:{1..*} Tank
+	var string name
+	var word:{Event Set} type
+	var boolean active = true
+
+Concept:{0..1} JmsService
+	var word:{Embed Remote} location = Embed
+	Concept JmsConnector
+		var word:{outgoing incoming} direction
+		var ExternalBus bus
+		var string[] topics
+		var boolean enabled = true
+
 Concept ExternalBus
 	var string originURL
 	var string sessionID
 	var string user
 	var string password
 
-Concept JMSConnector
-	var word:{outgoing incoming} direction
-	var ExternalBus bus
-	var string[] topics
-	var boolean enabled = true
-
-Concept:{0..1} Persistence
-	var word:{Local Remote} value
-
-Concept:{1..*} Tank
-	var string name
-	var word:{Event Set} type
-	var boolean active = true
-
 Concept Pipe
 	var string origin
 	var string destination
+
+Concept:Named Adapter
+
+Facet AdapterType on Adapter
+	sub Realtime
+	sub Batch
+
+Facet TankType on Adapter
+	var Tank[] tanks
+	var string startTimetag
+	var string endTimetag
+	sub Set
+		var function:SetAdapter adapt
+	sub Event
+		var function:EventAdapter adapt

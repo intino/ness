@@ -1,4 +1,4 @@
-package io.intino.ness;
+package io.intino.ness.sealing;
 
 public interface SessionManager {
 

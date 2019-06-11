@@ -1,7 +1,7 @@
 package io.intino.ness.triton.bus;
 
 import io.intino.alexandria.logger.Logger;
-import io.intino.ness.triton.graph.JMSConnector;
+import io.intino.ness.triton.graph.JmsService;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.Broker;
 import org.apache.activemq.broker.BrokerPlugin;
@@ -34,7 +34,7 @@ import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.intino.ness.triton.graph.JMSConnector.Direction.incoming;
+import static io.intino.ness.triton.graph.JmsService.JmsConnector.Direction.incoming;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
@@ -46,7 +46,7 @@ public class BusService {
 	private final boolean persistent;
 	private final File brokerStore;
 	private final Map<String, String> users;
-	private final List<JMSConnector> connectors;
+	private final List<JmsService.JmsConnector> connectors;
 	private final List<SimpleJmsTopicConnector> activeMQTopicConnectors;
 
 	private JavaRuntimeConfigurationPlugin configurationPlugin;
@@ -55,7 +55,7 @@ public class BusService {
 	private Map<String, VirtualDestinationInterceptor> pipes = new HashMap<>();
 	private JavaRuntimeConfigurationBroker confBroker;
 
-	public BusService(int brokerPort, int mqttPort, boolean persistent, File brokerStore, Map<String, String> users, List<JMSConnector> connectors) {
+	public BusService(int brokerPort, int mqttPort, boolean persistent, File brokerStore, Map<String, String> users, List<JmsService.JmsConnector> connectors) {
 		this.brokerPort = brokerPort;
 		this.mqttPort = mqttPort;
 		this.persistent = persistent;
@@ -88,7 +88,7 @@ public class BusService {
 		authenticator.getUserPasswords().remove(name);
 	}
 
-	public void addJMSConnector(JMSConnector c) {
+	public void addJmsConnector(JmsService.JmsConnector c) {
 		try {
 			SimpleJmsTopicConnector connector = new SimpleJmsTopicConnector();
 			connector.setName(c.name$());
@@ -227,7 +227,7 @@ public class BusService {
 		return users;
 	}
 
-	private void configure(boolean persistence, List<JMSConnector> connectors) {
+	private void configure(boolean persistence, List<JmsService.JmsConnector> connectors) {
 		try {
 			service.setBrokerName(NESS);
 			persistent(persistence);
@@ -254,8 +254,8 @@ public class BusService {
 		}
 	}
 
-	private void registerConnectors(List<JMSConnector> connectors) {
-		connectors.stream().filter(JMSConnector::enabled).forEach(this::addJMSConnector);
+	private void registerConnectors(List<JmsService.JmsConnector> connectors) {
+		connectors.stream().filter(JmsService.JmsConnector::enabled).forEach(this::addJmsConnector);
 	}
 
 	public void updateInterceptors() {

@@ -31,7 +31,7 @@
     <orderEntry type="library" name="Legio: io.intino.alexandria:primitives:1.0.3" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:zim:1.0.6" level="project" />
     <orderEntry type="library" name="Legio: io.intino.alexandria:inl:2.0.0" level="project" />
-    <orderEntry type="module" module-name="core" />
+    <orderEntry type="module" module-name="session" />
     <orderEntry type="module" module-name="ingestion" />
   </component>
 </module>
