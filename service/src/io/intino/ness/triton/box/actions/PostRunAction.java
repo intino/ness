@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
-public class PostAdapterAction {
+public class PostRunAction {
 
 	public ServiceBox box;
 	public io.intino.alexandria.core.Context context = new io.intino.alexandria.core.Context();
@@ -37,7 +37,7 @@ public class PostAdapterAction {
 		EventAdapter eventAdapter = adapter.asEvent();
 		ZimStream zim = new ZimStream.Merge(zimStreams(box.datalake().eventStore(), eventAdapter));
 		File adapterFolder = new File(box.adaptersFolder(), adapter.name$());
-		new Thread(() -> eventAdapter.adapt(zim, new Context(box.stageFolder(), adapterFolder, configuration, attachment.stream()))).start();
+		new Thread(() -> eventAdapter.adapt(zim, new Context(box.datalake(), adapterFolder))).start();
 	}
 
 	private void runSetAdapter(Adapter adapter) {

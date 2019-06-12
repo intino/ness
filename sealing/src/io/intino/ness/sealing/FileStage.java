@@ -4,21 +4,16 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.ness.Session;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.stream.Stream;
 
-import static java.time.Instant.now;
 import static java.util.Arrays.stream;
 
 class FileStage implements Stage {
 	private final File stageFolder;
-	private final File sessionsFolder;
 
-	FileStage(File stageFolder, File sessionsFolder) {
+	FileStage(File stageFolder) {
 		this.stageFolder = stageFolder;
-		this.sessionsFolder = sessionsFolder;
 		this.stageFolder.mkdirs();
-		this.sessionsFolder.mkdirs();
 	}
 
 	@Override
@@ -27,9 +22,7 @@ class FileStage implements Stage {
 	}
 
 	public void clear() {
-		File treatedFolder = new File(sessionsFolder, sealDateFolderName());
-		treatedFolder.mkdirs();
-		FS.filesIn(stageFolder, File::isFile).forEach(f -> move(f, treatedFolder));
+		FS.filesIn(stageFolder, File::isFile).forEach(f -> f.renameTo(new File(f.getAbsolutePath() + ".treated")));
 	}
 
 	private void push(Session session, File stageFolder) {
@@ -44,20 +37,8 @@ class FileStage implements Stage {
 		return session.name() + "." + session.type() + Session.SessionExtension;
 	}
 
-	private void move(File stageFile, File treatedFolder) {
-		try {
-			Files.move(stageFile.toPath(), new File(treatedFolder, stageFile.getName()).toPath());
-		} catch (IOException e) {
-			Logger.error(e);
-		}
-	}
-
 	public Stream<Session> sessions() {
 		return files().map(FileSession::new);
-	}
-
-	private String sealDateFolderName() {
-		return now().toString().substring(0, 19).replaceAll("[:T\\-]", "");
 	}
 
 	private Stream<File> files() {

@@ -1,31 +1,24 @@
 package io.intino.ness.triton.datalake.adapter;
 
+import io.intino.ness.datalake.Datalake;
+
 import java.io.File;
-import java.io.InputStream;
 
 public class Context {
-	private final File stageFolder;
+	private final Datalake datalake;
 	private final File workspaceFolder;
-	private String configuration;
-	private InputStream attachment;
 
-	public Context(File stageFolder, File workspaceFolder) {
-		this.stageFolder = stageFolder;
+	public Context(Datalake datalake, File workspaceFolder) {
+		this.datalake = datalake;
 		this.workspaceFolder = workspaceFolder;
 	}
 
-	public Context(File stageFolder, File workspaceFolder, String configuration, InputStream attachment) {
-		this.stageFolder = stageFolder;
-		this.workspaceFolder = workspaceFolder;
-		this.configuration = configuration;
-		this.attachment = attachment;
-	}
-
-	public File stageFolder() {
-		return stageFolder;
+	public Datalake datalake() {
+		return datalake;
 	}
 
 	public File workspaceFolder() {
 		return workspaceFolder;
 	}
+
 }

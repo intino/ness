@@ -5,16 +5,14 @@ import io.intino.ness.datalake.file.FileDatalake;
 import java.io.File;
 
 public class FileSessionManager implements SessionManager {
-	private final File sessionsFolder;
 	private final File stageFolder;
 	private final FileStage stage;
 	private final FileDatalake datalake;
 
-	public FileSessionManager(FileDatalake datalake, File sessionsFolder, File stageFolder) {
+	public FileSessionManager(FileDatalake datalake, File stageFolder) {
 		this.datalake = datalake;
-		this.sessionsFolder = sessionsFolder;
 		this.stageFolder = stageFolder;
-		this.stage = new FileStage(stageFolder, sessionsFolder);
+		this.stage = new FileStage(stageFolder);
 	}
 
 	public void seal() {
@@ -37,7 +35,7 @@ public class FileSessionManager implements SessionManager {
 	}
 
 	private File tempFolder() {
-		File temp = new File(this.sessionsFolder, "temp");
+		File temp = new File(this.stageFolder, "temp");
 		temp.mkdir();
 		return temp;
 	}

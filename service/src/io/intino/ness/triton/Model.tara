@@ -34,10 +34,16 @@ Facet AdapterType on Adapter
 	sub Batch
 
 Facet TankType on Adapter
-	var Tank[] tanks
-	var string startTimetag
-	var string endTimetag
+	var function:Configure configure = ''
 	sub Set
+		var Tank[] tanks
+		var string startTimetag
+		var string endTimetag
 		var function:SetAdapter adapt
 	sub Event
+		var Tank[] tanks
+		var string startTimetag
+		var string endTimetag
 		var function:EventAdapter adapt
+	sub Custom
+		var function:DatalakeAdapter adapt

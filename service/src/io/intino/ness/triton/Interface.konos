@@ -4,11 +4,16 @@ Task seal as CronTrigger("0 0 4 1/1 * ? *", "daily at 4")
 
 Service api as REST(host = "localhost", port = "{api-port}")
 
-	Resource(path = "/adapter/:name") adapter
+	Resource(path = "/adapter/:name/run") run
+		Post
+			Parameter(in = path) name as Text
+			Response
+			Exception(code = BadRequest)
+	Resource(path = "/adapter/:name/configure") configure
 		Post
 			Parameter(in = path) name as Text
 			Parameter(in = body) configuration as Text
-			Parameter(in = form) attachment as File
+			Parameter(in = form) attachment as FileΩ
 			Response
 			Exception(code = BadRequest)
 	Resource(path = "/adapters") adapters

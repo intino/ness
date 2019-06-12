@@ -27,4 +27,5 @@ Pipe("feed.consul.server.status", "feed.consul.serverstatus")
 Pipe("feed.cesar.infrastructure.operation", "feed.cesar.infrastructureoperation")
 
 
-Adapter messageAdapter as Event(tanks = processstatus, startTimetag = "20190404", endTimetag = empty, adapt = @adapt) Batch
+Adapter messageAdapter as Event(tanks = processstatus, startTimetag = "20190404", endTimetag = empty, adapt = @adapt, configure = @configureAdapter) Batch
+Adapter messageAdapter as Custom (adapt = @adaptDatalake) Batch
