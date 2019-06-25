@@ -24,6 +24,10 @@ public class SetAnalytics {
 		return evolutionOf(setStore.tank(tank), count);
 	}
 
+	public TankHistogram histogramOf(Datalake.SetStore.Tub tub, TankHistogram.Axis axis) {
+		return new TankHistogram(axis, tub);
+	}
+
 	public TankHistogram histogramOf(String tank, TankHistogram.Axis axis) {
 		return histogramOf(setStore.tank(tank), axis);
 	}
