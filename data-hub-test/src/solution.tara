@@ -170,8 +170,6 @@ Datalake(Month) datalake
 	Tank("Error.Semantico.MedidorAntesAlta") errorSemanticoMedidorAntesAlta as Set(porDivisiones, Singleton)
 	Tank("Error.Semantico.RPUNoExiste") errorSemanticoRPUNoExiste as Set(porDivisiones, Singleton)
 
-Adapter Advisor as Custom(adapt = '')
-
 Broker(port = 63000, secondaryPort = 1884)
 	User(name = "user1", password = "1234")
 

@@ -1,0 +1,34 @@
+dsl Proteo
+
+Concept:{0..1} Broker
+	var string path
+	var integer port
+	var integer secondaryPort
+	var object:{BrokerImplementation} implementation = empty
+	Concept User
+		var string name
+		var string password
+	Concept Pipe
+    	var string origin
+    	var string destination
+    Concept Bridge
+		Concept:{1..1} ExternalBus
+			var string url
+			var string user
+			var string password
+			var string sessionId
+		var word:{outgoing incoming
+		var string[] topics
+
+Concept:{0..1} Datalake
+	var word:{Year Month Day Hour Minute} scale
+	var string path
+	Concept:Named Split > var string[] values
+	Concept:{1..*}:FacetRequired Tank
+		var string name
+
+Facet TankType on Datalake.Tank
+	sub Set
+		var Datalake.Split split = empty
+		var word:{Multivalued Singleton} type = Multivalued
+	sub Event

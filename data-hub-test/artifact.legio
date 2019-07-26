@@ -1,14 +1,19 @@
 dsl Legio
 
-Artifact(groupId = "org.example", version = "1.0.0") data-hub-test as Solution
-	Model(language = "Ness", version = "2.0.0", sdk = "2.6.0")
-	Imports
-		Test("junit", "junit", "LATEST")
-	Package(mode = ModulesAndLibrariesLinkedByManifest)
-	Parameter("datalake_path", "")
-	Parameter("broker_path", "")
-	Parameter("datalake_scale", "")
-	Parameter("api_port", "")
+Artifact("org.example", "1.0.0") data-hub-test as Solution
+	Model("Ness", "2.0.0", "2.6.0")
+	Box(language = "Konos", version = "6.0.0")
+	Package(mode = ModulesAndLibrariesLinkedByManifest) as Runnable(mainClass = "org.example.datahubtest.box.Main")
+	Parameter("datalake_path")
+	Parameter("broker_path")
+	Parameter("api_port")
+	Parameter("stage_path")
+
+RunConfiguration dev
+	Argument("datalake_path", "temp/datalake")
+	Argument("broker_path", "temp/broker")
+	Argument("api_port", "9000")
+	Argument("stage_path", "temp/stage")
 
 Repository(identifier = "intino-maven")
 	Language(url = "https://artifactory.intino.io/artifactory/releases")
