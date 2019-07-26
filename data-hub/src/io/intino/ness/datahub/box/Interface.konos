@@ -1,0 +1,25 @@
+dsl Konos
+
+Task seal as CronTrigger("0 0 4 1/1 * ? *", "daily at 4")
+
+Service api as REST(host = "localhost", port = "{api-port}")
+
+	Resource(path = "/adapter/:name/run") run
+		Post
+			Parameter(in = path) name as Text
+			Response
+			Exception(code = BadRequest)
+	Resource(path = "/adapter/:name/configure") configure
+		Post
+			Parameter(in = path) name as Text
+			Parameter(in = body) configuration as Text
+			Parameter(in = form) attachment as File
+			Response
+			Exception(code = BadRequest)
+	Resource(path = "/adapters") adapters
+		Get
+			Response as Text List
+
+Service Manager as JMX
+	Operation("Seal stage") seal
+	Operation("Stops datalake service saving current information") stop

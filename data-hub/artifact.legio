@@ -1,0 +1,40 @@
+dsl Legio
+
+Artifact("io.intino.ness", "2.0.0") data-hub as Product
+	Model("Proteo", "2.3.1", "2.6.0") > outLanguage = "Ness"
+	Box("Konos", "6.0.0")
+	Imports
+		Compile("io.intino.alexandria", "jmx", "1.0.1")
+		Compile("io.intino.alexandria", "logger4j", "1.0.0")
+		Compile("io.intino.alexandria", "jms", "1.0.2")
+		Compile("io.intino.alexandria", "scheduler-framework", "1.0.1")
+		Compile("io.intino.alexandria", "logger4j", "1.0.0")
+		Compile("io.intino.alexandria", "ingestion", "1.0.0")
+		Compile("io.intino.alexandria", "sealing", "1.0.0")
+		Compile("io.intino.alexandria", "rest", "2.0.0")
+		Compile("org.apache.activemq", "activemq-broker", "5.15.8")
+		Compile("org.apache.activemq", "activemq-mqtt", "5.15.8")
+		Compile("org.apache.activemq", "activemq-kahadb-store", "5.15.8")
+		Compile("org.apache.activemq", "activemq-jaas", "5.15.8")
+		Compile("org.apache.activemq", "activemq-runtime-config", "5.15.8")
+		Test("junit", "junit", "LATEST")
+	Code("io.intino.ness.datahub")
+	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true) as Runnable("io.intino.ness.datahub.box.Main")
+	Distribution(intino.frameworks, intino.languages)
+	Parameter("datalake_path")
+	Parameter("datalake_scale")
+
+	Parameter("broker_path")
+	Parameter("broker_port", "63000")
+	Parameter("mqtt_port", "1884")
+	Parameter(name = "api-port")
+
+
+Repository("intino-maven") intino
+	Release("https://artifactory.intino.io/artifactory/releases")
+	Release("https://artifactory.intino.io/artifactory/release-frameworks") frameworks
+	Language("https://artifactory.intino.io/artifactory/release-languages") languages
+
+RunConfiguration dev
+	Argument(name = "scale", value = "Day")
+	Argument(name = "configurationModel", value = "ConfigurationTest")

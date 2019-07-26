@@ -1,0 +1,49 @@
+dsl Proteo
+
+Concept:{0..1} Broker
+	var integer port
+	var integer secondaryPort
+	var function:BrokerImplementation implementation = 'null';
+	Concept User
+		var string name
+		var string password
+	Concept Pipe
+    	var string origin
+    	var string destination
+    Concept Bridge
+		Concept:{1..1} ExternalBus
+			var string url
+			var string user
+			var string password
+			var string sessionId
+		var word:{outgoing incoming} direction
+		var string[] topics
+
+Concept:{0..1} Datalake
+	var word:{Year Month Day Hour Minute} scale = Hour is private
+	var string path = empty is private
+	Concept Split
+	Concept:{1..*} Tank
+		var string name
+		var word:{Event Set} type
+
+Concept:Named Adapter
+
+Facet AdapterType on Adapter
+	sub Realtime
+	sub Batch
+
+Facet TankType on Adapter
+	var function:Configure configure = ''
+	sub Set
+		var Datalake.Tank[] tanks
+		var string startTimetag
+		var string endTimetag
+		var function:SetAdapter adapt
+	sub Event
+		var Datalake.Tank[] tanks
+		var string startTimetag
+		var string endTimetag
+		var function:EventAdapter adapt
+	sub Custom
+		var function:DatalakeAdapter adapt
