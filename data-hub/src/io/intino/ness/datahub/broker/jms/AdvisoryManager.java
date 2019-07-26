@@ -12,17 +12,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AdvisoryManager {
+class AdvisoryManager {
 	private final Broker broker;
-	private final Session session;
 	private HashMap<String, Info> info = new HashMap<>();
 
-	public AdvisoryManager(Broker broker, Session session) {
+	AdvisoryManager(Broker broker) {
 		this.broker = broker;
-		this.session = session;
 	}
 
-	public void start() {
+	void start(Session session) {
 		try {
 			List<ActiveMQDestination> destinations = destinations();
 			for (ActiveMQDestination destination : destinations) {

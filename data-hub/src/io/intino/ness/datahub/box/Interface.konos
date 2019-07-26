@@ -2,7 +2,7 @@ dsl Konos
 
 Task seal as CronTrigger("0 0 4 1/1 * ? *", "daily at 4")
 
-Service api as REST(host = "localhost", port = "{api-port}")
+Service api as REST(host = "localhost", port = "{api_port}")
 
 	Resource(path = "/adapter/:name/run") run
 		Post

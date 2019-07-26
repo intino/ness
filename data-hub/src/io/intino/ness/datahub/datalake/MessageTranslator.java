@@ -1,8 +1,8 @@
 package io.intino.ness.datahub.datalake;
 
-import io.intino.alexandria.inl.Message;
-import io.intino.alexandria.inl.MessageReader;
 import io.intino.alexandria.logger.Logger;
+import io.intino.alexandria.message.Message;
+import io.intino.alexandria.message.MessageReader;
 
 import javax.jms.TextMessage;
 

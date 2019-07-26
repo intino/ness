@@ -2,26 +2,31 @@ package io.intino.ness.datahub.box;
 
 import io.intino.alexandria.datalake.Datalake;
 import io.intino.ness.datahub.DataHub;
+import io.intino.ness.datahub.broker.jms.JmsBrokerService;
 import io.intino.ness.datahub.graph.NessGraph;
 
 import java.io.File;
 
-public class DataHubBox extends AbstractBox {
+class DataHubBox extends AbstractBox {
 
 	private NessGraph graph;
 	private DataHub dataHub;
 
-	public DataHubBox(String[] args) {
+	DataHubBox(String[] args) {
 		super(args);
 	}
 
-	public DataHubBox(DataHubConfiguration configuration) {
+	DataHubBox(DataHubConfiguration configuration) {
 		super(configuration);
 	}
 
 	@Override
 	public io.intino.alexandria.core.Box put(Object o) {
-		if (o instanceof NessGraph) this.graph = (NessGraph) o;
+		if (o instanceof NessGraph) {
+			this.graph = (NessGraph) o;
+			if (this.graph.broker() != null && graph.broker() == null)
+				graph.broker().implementation(() -> new JmsBrokerService(graph));
+		}
 		return this;
 	}
 

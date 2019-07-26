@@ -18,7 +18,7 @@
   "paths": {
     "/adapter/:name/run": {
       "post": {
-        "operationId": "15d6f199-e408-42a2-a593-bf887b61ccf7",
+        "operationId": "edaa3138-8292-435e-8f7b-bef31488ddfa",
         "consumes": [
           "text/plain; charset\u003dutf-8",
           " application/json",
@@ -50,7 +50,7 @@
     },
     "/adapter/:name/configure": {
       "post": {
-        "operationId": "3f49ccfc-17ee-4e07-827c-8fc017b634f1",
+        "operationId": "cf1ceff9-cf45-4941-a2a1-1e8903bff771",
         "consumes": [
           "text/plain; charset\u003dutf-8",
           " application/json",
@@ -96,7 +96,7 @@
     },
     "/adapters": {
       "get": {
-        "operationId": "c399da6e-19ba-4567-9462-925d22b954fb",
+        "operationId": "05772740-ccd1-412b-9d04-afaf9f517ab9",
         "consumes": [
           "text/plain; charset\u003dutf-8",
           " application/json",

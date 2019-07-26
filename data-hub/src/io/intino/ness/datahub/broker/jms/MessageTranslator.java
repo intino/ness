@@ -6,9 +6,9 @@ import io.intino.alexandria.zim.ZimReader;
 
 import javax.jms.TextMessage;
 
-public class MessageTranslator {
+class MessageTranslator {
 
-	public static Message toInlMessage(javax.jms.Message message) {
+	static Message toInlMessage(javax.jms.Message message) {
 		try {
 			return readMessage(((TextMessage) message).getText());
 		} catch (Throwable e) {

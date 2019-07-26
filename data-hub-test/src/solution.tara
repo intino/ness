@@ -1,0 +1,178 @@
+dsl Ness
+
+Datalake(Month) datalake
+	Split("DA" "DB" "DC" "DD" "DF" "DG" "DJ" "DK" "DL" "DM" "DN" "DP" "DU" "DV" "DW" "DX") porDivisiones
+	Tank("asemed.Criterio") criterio as Event
+	Tank("asemed.CriterioBorrado") criterioBorrado as Event
+	Tank("asemed.CriterioModificado") criterioModificado as Event
+	Tank("asemed.CriterioSentencia") criterioSentencia as Event
+	Tank("asemed.CriterioSentenciaModificada") criterioSentenciaModificada as Event
+	Tank("asemed.CriterioSentenciaBorrada") criterioSentenciaBorrada as Event
+	Tank("asemed.CriterioHabilitado") criterioHabilitado as Event
+	Tank("asemed.CriterioDeshabilitado") criterioDeshabilitado as Event
+	Tank("asemed.CriterioEvolucionado") criterioEvolucionado as Event
+
+	Tank("asemed.UsuarioConectado") usuarioConectado as Event
+	Tank("asemed.UsuarioDesconectado") usuarioDesconectado as Event
+
+	Tank("Ajuste") ajuste as Event
+	Tank("CierreAjuste") cierreAjuste as Event
+	Tank("Alerta") alerta as Event
+	Tank("AltaComercial") altaComercial as Event
+	Tank("BajaComercial") bajaComercial as Event
+	Tank("CambioEstatusMedidor") cambioEstatusMedidor as Event
+	Tank("CambioEstatusServicio") cambioEstatusServicio as Event
+	Tank("CambioMedidor") cambioMedidor as Event
+	Tank("Conexion") conexion as Event
+	Tank("Desconexion") desconexion as Event
+	Tank("Reconexion") reconexion as Event
+	Tank("ConexionMedidor") conexionMedidor as Event
+	Tank("DesconexionMedidor") desconexionMedidor as Event
+	Tank("InstalacionMedidor") instalacionMedidor as Event
+	Tank("RetiroMedidor") retiroMedidor as Event
+	Tank("Despacho") despacho as Event
+	Tank("FacturacionServicio") facturacionServicio as Event
+	Tank("FirmaContrato") firmaContrato as Event
+	Tank("Inspeccion") inspeccion as Event
+	Tank("LecturaCircuito") lecturaCircuito as Event
+	Tank("LecturaDemanda") lecturaDemanda as Event
+	Tank("LecturaServicio") lecturaServicio as Event
+	Tank("QuejaMedidorRobado") quejaMedidorRobado as Event
+	Tank("SelladoMedidor") selladoMedidor as Event
+	Tank("Solicitud") solicitud as Event
+
+
+	Tank("Activos") activos as Set(porDivisiones, Singleton)
+	Tank("Inactivos") inactivos as Set(porDivisiones, Singleton)
+	Tank("EsCFE") esCFE as Set(porDivisiones, Singleton)
+	Tank("EsEmpleado") esEmpleado as Set(porDivisiones, Singleton)
+	Tank("Giro") giro as Set(porDivisiones)
+	Tank("SCIAN") scian as Set(porDivisiones)
+	Tank("Estatus") estatus as Set(porDivisiones)
+	Tank("Poblacion.Estado") poblacionEstado as Set(porDivisiones)
+	Tank("Poblacion.Municipio") poblacionMunicipio as Set(porDivisiones)
+	Tank("Poblacion.Colonia") poblacionColonia as Set(porDivisiones)
+	Tank("Poblacion.Tipo") poblacionTipo as Set(porDivisiones)
+	Tank("Contrato.Potencia") contratoPotencia as Set(porDivisiones)
+	Tank("Contrato.Firma") contratoFirma as Set(porDivisiones, Singleton)
+	Tank("Contrato.Alta") contratoAlta as Set(porDivisiones, Singleton)
+	Tank("Contrato.Baja") contratoBaja as Set(porDivisiones, Singleton)
+	Tank("Contrato.Estatus") contratoEstatus as Set(porDivisiones)
+	Tank("Facturacion.Periodicidad") facturacionPeriodicidad as Set(porDivisiones)
+	Tank("Facturacion.Modo") facturacionModo as Set(porDivisiones)
+	Tank("Facturacion.EsColectiva") facturacionEsColectiva as Set(porDivisiones, Singleton)
+	Tank("Facturacion.EsEspecial") facturacionEsEspecial as Set(porDivisiones, Singleton)
+	Tank("Facturacion.EsPuntual") facturacionEsPuntual as Set(porDivisiones, Singleton)
+	Tank("Tarifa.Codigo") tarifaCodigo as Set(porDivisiones)
+	Tank("Tarifa.Tipo") tarifaTipo as Set(porDivisiones)
+	Tank("Circuito.Codigo") circuitoCodigo as Set(porDivisiones)
+	Tank("Circuito.PerdidasPerCapita.PerdidaTecnica") circuitoPerdidasPerCapitaPerdidaTecnica as Set(porDivisiones)
+	Tank("Circuito.PerdidasPerCapita.PerdidaNoTecnica") circuitoPerdidasPerCapitaPerdidaNoTecnica as Set(porDivisiones)
+	Tank("Transformador.Conexiones") conexiones as Set(porDivisiones)
+	Tank("Adscripcion.Zona") adscripcionZona as Set(porDivisiones)
+	Tank("Adscripcion.Agencia") adscripcionAgencia as Set(porDivisiones)
+	Tank("Adscripcion.Poblacion") adscripcionPoblacion as Set(porDivisiones)
+	Tank("Adscripcion.Ruta") adscripcionRuta as Set(porDivisiones)
+	Tank("Adscripcion.Ciclo") adscripcionCiclo as Set(porDivisiones)
+	Tank("Conexion.Tipo") conexionTipo as Set(porDivisiones)
+	Tank("Conexion.Hilos") conexionHilos as Set(porDivisiones)
+	Tank("Conexion.PorteaEnergia") conexionPorteaEnergia as Set(porDivisiones, Singleton)
+	Tank("Conexion.GeneraEnergiaRenovable") conexionGeneraEnergiaRenovable as Set(porDivisiones, Singleton)
+	Tank("Conexion.Potencia") conexionPotencia as Set(porDivisiones)
+	Tank("Conexion.Conectado") conexionConectado as Set(porDivisiones, Singleton)
+	Tank("Conexion.Desconectado") conexionDesconectado as Set(porDivisiones, Singleton)
+	Tank("Conexion.Reconectado") conexionReconectado as Set(porDivisiones, Singleton)
+	Tank("Medidor.Tipo") medidorTipo as Set(porDivisiones)
+	Tank("Medidor.Codigo") medidorCodigo as Set(porDivisiones)
+	Tank("Medidor.Estatus") medidorEstatus as Set(porDivisiones)
+	Tank("Medidor.Fabricacion.Fecha") medidorFabricacionFecha as Set(porDivisiones)
+	Tank("Medidor.Fabricacion.Lote") medidorFabricacionLote as Set(porDivisiones)
+	Tank("Medidor.Caratulas") medidorCaratulas as Set(porDivisiones)
+	Tank("Medidor.Multiplicador") medidorMultiplicador as Set(porDivisiones)
+	Tank("Medidor.Instalado") medidorInstalado as Set(porDivisiones, Singleton)
+	Tank("Medidor.Retirado") medidorRetirado as Set(porDivisiones, Singleton)
+	Tank("Medidor.Conectado") medidorConectado as Set(porDivisiones, Singleton)
+	Tank("Medidor.Desconectado") medidorDesconectado as Set(porDivisiones, Singleton)
+	Tank("Medidor.Sellado") medidorSellado as Set(porDivisiones, Singleton)
+	Tank("Medidor.Cambiado") medidorCambiado as Set(porDivisiones, Singleton)
+	Tank("Lectura.Tipo") lecturaTipo as Set(porDivisiones)
+	Tank("Lectura.Negativa") lecturaNegativa as Set(porDivisiones, Singleton)
+	Tank("Consumo.Facturado") consumoFacturado as Set(porDivisiones, Singleton)
+	Tank("Consumo.NoFacturado") consumoNoFacturado as Set(porDivisiones, Singleton)
+	Tank("Consumo.MalFacturado") consumoMalFacturado as Set(porDivisiones, Singleton)
+	Tank("Consumo.Abatimiento") consumoAbatimiento as Set(porDivisiones)
+	Tank("Consumo.FacturaAbatida") consumoFacturaAbatida as Set(porDivisiones)
+	Tank("Consumo.PromedioDiario") consumoPromedioDiario as Set(porDivisiones)
+	Tank("Consumo.Plano") consumoPlano as Set(porDivisiones)
+	Tank("Consumo.DiferenciaConMaxCPD") consumoDiferenciaConMaxCPD as Set(porDivisiones)
+	Tank("Demanda.PromedioDiario") demandaPromedioDiario as Set(porDivisiones)
+	Tank("Demanda.FactorCarga") demandaFactorCarga as Set(porDivisiones)
+	Tank("Demanda.FactorCargaPromedioDiario") demandaFactorCargaPromedioDiario as Set(porDivisiones)
+	Tank("Demanda.FactorPotencia") demandaFactorPotencia as Set(porDivisiones)
+	Tank("Servicio.QuejaMedidorRobado") servicioQuejaMedidorRobado as Set(porDivisiones, Singleton)
+	Tank("Servicio.Solicitud") servicioSolicitud as Set(porDivisiones)
+	Tank("Revision.Inspector") revisionInspector as Set(porDivisiones)
+	Tank("Revision.Despacho") revisionDespacho as Set(porDivisiones, Singleton)
+	Tank("Revision.Inspeccion") revisionInspeccion as Set(porDivisiones)
+	Tank("Revision.NumeroInspecciones") revisionNumeroInspecciones as Set(porDivisiones)
+	Tank("Revision.Ajuste") revisionAjuste as Set(porDivisiones)
+	Tank("Revision.Cierre") revisionCierre as Set(porDivisiones)
+	Tank("Revision.EnergiaRecuperada") revisionEnergiaRecuperada as Set(porDivisiones)
+	Tank("Revision.OrigenAsemed") revisionOrigenAsemed as Set(porDivisiones, Singleton)
+
+	Tank("Inactivo.EsCFE") inactivoEsCFE as Set(porDivisiones, Singleton)
+	Tank("Inactivo.EsEmpleado") inactivoEsEmpleado as Set(porDivisiones, Singleton)
+	Tank("Inactivo.Giro") inactivoGiro as Set(porDivisiones)
+	Tank("Inactivo.SCIAN") inactivoSCIAN as Set(porDivisiones)
+	Tank("Inactivo.Estatus") inactivoEstatus as Set(porDivisiones)
+	Tank("Inactivo.Poblacion.Estado") inactivoPoblacionEstado as Set(porDivisiones)
+	Tank("Inactivo.Poblacion.Municipio") inactivoPoblacionMunicipio as Set(porDivisiones)
+	Tank("Inactivo.Poblacion.Colonia") inactivoPoblacionColonia as Set(porDivisiones)
+	Tank("Inactivo.Poblacion.Tipo") inactivoPoblacionTipo as Set(porDivisiones)
+	Tank("Inactivo.Contrato.Potencia") inactivoContratoPotencia as Set(porDivisiones)
+	Tank("Inactivo.Facturacion.Periodicidad") inactivoFacturacionPeriodicidad as Set(porDivisiones)
+	Tank("Inactivo.Facturacion.Modo") inactivoFacturacionModo as Set(porDivisiones)
+	Tank("Inactivo.Facturacion.EsColectiva") inactivoFacturacionEsColectiva as Set(porDivisiones, Singleton)
+	Tank("Inactivo.Facturacion.EsEspecial") inactivoFacturacionEsEspecial as Set(porDivisiones, Singleton)
+	Tank("Inactivo.Facturacion.EsPuntual") inactivoFacturacionEsPuntual as Set(porDivisiones, Singleton)
+	Tank("Inactivo.Circuito.Codigo") inactivoCircuitoCodigo as Set(porDivisiones)
+	Tank("Inactivo.Adscripcion.Zona") inactivoAdscripcionZona as Set(porDivisiones)
+	Tank("Inactivo.Adscripcion.Agencia") inactivoAdscripcionAgencia as Set(porDivisiones)
+	Tank("Inactivo.Adscripcion.Poblacion") inactivoAdscripcionPoblacion as Set(porDivisiones)
+	Tank("Inactivo.Adscripcion.Ruta") inactivoAdscripcionRuta as Set(porDivisiones)
+	Tank("Inactivo.Adscripcion.Ciclo") inactivoAdscripcionCiclo as Set(porDivisiones)
+	Tank("Inactivo.Revision.Inspector") inactivoRevisionInspector as Set(porDivisiones)
+	Tank("Inactivo.Revision.Despacho") inactivoRevisionDespacho as Set(porDivisiones, Singleton)
+	Tank("Inactivo.Revision.Inspeccion") inactivoRevisionInspeccion as Set(porDivisiones)
+	Tank("Inactivo.Revision.Ajuste") inactivoRevisionAjuste as Set(porDivisiones)
+	Tank("Inactivo.Revision.Cierre") inactivoRevisionCierre as Set(porDivisiones)
+	Tank("Inactivo.Revision.EnergiaRecuperada") inactivoRevisionEnergiaRecuperada as Set(porDivisiones)
+	Tank("Inactivo.Revision.OrigenAsemed") inactivoRevisionOrigenAsemed as Set(porDivisiones, Singleton)
+
+	Tank("Error.Sintactico.SinRutaDefinida") errorSintacticoSinRutaDefinida as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.RutaIncorrecta") errorSemanticoRutaIncorrecta as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.FirmaInactivo") errorSemanticoFirmaInactivo as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.ConectadoInactivo") errorSemanticoConectadoInactivo as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.DesconectadoInactivo") errorSemanticoDesconectadoInactivo as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.ReconectadoInactivo") errorSemanticoReconectadoInactivo as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.MedidorInstaladoInactivo") errorSemanticoMedidorInstaladoInactivo as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.MedidorRetiradoInactivo") errorSemanticoMedidorRetiradoInactivo as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.MedidorSelladoInactivo") errorSemanticoMedidorSelladoInactivo as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.MedidorCambiadoInactivo") errorSemanticoMedidorCambiadoInactivo as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.LecturaServicioInactivo") errorSemanticoLecturaServicioInactivo as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.ConsumoFacturadoInactivo") errorSemanticoConsumoFacturadoInactivo as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.LecturaDemandaInactivo") errorSemanticoLecturaDemandaInactivo as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.QuejaMedidorRobadoInactivo") errorSemanticoQuejaMedidorRobadoInactivo as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.ServicioSolicitudInactivo") errorSemanticoServicioSolicitudInactivo as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.LecturaServicioAntesAlta") errorSemanticoLecturaServicioAntesAlta as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.LecturaDemandaAntesAlta") errorSemanticoLecturaDemandaAntesAlta as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.FacturacionServicioAntesAlta") errorSemanticoFacturacionServicioAntesAlta as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.MedidorAntesAlta") errorSemanticoMedidorAntesAlta as Set(porDivisiones, Singleton)
+	Tank("Error.Semantico.RPUNoExiste") errorSemanticoRPUNoExiste as Set(porDivisiones, Singleton)
+
+Adapter Advisor as Custom(adapt = '')
+
+Broker(port = 63000, secondaryPort = 1884)
+	User(name = "user1", password = "1234")
+
+

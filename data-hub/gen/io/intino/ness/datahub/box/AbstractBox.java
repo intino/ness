@@ -20,7 +20,7 @@ public abstract class AbstractBox extends io.intino.alexandria.core.Box {
 	public AbstractBox(DataHubConfiguration configuration) {
 		this.configuration = configuration;
 		initJavaLogger();
-		io.intino.alexandria.rest.AlexandriaSparkBuilder.setup(Integer.parseInt(configuration().get("api-port")), "www/");
+		io.intino.alexandria.rest.AlexandriaSparkBuilder.setup(Integer.parseInt(configuration().get("api_port")), "www/");
 	}
 
 	public DataHubConfiguration configuration() {

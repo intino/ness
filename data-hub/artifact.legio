@@ -8,7 +8,6 @@ Artifact("io.intino.ness", "2.0.0") data-hub as Product
 		Compile("io.intino.alexandria", "logger4j", "1.0.0")
 		Compile("io.intino.alexandria", "jms", "1.0.2")
 		Compile("io.intino.alexandria", "scheduler-framework", "1.0.1")
-		Compile("io.intino.alexandria", "logger4j", "1.0.0")
 		Compile("io.intino.alexandria", "ingestion", "1.0.0")
 		Compile("io.intino.alexandria", "sealing", "1.0.0")
 		Compile("io.intino.alexandria", "rest", "2.0.0")
@@ -22,12 +21,8 @@ Artifact("io.intino.ness", "2.0.0") data-hub as Product
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true) as Runnable("io.intino.ness.datahub.box.Main")
 	Distribution(intino.frameworks, intino.languages)
 	Parameter("datalake_path")
-	Parameter("datalake_scale")
-
 	Parameter("broker_path")
-	Parameter("broker_port", "63000")
-	Parameter("mqtt_port", "1884")
-	Parameter(name = "api-port")
+	Parameter("api_port")
 
 
 Repository("intino-maven") intino

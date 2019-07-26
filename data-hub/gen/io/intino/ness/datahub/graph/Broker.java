@@ -4,6 +4,7 @@ import io.intino.ness.datahub.graph.*;
 import io.intino.ness.datahub.broker.BrokerService;
 
 public class Broker  extends io.intino.tara.magritte.Layer implements io.intino.tara.magritte.tags.Terminal {
+	protected java.lang.String path;
 	protected int port;
 	protected int secondaryPort;
 	protected io.intino.ness.datahub.graph.functions.BrokerImplementation implementation;
@@ -13,6 +14,10 @@ public class Broker  extends io.intino.tara.magritte.Layer implements io.intino.
 
 	public Broker(io.intino.tara.magritte.Node node) {
 		super(node);
+	}
+
+	public java.lang.String path() {
+		return path;
 	}
 
 	public int port() {
@@ -25,6 +30,11 @@ public class Broker  extends io.intino.tara.magritte.Layer implements io.intino.
 
 	public BrokerService implementation() {
 		return implementation.get();
+	}
+
+	public Broker path(java.lang.String value) {
+		this.path = value;
+		return (Broker) this;
 	}
 
 	public Broker port(int value) {
@@ -89,6 +99,7 @@ public class Broker  extends io.intino.tara.magritte.Layer implements io.intino.
 	@Override
 	protected java.util.Map<java.lang.String, java.util.List<?>> variables$() {
 		java.util.Map<String, java.util.List<?>> map = new java.util.LinkedHashMap<>();
+		map.put("path", new java.util.ArrayList(java.util.Collections.singletonList(this.path)));
 		map.put("port", new java.util.ArrayList(java.util.Collections.singletonList(this.port)));
 		map.put("secondaryPort", new java.util.ArrayList(java.util.Collections.singletonList(this.secondaryPort)));
 		map.put("implementation", this.implementation != null ? new java.util.ArrayList(java.util.Collections.singletonList(this.implementation)) : java.util.Collections.emptyList());
@@ -114,7 +125,8 @@ public class Broker  extends io.intino.tara.magritte.Layer implements io.intino.
 	@Override
 	protected void load$(java.lang.String name, java.util.List<?> values) {
 		super.load$(name, values);
-		if (name.equalsIgnoreCase("port")) this.port = io.intino.tara.magritte.loaders.IntegerLoader.load(values, this).get(0);
+		if (name.equalsIgnoreCase("path")) this.path = io.intino.tara.magritte.loaders.StringLoader.load(values, this).get(0);
+		else if (name.equalsIgnoreCase("port")) this.port = io.intino.tara.magritte.loaders.IntegerLoader.load(values, this).get(0);
 		else if (name.equalsIgnoreCase("secondaryPort")) this.secondaryPort = io.intino.tara.magritte.loaders.IntegerLoader.load(values, this).get(0);
 		else if (name.equalsIgnoreCase("implementation")) this.implementation = io.intino.tara.magritte.loaders.FunctionLoader.load(values, this, io.intino.ness.datahub.graph.functions.BrokerImplementation.class).get(0);
 	}
@@ -122,7 +134,8 @@ public class Broker  extends io.intino.tara.magritte.Layer implements io.intino.
 	@Override
 	protected void set$(java.lang.String name, java.util.List<?> values) {
 		super.set$(name, values);
-		if (name.equalsIgnoreCase("port")) this.port = (java.lang.Integer) values.get(0);
+		if (name.equalsIgnoreCase("path")) this.path = (java.lang.String) values.get(0);
+		else if (name.equalsIgnoreCase("port")) this.port = (java.lang.Integer) values.get(0);
 		else if (name.equalsIgnoreCase("secondaryPort")) this.secondaryPort = (java.lang.Integer) values.get(0);
 		else if (name.equalsIgnoreCase("implementation")) this.implementation = io.intino.tara.magritte.loaders.FunctionLoader.load(values.get(0), this, io.intino.ness.datahub.graph.functions.BrokerImplementation.class);
 	}

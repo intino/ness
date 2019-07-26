@@ -1,8 +1,8 @@
 package test;
 
-import io.intino.alexandria.inl.MessageBuilder;
 import io.intino.alexandria.jms.TopicProducer;
 import io.intino.alexandria.logger.Logger;
+import io.intino.alexandria.message.MessageBuilder;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.JMSException;

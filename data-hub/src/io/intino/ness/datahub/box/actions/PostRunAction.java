@@ -7,8 +7,9 @@ import io.intino.alexandria.zim.ZimStream;
 import io.intino.ness.datahub.box.DataHubBox;
 import io.intino.ness.datahub.datalake.adapter.Context;
 import io.intino.ness.datahub.graph.Adapter;
-import io.intino.ness.datahub.graph.event.EventAdapter;
-import io.intino.ness.datahub.graph.set.SetAdapter;
+import io.intino.ness.datahub.graph.custom.CustomAdapter;
+import io.intino.ness.datahub.graph.events.EventsAdapter;
+import io.intino.ness.datahub.graph.sets.SetsAdapter;
 
 import java.io.File;
 import java.util.List;
@@ -28,20 +29,25 @@ public class PostRunAction {
 		Adapter adapter = box.graph().adapterList().stream().filter(a -> a.name$().equals(name)).findFirst().orElse(null);
 		if (adapter == null) throw new BadRequest("Adapter not found");
 		if (adapter.isRealtime()) throw new BadRequest("Realtime Adapters cannot be run on demand");
-		if (adapter.isEvent()) runEventAdapter(adapter);
+		if (adapter.isEvents()) runEventAdapter(adapter.asEvents());
+		if (adapter.isCustom()) runCustomAdapter(adapter.asCustom());
 		else runSetAdapter(adapter);
 	}
 
-	private void runEventAdapter(Adapter adapter) {
-		EventAdapter eventAdapter = adapter.asEvent();
-		ZimStream zim = new ZimStream.Merge(zimStreams(box.datalake().eventStore(), eventAdapter));
+	private void runCustomAdapter(CustomAdapter adapter) {
+		File adapterFolder = new File(box.adaptersFolder(), adapter.name$());
+		new Thread(() -> adapter.adapt(box.datalake(), new Context(adapterFolder))).start();
+	}
+
+	private void runEventAdapter(EventsAdapter adapter) {
+		ZimStream zim = new ZimStream.Merge(zimStreams(box.datalake().eventStore(), adapter));
 		File adapterFolder = new File(box.adaptersFolder(), adapter.name$());
 		adapterFolder.mkdirs();
-		new Thread(() -> eventAdapter.adapt(zim, new Context(box.datalake(), adapterFolder))).start();
+		new Thread(() -> adapter.adapt(zim, new Context(adapterFolder))).start();
 	}
 
 	private void runSetAdapter(Adapter adapter) {
-		SetAdapter setAdapter = adapter.asSet();
+		SetsAdapter setAdapter = adapter.asSets();
 //		ZimStream zim = new ZimStream.Merge(zimStreams(box.datalake().eventStore(), setAdapter));
 //
 //		File adapterFolder = new File(box.adaptersFolder(), adapter.name$());
@@ -49,7 +55,7 @@ public class PostRunAction {
 	}
 
 
-	private ZimStream[] zimStreams(Datalake.EventStore store, EventAdapter eventAdapter) {
+	private ZimStream[] zimStreams(Datalake.EventStore store, EventsAdapter eventAdapter) {
 		Timetag start = new Timetag(eventAdapter.startTimetag());
 		Timetag end = new Timetag(eventAdapter.endTimetag());
 		return store.tanks()
@@ -58,7 +64,7 @@ public class PostRunAction {
 				.toArray(ZimStream[]::new);
 	}
 
-	private List<Stream<Datalake.SetStore.Tub>> zetStreams(Datalake.SetStore store, SetAdapter eventAdapter) {
+	private List<Stream<Datalake.SetStore.Tub>> zetStreams(Datalake.SetStore store, SetsAdapter eventAdapter) {
 		Timetag start = new Timetag(eventAdapter.startTimetag());
 		Timetag end = new Timetag(eventAdapter.endTimetag());
 		return store.tanks()

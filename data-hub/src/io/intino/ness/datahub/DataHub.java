@@ -1,16 +1,11 @@
 package io.intino.ness.datahub;
 
-import io.intino.alexandria.Scale;
 import io.intino.alexandria.datalake.Datalake;
 import io.intino.alexandria.datalake.file.FileDatalake;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.sealing.FileSessionSealer;
 import io.intino.alexandria.sealing.SessionSealer;
-import io.intino.ness.datahub.broker.jms.BrokerManager;
-import io.intino.ness.datahub.broker.jms.JmsBrokerService;
-import io.intino.ness.datahub.broker.jms.PipeManager;
-import io.intino.ness.datahub.broker.jms.TankManager;
-import io.intino.ness.datahub.graph.Broker;
+import io.intino.ness.datahub.broker.BrokerService;
 import io.intino.ness.datahub.graph.NessGraph;
 import org.apache.log4j.Level;
 
@@ -21,20 +16,17 @@ public class DataHub {
 		io.intino.alexandria.logger4j.Logger.init(Level.WARN);
 	}
 
-	private final File brokerStage;
 	private final NessGraph graph;
 	private final File root;
 	private Datalake datalake;
-	private BrokerManager brokerManager;
-	private JmsBrokerService jmsBrokerService;
+	private BrokerService brokerService;
 	private SessionSealer sessionSealer;
-	private PipeManager pipeManager;
 
 	public DataHub(NessGraph graph, File root) {
 		this.graph = graph;
 		this.root = root;
-		this.brokerStage = new File(this.root, "broker_stage");
-		this.brokerStage.mkdirs();
+		File brokerStage = new File(this.root, "broker_stage");
+		brokerStage.mkdirs();
 		this.root.mkdirs();
 		stageFolder().mkdirs();
 	}
@@ -46,7 +38,13 @@ public class DataHub {
 
 	public void stop() {
 		Logger.info("Shutting down datalake...");
-		if (brokerManager != null) brokerManager.stop();
+		if (brokerService != null) {
+			try {
+				brokerService.stop();
+			} catch (Exception e) {
+				Logger.error(e);
+			}
+		}
 	}
 
 	public NessGraph graph() {
@@ -61,8 +59,8 @@ public class DataHub {
 		return sessionSealer;
 	}
 
-	public JmsBrokerService brokerEngine() {
-		return jmsBrokerService;
+	public BrokerService brokerService() {
+		return brokerService;
 	}
 
 	public File stageFolder() {
@@ -75,30 +73,11 @@ public class DataHub {
 	}
 
 	private void configureBroker() {
-		jmsBrokerService = new JmsBrokerService(brokerDirectory(), graph);
-		brokerManager = new BrokerManager(jmsBrokerService);
-		brokerManager.start();
-		pipeManager = new PipeManager(brokerManager);
-		startServices();
-	}
-
-
-	private void startServices() {
-		if (graph.broker() != null) {
-			if (graph.datalake() != null) initTanks(Scale.valueOf(graph.datalake().scale().name()));
-			initPipes();
+		brokerService = graph.broker().implementation();
+		try {
+			brokerService.start();
+		} catch (Exception e) {
+			Logger.error(e);
 		}
-	}
-
-	private void initTanks(Scale scale) {
-		datalake.eventStore().tanks().forEach(t -> new TankManager(brokerManager, brokerStage, t, scale).register());
-	}
-
-	private void initPipes() {
-		for (Broker.Pipe pipe : graph.broker().pipeList()) pipeManager.start(pipe);
-	}
-
-	private File brokerDirectory() {
-		return new File(this.root, "broker");
 	}
 }

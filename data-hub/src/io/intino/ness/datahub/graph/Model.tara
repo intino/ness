@@ -1,6 +1,7 @@
 dsl Proteo
 
 Concept:{0..1} Broker
+	var string path = empty is private
 	var integer port
 	var integer secondaryPort
 	var function:BrokerImplementation implementation = 'null';
@@ -20,27 +21,32 @@ Concept:{0..1} Broker
 		var string[] topics
 
 Concept:{0..1} Datalake
-	var word:{Year Month Day Hour Minute} scale = Hour is private
+	var word:{Year Month Day Hour Minute} scale
 	var string path = empty is private
-	Concept Split
-	Concept:{1..*} Tank
+	Concept:Named Split > var string[] values
+	Concept:{1..*}:FacetRequired Tank
 		var string name
-		var word:{Event Set} type
 
-Concept:Named Adapter
+Concept:Named:FacetRequired Adapter
+
+Facet TankType on Datalake.Tank
+	sub Set
+		var Datalake.Split split = empty
+		var word:{Multivalued Singleton} type = Multivalued
+	sub Event
 
 Facet AdapterType on Adapter
 	sub Realtime
 	sub Batch
 
-Facet TankType on Adapter
+Facet TargetType on Adapter
 	var function:Configure configure = ''
-	sub Set
+	sub Sets
 		var Datalake.Tank[] tanks
 		var string startTimetag
 		var string endTimetag
 		var function:SetAdapter adapt
-	sub Event
+	sub Events
 		var Datalake.Tank[] tanks
 		var string startTimetag
 		var string endTimetag

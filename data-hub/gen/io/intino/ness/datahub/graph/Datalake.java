@@ -116,16 +116,15 @@ public class Datalake  extends io.intino.tara.magritte.Layer implements io.intin
 			this.name = name;
 		}
 
-		public io.intino.ness.datahub.graph.Datalake.Split split() {
+		public io.intino.ness.datahub.graph.Datalake.Split split(java.util.List<java.lang.String> values) {
 		    io.intino.ness.datahub.graph.Datalake.Split newElement = core$().graph().concept(io.intino.ness.datahub.graph.Datalake.Split.class).createNode(this.name, core$()).as(io.intino.ness.datahub.graph.Datalake.Split.class);
-
+			newElement.core$().set(newElement, "values", values);
 		    return newElement;
 		}
 
-		public io.intino.ness.datahub.graph.Datalake.Tank tank(java.lang.String name, io.intino.ness.datahub.graph.Datalake.Tank.Type type) {
+		public io.intino.ness.datahub.graph.Datalake.Tank tank(java.lang.String name) {
 		    io.intino.ness.datahub.graph.Datalake.Tank newElement = core$().graph().concept(io.intino.ness.datahub.graph.Datalake.Tank.class).createNode(this.name, core$()).as(io.intino.ness.datahub.graph.Datalake.Tank.class);
 			newElement.core$().set(newElement, "name", java.util.Collections.singletonList(name));
-			newElement.core$().set(newElement, "type", java.util.Collections.singletonList(type));
 		    return newElement;
 		}
 
@@ -146,25 +145,41 @@ public class Datalake  extends io.intino.tara.magritte.Layer implements io.intin
 	}
 
 	public static class Split  extends io.intino.tara.magritte.Layer implements io.intino.tara.magritte.tags.Terminal {
+		protected java.util.List<java.lang.String> values = new java.util.ArrayList<>();
 
 		public Split(io.intino.tara.magritte.Node node) {
 			super(node);
 		}
 
+		public java.util.List<java.lang.String> values() {
+			return values;
+		}
+
+		public java.lang.String values(int index) {
+			return values.get(index);
+		}
+
+		public java.util.List<java.lang.String> values(java.util.function.Predicate<java.lang.String> predicate) {
+			return values().stream().filter(predicate).collect(java.util.stream.Collectors.toList());
+		}
+
 		@Override
 		protected java.util.Map<java.lang.String, java.util.List<?>> variables$() {
 			java.util.Map<String, java.util.List<?>> map = new java.util.LinkedHashMap<>();
+			map.put("values", this.values);
 			return map;
 		}
 
 		@Override
 		protected void load$(java.lang.String name, java.util.List<?> values) {
 			super.load$(name, values);
+			if (name.equalsIgnoreCase("values")) this.values = io.intino.tara.magritte.loaders.StringLoader.load(values, this);
 		}
 
 		@Override
 		protected void set$(java.lang.String name, java.util.List<?> values) {
 			super.set$(name, values);
+			if (name.equalsIgnoreCase("values")) this.values = new java.util.ArrayList<>((java.util.List<java.lang.String>) values);
 		}
 
 		public io.intino.ness.datahub.graph.NessGraph graph() {
@@ -174,11 +189,6 @@ public class Datalake  extends io.intino.tara.magritte.Layer implements io.intin
 
 	public static class Tank  extends io.intino.tara.magritte.Layer implements io.intino.tara.magritte.tags.Terminal {
 		protected java.lang.String name;
-		protected Type type;
-
-		public enum Type {
-			Event, Set;
-		}
 
 		public Tank(io.intino.tara.magritte.Node node) {
 			super(node);
@@ -188,25 +198,42 @@ public class Datalake  extends io.intino.tara.magritte.Layer implements io.intin
 			return name;
 		}
 
-		public Type type() {
-			return type;
-		}
-
 		public Tank name(java.lang.String value) {
 			this.name = value;
 			return (Tank) this;
 		}
 
-		public Tank type(io.intino.ness.datahub.graph.Datalake.Tank.Type value) {
-			this.type = value;
-			return (Tank) this;
+		public io.intino.ness.datahub.graph.set.datalake.SetTank asSet() {
+			io.intino.tara.magritte.Layer as = a$(io.intino.ness.datahub.graph.set.datalake.SetTank.class);
+			return as != null ? (io.intino.ness.datahub.graph.set.datalake.SetTank) as : core$().addFacet(io.intino.ness.datahub.graph.set.datalake.SetTank.class);
+		}
+
+		public boolean isSet() {
+			return core$().is(io.intino.ness.datahub.graph.set.datalake.SetTank.class);
+		}
+
+		public io.intino.ness.datahub.graph.tanktype.datalake.TankTypeTank asTankType() {
+			io.intino.tara.magritte.Layer as = a$(io.intino.ness.datahub.graph.tanktype.datalake.TankTypeTank.class);
+			return as != null ? (io.intino.ness.datahub.graph.tanktype.datalake.TankTypeTank) as : null;
+		}
+
+		public boolean isTankType() {
+			return core$().is(io.intino.ness.datahub.graph.tanktype.datalake.TankTypeTank.class);
+		}
+
+		public io.intino.ness.datahub.graph.event.datalake.EventTank asEvent() {
+			io.intino.tara.magritte.Layer as = a$(io.intino.ness.datahub.graph.event.datalake.EventTank.class);
+			return as != null ? (io.intino.ness.datahub.graph.event.datalake.EventTank) as : core$().addFacet(io.intino.ness.datahub.graph.event.datalake.EventTank.class);
+		}
+
+		public boolean isEvent() {
+			return core$().is(io.intino.ness.datahub.graph.event.datalake.EventTank.class);
 		}
 
 		@Override
 		protected java.util.Map<java.lang.String, java.util.List<?>> variables$() {
 			java.util.Map<String, java.util.List<?>> map = new java.util.LinkedHashMap<>();
 			map.put("name", new java.util.ArrayList(java.util.Collections.singletonList(this.name)));
-			map.put("type", new java.util.ArrayList(java.util.Collections.singletonList(this.type)));
 			return map;
 		}
 
@@ -214,14 +241,12 @@ public class Datalake  extends io.intino.tara.magritte.Layer implements io.intin
 		protected void load$(java.lang.String name, java.util.List<?> values) {
 			super.load$(name, values);
 			if (name.equalsIgnoreCase("name")) this.name = io.intino.tara.magritte.loaders.StringLoader.load(values, this).get(0);
-			else if (name.equalsIgnoreCase("type")) this.type = io.intino.tara.magritte.loaders.WordLoader.load(values, Type.class, this).get(0);
 		}
 
 		@Override
 		protected void set$(java.lang.String name, java.util.List<?> values) {
 			super.set$(name, values);
 			if (name.equalsIgnoreCase("name")) this.name = (java.lang.String) values.get(0);
-			else if (name.equalsIgnoreCase("type")) this.type = (Type) values.get(0);
 		}
 
 		public io.intino.ness.datahub.graph.NessGraph graph() {

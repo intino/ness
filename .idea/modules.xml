@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/data-hub/data-hub.iml" filepath="$PROJECT_DIR$/data-hub/data-hub.iml" />
+      <module fileurl="file://$PROJECT_DIR$/data-hub-test/data-hub-test.iml" filepath="$PROJECT_DIR$/data-hub-test/data-hub-test.iml" />
     </modules>
   </component>
 </project>

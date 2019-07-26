@@ -4,7 +4,7 @@ import io.intino.ness.datahub.graph.*;
 import io.intino.alexandria.datalake.Datalake;
 import io.intino.ness.datahub.datalake.adapter.Context;
 
-public class CustomAdapter extends io.intino.ness.datahub.graph.tanktype.TankTypeAdapter implements io.intino.tara.magritte.tags.Terminal {
+public class CustomAdapter extends io.intino.ness.datahub.graph.targettype.TargetTypeAdapter implements io.intino.tara.magritte.tags.Terminal {
 	protected io.intino.ness.datahub.graph.functions.DatalakeAdapter adapt;
 
 	public CustomAdapter(io.intino.tara.magritte.Node node) {

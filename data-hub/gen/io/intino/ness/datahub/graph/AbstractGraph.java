@@ -8,12 +8,15 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 	private io.intino.ness.datahub.graph.Broker broker;
 	private io.intino.ness.datahub.graph.Datalake datalake;
 	private java.util.List<io.intino.ness.datahub.graph.Adapter> adapterList = new java.util.ArrayList<>();
+	private java.util.List<io.intino.ness.datahub.graph.tanktype.datalake.TankTypeTank> tankTypeTankList = new java.util.ArrayList<>();
+	private java.util.List<io.intino.ness.datahub.graph.set.datalake.SetTank> setTankList = new java.util.ArrayList<>();
+	private java.util.List<io.intino.ness.datahub.graph.event.datalake.EventTank> eventTankList = new java.util.ArrayList<>();
 	private java.util.List<io.intino.ness.datahub.graph.adaptertype.AdapterTypeAdapter> adapterTypeAdapterList = new java.util.ArrayList<>();
 	private java.util.List<io.intino.ness.datahub.graph.realtime.RealtimeAdapter> realtimeAdapterList = new java.util.ArrayList<>();
 	private java.util.List<io.intino.ness.datahub.graph.batch.BatchAdapter> batchAdapterList = new java.util.ArrayList<>();
-	private java.util.List<io.intino.ness.datahub.graph.tanktype.TankTypeAdapter> tankTypeAdapterList = new java.util.ArrayList<>();
-	private java.util.List<io.intino.ness.datahub.graph.set.SetAdapter> setAdapterList = new java.util.ArrayList<>();
-	private java.util.List<io.intino.ness.datahub.graph.event.EventAdapter> eventAdapterList = new java.util.ArrayList<>();
+	private java.util.List<io.intino.ness.datahub.graph.targettype.TargetTypeAdapter> targetTypeAdapterList = new java.util.ArrayList<>();
+	private java.util.List<io.intino.ness.datahub.graph.sets.SetsAdapter> setsAdapterList = new java.util.ArrayList<>();
+	private java.util.List<io.intino.ness.datahub.graph.events.EventsAdapter> eventsAdapterList = new java.util.ArrayList<>();
 	private java.util.List<io.intino.ness.datahub.graph.custom.CustomAdapter> customAdapterList = new java.util.ArrayList<>();
 
 	private java.util.Map<String, Indexer> _index = _fillIndex();
@@ -29,12 +32,15 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		this.broker = wrapper.broker;
 		this.datalake = wrapper.datalake;
 		this.adapterList = new java.util.ArrayList<>(wrapper.adapterList);
+		this.tankTypeTankList = new java.util.ArrayList<>(wrapper.tankTypeTankList);
+		this.setTankList = new java.util.ArrayList<>(wrapper.setTankList);
+		this.eventTankList = new java.util.ArrayList<>(wrapper.eventTankList);
 		this.adapterTypeAdapterList = new java.util.ArrayList<>(wrapper.adapterTypeAdapterList);
 		this.realtimeAdapterList = new java.util.ArrayList<>(wrapper.realtimeAdapterList);
 		this.batchAdapterList = new java.util.ArrayList<>(wrapper.batchAdapterList);
-		this.tankTypeAdapterList = new java.util.ArrayList<>(wrapper.tankTypeAdapterList);
-		this.setAdapterList = new java.util.ArrayList<>(wrapper.setAdapterList);
-		this.eventAdapterList = new java.util.ArrayList<>(wrapper.eventAdapterList);
+		this.targetTypeAdapterList = new java.util.ArrayList<>(wrapper.targetTypeAdapterList);
+		this.setsAdapterList = new java.util.ArrayList<>(wrapper.setsAdapterList);
+		this.eventsAdapterList = new java.util.ArrayList<>(wrapper.eventsAdapterList);
 		this.customAdapterList = new java.util.ArrayList<>(wrapper.customAdapterList);
 	}
 
@@ -76,6 +82,18 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		return adapterList;
 	}
 
+	public java.util.List<io.intino.ness.datahub.graph.tanktype.datalake.TankTypeTank> tankTypeTankList() {
+		return tankTypeTankList;
+	}
+
+	public java.util.List<io.intino.ness.datahub.graph.set.datalake.SetTank> setTankList() {
+		return setTankList;
+	}
+
+	public java.util.List<io.intino.ness.datahub.graph.event.datalake.EventTank> eventTankList() {
+		return eventTankList;
+	}
+
 	public java.util.List<io.intino.ness.datahub.graph.adaptertype.AdapterTypeAdapter> adapterTypeAdapterList() {
 		return adapterTypeAdapterList;
 	}
@@ -88,16 +106,16 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		return batchAdapterList;
 	}
 
-	public java.util.List<io.intino.ness.datahub.graph.tanktype.TankTypeAdapter> tankTypeAdapterList() {
-		return tankTypeAdapterList;
+	public java.util.List<io.intino.ness.datahub.graph.targettype.TargetTypeAdapter> targetTypeAdapterList() {
+		return targetTypeAdapterList;
 	}
 
-	public java.util.List<io.intino.ness.datahub.graph.set.SetAdapter> setAdapterList() {
-		return setAdapterList;
+	public java.util.List<io.intino.ness.datahub.graph.sets.SetsAdapter> setsAdapterList() {
+		return setsAdapterList;
 	}
 
-	public java.util.List<io.intino.ness.datahub.graph.event.EventAdapter> eventAdapterList() {
-		return eventAdapterList;
+	public java.util.List<io.intino.ness.datahub.graph.events.EventsAdapter> eventsAdapterList() {
+		return eventsAdapterList;
 	}
 
 	public java.util.List<io.intino.ness.datahub.graph.custom.CustomAdapter> customAdapterList() {
@@ -110,6 +128,30 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 
 	public io.intino.ness.datahub.graph.Adapter adapter(int index) {
 		return adapterList.get(index);
+	}
+
+	public java.util.stream.Stream<io.intino.ness.datahub.graph.tanktype.datalake.TankTypeTank> tankTypeTankList(java.util.function.Predicate<io.intino.ness.datahub.graph.tanktype.datalake.TankTypeTank> filter) {
+		return tankTypeTankList.stream().filter(filter);
+	}
+
+	public io.intino.ness.datahub.graph.tanktype.datalake.TankTypeTank tankTypeTank(int index) {
+		return tankTypeTankList.get(index);
+	}
+
+	public java.util.stream.Stream<io.intino.ness.datahub.graph.set.datalake.SetTank> setTankList(java.util.function.Predicate<io.intino.ness.datahub.graph.set.datalake.SetTank> filter) {
+		return setTankList.stream().filter(filter);
+	}
+
+	public io.intino.ness.datahub.graph.set.datalake.SetTank setTank(int index) {
+		return setTankList.get(index);
+	}
+
+	public java.util.stream.Stream<io.intino.ness.datahub.graph.event.datalake.EventTank> eventTankList(java.util.function.Predicate<io.intino.ness.datahub.graph.event.datalake.EventTank> filter) {
+		return eventTankList.stream().filter(filter);
+	}
+
+	public io.intino.ness.datahub.graph.event.datalake.EventTank eventTank(int index) {
+		return eventTankList.get(index);
 	}
 
 	public java.util.stream.Stream<io.intino.ness.datahub.graph.adaptertype.AdapterTypeAdapter> adapterTypeAdapterList(java.util.function.Predicate<io.intino.ness.datahub.graph.adaptertype.AdapterTypeAdapter> filter) {
@@ -136,28 +178,28 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		return batchAdapterList.get(index);
 	}
 
-	public java.util.stream.Stream<io.intino.ness.datahub.graph.tanktype.TankTypeAdapter> tankTypeAdapterList(java.util.function.Predicate<io.intino.ness.datahub.graph.tanktype.TankTypeAdapter> filter) {
-		return tankTypeAdapterList.stream().filter(filter);
+	public java.util.stream.Stream<io.intino.ness.datahub.graph.targettype.TargetTypeAdapter> targetTypeAdapterList(java.util.function.Predicate<io.intino.ness.datahub.graph.targettype.TargetTypeAdapter> filter) {
+		return targetTypeAdapterList.stream().filter(filter);
 	}
 
-	public io.intino.ness.datahub.graph.tanktype.TankTypeAdapter tankTypeAdapter(int index) {
-		return tankTypeAdapterList.get(index);
+	public io.intino.ness.datahub.graph.targettype.TargetTypeAdapter targetTypeAdapter(int index) {
+		return targetTypeAdapterList.get(index);
 	}
 
-	public java.util.stream.Stream<io.intino.ness.datahub.graph.set.SetAdapter> setAdapterList(java.util.function.Predicate<io.intino.ness.datahub.graph.set.SetAdapter> filter) {
-		return setAdapterList.stream().filter(filter);
+	public java.util.stream.Stream<io.intino.ness.datahub.graph.sets.SetsAdapter> setsAdapterList(java.util.function.Predicate<io.intino.ness.datahub.graph.sets.SetsAdapter> filter) {
+		return setsAdapterList.stream().filter(filter);
 	}
 
-	public io.intino.ness.datahub.graph.set.SetAdapter setAdapter(int index) {
-		return setAdapterList.get(index);
+	public io.intino.ness.datahub.graph.sets.SetsAdapter setsAdapter(int index) {
+		return setsAdapterList.get(index);
 	}
 
-	public java.util.stream.Stream<io.intino.ness.datahub.graph.event.EventAdapter> eventAdapterList(java.util.function.Predicate<io.intino.ness.datahub.graph.event.EventAdapter> filter) {
-		return eventAdapterList.stream().filter(filter);
+	public java.util.stream.Stream<io.intino.ness.datahub.graph.events.EventsAdapter> eventsAdapterList(java.util.function.Predicate<io.intino.ness.datahub.graph.events.EventsAdapter> filter) {
+		return eventsAdapterList.stream().filter(filter);
 	}
 
-	public io.intino.ness.datahub.graph.event.EventAdapter eventAdapter(int index) {
-		return eventAdapterList.get(index);
+	public io.intino.ness.datahub.graph.events.EventsAdapter eventsAdapter(int index) {
+		return eventsAdapterList.get(index);
 	}
 
 	public java.util.stream.Stream<io.intino.ness.datahub.graph.custom.CustomAdapter> customAdapterList(java.util.function.Predicate<io.intino.ness.datahub.graph.custom.CustomAdapter> filter) {
@@ -208,13 +250,24 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 			return newElement;
 		}
 
-		public io.intino.ness.datahub.graph.Datalake datalake() {
+		public io.intino.ness.datahub.graph.Datalake datalake(io.intino.ness.datahub.graph.Datalake.Scale scale) {
 			io.intino.ness.datahub.graph.Datalake newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.datahub.graph.Datalake.class, stash, this.name).a$(io.intino.ness.datahub.graph.Datalake.class);
+			newElement.core$().set(newElement, "scale", java.util.Collections.singletonList(scale));
 			return newElement;
 		}
 
 		public io.intino.ness.datahub.graph.Adapter adapter() {
 			io.intino.ness.datahub.graph.Adapter newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.datahub.graph.Adapter.class, stash, this.name).a$(io.intino.ness.datahub.graph.Adapter.class);
+			return newElement;
+		}
+
+		public io.intino.ness.datahub.graph.set.datalake.SetTank setTank() {
+			io.intino.ness.datahub.graph.set.datalake.SetTank newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.datahub.graph.set.datalake.SetTank.class, stash, this.name).a$(io.intino.ness.datahub.graph.set.datalake.SetTank.class);
+			return newElement;
+		}
+
+		public io.intino.ness.datahub.graph.event.datalake.EventTank eventTank() {
+			io.intino.ness.datahub.graph.event.datalake.EventTank newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.datahub.graph.event.datalake.EventTank.class, stash, this.name).a$(io.intino.ness.datahub.graph.event.datalake.EventTank.class);
 			return newElement;
 		}
 
@@ -228,8 +281,8 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 			return newElement;
 		}
 
-		public io.intino.ness.datahub.graph.set.SetAdapter setAdapter(java.util.List<io.intino.ness.datahub.graph.Datalake.Tank> tanks, java.lang.String startTimetag, java.lang.String endTimetag, io.intino.ness.datahub.graph.functions.SetAdapter adapt) {
-			io.intino.ness.datahub.graph.set.SetAdapter newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.datahub.graph.set.SetAdapter.class, stash, this.name).a$(io.intino.ness.datahub.graph.set.SetAdapter.class);
+		public io.intino.ness.datahub.graph.sets.SetsAdapter setsAdapter(java.util.List<io.intino.ness.datahub.graph.Datalake.Tank> tanks, java.lang.String startTimetag, java.lang.String endTimetag, io.intino.ness.datahub.graph.functions.SetAdapter adapt) {
+			io.intino.ness.datahub.graph.sets.SetsAdapter newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.datahub.graph.sets.SetsAdapter.class, stash, this.name).a$(io.intino.ness.datahub.graph.sets.SetsAdapter.class);
 			newElement.core$().set(newElement, "tanks", tanks);
 			newElement.core$().set(newElement, "startTimetag", java.util.Collections.singletonList(startTimetag));
 			newElement.core$().set(newElement, "endTimetag", java.util.Collections.singletonList(endTimetag));
@@ -237,8 +290,8 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 			return newElement;
 		}
 
-		public io.intino.ness.datahub.graph.event.EventAdapter eventAdapter(java.util.List<io.intino.ness.datahub.graph.Datalake.Tank> tanks, java.lang.String startTimetag, java.lang.String endTimetag, io.intino.ness.datahub.graph.functions.EventAdapter adapt) {
-			io.intino.ness.datahub.graph.event.EventAdapter newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.datahub.graph.event.EventAdapter.class, stash, this.name).a$(io.intino.ness.datahub.graph.event.EventAdapter.class);
+		public io.intino.ness.datahub.graph.events.EventsAdapter eventsAdapter(java.util.List<io.intino.ness.datahub.graph.Datalake.Tank> tanks, java.lang.String startTimetag, java.lang.String endTimetag, io.intino.ness.datahub.graph.functions.EventAdapter adapt) {
+			io.intino.ness.datahub.graph.events.EventsAdapter newElement = AbstractGraph.this.graph.createRoot(io.intino.ness.datahub.graph.events.EventsAdapter.class, stash, this.name).a$(io.intino.ness.datahub.graph.events.EventsAdapter.class);
 			newElement.core$().set(newElement, "tanks", tanks);
 			newElement.core$().set(newElement, "startTimetag", java.util.Collections.singletonList(startTimetag));
 			newElement.core$().set(newElement, "endTimetag", java.util.Collections.singletonList(endTimetag));
@@ -258,6 +311,14 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 	    	new java.util.ArrayList<>(AbstractGraph.this.adapterList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
 	    }
 
+	    public void setTank(java.util.function.Predicate<io.intino.ness.datahub.graph.set.datalake.SetTank> filter) {
+	    	new java.util.ArrayList<>(AbstractGraph.this.setTankList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
+	    }
+
+	    public void eventTank(java.util.function.Predicate<io.intino.ness.datahub.graph.event.datalake.EventTank> filter) {
+	    	new java.util.ArrayList<>(AbstractGraph.this.eventTankList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
+	    }
+
 	    public void realtimeAdapter(java.util.function.Predicate<io.intino.ness.datahub.graph.realtime.RealtimeAdapter> filter) {
 	    	new java.util.ArrayList<>(AbstractGraph.this.realtimeAdapterList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
 	    }
@@ -266,12 +327,12 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 	    	new java.util.ArrayList<>(AbstractGraph.this.batchAdapterList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
 	    }
 
-	    public void setAdapter(java.util.function.Predicate<io.intino.ness.datahub.graph.set.SetAdapter> filter) {
-	    	new java.util.ArrayList<>(AbstractGraph.this.setAdapterList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
+	    public void setsAdapter(java.util.function.Predicate<io.intino.ness.datahub.graph.sets.SetsAdapter> filter) {
+	    	new java.util.ArrayList<>(AbstractGraph.this.setsAdapterList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
 	    }
 
-	    public void eventAdapter(java.util.function.Predicate<io.intino.ness.datahub.graph.event.EventAdapter> filter) {
-	    	new java.util.ArrayList<>(AbstractGraph.this.eventAdapterList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
+	    public void eventsAdapter(java.util.function.Predicate<io.intino.ness.datahub.graph.events.EventsAdapter> filter) {
+	    	new java.util.ArrayList<>(AbstractGraph.this.eventsAdapterList()).stream().filter(filter).forEach(io.intino.tara.magritte.Layer::delete$);
 	    }
 
 	    public void customAdapter(java.util.function.Predicate<io.intino.ness.datahub.graph.custom.CustomAdapter> filter) {
@@ -285,12 +346,15 @@ public class AbstractGraph extends io.intino.tara.magritte.GraphWrapper {
 		map.put("Broker", new Indexer(node -> broker = node.as(io.intino.ness.datahub.graph.Broker.class), node -> broker = null, () -> broker = null));
 		map.put("Datalake", new Indexer(node -> datalake = node.as(io.intino.ness.datahub.graph.Datalake.class), node -> datalake = null, () -> datalake = null));
 		map.put("Adapter", new Indexer(node -> adapterList.add(node.as(io.intino.ness.datahub.graph.Adapter.class)), node -> adapterList.remove(node.as(io.intino.ness.datahub.graph.Adapter.class)), () -> adapterList.clear()));
+		map.put("TankType#Datalake$Tank", new Indexer(node -> tankTypeTankList.add(node.as(io.intino.ness.datahub.graph.tanktype.datalake.TankTypeTank.class)), node -> tankTypeTankList.remove(node.as(io.intino.ness.datahub.graph.tanktype.datalake.TankTypeTank.class)), () -> tankTypeTankList.clear()));
+		map.put("Set#Datalake$Tank", new Indexer(node -> setTankList.add(node.as(io.intino.ness.datahub.graph.set.datalake.SetTank.class)), node -> setTankList.remove(node.as(io.intino.ness.datahub.graph.set.datalake.SetTank.class)), () -> setTankList.clear()));
+		map.put("Event#Datalake$Tank", new Indexer(node -> eventTankList.add(node.as(io.intino.ness.datahub.graph.event.datalake.EventTank.class)), node -> eventTankList.remove(node.as(io.intino.ness.datahub.graph.event.datalake.EventTank.class)), () -> eventTankList.clear()));
 		map.put("AdapterType#Adapter", new Indexer(node -> adapterTypeAdapterList.add(node.as(io.intino.ness.datahub.graph.adaptertype.AdapterTypeAdapter.class)), node -> adapterTypeAdapterList.remove(node.as(io.intino.ness.datahub.graph.adaptertype.AdapterTypeAdapter.class)), () -> adapterTypeAdapterList.clear()));
 		map.put("Realtime#Adapter", new Indexer(node -> realtimeAdapterList.add(node.as(io.intino.ness.datahub.graph.realtime.RealtimeAdapter.class)), node -> realtimeAdapterList.remove(node.as(io.intino.ness.datahub.graph.realtime.RealtimeAdapter.class)), () -> realtimeAdapterList.clear()));
 		map.put("Batch#Adapter", new Indexer(node -> batchAdapterList.add(node.as(io.intino.ness.datahub.graph.batch.BatchAdapter.class)), node -> batchAdapterList.remove(node.as(io.intino.ness.datahub.graph.batch.BatchAdapter.class)), () -> batchAdapterList.clear()));
-		map.put("TankType#Adapter", new Indexer(node -> tankTypeAdapterList.add(node.as(io.intino.ness.datahub.graph.tanktype.TankTypeAdapter.class)), node -> tankTypeAdapterList.remove(node.as(io.intino.ness.datahub.graph.tanktype.TankTypeAdapter.class)), () -> tankTypeAdapterList.clear()));
-		map.put("Set#Adapter", new Indexer(node -> setAdapterList.add(node.as(io.intino.ness.datahub.graph.set.SetAdapter.class)), node -> setAdapterList.remove(node.as(io.intino.ness.datahub.graph.set.SetAdapter.class)), () -> setAdapterList.clear()));
-		map.put("Event#Adapter", new Indexer(node -> eventAdapterList.add(node.as(io.intino.ness.datahub.graph.event.EventAdapter.class)), node -> eventAdapterList.remove(node.as(io.intino.ness.datahub.graph.event.EventAdapter.class)), () -> eventAdapterList.clear()));
+		map.put("TargetType#Adapter", new Indexer(node -> targetTypeAdapterList.add(node.as(io.intino.ness.datahub.graph.targettype.TargetTypeAdapter.class)), node -> targetTypeAdapterList.remove(node.as(io.intino.ness.datahub.graph.targettype.TargetTypeAdapter.class)), () -> targetTypeAdapterList.clear()));
+		map.put("Sets#Adapter", new Indexer(node -> setsAdapterList.add(node.as(io.intino.ness.datahub.graph.sets.SetsAdapter.class)), node -> setsAdapterList.remove(node.as(io.intino.ness.datahub.graph.sets.SetsAdapter.class)), () -> setsAdapterList.clear()));
+		map.put("Events#Adapter", new Indexer(node -> eventsAdapterList.add(node.as(io.intino.ness.datahub.graph.events.EventsAdapter.class)), node -> eventsAdapterList.remove(node.as(io.intino.ness.datahub.graph.events.EventsAdapter.class)), () -> eventsAdapterList.clear()));
 		map.put("Custom#Adapter", new Indexer(node -> customAdapterList.add(node.as(io.intino.ness.datahub.graph.custom.CustomAdapter.class)), node -> customAdapterList.remove(node.as(io.intino.ness.datahub.graph.custom.CustomAdapter.class)), () -> customAdapterList.clear()));
 		return map;
 	}

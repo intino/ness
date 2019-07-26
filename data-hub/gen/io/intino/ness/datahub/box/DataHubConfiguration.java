@@ -13,6 +13,18 @@ public class DataHubConfiguration extends io.intino.alexandria.core.BoxConfigura
 		return args.get(key);
 	}
 
+	public String datalakePath() {
+		return get("datalake_path");
+	}
+
+	public String brokerPath() {
+		return get("broker_path");
+	}
+
+	public String apiPort() {
+		return get("api_port");
+	}
+
 	public static java.net.URL url(String url) {
 		try {
 		return new java.net.URL(url);
