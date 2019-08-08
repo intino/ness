@@ -1,6 +1,6 @@
 dsl Ness
 
-Datalake(Month) datalake
+Datalake(Month, path = "") datalake
 	Split("DA" "DB" "DC" "DD" "DF" "DG" "DJ" "DK" "DL" "DM" "DN" "DP" "DU" "DV" "DW" "DX") porDivisiones
 	Tank("asemed.Criterio") criterio as Event
 	Tank("asemed.CriterioBorrado") criterioBorrado as Event
@@ -170,7 +170,5 @@ Datalake(Month) datalake
 	Tank("Error.Semantico.MedidorAntesAlta") errorSemanticoMedidorAntesAlta as Set(porDivisiones, Singleton)
 	Tank("Error.Semantico.RPUNoExiste") errorSemanticoRPUNoExiste as Set(porDivisiones, Singleton)
 
-Broker(port = 63000, secondaryPort = 1884)
+Broker(port = 63000, secondaryPort = 1884, path = "./broker")
 	User(name = "user1", password = "1234")
-
-

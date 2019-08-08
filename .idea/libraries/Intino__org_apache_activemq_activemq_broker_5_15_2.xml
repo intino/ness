@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Intino: org.apache.activemq:activemq-broker:5.15.2">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/activemq/activemq-broker/5.15.2/activemq-broker-5.15.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/activemq/activemq-broker/5.15.2/activemq-broker-5.15.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

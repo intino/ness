@@ -17,7 +17,7 @@ Concept:{0..1} Broker
 			var string user
 			var string password
 			var string sessionId
-		var word:{outgoing incoming
+		var word:{outgoing incoming} direction = incoming
 		var string[] topics
 
 Concept:{0..1} Datalake

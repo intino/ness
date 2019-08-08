@@ -8,12 +8,14 @@ Artifact("org.example", "1.0.0") data-hub-test as Solution
 	Parameter("broker_path")
 	Parameter("api_port")
 	Parameter("stage_path")
+	Parameter(name = "workspace")
 
 RunConfiguration dev
 	Argument("datalake_path", "temp/datalake")
 	Argument("broker_path", "temp/broker")
 	Argument("api_port", "9000")
 	Argument("stage_path", "temp/stage")
+	Argument(name = "workspace", value = "temp/")
 
 Repository(identifier = "intino-maven")
 	Language(url = "https://artifactory.intino.io/artifactory/releases")
