@@ -4,12 +4,13 @@ import io.intino.alexandria.jms.TopicProducer;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.MessageBuilder;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.command.ActiveMQTextMessage;
 
 import javax.jms.JMSException;
+import javax.jms.MessageNotWriteableException;
 import javax.jms.Session;
 import java.time.Instant;
 
-import static io.intino.alexandria.jms.MessageFactory.createMessageFor;
 import static java.lang.Thread.sleep;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 
@@ -22,8 +23,12 @@ public class Feeder {
 	private static void start(TopicProducer producer) {
 		new Thread(() -> {
 			while (true) {
-				producer.produce(createMessageFor(message()));
-				System.out.println("sent!");
+				try {
+					producer.produce(createMessage(message()));
+					System.out.println("sent!");
+				} catch (MessageNotWriteableException e) {
+					Logger.error(e);
+				}
 				try {
 					sleep(5000);
 				} catch (InterruptedException e) {
@@ -47,6 +52,12 @@ public class Feeder {
 			Logger.error(e.getMessage(), e);
 			return null;
 		}
+	}
+
+	private static ActiveMQTextMessage createMessage(String message) throws MessageNotWriteableException {
+		ActiveMQTextMessage textMessage = new ActiveMQTextMessage();
+		textMessage.setText(message);
+		return textMessage;
 	}
 
 	public static class ExampleMessage {

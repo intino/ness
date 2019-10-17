@@ -12,7 +12,7 @@ import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 
 public class Consumer {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws JMSException {
 		start(new TopicConsumer(sessionLocal(), "feed.consul.serverstatus"));
 	}
 

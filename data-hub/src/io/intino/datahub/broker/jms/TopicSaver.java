@@ -2,7 +2,6 @@ package io.intino.datahub.broker.jms;
 
 import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
-import io.intino.alexandria.jms.Consumer;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 
@@ -10,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
+import java.util.function.Consumer;
 
 import static io.intino.alexandria.Timetag.of;
 import static java.nio.file.StandardOpenOption.APPEND;
@@ -28,7 +28,7 @@ class TopicSaver {
 		this.scale = scale;
 	}
 
-	public Consumer create() {
+	Consumer<javax.jms.Message> create() {
 		return message -> save(MessageTranslator.toInlMessage(message));
 	}
 
