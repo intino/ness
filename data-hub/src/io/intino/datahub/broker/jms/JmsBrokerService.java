@@ -238,6 +238,7 @@ public class JmsBrokerService implements BrokerService {
         private void startTanks() {
             if (graph.datalake() != null) {
                 File stage = new File(graph.broker().path(), "stage");
+                stage.mkdirs();
                 graph.datalake().tankList().stream().filter(Datalake.Tank::isEvent).
                         forEach(t -> brokerManager.registerConsumer(t.name(), new TopicSaver(stage, t.name(), Scale.valueOf(graph.datalake().scale().name())).create()));
             }

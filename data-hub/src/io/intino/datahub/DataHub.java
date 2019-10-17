@@ -8,15 +8,10 @@ import io.intino.alexandria.sealing.SessionSealer;
 import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.broker.jms.JmsBrokerService;
 import io.intino.datahub.graph.NessGraph;
-import org.apache.log4j.Level;
 
 import java.io.File;
 
 public class DataHub {
-	static {
-		io.intino.alexandria.logger4j.Logger.init(Level.WARN);
-	}
-
 	private final NessGraph graph;
 	private final File stageDirectory;
 	private Datalake datalake;
