@@ -1,8 +1,8 @@
 dsl Legio
 
 Artifact("org.example", "1.0.0") data-hub-test as Solution
-	Model("Ness", "2.0.0", "2.6.0")
-	Box(language = "Konos", version = "6.0.0")
+	Model("Ness", "3.0.0", "3.0.0")
+	Box(language = "Konos", version = "7.0.0")
 	Package(mode = ModulesAndLibrariesLinkedByManifest) as Runnable(mainClass = "org.example.datahubtest.box.Main")
 	Parameter("datalake_path")
 	Parameter("broker_path")

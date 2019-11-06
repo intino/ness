@@ -24,11 +24,10 @@ Concept:{0..1} Datalake
 	var word:{Year Month Day Hour Minute} scale
 	var string path
 	Concept:Named Split > var string[] values
-	Concept:{1..*}:FacetRequired Tank
+	Concept:{1..*}:AspectRequired Tank
 		var string name
-
-Facet TankType on Datalake.Tank
-	sub Set
-		var Datalake.Split split = empty
-		var word:{Multivalued Singleton} type = Multivalued
-	sub Event
+		Aspect TankType
+        	sub Set
+        		var Datalake.Split split = empty
+        		var word:{Multivalued Singleton} type = Multivalued
+        	sub Event
