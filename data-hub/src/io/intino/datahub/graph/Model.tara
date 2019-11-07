@@ -31,3 +31,13 @@ Concept:{0..1} Datalake
         		var Datalake.Split split = empty
         		var word:{Multivalued Singleton} type = Multivalued
         	sub Event
+
+Concept Message
+	Aspect Contextual
+		var string context
+
+Concept MessageHub
+	Concept Publish
+		var Message message
+	Concept Subscribe
+		var Message message

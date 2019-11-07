@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Intino: org.apache.activemq:activemq-mqtt:5.15.2">
-    <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/apache/activemq/activemq-mqtt/5.15.2/activemq-mqtt-5.15.2.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

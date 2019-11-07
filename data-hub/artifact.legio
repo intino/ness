@@ -5,7 +5,6 @@ Artifact("io.intino", "3.0.0") data-hub as Product
 	Imports
 		Compile("io.intino.alexandria", "exceptions", "1.0.0")
 		Compile("io.intino.alexandria", "jms", "1.2.0")
-		Compile("io.intino.alexandria", "scheduler-framework", "1.0.2")
 		Compile("io.intino.alexandria", "ingestion", "1.0.0")
 		Compile("io.intino.alexandria", "sealing", "1.0.0")
 		Compile("org.apache.activemq", "activemq-broker", "5.15.8")
