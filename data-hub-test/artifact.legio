@@ -5,8 +5,8 @@ Artifact("org.example", "1.0.0") data-hub-test as Solution
 	Box(language = "Konos", version = "7.0.0")
 	Imports
 		Compile(groupId = "io.intino.alexandria", artifactId = "core-framework", version = "2.0.1")
-
 	Package(mode = ModulesAndLibrariesLinkedByManifest) as Runnable(mainClass = "org.example.datahubtest.box.Main")
+		IntinoPlugin(artifact = "io.intino.ness:data-hub-accessor-plugin:1.0.0", pluginClass = "io.intino.ness.datahubaccessorplugin.DataHubAccessorsPluginLauncher")
 	Parameter("datalake_path")
 	Parameter("broker_path")
 	Parameter("api_port")

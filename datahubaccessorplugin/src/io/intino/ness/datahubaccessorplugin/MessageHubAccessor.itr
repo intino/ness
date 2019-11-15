@@ -1,0 +1,31 @@
+def type(accessor)
+	package $package+validPackage;
+
+	import $package+validPackage.schemas.*;
+	import java.util.List;
+
+	public class $name+snakeCaseToCamelCase+firstUpperCase~MessageHub {
+
+		private final io.intino.alexandria.message.MessageHub messageHub;
+
+		public $name+snakeCaseToCamelCase+firstUpperCase~MessageHub(io.intino.alexandria.message.MessageHub messageHub) {
+			this.messageHub = messageHub;
+		}
+
+		$publish...[$NL$NL]
+
+		$subscribe...[$NL$NL]
+	}
+end
+
+def trigger(publish)
+	public void send($type+FirstUpperCase $type+firstLowerCase) {
+		messageHub.sendMessage("$channel", $type+firstLowerCase.get());
+	}
+end
+
+def trigger(subscribe)
+	public void subscribeTo$context+FirstUpperCase(java.util.function.Consumer<$type+FirstUpperCase> onMessageReceived) {
+		messageHub.attachListener("$channel", m -> onMessageReceived.accept(new $type+FirstUpperCase(m)));
+	}
+end

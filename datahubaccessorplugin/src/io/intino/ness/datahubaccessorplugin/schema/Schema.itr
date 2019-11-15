@@ -1,0 +1,112 @@
+def type(root)
+	package $package+ValidPackage;
+
+	$schema
+end
+
+def trigger(schema)
+	public [$inner] class $name+firstUpperCase [extends $parent] implements java.io.Serializable {
+		io.intino.alexandria.message.Message message;
+		$attribute+declaration...[$NL]
+
+		public $name+firstUpperCase(io.intino.alexandria.message.Message message) {
+			this.message = message;
+		}
+
+		$attribute+getter...[$NL$NL]
+
+		$attribute+setter...[$NL$NL]
+
+
+		public io.intino.alexandria.message.Message get() {
+			return this.message;
+		}
+
+		[$schema...[$NL$NL]]
+	}
+end
+
+def type(word & single) trigger(declaration)
+	public enum $name+FirstUpperCase {
+		$words...[, ]
+	}
+
+end
+
+def type(word & multiple) trigger(declaration)
+	public enum $name+FirstUpperCase {
+		$words...[, ]
+	}
+
+end
+
+def type(word & single) trigger(getter)
+	public $name+FirstUpperCase $name+FirstLowerCase() {
+		return $name+FirstUpperCase.valueOf(message.get("$name+FirstLowerCase").as(String.class);
+	}
+end
+
+def type(word & multiple) trigger(getter)
+	public java.util.List<$type+FirstUpperCase> $name+FirstLowerCase() {
+		return java.util.Arrays.stream(message.get("$name+FirstLowerCase").as(String$[].class)).map(v -> $name+FirstUpperCase.valueOf(v)).collect(java.util.Collectors.toList());
+	}
+end
+
+def type(primitive & single) trigger(getter)
+	public $type $name+firstLowerCase() {
+		return message.get("$name+FirstLowerCase").as($type.class);
+	}
+end
+
+def !type(primitive) type(single) trigger(getter)
+	public java.util.List<io.intino.alexandria.message.Message> $name+firstLowerCase() {
+		return message.components("$name");
+	}
+end
+
+def type(multiple) trigger(getter)
+	public java.util.List<$type> $name+firstLowerCase() {
+		return java.util.Arrays.stream(message.get("$name+FirstLowerCase").as($type$[].class));
+	}
+end
+
+def type(word & single) trigger(setter)
+	public $element+firstUpperCase $name+firstLowerCase($type+FirstUpperCase $name+firstLowerCase) {
+		this.message.set("$name+firstLowerCase", $name+firstLowerCase.toString());
+		return this;
+	}
+end
+def type(word & multiple) trigger(setter)
+	public $element+firstUpperCase $name+firstLowerCase(java.util.List<$type+FirstUpperCase> $name+firstLowerCase) {
+		//TODO inl
+		return this;
+	}
+end
+
+def type(primitive & single) trigger(setter)
+	public $element+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
+		this.message.set("$name+firstLowerCase", $name+firstLowerCase);
+		return this;
+	}
+end
+
+def !type(primitive) type(single) trigger(setter)
+	public $element+firstUpperCase $name+firstLowerCase($type+firstUpperCase $name+firstLowerCase) {
+		//TODO inl
+		return this;
+	}
+end
+
+def type(multiple & member) trigger(setter)
+	public $element+firstUpperCase $name+firstLowerCase(java.util.List<$type+firstUpperCase> $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
+		return this;
+	}
+end
+
+def type(multiple) trigger(setter)
+	public $element+firstUpperCase $name+firstLowerCase(java.util.List<$type> $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
+		return this;
+	}
+end

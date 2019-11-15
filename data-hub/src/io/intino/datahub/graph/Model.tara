@@ -32,12 +32,57 @@ Concept:{0..1} Datalake
         		var word:{Multivalued Singleton} type = Multivalued
         	sub Event
 
-Concept Message
+Concept:Named Message extends Schema
 	Aspect Contextual
 		var string context
 
-Concept MessageHub
-	Concept Publish
-		var Message message
-	Concept Subscribe
-		var Message message
+Concept:Named MessageHub
+	Concept:{0..1} Publish
+		var Message[] messages
+	Concept:{0..1} Subscribe
+		var Message[] messages
+!! Schemas allows to define how objects are. This objects can be provided as either parameter or response
+Concept Schema is abstract
+	var boolean multiple = false
+	!! Attribute of the member
+	Concept:Named:RequiresAspect Attribute extends Data
+		var boolean isRequired = true
+	has Schema
+	Aspect ExtensionOf
+    	var Schema parent
+
+
+Concept Data is abstract
+	Aspect List
+	Aspect Type
+		var string type is reactive private
+		sub Real
+			var double defaultValue = empty
+			var string type = "Double" is reactive private
+		sub Integer
+			var integer defaultValue = empty
+			var string type = "Integer" is reactive private
+		sub LongInteger
+			var long defaultValue = empty
+			var string type = "Long" is reactive private
+		sub Bool
+			var boolean defaultValue = empty
+			var string type = "Boolean" is reactive private
+		sub Text
+			var string defaultValue = empty
+			var string type = "String" is reactive private
+		sub Date
+			var string format = "dd/MM/yyyy"
+			var string type = "java.util.Date" is reactive private
+		sub DateTime
+			var string format = "dd/MM/yyyy HH:mm:ss"
+			var string type = "java.time.Instant" is reactive private
+		sub Word
+			var string type = "java.lang.Enum" is reactive private
+			var string[] values;
+		sub File
+			var string type = "io.intino.alexandria.Resource" is reactive private
+			var word:{body path form header query} in = form
+		sub Object
+			var Schema schema
+			var string type = @schemaName is reactive private
