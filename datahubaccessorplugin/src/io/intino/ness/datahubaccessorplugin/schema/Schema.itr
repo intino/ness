@@ -42,7 +42,7 @@ end
 
 def type(word & single) trigger(getter)
 	public $name+FirstUpperCase $name+FirstLowerCase() {
-		return $name+FirstUpperCase.valueOf(message.get("$name+FirstLowerCase").as(String.class);
+		return $name+FirstUpperCase.valueOf(message.get("$name+FirstLowerCase").as(String.class));
 	}
 end
 

@@ -33,11 +33,22 @@ public class DataHubAccessorsPluginLauncher extends PluginLauncher {
 	private void publishAccessor(NessGraph nessGraph) {
 		try {
 			File tempDir = Files.createTempDirectory("_temp").toFile();
-			nessGraph.messageHubList().forEach(messageHub ->
-					new AccessorsPublisher(new File(tempDir, messageHub.name$()), messageHub, tanks(messageHub), configuration(), systemProperties(), logger()).publish());
+			nessGraph.messageHubList().forEach(messageHub -> {
+				new AccessorsPublisher(new File(tempDir, messageHub.name$()), messageHub, tanks(messageHub), configuration(), systemProperties(), logger()).publish();
+				notifier().notify(accesorDepenency(configuration().artifact().groupId(), messageHub.name$(), configuration().artifact().version()));
+			});
+
 		} catch (IOException e) {
 			log.println(e.getMessage());
 		}
+	}
+
+	private String accesorDepenency(String groupId, String artifactId, String version) {
+		return "<dependency>\n" +
+				"    <groupId>" + groupId.toLowerCase() + "</groupId>\n" +
+				"    <artifactId>" + artifactId.toLowerCase() + "</artifactId>\n" +
+				"    <version>" + version + "</version>\n" +
+				"</dependency>";
 	}
 
 	private List<Tank.Event> tanks(MessageHub messageHub) {
