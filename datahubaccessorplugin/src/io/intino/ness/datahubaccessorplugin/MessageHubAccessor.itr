@@ -4,11 +4,11 @@ def type(accessor)
 	import $package+validPackage.schemas.*;
 	import java.util.List;
 
-	public class $name+snakeCaseToCamelCase+firstUpperCase~MessageHub {
+	public class $name+snakeCaseToCamelCase+firstUpperCase {
 
 		private final io.intino.alexandria.message.MessageHub messageHub;
 
-		public $name+snakeCaseToCamelCase+firstUpperCase~MessageHub(io.intino.alexandria.message.MessageHub messageHub) {
+		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.message.MessageHub messageHub) {
 			this.messageHub = messageHub;
 		}
 

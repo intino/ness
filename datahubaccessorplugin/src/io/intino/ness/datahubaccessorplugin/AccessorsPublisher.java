@@ -63,7 +63,8 @@ class AccessorsPublisher {
 	private Collection<Message> hierarchy(Message message) {
 		Set<Message> messages = new HashSet<>();
 		if (message.isExtensionOf())
-			messages.addAll(hierarchy(message.asExtensionOf().asMessage()));
+			messages.addAll(hierarchy(message.asExtensionOf().parent()));
+		messages.add(message);
 		return messages;
 	}
 

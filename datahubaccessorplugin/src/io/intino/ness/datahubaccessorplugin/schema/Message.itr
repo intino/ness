@@ -6,11 +6,11 @@ end
 
 def trigger(schema)
 	public [$inner] class $name+firstUpperCase [extends $parent] implements java.io.Serializable {
-		io.intino.alexandria.message.Message message;
+		[$parent+delegate?io.intino.alexandria.message.Message message;]
 		$attribute+declaration...[$NL]
 
 		public $name+firstUpperCase(io.intino.alexandria.message.Message message) {
-			this.message = message;
+			[$parent+super?this.message = message;]
 		}
 
 		$attribute+getter...[$NL$NL]
@@ -24,6 +24,14 @@ def trigger(schema)
 
 		[$schema...[$NL$NL]]
 	}
+end
+
+def trigger(super)
+	super(message);
+end
+def trigger(delegate)
+	;
+
 end
 
 def type(word & single) trigger(declaration)
@@ -92,7 +100,7 @@ end
 
 def !type(primitive) type(single) trigger(setter)
 	public $element+firstUpperCase $name+firstLowerCase($type+firstUpperCase $name+firstLowerCase) {
-		this.message.components("$type").forEach(v -> this.message.remove(v.get()));
+		this.message.components("$type").forEach(v -> this.message.remove(v));
 		this.message.add($name+firstLowerCase.get());
 		return this;
 	}
@@ -100,7 +108,7 @@ end
 
 def type(multiple & member) trigger(setter)
 	public $element+firstUpperCase $name+firstLowerCase(java.util.List<$type+firstUpperCase> $name+firstLowerCase) {
-		this.message.components("$type").forEach(v -> this.message.remove(v.get()));
+		this.message.components("$type").forEach(v -> this.message.remove(v));
 		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v));
 		return this;
 	}

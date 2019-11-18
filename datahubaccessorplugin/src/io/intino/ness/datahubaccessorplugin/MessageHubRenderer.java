@@ -23,7 +23,7 @@ class MessageHubRenderer {
 
 	void render() {
 		final File packageFolder = new File(srcDir, basePackage.replace(".", File.separator));
-		Commons.writeFrame(packageFolder, messageHub.name$() + "MessageHub", template().render(createMessageHubFrame()));
+		Commons.writeFrame(packageFolder, messageHub.name$(), template().render(createMessageHubFrame()));
 	}
 
 	private Frame createMessageHubFrame() {
