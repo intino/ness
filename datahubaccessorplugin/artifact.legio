@@ -6,6 +6,8 @@ Artifact(groupId = "io.intino.ness", version = "1.0.0") data-hub-accessor-plugin
 		Compile("io.intino", "plugin-interface", "1.0.0")
 		Compile("io.intino.itrules", "engine", "1.0.0")
 		Compile("org.apache.maven.shared", "maven-invoker", "2.0.11")
+		Compile("commons-io", "commons-io", "2.4")
+
 		Test("io.intino.legio","model", "3.2.0")
 		Test("junit", "junit", "LATEST")
 	Package(mode = ModulesAndLibrariesLinkedByManifest)

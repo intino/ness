@@ -48,7 +48,7 @@ end
 
 def type(word & multiple) trigger(getter)
 	public java.util.List<$type+FirstUpperCase> $name+FirstLowerCase() {
-		return java.util.Arrays.stream(message.get("$name+FirstLowerCase").as(String$[].class)).map(v -> $name+FirstUpperCase.valueOf(v)).collect(java.util.Collectors.toList());
+		return java.util.Arrays.asList(message.get("$name+FirstLowerCase").as(String$[].class)).map(v -> $name+FirstUpperCase.valueOf(v)).collect(java.util.Collectors.toList());
 	}
 end
 
@@ -66,7 +66,7 @@ end
 
 def type(multiple) trigger(getter)
 	public java.util.List<$type> $name+firstLowerCase() {
-		return java.util.Arrays.stream(message.get("$name+FirstLowerCase").as($type$[].class));
+		return java.util.Arrays.asList(message.get("$name+FirstLowerCase").as($type$[].class));
 	}
 end
 
@@ -92,7 +92,7 @@ end
 
 def !type(primitive) type(single) trigger(setter)
 	public $element+firstUpperCase $name+firstLowerCase($type+firstUpperCase $name+firstLowerCase) {
-		this.message.components($type).forEach(v -> this.message.remove(v.get());
+		this.message.components("$type").forEach(v -> this.message.remove(v.get()));
 		this.message.add($name+firstLowerCase.get());
 		return this;
 	}
@@ -100,7 +100,7 @@ end
 
 def type(multiple & member) trigger(setter)
 	public $element+firstUpperCase $name+firstLowerCase(java.util.List<$type+firstUpperCase> $name+firstLowerCase) {
-		this.message.components($type).forEach(v -> this.message.remove(v.get());
+		this.message.components("$type").forEach(v -> this.message.remove(v.get()));
 		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v));
 		return this;
 	}

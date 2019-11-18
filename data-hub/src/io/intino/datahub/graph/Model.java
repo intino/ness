@@ -11,10 +11,10 @@ import static java.util.Collections.singletonList;
 public class Model {
 
 	public static String schemaName(Data.Object self) {
-		final io.intino.datahub.graph.Schema schema = self.schema();
+		final io.intino.datahub.graph.Message schema = self.message();
 		StringBuilder fullName = new StringBuilder();
 		Node node = schema.core$();
-		while (node.is(Schema.class)) {
+		while (node.is(Message.class)) {
 			fullName.insert(0, firstUpperCase(node.name()) + ".");
 			node = node.owner();
 		}

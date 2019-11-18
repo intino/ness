@@ -40,12 +40,12 @@ class MessageHubRenderer {
 	private List<Frame> frameOf(Datalake.Tank.Event tank) {
 		List<Frame> frames = new ArrayList<>();
 		if (tank.asTank().isContextual()) {
-			FrameBuilder builder = new FrameBuilder("context").add("type", tank.name$()).add("context", tank.asTank().asContextual().context().name$());
+			FrameBuilder builder = new FrameBuilder("context").add("type", tank.message().name$()).add("context", tank.asTank().asContextual().context().name$());
 			builder.add("channel", tank.qn());
 			Datalake.Context context = tank.asTank().asContextual().context();
 			if (!context.isLeaf()) for (Datalake.Context leaf : context.leafs()) {
-				FrameBuilder b = new FrameBuilder("context").add("type", tank.name$()).add("context", leaf.name$());
-				b.add("channel", (leaf.qn().isEmpty() ? "" : leaf.qn() + ".") + tank.name$());
+				FrameBuilder b = new FrameBuilder("context").add("type", tank.message().name$()).add("context", leaf.name$());
+				b.add("channel", (leaf.qn().isEmpty() ? "" : leaf.qn() + ".") + tank.message().name$());
 				frames.add(b.toFrame());
 			}
 			frames.add(builder.toFrame());

@@ -38,21 +38,19 @@ Concept:{0..1} Datalake
         	sub Event
         Aspect Contextual > var Context context
 
-Concept:Named Message extends Schema
-
 Concept:Named MessageHub
 	Concept:{0..1} Publish
 		var Datalake.Tank.Event[] tanks
 	Concept:{0..1} Subscribe
 		var Datalake.Tank.Event[] tanks
 
-Concept Schema is abstract
+Concept Message
 	var boolean multiple = false
 	Concept:Named:RequiresAspect Attribute extends Data
 		var boolean isRequired = true
-	has Schema
+	has Message
 	Aspect ExtensionOf
-    	var Schema parent
+    	var Message parent
 
 
 Concept Data is abstract
@@ -87,5 +85,5 @@ Concept Data is abstract
 			var string type = "io.intino.alexandria.Resource" is reactive private
 			var word:{body path form header query} in = form
 		sub Object
-			var Schema schema
+			var Message message
 			var string type = @schemaName is reactive private

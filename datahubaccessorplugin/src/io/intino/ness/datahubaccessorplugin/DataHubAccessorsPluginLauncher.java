@@ -18,6 +18,7 @@ import java.util.Objects;
 public class DataHubAccessorsPluginLauncher extends PluginLauncher {
 	@Override
 	public void run() {
+		if (invokedPhase.ordinal() < 2) return;
 		logger().println("Building " + configuration().artifact().name$() + " accessor");
 		List<File> directories = moduleStructure().resDirectories;
 		File resDirectory = directories.stream().filter(d -> {
@@ -34,16 +35,16 @@ public class DataHubAccessorsPluginLauncher extends PluginLauncher {
 		try {
 			File tempDir = Files.createTempDirectory("_temp").toFile();
 			nessGraph.messageHubList().forEach(messageHub -> {
-				new AccessorsPublisher(new File(tempDir, messageHub.name$()), messageHub, tanks(messageHub), configuration(), systemProperties(), logger()).publish();
-				notifier().notify(accesorDepenency(configuration().artifact().groupId(), messageHub.name$(), configuration().artifact().version()));
+				new AccessorsPublisher(new File(tempDir, messageHub.name$()), messageHub, tanks(messageHub), configuration(), systemProperties(), invokedPhase, logger()).publish();
+				notifier().notify("MessageHub" + messageHub.name$() + "created. Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId(), messageHub.name$(), configuration().artifact().version()));
 			});
-
+//			FileUtils.deleteDirectory(tempDir);
 		} catch (IOException e) {
-			log.println(e.getMessage());
+			logger().println(e.getMessage());
 		}
 	}
 
-	private String accesorDepenency(String groupId, String artifactId, String version) {
+	private String accessorDependency(String groupId, String artifactId, String version) {
 		return "<dependency>\n" +
 				"    <groupId>" + groupId.toLowerCase() + "</groupId>\n" +
 				"    <artifactId>" + artifactId.toLowerCase() + "</artifactId>\n" +

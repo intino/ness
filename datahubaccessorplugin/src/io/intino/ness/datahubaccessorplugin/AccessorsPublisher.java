@@ -1,6 +1,7 @@
 package io.intino.ness.datahubaccessorplugin;
 
 import io.intino.datahub.graph.Datalake.Tank;
+import io.intino.datahub.graph.Message;
 import io.intino.datahub.graph.MessageHub;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
@@ -13,9 +14,7 @@ import org.apache.maven.shared.invoker.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 class AccessorsPublisher {
 	private final File root;
@@ -23,23 +22,25 @@ class AccessorsPublisher {
 	private final LegioGraph conf;
 	private final PluginLauncher.SystemProperties systemProperties;
 	private final String basePackage;
+	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
 	private List<Tank.Event> tanks;
 
-	AccessorsPublisher(File root, MessageHub messageHub, List<Tank.Event> tanks, LegioGraph configuration, PluginLauncher.SystemProperties systemProperties, PrintStream logger) {
+	AccessorsPublisher(File root, MessageHub messageHub, List<Tank.Event> tanks, LegioGraph configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
 		this.messageHub = messageHub;
 		this.tanks = tanks;
 		this.conf = configuration;
 		this.systemProperties = systemProperties;
 		this.basePackage = configuration.artifact().groupId();
+		this.invokedPhase = invokedPhase;
 		this.logger = logger;
 	}
 
 	void publish() {
 		if (!createSources()) return;
 		try {
-			mvn("install");
+			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
 		} catch (IOException | MavenInvocationException e) {
 			logger.println(e.getMessage());
 		}
@@ -49,8 +50,21 @@ class AccessorsPublisher {
 		File srcDirectory = new File(root, "src");
 		srcDirectory.mkdirs();
 		new MessageHubRenderer(messageHub, srcDirectory, basePackage).render();
-		tanks.forEach(t -> new MessageRenderer(t.message(), srcDirectory, basePackage).render());
+		collectMessages(tanks).forEach(m -> new MessageRenderer(m, srcDirectory, basePackage).render());
 		return true;
+	}
+
+	private Collection<Message> collectMessages(List<Tank.Event> tanks) {
+		Set<Message> messages = new HashSet<>();
+		tanks.stream().map(tank -> hierarchy(tank.message())).forEach(messages::addAll);
+		return messages;
+	}
+
+	private Collection<Message> hierarchy(Message message) {
+		Set<Message> messages = new HashSet<>();
+		if (message.isExtensionOf())
+			messages.addAll(hierarchy(message.asExtensionOf().asMessage()));
+		return messages;
 	}
 
 	private void mvn(String goal) throws IOException, MavenInvocationException {
