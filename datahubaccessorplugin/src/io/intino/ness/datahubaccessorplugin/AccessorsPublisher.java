@@ -37,13 +37,15 @@ class AccessorsPublisher {
 		this.logger = logger;
 	}
 
-	void publish() {
-		if (!createSources()) return;
+	boolean publish() {
+		if (!createSources()) return false;
 		try {
 			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
 		} catch (IOException | MavenInvocationException e) {
 			logger.println(e.getMessage());
+			return false;
 		}
+		return true;
 	}
 
 	private boolean createSources() {

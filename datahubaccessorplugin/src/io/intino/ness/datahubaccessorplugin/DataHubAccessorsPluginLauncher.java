@@ -6,6 +6,7 @@ import io.intino.datahub.graph.NessGraph;
 import io.intino.plugin.PluginLauncher;
 import io.intino.tara.magritte.Graph;
 import io.intino.tara.magritte.stores.FileSystemStore;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DataHubAccessorsPluginLauncher extends PluginLauncher {
 	@Override
@@ -34,14 +36,20 @@ public class DataHubAccessorsPluginLauncher extends PluginLauncher {
 	private void publishAccessor(NessGraph nessGraph) {
 		try {
 			File tempDir = Files.createTempDirectory("_temp").toFile();
+			AtomicBoolean published = new AtomicBoolean(true);
 			nessGraph.messageHubList().forEach(messageHub -> {
-				new AccessorsPublisher(new File(tempDir, messageHub.name$()), messageHub, tanks(messageHub), configuration(), systemProperties(), invokedPhase, logger()).publish();
-				notifier().notify("MessageHub" + messageHub.name$() + "created. Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId(), messageHub.name$(), configuration().artifact().version()));
+				published.set(new AccessorsPublisher(new File(tempDir, messageHub.name$()), messageHub, tanks(messageHub), configuration(), systemProperties(), invokedPhase, logger()).publish() & published.get());
+				if (published.get())
+					notifier().notify("MessageHub " + messageHub.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId(), messageHub.name$(), configuration().artifact().version()));
 			});
-//			FileUtils.deleteDirectory(tempDir);
+			if (published.get()) FileUtils.deleteDirectory(tempDir);
 		} catch (IOException e) {
 			logger().println(e.getMessage());
 		}
+	}
+
+	private String participle() {
+		return invokedPhase == Phase.INSTALL ? "installed" : "distributed";
 	}
 
 	private String accessorDependency(String groupId, String artifactId, String version) {
