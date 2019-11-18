@@ -1,6 +1,6 @@
 package io.intino.ness.datahubaccessorplugin;
 
-import io.intino.datahub.graph.Message;
+import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.datahub.graph.MessageHub;
 import io.intino.datahub.graph.NessGraph;
 import io.intino.plugin.PluginLauncher;
@@ -21,11 +21,11 @@ public class DataHubAccessorsPluginLauncher extends PluginLauncher {
 		logger().println("Building " + configuration().artifact().name$() + " accessor");
 		List<File> directories = moduleStructure().resDirectories;
 		File resDirectory = directories.stream().filter(d -> {
-			File[] files = d.listFiles(f -> f.getName().endsWith(".stash"));
+			File[] files = d.getAbsoluteFile().listFiles(f -> f.getName().endsWith(".stash"));
 			return files != null && files.length > 0;
 		}).findFirst().orElse(null);
 		if (resDirectory == null) return;
-		String[] stashes = Arrays.stream(Objects.requireNonNull(resDirectory.listFiles(f -> f.getName().endsWith(".stash")))).map(f->f.getName().replace(".stash", "")).toArray(String[]::new);
+		String[] stashes = Arrays.stream(Objects.requireNonNull(resDirectory.listFiles(f -> f.getName().endsWith(".stash")))).map(f -> f.getName().replace(".stash", "")).toArray(String[]::new);
 		Graph graph = new Graph(new FileSystemStore(resDirectory)).loadStashes(stashes);
 		publishAccessor(graph.as(NessGraph.class));
 	}
@@ -34,16 +34,16 @@ public class DataHubAccessorsPluginLauncher extends PluginLauncher {
 		try {
 			File tempDir = Files.createTempDirectory("_temp").toFile();
 			nessGraph.messageHubList().forEach(messageHub ->
-					new AccessorsPublisher(new File(tempDir, messageHub.name$()), messageHub, schemasOf(messageHub), configuration(), systemProperties(), logger()).publish());
+					new AccessorsPublisher(new File(tempDir, messageHub.name$()), messageHub, tanks(messageHub), configuration(), systemProperties(), logger()).publish());
 		} catch (IOException e) {
 			log.println(e.getMessage());
 		}
 	}
 
-	private List<Message> schemasOf(MessageHub messageHub) {
-		List<Message> messages = new ArrayList<>();
-		if (messageHub.publish()!= null) messages.addAll(messageHub.publish().messages());
-		if (messageHub.subscribe()!= null) messages.addAll(messageHub.subscribe().messages());
-		return messages;
+	private List<Tank.Event> tanks(MessageHub messageHub) {
+		List<Tank.Event> tanks = new ArrayList<>();
+		if (messageHub.publish() != null) tanks.addAll(messageHub.publish().tanks());
+		if (messageHub.subscribe() != null) tanks.addAll(messageHub.subscribe().tanks());
+		return tanks;
 	}
 }

@@ -23,28 +23,31 @@ Concept:{0..1} Broker
 Concept:{0..1} Datalake
 	var word:{Year Month Day Hour Minute} scale
 	var string path
-	Concept:Named Split > var string[] values
+	Concept:Named Context
+		var string label = 'self.name$()'
+		var string qn = @qn is private reactive
+		var boolean isLeaf = @isLeaf is private reactive
+		var boolean isRoot = @isRoot is private reactive
+		var Context[] leafs = @leafs is private reactive
+		has:Named Context
 	Concept:{1..*}:AspectRequired Tank
-		var string name
+		var Message message
+		var string qn = @qn is private reactive
 		Aspect TankType
-        	sub Set
-        		var Datalake.Split split = empty
-        		var word:{Multivalued Singleton} type = Multivalued
+        	sub Set > var word:{Multivalued Singleton} type = Multivalued
         	sub Event
+        Aspect Contextual > var Context context
 
 Concept:Named Message extends Schema
-	Aspect Contextual
-		var string context
 
 Concept:Named MessageHub
 	Concept:{0..1} Publish
-		var Message[] messages
+		var Datalake.Tank.Event[] tanks
 	Concept:{0..1} Subscribe
-		var Message[] messages
-!! Schemas allows to define how objects are. This objects can be provided as either parameter or response
+		var Datalake.Tank.Event[] tanks
+
 Concept Schema is abstract
 	var boolean multiple = false
-	!! Attribute of the member
 	Concept:Named:RequiresAspect Attribute extends Data
 		var boolean isRequired = true
 	has Schema

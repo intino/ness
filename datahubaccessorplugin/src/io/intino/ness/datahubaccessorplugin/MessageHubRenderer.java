@@ -1,45 +1,58 @@
 package io.intino.ness.datahubaccessorplugin;
 
-import io.intino.datahub.graph.Message;
+import io.intino.datahub.graph.Datalake;
 import io.intino.datahub.graph.MessageHub;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
-public class MessageHubRenderer {
+class MessageHubRenderer {
 	private final MessageHub messageHub;
 	private final File srcDir;
 	private final String basePackage;
 
-	public MessageHubRenderer(MessageHub messageHub, File srcDir, String basePackage) {
+	MessageHubRenderer(MessageHub messageHub, File srcDir, String basePackage) {
 		this.messageHub = messageHub;
 		this.srcDir = srcDir;
 		this.basePackage = basePackage;
 	}
 
-	public void render() {
+	void render() {
 		final File packageFolder = new File(srcDir, basePackage.replace(".", File.separator));
-		Commons.writeFrame(packageFolder, messageHub.name$()+ "MessageHub", template().render(createMessageHubFrame()));
+		Commons.writeFrame(packageFolder, messageHub.name$() + "MessageHub", template().render(createMessageHubFrame()));
 	}
 
 	private Frame createMessageHubFrame() {
-		FrameBuilder frame = new FrameBuilder().add("accessor").add("package", basePackage).add("name", messageHub.name$());
+		FrameBuilder builder = new FrameBuilder().add("accessor").add("package", basePackage).add("name", messageHub.name$());
 		if (messageHub.publish() != null)
-			frame.add("publish", messageHub.publish().messages().stream().map(this::frameOf).toArray(Frame[]::new));
+			for (Datalake.Tank.Event tank : messageHub.publish().tanks())
+				frameOf(tank).forEach(f -> builder.add("publish", f));
 		if (messageHub.subscribe() != null)
-			frame.add("subscribe", messageHub.subscribe().messages().stream().map(this::frameOf).toArray(Frame[]::new));
-		return frame.toFrame();
+			for (Datalake.Tank.Event tank : messageHub.subscribe().tanks())
+				frameOf(tank).forEach(f -> builder.add("subscribe", f));
+		return builder.toFrame();
 	}
 
-	private Frame frameOf(Message message) {
-		return new FrameBuilder().
-				add("type", message.name$()).
-				add("channel", (message.isContextual() ? message.asContextual().context() + "." : "") + message.name$()).
-				add("context", (message.isContextual() ? message.asContextual().context() : "")).
-				toFrame();
+	private List<Frame> frameOf(Datalake.Tank.Event tank) {
+		List<Frame> frames = new ArrayList<>();
+		if (tank.asTank().isContextual()) {
+			FrameBuilder builder = new FrameBuilder("context").add("type", tank.name$()).add("context", tank.asTank().asContextual().context().name$());
+			builder.add("channel", tank.qn());
+			Datalake.Context context = tank.asTank().asContextual().context();
+			if (!context.isLeaf()) for (Datalake.Context leaf : context.leafs()) {
+				FrameBuilder b = new FrameBuilder("context").add("type", tank.name$()).add("context", leaf.name$());
+				b.add("channel", (leaf.qn().isEmpty() ? "" : leaf.qn() + ".") + tank.name$());
+				frames.add(b.toFrame());
+			}
+			frames.add(builder.toFrame());
+		}
+		return frames;
 	}
+
 
 	private Template template() {
 		return Formatters.customize(new MessageHubAccessorTemplate()).add("typeFormat", (value) -> {

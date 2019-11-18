@@ -92,21 +92,24 @@ end
 
 def !type(primitive) type(single) trigger(setter)
 	public $element+firstUpperCase $name+firstLowerCase($type+firstUpperCase $name+firstLowerCase) {
-		//TODO inl
+		this.message.components($type).forEach(v -> this.message.remove(v.get());
+		this.message.add($name+firstLowerCase.get());
 		return this;
 	}
 end
 
 def type(multiple & member) trigger(setter)
 	public $element+firstUpperCase $name+firstLowerCase(java.util.List<$type+firstUpperCase> $name+firstLowerCase) {
-		this.$name+firstLowerCase = $name+firstLowerCase;
+		this.message.components($type).forEach(v -> this.message.remove(v.get());
+		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v));
 		return this;
 	}
 end
 
 def type(multiple) trigger(setter)
 	public $element+firstUpperCase $name+firstLowerCase(java.util.List<$type> $name+firstLowerCase) {
-		this.$name+firstLowerCase = $name+firstLowerCase;
+		this.message.remove("$name+firstLowerCase");
+		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v));
 		return this;
 	}
 end

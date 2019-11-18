@@ -1,6 +1,6 @@
 package io.intino.ness.datahubaccessorplugin;
 
-import io.intino.datahub.graph.Message;
+import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.datahub.graph.MessageHub;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
@@ -20,16 +20,16 @@ import java.util.UUID;
 class AccessorsPublisher {
 	private final File root;
 	private final MessageHub messageHub;
-	private List<Message> messages;
 	private final LegioGraph conf;
 	private final PluginLauncher.SystemProperties systemProperties;
 	private final String basePackage;
 	private final PrintStream logger;
+	private List<Tank.Event> tanks;
 
-	AccessorsPublisher(File root, MessageHub messageHub, List<Message> messages, LegioGraph configuration, PluginLauncher.SystemProperties systemProperties, PrintStream logger) {
+	AccessorsPublisher(File root, MessageHub messageHub, List<Tank.Event> tanks, LegioGraph configuration, PluginLauncher.SystemProperties systemProperties, PrintStream logger) {
 		this.root = root;
 		this.messageHub = messageHub;
-		this.messages = messages;
+		this.tanks = tanks;
 		this.conf = configuration;
 		this.systemProperties = systemProperties;
 		this.basePackage = configuration.artifact().groupId();
@@ -49,7 +49,7 @@ class AccessorsPublisher {
 		File srcDirectory = new File(root, "src");
 		srcDirectory.mkdirs();
 		new MessageHubRenderer(messageHub, srcDirectory, basePackage).render();
-		messages.forEach(message -> new MessageRenderer(message, srcDirectory, basePackage).render());
+		tanks.forEach(t -> new MessageRenderer(t.message(), srcDirectory, basePackage).render());
 		return true;
 	}
 

@@ -18,14 +18,35 @@ def type(accessor)
 	}
 end
 
-def trigger(publish)
-	public void send($type+FirstUpperCase $type+firstLowerCase) {
+def type(contextual) trigger(publish)
+	$context+publish...[$NL$NL]
+end
+
+def type(context) trigger(publish)
+	public void sendTo$context($type+FirstUpperCase $type+firstLowerCase) {
 		messageHub.sendMessage("$channel", $type+firstLowerCase.get());
 	}
 end
 
-def trigger(subscribe)
+def type(contextual) trigger(subscribe)
+	$context+subscribe...[$NL$NL]
+end
+
+
+def type(context) trigger(subscribe)
 	public void subscribeTo$context+FirstUpperCase(java.util.function.Consumer<$type+FirstUpperCase> onMessageReceived) {
 		messageHub.attachListener("$channel", m -> onMessageReceived.accept(new $type+FirstUpperCase(m)));
+	}
+end
+
+def trigger(subscribe)
+	public void subscribeTo$type+FirstUpperCase(java.util.function.Consumer<$type+FirstUpperCase> onMessageReceived) {
+		messageHub.attachListener("$channel", m -> onMessageReceived.accept(new $type+FirstUpperCase(m)));
+	}
+end
+
+def trigger(publish)
+	public void send($type+FirstUpperCase $type+firstLowerCase) {
+		messageHub.sendMessage("$channel", $type+firstLowerCase.get());
 	}
 end
