@@ -1,4 +1,4 @@
-package io.intino.ness.datahubaccessorplugin;
+package io.intino.ness.datahubterminalplugin;
 
 
 import java.io.File;

@@ -1,4 +1,4 @@
-package io.intino.ness.datahubaccessorplugin;
+package io.intino.ness.datahubterminalplugin;
 
 import io.intino.itrules.RuleSet;
 import io.intino.itrules.Template;

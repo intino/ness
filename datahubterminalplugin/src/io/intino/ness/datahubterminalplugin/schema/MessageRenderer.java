@@ -1,12 +1,12 @@
-package io.intino.ness.datahubaccessorplugin.schema;
+package io.intino.ness.datahubterminalplugin.schema;
 
 import io.intino.datahub.graph.Data;
 import io.intino.datahub.graph.Message;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
-import io.intino.ness.datahubaccessorplugin.Commons;
-import io.intino.ness.datahubaccessorplugin.Formatters;
+import io.intino.ness.datahubterminalplugin.Commons;
+import io.intino.ness.datahubterminalplugin.Formatters;
 
 import java.io.File;
 import java.util.ArrayList;

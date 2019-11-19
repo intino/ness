@@ -93,8 +93,9 @@ def type(primitive & single) trigger(setter)
 end
 
 def !type(primitive) type(single) trigger(getter)
-	public java.util.List<$type> $name+firstLowerCase() {
-		return message.components("$name").stream().map(m -> new $type(m)).collect(java.util.stream.Collectors.toList());
+	public $type $name+firstLowerCase() {
+		List<Message> components = message.components("$name");
+		return components.isEmpty() ? null : new $type(components.get(0));
 	}
 end
 

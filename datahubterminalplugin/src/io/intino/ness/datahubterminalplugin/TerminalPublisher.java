@@ -1,4 +1,4 @@
-package io.intino.ness.datahubaccessorplugin;
+package io.intino.ness.datahubterminalplugin;
 
 import io.intino.datahub.graph.DataHubTerminal;
 import io.intino.datahub.graph.Datalake.Tank;
@@ -7,7 +7,7 @@ import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.legio.graph.LegioGraph;
 import io.intino.legio.graph.Repository;
-import io.intino.ness.datahubaccessorplugin.schema.MessageRenderer;
+import io.intino.ness.datahubterminalplugin.schema.MessageRenderer;
 import io.intino.plugin.PluginLauncher;
 import org.apache.maven.shared.invoker.*;
 

@@ -1,5 +1,5 @@
 import io.intino.legio.graph.LegioGraph;
-import io.intino.ness.datahubaccessorplugin.DataHubTerminalsPluginLauncher;
+import io.intino.ness.datahubterminalplugin.DataHubTerminalsPluginLauncher;
 import io.intino.plugin.PluginLauncher;
 import io.intino.tara.magritte.Graph;
 import org.junit.Ignore;

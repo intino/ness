@@ -1,4 +1,4 @@
-package io.intino.ness.datahubaccessorplugin;
+package io.intino.ness.datahubterminalplugin;
 
 import io.intino.datahub.graph.DataHubTerminal;
 import io.intino.datahub.graph.Datalake.Tank;
@@ -21,7 +21,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	@Override
 	public void run() {
 		if (invokedPhase.ordinal() < 2) return;
-		logger().println("Building " + configuration().artifact().name$() + " accessor");
+		logger().println("Building " + configuration().artifact().name$() + " terminal");
 		List<File> directories = moduleStructure().resDirectories;
 		File resDirectory = directories.stream().filter(d -> {
 			File[] files = d.getAbsoluteFile().listFiles(f -> f.getName().endsWith(".stash"));
