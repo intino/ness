@@ -88,7 +88,8 @@ def type(word & single) trigger(setter)
 end
 def type(word & multiple) trigger(setter)
 	public $element+firstUpperCase $name+firstLowerCase(java.util.List<$type+FirstUpperCase> $name+firstLowerCase) {
-		//TODO inl
+		this.message.remove("$name+firstLowerCase");
+		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v.name()));
 		return this;
 	}
 end
