@@ -110,7 +110,7 @@ end
 def type(multiple & member) trigger(setter)
 	public $element+firstUpperCase $name+firstLowerCase(java.util.List<$type+firstUpperCase> $name+firstLowerCase) {
 		this.message.components("$type").forEach(v -> this.message.remove(v));
-		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v));
+		$name+firstLowerCase.forEach(v -> this.message.add("$name+firstLowerCase", v.get()));
 		return this;
 	}
 end
@@ -118,7 +118,7 @@ end
 def type(multiple) trigger(setter)
 	public $element+firstUpperCase $name+firstLowerCase(java.util.List<$type> $name+firstLowerCase) {
 		this.message.remove("$name+firstLowerCase");
-		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v));
+		$name+firstLowerCase.forEach(v -> this.message.add("$name+firstLowerCase", v.get()));
 		return this;
 	}
 end
