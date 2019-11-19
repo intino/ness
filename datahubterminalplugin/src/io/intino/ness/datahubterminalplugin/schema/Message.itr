@@ -100,6 +100,14 @@ def type(primitive & multiple) trigger(setter)
 	}
 end
 
+
+def !type(primitive) !type(single) trigger(getter)
+	public java.util.List<$type> $name+firstLowerCase() {
+		java.util.List<io.intino.alexandria.message.Message> components = message.components("$name");
+		return components.stream().map(v -> new $type(v)).collect(java.util.stream.Collectors.toList());
+	}
+end
+
 def !type(primitive) type(single) trigger(getter)
 	public $type $name+firstLowerCase() {
 		java.util.List<io.intino.alexandria.message.Message> components = message.components("$name");
