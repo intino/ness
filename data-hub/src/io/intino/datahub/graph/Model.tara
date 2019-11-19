@@ -57,16 +57,16 @@ Concept Data is abstract
 	Aspect Type
 		var string type is reactive private
 		sub Real
-			var double defaultValue = empty
+			var double defaultValue = 0
 			var string type = "Double" is reactive private
 		sub Integer
-			var integer defaultValue = empty
+			var integer defaultValue = 0
 			var string type = "Integer" is reactive private
 		sub LongInteger
-			var long defaultValue = empty
+			var long defaultValue = 0
 			var string type = "Long" is reactive private
 		sub Bool
-			var boolean defaultValue = empty
+			var boolean defaultValue = false
 			var string type = "Boolean" is reactive private
 		sub Text
 			var string defaultValue = empty

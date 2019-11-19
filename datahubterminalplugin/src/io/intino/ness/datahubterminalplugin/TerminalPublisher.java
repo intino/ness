@@ -1,5 +1,7 @@
 package io.intino.ness.datahubterminalplugin;
 
+import com.google.gson.Gson;
+import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.graph.DataHubTerminal;
 import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.datahub.graph.Message;
@@ -14,7 +16,9 @@ import org.apache.maven.shared.invoker.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.stream.Collectors;
 
 class TerminalPublisher {
 	private final File root;
@@ -53,7 +57,19 @@ class TerminalPublisher {
 		srcDirectory.mkdirs();
 		new MessageHubRenderer(terminal, srcDirectory, basePackage).render();
 		collectMessages(tanks).forEach(m -> new MessageRenderer(m, srcDirectory, basePackage).render());
+		File resDirectory = new File(root, "res");
+		resDirectory.mkdirs();
+		writeManifest(resDirectory);
 		return true;
+	}
+
+	private void writeManifest(File srcDirectory) {
+		Manifest manifest = new Manifest(terminal.publish().tanks().stream().map(Tank.Event::qn).collect(Collectors.toList()), terminal.subscribe().tanks().stream().map(Tank.Event::qn).collect(Collectors.toList()));
+		try {
+			Files.write(new File(srcDirectory, "terminal.mf").toPath(), new Gson().toJson(manifest).getBytes());
+		} catch (IOException e) {
+			Logger.error(e);
+		}
 	}
 
 	private Collection<Message> collectMessages(List<Tank.Event> tanks) {

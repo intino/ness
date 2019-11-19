@@ -58,7 +58,7 @@ end
 
 def type(word & single) trigger(getter)
 	public $name+FirstUpperCase $name+FirstLowerCase() {
-		return $name+FirstUpperCase.valueOf(message.get("$name+FirstLowerCase").as(String.class));
+		return !message.contains("$name+FirstLowerCase") ? null : $name+FirstUpperCase.valueOf(message.get("$name+FirstLowerCase").as(String.class));
 	}
 end
 
@@ -70,19 +70,20 @@ end
 
 def type(primitive & single) trigger(getter)
 	public $type $name+firstLowerCase() {
-		return message.get("$name+FirstLowerCase").as($type.class);
+		return message.contains("$name+FirstLowerCase") ? $defaultValue : message.get("$name+FirstLowerCase").as($type.class);
 	}
 end
 
 def type(primitive & multiple) trigger(getter)
 	public java.util.List<$type> $name+firstLowerCase() {
-		return java.util.Arrays.asList(message.get("$name+FirstLowerCase").as($type$[].class));
+		return !message.contains("$name+FirstLowerCase") ? java.util.Collections.emptyList() : java.util.Arrays.asList(message.get("$name+FirstLowerCase").as($type$[].class));
 	}
 end
 
 def type(word & single) trigger(setter)
 	public $element+firstUpperCase $name+firstLowerCase($type+FirstUpperCase $name+firstLowerCase) {
-		this.message.set("$name+firstLowerCase", $name+firstLowerCase.toString());
+		if ($name+firstLowerCase == null) this.message.remove("$name+firstLowerCase");
+		else this.message.set("$name+firstLowerCase", $name+firstLowerCase.name());
 		return this;
 	}
 end
@@ -127,7 +128,7 @@ end
 def !type(primitive) type(single) trigger(setter)
 	public $element+firstUpperCase $name+firstLowerCase($type+firstUpperCase $name+firstLowerCase) {
 		this.message.components("$type").forEach(v -> this.message.remove(v));
-		this.message.add($name+firstLowerCase.get());
+		if ($name+firstLowerCase != null) this.message.add($name+firstLowerCase.get());
 		return this;
 	}
 end

@@ -8,8 +8,14 @@ def type(accessor)
 
 		private final io.intino.alexandria.message.MessageHub messageHub;
 
+		public static String$[] subscriptionChannels = new String$[]{$subscribe+channel};
+
 		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.message.MessageHub messageHub) {
 			this.messageHub = messageHub;
+		}
+
+		public io.intino.alexandria.message.MessageHub messageHub() {
+			return this.messageHub;
 		}
 
 		$publish...[$NL$NL]
@@ -49,4 +55,8 @@ def trigger(publish)
 	public void send($type+FirstUpperCase $type+firstLowerCase) {
 		messageHub.sendMessage("$channel", $type+firstLowerCase.get());
 	}
+end
+
+def trigger(quoted)
+	"$this"
 end

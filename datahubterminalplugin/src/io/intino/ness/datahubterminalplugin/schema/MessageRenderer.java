@@ -118,18 +118,17 @@ public class MessageRenderer {
 	}
 
 	private FrameBuilder process(Data.Text attribute) {
-		FrameBuilder builder = new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
+		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
 				.add("name", attribute.a$(Message.Attribute.class).name$())
-				.add("type", attribute.type());
-		if (attribute.defaultValue() != null) builder.add("defaultValue", "\"" + attribute.defaultValue() + "\"");
-		return builder;
+				.add("type", attribute.type())
+				.add("defaultValue", attribute.defaultValue() + "");
 
 	}
 
 	private FrameBuilder process(Data.DateTime attribute) {
 		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
 				.add("name", attribute.a$(Message.Attribute.class).name$())
-				.add("type", attribute.type());
+				.add("type", attribute.type()).add("defaultValue", "null");
 	}
 
 	private FrameBuilder process(Data.Date attribute) {
