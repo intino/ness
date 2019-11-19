@@ -66,13 +66,7 @@ def type(primitive & single) trigger(getter)
 	}
 end
 
-def !type(primitive) type(single) trigger(getter)
-	public java.util.List<io.intino.alexandria.message.Message> $name+firstLowerCase() {
-		return message.components("$name");
-	}
-end
-
-def type(multiple) trigger(getter)
+def type(primitive & multiple) trigger(getter)
 	public java.util.List<$type> $name+firstLowerCase() {
 		return java.util.Arrays.asList(message.get("$name+FirstLowerCase").as($type$[].class));
 	}
@@ -95,6 +89,12 @@ def type(primitive & single) trigger(setter)
 	public $element+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
 		this.message.set("$name+firstLowerCase", $name+firstLowerCase);
 		return this;
+	}
+end
+
+def !type(primitive) type(single) trigger(getter)
+	public java.util.List<$type> $name+firstLowerCase() {
+		return message.components("$name").stream().map(m -> new $type(m)).collect(java.util.stream.Collectors.toList());
 	}
 end
 

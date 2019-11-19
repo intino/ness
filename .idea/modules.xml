@@ -4,7 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/data-hub/data-hub.iml" filepath="$PROJECT_DIR$/data-hub/data-hub.iml" />
       <module fileurl="file://$PROJECT_DIR$/data-hub-test/data-hub-test.iml" filepath="$PROJECT_DIR$/data-hub-test/data-hub-test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/datahubaccessorplugin/datahubaccessorplugin.iml" filepath="$PROJECT_DIR$/datahubaccessorplugin/datahubaccessorplugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/datahubterminalplugin/datahubterminalplugin.iml" filepath="$PROJECT_DIR$/datahubterminalplugin/datahubterminalplugin.iml" />
     </modules>
   </component>
 </project>

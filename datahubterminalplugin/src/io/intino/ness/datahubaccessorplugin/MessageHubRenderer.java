@@ -1,7 +1,7 @@
 package io.intino.ness.datahubaccessorplugin;
 
+import io.intino.datahub.graph.DataHubTerminal;
 import io.intino.datahub.graph.Datalake;
-import io.intino.datahub.graph.MessageHub;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
@@ -11,28 +11,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 class MessageHubRenderer {
-	private final MessageHub messageHub;
+	private final DataHubTerminal terminal;
 	private final File srcDir;
 	private final String basePackage;
 
-	MessageHubRenderer(MessageHub messageHub, File srcDir, String basePackage) {
-		this.messageHub = messageHub;
+	MessageHubRenderer(DataHubTerminal terminal, File srcDir, String basePackage) {
+		this.terminal = terminal;
 		this.srcDir = srcDir;
 		this.basePackage = basePackage;
 	}
 
 	void render() {
 		final File packageFolder = new File(srcDir, basePackage.replace(".", File.separator));
-		Commons.writeFrame(packageFolder, messageHub.name$(), template().render(createMessageHubFrame()));
+		Commons.writeFrame(packageFolder, terminal.name$(), template().render(createMessageHubFrame()));
 	}
 
 	private Frame createMessageHubFrame() {
-		FrameBuilder builder = new FrameBuilder().add("accessor").add("package", basePackage).add("name", messageHub.name$());
-		if (messageHub.publish() != null)
-			for (Datalake.Tank.Event tank : messageHub.publish().tanks())
+		FrameBuilder builder = new FrameBuilder().add("accessor").add("package", basePackage).add("name", terminal.name$());
+		if (terminal.publish() != null)
+			for (Datalake.Tank.Event tank : terminal.publish().tanks())
 				frameOf(tank).forEach(f -> builder.add("publish", f));
-		if (messageHub.subscribe() != null)
-			for (Datalake.Tank.Event tank : messageHub.subscribe().tanks())
+		if (terminal.subscribe() != null)
+			for (Datalake.Tank.Event tank : terminal.subscribe().tanks())
 				frameOf(tank).forEach(f -> builder.add("subscribe", f));
 		return builder.toFrame();
 	}
@@ -55,7 +55,7 @@ class MessageHubRenderer {
 
 
 	private Template template() {
-		return Formatters.customize(new MessageHubAccessorTemplate()).add("typeFormat", (value) -> {
+		return Formatters.customize(new DataHubTerminalTemplate()).add("typeFormat", (value) -> {
 			if (value.toString().contains(".")) return Formatters.firstLowerCase(value.toString());
 			else return value;
 		});

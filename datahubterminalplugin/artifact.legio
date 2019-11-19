@@ -1,8 +1,17 @@
 dsl Legio
 
-Artifact(groupId = "io.intino.ness", version = "1.0.0") data-hub-accessor-plugin
+Artifact(groupId = "io.intino.ness", version = "1.0.0") data-hub-terminal-plugin
 	Imports
 		Compile("io.intino", "data-hub", "3.0.0")
+			Exclude("io.intino.alexandria", "exceptions")
+			Exclude("io.intino.alexandria", "jms")
+			Exclude("io.intino.alexandria", "ingestion")
+			Exclude("io.intino.alexandria", "sealing")
+			Exclude("org.apache.activemq", "activemq-broker")
+			Exclude("org.apache.activemq", "activemq-mqtt")
+			Exclude("org.apache.activemq", "activemq-kahadb-store")
+			Exclude("org.apache.activemq", "activemq-jaas")
+			Exclude("org.apache.activemq", "activemq-runtime-config")
 		Compile("io.intino", "plugin-interface", "1.0.0")
 		Compile("io.intino.itrules", "engine", "1.0.0")
 		Compile("org.apache.maven.shared", "maven-invoker", "2.0.11")
@@ -11,7 +20,7 @@ Artifact(groupId = "io.intino.ness", version = "1.0.0") data-hub-accessor-plugin
 		Test("io.intino.legio","model", "3.2.0")
 		Test("junit", "junit", "LATEST")
 	Package(mode = ModulesAndLibrariesLinkedByManifest)
-		attachSources =true
+		attachSources = true
 	Distribution(intino.builders, empty)
 
 Repository(identifier = "intino-maven") intino

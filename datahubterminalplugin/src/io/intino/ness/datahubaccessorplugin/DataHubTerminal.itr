@@ -34,13 +34,13 @@ end
 
 
 def type(context) trigger(subscribe)
-	public void subscribeTo$context+FirstUpperCase(java.util.function.Consumer<$type+FirstUpperCase> onMessageReceived) {
+	public void subscribeTo$context+FirstUpperCase$type+FirstUpperCase(java.util.function.Consumer<$type+FirstUpperCase> onMessageReceived) {
 		messageHub.attachListener("$channel", m -> onMessageReceived.accept(new $type+FirstUpperCase(m)));
 	}
 end
 
 def trigger(subscribe)
-	public void subscribeTo$type+FirstUpperCase(java.util.function.Consumer<$type+FirstUpperCase> onMessageReceived) {
+	public void subscribeTo$type+FirstUpperCase$type+FirstUpperCase(java.util.function.Consumer<$type+FirstUpperCase> onMessageReceived) {
 		messageHub.attachListener("$channel", m -> onMessageReceived.accept(new $type+FirstUpperCase(m)));
 	}
 end

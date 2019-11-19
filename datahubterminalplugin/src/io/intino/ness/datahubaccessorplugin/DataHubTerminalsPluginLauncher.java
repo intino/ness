@@ -1,7 +1,7 @@
 package io.intino.ness.datahubaccessorplugin;
 
+import io.intino.datahub.graph.DataHubTerminal;
 import io.intino.datahub.graph.Datalake.Tank;
-import io.intino.datahub.graph.MessageHub;
 import io.intino.datahub.graph.NessGraph;
 import io.intino.plugin.PluginLauncher;
 import io.intino.tara.magritte.Graph;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class DataHubAccessorsPluginLauncher extends PluginLauncher {
+public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	@Override
 	public void run() {
 		if (invokedPhase.ordinal() < 2) return;
@@ -37,10 +37,10 @@ public class DataHubAccessorsPluginLauncher extends PluginLauncher {
 		try {
 			File tempDir = Files.createTempDirectory("_temp").toFile();
 			AtomicBoolean published = new AtomicBoolean(true);
-			nessGraph.messageHubList().forEach(messageHub -> {
-				published.set(new AccessorsPublisher(new File(tempDir, messageHub.name$()), messageHub, tanks(messageHub), configuration(), systemProperties(), invokedPhase, logger()).publish() & published.get());
+			nessGraph.dataHubTerminalList().forEach(terminal -> {
+				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), systemProperties(), invokedPhase, logger()).publish() & published.get());
 				if (published.get())
-					notifier().notify("MessageHub " + messageHub.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId(), messageHub.name$(), configuration().artifact().version()));
+					notifier().notify("MessageHub " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId(), terminal.name$(), configuration().artifact().version()));
 			});
 			if (published.get()) FileUtils.deleteDirectory(tempDir);
 		} catch (IOException e) {
@@ -60,7 +60,7 @@ public class DataHubAccessorsPluginLauncher extends PluginLauncher {
 				"</dependency>";
 	}
 
-	private List<Tank.Event> tanks(MessageHub messageHub) {
+	private List<Tank.Event> tanks(DataHubTerminal messageHub) {
 		List<Tank.Event> tanks = new ArrayList<>();
 		if (messageHub.publish() != null) tanks.addAll(messageHub.publish().tanks());
 		if (messageHub.subscribe() != null) tanks.addAll(messageHub.subscribe().tanks());

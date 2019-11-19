@@ -38,7 +38,7 @@ Concept:{0..1} Datalake
         	sub Event
         Aspect Contextual > var Context context
 
-Concept:Named MessageHub
+Concept:Named DataHubTerminal
 	Concept:{0..1} Publish
 		var Datalake.Tank.Event[] tanks
 	Concept:{0..1} Subscribe

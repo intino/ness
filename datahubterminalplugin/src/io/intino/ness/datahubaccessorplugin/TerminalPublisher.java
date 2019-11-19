@@ -1,8 +1,8 @@
 package io.intino.ness.datahubaccessorplugin;
 
+import io.intino.datahub.graph.DataHubTerminal;
 import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.datahub.graph.Message;
-import io.intino.datahub.graph.MessageHub;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.legio.graph.LegioGraph;
@@ -16,9 +16,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
 
-class AccessorsPublisher {
+class TerminalPublisher {
 	private final File root;
-	private final MessageHub messageHub;
+	private final DataHubTerminal terminal;
 	private final LegioGraph conf;
 	private final PluginLauncher.SystemProperties systemProperties;
 	private final String basePackage;
@@ -26,9 +26,9 @@ class AccessorsPublisher {
 	private final PrintStream logger;
 	private List<Tank.Event> tanks;
 
-	AccessorsPublisher(File root, MessageHub messageHub, List<Tank.Event> tanks, LegioGraph configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
+	TerminalPublisher(File root, DataHubTerminal terminal, List<Tank.Event> tanks, LegioGraph configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
-		this.messageHub = messageHub;
+		this.terminal = terminal;
 		this.tanks = tanks;
 		this.conf = configuration;
 		this.systemProperties = systemProperties;
@@ -51,7 +51,7 @@ class AccessorsPublisher {
 	private boolean createSources() {
 		File srcDirectory = new File(root, "src");
 		srcDirectory.mkdirs();
-		new MessageHubRenderer(messageHub, srcDirectory, basePackage).render();
+		new MessageHubRenderer(terminal, srcDirectory, basePackage).render();
 		collectMessages(tanks).forEach(m -> new MessageRenderer(m, srcDirectory, basePackage).render());
 		return true;
 	}
@@ -71,7 +71,7 @@ class AccessorsPublisher {
 	}
 
 	private void mvn(String goal) throws IOException, MavenInvocationException {
-		final File pom = createPom(root, basePackage, messageHub.name$() + "MessageHub", conf.artifact().version());
+		final File pom = createPom(root, basePackage, terminal.name$(), conf.artifact().version());
 		final InvocationResult result = invoke(pom, goal);
 		if (result != null && result.getExitCode() != 0) {
 			if (result.getExecutionException() != null)
@@ -108,7 +108,7 @@ class AccessorsPublisher {
 	private File createPom(File root, String group, String artifact, String version) {
 		final FrameBuilder builder = new FrameBuilder("pom").add("group", group).add("artifact", artifact).add("version", version);
 		conf.repositoryList().forEach(r -> buildRepoFrame(builder, r));
-		final FrameBuilder depBuilder = new FrameBuilder(messageHub.core$().conceptList().stream().map(s -> s.id().split("#")[0].toLowerCase()).toArray(String[]::new)).add("value", "");
+		final FrameBuilder depBuilder = new FrameBuilder(terminal.core$().conceptList().stream().map(s -> s.id().split("#")[0].toLowerCase()).toArray(String[]::new)).add("value", "");
 		builder.add("dependency", depBuilder.toFrame());
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new AccessorPomTemplate().render(builder.toFrame()));
