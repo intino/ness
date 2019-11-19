@@ -70,7 +70,7 @@ end
 
 def type(primitive & single) trigger(getter)
 	public $type $name+firstLowerCase() {
-		return message.contains("$name+FirstLowerCase") ? $defaultValue : message.get("$name+FirstLowerCase").as($type.class);
+		return !message.contains("$name+FirstLowerCase") ? $defaultValue : message.get("$name+FirstLowerCase").as($type.class);
 	}
 end
 
