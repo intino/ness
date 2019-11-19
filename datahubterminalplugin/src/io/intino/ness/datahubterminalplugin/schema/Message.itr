@@ -92,6 +92,14 @@ def type(primitive & single) trigger(setter)
 	}
 end
 
+def type(primitive & multiple) trigger(setter)
+	public $element+firstUpperCase $name+firstLowerCase(java.util.List<$type> $name+firstLowerCase) {
+		this.message.remove("$name+firstLowerCase");
+		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v));
+		return this;
+	}
+end
+
 def !type(primitive) type(single) trigger(getter)
 	public $type $name+firstLowerCase() {
 		java.util.List<io.intino.alexandria.message.Message> components = message.components("$name");
@@ -110,14 +118,6 @@ end
 def type(multiple & member) trigger(setter)
 	public $element+firstUpperCase $name+firstLowerCase(java.util.List<$type+firstUpperCase> $name+firstLowerCase) {
 		this.message.components("$type").forEach(v -> this.message.remove(v));
-		$name+firstLowerCase.forEach(v -> this.message.add(v.get()));
-		return this;
-	}
-end
-
-def type(multiple) trigger(setter)
-	public $element+firstUpperCase $name+firstLowerCase(java.util.List<$type> $name+firstLowerCase) {
-		this.message.remove("$name+firstLowerCase");
 		$name+firstLowerCase.forEach(v -> this.message.add(v.get()));
 		return this;
 	}
