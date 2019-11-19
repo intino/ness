@@ -9,6 +9,10 @@ def trigger(schema)
 		[$parent+delegate?io.intino.alexandria.message.Message message;]
 		$attribute+declaration...[$NL]
 
+		public $name+firstUpperCase() {
+			[$parent+superEmpty?this.message = new io.intino.alexandria.message.Message(this.getClass().getSimpleName());]
+		}
+
 		public $name+firstUpperCase(io.intino.alexandria.message.Message message) {
 			[$parent+super?this.message = message;]
 		}
@@ -24,6 +28,10 @@ def trigger(schema)
 
 		[$schema...[$NL$NL]]
 	}
+end
+
+def trigger(superEmpty)
+	super();
 end
 
 def trigger(super)
