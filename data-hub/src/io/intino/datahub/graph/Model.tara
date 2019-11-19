@@ -45,9 +45,8 @@ Concept:Named DataHubTerminal
 		var Datalake.Tank.Event[] tanks
 
 Concept Message
-	var boolean multiple = false
+	var boolean multiple = true
 	Concept:Named:RequiresAspect Attribute extends Data
-		var boolean isRequired = true
 	has Message
 	Aspect ExtensionOf
     	var Message parent

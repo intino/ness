@@ -94,7 +94,7 @@ end
 
 def !type(primitive) type(single) trigger(getter)
 	public $type $name+firstLowerCase() {
-		List<Message> components = message.components("$name");
+		java.util.List<io.intino.alexandria.message.Message> components = message.components("$name");
 		return components.isEmpty() ? null : new $type(components.get(0));
 	}
 end
