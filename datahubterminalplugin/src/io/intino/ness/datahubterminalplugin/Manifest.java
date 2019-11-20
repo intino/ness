@@ -10,7 +10,7 @@ public class Manifest {
 	public List<String> publish;
 	public List<String> subscribe;
 	public Map<String, String> tankClasses;
-	public List<String> parameters = Arrays.asList("terminal_user", "terminal_password", "terminal_clientId");
+	public List<String> parameters = Arrays.asList("terminal_url", "terminal_user", "terminal_password", "terminal_clientId", "terminal_working_directory");
 
 	public Manifest(String name, String qn, List<String> publish, List<String> subscribe, Map<String, String> tankClasses) {
 		this.terminal = name;
