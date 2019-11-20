@@ -64,7 +64,9 @@ class TerminalPublisher {
 	}
 
 	private void writeManifest(File srcDirectory) {
-		Manifest manifest = new Manifest(terminal.publish().tanks().stream().map(Tank.Event::qn).collect(Collectors.toList()), terminal.subscribe().tanks().stream().map(Tank.Event::qn).collect(Collectors.toList()));
+		List<String> publish = terminal.publish() != null ? terminal.publish().tanks().stream().map(Tank.Event::qn).collect(Collectors.toList()) : Collections.emptyList();
+		List<String> collect = terminal.subscribe() != null ? terminal.subscribe().tanks().stream().map(Tank.Event::qn).collect(Collectors.toList()) : Collections.emptyList();
+		Manifest manifest = new Manifest(publish, collect);
 		try {
 			Files.write(new File(srcDirectory, "terminal.mf").toPath(), new Gson().toJson(manifest).getBytes());
 		} catch (IOException e) {
