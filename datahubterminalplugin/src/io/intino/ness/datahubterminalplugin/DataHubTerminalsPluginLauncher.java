@@ -1,8 +1,8 @@
 package io.intino.ness.datahubterminalplugin;
 
-import io.intino.datahub.graph.DataHubTerminal;
 import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.datahub.graph.NessGraph;
+import io.intino.datahub.graph.Terminal;
 import io.intino.plugin.PluginLauncher;
 import io.intino.tara.magritte.Graph;
 import io.intino.tara.magritte.stores.FileSystemStore;
@@ -37,7 +37,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		try {
 			File tempDir = Files.createTempDirectory("_temp").toFile();
 			AtomicBoolean published = new AtomicBoolean(true);
-			nessGraph.dataHubTerminalList().forEach(terminal -> {
+			nessGraph.terminalList().forEach(terminal -> {
 				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), systemProperties(), invokedPhase, logger()).publish() & published.get());
 				if (published.get())
 					notifier().notify("MessageHub " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId(), terminal.name$(), configuration().artifact().version()));
@@ -60,7 +60,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 				"</dependency>";
 	}
 
-	private List<Tank.Event> tanks(DataHubTerminal messageHub) {
+	private List<Tank.Event> tanks(Terminal messageHub) {
 		List<Tank.Event> tanks = new ArrayList<>();
 		if (messageHub.publish() != null) tanks.addAll(messageHub.publish().tanks());
 		if (messageHub.subscribe() != null) tanks.addAll(messageHub.subscribe().tanks());

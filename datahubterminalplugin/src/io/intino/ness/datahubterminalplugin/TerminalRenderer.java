@@ -1,7 +1,7 @@
 package io.intino.ness.datahubterminalplugin;
 
-import io.intino.datahub.graph.DataHubTerminal;
 import io.intino.datahub.graph.Datalake;
+import io.intino.datahub.graph.Terminal;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
@@ -11,11 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 class TerminalRenderer {
-	private final DataHubTerminal terminal;
+	private final Terminal terminal;
 	private final File srcDir;
 	private final String basePackage;
 
-	TerminalRenderer(DataHubTerminal terminal, File srcDir, String basePackage) {
+	TerminalRenderer(Terminal terminal, File srcDir, String basePackage) {
 		this.terminal = terminal;
 		this.srcDir = srcDir;
 		this.basePackage = basePackage;

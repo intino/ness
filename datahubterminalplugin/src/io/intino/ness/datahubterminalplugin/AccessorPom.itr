@@ -66,6 +66,7 @@ def type(pom)
 			<artifactId>terminal-jms</artifactId>
 			<version>$[1.0.0, 2.0.0)</version>
 		</dependency>
+		$hasBpm
 	</dependencies>
 </project>
 end
@@ -76,6 +77,14 @@ def type(repository) type(Distribution) trigger(distribution)
 		<name>$name</name>
 		<url>$url</url>
 	</repository>
+end
+
+def trigger(hasBpm)
+	<dependency>
+		<groupId>io.intino.alexandria</groupId>
+		<artifactId>bpm</artifactId>
+		<version>$[1.0.0, 2.0.0)</version>
+	</dependency>
 end
 
 def trigger(distribution)

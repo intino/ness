@@ -2,9 +2,10 @@ package io.intino.ness.datahubterminalplugin;
 
 import com.google.gson.Gson;
 import io.intino.alexandria.logger.Logger;
-import io.intino.datahub.graph.DataHubTerminal;
+import io.intino.datahub.graph.Datalake;
 import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.datahub.graph.Message;
+import io.intino.datahub.graph.Terminal;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.legio.graph.LegioGraph;
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
 
 class TerminalPublisher {
 	private final File root;
-	private final DataHubTerminal terminal;
+	private final Terminal terminal;
 	private final LegioGraph conf;
 	private final PluginLauncher.SystemProperties systemProperties;
 	private final String basePackage;
@@ -30,7 +31,7 @@ class TerminalPublisher {
 	private final PrintStream logger;
 	private List<Tank.Event> tanks;
 
-	TerminalPublisher(File root, DataHubTerminal terminal, List<Tank.Event> tanks, LegioGraph configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
+	TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, LegioGraph configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
 		this.terminal = terminal;
 		this.tanks = tanks;
@@ -76,9 +77,16 @@ class TerminalPublisher {
 
 	private Map<String, String> tankClasses() {
 		Map<String, String> tankClasses = new HashMap<>();
-		if (terminal.publish() != null) {
+		if (terminal.publish() != null)
 			terminal.publish().tanks().forEach(t -> tankClasses.putIfAbsent(t.qn(), basePackage + ".schemas." + t.asTank().message().name$()));
+		if (terminal.subscribe() != null)
 			terminal.subscribe().tanks().forEach(t -> tankClasses.putIfAbsent(t.qn(), basePackage + ".schemas." + t.asTank().message().name$()));
+		if (terminal.allowsBpmIn() != null) {
+			Datalake.Context context = terminal.allowsBpmIn().context();
+			String statusQn = terminal.allowsBpmIn().processStatusClass();
+			String statusClassName = statusQn.substring(statusQn.lastIndexOf("."));
+			tankClasses.put((context != null ? context.qn() + "." : "") + statusClassName, statusQn);
+
 		}
 		return tankClasses;
 	}
@@ -135,8 +143,9 @@ class TerminalPublisher {
 	private File createPom(File root, String group, String artifact, String version) {
 		final FrameBuilder builder = new FrameBuilder("pom").add("group", group).add("artifact", artifact).add("version", version);
 		conf.repositoryList().forEach(r -> buildRepoFrame(builder, r));
-		final FrameBuilder depBuilder = new FrameBuilder(terminal.core$().conceptList().stream().map(s -> s.id().split("#")[0].toLowerCase()).toArray(String[]::new)).add("value", "");
-		builder.add("dependency", depBuilder.toFrame());
+		if (terminal.allowsBpmIn() != null) {
+			builder.add("hasBpm", ";");
+		}
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new AccessorPomTemplate().render(builder.toFrame()));
 		return pomFile;
