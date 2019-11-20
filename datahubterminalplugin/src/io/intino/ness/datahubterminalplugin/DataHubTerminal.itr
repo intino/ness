@@ -6,21 +6,25 @@ def type(accessor)
 
 	public class $name+snakeCaseToCamelCase+firstUpperCase {
 
-		private final io.intino.alexandria.message.MessageHub messageHub;
+		private final io.intino.alexandria.messagehub.JmsMessageHub messageHub;
 
 		public static String$[] subscriptionChannels = new String$[]{$subscribe+channel};
 
-		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.message.MessageHub messageHub) {
+		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.messagehub.JmsMessageHub messageHub) {
 			this.messageHub = messageHub;
 		}
 
-		public io.intino.alexandria.message.MessageHub messageHub() {
+		public io.intino.alexandria.messagehub.JmsMessageHub messageHub() {
 			return this.messageHub;
 		}
 
 		$publish...[$NL$NL]
 
 		$subscribe...[$NL$NL]
+
+		public void stop() {
+			messageHub.stop();
+		}
 	}
 end
 

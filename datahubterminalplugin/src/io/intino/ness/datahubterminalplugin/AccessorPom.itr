@@ -63,7 +63,7 @@ def type(pom)
 	<dependencies>
 		<dependency>
 			<groupId>io.intino.alexandria</groupId>
-			<artifactId>message</artifactId>
+			<artifactId>terminal-jms</artifactId>
 			<version>$[1.0.0, 2.0.0)</version>
 		</dependency>
 	</dependencies>

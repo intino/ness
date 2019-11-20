@@ -10,12 +10,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-class MessageHubRenderer {
+class TerminalRenderer {
 	private final DataHubTerminal terminal;
 	private final File srcDir;
 	private final String basePackage;
 
-	MessageHubRenderer(DataHubTerminal terminal, File srcDir, String basePackage) {
+	TerminalRenderer(DataHubTerminal terminal, File srcDir, String basePackage) {
 		this.terminal = terminal;
 		this.srcDir = srcDir;
 		this.basePackage = basePackage;
@@ -23,10 +23,10 @@ class MessageHubRenderer {
 
 	void render() {
 		final File packageFolder = new File(srcDir, basePackage.replace(".", File.separator));
-		Commons.writeFrame(packageFolder, terminal.name$(), template().render(createMessageHubFrame()));
+		Commons.writeFrame(packageFolder, terminal.name$(), template().render(createTerminalFrame()));
 	}
 
-	private Frame createMessageHubFrame() {
+	private Frame createTerminalFrame() {
 		FrameBuilder builder = new FrameBuilder().add("accessor").add("package", basePackage).add("name", terminal.name$());
 		if (terminal.publish() != null)
 			for (Datalake.Tank.Event tank : terminal.publish().tanks())
