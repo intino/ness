@@ -52,11 +52,11 @@ public class MessageRenderer {
 		return schema.messageList().stream().filter(processed::add).map(s -> createMessageFrame(s, packageName, processed)).toArray(Frame[]::new);
 	}
 
-	private FrameBuilder[] collectAttributes(Message schema) {
+	private FrameBuilder[] collectAttributes(Message message) {
 		List<FrameBuilder> attributes = new ArrayList<>();
-		addAll(attributes, processAttributes(schema.attributeList()));
-		addAll(attributes, processComponents(schema.messageList()));
-		attributes.forEach(f -> f.add("element", schema.name$()));
+		addAll(attributes, processAttributes(message.attributeList()));
+		addAll(attributes, processComponents(message.messageList()));
+		attributes.forEach(f -> f.add("element", message.name$()));
 		return attributes.toArray(new FrameBuilder[0]);
 	}
 

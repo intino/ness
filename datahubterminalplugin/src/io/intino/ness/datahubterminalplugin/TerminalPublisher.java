@@ -65,13 +65,23 @@ class TerminalPublisher {
 
 	private void writeManifest(File srcDirectory) {
 		List<String> publish = terminal.publish() != null ? terminal.publish().tanks().stream().map(Tank.Event::qn).collect(Collectors.toList()) : Collections.emptyList();
-		List<String> collect = terminal.subscribe() != null ? terminal.subscribe().tanks().stream().map(Tank.Event::qn).collect(Collectors.toList()) : Collections.emptyList();
-		Manifest manifest = new Manifest(publish, collect);
+		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().tanks().stream().map(Tank.Event::qn).collect(Collectors.toList()) : Collections.emptyList();
+
+		Manifest manifest = new Manifest(publish, subscribe, tankClasses());
 		try {
 			Files.write(new File(srcDirectory, "terminal.mf").toPath(), new Gson().toJson(manifest).getBytes());
 		} catch (IOException e) {
 			Logger.error(e);
 		}
+	}
+
+	private Map<String, String> tankClasses() {
+		Map<String, String> tankClasses = new HashMap<>();
+		if (terminal.publish() != null) {
+			terminal.publish().tanks().forEach(t -> tankClasses.putIfAbsent(t.qn(), basePackage + ".schemas." + t.asTank().message().name$()));
+			terminal.subscribe().tanks().forEach(t -> tankClasses.putIfAbsent(t.qn(), basePackage + ".schemas." + t.asTank().message().name$()));
+		}
+		return tankClasses;
 	}
 
 	private Collection<Message> collectMessages(List<Tank.Event> tanks) {
