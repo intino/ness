@@ -22,36 +22,45 @@ def type(terminal)
 
 		$subscribe...[$NL$NL]
 
+		$message+interface...[$NL$NL]
+
 		public void stop() {
 			//messageHub.stop();
 		}
 	}
 end
 
-def type(context) trigger(publish)
-	public void sendTo$context($type+FirstUpperCase $type+firstLowerCase) {
-		messageHub.sendMessage("$channel", $type+firstLowerCase.get());
-	}
-end
-
-def type(context) trigger(subscribe)
-	public void subscribeTo$context+FirstUpperCase$type+FirstUpperCase(java.util.function.Consumer<$type+FirstUpperCase> onMessageReceived) {
-		messageHub.attachListener("$channel", m -> onMessageReceived.accept(new $type+FirstUpperCase(m)));
-	}
-end
-
-def trigger(subscribe)
-	public void subscribeTo$type+FirstUpperCase(java.util.function.Consumer<$type+FirstUpperCase> onMessageReceived) {
-		messageHub.attachListener("$channel", m -> onMessageReceived.accept(new $type+FirstUpperCase(m)));
+def type(multicontext) trigger(publish)
+	public void publish($type+FirstUpperCase $type+firstLowerCase, $type+FirstUpperCase.Context... contexts) {
+		for ($type+FirstUpperCase.Context c : contexts)
+			messageHub.sendMessage(c.qn() + ".$type", $type+firstLowerCase.get());
 	}
 end
 
 def trigger(publish)
-	public void send($type+FirstUpperCase $type+firstLowerCase) {
+	public void publish($type+FirstUpperCase $type+firstLowerCase) {
 		messageHub.sendMessage("$channel", $type+firstLowerCase.get());
+	}
+end
+
+def type(multiContext) trigger(subscribe)
+	public void subscribe($type+FirstUpperCase~Consumer onEventReceived, $type+FirstUpperCase.Context... contexts) {
+		for ($type+FirstUpperCase.Context c : contexts)
+			messageHub.attachListener(c.qn() + ".$type", m -> onEventReceived.accept(new $type+FirstUpperCase(m)));
+	}
+end
+
+def trigger(subscribe)
+	public void subscribe($type+FirstUpperCase~Consumer onEventReceived) {
+		messageHub.attachListener("$channel", m -> onEventReceived.accept(new $type+FirstUpperCase(m)));
 	}
 end
 
 def trigger(quoted)
 	"$this"
+end
+
+def trigger(interface)
+	public interface $name~Consumer extends java.util.function.Consumer<$name+FirstUpperCase> {
+	}
 end

@@ -2,7 +2,7 @@ package io.intino.ness.datahubterminalplugin;
 
 import com.google.gson.Gson;
 import io.intino.alexandria.logger.Logger;
-import io.intino.datahub.graph.Datalake;
+import io.intino.datahub.graph.Datalake.Context;
 import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.datahub.graph.Message;
 import io.intino.datahub.graph.Terminal;
@@ -37,7 +37,7 @@ class TerminalPublisher {
 		this.tanks = tanks;
 		this.conf = configuration;
 		this.systemProperties = systemProperties;
-		this.basePackage = configuration.artifact().groupId();
+		this.basePackage = configuration.artifact().groupId().toLowerCase() + "." + Formatters.snakeCaseToCamelCase().format(configuration.artifact().name$()).toString().toLowerCase();
 		this.invokedPhase = invokedPhase;
 		this.logger = logger;
 	}
@@ -56,8 +56,9 @@ class TerminalPublisher {
 	private boolean createSources() {
 		File srcDirectory = new File(root, "src");
 		srcDirectory.mkdirs();
-		new TerminalRenderer(terminal, srcDirectory, basePackage).render();
-		collectMessages(tanks).forEach(m -> new MessageRenderer(m, srcDirectory, basePackage).render());
+		Map<Message, Context> messageContextMap = collectMessages(tanks);
+		new TerminalRenderer(terminal, messageContextMap, srcDirectory, basePackage).render();
+		messageContextMap.forEach((k, v) -> new MessageRenderer(k, v, srcDirectory, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
 		writeManifest(resDirectory);
@@ -82,27 +83,31 @@ class TerminalPublisher {
 		if (terminal.subscribe() != null)
 			terminal.subscribe().tanks().forEach(t -> tankClasses.putIfAbsent(t.qn(), basePackage + ".schemas." + t.asTank().message().name$()));
 		if (terminal.allowsBpmIn() != null) {
-			Datalake.Context context = terminal.allowsBpmIn().context();
+			Context context = terminal.allowsBpmIn().context();
 			String statusQn = terminal.allowsBpmIn().processStatusClass();
-			String statusClassName = statusQn.substring(statusQn.lastIndexOf("."));
+			String statusClassName = statusQn.substring(statusQn.lastIndexOf(".") + 1);
 			tankClasses.put((context != null ? context.qn() + "." : "") + statusClassName, statusQn);
-
 		}
 		return tankClasses;
 	}
 
-	private Collection<Message> collectMessages(List<Tank.Event> tanks) {
-		Set<Message> messages = new HashSet<>();
-		tanks.stream().map(tank -> hierarchy(tank.message())).forEach(messages::addAll);
+	private Map<Message, Context> collectMessages(List<Tank.Event> tanks) {
+		Map<Message, Context> messages = new HashMap<>();
+		for (Tank.Event tank : tanks) {
+			List<Message> hierarchy = hierarchy(tank.message());
+			Context context = tank.asTank().isContextual() ? tank.asTank().asContextual().context() : null;
+			messages.put(hierarchy.get(0), context);
+			hierarchy.remove(0);
+			hierarchy.forEach(message -> messages.put(message, null));
+		}
 		return messages;
 	}
 
-	private Collection<Message> hierarchy(Message message) {
-		Set<Message> messages = new HashSet<>();
-		if (message.isExtensionOf())
-			messages.addAll(hierarchy(message.asExtensionOf().parent()));
+	private List<Message> hierarchy(Message message) {
+		Set<Message> messages = new LinkedHashSet<>();
 		messages.add(message);
-		return messages;
+		if (message.isExtensionOf()) messages.addAll(hierarchy(message.asExtensionOf().parent()));
+		return new ArrayList<>(messages);
 	}
 
 	private void mvn(String goal) throws IOException, MavenInvocationException {

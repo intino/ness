@@ -6,6 +6,7 @@ end
 
 def trigger(schema)
 	public [$inner] class $name+firstUpperCase [extends $parent] implements java.io.Serializable {
+		$context
 		[$parent+delegate?io.intino.alexandria.message.Message message;]
 		$attribute+declaration...[$NL]
 
@@ -27,6 +28,22 @@ def trigger(schema)
 		}
 
 		[$schema...[$NL$NL]]
+	}
+end
+
+def trigger(context)
+	public enum Context {
+		$enum+asEnum...[, ];
+
+		public abstract String qn();
+	}
+end
+
+def trigger(asEnum)
+	$value {
+		public String qn() {
+			return ["$parent." +] this.name();
+		}
 	}
 end
 
@@ -112,7 +129,7 @@ end
 
 
 def !type(primitive) !type(single) trigger(getter)
-	public java.util.List<$type> $name+firstLowerCase() {
+	public java.util.List<$type> $name+firstLowerCase~List() {
 		java.util.List<io.intino.alexandria.message.Message> components = message.components("$name");
 		return components.stream().map(v -> new $type(v)).collect(java.util.stream.Collectors.toList());
 	}
