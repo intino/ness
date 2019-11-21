@@ -46,7 +46,7 @@ public class MessageRenderer {
 	private Frame[] enums(List<Context> leafs) {
 		List<Frame> frames = new ArrayList<>();
 		for (Context leaf : leafs) {
-			FrameBuilder builder = new FrameBuilder("enum").add("value", leaf.qn());
+			FrameBuilder builder = new FrameBuilder("enum").add("value", Formatters.firstLowerCase(Formatters.snakeCaseToCamelCase().format(leaf.qn().replace(".", "-")).toString()));
 			if (!leaf.isRoot()) builder.add("parent", leaf.core$().ownerAs(Context.class).qn());
 			frames.add(builder.toFrame());
 		}

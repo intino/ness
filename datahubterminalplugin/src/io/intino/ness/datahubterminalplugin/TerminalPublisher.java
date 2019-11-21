@@ -68,12 +68,19 @@ class TerminalPublisher {
 	private void writeManifest(File srcDirectory) {
 		List<String> publish = terminal.publish() != null ? terminal.publish().tanks().stream().map(Tank.Event::qn).collect(Collectors.toList()) : Collections.emptyList();
 		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().tanks().stream().map(Tank.Event::qn).collect(Collectors.toList()) : Collections.emptyList();
-		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses());
+		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses(), messageContexts());
 		try {
 			Files.write(new File(srcDirectory, "terminal.mf").toPath(), new Gson().toJson(manifest).getBytes());
 		} catch (IOException e) {
 			Logger.error(e);
 		}
+	}
+
+	private Map<String, List<String>> messageContexts() {
+		return terminal.publish().tanks().stream().
+				collect(Collectors.toMap(t -> t.asTank().message().name$(),
+						tank -> tank.asTank().isContextual() ? tank.asTank().asContextual().context().leafs().stream().map(Context::qn).collect(Collectors.toList()) : Collections.emptyList(),
+						(a, b) -> b));
 	}
 
 	private Map<String, String> tankClasses() {

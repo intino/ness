@@ -40,7 +40,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			nessGraph.terminalList().forEach(terminal -> {
 				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), systemProperties(), invokedPhase, logger()).publish() & published.get());
 				if (published.get() && notifier() != null)
-					notifier().notify("MessageHub " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId(), terminal.name$(), configuration().artifact().version()));
+					notifier().notify("MessageHub " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name$()).toString().toLowerCase(), terminal.name$(), configuration().artifact().version()));
 			});
 			if (published.get()) FileUtils.deleteDirectory(tempDir);
 		} catch (IOException e) {

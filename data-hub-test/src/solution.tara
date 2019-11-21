@@ -35,5 +35,5 @@ Message cierreAjuste
 Message usuarioConectado
 Message usuarioDesconectado
 
-DataHubTerminal  first
+Terminal  first
 	Publish(tanks = datalake.cierreAjuste)
