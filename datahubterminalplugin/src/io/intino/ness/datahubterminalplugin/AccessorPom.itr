@@ -82,7 +82,7 @@ end
 def trigger(hasBpm)
 	<dependency>
 		<groupId>io.intino.alexandria</groupId>
-		<artifactId>bpm</artifactId>
+		<artifactId>bpm-framework</artifactId>
 		<version>$[1.0.0, 2.0.0)</version>
 	</dependency>
 end

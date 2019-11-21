@@ -18,6 +18,7 @@ Artifact(groupId = "io.intino.ness", version = "1.0.0") data-hub-terminal-plugin
 		Compile("commons-io", "commons-io", "2.4")
 
 		Test("io.intino.legio","model", "3.2.0")
+		Test("io.intino.alexandria","bpm-framework", "LATEST")
 		Test("junit", "junit", "LATEST")
 	Package(mode = ModulesAndLibrariesLinkedByManifest)
 		attachSources = true
