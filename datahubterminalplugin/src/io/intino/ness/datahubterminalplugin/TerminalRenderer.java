@@ -27,7 +27,7 @@ class TerminalRenderer {
 	}
 
 	private Frame createTerminalFrame() {
-		FrameBuilder builder = new FrameBuilder().add("accessor").add("package", basePackage).add("name", terminal.name$());
+		FrameBuilder builder = new FrameBuilder().add("terminal").add("package", basePackage).add("name", terminal.name$());
 		if (terminal.publish() != null)
 			for (Datalake.Tank.Event tank : terminal.publish().tanks())
 				frameOf(tank).forEach(f -> builder.add("publish", f));
@@ -40,22 +40,27 @@ class TerminalRenderer {
 	private List<Frame> frameOf(Datalake.Tank.Event tank) {
 		List<Frame> frames = new ArrayList<>();
 		if (tank.asTank().isContextual()) {
-			FrameBuilder builder = new FrameBuilder("context").add("type", tank.message().name$()).add("context", tank.asTank().asContextual().context().name$());
-			builder.add("channel", tank.qn());
+			FrameBuilder builder = new FrameBuilder("context").
+					add("type", tank.message().name$()).
+					add("context", tank.asTank().asContextual().context().name$()).add("channel", tank.qn());
 			Datalake.Context context = tank.asTank().asContextual().context();
-			if (!context.isLeaf()) for (Datalake.Context leaf : context.leafs()) {
-				FrameBuilder b = new FrameBuilder("context").add("type", tank.message().name$()).add("context", leaf.name$());
-				b.add("channel", (leaf.qn().isEmpty() ? "" : leaf.qn() + ".") + tank.message().name$());
-				frames.add(b.toFrame());
-			}
+			if (!context.isLeaf())
+				for (Datalake.Context leaf : context.leafs())
+					frames.add(new FrameBuilder("context").
+							add("type", tank.message().name$()).
+							add("context", leaf.name$()).
+							add("channel", (leaf.qn().isEmpty() ? "" : leaf.qn() + ".") + tank.message().name$()).toFrame());
 			frames.add(builder.toFrame());
+		} else {
+			frames.add(new FrameBuilder().
+					add("type", tank.message().name$()).
+					add("channel", tank.qn()).toFrame());
 		}
 		return frames;
 	}
 
-
 	private Template template() {
-		return Formatters.customize(new DataHubTerminalTemplate()).add("typeFormat", (value) -> {
+		return Formatters.customize(new TerminalTemplate()).add("typeFormat", (value) -> {
 			if (value.toString().contains(".")) return Formatters.firstLowerCase(value.toString());
 			else return value;
 		});

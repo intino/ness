@@ -65,7 +65,7 @@ public class MessageRenderer {
 	}
 
 	private FrameBuilder[] processComponents(List<Message> schemas) {
-		return schemas.stream().map(schema -> processMessageAsAttribute(schema, schema.name$() + (schema.multiple() ? "List" : ""), schema.multiple())).toArray(FrameBuilder[]::new);
+		return schemas.stream().map(schema -> processMessageAsAttribute(schema, schema.name$(), schema.multiple())).toArray(FrameBuilder[]::new);
 	}
 
 	private FrameBuilder process(Message.Attribute attribute) {

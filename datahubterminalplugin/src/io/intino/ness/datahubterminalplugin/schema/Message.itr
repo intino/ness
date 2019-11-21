@@ -134,7 +134,7 @@ def !type(primitive) type(single) trigger(setter)
 end
 
 def type(multiple & member) trigger(setter)
-	public $element+firstUpperCase $name+firstLowerCase(java.util.List<$type+firstUpperCase> $name+firstLowerCase) {
+	public $element+firstUpperCase $name+firstLowerCase~List(java.util.List<$type+firstUpperCase> $name+firstLowerCase) {
 		this.message.components("$type").forEach(v -> this.message.remove(v));
 		$name+firstLowerCase.forEach(v -> this.message.add(v.get()));
 		return this;

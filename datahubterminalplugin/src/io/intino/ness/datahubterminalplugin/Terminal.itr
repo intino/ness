@@ -1,4 +1,4 @@
-def type(accessor)
+def type(terminal)
 	package $package+validPackage;
 
 	import $package+validPackage.schemas.*;
@@ -28,20 +28,11 @@ def type(accessor)
 	}
 end
 
-def type(contextual) trigger(publish)
-	$context+publish...[$NL$NL]
-end
-
 def type(context) trigger(publish)
 	public void sendTo$context($type+FirstUpperCase $type+firstLowerCase) {
 		messageHub.sendMessage("$channel", $type+firstLowerCase.get());
 	}
 end
-
-def type(contextual) trigger(subscribe)
-	$context+subscribe...[$NL$NL]
-end
-
 
 def type(context) trigger(subscribe)
 	public void subscribeTo$context+FirstUpperCase$type+FirstUpperCase(java.util.function.Consumer<$type+FirstUpperCase> onMessageReceived) {
@@ -50,7 +41,7 @@ def type(context) trigger(subscribe)
 end
 
 def trigger(subscribe)
-	public void subscribeTo$type+FirstUpperCase$type+FirstUpperCase(java.util.function.Consumer<$type+FirstUpperCase> onMessageReceived) {
+	public void subscribeTo$type+FirstUpperCase(java.util.function.Consumer<$type+FirstUpperCase> onMessageReceived) {
 		messageHub.attachListener("$channel", m -> onMessageReceived.accept(new $type+FirstUpperCase(m)));
 	}
 end
