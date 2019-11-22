@@ -76,10 +76,21 @@ class TerminalPublisher {
 		}
 	}
 
-	private Map<String, List<String>> messageContexts() {
-		return terminal.publish().tanks().stream().
+	private Map<String, Set<String>> messageContexts() {
+		Map<String, Set<String>> messageContexts = terminal.publish() == null ? new HashMap<>() : messageContextOf(terminal.publish().tanks());
+		if (terminal.subscribe() == null) return messageContexts;
+		Map<String, Set<String>> subscribeMessageContexts = messageContextOf(terminal.subscribe().tanks());
+		for (String messageType : subscribeMessageContexts.keySet()) {
+			if (!messageContexts.containsKey(messageType)) messageContexts.put(messageType, new HashSet<>());
+			messageContexts.get(messageType).addAll(subscribeMessageContexts.get(messageType));
+		}
+		return messageContexts;
+	}
+
+	private Map<String, Set<String>> messageContextOf(List<Tank.Event> tanks) {
+		return tanks.stream().
 				collect(Collectors.toMap(t -> t.asTank().message().name$(),
-						tank -> tank.asTank().isContextual() ? tank.asTank().asContextual().context().leafs().stream().map(Context::qn).collect(Collectors.toList()) : Collections.emptyList(),
+						tank -> tank.asTank().isContextual() ? tank.asTank().asContextual().context().leafs().stream().map(Context::qn).collect(Collectors.toSet()) : Collections.emptySet(),
 						(a, b) -> b));
 	}
 
