@@ -46,13 +46,13 @@ end
 
 def type(multiContext) trigger(subscribe)
 	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, $type+FirstUpperCase.Context... contexts) {
-		consumers.put(onEventReceived, message -> onEventReceived.accept(new ContratoEliminado(message)));
+		consumers.put(onEventReceived, message -> onEventReceived.accept(new $type(message)));
 		for ($type+FirstUpperCase.Context c : contexts)
 			messageHub.attachListener(c.qn() + ".$type", subscriberId, consumers.get(onEventReceived));
 	}
 
 	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, $type+FirstUpperCase.Context... contexts) {
-		consumers.put(onEventReceived, message -> onEventReceived.accept(new ContratoEliminado(message)));
+		consumers.put(onEventReceived, message -> onEventReceived.accept(new $type(message)));
 		for ($type+FirstUpperCase.Context c : contexts)
 			messageHub.attachListener(c.qn() + ".$type", consumers.get(onEventReceived));
 	}
@@ -69,6 +69,7 @@ def trigger(subscribe)
 	}
 
 	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived) {
+		consumers.put(onEventReceived, message -> onEventReceived.accept(new $type(message)));
 		messageHub.attachListener("$channel", consumers.get(onEventReceived));
 	}
 
