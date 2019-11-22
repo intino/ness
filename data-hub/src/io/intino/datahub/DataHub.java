@@ -1,6 +1,5 @@
 package io.intino.datahub;
 
-import io.intino.alexandria.datalake.Datalake;
 import io.intino.alexandria.datalake.file.FileDatalake;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.sealing.FileSessionSealer;
@@ -14,7 +13,7 @@ import java.io.File;
 public class DataHub {
 	private final NessGraph graph;
 	private final File stageDirectory;
-	private Datalake datalake;
+	private FileDatalake datalake;
 	private BrokerService brokerService;
 	private SessionSealer sessionSealer;
 
@@ -46,7 +45,7 @@ public class DataHub {
 		}
 	}
 
-	public Datalake datalake() {
+	public FileDatalake datalake() {
 		return datalake;
 	}
 
