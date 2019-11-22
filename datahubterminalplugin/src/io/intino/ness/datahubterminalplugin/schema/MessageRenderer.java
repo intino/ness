@@ -47,7 +47,10 @@ public class MessageRenderer {
 		List<Frame> frames = new ArrayList<>();
 		for (Context leaf : leafs) {
 			FrameBuilder builder = new FrameBuilder("enum").add("value", Formatters.firstLowerCase(Formatters.snakeCaseToCamelCase().format(leaf.qn().replace(".", "-")).toString()));
-			if (!leaf.isRoot()) builder.add("parent", leaf.core$().ownerAs(Context.class).qn());
+			if (!leaf.isRoot()) {
+				String qn = leaf.core$().ownerAs(Context.class).qn();
+				if (!qn.isEmpty()) builder.add("parent", qn);
+			}
 			frames.add(builder.toFrame());
 		}
 		return frames.toArray(new Frame[0]);
