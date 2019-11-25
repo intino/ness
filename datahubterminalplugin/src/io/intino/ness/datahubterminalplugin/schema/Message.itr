@@ -113,10 +113,17 @@ def type(word & multiple) trigger(setter)
 	}
 end
 
-def type(primitive & single) trigger(setter)
-	public $element+firstUpperCase $name+firstLowerCase($objectType $name+firstLowerCase) {
-		if ($name+firstLowerCase == null) this.message.remove("$name+firstLowerCase");
+def type(primitive & single) type(integer | double) trigger(setter)
+	public $element+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
 		this.message.set("$name+firstLowerCase", $name+firstLowerCase);
+		return this;
+	}
+end
+
+def type(primitive & single) trigger(setter)
+	public $element+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
+		if ($name+firstLowerCase == null) this.message.remove("$name+firstLowerCase");
+		else this.message.set("$name+firstLowerCase", $name+firstLowerCase);
 		return this;
 	}
 end

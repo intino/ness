@@ -15,8 +15,8 @@ def type(terminal)
 			this.messageHub = messageHub;
 		}
 
-		public io.intino.alexandria.message.MessageHub messageHub() {
-			return this.messageHub;
+		public void publish(Object event, String context) {
+			$publish+if...[$NL]
 		}
 
 		$publish...[$NL$NL]
@@ -29,6 +29,14 @@ def type(terminal)
 			//messageHub.stop();
 		}
 	}
+end
+
+def type(multicontext) trigger(if)
+	   if (event instanceof $type) publish(($type) event, $type+FirstUpperCase.Context.valueOf(context));
+end
+
+def trigger(if)
+	   if (event instanceof $type) publish(($type) event);
 end
 
 def type(multicontext) trigger(publish)

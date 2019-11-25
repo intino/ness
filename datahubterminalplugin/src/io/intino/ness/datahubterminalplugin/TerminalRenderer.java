@@ -55,7 +55,7 @@ class TerminalRenderer {
 
 	private Frame frameOf(Datalake.Tank.Event tank) {
 		return new FrameBuilder(contextsOf(tank).size() > 1 ? "multicontext" : "default").
-				add("type", tank.message().name$()).
+				add("type", Formatters.firstUpperCase(tank.message().name$())).
 				add("typeName", tank.message().name$()).
 				add("channel", tank.qn()).toFrame();
 	}
