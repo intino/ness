@@ -105,6 +105,7 @@ public class MessageRenderer {
 		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", "double")
 				.add("name", attribute.a$(Message.Attribute.class).name$())
 				.add("type", !multiple(attribute) ? "double" : attribute.type())
+				.add("objectType", attribute.type())
 				.add("defaultValue", attribute.defaultValue());
 	}
 
@@ -112,6 +113,7 @@ public class MessageRenderer {
 		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
 				.add("name", attribute.a$(Message.Attribute.class).name$())
 				.add("type", !multiple(attribute) ? "int" : attribute.type())
+				.add("objectType", attribute.type())
 				.add("defaultValue", attribute.defaultValue());
 	}
 
