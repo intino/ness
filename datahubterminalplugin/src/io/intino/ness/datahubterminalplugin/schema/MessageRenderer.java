@@ -105,6 +105,7 @@ public class MessageRenderer {
 		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", "double")
 				.add("name", attribute.a$(Message.Attribute.class).name$())
 				.add("type", !multiple(attribute) ? "double" : attribute.type())
+				.add("simpleType", attribute.type().substring(attribute.type().lastIndexOf(".") + 1))
 				.add("objectType", attribute.type())
 				.add("defaultValue", attribute.defaultValue());
 	}
@@ -113,6 +114,7 @@ public class MessageRenderer {
 		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
 				.add("name", attribute.a$(Message.Attribute.class).name$())
 				.add("type", !multiple(attribute) ? "int" : attribute.type())
+				.add("simpleType", attribute.type().substring(attribute.type().lastIndexOf(".") + 1))
 				.add("objectType", attribute.type())
 				.add("defaultValue", attribute.defaultValue());
 	}
@@ -121,12 +123,14 @@ public class MessageRenderer {
 		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
 				.add("name", attribute.a$(Message.Attribute.class).name$())
 				.add("type", attribute.type())
+				.add("simpleType", attribute.type().substring(attribute.type().lastIndexOf(".") + 1))
 				.add("defaultValue", attribute.defaultValue() + "L");
 	}
 
 	private FrameBuilder process(Data.File attribute) {
 		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
 				.add("name", attribute.a$(Message.Attribute.class).name$())
+				.add("simpleType", attribute.type().substring(attribute.type().lastIndexOf(".") + 1))
 				.add("type", attribute.type());
 	}
 
@@ -134,6 +138,7 @@ public class MessageRenderer {
 		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
 				.add("name", attribute.a$(Message.Attribute.class).name$())
 				.add("type", attribute.type())
+				.add("simpleType", attribute.type())
 				.add("defaultValue", attribute.defaultValue());
 	}
 
@@ -141,6 +146,7 @@ public class MessageRenderer {
 		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
 				.add("name", attribute.a$(Message.Attribute.class).name$())
 				.add("type", attribute.type())
+				.add("simpleType", attribute.type())
 				.add("defaultValue", attribute.defaultValue() + "");
 
 	}
@@ -148,12 +154,15 @@ public class MessageRenderer {
 	private FrameBuilder process(Data.DateTime attribute) {
 		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
 				.add("name", attribute.a$(Message.Attribute.class).name$())
-				.add("type", attribute.type()).add("defaultValue", "null");
+				.add("type", attribute.type())
+				.add("simpleType", attribute.type().substring(attribute.type().lastIndexOf(".") + 1))
+				.add("defaultValue", "null");
 	}
 
 	private FrameBuilder process(Data.Date attribute) {
 		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
 				.add("name", attribute.a$(Message.Attribute.class).name$())
+				.add("simpleType", attribute.type().substring(attribute.type().lastIndexOf(".") + 1))
 				.add("type", attribute.type());
 	}
 

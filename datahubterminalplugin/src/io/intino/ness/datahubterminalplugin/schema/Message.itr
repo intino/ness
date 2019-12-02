@@ -8,7 +8,8 @@ def trigger(schema)
 	public [$inner] class $name+firstUpperCase [extends $parent] implements java.io.Serializable {
 		$context
 		[$parent+delegate?io.intino.alexandria.message.Message message;]
-		$attribute+declaration...[$NL]
+		[$attribute+declaration...[$NL]]
+		[$schema+declaration...[$NL]]
 
 		public $name+firstUpperCase() {
 			[$parent+superEmpty?this.message = new io.intino.alexandria.message.Message(this.getClass().getSimpleName());]
@@ -73,22 +74,26 @@ def type(word & multiple) trigger(declaration)
 
 end
 
+def !type(primitive) type(member)trigger(declaration)
+	private java.util.List<$type> $name+firstLowerCase~List = null;
+end
+
 def type(word & single) trigger(getter)
 	public $name+FirstUpperCase $name+FirstLowerCase() {
-		return !message.contains("$name+FirstLowerCase") ? null : $name+FirstUpperCase.valueOf(message.get("$name+FirstLowerCase").as(String.class));
+		return !message.contains("$name+FirstLowerCase") ? null : $name+FirstUpperCase.valueOf(message.get("$name+FirstLowerCase").asString());
 	}
 end
 
 def type(word & multiple) trigger(getter)
 	public java.util.List<$type+FirstUpperCase> $name+FirstLowerCase() {
 		if (!message.contains("$name+FirstLowerCase")) return java.util.Collections.emptyList();
-		return java.util.Collections.unmodifiableList(java.util.Arrays.asList(message.get("$name+FirstLowerCase").as(String$[].class)).map(v -> $name+FirstUpperCase.valueOf(v)).collect(java.util.Collectors.toList()));
+		return java.util.Collections.unmodifiableList(java.util.Arrays.asList(message.get("$name+FirstLowerCase").as(String$[].class)).map(v -> $name+FirstUpperCase.valueOf(v)).collect(java.util.stream.Collectors.toList()));
 	}
 end
 
 def type(primitive & single) trigger(getter)
 	public $type $name+firstLowerCase() {
-		return !message.contains("$name+FirstLowerCase") ? $defaultValue : message.get("$name+FirstLowerCase").as($type.class);
+		return !message.contains("$name+FirstLowerCase") ? $defaultValue : message.get("$name+FirstLowerCase").as$simpleType();
 	}
 end
 
@@ -140,7 +145,52 @@ end
 def !type(primitive) !type(single) trigger(getter)
 	public java.util.List<$type> $name+firstLowerCase~List() {
 		java.util.List<io.intino.alexandria.message.Message> components = message.components("$name");
-		return components.stream().map(v -> new $type(v)).collect(java.util.stream.Collectors.toList());
+        		if (this.$name+firstLowerCase~List != null) return this.$name+firstLowerCase~List;
+        		return this.$name+firstLowerCase~List = new java.util.ArrayList<$type>(components.stream().map(c -> new $type(c)).collect(java.util.stream.Collectors.toList())) {
+        			@Override
+        			public boolean add($type element) {
+        				super.add(element);
+        				message.add(element.get());
+        				return true;
+        			}
+
+        			@Override
+        			public void add(int index, $type element) {
+        				throw new UnsupportedOperationException();
+        			}
+
+        			@Override
+        			public boolean remove(Object o) {
+        				if (!(o instanceof $type)) return false;
+        				super.remove(o);
+        				message.remove((($type) o).get());
+        				return true;
+        			}
+
+        			@Override
+        			public $type remove(int index) {
+        				$type type = get(index);
+        				remove(type);
+        				return type;
+        			}
+
+        			@Override
+        			public boolean removeAll(java.util.Collection<?> c) {
+        				c.forEach(this::remove);
+        				return true;
+        			}
+
+        			@Override
+        			public boolean addAll(java.util.Collection<? extends $type> c) {
+        				c.forEach(this::add);
+        				return true;
+        			}
+
+        			@Override
+        			public boolean addAll(int index, java.util.Collection<? extends $type> c) {
+        				throw new UnsupportedOperationException();
+        			}
+        		};
 	}
 end
 
