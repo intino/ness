@@ -144,9 +144,8 @@ end
 
 def !type(primitive) !type(single) trigger(getter)
 	public java.util.List<$type> $name+firstLowerCase~List() {
-		java.util.List<io.intino.alexandria.message.Message> components = message.components("$name");
         		if (this.$name+firstLowerCase~List != null) return this.$name+firstLowerCase~List;
-        		return this.$name+firstLowerCase~List = new java.util.ArrayList<$type>(components.stream().map(c -> new $type(c)).collect(java.util.stream.Collectors.toList())) {
+        		return this.$name+firstLowerCase~List = new java.util.ArrayList<$type>(message.components("$type").stream().map(c -> new $type(c)).collect(java.util.stream.Collectors.toList())) {
         			@Override
         			public boolean add($type element) {
         				super.add(element);
@@ -196,7 +195,7 @@ end
 
 def !type(primitive) type(single) trigger(getter)
 	public $type $name+firstLowerCase() {
-		java.util.List<io.intino.alexandria.message.Message> components = message.components("$name");
+		java.util.List<io.intino.alexandria.message.Message> components = message.components("$type");
 		return components.isEmpty() ? null : new $type(components.get(0));
 	}
 end
