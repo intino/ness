@@ -2,7 +2,7 @@ package io.intino.ness.datahubterminalplugin;
 
 import io.intino.datahub.graph.Datalake;
 import io.intino.datahub.graph.Datalake.Context;
-import io.intino.datahub.graph.Message;
+import io.intino.datahub.graph.Event;
 import io.intino.datahub.graph.Terminal;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
@@ -15,13 +15,13 @@ import java.util.Map;
 
 class TerminalRenderer {
 	private final Terminal terminal;
-	private final Map<Message, Context> messagesWithContext;
+	private final Map<Event, Context> eventWithContext;
 	private final File srcDir;
 	private final String basePackage;
 
-	TerminalRenderer(Terminal terminal, Map<Message, Context> messagesWithContext, File srcDir, String basePackage) {
+	TerminalRenderer(Terminal terminal, Map<Event, Context> eventWithContext, File srcDir, String basePackage) {
 		this.terminal = terminal;
-		this.messagesWithContext = messagesWithContext;
+		this.eventWithContext = eventWithContext;
 		this.srcDir = srcDir;
 		this.basePackage = basePackage;
 	}
@@ -33,7 +33,7 @@ class TerminalRenderer {
 
 	private Frame createTerminalFrame() {
 		FrameBuilder builder = new FrameBuilder().add("terminal").add("package", basePackage).add("name", terminal.name$());
-		builder.add("message", messagesWithContext.keySet().stream().map(m -> new FrameBuilder("message").add("name", m.name$()).add("type", m.name$()).toFrame()).toArray(Frame[]::new));
+		builder.add("event", eventWithContext.keySet().stream().map(m -> new FrameBuilder("event").add("name", m.name$()).add("type", m.name$()).toFrame()).toArray(Frame[]::new));
 		if (terminal.publish() != null)
 			for (Datalake.Tank.Event tank : terminal.publish().tanks())
 				builder.add("publish", frameOf(tank));
@@ -47,7 +47,7 @@ class TerminalRenderer {
 			Frame frame = new FrameBuilder("default").add("type", statusQn).add("typeName", statusClassName).add("channel", (context != null ? context.qn() + "." : "") + statusClassName).toFrame();
 			builder.add("subscribe", frame);
 			builder.add("publish", frame);
-			builder.add("message", new FrameBuilder("message").add("name", statusClassName).add("type", statusQn).toFrame());
+			builder.add("event", new FrameBuilder("event").add("name", statusClassName).add("type", statusQn).toFrame());
 		}
 
 		return builder.toFrame();
@@ -55,8 +55,8 @@ class TerminalRenderer {
 
 	private Frame frameOf(Datalake.Tank.Event tank) {
 		return new FrameBuilder(contextsOf(tank).size() > 1 ? "multicontext" : "default").
-				add("type", Formatters.firstUpperCase(tank.message().name$())).
-				add("typeName", tank.message().name$()).
+				add("type", Formatters.firstUpperCase(tank.event().name$())).
+				add("typeName", tank.event().name$()).
 				add("channel", tank.qn()).toFrame();
 	}
 

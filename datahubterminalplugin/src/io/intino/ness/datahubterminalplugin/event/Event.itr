@@ -1,35 +1,72 @@
 def type(root)
 	package $package+ValidPackage;
 
-	$schema
+	$event
 end
 
-def trigger(schema)
-	public [$inner] class $name+firstUpperCase [extends $parent] implements java.io.Serializable {
+def trigger(event)
+	public class $name+firstUpperCase [extends $parent] implements java.io.Serializable {
 		$context
-		[$parent+delegate?io.intino.alexandria.message.Message message;]
+
 		[$attribute+declaration...[$NL]]
-		[$schema+declaration...[$NL]]
+		[$component+declaration...[$NL]]
 
 		public $name+firstUpperCase() {
-			[$parent+superEmpty?this.message = new io.intino.alexandria.message.Message(this.getClass().getSimpleName());]
+			[super(new io.intino.alexandria.event.Event("$parentSuper"))?super("$name")];
+		}
+
+		public $name+firstUpperCase(io.intino.alexandria.event.Event event) {
+			this(event.toMessage());
 		}
 
 		public $name+firstUpperCase(io.intino.alexandria.message.Message message) {
-			[$parent+super?this.message = message;]
+			super(message);
 		}
 
 		$attribute+getter...[$NL$NL]
 
+		$component+getter...[$NL$NL]
+
 		$attribute+setter...[$NL$NL]
 
+		$component+setter...[$NL$NL]
 
-		public io.intino.alexandria.message.Message get() {
-			return this.message;
+		[$component...[$NL$NL]]
+	}
+end
+
+def trigger(component)
+	public static class $name+firstUpperCase [extends $parent] implements java.io.Serializable {
+		[$attribute+declaration...[$NL]]
+		[$component+declaration...[$NL]]
+		[$parent+delegate?protected io.intino.alexandria.message.Message message;]
+
+		public $name+firstUpperCase() {
+			[this(new io.intino.alexandria.message.Message("$parentSuper")?this.message = new io.intino.alexandria.message.Message("$name");]
 		}
 
-		[$schema...[$NL$NL]]
+		public $name+firstUpperCase(io.intino.alexandria.message.Message message) {
+			[super(message)$parent+delegate?this.message = message;]
+		}
+
+		$attribute+getter...[$NL$NL]
+
+		$component+getter...[$NL$NL]
+
+		$attribute+setter...[$NL$NL]
+
+		$component+setter...[$NL$NL]
+
+		[$component...[$NL$NL]]
+
+		public io.intino.alexandria.message.Message toMessage() {
+			return this.message;
+		}
 	}
+end
+
+def type(default) trigger(super)
+	super(")
 end
 
 def trigger(context)
@@ -48,13 +85,6 @@ def trigger(asEnum)
 	}
 end
 
-def trigger(superEmpty)
-	super();
-end
-
-def trigger(super)
-	super(message);
-end
 def trigger(delegate)
 	;
 
@@ -74,7 +104,7 @@ def type(word & multiple) trigger(declaration)
 
 end
 
-def !type(primitive) type(member)trigger(declaration)
+def type(component) trigger(declaration)
 	private java.util.List<$type> $name+firstLowerCase~List = null;
 end
 
@@ -91,6 +121,12 @@ def type(word & multiple) trigger(getter)
 	}
 end
 
+def type(primitive & single) !attribute(defaultValue:null) trigger(getter)
+	public $type $name+firstLowerCase() {
+		return message.get("$name+FirstLowerCase").as$simpleType();
+	}
+end
+
 def type(primitive & single) trigger(getter)
 	public $type $name+firstLowerCase() {
 		return !message.contains("$name+FirstLowerCase") ? $defaultValue : message.get("$name+FirstLowerCase").as$simpleType();
@@ -104,14 +140,14 @@ def type(primitive & multiple) trigger(getter)
 end
 
 def type(word & single) trigger(setter)
-	public $element+firstUpperCase $name+firstLowerCase($type+FirstUpperCase $name+firstLowerCase) {
+	public $owner+firstUpperCase $name+firstLowerCase($type+FirstUpperCase $name+firstLowerCase) {
 		if ($name+firstLowerCase == null) this.message.remove("$name+firstLowerCase");
 		else this.message.set("$name+firstLowerCase", $name+firstLowerCase.name());
 		return this;
 	}
 end
 def type(word & multiple) trigger(setter)
-	public $element+firstUpperCase $name+firstLowerCase(java.util.List<$type+FirstUpperCase> $name+firstLowerCase) {
+	public $owner+firstUpperCase $name+firstLowerCase(java.util.List<$type+FirstUpperCase> $name+firstLowerCase) {
 		this.message.remove("$name+firstLowerCase");
 		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v.name()));
 		return this;
@@ -119,14 +155,14 @@ def type(word & multiple) trigger(setter)
 end
 
 def type(primitive & single) type(integer | double) trigger(setter)
-	public $element+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
+	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
 		this.message.set("$name+firstLowerCase", $name+firstLowerCase);
 		return this;
 	}
 end
 
 def type(primitive & single) trigger(setter)
-	public $element+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
+	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
 		if ($name+firstLowerCase == null) this.message.remove("$name+firstLowerCase");
 		else this.message.set("$name+firstLowerCase", $name+firstLowerCase);
 		return this;
@@ -134,7 +170,7 @@ def type(primitive & single) trigger(setter)
 end
 
 def type(primitive & multiple) trigger(setter)
-	public $element+firstUpperCase $name+firstLowerCase(java.util.List<$type> $name+firstLowerCase) {
+	public $owner+firstUpperCase $name+firstLowerCase(java.util.List<$type> $name+firstLowerCase) {
 		this.message.remove("$name+firstLowerCase");
 		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v));
 		return this;
@@ -142,14 +178,14 @@ def type(primitive & multiple) trigger(setter)
 end
 
 
-def !type(primitive) !type(single) trigger(getter)
+def type(component) !type(single) trigger(getter)
 	public java.util.List<$type> $name+firstLowerCase~List() {
         		if (this.$name+firstLowerCase~List != null) return this.$name+firstLowerCase~List;
         		return this.$name+firstLowerCase~List = new java.util.ArrayList<$type>(message.components("$type").stream().map(c -> new $type(c)).collect(java.util.stream.Collectors.toList())) {
         			@Override
         			public boolean add($type element) {
         				super.add(element);
-        				message.add(element.get());
+        				message.add(element.toMessage());
         				return true;
         			}
 
@@ -162,7 +198,7 @@ def !type(primitive) !type(single) trigger(getter)
         			public boolean remove(Object o) {
         				if (!(o instanceof $type)) return false;
         				super.remove(o);
-        				message.remove((($type) o).get());
+        				message.remove((($type) o).toMessage());
         				return true;
         			}
 
@@ -193,25 +229,25 @@ def !type(primitive) !type(single) trigger(getter)
 	}
 end
 
-def !type(primitive) type(single) trigger(getter)
+def type(component) type(single) trigger(getter)
 	public $type $name+firstLowerCase() {
 		java.util.List<io.intino.alexandria.message.Message> components = message.components("$type");
 		return components.isEmpty() ? null : new $type(components.get(0));
 	}
 end
 
-def !type(primitive) type(single) trigger(setter)
-	public $element+firstUpperCase $name+firstLowerCase($type+firstUpperCase $name+firstLowerCase) {
+def type(component) type(single) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase($type+firstUpperCase $name+firstLowerCase) {
 		this.message.components("$type").forEach(v -> this.message.remove(v));
-		if ($name+firstLowerCase != null) this.message.add($name+firstLowerCase.get());
+		if ($name+firstLowerCase != null) this.message.add($name+firstLowerCase.toMessage());
 		return this;
 	}
 end
 
-def type(multiple & member) trigger(setter)
-	public $element+firstUpperCase $name+firstLowerCase~List(java.util.List<$type+firstUpperCase> $name+firstLowerCase) {
+def type(multiple & component) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase~List(java.util.List<$type+firstUpperCase> $name+firstLowerCase) {
 		this.message.components("$type").forEach(v -> this.message.remove(v));
-		$name+firstLowerCase.forEach(v -> this.message.add(v.get()));
+		$name+firstLowerCase.forEach(v -> this.message.add(v.toMessage()));
 		return this;
 	}
 end

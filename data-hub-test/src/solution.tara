@@ -9,31 +9,31 @@ Datalake(Month, path = "") datalake
 	Tank(criterioModificado) criterioModificado as Event Contextual(asemed)
 	Tank(criterioSentencia) criterioSentencia as Event Contextual(asemed)
 
-	Tank (message = usuarioConectado)usuarioConectado as Event
-	Tank (message = usuarioDesconectado)usuarioDesconectado as Event
+	Tank (usuarioConectado)usuarioConectado as Event
+	Tank (usuarioDesconectado)usuarioDesconectado as Event
 
-	Tank (message = ajuste) ajuste as Event Contextual(Divisiones)
-	Tank (message = cierreAjuste) cierreAjuste as Event Contextual(Divisiones)
+	Tank (ajuste) ajuste as Event Contextual(Divisiones)
+	Tank (cierreAjuste) cierreAjuste as Event Contextual(Divisiones)
 
-	Tank (message = activos) activos as Set(type = Singleton) Contextual(Divisiones)
-	Tank (message = inactivos) inactivos as Set(type = Singleton) Contextual(Divisiones)
+	Tank (activos) activos as Set(type = Singleton) Contextual(Divisiones)
+	Tank (inactivos) inactivos as Set(type = Singleton) Contextual(Divisiones)
 
 Broker(port = 63000, secondaryPort = 1884, path = "./broker")
 	User(name = "user1", password = "1234")
 
-Message criterio
+Event criterio
 	Attribute ts as Bool
 	Attribute value as Text
 	Attribute id as Integer
-Message criterioBorrado
-Message criterioModificado
-Message criterioSentencia
-Message activos
-Message inactivos
-Message ajuste
-Message cierreAjuste
-Message usuarioConectado
-Message usuarioDesconectado
+Event criterioBorrado
+Event criterioModificado
+Event criterioSentencia
+Event activos
+Event inactivos
+Event ajuste
+Event cierreAjuste
+Event usuarioConectado
+Event usuarioDesconectado
 
 Terminal  first
 	Publish(tanks = datalake.cierreAjuste)

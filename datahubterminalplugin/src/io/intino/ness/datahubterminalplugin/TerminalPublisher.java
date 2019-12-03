@@ -4,13 +4,13 @@ import com.google.gson.Gson;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.graph.Datalake.Context;
 import io.intino.datahub.graph.Datalake.Tank;
-import io.intino.datahub.graph.Message;
+import io.intino.datahub.graph.Event;
 import io.intino.datahub.graph.Terminal;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.legio.graph.LegioGraph;
 import io.intino.legio.graph.Repository;
-import io.intino.ness.datahubterminalplugin.schema.MessageRenderer;
+import io.intino.ness.datahubterminalplugin.event.EventRenderer;
 import io.intino.plugin.PluginLauncher;
 import org.apache.maven.shared.invoker.*;
 
@@ -56,9 +56,9 @@ class TerminalPublisher {
 	private boolean createSources() {
 		File srcDirectory = new File(root, "src");
 		srcDirectory.mkdirs();
-		Map<Message, Context> messageContextMap = collectMessages(tanks);
-		new TerminalRenderer(terminal, messageContextMap, srcDirectory, basePackage).render();
-		messageContextMap.forEach((k, v) -> new MessageRenderer(k, v, srcDirectory, basePackage).render());
+		Map<Event, Context> eventContextMap = collectEvents(tanks);
+		new TerminalRenderer(terminal, eventContextMap, srcDirectory, basePackage).render();
+		eventContextMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
 		writeManifest(resDirectory);
@@ -68,7 +68,7 @@ class TerminalPublisher {
 	private void writeManifest(File srcDirectory) {
 		List<String> publish = terminal.publish() != null ? terminal.publish().tanks().stream().map(Tank.Event::qn).collect(Collectors.toList()) : Collections.emptyList();
 		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().tanks().stream().map(Tank.Event::qn).collect(Collectors.toList()) : Collections.emptyList();
-		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses(), messageContexts());
+		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses(), eventContexts());
 		try {
 			Files.write(new File(srcDirectory, "terminal.mf").toPath(), new Gson().toJson(manifest).getBytes());
 		} catch (IOException e) {
@@ -76,20 +76,20 @@ class TerminalPublisher {
 		}
 	}
 
-	private Map<String, Set<String>> messageContexts() {
-		Map<String, Set<String>> messageContexts = terminal.publish() == null ? new HashMap<>() : messageContextOf(terminal.publish().tanks());
-		if (terminal.subscribe() == null) return messageContexts;
-		Map<String, Set<String>> subscribeMessageContexts = messageContextOf(terminal.subscribe().tanks());
-		for (String messageType : subscribeMessageContexts.keySet()) {
-			if (!messageContexts.containsKey(messageType)) messageContexts.put(messageType, new HashSet<>());
-			messageContexts.get(messageType).addAll(subscribeMessageContexts.get(messageType));
+	private Map<String, Set<String>> eventContexts() {
+		Map<String, Set<String>> eventContexts = terminal.publish() == null ? new HashMap<>() : eventContextOf(terminal.publish().tanks());
+		if (terminal.subscribe() == null) return eventContexts;
+		Map<String, Set<String>> subscribeEventContexts = eventContextOf(terminal.subscribe().tanks());
+		for (String eventType : subscribeEventContexts.keySet()) {
+			if (!eventContexts.containsKey(eventType)) eventContexts.put(eventType, new HashSet<>());
+			eventContexts.get(eventType).addAll(subscribeEventContexts.get(eventType));
 		}
-		return messageContexts;
+		return eventContexts;
 	}
 
-	private Map<String, Set<String>> messageContextOf(List<Tank.Event> tanks) {
+	private Map<String, Set<String>> eventContextOf(List<Tank.Event> tanks) {
 		return tanks.stream().
-				collect(Collectors.toMap(t -> t.asTank().message().name$(),
+				collect(Collectors.toMap(t -> t.asTank().event().name$(),
 						tank -> tank.asTank().isContextual() ? tank.asTank().asContextual().context().leafs().stream().map(Context::qn).collect(Collectors.toSet()) : Collections.emptySet(),
 						(a, b) -> b));
 	}
@@ -97,9 +97,9 @@ class TerminalPublisher {
 	private Map<String, String> tankClasses() {
 		Map<String, String> tankClasses = new HashMap<>();
 		if (terminal.publish() != null)
-			terminal.publish().tanks().forEach(t -> tankClasses.putIfAbsent(t.qn(), basePackage + ".schemas." + t.asTank().message().name$()));
+			terminal.publish().tanks().forEach(t -> tankClasses.putIfAbsent(t.qn(), basePackage + ".schemas." + t.asTank().event().name$()));
 		if (terminal.subscribe() != null)
-			terminal.subscribe().tanks().forEach(t -> tankClasses.putIfAbsent(t.qn(), basePackage + ".schemas." + t.asTank().message().name$()));
+			terminal.subscribe().tanks().forEach(t -> tankClasses.putIfAbsent(t.qn(), basePackage + ".schemas." + t.asTank().event().name$()));
 		if (terminal.allowsBpmIn() != null) {
 			Context context = terminal.allowsBpmIn().context();
 			String statusQn = terminal.allowsBpmIn().processStatusClass();
@@ -109,23 +109,23 @@ class TerminalPublisher {
 		return tankClasses;
 	}
 
-	private Map<Message, Context> collectMessages(List<Tank.Event> tanks) {
-		Map<Message, Context> messages = new HashMap<>();
+	private Map<Event, Context> collectEvents(List<Tank.Event> tanks) {
+		Map<Event, Context> events = new HashMap<>();
 		for (Tank.Event tank : tanks) {
-			List<Message> hierarchy = hierarchy(tank.message());
+			List<Event> hierarchy = hierarchy(tank.event());
 			Context context = tank.asTank().isContextual() ? tank.asTank().asContextual().context() : null;
-			messages.put(hierarchy.get(0), context);
+			events.put(hierarchy.get(0), context);
 			hierarchy.remove(0);
-			hierarchy.forEach(message -> messages.put(message, null));
+			hierarchy.forEach(e -> events.put(e, null));
 		}
-		return messages;
+		return events;
 	}
 
-	private List<Message> hierarchy(Message message) {
-		Set<Message> messages = new LinkedHashSet<>();
-		messages.add(message);
-		if (message.isExtensionOf()) messages.addAll(hierarchy(message.asExtensionOf().parent()));
-		return new ArrayList<>(messages);
+	private List<Event> hierarchy(Event event) {
+		Set<Event> events = new LinkedHashSet<>();
+		events.add(event);
+		if (event.isExtensionOf()) events.addAll(hierarchy(event.asExtensionOf().parent()));
+		return new ArrayList<>(events);
 	}
 
 	private void mvn(String goal) throws IOException, MavenInvocationException {

@@ -2,16 +2,16 @@ import io.intino.legio.graph.LegioGraph;
 import io.intino.ness.datahubterminalplugin.DataHubTerminalsPluginLauncher;
 import io.intino.plugin.PluginLauncher;
 import io.intino.tara.magritte.Graph;
-import org.junit.Ignore;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 
 public class PluginTest {
 	@Test
-	@Ignore
-	public void should_build_accessors() {
+	public void should_build_accessors() throws IOException {
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
 		launcher.
 				moduleStructure(new PluginLauncher.ModuleStructure(Collections.singletonList(new File(System.getProperty("user.home") + "/workspace/gestioncomercial/data-hub/src")), Collections.singletonList(new File(System.getProperty("user.home") + "/workspace/ness/datahubterminalplugin/test-res")), new File(System.getProperty("user.home") + "/workspace/ness/out/data-hub-test/")))
@@ -19,6 +19,10 @@ public class PluginTest {
 				.logger(System.out)
 				.invokedPhase(PluginLauncher.Phase.INSTALL)
 				.moduleConfiguration(new Graph().loadStashes("data-hub").as(LegioGraph.class));
-		launcher.run();
+		File temp = new File("/Users/oroncal/workspace/ness/datahubterminalplugin/temp");
+		FileUtils.deleteDirectory(temp);
+
+		temp.mkdirs();
+		launcher.run(temp);
 	}
 }

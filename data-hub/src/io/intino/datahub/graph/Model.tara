@@ -31,7 +31,8 @@ Concept:{0..1} Datalake
 		var Context[] leafs = @leafs is private reactive
 		has:Named Context
 	Concept:{1..*}:AspectRequired Tank
-		var Message message
+		var Event event
+		var boolean sortingRequired = true
 		var string qn = @qn is private reactive
 		Aspect TankType
         	sub Set > var word:{Multivalued Singleton} type = Multivalued
@@ -47,13 +48,20 @@ Concept:Named Terminal
 	Concept:{0..1} Subscribe
 		var Datalake.Tank.Event[] tanks
 
-Concept Message
-	var boolean multiple = true
-	Concept:Named:RequiresAspect Attribute extends Data
-	has Message
-	Aspect ExtensionOf
-    	var Message parent
+Concept Event
+	has Attribute
+	has Component
+	Concept Has > var Component element
+	Aspect ExtensionOf > var Event parent
 
+Concept Component
+	var boolean multiple = true
+	has Attribute
+	has Component
+	Concept Has > var Component element
+	Aspect ExtensionOf > var Component parent
+
+Concept:Named:RequiresAspect Attribute extends Data is component
 
 Concept Data is abstract
 	Aspect List
@@ -86,6 +94,3 @@ Concept Data is abstract
 		sub File
 			var string type = "io.intino.alexandria.Resource" is reactive private
 			var word:{body path form header query} in = form
-		sub Object
-			var Message message
-			var string type = @schemaName is reactive private

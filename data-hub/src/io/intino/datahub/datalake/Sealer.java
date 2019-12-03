@@ -1,6 +1,7 @@
 package io.intino.datahub.datalake;
 
 import io.intino.alexandria.Timetag;
+import io.intino.alexandria.event.Event;
 import io.intino.alexandria.ingestion.EventSession;
 import io.intino.alexandria.ingestion.SessionHandler;
 import io.intino.alexandria.logger.Logger;
@@ -41,7 +42,7 @@ public class Sealer {
 				SessionHandler handler = new SessionHandler();
 				EventSession eventSession = handler.createEventSession();
 				for (Message message : new MessageReader(new BufferedInputStream(new FileInputStream(file))))
-					eventSession.put(split[0], new Timetag(split[1]), message);
+					eventSession.put(split[0], new Timetag(split[1]), new Event(message));
 				eventSession.close();
 				handler.pushTo(brokerStageDirectory);
 				file.delete();

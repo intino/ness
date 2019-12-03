@@ -1,5 +1,6 @@
 package io.intino.ness.datahubterminalplugin;
 
+import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.datahub.graph.NessGraph;
 import io.intino.datahub.graph.Terminal;
@@ -22,6 +23,11 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	public void run() {
 		if (invokedPhase.ordinal() < 2) return;
 		logger().println("Building " + configuration().artifact().name$() + " terminal");
+		File tempDir = tempDirectory();
+		run(tempDir);
+	}
+
+	public void run(File tempDir) {
 		List<File> directories = moduleStructure().resDirectories;
 		File resDirectory = directories.stream().filter(d -> {
 			File[] files = d.getAbsoluteFile().listFiles(f -> f.getName().endsWith(".stash"));
@@ -30,12 +36,11 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		if (resDirectory == null) return;
 		String[] stashes = Arrays.stream(Objects.requireNonNull(resDirectory.listFiles(f -> f.getName().endsWith(".stash")))).map(f -> f.getName().replace(".stash", "")).toArray(String[]::new);
 		Graph graph = new Graph(new FileSystemStore(resDirectory)).loadStashes(stashes);
-		publishAccessor(graph.as(NessGraph.class));
+		publishAccessor(graph.as(NessGraph.class), tempDir);
 	}
 
-	private void publishAccessor(NessGraph nessGraph) {
+	private void publishAccessor(NessGraph nessGraph, File tempDir) {
 		try {
-			File tempDir = Files.createTempDirectory("_temp").toFile();
 			AtomicBoolean published = new AtomicBoolean(true);
 			nessGraph.terminalList().forEach(terminal -> {
 				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), systemProperties(), invokedPhase, logger()).publish() & published.get());
@@ -58,6 +63,15 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 				"    <artifactId>" + artifactId.toLowerCase() + "</artifactId>\n" +
 				"    <version>" + version + "</version>\n" +
 				"</dependency>";
+	}
+
+	private File tempDirectory() {
+		try {
+			return Files.createTempDirectory("_temp").toFile();
+		} catch (IOException e) {
+			Logger.error(e);
+			return new File("");
+		}
 	}
 
 	private List<Tank.Event> tanks(Terminal messageHub) {

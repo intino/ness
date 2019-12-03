@@ -5,8 +5,8 @@ Artifact("io.intino", "3.0.0") data-hub as Product
 	Imports
 		Compile("io.intino.alexandria", "exceptions", "1.0.0")
 		Compile("io.intino.alexandria", "jms", "1.2.0")
-		Compile("io.intino.alexandria", "ingestion", "1.0.0")
-		Compile("io.intino.alexandria", "sealing", "1.0.0")
+		Compile("io.intino.alexandria", "ingestion", "2.0.0")
+		Compile("io.intino.alexandria", "sealing", "2.0.0")
 		Compile("org.apache.activemq", "activemq-broker", "5.15.8")
 		Compile("org.apache.activemq", "activemq-mqtt", "5.15.8")
 		Compile("org.apache.activemq", "activemq-kahadb-store", "5.15.8")
@@ -16,7 +16,6 @@ Artifact("io.intino", "3.0.0") data-hub as Product
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true)
 	Distribution(intino.frameworks, intino.languages)
-
 
 Repository("intino-maven") intino
 	Release("https://artifactory.intino.io/artifactory/releases")
