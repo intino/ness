@@ -51,7 +51,7 @@ public class EventRenderer {
 		if (!components.isEmpty()) eventFrame.add("component", processComponents(components, event.name$()));
 		if (context != null) {
 			List<Context> leafs = context.isLeaf() ? Collections.singletonList(context) : context.leafs();
-			eventFrame.add("context", new FrameBuilder().add("context").add("enum", enums(leafs)));
+			eventFrame.add("context", new FrameBuilder().add("context").add("enum", enums(context, leafs)));
 		}
 		return eventFrame.toFrame();
 	}
@@ -103,10 +103,12 @@ public class EventRenderer {
 		return null;
 	}
 
-	private Frame[] enums(List<Context> leafs) {
+	private Frame[] enums(Context realContext, List<Context> leafs) {
 		List<Frame> frames = new ArrayList<>();
+		if (!leafs.contains(realContext) && !realContext.label().isEmpty())
+			frames.add(new FrameBuilder("enum").add("value", realContext.label()).toFrame());
 		for (Context leaf : leafs) {
-			FrameBuilder builder = new FrameBuilder("enum").add("value", Formatters.firstLowerCase(Formatters.snakeCaseToCamelCase().format(leaf.qn().replace(".", "-")).toString()));
+			FrameBuilder builder = new FrameBuilder("enum").add("value", leaf.label());
 			if (!leaf.isRoot()) {
 				String qn = leaf.core$().ownerAs(Context.class).qn();
 				if (!qn.isEmpty()) builder.add("parent", qn);
