@@ -250,10 +250,17 @@ public class JmsBrokerService implements BrokerService {
 							Scale scale = Scale.valueOf(graph.datalake().scale().name());
 							if (!t.isContextual() || t.asContextual().context().isLeaf())
 								brokerManager.registerConsumer(t.qn(), new TopicSaver(stage, t.qn(), scale).create());
-							else t.asContextual().context().leafs().forEach(c ->
-									brokerManager.registerConsumer(c.qn() + "." + t.name$(), new TopicSaver(stage, c.qn() + "." + t.name$(), scale).create()));
+							else {
+								Datalake.Context context = t.asContextual().context();
+								register(stage, t, scale, context);
+								context.leafs().forEach(c -> register(stage, t, scale, c));
+							}
 						});
 			}
+		}
+
+		private void register(File stage, Datalake.Tank t, Scale scale, Datalake.Context c) {
+			brokerManager.registerConsumer(c.qn() + "." + t.name$(), new TopicSaver(stage, c.qn() + "." + t.name$(), scale).create());
 		}
 
 		private Session nessSession() {
