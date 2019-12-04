@@ -15,6 +15,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
@@ -46,7 +47,7 @@ public class EventRenderer {
 				add("parent", event.isExtensionOf() ? event.asExtensionOf().parent().name$() : PARENT);
 		if (event.isExtensionOf()) eventFrame.add("parentSuper", event.name$());
 		eventFrame.add("attribute", processAttributes(event.attributeList(), event.name$()));
-		List<Component> components = collectComponents(event);
+		Map<Component, Boolean> components = collectComponents(event);
 		if (!components.isEmpty()) eventFrame.add("component", processComponents(components, event.name$()));
 		if (context != null) {
 			List<Context> leafs = context.isLeaf() ? Collections.singletonList(context) : context.leafs();
@@ -61,8 +62,8 @@ public class EventRenderer {
 		return frames;
 	}
 
-	private FrameBuilder[] processComponents(List<Component> components, String owner) {
-		return components.stream().map(c -> processComponent(c, owner, c.multiple())).toArray(FrameBuilder[]::new);
+	private FrameBuilder[] processComponents(Map<Component, Boolean> components, String owner) {
+		return components.entrySet().stream().map(e -> processComponent(e.getKey(), owner, e.getValue())).toArray(FrameBuilder[]::new);
 	}
 
 	private FrameBuilder processComponent(Component component, String owner, boolean multiple) {
@@ -72,20 +73,20 @@ public class EventRenderer {
 				add("owner", owner).
 				add("attribute", processAttributes(component.attributeList(), component.name$()));
 		if (component.isExtensionOf()) builder.add("parent", component.asExtensionOf().parent().name$());
-		List<Component> components = collectComponents(component);
+		Map<Component, Boolean> components = collectComponents(component);
 		if (!components.isEmpty()) builder.add("component", processComponents(components, component.name$()));
 		return builder;
 	}
 
-	private List<Component> collectComponents(Event event) {
-		List<Component> components = new ArrayList<>(event.componentList());
-		components.addAll(event.hasList().stream().map(Event.Has::element).collect(Collectors.toList()));
+	private Map<Component, Boolean> collectComponents(Event event) {
+		Map<Component, Boolean> components = event.componentList().stream().collect(Collectors.toMap(c -> c, Component::multiple));
+		components.putAll(event.hasList().stream().collect(Collectors.toMap(Event.Has::element, Event.Has::multiple)));
 		return components;
 	}
 
-	private List<Component> collectComponents(Component component) {
-		List<Component> components = new ArrayList<>(component.componentList());
-		components.addAll(component.hasList().stream().map(Component.Has::element).collect(Collectors.toList()));
+	private Map<Component, Boolean> collectComponents(Component component) {
+		Map<Component, Boolean> components = component.componentList().stream().collect(Collectors.toMap(c -> c, Component::multiple));
+		components.putAll(component.hasList().stream().collect(Collectors.toMap(Component.Has::element, Component.Has::multiple)));
 		return components;
 	}
 

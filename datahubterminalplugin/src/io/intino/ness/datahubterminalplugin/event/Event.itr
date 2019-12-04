@@ -23,6 +23,16 @@ def trigger(event)
 			super(message);
 		}
 
+		public $name+firstUpperCase ts(java.time.Instant ts) {
+			super.ts(ts);
+			return this;
+		}
+
+		public $name+firstUpperCase ss(String ss) {
+			super.ss(ss);
+			return this;
+		}
+
 		$attribute+getter...[$NL$NL]
 
 		$component+getter...[$NL$NL]

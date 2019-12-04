@@ -3,6 +3,7 @@ import io.intino.ness.datahubterminalplugin.DataHubTerminalsPluginLauncher;
 import io.intino.plugin.PluginLauncher;
 import io.intino.tara.magritte.Graph;
 import org.apache.commons.io.FileUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -11,6 +12,7 @@ import java.util.Collections;
 
 public class PluginTest {
 	@Test
+	@Ignore
 	public void should_build_accessors() throws IOException {
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
 		launcher.

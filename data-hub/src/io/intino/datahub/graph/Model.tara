@@ -51,14 +51,18 @@ Concept:Named Terminal
 Concept Event
 	has Attribute
 	has Component
-	Concept Has > var Component element
+	Concept Has
+		var Component element
+		var boolean multiple = true
 	Aspect ExtensionOf > var Event parent
 
 Concept Component
 	var boolean multiple = true
 	has Attribute
 	has Component
-	Concept Has > var Component element
+	Concept Has
+		var Component element
+		var boolean multiple = true
 	Aspect ExtensionOf > var Component parent
 
 Concept:Named:RequiresAspect Attribute extends Data is component
