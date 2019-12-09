@@ -97,9 +97,9 @@ class TerminalPublisher {
 	private Map<String, String> tankClasses() {
 		Map<String, String> tankClasses = new HashMap<>();
 		if (terminal.publish() != null)
-			terminal.publish().tanks().forEach(t -> tankClasses.putIfAbsent(t.qn(), basePackage + ".schemas." + t.asTank().event().name$()));
+			terminal.publish().tanks().forEach(t -> tankClasses.putIfAbsent(t.qn(), basePackage + ".events." + t.asTank().event().name$()));
 		if (terminal.subscribe() != null)
-			terminal.subscribe().tanks().forEach(t -> tankClasses.putIfAbsent(t.qn(), basePackage + ".schemas." + t.asTank().event().name$()));
+			terminal.subscribe().tanks().forEach(t -> tankClasses.putIfAbsent(t.qn(), basePackage + ".events." + t.asTank().event().name$()));
 		if (terminal.allowsBpmIn() != null) {
 			Context context = terminal.allowsBpmIn().context();
 			String statusQn = terminal.allowsBpmIn().processStatusClass();
