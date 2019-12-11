@@ -1,6 +1,7 @@
 package io.intino.datahub.datalake;
 
 import io.intino.alexandria.Timetag;
+import io.intino.alexandria.datalake.Datalake;
 import io.intino.alexandria.datalake.file.FileDatalake;
 import io.intino.alexandria.event.Event;
 import io.intino.alexandria.ingestion.EventSession;
@@ -15,6 +16,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.List;
 import java.util.Objects;
 
 public class BrokerSessionSealer implements SessionSealer {
@@ -26,7 +28,8 @@ public class BrokerSessionSealer implements SessionSealer {
 		this.brokerStageDirectory = brokerStageDirectory;
 	}
 
-	public void seal() {
+	@Override
+	public void seal(List<Datalake.EventStore.Tank> avoidSorting) {
 		Logger.info("Starting seal broker events");
 		new Thread(() -> {
 			pushTemporalSessions();
