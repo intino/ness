@@ -1,12 +1,14 @@
 package io.intino.datahub.datalake;
 
 import io.intino.alexandria.Timetag;
+import io.intino.alexandria.datalake.file.FileDatalake;
 import io.intino.alexandria.event.Event;
 import io.intino.alexandria.ingestion.EventSession;
 import io.intino.alexandria.ingestion.SessionHandler;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.alexandria.message.MessageReader;
+import io.intino.alexandria.sealing.FileSessionSealer;
 import io.intino.alexandria.sealing.SessionSealer;
 
 import java.io.BufferedInputStream;
@@ -15,18 +17,17 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Objects;
 
-public class Sealer {
-
+public class BrokerSessionSealer implements SessionSealer {
 	private final SessionSealer sealer;
 	private final File brokerStageDirectory;
 
-	public Sealer(SessionSealer sealer, File brokerStageDirectory) {
-		this.sealer = sealer;
+	public BrokerSessionSealer(FileDatalake datalake, File brokerStageDirectory) {
+		this.sealer = new FileSessionSealer(datalake, brokerStageDirectory);
 		this.brokerStageDirectory = brokerStageDirectory;
 	}
 
-	public void execute() {
-		Logger.info("Starting seal of tanks");
+	public void seal() {
+		Logger.info("Starting seal broker events");
 		new Thread(() -> {
 			pushTemporalSessions();
 			sealer.seal();

@@ -41,15 +41,17 @@ public class JmsBrokerService implements BrokerService {
 	private static final String NESS = "ness";
 	private final File root;
 	private final NessGraph graph;
+	private final File brokerStage;
 	private final BrokerManager brokerManager;
 	private final PipeManager pipeManager;
 	private final Map<String, VirtualDestinationInterceptor> pipes = new HashMap<>();
 
 	private org.apache.activemq.broker.BrokerService service;
 
-	public JmsBrokerService(NessGraph graph) {
+	public JmsBrokerService(NessGraph graph, File brokerStage) {
 		this.root = new File(graph.broker().path());
 		this.graph = graph;
+		this.brokerStage = brokerStage;
 		configure();
 		this.brokerManager = new BrokerManager(graph, new AdvisoryManager(jmsBroker()));
 		this.pipeManager = new PipeManager(brokerManager, graph.broker().pipeList());
@@ -243,24 +245,23 @@ public class JmsBrokerService implements BrokerService {
 
 		private void startTanks() {
 			if (graph.datalake() != null) {
-				File stage = new File(graph.broker().path(), "stage");
-				stage.mkdirs();
+				brokerStage.mkdirs();
 				graph.datalake().tankList().stream().filter(Datalake.Tank::isEvent).
 						forEach(t -> {
 							Scale scale = Scale.valueOf(graph.datalake().scale().name());
 							if (!t.isContextual() || t.asContextual().context().isLeaf())
-								brokerManager.registerConsumer(t.qn(), new TopicSaver(stage, t.qn(), scale).create());
+								brokerManager.registerConsumer(t.qn(), new TopicSaver(brokerStage, t.qn(), scale).create());
 							else {
 								Datalake.Context context = t.asContextual().context();
-								register(stage, t, scale, context);
-								context.leafs().forEach(c -> register(stage, t, scale, c));
+								register(t, scale, context);
+								context.leafs().forEach(c -> register(t, scale, c));
 							}
 						});
 			}
 		}
 
-		private void register(File stage, Datalake.Tank t, Scale scale, Datalake.Context c) {
-			brokerManager.registerConsumer(c.qn() + "." + t.name$(), new TopicSaver(stage, c.qn() + "." + t.name$(), scale).create());
+		private void register(Datalake.Tank t, Scale scale, Datalake.Context c) {
+			brokerManager.registerConsumer(c.qn() + "." + t.name$(), new TopicSaver(brokerStage, c.qn() + "." + t.name$(), scale).create());
 		}
 
 		private Session nessSession() {

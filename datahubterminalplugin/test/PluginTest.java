@@ -27,4 +27,21 @@ public class PluginTest {
 		temp.mkdirs();
 		launcher.run(temp);
 	}
+
+	@Test
+	@Ignore
+	public void should_build_cesar_terminal() throws IOException {
+		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
+		launcher.
+				moduleStructure(new PluginLauncher.ModuleStructure(Collections.singletonList(new File(System.getProperty("user.home") + "/workspace/cesar/data-hub/src")), Collections.singletonList(new File(System.getProperty("user.home") + "/workspace/ness/datahubterminalplugin/test-res/cesar/stashes")), new File(System.getProperty("user.home") + "/workspace/ness/out/data-hub-test/")))
+				.systemProperties(new PluginLauncher.SystemProperties(new File("/Applications/IntelliJ IDEA - 2019.2.app/Contents/plugins/maven/lib/maven3/"), new File("/Library/Java/JavaVirtualMachines/jdk-11.0.4.jdk/Contents/Home")))
+				.logger(System.out)
+				.invokedPhase(PluginLauncher.Phase.INSTALL)
+				.moduleConfiguration(new Graph().loadStashes("cesar/data-hub").as(LegioGraph.class));
+		File temp = new File("/Users/oroncal/workspace/ness/datahubterminalplugin/temp");
+		FileUtils.deleteDirectory(temp);
+
+		temp.mkdirs();
+		launcher.run(temp);
+	}
 }

@@ -6,6 +6,7 @@ import io.intino.alexandria.sealing.FileSessionSealer;
 import io.intino.alexandria.sealing.SessionSealer;
 import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.broker.jms.JmsBrokerService;
+import io.intino.datahub.datalake.BrokerSessionSealer;
 import io.intino.datahub.graph.NessGraph;
 
 import java.io.File;
@@ -16,6 +17,7 @@ public class DataHub {
 	private FileDatalake datalake;
 	private BrokerService brokerService;
 	private SessionSealer sessionSealer;
+	private BrokerSessionSealer brokerSealer;
 
 	public DataHub(NessGraph graph, File stageDirectory) {
 		this.graph = graph;
@@ -26,7 +28,7 @@ public class DataHub {
 
 	private void load() {
 		if (this.graph.broker() != null && graph.broker().implementation() == null)
-			graph.broker().implementation(() -> new JmsBrokerService(graph));
+			graph.broker().implementation(() -> new JmsBrokerService(graph, brokerStage()));
 	}
 
 	public void start() {
@@ -53,6 +55,10 @@ public class DataHub {
 		return sessionSealer;
 	}
 
+	public SessionSealer brokerSessionSealer() {
+		return brokerSealer;
+	}
+
 	public BrokerService brokerService() {
 		return brokerService;
 	}
@@ -61,13 +67,18 @@ public class DataHub {
 		return stageDirectory;
 	}
 
+	public File brokerStage() {
+		return new File(graph.broker().path(), "stage");
+	}
+
 	private void configureDatalake() {
 		this.datalake = new FileDatalake(new File(graph.datalake().path()));
-		this.sessionSealer = new FileSessionSealer((FileDatalake) datalake, stageDirectory);
+		this.sessionSealer = new FileSessionSealer(datalake, stageDirectory);
 	}
 
 	private void configureBroker() {
 		brokerService = graph.broker().implementation().get();
+		this.brokerSealer = new BrokerSessionSealer(this.datalake, brokerStage());
 		try {
 			brokerService.start();
 		} catch (Exception e) {

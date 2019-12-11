@@ -28,7 +28,7 @@ class TerminalRenderer {
 
 	void render() {
 		final File packageFolder = new File(srcDir, basePackage.replace(".", File.separator));
-		Commons.writeFrame(packageFolder, terminal.name$(), template().render(createTerminalFrame()));
+		Commons.writeFrame(packageFolder, Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString(), template().render(createTerminalFrame()));
 	}
 
 	private Frame createTerminalFrame() {
