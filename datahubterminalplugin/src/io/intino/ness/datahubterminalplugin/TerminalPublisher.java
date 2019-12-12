@@ -66,18 +66,14 @@ class TerminalPublisher {
 	}
 
 	private void writeManifest(File srcDirectory) {
-		List<String> publish = terminal.publish() != null ? qnsOf(terminal.publish().tanks()) : Collections.emptyList();
-		List<String> subscribe = terminal.subscribe() != null ? qnsOf(terminal.subscribe().tanks()) : Collections.emptyList();
+		List<String> publish = terminal.publish() != null ? terminal.publish().tanks().stream().map(t -> t.asTank().event().name$()).collect(Collectors.toList()) : Collections.emptyList();
+		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().tanks().stream().map(t -> t.asTank().event().name$()).collect(Collectors.toList()) : Collections.emptyList();
 		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses(), eventContexts());
 		try {
 			Files.write(new File(srcDirectory, "terminal.mf").toPath(), new Gson().toJson(manifest).getBytes());
 		} catch (IOException e) {
 			Logger.error(e);
 		}
-	}
-
-	private List<String> qnsOf(List<Tank.Event> tanks) {
-		return tanks.stream().map(t -> collectQualifiedNamesWithContexts(t.asTank())).flatMap(List::stream).collect(Collectors.toList());
 	}
 
 	private Map<String, Set<String>> eventContexts() {
@@ -101,15 +97,9 @@ class TerminalPublisher {
 	private Map<String, String> tankClasses() {
 		Map<String, String> tankClasses = new HashMap<>();
 		if (terminal.publish() != null)
-			terminal.publish().tanks().forEach(t -> {
-				List<String> tanks = collectQualifiedNamesWithContexts(t.asTank());
-				tanks.forEach(t2 -> tankClasses.putIfAbsent(t2, basePackage + ".events." + t.asTank().event().name$()));
-			});
+			terminal.publish().tanks().forEach(t -> tankClasses.putIfAbsent(t.asTank().event().name$(), basePackage + ".events." + t.asTank().event().name$()));
 		if (terminal.subscribe() != null)
-			terminal.subscribe().tanks().forEach(t -> {
-				List<String> tanks = collectQualifiedNamesWithContexts(t.asTank());
-				tanks.forEach(t2 -> tankClasses.putIfAbsent(t2, basePackage + ".events." + t.asTank().event().name$()));
-			});
+			terminal.subscribe().tanks().forEach(t -> tankClasses.putIfAbsent(t.asTank().event().name$(), basePackage + ".events." + t.asTank().event().name$()));
 		if (terminal.allowsBpmIn() != null) {
 			Context context = terminal.allowsBpmIn().context();
 			String statusQn = terminal.allowsBpmIn().processStatusClass();
@@ -117,11 +107,6 @@ class TerminalPublisher {
 			tankClasses.put((context != null ? context.qn() + "." : "") + statusClassName, statusQn);
 		}
 		return tankClasses;
-	}
-
-	private List<String> collectQualifiedNamesWithContexts(Tank t) {
-		if (!t.isContextual()) return Collections.singletonList(t.qn());
-		return t.asContextual().context().leafs().stream().map(context -> context.qn() + "." + t.event().name$()).collect(Collectors.toList());
 	}
 
 	private Map<Event, Context> collectEvents(List<Tank.Event> tanks) {
