@@ -45,7 +45,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			nessGraph.terminalList().forEach(terminal -> {
 				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), systemProperties(), invokedPhase, logger()).publish() & published.get());
 				if (published.get() && notifier() != null)
-					notifier().notify("MessageHub " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name$()).toString().toLowerCase(), terminal.name$(), configuration().artifact().version()));
+					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name$()).toString().toLowerCase(), terminal.name$(), configuration().artifact().version()));
 			});
 			if (published.get()) FileUtils.deleteDirectory(tempDir);
 		} catch (IOException e) {
@@ -74,10 +74,10 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		}
 	}
 
-	private List<Tank.Event> tanks(Terminal messageHub) {
+	private List<Tank.Event> tanks(Terminal terminal) {
 		List<Tank.Event> tanks = new ArrayList<>();
-		if (messageHub.publish() != null) tanks.addAll(messageHub.publish().tanks());
-		if (messageHub.subscribe() != null) tanks.addAll(messageHub.subscribe().tanks());
+		if (terminal.publish() != null) tanks.addAll(terminal.publish().tanks());
+		if (terminal.subscribe() != null) tanks.addAll(terminal.subscribe().tanks());
 		return tanks;
 	}
 }
