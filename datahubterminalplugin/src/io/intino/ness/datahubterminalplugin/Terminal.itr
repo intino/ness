@@ -40,8 +40,9 @@ def trigger(if)
 end
 
 def type(multicontext) trigger(publish)
-	public void publish($type $typeName+firstLowerCase, $type+FirstUpperCase.Context... contexts) {
-		for ($type+FirstUpperCase.Context c : contexts)
+	public void publish($type $typeName+firstLowerCase, $type+FirstUpperCase.Context context, $type+FirstUpperCase.Context... moreContexts) {
+		eventHub.sendEvent(context.qn() + ".$type", $typeName+firstLowerCase);
+		for ($type+FirstUpperCase.Context c : moreContexts)
 			eventHub.sendEvent(c.qn() + ".$type", $typeName+firstLowerCase);
 	}
 end
@@ -53,15 +54,17 @@ def trigger(publish)
 end
 
 def type(multiContext) trigger(subscribe)
-	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, $type+FirstUpperCase.Context... contexts) {
+	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, $type+FirstUpperCase.Context context, $type+FirstUpperCase.Context... moreContexts) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
-		for ($type+FirstUpperCase.Context c : contexts)
+		eventHub.attachListener(context.qn() + ".$type", subscriberId, consumers.get(onEventReceived));
+		for ($type+FirstUpperCase.Context c : moreContexts)
 			eventHub.attachListener(c.qn() + ".$type", subscriberId, consumers.get(onEventReceived));
 	}
 
-	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, $type+FirstUpperCase.Context... contexts) {
+	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, $type+FirstUpperCase.Context context, $type+FirstUpperCase.Context... moreContexts) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
-		for ($type+FirstUpperCase.Context c : contexts)
+		eventHub.attachListener(context.qn() + ".$type", subscriberId, consumers.get(onEventReceived));
+		for ($type+FirstUpperCase.Context c : moreContexts)
 			eventHub.attachListener(c.qn() + ".$type", consumers.get(onEventReceived));
 	}
 
