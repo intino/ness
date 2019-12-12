@@ -106,13 +106,9 @@ public class EventRenderer {
 	private Frame[] enums(Context realContext, List<Context> leafs) {
 		List<Frame> frames = new ArrayList<>();
 		if (!leafs.contains(realContext) && !realContext.label().isEmpty())
-			frames.add(new FrameBuilder("enum").add("value", realContext.label()).toFrame());
+			frames.add(new FrameBuilder("enum").add("value", realContext.qn().replace(".", "-")).toFrame());
 		for (Context leaf : leafs) {
-			FrameBuilder builder = new FrameBuilder("enum").add("value", leaf.label());
-			if (!leaf.isRoot()) {
-				String qn = leaf.core$().ownerAs(Context.class).qn();
-				if (!qn.isEmpty()) builder.add("parent", qn);
-			}
+			FrameBuilder builder = new FrameBuilder("enum").add("value", leaf.qn().replace(".", "-")).add("qn", leaf.qn());
 			frames.add(builder.toFrame());
 		}
 		return frames.toArray(new Frame[0]);

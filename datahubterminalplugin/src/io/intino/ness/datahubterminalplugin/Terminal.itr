@@ -32,7 +32,7 @@ def type(terminal)
 end
 
 def type(multicontext) trigger(if)
-	   if (event instanceof $type) publish(($type) event, $type+FirstUpperCase.Context.valueOf(context));
+	   if (event instanceof $type) publish(($type) event, $type+FirstUpperCase.Context.contextByQn(context));
 end
 
 def trigger(if)

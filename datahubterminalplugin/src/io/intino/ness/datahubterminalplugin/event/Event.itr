@@ -84,13 +84,17 @@ def trigger(context)
 		$enum+asEnum...[, ];
 
 		public abstract String qn();
+
+		public static Context contextByQn(String qn) {
+			return java.util.Arrays.stream(values()).filter(c -> c.qn().equals(qn)).findFirst().orElse(null);
+		}
 	}
 end
 
 def trigger(asEnum)
-	$value {
+	$value+snakeCaseToCamelCase {
 		public String qn() {
-			return ["$parent." +] this.name();
+			return "$qn";
 		}
 	}
 end
