@@ -178,6 +178,11 @@ def type(primitive & multiple) trigger(getter)
 			}
 
 			@Override
+			public boolean removeIf(java.util.function.Predicate<? super $type> filter) {
+				return removeAll(java.util.stream.IntStream.range(0, this.size()).filter(i -> filter.test(get(i))).mapToObj(this::get).collect(java.util.stream.Collectors.toList()));
+			}
+
+			@Override
 			public boolean removeAll(java.util.Collection<?> c) {
 				c.forEach(this::remove);
 				return true;
@@ -265,6 +270,11 @@ def type(component) !type(single) trigger(getter)
 				$type type = get(index);
 				remove(type);
 				return type;
+			}
+
+			@Override
+			public boolean removeIf(java.util.function.Predicate<? super $type> filter) {
+				return removeAll(java.util.stream.IntStream.range(0, this.size()).filter(i -> filter.test(get(i))).mapToObj(this::get).collect(java.util.stream.Collectors.toList()));
 			}
 
 			@Override
