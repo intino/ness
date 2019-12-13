@@ -314,7 +314,7 @@ end
 
 def type(multiple & component) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase~List(java.util.List<$type+firstUpperCase> $name+firstLowerCase) {
-		new java.util.ArrayList(this.$name+firstLowerCase~List).forEach(v -> this.$name+firstLowerCase~List.remove(v));
+		new java.util.ArrayList(this.$name+firstLowerCase~List()).forEach(v -> this.$name+firstLowerCase~List.remove(v));
 		this.$name+firstLowerCase~List.addAll($name+firstLowerCase);
 		return this;
 	}
