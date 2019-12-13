@@ -83,6 +83,11 @@ public class JmsBrokerService implements BrokerService {
 		}
 	}
 
+	@Override
+	public io.intino.datahub.broker.BrokerManager manager() {
+		return brokerManager;
+	}
+
 	private void configure() {
 		try {
 			service = new org.apache.activemq.broker.BrokerService();
@@ -193,7 +198,7 @@ public class JmsBrokerService implements BrokerService {
 		return textMessage;
 	}
 
-	final class BrokerManager {
+	final class BrokerManager implements io.intino.datahub.broker.BrokerManager {
 		private final Map<String, TopicProducer> producers = new HashMap<>();
 		private final Map<String, List<TopicConsumer>> consumers = new HashMap<>();
 		private final NessGraph graph;
@@ -269,21 +274,27 @@ public class JmsBrokerService implements BrokerService {
 			return session;
 		}
 
-		void registerConsumer(String topic, Consumer<Message> consumer) {
-			List<TopicConsumer> value = new ArrayList<>();
-			if (!this.consumers.containsKey(topic)) this.consumers.put(topic, value);
-			else value = this.consumers.get(topic);
-			TopicConsumer topicConsumer;
+		public TopicConsumer registerConsumer(String topic, Consumer<Message> consumer) {
+			List<TopicConsumer> list = new ArrayList<>();
+			if (!this.consumers.containsKey(topic)) this.consumers.putIfAbsent(topic, list);
+			else list = this.consumers.get(topic);
 			try {
-				topicConsumer = new TopicConsumer(nessSession(), topic);
+				TopicConsumer topicConsumer = new TopicConsumer(nessSession(), topic);
 				topicConsumer.listen(consumer);
-				value.add(topicConsumer);
+				list.add(topicConsumer);
+				return topicConsumer;
 			} catch (JMSException e) {
 				Logger.error(e);
 			}
+			return null;
 		}
 
-		TopicProducer getTopicProducer(String topic) {
+		public void unregisterConsumer(TopicConsumer consumer) {
+			consumer.close();
+			consumers.values().forEach(list -> list.remove(consumer));
+		}
+
+		public TopicProducer producerOf(String topic) {
 			try {
 				if (!this.producers.containsKey(topic))
 					this.producers.put(topic, new TopicProducer(nessSession(), topic));
@@ -329,7 +340,7 @@ public class JmsBrokerService implements BrokerService {
 		}
 
 		private void send(String destination, String message) {
-			final TopicProducer producer = brokerManager.getTopicProducer(destination);
+			final TopicProducer producer = brokerManager.producerOf(destination);
 			new Thread(() -> send(producer, message)).start();
 		}
 
