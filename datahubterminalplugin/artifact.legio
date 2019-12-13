@@ -12,6 +12,7 @@ Artifact(groupId = "io.intino.ness", version = "1.0.0") data-hub-terminal-plugin
 			Exclude("org.apache.activemq", "activemq-kahadb-store")
 			Exclude("org.apache.activemq", "activemq-jaas")
 			Exclude("org.apache.activemq", "activemq-runtime-config")
+		Compile("io.intino.alexandria", "json", "1.0.1")
 		Compile("io.intino", "plugin-interface", "1.0.0")
 		Compile("io.intino.itrules", "engine", "1.0.0")
 		Compile("org.apache.maven.shared", "maven-invoker", "2.0.11")

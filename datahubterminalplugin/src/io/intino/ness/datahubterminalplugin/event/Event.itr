@@ -149,7 +149,51 @@ end
 
 def type(primitive & multiple) trigger(getter)
 	public java.util.List<$type> $name+firstLowerCase() {
-		return !message.contains("$name+FirstLowerCase") ? java.util.Collections.emptyList() : java.util.Collections.unmodifiableList(java.util.Arrays.asList(message.get("$name+FirstLowerCase").as($type$[].class)));
+		return new java.util.ArrayList<$type>(java.util.Arrays.asList(message.get("$name+FirstLowerCase").as($type$[].class))) {
+			@Override
+			public boolean add($type value) {
+				super.add(value);
+				message.append("$name+FirstLowerCase", value);
+				return true;
+			}
+
+			@Override
+			public void add(int index, $type element) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public boolean remove(Object value) {
+				if (!(value instanceof $type)) return false;
+				super.remove(value);
+				message.remove("$name+FirstLowerCase", value);
+				return true;
+			}
+
+			@Override
+			public $type remove(int index) {
+				$type type = get(index);
+				remove(type);
+				return type;
+			}
+
+			@Override
+			public boolean removeAll(java.util.Collection<?> c) {
+				c.forEach(this::remove);
+				return true;
+			}
+
+			@Override
+			public boolean addAll(java.util.Collection<? extends $type> c) {
+				c.forEach(this::add);
+				return true;
+			}
+
+			@Override
+			public boolean addAll(int index, java.util.Collection<? extends $type> c) {
+				throw new UnsupportedOperationException();
+			}
+		};
 	}
 end
 
@@ -194,52 +238,52 @@ end
 
 def type(component) !type(single) trigger(getter)
 	public java.util.List<$type> $name+firstLowerCase~List() {
-        		if (this.$name+firstLowerCase~List != null) return this.$name+firstLowerCase~List;
-        		return this.$name+firstLowerCase~List = new java.util.ArrayList<$type>(message.components("$type").stream().map(c -> new $type(c)).collect(java.util.stream.Collectors.toList())) {
-        			@Override
-        			public boolean add($type element) {
-        				super.add(element);
-        				message.add(element.toMessage());
-        				return true;
-        			}
+		if (this.$name+firstLowerCase~List != null) return this.$name+firstLowerCase~List;
+		return this.$name+firstLowerCase~List = new java.util.ArrayList<$type>(message.components("$type").stream().map(c -> new $type(c)).collect(java.util.stream.Collectors.toList())) {
+			@Override
+			public boolean add($type element) {
+				super.add(element);
+				message.add(element.toMessage());
+				return true;
+			}
 
-        			@Override
-        			public void add(int index, $type element) {
-        				throw new UnsupportedOperationException();
-        			}
+			@Override
+			public void add(int index, $type element) {
+				throw new UnsupportedOperationException();
+			}
 
-        			@Override
-        			public boolean remove(Object o) {
-        				if (!(o instanceof $type)) return false;
-        				super.remove(o);
-        				message.remove((($type) o).toMessage());
-        				return true;
-        			}
+			@Override
+			public boolean remove(Object o) {
+				if (!(o instanceof $type)) return false;
+				super.remove(o);
+				message.remove((($type) o).toMessage());
+				return true;
+			}
 
-        			@Override
-        			public $type remove(int index) {
-        				$type type = get(index);
-        				remove(type);
-        				return type;
-        			}
+			@Override
+			public $type remove(int index) {
+				$type type = get(index);
+				remove(type);
+				return type;
+			}
 
-        			@Override
-        			public boolean removeAll(java.util.Collection<?> c) {
-        				c.forEach(this::remove);
-        				return true;
-        			}
+			@Override
+			public boolean removeAll(java.util.Collection<?> c) {
+				c.forEach(this::remove);
+				return true;
+			}
 
-        			@Override
-        			public boolean addAll(java.util.Collection<? extends $type> c) {
-        				c.forEach(this::add);
-        				return true;
-        			}
+			@Override
+			public boolean addAll(java.util.Collection<? extends $type> c) {
+				c.forEach(this::add);
+				return true;
+			}
 
-        			@Override
-        			public boolean addAll(int index, java.util.Collection<? extends $type> c) {
-        				throw new UnsupportedOperationException();
-        			}
-        		};
+			@Override
+			public boolean addAll(int index, java.util.Collection<? extends $type> c) {
+				throw new UnsupportedOperationException();
+			}
+		};
 	}
 end
 
@@ -260,8 +304,8 @@ end
 
 def type(multiple & component) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase~List(java.util.List<$type+firstUpperCase> $name+firstLowerCase) {
-		this.message.components("$type").forEach(v -> this.message.remove(v));
-		$name+firstLowerCase.forEach(v -> this.message.add(v.toMessage()));
+		new java.util.ArrayList(this.$name+firstLowerCase~List).forEach(v -> $name+firstLowerCase.remove(v));
+		this.$name+firstLowerCase~List.addAll($name+firstLowerCase);
 		return this;
 	}
 end

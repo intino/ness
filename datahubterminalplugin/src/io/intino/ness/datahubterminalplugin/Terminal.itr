@@ -63,7 +63,7 @@ def type(multiContext) trigger(subscribe)
 
 	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, $type+FirstUpperCase.Context context, $type+FirstUpperCase.Context... moreContexts) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
-		eventHub.attachListener(context.qn() + ".$type", subscriberId, consumers.get(onEventReceived));
+		eventHub.attachListener(context.qn() + ".$type", consumers.get(onEventReceived));
 		for ($type+FirstUpperCase.Context c : moreContexts)
 			eventHub.attachListener(c.qn() + ".$type", consumers.get(onEventReceived));
 	}
