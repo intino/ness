@@ -149,7 +149,7 @@ end
 
 def type(primitive & multiple) trigger(getter)
 	public java.util.List<$type> $name+firstLowerCase() {
-		return new java.util.ArrayList<$type>(java.util.Arrays.asList(message.get("$name+FirstLowerCase").as($type$[].class))) {
+		return new java.util.ArrayList<$type>(message.contains("$name+FirstLowerCase") ? java.util.Arrays.asList(message.get("$name+FirstLowerCase").as($type$[].class)) : java.util.Collections.emptyList()) {
 			@Override
 			public boolean add($type value) {
 				super.add(value);
@@ -314,7 +314,7 @@ end
 
 def type(multiple & component) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase~List(java.util.List<$type+firstUpperCase> $name+firstLowerCase) {
-		new java.util.ArrayList(this.$name+firstLowerCase~List).forEach(v -> $name+firstLowerCase.remove(v));
+		new java.util.ArrayList(this.$name+firstLowerCase~List).forEach(v -> this.$name+firstLowerCase~List.remove(v));
 		this.$name+firstLowerCase~List.addAll($name+firstLowerCase);
 		return this;
 	}
