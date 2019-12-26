@@ -78,7 +78,7 @@ public class DataHub {
 
 	private void configureBroker() {
 		brokerService = graph.broker().implementation().get();
-		this.brokerSealer = new BrokerSessionSealer(this.datalake, brokerStage());
+		this.brokerSealer = new BrokerSessionSealer(this.datalake, brokerStage(), stageDirectory);
 		try {
 			brokerService.start();
 		} catch (Exception e) {

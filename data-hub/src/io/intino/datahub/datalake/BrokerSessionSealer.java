@@ -12,18 +12,19 @@ import io.intino.alexandria.message.MessageReader;
 import io.intino.alexandria.sealing.FileSessionSealer;
 import io.intino.alexandria.sealing.SessionSealer;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
+import java.nio.file.Files;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
 public class BrokerSessionSealer implements SessionSealer {
 	private final SessionSealer sealer;
 	private final File brokerStageDirectory;
+	private final File stageDirectory;
 
-	public BrokerSessionSealer(FileDatalake datalake, File brokerStageDirectory) {
+	public BrokerSessionSealer(FileDatalake datalake, File brokerStageDirectory, File stageDirectory) {
+		this.stageDirectory = stageDirectory;
 		this.sealer = new FileSessionSealer(datalake, brokerStageDirectory);
 		this.brokerStageDirectory = brokerStageDirectory;
 	}
@@ -34,8 +35,27 @@ public class BrokerSessionSealer implements SessionSealer {
 		new Thread(() -> {
 			pushTemporalSessions();
 			sealer.seal();
+			File[] files = treatedSessions();
+			if (files.length > 0) {
+				File treatedDirectory = new File(stageDirectory, "treated.broker_" + instant());
+				treatedDirectory.mkdir();
+				moveTreatedSessions(treatedSessions(), treatedDirectory);
+			}
 			Logger.info("Sealing of tanks finished successfully");
 		}).start();
+	}
+
+	private void moveTreatedSessions(File[] treatedSessions, File treatedDirectory) {
+		try {
+			for (File treatedSession : treatedSessions)
+				Files.move(treatedSession.toPath(), new File(treatedDirectory, treatedSession.getName()).toPath());
+		} catch (IOException e) {
+			Logger.error(e);
+		}
+	}
+
+	private File[] treatedSessions() {
+		return brokerStageDirectory.listFiles(f -> f.isFile() && f.getName().endsWith(".treated"));
 	}
 
 	private void pushTemporalSessions() {
@@ -53,5 +73,10 @@ public class BrokerSessionSealer implements SessionSealer {
 		} catch (FileNotFoundException e) {
 			Logger.error(e);
 		}
+	}
+
+	private String instant() {
+		String instant = Instant.now().toString().replace(":", "-");
+		return instant.substring(0, instant.indexOf("."));
 	}
 }
