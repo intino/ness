@@ -84,6 +84,7 @@ def trigger(hasBpm)
 		<groupId>io.intino.alexandria</groupId>
 		<artifactId>bpm-framework</artifactId>
 		<version>1.0.1</version>
+		<scope>provided</scope>
 	</dependency>
 end
 
