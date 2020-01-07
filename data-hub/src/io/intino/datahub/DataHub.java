@@ -6,7 +6,7 @@ import io.intino.alexandria.sealing.FileSessionSealer;
 import io.intino.alexandria.sealing.SessionSealer;
 import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.broker.jms.JmsBrokerService;
-import io.intino.datahub.datalake.BrokerSessionSealer;
+import io.intino.datahub.datalake.BrokerSessions;
 import io.intino.datahub.graph.NessGraph;
 
 import java.io.File;
@@ -17,7 +17,7 @@ public class DataHub {
 	private FileDatalake datalake;
 	private BrokerService brokerService;
 	private SessionSealer sessionSealer;
-	private BrokerSessionSealer brokerSealer;
+	private BrokerSessions brokerSessions;
 
 	public DataHub(NessGraph graph, File stageDirectory) {
 		this.graph = graph;
@@ -55,8 +55,8 @@ public class DataHub {
 		return sessionSealer;
 	}
 
-	public SessionSealer brokerSessionSealer() {
-		return brokerSealer;
+	public BrokerSessions brokerSessions() {
+		return brokerSessions;
 	}
 
 	public BrokerService brokerService() {
@@ -78,7 +78,7 @@ public class DataHub {
 
 	private void configureBroker() {
 		brokerService = graph.broker().implementation().get();
-		this.brokerSealer = new BrokerSessionSealer(this.datalake, brokerStage(), stageDirectory);
+		this.brokerSessions = new BrokerSessions(brokerStage(), stageDirectory);
 		try {
 			brokerService.start();
 		} catch (Exception e) {
