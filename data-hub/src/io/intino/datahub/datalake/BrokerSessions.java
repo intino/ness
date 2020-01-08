@@ -32,17 +32,17 @@ public class BrokerSessions {
 
 	private void pushTemporalSessions() {
 		try {
+			SessionHandler handler = new SessionHandler(brokerStageDirectory);
 			for (File file : Objects.requireNonNull(brokerStageDirectory.listFiles(f -> f.getName().endsWith(".inl")))) {
 				String name = file.getName().replace(".inl", "");
 				String[] split = name.split("#");
-				SessionHandler handler = new SessionHandler(brokerStageDirectory);
 				EventSession eventSession = handler.createEventSession();
 				for (Message message : new MessageReader(new BufferedInputStream(new FileInputStream(file))))
 					eventSession.put(split[0], new Timetag(split[1]), new Event(message));
 				eventSession.close();
-				handler.pushTo(stageDirectory);
 				file.delete();
 			}
+			new SessionHandler(brokerStageDirectory).pushTo(stageDirectory);
 		} catch (FileNotFoundException e) {
 			Logger.error(e);
 		}
