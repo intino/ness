@@ -25,10 +25,9 @@ public class BrokerSessions {
 
 	public void push() {
 		Logger.info("Pushing broker events");
-		new Thread(() -> {
-			pushTemporalSessions();
-			Logger.info("Pushed broker events");
-		}).start();
+		pushTemporalSessions();
+		Logger.info("Pushed broker events");
+
 	}
 
 	private void pushTemporalSessions() {
@@ -36,7 +35,7 @@ public class BrokerSessions {
 			for (File file : Objects.requireNonNull(brokerStageDirectory.listFiles(f -> f.getName().endsWith(".inl")))) {
 				String name = file.getName().replace(".inl", "");
 				String[] split = name.split("#");
-				SessionHandler handler = new SessionHandler();
+				SessionHandler handler = new SessionHandler(brokerStageDirectory);
 				EventSession eventSession = handler.createEventSession();
 				for (Message message : new MessageReader(new BufferedInputStream(new FileInputStream(file))))
 					eventSession.put(split[0], new Timetag(split[1]), new Event(message));
