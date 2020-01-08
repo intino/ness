@@ -1,5 +1,6 @@
 package io.intino.datahub.datalake;
 
+import io.intino.alexandria.Session;
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.event.Event;
 import io.intino.alexandria.ingestion.EventSession;
@@ -12,7 +13,9 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.Objects;
+import java.util.Arrays;
+
+import static java.util.Objects.requireNonNull;
 
 public class BrokerSessions {
 	private final File brokerStageDirectory;
@@ -33,7 +36,7 @@ public class BrokerSessions {
 	private void pushTemporalSessions() {
 		try {
 			SessionHandler handler = new SessionHandler(brokerStageDirectory);
-			for (File file : Objects.requireNonNull(brokerStageDirectory.listFiles(f -> f.getName().endsWith(".inl")))) {
+			for (File file : requireNonNull(brokerStageDirectory.listFiles(f -> f.getName().endsWith(".inl")))) {
 				String name = file.getName().replace(".inl", "");
 				String[] split = name.split("#");
 				EventSession eventSession = handler.createEventSession();
@@ -43,6 +46,7 @@ public class BrokerSessions {
 				file.delete();
 			}
 			new SessionHandler(brokerStageDirectory).pushTo(stageDirectory);
+			Arrays.stream(requireNonNull(brokerStageDirectory.listFiles(f -> f.getName().endsWith(Session.EventSessionExtension)))).forEach(File::delete);
 		} catch (FileNotFoundException e) {
 			Logger.error(e);
 		}
