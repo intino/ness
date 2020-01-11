@@ -266,7 +266,7 @@ public class JmsBrokerService implements BrokerService {
 		}
 
 		private void register(Datalake.Tank t, Scale scale, Datalake.Context c) {
-			brokerManager.registerConsumer(c.qn() + "." + t.event().name$(), new TopicSaver(brokerStage, c.qn() + "." + t.name$(), scale).create());
+			brokerManager.registerConsumer((!c.qn().isEmpty() ? c.qn() + "." : "") + t.event().name$(), new TopicSaver(brokerStage, c.qn() + "." + t.name$(), scale).create());
 		}
 
 		private Session nessSession() {
