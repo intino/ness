@@ -76,6 +76,10 @@ class TerminalPublisher {
 		}
 	}
 
+	private String terminalNameArtifact() {
+		return Formatters.firstLowerCase(Formatters.camelCaseToSnakeCase().format(terminal.name$()).toString());
+	}
+
 	private Map<String, Set<String>> eventContexts() {
 		Map<String, Set<String>> eventContexts = terminal.publish() == null ? new HashMap<>() : eventContextOf(terminal.publish().tanks());
 		if (terminal.subscribe() == null) return eventContexts;
@@ -129,7 +133,7 @@ class TerminalPublisher {
 	}
 
 	private void mvn(String goal) throws IOException, MavenInvocationException {
-		final File pom = createPom(root, basePackage, terminal.name$(), conf.artifact().version());
+		final File pom = createPom(root, basePackage, terminalNameArtifact(), conf.artifact().version());
 		final InvocationResult result = invoke(pom, goal);
 		if (result != null && result.getExitCode() != 0) {
 			if (result.getExecutionException() != null)
