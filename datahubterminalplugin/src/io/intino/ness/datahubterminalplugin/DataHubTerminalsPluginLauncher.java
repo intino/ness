@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	@Override
@@ -36,10 +37,23 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		if (resDirectory == null) return;
 		String[] stashes = Arrays.stream(Objects.requireNonNull(resDirectory.listFiles(f -> f.getName().endsWith(".stash")))).map(f -> f.getName().replace(".stash", "")).toArray(String[]::new);
 		Graph graph = new Graph(new FileSystemStore(resDirectory)).loadStashes(stashes);
-		publishAccessor(graph.as(NessGraph.class), tempDir);
+		publishOntology(graph.as(NessGraph.class), tempDir);
+		publishTerminals(graph.as(NessGraph.class), tempDir);
 	}
 
-	private void publishAccessor(NessGraph nessGraph, File tempDir) {
+	private void publishOntology(NessGraph nessGraph, File tempDir) {
+		try {
+			AtomicBoolean published = new AtomicBoolean(true);
+			published.set(new OntologyPublisher(new File(tempDir, "ontology"), eventTanks(nessGraph), configuration(), systemProperties(), invokedPhase, logger()).publish() & published.get());
+			if (published.get() && notifier() != null)
+				notifier().notify("Ontology " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name$()).toString().toLowerCase(), "ontology", configuration().artifact().version()));
+			if (published.get()) FileUtils.deleteDirectory(tempDir);
+		} catch (IOException e) {
+			logger().println(e.getMessage());
+		}
+	}
+
+	private void publishTerminals(NessGraph nessGraph, File tempDir) {
 		try {
 			AtomicBoolean published = new AtomicBoolean(true);
 			nessGraph.terminalList().forEach(terminal -> {
@@ -72,6 +86,10 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			Logger.error(e);
 			return new File("");
 		}
+	}
+
+	private List<Tank.Event> eventTanks(NessGraph nessGraph) {
+		return nessGraph.datalake().tankList().stream().filter(Tank::isEvent).map(Tank::asEvent).collect(Collectors.toList());
 	}
 
 	private List<Tank.Event> tanks(Terminal terminal) {

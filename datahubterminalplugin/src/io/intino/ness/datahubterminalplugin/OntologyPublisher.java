@@ -1,11 +1,8 @@
 package io.intino.ness.datahubterminalplugin;
 
-import com.google.gson.Gson;
-import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.graph.Datalake.Context;
 import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.datahub.graph.Event;
-import io.intino.datahub.graph.Terminal;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.legio.graph.LegioGraph;
@@ -17,13 +14,10 @@ import org.apache.maven.shared.invoker.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.Files;
 import java.util.*;
-import java.util.stream.Collectors;
 
-class TerminalPublisher {
+class OntologyPublisher {
 	private final File root;
-	private final Terminal terminal;
 	private final LegioGraph conf;
 	private final PluginLauncher.SystemProperties systemProperties;
 	private final String basePackage;
@@ -31,9 +25,8 @@ class TerminalPublisher {
 	private final PrintStream logger;
 	private List<Tank.Event> tanks;
 
-	TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, LegioGraph configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
+	OntologyPublisher(File root, List<Tank.Event> tanks, LegioGraph configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
-		this.terminal = terminal;
 		this.tanks = tanks;
 		this.conf = configuration;
 		this.systemProperties = systemProperties;
@@ -57,61 +50,12 @@ class TerminalPublisher {
 		File srcDirectory = new File(root, "src");
 		srcDirectory.mkdirs();
 		Map<Event, Context> eventContextMap = collectEvents(tanks);
-		new TerminalRenderer(terminal, eventContextMap, srcDirectory, basePackage).render();
 		eventContextMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
-		writeManifest(resDirectory);
 		return true;
 	}
 
-	private void writeManifest(File srcDirectory) {
-		List<String> publish = terminal.publish() != null ? terminal.publish().tanks().stream().map(t -> t.asTank().event().name$()).collect(Collectors.toList()) : Collections.emptyList();
-		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().tanks().stream().map(t -> t.asTank().event().name$()).collect(Collectors.toList()) : Collections.emptyList();
-		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses(), eventContexts());
-		try {
-			Files.write(new File(srcDirectory, "terminal.mf").toPath(), new Gson().toJson(manifest).getBytes());
-		} catch (IOException e) {
-			Logger.error(e);
-		}
-	}
-
-	private String terminalNameArtifact() {
-		return Formatters.firstLowerCase(Formatters.camelCaseToSnakeCase().format(terminal.name$()).toString());
-	}
-
-	private Map<String, Set<String>> eventContexts() {
-		Map<String, Set<String>> eventContexts = terminal.publish() == null ? new HashMap<>() : eventContextOf(terminal.publish().tanks());
-		if (terminal.subscribe() == null) return eventContexts;
-		Map<String, Set<String>> subscribeEventContexts = eventContextOf(terminal.subscribe().tanks());
-		for (String eventType : subscribeEventContexts.keySet()) {
-			if (!eventContexts.containsKey(eventType)) eventContexts.put(eventType, new HashSet<>());
-			eventContexts.get(eventType).addAll(subscribeEventContexts.get(eventType));
-		}
-		return eventContexts;
-	}
-
-	private Map<String, Set<String>> eventContextOf(List<Tank.Event> tanks) {
-		return tanks.stream().
-				collect(Collectors.toMap(t -> t.asTank().event().name$(),
-						tank -> tank.asTank().isContextual() ? tank.asTank().asContextual().context().leafs().stream().map(Context::qn).collect(Collectors.toSet()) : Collections.emptySet(),
-						(a, b) -> b));
-	}
-
-	private Map<String, String> tankClasses() {
-		Map<String, String> tankClasses = new HashMap<>();
-		if (terminal.publish() != null)
-			terminal.publish().tanks().forEach(t -> tankClasses.putIfAbsent(t.asTank().event().name$(), basePackage + ".events." + t.asTank().event().name$()));
-		if (terminal.subscribe() != null)
-			terminal.subscribe().tanks().forEach(t -> tankClasses.putIfAbsent(t.asTank().event().name$(), basePackage + ".events." + t.asTank().event().name$()));
-		if (terminal.allowsBpmIn() != null) {
-			Context context = terminal.allowsBpmIn().context();
-			String statusQn = terminal.allowsBpmIn().processStatusClass();
-			String statusClassName = statusQn.substring(statusQn.lastIndexOf(".") + 1);
-			tankClasses.put((context != null ? context.qn() + "." : "") + statusClassName, statusQn);
-		}
-		return tankClasses;
-	}
 
 	private Map<Event, Context> collectEvents(List<Tank.Event> tanks) {
 		Map<Event, Context> events = new HashMap<>();
@@ -133,7 +77,7 @@ class TerminalPublisher {
 	}
 
 	private void mvn(String goal) throws IOException, MavenInvocationException {
-		final File pom = createPom(root, basePackage, terminalNameArtifact(), conf.artifact().version());
+		final File pom = createPom(root, basePackage, "ontology", conf.artifact().version());
 		final InvocationResult result = invoke(pom, goal);
 		if (result != null && result.getExitCode() != 0) {
 			if (result.getExecutionException() != null)
@@ -170,8 +114,7 @@ class TerminalPublisher {
 	private File createPom(File root, String group, String artifact, String version) {
 		final FrameBuilder builder = new FrameBuilder("pom").add("group", group).add("artifact", artifact).add("version", version);
 		conf.repositoryList().forEach(r -> buildRepoFrame(builder, r));
-		builder.add("ontology", new FrameBuilder("ontology").add("group", group).add("artifact", "ontology").add("version", version));
-		if (terminal.allowsBpmIn() != null) builder.add("hasBpm", ";");
+		builder.add("event", new FrameBuilder());
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new AccessorPomTemplate().render(builder.toFrame()));
 		return pomFile;

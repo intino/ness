@@ -61,14 +61,32 @@ def type(pom)
 	</distributionManagement>
 
 	<dependencies>
-		<dependency>
-			<groupId>io.intino.alexandria</groupId>
-			<artifactId>terminal-jms</artifactId>
-			<version>1.0.0</version>
-		</dependency>
+		$event
+		$ontology
 		$hasBpm
 	</dependencies>
 </project>
+end
+
+def trigger(event)
+	<dependency>
+		<groupId>io.intino.alexandria</groupId>
+		<artifactId>event</artifactId>
+		<version>1.0.0</version>
+	</dependency>
+end
+
+def trigger(ontology)
+	<dependency>
+		<groupId>io.intino.alexandria</groupId>
+		<artifactId>terminal-jms</artifactId>
+		<version>1.0.0</version>
+	</dependency>
+	<dependency>
+		<groupId>$group+lowercase</groupId>
+		<artifactId>$artifact+lowercase</artifactId>
+		<version>$version</version>
+	</dependency>
 end
 
 def type(repository) type(Distribution) trigger(distribution)
