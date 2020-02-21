@@ -1,6 +1,7 @@
 package io.intino.ness.datahubterminalplugin;
 
 import com.google.gson.Gson;
+import io.intino.Configuration;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.graph.Datalake.Context;
 import io.intino.datahub.graph.Datalake.Tank;
@@ -8,9 +9,6 @@ import io.intino.datahub.graph.Event;
 import io.intino.datahub.graph.Terminal;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
-import io.intino.legio.graph.LegioGraph;
-import io.intino.legio.graph.Repository;
-import io.intino.ness.datahubterminalplugin.event.EventRenderer;
 import io.intino.plugin.PluginLauncher;
 import org.apache.maven.shared.invoker.*;
 
@@ -24,20 +22,20 @@ import java.util.stream.Collectors;
 class TerminalPublisher {
 	private final File root;
 	private final Terminal terminal;
-	private final LegioGraph conf;
+	private final Configuration conf;
 	private final PluginLauncher.SystemProperties systemProperties;
 	private final String basePackage;
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
 	private List<Tank.Event> tanks;
 
-	TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, LegioGraph configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
+	TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, Configuration configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
 		this.terminal = terminal;
 		this.tanks = tanks;
 		this.conf = configuration;
 		this.systemProperties = systemProperties;
-		this.basePackage = configuration.artifact().groupId().toLowerCase() + "." + Formatters.snakeCaseToCamelCase().format(configuration.artifact().name$()).toString().toLowerCase();
+		this.basePackage = configuration.artifact().groupId().toLowerCase() + "." + Formatters.snakeCaseToCamelCase().format(configuration.artifact().name()).toString().toLowerCase();
 		this.invokedPhase = invokedPhase;
 		this.logger = logger;
 	}
@@ -58,7 +56,6 @@ class TerminalPublisher {
 		srcDirectory.mkdirs();
 		Map<Event, Context> eventContextMap = collectEvents(tanks);
 		new TerminalRenderer(terminal, eventContextMap, srcDirectory, basePackage).render();
-		eventContextMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
 		writeManifest(resDirectory);
@@ -169,7 +166,7 @@ class TerminalPublisher {
 
 	private File createPom(File root, String group, String artifact, String version) {
 		final FrameBuilder builder = new FrameBuilder("pom").add("group", group).add("artifact", artifact).add("version", version);
-		conf.repositoryList().forEach(r -> buildRepoFrame(builder, r));
+		conf.repositories().forEach(r -> buildRepoFrame(builder, r));
 		builder.add("ontology", new FrameBuilder("ontology").add("group", group).add("artifact", "ontology").add("version", version));
 		if (terminal.allowsBpmIn() != null) builder.add("hasBpm", ";");
 		final File pomFile = new File(root, "pom.xml");
@@ -177,18 +174,18 @@ class TerminalPublisher {
 		return pomFile;
 	}
 
-	private void buildRepoFrame(FrameBuilder builder, Repository r) {
-		builder.add("repository", r.releaseList().stream().map(release -> createRepositoryFrame(r, release)).toArray(Frame[]::new));
+	private void buildRepoFrame(FrameBuilder builder, Configuration.Repository r) {
+		builder.add("repository", createRepositoryFrame(r));
 	}
 
-	private Frame createRepositoryFrame(Repository repository, Repository.Release release) {
-		return new FrameBuilder("repository", isDistribution(release) ? "distribution" : "release").
+	private Frame createRepositoryFrame(Configuration.Repository repository) {
+		return new FrameBuilder("repository", isDistribution(repository) ? "distribution" : "release").
 				add("name", repository.identifier()).
 				add("random", UUID.randomUUID().toString()).
-				add("url", release.url()).toFrame();
+				add("url", repository.url()).toFrame();
 	}
 
-	private boolean isDistribution(Repository.Release release) {
-		return conf.artifact().distribution() != null && release.equals(conf.artifact().distribution().release());
+	private boolean isDistribution(Configuration.Repository repository) {
+		return conf.artifact().distribution() != null && repository.equals(conf.artifact().distribution().release());
 	}
 }

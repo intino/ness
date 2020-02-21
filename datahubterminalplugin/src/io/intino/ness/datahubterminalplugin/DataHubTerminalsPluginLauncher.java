@@ -23,7 +23,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	@Override
 	public void run() {
 		if (invokedPhase.ordinal() < 2) return;
-		logger().println("Building " + configuration().artifact().name$() + " terminal");
+		logger().println("Building " + configuration().artifact().name() + " terminal");
 		File tempDir = tempDirectory();
 		run(tempDir);
 	}
@@ -41,12 +41,12 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		publishTerminals(graph.as(NessGraph.class), tempDir);
 	}
 
-	private void publishOntology(NessGraph nessGraph, File tempDir) {
+	private void publishOntology(NessGraph graph, File tempDir) {
 		try {
 			AtomicBoolean published = new AtomicBoolean(true);
-			published.set(new OntologyPublisher(new File(tempDir, "ontology"), eventTanks(nessGraph), configuration(), systemProperties(), invokedPhase, logger()).publish() & published.get());
+			published.set(new OntologyPublisher(new File(tempDir, "ontology"), eventTanks(graph), graph.eventList(), configuration(), systemProperties(), invokedPhase, logger()).publish() & published.get());
 			if (published.get() && notifier() != null)
-				notifier().notify("Ontology " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name$()).toString().toLowerCase(), "ontology", configuration().artifact().version()));
+				notifier().notify("Ontology " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), "ontology", configuration().artifact().version()));
 			if (published.get()) FileUtils.deleteDirectory(tempDir);
 		} catch (IOException e) {
 			logger().println(e.getMessage());
@@ -59,7 +59,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			nessGraph.terminalList().forEach(terminal -> {
 				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), systemProperties(), invokedPhase, logger()).publish() & published.get());
 				if (published.get() && notifier() != null)
-					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name$()).toString().toLowerCase(), terminal.name$(), configuration().artifact().version()));
+					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), terminal.name$(), configuration().artifact().version()));
 			});
 			if (published.get()) FileUtils.deleteDirectory(tempDir);
 		} catch (IOException e) {
