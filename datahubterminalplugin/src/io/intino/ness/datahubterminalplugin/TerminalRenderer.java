@@ -32,25 +32,26 @@ class TerminalRenderer {
 	}
 
 	private Frame createTerminalFrame() {
+		Datalake datalake = terminal.graph().datalake();
 		FrameBuilder builder = new FrameBuilder().add("terminal").add("package", basePackage).add("name", terminal.name$());
+		if (datalake != null) builder.add("scale", datalake.scale().name());
 		builder.add("event", eventWithContext.keySet().stream().map(m -> new FrameBuilder("event").add("name", m.name$()).add("type", m.name$()).toFrame()).toArray(Frame[]::new));
 		if (terminal.publish() != null)
-			for (Datalake.Tank.Event tank : terminal.publish().tanks())
-				builder.add("publish", frameOf(tank));
+			terminal.publish().tanks().forEach(tank -> builder.add("publish", frameOf(tank)));
 		if (terminal.subscribe() != null)
-			for (Datalake.Tank.Event tank : terminal.subscribe().tanks())
-				builder.add("subscribe", frameOf(tank));
-		if (terminal.allowsBpmIn() != null) {
-			Context context = terminal.allowsBpmIn().context();
-			String statusQn = terminal.allowsBpmIn().processStatusClass();
-			String statusClassName = statusQn.substring(statusQn.lastIndexOf(".") + 1);
-			Frame frame = new FrameBuilder("default").add("type", statusQn).add("typeName", statusClassName).add("channel", (context != null ? context.qn() + "." : "") + statusClassName).toFrame();
-			builder.add("subscribe", frame);
-			builder.add("publish", frame);
-			builder.add("event", new FrameBuilder("event").add("name", statusClassName).add("type", statusQn).toFrame());
-		}
-
+			terminal.subscribe().tanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
+		if (terminal.allowsBpmIn() != null) addBpm(builder);
 		return builder.toFrame();
+	}
+
+	private void addBpm(FrameBuilder builder) {
+		Context context = terminal.allowsBpmIn().context();
+		String statusQn = terminal.allowsBpmIn().processStatusClass();
+		String statusClassName = statusQn.substring(statusQn.lastIndexOf(".") + 1);
+		Frame frame = new FrameBuilder("default").add("type", statusQn).add("typeName", statusClassName).add("channel", (context != null ? context.qn() + "." : "") + statusClassName).toFrame();
+		builder.add("subscribe", frame);
+		builder.add("publish", frame);
+		builder.add("event", new FrameBuilder("event").add("name", statusClassName).add("type", statusQn).toFrame());
 	}
 
 	private Frame frameOf(Datalake.Tank.Event tank) {

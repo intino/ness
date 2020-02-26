@@ -1,33 +1,77 @@
 def type(terminal)
 	package $package+validPackage;
 
+	import io.intino.alexandria.Timetag;
+	import io.intino.alexandria.Scale;
+	import io.intino.alexandria.event.Event;
 	import $package+validPackage.events.*;
 	import java.util.List;
 
 	public class $name+snakeCaseToCamelCase+firstUpperCase {
-
+		private static final Scale scale = Scale.$scale;
+		private final File stage;
 		private final io.intino.alexandria.event.EventHub eventHub;
 		private java.util.Map<java.util.function.Consumer<?>, java.util.function.Consumer<io.intino.alexandria.event.Event>> consumers = new java.util.HashMap<>();
 
 		public static String$[] subscriptionChannels = new String$[]{$subscribe+channel};
 
-		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.event.EventHub eventHub) {
+		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.event.EventHub eventHub, java.io.File stage) {
 			this.eventHub = eventHub;
+			this.stage = stage;
 		}
 
 		public void publish(Object event, String context) {
 			$publish+if...[$NL]
 		}
 
+		public BatchSession batch(java.io.File temporalStageDirectory) {
+			return new BatchSession(temporalStageDirectory);
+		}
+
 		$publish...[$NL$NL]
 
 		$subscribe...[$NL$NL]
 
-		$event+interface...[$NL$NL]
-
 		public void stop() {
 			//eventHub.stop();
 		}
+
+		public class BatchSession {
+			private final File temporalStage;
+			private final io.intino.alexandria.ingestion.SessionHandler sessionHandler;
+			private final io.intino.alexandria.ingestion.EventSession eventSession;
+
+			public BatchSession(java.io.File temporalStage) {
+				this.temporalStage = temporalStage;
+				this.sessionHandler = new io.intino.alexandria.ingestion.SessionHandler(temporalStage);
+				this.eventSession = sessionHandler.createEventSession();
+			}
+
+			public void feed(Event event, String context) {
+                eventSession.put(tankOf(event, context), Timetag.of(event.ts(), scale), event);
+			}
+
+			public void push() {
+				sessionHandler.pushTo($name+snakeCaseToCamelCase+firstUpperCase.this.stage);
+				//eventHub.sendEvent("service.ness.push", new Event(new Message("Push").set("stage", temporalStage.getName())));
+			}
+
+			public void seal() {
+				Thread thread = Thread.currentThread();
+				eventHub.requestResponse("service.ness.seal", new Event(new Message("Seal").set("stage", temporalStage.getName())).ts(Instant.now()).toString(), s -> thread.notify());
+				try {
+					thread.wait();
+				} catch (InterruptedException e) {
+					io.intino.alexandria.Logger.error(e);
+				}
+            }
+
+            private String tankOf(Event event, String context) {
+            	$publish+tankOf...[$NL]
+            }
+		}
+
+		$event+interface...[$NL$NL]
 	}
 end
 
@@ -37,6 +81,14 @@ end
 
 def trigger(if)
 	   if (event instanceof $type) publish(($type) event);
+end
+
+def type(multicontext) trigger(tankOf)
+	   if (event instanceof $type) $type+FirstUpperCase.Context.contextByQn(context).qn() + ".$type");
+end
+
+def trigger(tankOf)
+	   if (event instanceof $type) return "$channel";
 end
 
 def type(multicontext) trigger(publish)

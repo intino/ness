@@ -26,17 +26,28 @@ public class DataHubTestBox extends AbstractBox {
 		return this;
 	}
 
-	public io.intino.alexandria.core.Box open() {
-		super.open();
-		dataHub.start();
-		return this;
+	@Override
+	protected void beforeStart() {
+
+	}
+
+	@Override
+	protected void afterStart() {
+
+	}
+
+	@Override
+	protected void beforeStop() {
+
+	}
+
+	@Override
+	protected void afterStop() {
+
 	}
 
 	public DataHub dataHub() {
 		return dataHub;
 	}
 
-	public void close() {
-		super.close();
-	}
 }

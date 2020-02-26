@@ -7,15 +7,18 @@ Artifact("io.intino", "3.0.0") data-hub as Product
 		Compile("io.intino.alexandria", "jms", "1.2.0")
 		Compile("io.intino.alexandria", "ingestion", "2.0.0")
 		Compile("io.intino.alexandria", "sealing", "2.0.0")
+		Compile("io.intino.alexandria", "scheduler-framework", "1.0.2") > Exclude("org.slf4j", "slf4j-api")
+
 		Compile("org.apache.activemq", "activemq-broker", "5.15.8")
 		Compile("org.apache.activemq", "activemq-mqtt", "5.15.8")
 		Compile("org.apache.activemq", "activemq-kahadb-store", "5.15.8")
 		Compile("org.apache.activemq", "activemq-jaas", "5.15.8")
 		Compile("org.apache.activemq", "activemq-runtime-config", "5.15.8")
+		Compile("commons-io", "commons-io", "2.6")
 		Test("junit", "junit", "LATEST")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true)
-	Distribution(intino.frameworks, intino.languages)
+	Distribution(intino.frameworks, language= intino.languages)
 
 Repository("intino-maven") intino
 	Release("https://artifactory.intino.io/artifactory/releases")

@@ -8,6 +8,8 @@ import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.broker.jms.JmsBrokerService;
 import io.intino.datahub.datalake.BrokerSessions;
 import io.intino.datahub.graph.NessGraph;
+import io.intino.datahub.service.jms.NessService;
+import io.intino.datahub.service.scheduling.Sentinels;
 
 import java.io.File;
 
@@ -18,6 +20,8 @@ public class DataHub {
 	private BrokerService brokerService;
 	private SessionSealer sessionSealer;
 	private BrokerSessions brokerSessions;
+	private NessService nessService;
+	private Sentinels sentinels;
 
 	public DataHub(NessGraph graph, File stageDirectory) {
 		this.graph = graph;
@@ -33,7 +37,11 @@ public class DataHub {
 
 	public void start() {
 		if (graph.datalake() != null) configureDatalake();
-		if (graph.broker() != null) configureBroker();
+		if (graph.broker() != null) {
+			configureBroker();
+			nessService = new NessService(this);
+		}
+		sentinels = new Sentinels(this);
 	}
 
 	public void stop() {
@@ -45,6 +53,7 @@ public class DataHub {
 				Logger.error(e);
 			}
 		}
+		sentinels.stop();
 	}
 
 	public FileDatalake datalake() {
@@ -84,5 +93,21 @@ public class DataHub {
 		} catch (Exception e) {
 			Logger.error(e);
 		}
+	}
+
+	public NessGraph graph() {
+		return graph;
+	}
+
+	public File backupDirectory() {
+		return null;
+	}
+
+	public File datalakeBackupDirectory() {
+		return null;
+	}
+
+	public File sessionsBackupDirectory() {
+		return null;
 	}
 }
