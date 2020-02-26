@@ -8,6 +8,8 @@
       <sourceFolder url="file://$MODULE_DIR$/test-res" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/temp/first/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/temp/ontology/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/temp/generadorHub/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/temp/contratacionHub/src" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
