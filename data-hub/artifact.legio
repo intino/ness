@@ -18,6 +18,7 @@ Artifact("io.intino", "4.0.0") data-hub as Product
 		Test("junit", "junit", "LATEST")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true)
+		attachDoc =false
 	Distribution(intino.frameworks, language= intino.languages)
 
 Repository("intino-maven") intino
