@@ -1,0 +1,152 @@
+def type(terminal)
+	package $package+validPackage;
+
+	import io.intino.alexandria.Timetag;
+	import io.intino.alexandria.Scale;
+	import io.intino.alexandria.event.Event;
+	import $package+validPackage.events.*;
+	import java.util.List;
+
+	public class $name+snakeCaseToCamelCase+firstUpperCase {
+		private static final Scale scale = Scale.$scale;
+		private final io.intino.alexandria.event.EventHub eventHub;
+		private java.util.Map<java.util.function.Consumer<?>, java.util.function.Consumer<io.intino.alexandria.event.Event>> consumers = new java.util.HashMap<>();
+
+		public static String$[] subscriptionChannels = new String$[]{$subscribe+channel};
+
+		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.event.EventHub eventHub) {
+			this.eventHub = eventHub;
+		}
+
+		public void publish(Object event, String context) {
+			$publish+if...[$NL]
+		}
+
+		public BatchSession batch(java.io.File dataHubStageDirectory, java.io.File temporalStageDirectory) {
+			return new BatchSession(dataHubStageDirectory, temporalStageDirectory);
+		}
+
+		$publish...[$NL$NL]
+
+		$subscribe...[$NL$NL]
+
+		public void stop() {
+			//eventHub.stop();
+		}
+
+		public class BatchSession {
+			private final java.io.File dataHubStage;
+			private final java.io.File temporalStage;
+			private final io.intino.alexandria.ingestion.SessionHandler sessionHandler;
+			private final io.intino.alexandria.ingestion.EventSession eventSession;
+
+			public BatchSession(java.io.File dataHubStage, java.io.File temporalStage) {
+				this.dataHubStage = dataHubStage;
+				this.temporalStage = temporalStage;
+				this.sessionHandler = new io.intino.alexandria.ingestion.SessionHandler(temporalStage);
+				this.eventSession = sessionHandler.createEventSession();
+			}
+
+			public void feed(Event event, String context) {
+                eventSession.put(tankOf(event, context), Timetag.of(event.ts(), scale), event);
+			}
+
+			public void push() {
+				sessionHandler.pushTo(this.dataHubStage);
+				//eventHub.sendEvent("service.ness.push", new Event(new io.intino.alexandria.message.Message("Push").set("stage", temporalStage.getName())));
+			}
+
+			public void seal() {
+				Thread thread = Thread.currentThread();
+				eventHub.requestResponse("service.ness.seal", new Event(new io.intino.alexandria.message.Message("Seal").set("stage", temporalStage.getName())).ts(java.time.Instant.now()).toString(), s -> thread.notify());
+				try {
+					thread.wait();
+				} catch (InterruptedException e) {
+					io.intino.alexandria.logger.Logger.error(e);
+				}
+            }
+
+            private String tankOf(Event event, String context) {
+            	$publish+tankOf...[$NL]
+            	return "";
+            }
+		}
+
+		$event+interface...[$NL$NL]
+	}
+end
+
+def type(multicontext) trigger(if)
+	   if (event instanceof $type) publish(($type) event, $type+FirstUpperCase.Context.contextByQn(context));
+end
+
+def trigger(if)
+	   if (event instanceof $type) publish(($type) event);
+end
+
+def type(multicontext) trigger(tankOf)
+	   if (event instanceof $type) return $type+FirstUpperCase.Context.contextByQn(context).qn() + ".$type";
+end
+
+def trigger(tankOf)
+	   if (event instanceof $type) return "$channel";
+end
+
+def type(multicontext) trigger(publish)
+	public void publish($type $typeName+firstLowerCase, $type+FirstUpperCase.Context context, $type+FirstUpperCase.Context... moreContexts) {
+		eventHub.sendEvent(context.qn() + ".$type", $typeName+firstLowerCase);
+		for ($type+FirstUpperCase.Context c : moreContexts)
+			eventHub.sendEvent(c.qn() + ".$type", $typeName+firstLowerCase);
+	}
+end
+
+def trigger(publish)
+	public void publish($type $typeName+firstLowerCase) {
+		eventHub.sendEvent("$channel", $typeName+firstLowerCase);
+	}
+end
+
+def type(multiContext) trigger(subscribe)
+	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, $type+FirstUpperCase.Context context, $type+FirstUpperCase.Context... moreContexts) {
+		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
+		eventHub.attachListener(context.qn() + ".$type", subscriberId, consumers.get(onEventReceived));
+		for ($type+FirstUpperCase.Context c : moreContexts)
+			eventHub.attachListener(c.qn() + ".$type", subscriberId, consumers.get(onEventReceived));
+	}
+
+	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, $type+FirstUpperCase.Context context, $type+FirstUpperCase.Context... moreContexts) {
+		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
+		eventHub.attachListener(context.qn() + ".$type", consumers.get(onEventReceived));
+		for ($type+FirstUpperCase.Context c : moreContexts)
+			eventHub.attachListener(c.qn() + ".$type", consumers.get(onEventReceived));
+	}
+
+	public void unsubscribe($type+FirstUpperCase~Consumer onEventReceived) {
+		eventHub.detachListeners(consumers.get(onEventReceived));
+	}
+end
+
+def trigger(subscribe)
+	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId) {
+		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
+		eventHub.attachListener("$channel", subscriberId, consumers.get(onEventReceived));
+	}
+
+	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived) {
+		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
+		eventHub.attachListener("$channel", consumers.get(onEventReceived));
+	}
+
+	public void unsubscribe($typeName+FirstUpperCase~Consumer onEventReceived) {
+		eventHub.detachListeners(consumers.get(onEventReceived));
+	}
+end
+
+def trigger(quoted)
+	"$this"
+end
+
+def trigger(interface)
+	public interface $name~Consumer extends java.util.function.Consumer<$type> {
+	}
+end

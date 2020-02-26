@@ -1,0 +1,105 @@
+dsl Proteo
+
+Concept:{0..1} Broker
+	var string path
+	var integer port
+	var integer secondaryPort
+	var object:{BrokerImplementation} implementation = empty
+	Concept User
+		var string name
+		var string password
+	Concept Pipe
+    	var string origin
+    	var string destination
+    Concept Bridge
+		Concept:{1..1} ExternalBus
+			var string url
+			var string user
+			var string password
+			var string sessionId
+		var word:{outgoing incoming} direction = incoming
+		var string[] topics
+
+Concept:{0..1} Datalake
+	var word:{Year Month Day Hour Minute} scale
+	var string path
+	Concept:{0..1} Backup
+    	var string cronPattern
+    	var string path
+    Concept:{0..1} Seal > var string cronPattern
+
+	Concept:Named Context
+		var string label = 'self.name$()'
+		var string qn = @qn is private reactive
+		var boolean isLeaf = @isLeaf is private reactive
+		var boolean isRoot = @isRoot is private reactive
+		var Context[] leafs = @leafs is private reactive
+		has:Named Context
+	Concept:{1..*}:AspectRequired Tank
+		var Event event
+		var boolean sortingRequired = true
+		var string qn = @qn is private reactive
+		Aspect TankType
+        	sub Set > var word:{Multivalued Singleton} type = Multivalued
+        	sub Event
+        Aspect Contextual > var Context context
+
+Concept:Named Terminal
+	Concept:{0..1} AllowsBpmIn
+		var string processStatusClass = "io.intino.alexandria.bpm.ProcessStatus" is private
+		var Datalake.Context context
+	Concept:{0..1} Publish
+		var Datalake.Tank.Event[] tanks
+	Concept:{0..1} Subscribe
+		var Datalake.Tank.Event[] tanks
+
+Concept Event
+	has Attribute
+	has Component
+	Concept Has
+		var Component element
+		var boolean multiple = true
+	Aspect ExtensionOf > var Event parent
+
+Concept Component
+	var boolean multiple = true
+	has Attribute
+	has Component
+	Concept Has
+		var Component element
+		var boolean multiple = true
+	Aspect ExtensionOf > var Component parent
+
+Concept:Named:RequiresAspect Attribute extends Data is component
+
+Concept Data is abstract
+	Aspect List
+	Aspect Type
+		var string type is reactive private
+		sub Real
+			var double defaultValue = 0
+			var string type = "Double" is reactive private
+		sub Integer
+			var integer defaultValue = 0
+			var string type = "Integer" is reactive private
+		sub LongInteger
+			var long defaultValue = 0
+			var string type = "Long" is reactive private
+		sub Bool
+			var boolean defaultValue = false
+			var string type = "Boolean" is reactive private
+		sub Text
+			var string defaultValue = empty
+			var string type = "String" is reactive private
+		sub Date
+			var string format = "dd/MM/yyyy"
+			var string type = "java.util.Date" is reactive private
+		sub DateTime
+			var string format = "dd/MM/yyyy HH:mm:ss"
+			var string type = "java.time.Instant" is reactive private
+		sub Word
+			var string type = "java.lang.Enum" is reactive private
+			var string[] values;
+		sub File
+			var string type = "io.intino.alexandria.Resource" is reactive private
+			var word:{body path form header query} in = form

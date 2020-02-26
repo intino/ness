@@ -1,0 +1,29 @@
+dsl Legio
+
+Artifact("org.example", "1.0.0") data-hub-test as Solution
+	Model("Ness", "3.0.0", "4.0.0")
+	Box(language = "Konos", version = "8.0.0")
+	Imports
+		Compile(groupId = "io.intino.alexandria", artifactId = "core-framework", version = "2.0.2")
+		Test("junit", "junit", "LATEST")
+
+	IntinoPlugin(artifact = "io.intino.ness:data-hub-accessor-plugin:1.0.0", pluginClass = "io.intino.ness.datahubaccessorplugin.DataHubAccessorsPluginLauncher")
+	Package(mode = ModulesAndLibrariesLinkedByManifest) as Runnable(mainClass = "org.example.datahubtest.box.Main")
+	Parameter("datalake_path")
+	Parameter("broker_path")
+	Parameter("api_port")
+	Parameter("stage_path")
+	Parameter(name = "workspace")
+	Parameter(name = "home")
+	Parameter(name = "home")
+
+RunConfiguration dev
+	Argument("datalake_path", "temp/datalake")
+	Argument("broker_path", "temp/broker")
+	Argument("api_port", "9000")
+	Argument("stage_path", "temp/stage")
+	Argument(name = "workspace", value = "temp/")
+
+Repository(identifier = "intino-maven")
+	Language(url = "https://artifactory.intino.io/artifactory/releases")
+	Release(url = "https://artifactory.intino.io/artifactory/releases")

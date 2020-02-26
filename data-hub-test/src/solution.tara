@@ -1,0 +1,39 @@
+dsl Ness
+
+Datalake(Month, path = "") datalake
+	Context("") Divisiones
+		Context DA;Context DB;Context DC;Context DD;Context DF;Context DG;Context DJ;Context DK;Context DL;Context DM;Context DN;Context DP;Context DU;Context DV;Context DW;Context DX;
+	Context asemed
+	Tank(criterio) criterio as Event Contextual(asemed)
+	Tank(criterioBorrado) criterioBorrado as Event Contextual(asemed)
+	Tank(criterioModificado) criterioModificado as Event Contextual(asemed)
+	Tank(criterioSentencia) criterioSentencia as Event Contextual(asemed)
+
+	Tank (usuarioConectado)usuarioConectado as Event
+	Tank (usuarioDesconectado)usuarioDesconectado as Event
+
+	Tank (ajuste) ajuste as Event Contextual(Divisiones)
+	Tank (cierreAjuste) cierreAjuste as Event Contextual(Divisiones)
+
+	Tank (activos) activos as Set(type = Singleton) Contextual(Divisiones)
+	Tank (inactivos) inactivos as Set(type = Singleton) Contextual(Divisiones)
+
+Broker(port = 63000, secondaryPort = 1884, path = "./broker")
+	User(name = "user1", password = "1234")
+
+Event criterio
+	Attribute ts as Bool
+	Attribute value as Text
+	Attribute id as Integer
+Event criterioBorrado
+Event criterioModificado
+Event criterioSentencia
+Event activos
+Event inactivos
+Event ajuste
+Event cierreAjuste
+Event usuarioConectado
+Event usuarioDesconectado
+
+Terminal  first
+	Publish(tanks = datalake.cierreAjuste)
