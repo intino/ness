@@ -14,6 +14,8 @@ Artifact("org.example", "1.0.0") data-hub-test as Solution
 	Parameter("api_port")
 	Parameter("stage_path")
 	Parameter(name = "workspace")
+	Parameter(name = "home")
+	Parameter(name = "home")
 
 RunConfiguration dev
 	Argument("datalake_path", "temp/datalake")

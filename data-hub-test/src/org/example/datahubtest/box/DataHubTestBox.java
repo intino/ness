@@ -2,7 +2,7 @@ package org.example.datahubtest.box;
 
 import io.intino.datahub.DataHub;
 import io.intino.datahub.graph.NessGraph;
-import io.intino.tara.magritte.Graph;
+import io.intino.magritte.framework.Graph;
 
 import java.io.File;
 

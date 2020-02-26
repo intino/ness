@@ -1,6 +1,6 @@
 package io.intino.datahub.graph;
 
-import io.intino.tara.magritte.Graph;
+import io.intino.magritte.framework.Graph;
 
 public class NessGraph extends AbstractGraph {
 
@@ -8,7 +8,7 @@ public class NessGraph extends AbstractGraph {
 		super(graph);
 	}
 
-	public NessGraph(io.intino.tara.magritte.Graph graph, NessGraph wrapper) {
+	public NessGraph(io.intino.magritte.framework.Graph graph, NessGraph wrapper) {
 		super(graph, wrapper);
 	}
 }

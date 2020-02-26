@@ -72,9 +72,6 @@
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-spring:5.15.8" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-pool:5.15.8" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-jms-pool:5.15.8" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.tara:magritte:3.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.tara:io:3.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.tara:language:1.2.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:jms:1.2.0" level="project" />
     <orderEntry type="module" module-name="data-hub" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:2.0.0" level="project" />
@@ -94,5 +91,8 @@
     <orderEntry type="library" name="Intino: org.quartz-scheduler:quartz-jobs:2.2.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: junit:junit:4.13" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.0.2" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.magritte:language:1.3.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.magritte:io:3.0.0" level="project" />
   </component>
 </module>

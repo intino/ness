@@ -1,7 +1,7 @@
 package io.intino.datahub.graph.rules;
 
-import io.intino.tara.lang.model.Node;
-import io.intino.tara.lang.model.rules.NodeRule;
+import io.intino.magritte.lang.model.Node;
+import io.intino.magritte.lang.model.rules.NodeRule;
 
 public class RequiresAspect implements NodeRule {
 	public boolean accept(Node node) {
