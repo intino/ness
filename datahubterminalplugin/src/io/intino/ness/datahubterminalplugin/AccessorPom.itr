@@ -83,6 +83,11 @@ def trigger(ontology)
 		<version>1.0.0</version>
 	</dependency>
 	<dependency>
+		<groupId>io.intino.alexandria</groupId>
+		<artifactId>ingestion</artifactId>
+		<version>2.0.0</version>
+	</dependency>
+	<dependency>
 		<groupId>$group+lowercase</groupId>
 		<artifactId>$artifact+lowercase</artifactId>
 		<version>$version</version>

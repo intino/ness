@@ -13,6 +13,7 @@ import static java.util.Collections.singletonList;
 
 public class PluginTest {
 	@Test
+	@Ignore
 	public void should_build_accessors() throws IOException {
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
 		launcher.
