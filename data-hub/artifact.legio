@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino", "4.0.0") data-hub as Product
+Artifact("io.intino", "4.0.0-SNAPSHOT") data-hub as Product
 	Model("Proteo", "3.0.0", "4.0.0") > outLanguage = "Ness"
 	Imports
 		Compile("io.intino.alexandria", "exceptions", "1.0.0")
@@ -17,11 +17,11 @@ Artifact("io.intino", "4.0.0") data-hub as Product
 		Compile("commons-io", "commons-io", "2.6")
 		Test("junit", "junit", "LATEST")
 	Code("io.intino.datahub")
-	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true)
-		attachDoc =false
-	Distribution(intino.frameworks, language= intino.languages)
+	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
+	Distribution(intino.frameworks, language = intino.languages, snapshot = intino.snapshots)
 
 Repository("intino-maven") intino
 	Release("https://artifactory.intino.io/artifactory/releases")
 	Release("https://artifactory.intino.io/artifactory/release-frameworks") frameworks
 	Language("https://artifactory.intino.io/artifactory/release-languages") languages
+	Snapshot("https://artifactory.intino.io/artifactory/snapshot-frameworks") snapshots

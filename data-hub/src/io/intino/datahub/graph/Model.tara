@@ -24,10 +24,15 @@ Concept:{0..1} Datalake
 	var word:{Year Month Day Hour Minute} scale
 	var string path
 	Concept:{0..1} Backup
-    	var string cronPattern
     	var string path
-    Concept:{0..1} Seal > var string cronPattern
-    
+    	Concept:{1..1} Cron
+    		var string pattern
+    		var string timeZone
+    Concept:{0..1} Seal
+    	Concept:{1..1} Cron
+			var string pattern
+			var string timeZone
+
 	Concept:Named Context
 		var string label = 'self.name$()'
 		var string qn = @qn is private reactive
