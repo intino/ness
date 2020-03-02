@@ -27,7 +27,7 @@ Concept:{0..1} Datalake
     	var string cronPattern
     	var string path
     Concept:{0..1} Seal > var string cronPattern
-
+    
 	Concept:Named Context
 		var string label = 'self.name$()'
 		var string qn = @qn is private reactive
