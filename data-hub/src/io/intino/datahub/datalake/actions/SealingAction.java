@@ -27,6 +27,16 @@ public class SealingAction {
 		started.set(false);
 	}
 
+	public synchronized void execute(String stage) {
+		if (started.get()) return;
+		started.set(true);
+		File subStage = new File(dataHub.stage(), stage);
+		if (subStage.exists()) dataHub.sessionSealer(subStage).seal();
+		Logger.info("Finished sealing of stage " + stage);
+		started.set(false);
+	}
+
+
 	private void cleanStage() {
 		for (File file : Objects.requireNonNull(dataHub.stage().listFiles())) {
 			if (file.isDirectory() && Objects.requireNonNull(file.listFiles()).length == 0) {

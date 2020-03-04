@@ -61,7 +61,11 @@ public class DataHub {
 	}
 
 	public SessionSealer sessionSealer() {
-		return sessionSealer;
+		return new FileSessionSealer(datalake, stageDirectory);
+	}
+
+	public SessionSealer sessionSealer(File stageDirectory) {
+		return new FileSessionSealer(datalake, stageDirectory);
 	}
 
 	public BrokerSessions brokerSessions() {
@@ -82,7 +86,6 @@ public class DataHub {
 
 	private void configureDatalake() {
 		this.datalake = new FileDatalake(new File(graph.datalake().path()));
-		this.sessionSealer = new FileSessionSealer(datalake, stageDirectory);
 	}
 
 	private void configureBroker() {

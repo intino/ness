@@ -94,12 +94,15 @@ def trigger(ontology)
 	</dependency>
 end
 
-def type(repository) type(Distribution) trigger(distribution)
+def type(repository & distribution) trigger(distribution)
 	<repository>
 		<id>$name</id>
 		<name>$name</name>
 		<url>$url</url>
 	</repository>
+end
+
+def trigger(distribution)
 end
 
 def trigger(hasBpm)
@@ -109,9 +112,6 @@ def trigger(hasBpm)
 		<version>1.0.1</version>
 		<scope>provided</scope>
 	</dependency>
-end
-
-def trigger(distribution)
 end
 
 def type(repository) !type(distribution) trigger(release)

@@ -13,8 +13,6 @@ Artifact("org.example", "1.0.0") data-hub-test as Solution
 	Parameter("broker_path")
 	Parameter("api_port")
 	Parameter("stage_path")
-	Parameter(name = "workspace")
-	Parameter(name = "home")
 	Parameter(name = "home")
 
 RunConfiguration dev

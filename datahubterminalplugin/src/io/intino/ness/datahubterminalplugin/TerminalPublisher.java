@@ -166,7 +166,7 @@ class TerminalPublisher {
 
 	private File createPom(File root, String group, String artifact, String version) {
 		final FrameBuilder builder = new FrameBuilder("pom").add("group", group).add("artifact", artifact).add("version", version);
-		conf.repositories().forEach(r -> buildRepoFrame(builder, r));
+		conf.repositories().stream().filter(r -> r instanceof Configuration.Repository.Release).forEach(r -> buildRepoFrame(builder, r));
 		builder.add("ontology", new FrameBuilder("ontology").add("group", group).add("artifact", "ontology").add("version", version));
 		if (terminal.allowsBpmIn() != null) builder.add("hasBpm", ";");
 		final File pomFile = new File(root, "pom.xml");
@@ -186,6 +186,9 @@ class TerminalPublisher {
 	}
 
 	private boolean isDistribution(Configuration.Repository repository) {
-		return conf.artifact().distribution() != null && repository.equals(conf.artifact().distribution().release());
+		Configuration.Repository distribution = conf.artifact().distribution().release();
+		return conf.artifact().distribution() != null &&
+				repository.identifier().equals(distribution.identifier()) &&
+				repository.url().equals(distribution.url());
 	}
 }

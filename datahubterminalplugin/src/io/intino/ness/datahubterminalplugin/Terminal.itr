@@ -68,7 +68,7 @@ def type(terminal)
 
             private String tankOf(Event event, String context) {
             	$publish+tankOf...[$NL]
-            	return "";
+            	return event.toMessage().type();
             }
 		}
 

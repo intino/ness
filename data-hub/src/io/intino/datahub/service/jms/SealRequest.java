@@ -17,13 +17,13 @@ public class SealRequest implements RequestConsumer {
 	public String accept(String request) {
 		try {
 			Message next = new MessageReader(request).next();
-			next.get("stage");
-			new SealingAction(dataHub).execute();
+			String stage = next.get("stage").data();
+			if (stage != null) new SealingAction(dataHub).execute(stage);
+			else new SealingAction(dataHub).execute();
 			return String.valueOf(true);
 		} catch (Throwable e) {
 			io.intino.alexandria.logger.Logger.error(e.getMessage(), e);
 			return null;
 		}
 	}
-
 }

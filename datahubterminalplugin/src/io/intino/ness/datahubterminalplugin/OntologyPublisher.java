@@ -113,10 +113,9 @@ class OntologyPublisher {
 		request.setJavaHome(systemProperties.javaHome);
 	}
 
-
 	private File createPom(File root, String group, String version) {
 		final FrameBuilder builder = new FrameBuilder("pom").add("group", group).add("artifact", "ontology").add("version", version);
-		conf.repositories().forEach(r -> buildRepoFrame(builder, r));
+		conf.repositories().stream().filter(r -> r instanceof Repository.Release).forEach(r -> buildRepoFrame(builder, r));
 		builder.add("event", new FrameBuilder());
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new AccessorPomTemplate().render(builder.toFrame()));
@@ -135,6 +134,9 @@ class OntologyPublisher {
 	}
 
 	private boolean isDistribution(Repository repository) {
-		return conf.artifact().distribution() != null && repository.equals(conf.artifact().distribution().release());
+		Repository distribution = conf.artifact().distribution().release();
+		return conf.artifact().distribution() != null &&
+				repository.identifier().equals(distribution.identifier()) &&
+				repository.url().equals(distribution.url());
 	}
 }
