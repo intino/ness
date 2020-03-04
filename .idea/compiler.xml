@@ -12,6 +12,8 @@
       <entry name="!?*.clj" />
       <entry name="!?*.aj" />
       <entry name="!?*.tara" />
+      <entry name="!?*.itr" />
+      <entry name="!?*.konos" />
     </wildcardResourcePatterns>
     <annotationProcessing>
       <profile name="Maven default annotation processors profile">
