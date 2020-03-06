@@ -33,13 +33,15 @@ public class Sentinels {
 				job = newJob(SealingListener.class).withIdentity("Sealing").build();
 				job.getJobDataMap().put("dataHub", dataHub);
 				Datalake.Seal.Cron cron = dataHub.graph().datalake().seal().cron();
-				scheduler.scheduleJob(job, newSet(newTrigger().withIdentity("DataHub#Sealing").withSchedule(cronSchedule(cron.pattern()).inTimeZone(TimeZone.getTimeZone(ZoneId.of(cron.timeZone())))).build(), newTrigger().startNow().build()), true);
+				String zoneId = cron.timeZone();
+				scheduler.scheduleJob(job, newSet(newTrigger().withIdentity("DataHub#Sealing").withSchedule(cronSchedule(cron.pattern()).inTimeZone(zoneId == null ? TimeZone.getDefault() : TimeZone.getTimeZone(ZoneId.of(zoneId)))).build(), newTrigger().startNow().build()), true);
 			}
 			if (dataHub.graph().datalake() != null && dataHub.graph().datalake().backup() != null) {
 				job = newJob(DatalakeBackupListener.class).withIdentity("DatalakeBackup").build();
 				job.getJobDataMap().put("dataHub", dataHub);
 				Datalake.Backup.Cron cron = dataHub.graph().datalake().backup().cron();
-				scheduler.scheduleJob(job, newSet(newTrigger().withIdentity("DataHub#DatalakeBackup").withSchedule(cronSchedule(cron.pattern()).inTimeZone(TimeZone.getTimeZone(ZoneId.of(cron.timeZone())))).build()), true);
+				String zoneId = cron.timeZone();
+				scheduler.scheduleJob(job, newSet(newTrigger().withIdentity("DataHub#DatalakeBackup").withSchedule(cronSchedule(cron.pattern()).inTimeZone(zoneId == null ? TimeZone.getDefault() : TimeZone.getTimeZone(ZoneId.of(zoneId)))).build()), true);
 			}
 			scheduler.startSchedules();
 		} catch (Exception e) {
@@ -61,13 +63,13 @@ public class Sentinels {
 		return set;
 	}
 
-	private static class DatalakeBackupListener implements ScheduledTrigger {
+	public static class DatalakeBackupListener implements ScheduledTrigger {
 		public void execute(JobExecutionContext context) {
 			new DatalakeBackupAction((DataHub) context.getMergedJobDataMap().get("dataHub")).execute();
 		}
 	}
 
-	private static class SealingListener implements ScheduledTrigger {
+	public static class SealingListener implements ScheduledTrigger {
 		public void execute(JobExecutionContext context) {
 			new SealingAction((DataHub) context.getMergedJobDataMap().get("dataHub")).execute();
 		}
