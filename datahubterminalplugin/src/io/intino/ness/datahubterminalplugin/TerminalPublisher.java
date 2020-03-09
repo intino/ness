@@ -186,9 +186,9 @@ class TerminalPublisher {
 	}
 
 	private boolean isDistribution(Configuration.Repository repository) {
+		if (conf.artifact().distribution() == null) return false;
 		Configuration.Repository distribution = conf.artifact().distribution().release();
-		return conf.artifact().distribution() != null &&
-				repository.identifier().equals(distribution.identifier()) &&
+		return repository.identifier().equals(distribution.identifier()) &&
 				repository.url().equals(distribution.url());
 	}
 }
