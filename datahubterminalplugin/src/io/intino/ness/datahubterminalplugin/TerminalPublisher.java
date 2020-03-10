@@ -166,7 +166,7 @@ class TerminalPublisher {
 
 	private File createPom(File root, String group, String artifact, String version) {
 		final FrameBuilder builder = new FrameBuilder("pom").add("group", group).add("artifact", artifact).add("version", version);
-		conf.repositories().stream().filter(r -> r instanceof Configuration.Repository.Release).forEach(r -> buildRepoFrame(builder, r));
+		conf.repositories().stream().filter(r -> r instanceof Configuration.Repository.Release).forEach(r -> buildRepoFrame(builder, r, conf.artifact().version().contains("SNAPSHOT")));
 		builder.add("ontology", new FrameBuilder("ontology").add("group", group).add("artifact", "ontology").add("version", version));
 		if (terminal.allowsBpmIn() != null) builder.add("hasBpm", ";");
 		final File pomFile = new File(root, "pom.xml");
@@ -174,21 +174,22 @@ class TerminalPublisher {
 		return pomFile;
 	}
 
-	private void buildRepoFrame(FrameBuilder builder, Configuration.Repository r) {
-		builder.add("repository", createRepositoryFrame(r));
+	private void buildRepoFrame(FrameBuilder builder, Configuration.Repository r, boolean snapshot) {
+		builder.add("repository", createRepositoryFrame(r, snapshot));
 	}
 
-	private Frame createRepositoryFrame(Configuration.Repository repository) {
-		return new FrameBuilder("repository", isDistribution(repository) ? "distribution" : "release").
+	private Frame createRepositoryFrame(Configuration.Repository repository, boolean snapshot) {
+		return new FrameBuilder("repository", isDistribution(repository, snapshot) ? "distribution" : "release").
 				add("name", repository.identifier()).
 				add("random", UUID.randomUUID().toString()).
 				add("url", repository.url()).toFrame();
 	}
 
-	private boolean isDistribution(Configuration.Repository repository) {
-		if (conf.artifact().distribution() == null) return false;
-		Configuration.Repository distribution = conf.artifact().distribution().release();
-		return repository.identifier().equals(distribution.identifier()) &&
-				repository.url().equals(distribution.url());
+	private boolean isDistribution(Configuration.Repository repository, boolean snapshot) {
+		Configuration.Distribution distribution = conf.artifact().distribution();
+		if (distribution == null) return false;
+		Configuration.Repository repo = snapshot ? distribution.snapshot() : distribution.release();
+		return repo != null && repository.identifier().equals(repo.identifier()) &&
+				repository.url().equals(repo.url());
 	}
 }
