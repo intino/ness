@@ -82,5 +82,6 @@
     <orderEntry type="library" name="Intino: io.intino.magritte:io:3.0.0" level="project" />
     <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-annotations:2.9.0" level="project" />
     <orderEntry type="library" name="Intino: commons-logging:commons-logging:1.0.3" level="project" />
+    <orderEntry type="library" name="Intino: io.intino:data-hub:4.0.0" level="project" />
   </component>
 </module>
