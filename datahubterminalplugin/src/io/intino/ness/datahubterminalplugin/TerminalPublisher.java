@@ -166,7 +166,7 @@ class TerminalPublisher {
 
 	private File createPom(File root, String group, String artifact, String version) {
 		final FrameBuilder builder = new FrameBuilder("pom").add("group", group).add("artifact", artifact).add("version", version);
-		conf.repositories().stream().filter(r -> r instanceof Configuration.Repository.Release).forEach(r -> buildRepoFrame(builder, r, conf.artifact().version().contains("SNAPSHOT")));
+		conf.repositories().stream().filter(r -> !(r instanceof Configuration.Repository.Language)).forEach(r -> buildRepoFrame(builder, r, conf.artifact().version().contains("SNAPSHOT")));
 		builder.add("ontology", new FrameBuilder("ontology").add("group", group).add("artifact", "ontology").add("version", version));
 		if (terminal.allowsBpmIn() != null) builder.add("hasBpm", ";");
 		final File pomFile = new File(root, "pom.xml");

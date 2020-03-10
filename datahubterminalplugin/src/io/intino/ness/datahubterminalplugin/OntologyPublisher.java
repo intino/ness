@@ -115,7 +115,7 @@ class OntologyPublisher {
 
 	private File createPom(File root, String group, String version) {
 		final FrameBuilder builder = new FrameBuilder("pom").add("group", group).add("artifact", "ontology").add("version", version);
-		conf.repositories().stream().filter(r -> r instanceof Repository.Release).forEach(r -> buildRepoFrame(builder, r, conf.artifact().version().contains("SNAPSHOT")));
+		conf.repositories().stream().filter(r -> !(r instanceof Repository.Language)).forEach(r -> buildRepoFrame(builder, r, conf.artifact().version().contains("SNAPSHOT")));
 		builder.add("event", new FrameBuilder());
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new AccessorPomTemplate().render(builder.toFrame()));
