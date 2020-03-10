@@ -29,7 +29,6 @@ public class PluginTest {
 	}
 
 	@Test
-	@Ignore
 	public void should_build_cesar_terminal() throws IOException {
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
 		launcher.
@@ -57,7 +56,7 @@ public class PluginTest {
 
 					@Override
 					public String name() {
-						return "cesar";
+						return "datahub";
 					}
 
 					@Override
