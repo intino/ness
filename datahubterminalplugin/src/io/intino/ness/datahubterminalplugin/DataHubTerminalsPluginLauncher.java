@@ -34,7 +34,10 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			File[] files = d.getAbsoluteFile().listFiles(f -> f.getName().endsWith(".stash"));
 			return files != null && files.length > 0;
 		}).findFirst().orElse(null);
-		if (resDirectory == null) return;
+		if (resDirectory == null) {
+			notifier().notifyError("Stashes not found. Please compile module");
+			return;
+		}
 		String[] stashes = Arrays.stream(Objects.requireNonNull(resDirectory.listFiles(f -> f.getName().endsWith(".stash")))).map(f -> f.getName().replace(".stash", "")).toArray(String[]::new);
 		Graph graph = new Graph(new FileSystemStore(resDirectory)).loadStashes(stashes);
 		publishOntology(graph.as(NessGraph.class), tempDir);
