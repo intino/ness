@@ -34,12 +34,14 @@ def type(terminal)
 			//eventHub.stop();
 		}
 
+		private static final Object monitor = new Object();
+
 		public class BatchSession {
 			private final java.io.File dataHubStage;
 			private final java.io.File temporalStage;
 			private final io.intino.alexandria.ingestion.SessionHandler sessionHandler;
 			private final io.intino.alexandria.ingestion.EventSession eventSession;
-			private static final Object monitor = new Object();
+
 
 			public BatchSession(java.io.File dataHubStage, java.io.File temporalStage) {
 				this.dataHubStage = dataHubStage;
@@ -59,9 +61,9 @@ def type(terminal)
 
 			public synchronized void seal() {
 				synchronized(monitor) {
-					eventHub.requestResponse("service.ness.seal", new Event(new io.intino.alexandria.message.Message("Seal").set("stage", temporalStage.getName())).ts(java.time.Instant.now()).toString(), s -> object.notify());
+					eventHub.requestResponse("service.ness.seal", new Event(new io.intino.alexandria.message.Message("Seal").set("stage", temporalStage.getName())).ts(java.time.Instant.now()).toString(), s -> monitor.notify());
 					try {
-						object.wait();
+						monitor.wait();
 					} catch (InterruptedException e) {
 						io.intino.alexandria.logger.Logger.error(e);
 					}
