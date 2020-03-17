@@ -183,6 +183,26 @@ public class PluginTest {
 					public ConfigurationNode owner() {
 						return null;
 					}
+				}, new Repository() {
+					@Override
+					public String identifier() {
+						return "intino-maven";
+					}
+
+					@Override
+					public String url() {
+						return "https://artifactory.intino.io/artifactory/release-libraries";
+					}
+
+					@Override
+					public Configuration root() {
+						return null;
+					}
+
+					@Override
+					public ConfigurationNode owner() {
+						return null;
+					}
 				});
 			}
 		};
