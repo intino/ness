@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
+
 @Ignore
 public class PluginTest {
 	@Test
@@ -34,6 +35,7 @@ public class PluginTest {
 				moduleStructure(new PluginLauncher.ModuleStructure(singletonList(new File(System.getProperty("user.home") + "/workspace/cesar/data-hub/src")), singletonList(new File(System.getProperty("user.home") + "/workspace/ness/datahubterminalplugin/test-res/cesar/stashes")), new File(System.getProperty("user.home") + "/workspace/ness/out/data-hub-test/")))
 				.systemProperties(new PluginLauncher.SystemProperties(new File("/Applications/IntelliJ IDEA - 2019.2.app/Contents/plugins/maven/lib/maven3/"), new File("/Library/Java/JavaVirtualMachines/jdk-11.0.4.jdk/Contents/Home")))
 				.logger(System.out)
+				.notifier(notifier())
 				.invokedPhase(PluginLauncher.Phase.INSTALL)
 				.moduleConfiguration(configuration());
 		File temp = new File("/Users/oroncal/workspace/ness/datahubterminalplugin/temp");
@@ -41,6 +43,20 @@ public class PluginTest {
 
 		temp.mkdirs();
 		launcher.run(temp);
+	}
+
+	private PluginLauncher.Notifier notifier() {
+		return new PluginLauncher.Notifier() {
+			@Override
+			public void notify(String s) {
+				System.out.println(s);
+			}
+
+			@Override
+			public void notifyError(String s) {
+				System.err.println(s);;
+			}
+		};
 	}
 
 	private Configuration configuration() {
