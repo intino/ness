@@ -1,9 +1,7 @@
 package io.intino.datahub.broker.jms;
 
 import io.intino.alexandria.Scale;
-import io.intino.alexandria.jms.JmsProducer;
-import io.intino.alexandria.jms.TopicConsumer;
-import io.intino.alexandria.jms.TopicProducer;
+import io.intino.alexandria.jms.*;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.graph.Broker;
@@ -200,7 +198,7 @@ public class JmsBrokerService implements BrokerService {
 
 	final class BrokerManager implements io.intino.datahub.broker.BrokerManager {
 		private final Map<String, TopicProducer> producers = new HashMap<>();
-		private final Map<String, List<TopicConsumer>> consumers = new HashMap<>();
+		private final Map<String, List<JmsConsumer>> consumers = new HashMap<>();
 		private final NessGraph graph;
 		private final AdvisoryManager advisoryManager;
 		private Connection connection;
@@ -220,7 +218,7 @@ public class JmsBrokerService implements BrokerService {
 		void stop() {
 			try {
 				Logger.info("Stopping bus");
-				consumers.values().forEach(c -> c.forEach(TopicConsumer::close));
+				consumers.values().forEach(c -> c.forEach(JmsConsumer::close));
 				consumers.clear();
 				producers.values().forEach(JmsProducer::close);
 				producers.clear();
@@ -255,7 +253,7 @@ public class JmsBrokerService implements BrokerService {
 						forEach(t -> {
 							Scale scale = Scale.valueOf(graph.datalake().scale().name());
 							if (!t.isContextual() || t.asContextual().context().isLeaf())
-								brokerManager.registerConsumer(t.qn(), new TopicSaver(brokerStage, t.qn(), scale).create());
+								brokerManager.registerTopicConsumer(t.qn(), new TopicSaver(brokerStage, t.qn(), scale).create());
 							else {
 								Datalake.Context context = t.asContextual().context();
 								register(t, scale, context);
@@ -266,7 +264,7 @@ public class JmsBrokerService implements BrokerService {
 		}
 
 		private void register(Datalake.Tank t, Scale scale, Datalake.Context c) {
-			brokerManager.registerConsumer(tankQn(t, c), new TopicSaver(brokerStage, tankQn(t, c), scale).create());
+			brokerManager.registerTopicConsumer(tankQn(t, c), new TopicSaver(brokerStage, tankQn(t, c), scale).create());
 		}
 
 		private Session nessSession() {
@@ -274,8 +272,8 @@ public class JmsBrokerService implements BrokerService {
 			return session;
 		}
 
-		public TopicConsumer registerConsumer(String topic, Consumer<Message> consumer) {
-			List<TopicConsumer> list = new ArrayList<>();
+		public TopicConsumer registerTopicConsumer(String topic, Consumer<Message> consumer) {
+			List<JmsConsumer> list = new ArrayList<>();
 			if (!this.consumers.containsKey(topic)) this.consumers.putIfAbsent(topic, list);
 			else list = this.consumers.get(topic);
 			try {
@@ -283,6 +281,21 @@ public class JmsBrokerService implements BrokerService {
 				topicConsumer.listen(consumer);
 				list.add(topicConsumer);
 				return topicConsumer;
+			} catch (JMSException e) {
+				Logger.error(e);
+			}
+			return null;
+		}
+
+		public QueueConsumer registerQueueConsumer(String topic, Consumer<Message> consumer) {
+			List<JmsConsumer> list = new ArrayList<>();
+			if (!this.consumers.containsKey(topic)) this.consumers.putIfAbsent(topic, list);
+			else list = this.consumers.get(topic);
+			try {
+				QueueConsumer queueConsumer = new QueueConsumer(nessSession(), topic);
+				queueConsumer.listen(consumer);
+				list.add(queueConsumer);
+				return queueConsumer;
 			} catch (JMSException e) {
 				Logger.error(e);
 			}
@@ -307,7 +320,7 @@ public class JmsBrokerService implements BrokerService {
 
 		void stopConsumersOf(String topic) {
 			if (!this.consumers.containsKey(topic)) return;
-			this.consumers.get(topic).forEach(TopicConsumer::close);
+			this.consumers.get(topic).forEach(JmsConsumer::close);
 			this.consumers.get(topic).clear();
 		}
 
@@ -331,7 +344,7 @@ public class JmsBrokerService implements BrokerService {
 
 		void start() {
 			for (Broker.Pipe pipe : pipes) {
-				brokerManager.registerConsumer(pipe.origin(), message -> send(pipe.destination(), textFrom(message)));
+				brokerManager.registerTopicConsumer(pipe.origin(), message -> send(pipe.destination(), textFrom(message)));
 				Logger.info("Pipe " + pipe.origin() + " -> " + pipe.destination() + " established");
 			}
 		}
