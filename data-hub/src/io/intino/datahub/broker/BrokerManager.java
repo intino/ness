@@ -1,6 +1,7 @@
 package io.intino.datahub.broker;
 
 import io.intino.alexandria.jms.QueueConsumer;
+import io.intino.alexandria.jms.QueueProducer;
 import io.intino.alexandria.jms.TopicConsumer;
 import io.intino.alexandria.jms.TopicProducer;
 
@@ -15,5 +16,7 @@ public interface BrokerManager {
 
 	void unregisterConsumer(TopicConsumer consumer);
 
-	TopicProducer producerOf(String topic);
+	TopicProducer topicProducerOf(String topic);
+
+	QueueProducer queueProducerOf(String queue);
 }

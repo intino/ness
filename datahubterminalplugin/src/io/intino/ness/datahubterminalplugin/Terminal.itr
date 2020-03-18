@@ -61,7 +61,12 @@ def type(terminal)
 
 			public synchronized void seal() {
 				synchronized(monitor) {
-					eventHub.requestResponse("service.ness.seal", new Event(new io.intino.alexandria.message.Message("Seal").set("stage", temporalStage.getName())).ts(java.time.Instant.now()).toString(), s -> monitor.notify());
+					eventHub.requestResponse("service.ness.seal", new Event(new io.intino.alexandria.message.Message("Seal").set("stage", temporalStage.getName())).ts(java.time.Instant.now()).toString(), s -> {
+							synchronized(monitor) {
+								monitor.notify();
+							}
+						}
+					);
 					try {
 						monitor.wait();
 					} catch (InterruptedException e) {
