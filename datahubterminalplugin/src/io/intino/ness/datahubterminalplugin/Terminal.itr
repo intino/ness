@@ -55,6 +55,7 @@ def type(terminal)
 			}
 
 			public void push() {
+				eventSession.close();
 				sessionHandler.pushTo(this.dataHubStage);
 				//eventHub.sendEvent("service.ness.push", new Event(new io.intino.alexandria.message.Message("Push").set("stage", temporalStage.getName())));
 			}
