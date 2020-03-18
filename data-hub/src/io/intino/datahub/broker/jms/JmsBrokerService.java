@@ -197,7 +197,7 @@ public class JmsBrokerService implements BrokerService {
 	}
 
 	final class BrokerManager implements io.intino.datahub.broker.BrokerManager {
-		private final Map<String, TopicProducer> producers = new HashMap<>();
+		private final Map<String, JmsProducer> producers = new HashMap<>();
 		private final Map<String, List<JmsConsumer>> consumers = new HashMap<>();
 		private final NessGraph graph;
 		private final AdvisoryManager advisoryManager;
@@ -307,11 +307,23 @@ public class JmsBrokerService implements BrokerService {
 			consumers.values().forEach(list -> list.remove(consumer));
 		}
 
-		public TopicProducer producerOf(String topic) {
+		@Override
+		public QueueProducer queueProducerOf(String queue) {
+			try {
+				if (!this.producers.containsKey(queue))
+					this.producers.put(queue, new QueueProducer(nessSession(), queue));
+				return (QueueProducer) this.producers.get(queue);
+			} catch (JMSException e) {
+				Logger.error(e.getMessage(), e);
+				return null;
+			}
+		}
+
+		public TopicProducer topicProducerOf(String topic) {
 			try {
 				if (!this.producers.containsKey(topic))
 					this.producers.put(topic, new TopicProducer(nessSession(), topic));
-				return this.producers.get(topic);
+				return (TopicProducer) this.producers.get(topic);
 			} catch (JMSException e) {
 				Logger.error(e.getMessage(), e);
 				return null;
@@ -357,7 +369,7 @@ public class JmsBrokerService implements BrokerService {
 		}
 
 		private void send(String destination, String message) {
-			final TopicProducer producer = brokerManager.producerOf(destination);
+			final TopicProducer producer = brokerManager.topicProducerOf(destination);
 			new Thread(() -> send(producer, message)).start();
 		}
 
