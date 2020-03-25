@@ -60,8 +60,6 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:zim:2.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.0.4" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:message:2.0.0" level="project" />
-    <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.8.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.0.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: junit:junit:4.13" level="project" />
     <orderEntry type="library" name="Intino: io.intino:plugin-interface:2.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino:configuration:1.0.0" level="project" />
@@ -103,9 +101,7 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:2.1.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:2.1.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:2.1.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:event:1.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:2.0.0" level="project" />
-    <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-annotations:2.9.0" level="project" />
-    <orderEntry type="library" name="Intino: commons-logging:commons-logging:1.0.3" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.0.2" level="project" />
+    <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.8.6" level="project" />
   </component>
 </module>
