@@ -12,7 +12,7 @@ public class MappersAction {
 	public io.intino.alexandria.Context context = new io.intino.alexandria.Context();
 
 	public String execute() {
-		File[] files = box.mappersDirectory().listFiles(f -> f.getName().equals(".java"));
+		File[] files = box.mappersDirectory().listFiles(f -> f.getName().endsWith(".java"));
 		if (files != null) {
 			String collect = Arrays.stream(files).map(f -> f.getName().replace(".java", "")).collect(Collectors.joining("\n"));
 			if (!collect.isEmpty()) return collect;
