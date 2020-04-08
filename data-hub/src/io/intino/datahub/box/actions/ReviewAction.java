@@ -6,6 +6,7 @@ import io.intino.datahub.datalake.regenerator.Mapper;
 import io.intino.datahub.datalake.regenerator.MapperLoader;
 import io.intino.datahub.datalake.regenerator.MapperReader;
 import io.intino.datahub.datalake.regenerator.Regenerator;
+import io.intino.datahub.graph.Datalake;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -28,7 +29,8 @@ public class ReviewAction {
 			Mapper mapper = new MapperLoader(box.configuration().home()).compileAndLoad(mapperCode);
 			File reviewsDirectory = new File(box.configuration().home(), "reviews");
 			reviewsDirectory.mkdirs();
-			File sessionsDirectory = new File(box.graph().datalake().backup().path(), "sessions");
+			Datalake.Backup backup = box.graph().datalake().backup();
+			File sessionsDirectory = backup == null ? null : new File(backup.path(), "sessions");
 			List<File> review = new Regenerator(box.datalake(), sessionsDirectory, reviewsDirectory).review(mapper);
 			started.set(false);
 			return Files.readString(review.get(0).toPath());

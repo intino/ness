@@ -24,9 +24,13 @@ public class Regenerator {
 		Logger.info("Executing Regeneration review with mapper " + mapper.getClass().getSimpleName());
 		File datalakeReport = new DatalakeRegenerator(datalake, reviewsDirectory, ts).review(mapper);
 		Logger.info("Finished review on datalake");
-		File sessionsReport = new SessionRegenerator(datalake, sessionsBackupDirectory, reviewsDirectory, ts).review(mapper);
-		Logger.info("Finished Regeneration review");
-		return Arrays.asList(datalakeReport, sessionsReport);
+		if (sessionsBackupDirectory != null) {
+			File sessionsReport = new SessionRegenerator(datalake, sessionsBackupDirectory, reviewsDirectory, ts).review(mapper);
+			Logger.info("Finished Regeneration review");
+			return Arrays.asList(datalakeReport, sessionsReport);
+		}
+		Logger.info("Finished Regeneration revise");
+		return List.of(datalakeReport);
 	}
 
 	public List<File> revise(Mapper mapper) {
@@ -34,9 +38,13 @@ public class Regenerator {
 		Logger.info("Executing Regeneration revise with mapper " + mapper.getClass().getSimpleName());
 		File datalakeReport = new DatalakeRegenerator(datalake, reviewsDirectory, ts).revise(mapper);
 		Logger.info("Finished revise on datalake");
-		File sessionsReport = new SessionRegenerator(datalake, sessionsBackupDirectory, reviewsDirectory, ts).revise(mapper);
-		Logger.info("Finished Regeneration");
-		return Arrays.asList(datalakeReport, sessionsReport);
+		if (sessionsBackupDirectory != null) {
+			File sessionsReport = new SessionRegenerator(datalake, sessionsBackupDirectory, reviewsDirectory, ts).revise(mapper);
+			Logger.info("Finished Regeneration revise");
+			return Arrays.asList(datalakeReport, sessionsReport);
+		}
+		Logger.info("Finished Regeneration revise");
+		return List.of(datalakeReport);
 	}
 
 	private String ts() {
