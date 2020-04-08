@@ -39,6 +39,10 @@ public class DataHubBox extends AbstractBox {
 			graph = ((Graph) o).as(NessGraph.class);
 			injectJmsConfiguration();
 		}
+		if (o instanceof NessGraph) {
+			graph = (NessGraph) o;
+			injectJmsConfiguration();
+		}
 		return this;
 	}
 
