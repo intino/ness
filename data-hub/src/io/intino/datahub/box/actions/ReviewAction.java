@@ -24,6 +24,7 @@ public class ReviewAction {
 		started.set(true);
 		try {
 			String mapperCode = new MapperReader(box.mappersDirectory()).read(mapper);
+			if (mapperCode == null) return "Mapper not found";
 			Mapper mapper = new MapperLoader(box.configuration().home()).compileAndLoad(mapperCode);
 			File reviewsDirectory = new File(box.configuration().home(), "reviews");
 			reviewsDirectory.mkdirs();
