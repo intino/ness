@@ -1,7 +1,7 @@
 package io.intino.datahub.datalake.actions;
 
 import io.intino.alexandria.logger.Logger;
-import io.intino.datahub.DataHub;
+import io.intino.datahub.box.DataHubBox;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
@@ -22,10 +22,10 @@ import java.util.zip.ZipOutputStream;
 public class DatalakeBackupAction {
 	public static final String BAK = "bak";
 	private static AtomicBoolean started = new AtomicBoolean(false);
-	private final DataHub dataHub;
+	private final DataHubBox box;
 
-	public DatalakeBackupAction(DataHub dataHub) {
-		this.dataHub = dataHub;
+	public DatalakeBackupAction(DataHubBox box) {
+		this.box = box;
 	}
 
 	public boolean isStarted() {
@@ -33,18 +33,19 @@ public class DatalakeBackupAction {
 	}
 
 	public synchronized void execute() {
+		if (box.graph().datalake().backup() == null) return;
 		if (started.get()) return;
 		started.set(true);
-		if (!dataHub.backupDirectory().exists()) return;
 		removeOldBacks();
-		backupDatalake(dataHub.datalakeBackupDirectory());
-		backupSessions(dataHub.sessionsBackupDirectory());
+		File backupDirectory = new File(box.graph().datalake().backup().path());
+		backupDatalake(backupDirectory);
+		backupSessions(new File(backupDirectory, "sessions"));
 		Logger.info("Backup finished");
 		started.set(false);
 	}
 
 	private void removeOldBacks() {
-		File root = dataHub.datalake().root();
+		File root = new File(box.graph().datalake().path());
 		List<File> collect = new ArrayList<>(FileUtils.listFiles(root, new String[]{BAK}, true)).stream().
 				filter(f -> new Date(f.lastModified()).before(Date.from(Instant.now().minus(7, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS)))).collect(Collectors.toList());
 		for (File file : collect) file.delete();
@@ -53,7 +54,7 @@ public class DatalakeBackupAction {
 	private void backupDatalake(File backupDirectory) {
 		Logger.info("Launching Backup of datalake...");
 		backupDirectory.mkdir();
-		File root = dataHub.datalake().root();
+		File root = new File(box.graph().datalake().path());
 		File destination = new File(backupDirectory, name() + ".zip");
 		destination.getParentFile().mkdirs();
 		try {
@@ -73,7 +74,7 @@ public class DatalakeBackupAction {
 
 	private void backupSessions(File backupDirectory) {
 		Logger.info("Launching Backup of sessions...");
-		File stage = dataHub.stage();
+		File stage = box.stageDirectory();
 		List<File> collect = new ArrayList<>(FileUtils.listFiles(stage, new String[]{"treated"}, true));
 		Logger.info(collect.size() + " session to backup");
 		for (File session : collect) {

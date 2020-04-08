@@ -1,9 +1,9 @@
 dsl Proteo
 
 Concept:{0..1} Broker
-	var string path
-	var integer port
-	var integer secondaryPort
+	var string path = empty
+	var integer port = empty
+	var integer secondaryPort = empty
 	var object:{BrokerImplementation} implementation = empty
 	Concept User
 		var string name
@@ -22,9 +22,9 @@ Concept:{0..1} Broker
 
 Concept:{0..1} Datalake
 	var word:{Year Month Day Hour Minute} scale
-	var string path
+	var string path = empty
 	Concept:{0..1} Backup
-    	var string path
+    	var string path = empty
     	Concept:{1..1} Cron
     		var string pattern
     		var string timeZone

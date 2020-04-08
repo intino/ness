@@ -1,7 +1,7 @@
-package io.intino.datahub.datalake.actions;
+package io.intino.datahub.box.actions;
 
 import io.intino.alexandria.logger.Logger;
-import io.intino.datahub.DataHub;
+import io.intino.datahub.box.DataHubBox;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -9,36 +9,40 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class SealingAction {
+public class SealAction {
 	private static AtomicBoolean started = new AtomicBoolean(false);
-	public DataHub dataHub;
+	public DataHubBox box;
 
-	public SealingAction(DataHub dataHub) {
-		this.dataHub = dataHub;
+	public SealAction() {
 	}
 
-	public synchronized void execute() {
-		if (started.get()) return;
+	public SealAction(DataHubBox box) {
+		this.box = box;
+	}
+
+	public synchronized String execute() {
+		if (started.get()) return "Sealing already started";
 		started.set(true);
-		dataHub.brokerSessions().push();
+		box.brokerSessions().push();
 		cleanStage();
-		dataHub.sessionSealer().seal();
+		box.sessionSealer().seal();
 		Logger.info("Finished sealing!");
 		started.set(false);
+		return "Finished sealing!";
 	}
 
 	public synchronized void execute(String stage) {
 		if (started.get()) return;
 		started.set(true);
-		File subStage = new File(dataHub.stage(), stage);
-		if (subStage.exists()) dataHub.sessionSealer(subStage).seal();
+		File subStage = new File(box.stageDirectory(), stage);
+		if (subStage.exists()) box.sessionSealer(subStage).seal();
 		Logger.info("Finished sealing of stage " + stage);
 		started.set(false);
 	}
 
 
 	private void cleanStage() {
-		for (File file : Objects.requireNonNull(dataHub.stage().listFiles())) {
+		for (File file : Objects.requireNonNull(box.stageDirectory().listFiles())) {
 			if (file.isDirectory() && Objects.requireNonNull(file.listFiles()).length == 0) {
 				try {
 					FileUtils.deleteDirectory(file);
@@ -48,9 +52,5 @@ public class SealingAction {
 			}
 
 		}
-	}
-
-	public boolean isStarted() {
-		return started.get();
 	}
 }

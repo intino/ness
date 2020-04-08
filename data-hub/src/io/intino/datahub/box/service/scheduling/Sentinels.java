@@ -1,11 +1,11 @@
-package io.intino.datahub.service.scheduling;
+package io.intino.datahub.box.service.scheduling;
 
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.scheduler.AlexandriaScheduler;
 import io.intino.alexandria.scheduler.ScheduledTrigger;
-import io.intino.datahub.DataHub;
-import io.intino.datahub.datalake.actions.DatalakeBackupAction;
-import io.intino.datahub.datalake.actions.SealingAction;
+import io.intino.datahub.box.DataHubBox;
+import io.intino.datahub.box.actions.BackupAction;
+import io.intino.datahub.box.actions.SealAction;
 import io.intino.datahub.graph.Datalake;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
@@ -25,21 +25,21 @@ public class Sentinels {
 
 	private final AlexandriaScheduler scheduler;
 
-	public Sentinels(DataHub dataHub) {
+	public Sentinels(DataHubBox box) {
 		this.scheduler = new AlexandriaScheduler();
 		JobDetail job;
 		try {
-			if (dataHub.graph().datalake() != null && dataHub.graph().datalake().seal() != null) {
+			if (box.graph().datalake() != null && box.graph().datalake().seal() != null) {
 				job = newJob(SealingListener.class).withIdentity("Sealing").build();
-				job.getJobDataMap().put("dataHub", dataHub);
-				Datalake.Seal.Cron cron = dataHub.graph().datalake().seal().cron();
+				job.getJobDataMap().put("box", box);
+				Datalake.Seal.Cron cron = box.graph().datalake().seal().cron();
 				String zoneId = cron.timeZone();
 				scheduler.scheduleJob(job, newSet(newTrigger().withIdentity("DataHub#Sealing").withSchedule(cronSchedule(cron.pattern()).inTimeZone(zoneId == null ? TimeZone.getDefault() : TimeZone.getTimeZone(ZoneId.of(zoneId)))).build(), newTrigger().startNow().build()), true);
 			}
-			if (dataHub.graph().datalake() != null && dataHub.graph().datalake().backup() != null) {
+			if (box.graph().datalake() != null && box.graph().datalake().backup() != null) {
 				job = newJob(DatalakeBackupListener.class).withIdentity("DatalakeBackup").build();
-				job.getJobDataMap().put("dataHub", dataHub);
-				Datalake.Backup.Cron cron = dataHub.graph().datalake().backup().cron();
+				job.getJobDataMap().put("box", box);
+				Datalake.Backup.Cron cron = box.graph().datalake().backup().cron();
 				String zoneId = cron.timeZone();
 				scheduler.scheduleJob(job, newSet(newTrigger().withIdentity("DataHub#DatalakeBackup").withSchedule(cronSchedule(cron.pattern()).inTimeZone(zoneId == null ? TimeZone.getDefault() : TimeZone.getTimeZone(ZoneId.of(zoneId)))).build()), true);
 			}
@@ -65,13 +65,13 @@ public class Sentinels {
 
 	public static class DatalakeBackupListener implements ScheduledTrigger {
 		public void execute(JobExecutionContext context) {
-			new DatalakeBackupAction((DataHub) context.getMergedJobDataMap().get("dataHub")).execute();
+			new BackupAction((DataHubBox) context.getMergedJobDataMap().get("box")).execute();
 		}
 	}
 
 	public static class SealingListener implements ScheduledTrigger {
 		public void execute(JobExecutionContext context) {
-			new SealingAction((DataHub) context.getMergedJobDataMap().get("dataHub")).execute();
+			new SealAction((DataHubBox) context.getMergedJobDataMap().get("box")).execute();
 		}
 	}
 }

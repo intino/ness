@@ -1,0 +1,21 @@
+dsl Konos
+
+
+Service service as JMX
+	Operation("Show tanks") tanks
+		Response as Text
+	Operation("Launch datalake and datahub backup on demand") backup
+		Response as Text
+    Operation("Launch datalake sealing") seal
+		Response as Text
+	Operation("Restore datalake to timetag parameter. Timetag is in scale of days") restoreDatalake
+		Parameter timetag as Text
+		Response as Text
+	Operation("Shows a list of available mappers") mappers
+		Response as Text
+	Operation("Review datalake using a defined mapper. Returns a file containing the efects of passing the mapper") review
+		Parameter mapper as Text
+		Response as Text
+	Operation("Review datalake using a defined mapper") revise
+		Parameter mapper as Text
+		Response as Text

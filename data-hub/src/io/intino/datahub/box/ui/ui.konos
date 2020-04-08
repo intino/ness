@@ -1,0 +1,30 @@
+dsl Konos
+
+
+Service datalakeInspector as UI(port = "{ui_port}", title = "Data Lake Inspector", favicon = "")
+	Resource(path = "/") home as Page(homeTemplate) Main
+
+Template(layout=Vertical Flexible) homeTemplate as Decorated Relative(height=100%,width=100%)
+	Block(layout=Vertical Flexible)
+		Header(color="white", format=airHeader separator, elevation=0) as Absolute(height=65px)
+			Stamp(template=header) header
+		Block(layout=Horizontal) as Relative(width=100%)
+			Text mapper as Memo
+			Button(title = "review") review as Action
+			Frame(display=htmlViewer,format=fullWidth) table
+
+Template(layout=Horizontal Center) header as Decorated
+	Block(layout=Horizontal Center Flexible, spacing=DP8)
+		Image(value="images/logo.jpeg") as Absolute(width=200px, 50px)
+		Text(value="Data Lake Inspector", format=h2)
+
+
+Display htmlViewer
+	Notification refresh as Text
+
+Format("width:'100%'") fullWidth
+Format("padding:'4px 20px'") airHeader
+Format("borderRight:'1px solid black'") separator
+Format("color:'#05673c',textShadow:'2px 2px 2px #fff',fontSize:'20pt'") h2
+
+
