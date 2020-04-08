@@ -1,7 +1,5 @@
 package io.intino.datahub.datalake.regenerator;
 
-import io.intino.alexandria.logger.Logger;
-
 import javax.tools.*;
 import java.io.File;
 import java.io.IOException;
@@ -20,21 +18,16 @@ public class MapperLoader {
 		this.home = home;
 	}
 
-	public Mapper compileAndLoad(String mapperCode) {
+	public Mapper compileAndLoad(String mapperCode) throws Exception {
 		mapperCode = mapperCode.trim();
 		if (mapperCode.startsWith("package")) mapperCode = mapperCode.substring(mapperCode.indexOf("\n"));
 		File home = new File(this.home, "mappers");
 		home.mkdirs();
 		String className = nameOf(mapperCode);
 		File file = new File(home, className + ".java");
-		try {
-			Files.writeString(file.toPath(), mapperCode);
-			compile(file);
-			return load(home, className);
-		} catch (IOException | InvocationTargetException | IllegalAccessException | ClassNotFoundException | InstantiationException e) {
-			Logger.error(e);
-		}
-		return null;
+		Files.writeString(file.toPath(), mapperCode);
+		compile(file);
+		return load(home, className);
 	}
 
 	private void compile(File mapperJava) throws IOException {
