@@ -4,3 +4,9 @@ activemq-data
 data-hub-test/gen
 data-hub/gen
 broker
+node_modules
+package.json
+package-lock.json
+webpack.config.js
+babel.config.js
+gen

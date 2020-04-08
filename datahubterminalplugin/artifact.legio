@@ -1,12 +1,13 @@
 dsl Legio
 
-Artifact("io.intino.ness", "2.3.0") data-hub-terminal-plugin
+Artifact("io.intino.ness", "2.3.1") data-hub-terminal-plugin
 	Imports
-		Compile("io.intino", "data-hub", "4.2.0")
+		Compile("io.intino", "data-hub", "4.2.1")
 			Exclude("io.intino.alexandria", "exceptions")
 			Exclude("io.intino.alexandria", "jms")
 			Exclude("io.intino.alexandria", "ingestion")
 			Exclude("io.intino.alexandria", "sealing")
+			Exclude("io.intino.alexandria", "ui-framework")
 			Exclude("org.apache.activemq", "activemq-broker")
 			Exclude("org.apache.activemq", "activemq-mqtt")
 			Exclude("org.apache.activemq", "activemq-kahadb-store")

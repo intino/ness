@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>$title</title>
+
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes"/>
+
+    <link rel="icon" href-absolute="$favicon">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+
+    <style>
+            html, body {
+                min-height: 100vh;
+                height: 100%;
+            }
+            .page {
+                display: table;
+                height: 100%;
+                width: 100%;
+            }
+
+    </style>
+</head>
+
+<body>
+<div class="page" id="Home"></div>
+<script>
+			document.configuration = {};
+			document.configuration.googleApiKey = "$googleApiKey";
+			document.configuration.pushConnections = "$pushConnections".split(",");
+			document.configuration.clientId = "$client";
+			document.configuration.language = "$language";
+			document.configuration.url = "$url";
+			document.configuration.baseUrl = "$baseUrl";
+			document.configuration.basePath = "$basePath";
+
+</script>
+</body>
+</html>
