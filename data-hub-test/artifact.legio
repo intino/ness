@@ -1,26 +1,28 @@
 dsl Legio
 
 Artifact("org.example", "1.0.0") data-hub-test as Solution
-	Model("Ness", "3.0.0", "4.0.0")
-	Box(language = "Konos", version = "8.0.0")
+	Model("Ness", "4.2.0", "4.0.0")
+	Box("Konos", "8.2.9")
 	Imports
-		Compile(groupId = "io.intino.alexandria", artifactId = "core-framework", version = "2.0.2")
+		Compile("io.intino.alexandria", "core-framework", "2.0.4")
 		Test("junit", "junit", "LATEST")
 
-	IntinoPlugin(artifact = "io.intino.ness:data-hub-accessor-plugin:1.0.0", pluginClass = "io.intino.ness.datahubaccessorplugin.DataHubAccessorsPluginLauncher")
+	IntinoPlugin("io.intino.ness:data-hub-accessor-plugin:2.2.4", "io.intino.ness.datahubaccessorplugin.DataHubAccessorsPluginLauncher")
 	Package(mode = ModulesAndLibrariesLinkedByManifest) as Runnable(mainClass = "org.example.datahubtest.box.Main")
-	Parameter("datalake_path")
-	Parameter("broker_path")
-	Parameter("api_port")
-	Parameter("stage_path")
-	Parameter(name = "home")
+	Parameter("home")
+	Parameter("backup_directory")
+	Parameter("datalake_directory")
+	Parameter("broker_port")
+	Parameter("broker_secondary_port")
+	Parameter("ui_port")
 
 RunConfiguration dev
-	Argument("datalake_path", "temp/datalake")
-	Argument("broker_path", "temp/broker")
-	Argument("api_port", "9000")
-	Argument("stage_path", "temp/stage")
-	Argument(name = "workspace", value = "temp/")
+	Argument("ui_port", "9000")
+	Argument("home", "temp/datahub")
+	Argument("datalake_directory", "temp/datalake")
+	Argument("backup_directory", "temp/backup")
+	Argument("broker_port", "63000")
+	Argument("broker_secondary_port", "1884")
 
 Repository(identifier = "intino-maven")
 	Language(url = "https://artifactory.intino.io/artifactory/releases")

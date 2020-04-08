@@ -17,6 +17,9 @@ Datalake(Month, path = "") datalake
 
 	Tank (activos) activos as Set(type = Singleton) Contextual(Divisiones)
 	Tank (inactivos) inactivos as Set(type = Singleton) Contextual(Divisiones)
+	Backup
+		Cron(pattern = "0 0 12 1/1 * ? *", timeZone = "Atlantic/Canary")
+
 
 Broker(port = 63000, secondaryPort = 1884, path = "./broker")
 	User(name = "user1", password = "1234")

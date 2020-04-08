@@ -1,24 +1,36 @@
 dsl Legio
 
-Artifact("io.intino", "4.1.0") data-hub as Product
+Artifact("io.intino", "4.2.0") data-hub as Product
 	Model("Proteo", "3.0.0", "4.0.0") > outLanguage = "Ness"
+	Box("Konos", "8.2.9")
 	Imports
+		Compile("io.intino.alexandria", "core-framework", "2.0.4")
+		Compile("io.intino.alexandria", "ui-framework", "4.0.8")
 		Compile("io.intino.alexandria", "exceptions", "1.0.0")
 		Compile("io.intino.alexandria", "jms", "1.2.0")
+		Compile("io.intino.alexandria", "zip", "1.0.0")
 		Compile("io.intino.alexandria", "ingestion", "2.1.0")
 		Compile("io.intino.alexandria", "sealing", "2.1.0")
-		Compile("io.intino.alexandria", "scheduler-framework", "1.0.2") > Exclude("org.slf4j", "slf4j-api")
+		Compile("io.intino.alexandria", "scheduler-framework", "1.1.0") > Exclude("org.slf4j", "slf4j-api")
 
-		Compile("org.apache.activemq", "activemq-broker", "5.15.8")
-		Compile("org.apache.activemq", "activemq-mqtt", "5.15.8")
-		Compile("org.apache.activemq", "activemq-kahadb-store", "5.15.8")
-		Compile("org.apache.activemq", "activemq-jaas", "5.15.8")
-		Compile("org.apache.activemq", "activemq-runtime-config", "5.15.8")
+		Compile("org.apache.activemq", "activemq-broker", "5.15.9")
+		Compile("org.apache.activemq", "activemq-mqtt", "5.15.9")
+		Compile("org.apache.activemq", "activemq-kahadb-store", "5.15.9")
+		Compile("org.apache.activemq", "activemq-jaas", "5.15.9")
+		Compile("org.apache.activemq", "activemq-runtime-config", "5.15.9")
 		Compile("commons-io", "commons-io", "2.6")
 		Test("junit", "junit", "LATEST")
+		Web("io.intino", "datalake-inspector", "1.0.0")
+		Compile(groupId = "io.intino.alexandria", artifactId = "jmx", version = "1.0.1")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
 	Distribution(intino.frameworks, language = intino.languages, snapshot = intino.snapshots)
+	Parameter("home")
+	Parameter("backup_directory")
+	Parameter("datalake_directory")
+	Parameter("broker_port")
+	Parameter("broker_secondary_port")
+	Parameter("ui_port")
 
 Repository("intino-maven") intino
 	Release("https://artifactory.intino.io/artifactory/releases")

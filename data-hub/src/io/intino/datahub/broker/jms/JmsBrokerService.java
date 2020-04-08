@@ -57,12 +57,12 @@ public class JmsBrokerService implements BrokerService {
 
 	public void start() {
 		try {
-			Logger.info("Starting Jms broker...");
+			Logger.info("Starting broker...");
 			this.service.start();
 			this.service.waitUntilStarted();
 			this.brokerManager.start();
 			this.pipeManager.start();
-			Logger.info("Jms Broker started!");
+			Logger.info("Broker started!");
 		} catch (Exception e) {
 			Logger.error(e.getMessage(), e);
 		}
@@ -212,7 +212,7 @@ public class JmsBrokerService implements BrokerService {
 		void start() {
 			startNessSession();
 			startTanks();
-			Logger.info("JMS service: started!");
+			Logger.info("Tanks started!");
 		}
 
 		void stop() {
@@ -240,7 +240,6 @@ public class JmsBrokerService implements BrokerService {
 				session = connection.createSession(false, AUTO_ACKNOWLEDGE);
 				advisoryManager.start(session);
 				connection.start();
-				Logger.info("Ness session started!");
 			} catch (JMSException e) {
 				Logger.error(e.getMessage(), e);
 			}
