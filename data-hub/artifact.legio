@@ -14,8 +14,6 @@ Artifact("io.intino", "4.2.2") data-hub as Product
 		Compile("io.intino.alexandria", "sealing", "2.1.0")
 		Compile("io.intino.alexandria", "scheduler-framework", "1.1.0") > Exclude("org.slf4j", "slf4j-api")
 
-		Compile("org.objenesis", "objenesis", "2.2") //TODO Remove and add to magritte-io
-
 		Compile("org.apache.activemq", "activemq-broker", "5.15.9")
 		Compile("org.apache.activemq", "activemq-mqtt", "5.15.9")
 		Compile("org.apache.activemq", "activemq-kahadb-store", "5.15.9")
