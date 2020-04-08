@@ -7,7 +7,6 @@ import io.intino.datahub.datalake.regenerator.MapperLoader;
 import io.intino.datahub.datalake.regenerator.Regenerator;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
@@ -31,11 +30,11 @@ public class HomeTemplate extends AbstractHomeTemplate<DataHubBox> {
 
 	private String calculateContent(String mapperCode) {
 		DataHubBox box = box();
-		Mapper mapper = new MapperLoader(box.configuration().home()).compileAndLoad(mapperCode);
-		List<File> review = new Regenerator(box.datalake(), new File(box.graph().datalake().backup().path(), "sessions"), new File(box.configuration().home(), "reviews")).review(mapper);
 		try {
+			Mapper mapper = new MapperLoader(box.configuration().home()).compileAndLoad(mapperCode);
+			List<File> review = new Regenerator(box.datalake(), new File(box.graph().datalake().backup().path(), "sessions"), new File(box.configuration().home(), "reviews")).review(mapper);
 			return Files.readString(review.get(0).toPath());
-		} catch (IOException e) {
+		} catch (Exception e) {
 			return e.getMessage();
 		}
 	}

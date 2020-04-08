@@ -64,7 +64,7 @@ public class Regenerator {
 					"}\n";
 
 	@Test
-	public void compileAndLoad() {
+	public void compileAndLoad() throws Exception {
 		MapperLoader loader = new MapperLoader(new File("./temp"));
 		Mapper mapper = loader.compileAndLoad(MAPPER_CODE);
 		Assert.assertNotNull(mapper);
