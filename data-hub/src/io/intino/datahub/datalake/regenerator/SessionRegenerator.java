@@ -93,6 +93,7 @@ public class SessionRegenerator {
 	}
 
 	private Collection<File> sessions() {
+		backupDirectory.mkdirs();
 		return listFiles(backupDirectory, new String[]{"event.session.treated"}, true);
 	}
 

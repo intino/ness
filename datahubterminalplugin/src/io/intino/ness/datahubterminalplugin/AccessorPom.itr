@@ -74,7 +74,7 @@ def trigger(ontology)
 	<dependency>
 		<groupId>io.intino.alexandria</groupId>
 		<artifactId>terminal-jms</artifactId>
-		<version>1.1.1</version>
+		<version>1.1.2</version>
 	</dependency>
 	<dependency>
 		<groupId>io.intino.alexandria</groupId>
@@ -103,7 +103,7 @@ def trigger(hasBpm)
 	<dependency>
 		<groupId>io.intino.alexandria</groupId>
 		<artifactId>bpm-framework</artifactId>
-		<version>1.0.1</version>
+		<version>1.1.0</version>
 		<scope>provided</scope>
 	</dependency>
 end
