@@ -25,8 +25,15 @@ public class ReviewAction {
 		started.set(true);
 		try {
 			String mapperCode = new MapperReader(box.mappersDirectory()).read(mapper);
-			if (mapperCode == null) return "Mapper not found";
+			if (mapperCode == null) {
+				started.set(false);
+				return "Mapper not found";
+			}
 			Mapper mapper = new MapperLoader(box.configuration().home()).compileAndLoad(mapperCode);
+			if (mapper == null) {
+				started.set(false);
+				return "Mapper " + this.mapper + " cannot be loaded";
+			}
 			File reviewsDirectory = new File(box.configuration().home(), "reviews");
 			reviewsDirectory.mkdirs();
 			Datalake.Backup backup = box.graph().datalake().backup();
