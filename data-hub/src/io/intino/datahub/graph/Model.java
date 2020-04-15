@@ -14,18 +14,11 @@ public class Model {
 		return prefix + self.label();
 	}
 
-	public static String qn(Datalake.Tank.EventTankType self) {
+	public static String qn(Datalake.Tank.Event self) {
 		if (self.asTank().isContextual()) {
 			String contextQn = self.asTank().asContextual().context().qn();
 			return (contextQn.isEmpty() ? "" : contextQn + ".") + self.event().name$();
 		} else return self.event().name$();
-	}
-
-	public static String qn(Datalake.Tank.SessionEventTank self) {
-		if (self.asTank().isContextual()) {
-			String contextQn = self.asTank().asContextual().context().qn();
-			return (contextQn.isEmpty() ? "" : contextQn + ".") + self.sessionEventClass();
-		} else return self.sessionEventClass();
 	}
 
 	public static boolean isRoot(Context self) {

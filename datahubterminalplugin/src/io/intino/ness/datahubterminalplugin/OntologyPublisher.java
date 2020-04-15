@@ -24,9 +24,9 @@ class OntologyPublisher {
 	private final String basePackage;
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
-	private List<Tank.EventTankType> tanks;
+	private List<Tank.Event> tanks;
 
-	OntologyPublisher(File root, List<Tank.EventTankType> tanks, List<Event> events, Configuration configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
+	OntologyPublisher(File root, List<Tank.Event> tanks, List<Event> events, Configuration configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
 		this.tanks = tanks;
 		this.events = events;
@@ -60,9 +60,9 @@ class OntologyPublisher {
 	}
 
 
-	private Map<Event, Context> collectEvents(List<Tank.EventTankType> tanks) {
+	private Map<Event, Context> collectEvents(List<Tank.Event> tanks) {
 		Map<Event, Context> events = new HashMap<>();
-		for (Tank.EventTankType tank : tanks) {
+		for (Tank.Event tank : tanks) {
 			List<Event> hierarchy = hierarchy(tank.event());
 			Context context = tank.asTank().isContextual() ? tank.asTank().asContextual().context() : null;
 			events.put(hierarchy.get(0), context);

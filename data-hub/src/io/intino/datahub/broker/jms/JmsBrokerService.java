@@ -248,7 +248,7 @@ public class JmsBrokerService implements BrokerService {
 		private void startTanks() {
 			if (graph.datalake() != null) {
 				brokerStage.mkdirs();
-				graph.datalake().tankList().stream().filter(Datalake.Tank::isEventTank).map(tank -> tank.asEventTank()).
+				graph.datalake().tankList().stream().filter(Datalake.Tank::isEvent).map(Datalake.Tank::asEvent).
 						forEach(t -> {
 							Scale scale = Scale.valueOf(graph.datalake().scale().name());
 							if (!t.asTank().isContextual() || t.asTank().asContextual().context().isLeaf())
@@ -262,7 +262,7 @@ public class JmsBrokerService implements BrokerService {
 			}
 		}
 
-		private void register(Datalake.Tank.EventTank t, Scale scale, Datalake.Context c) {
+		private void register(Datalake.Tank.Event t, Scale scale, Datalake.Context c) {
 			brokerManager.registerTopicConsumer(tankQn(t, c), new TopicSaver(brokerStage, tankQn(t, c), scale).create());
 		}
 
@@ -340,7 +340,7 @@ public class JmsBrokerService implements BrokerService {
 		}
 	}
 
-	private String tankQn(Datalake.Tank.EventTank t, Datalake.Context c) {
+	private String tankQn(Datalake.Tank.Event t, Datalake.Context c) {
 		return (!c.qn().isEmpty() ? c.qn() + "." : "") + t.event().name$();
 	}
 

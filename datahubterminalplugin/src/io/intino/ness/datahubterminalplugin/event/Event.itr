@@ -28,10 +28,7 @@ def trigger(event)
 			return this;
 		}
 
-		public $name+firstUpperCase ss(String ss) {
-			super.ss(ss);
-			return this;
-		}
+		$ss
 
 		$attribute+getter...[$NL$NL]
 
@@ -72,6 +69,13 @@ def trigger(component)
 		public io.intino.alexandria.message.Message toMessage() {
 			return this.message;
 		}
+	}
+end
+
+def trigger(ss)
+	public $this+firstUpperCase ss(String ss) {
+		super.ss(ss);
+		return this;
 	}
 end
 
