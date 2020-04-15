@@ -39,7 +39,7 @@ public class HomeTemplate extends AbstractHomeTemplate<DataHubBox> {
 			File reviewResult = calculateReview(mapper.value());
 			if (reviewResult != null) {
 				downloadReview.onExecute(event -> loadFile(reviewResult));
-				if (reviewResult.length() > 2000)
+				if (reviewResult.length() > 2000000)
 					htmlViewer.content(wrap("Review report is too long. Download to inspect it."));
 				else {
 					String content = Files.readString(reviewResult.toPath());
