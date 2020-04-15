@@ -22,11 +22,8 @@ class HtmlViewer extends AbstractHtmlViewer {
 
 	render() {
 	    if (this.state.content == null || this.state.content === "") return (<React.Fragment/>);
-	    return (
-	        <div style={{width:'100%'}}>
-	        	{this.state.content}
-            </div>
-        );
+	    const htmlStyle = "<style>html, body {height: 100%;} table {width: 100%;}table, th, td {border: 1px solid black;}table tr td { width: 50%; overflow-y: scroll;} table tr td div {width:1px;} td { vertical-align: top;}</style>"
+		return (<div style={{width:"100%",height:"100%"}} dangerouslySetInnerHTML={{__html: htmlStyle + this.state.content}}></div>);
 	};
 
 	refresh = (content) => {

@@ -1,6 +1,5 @@
 dsl Konos
 
-
 Service datalakeInspector as UI(port = "{ui_port}", title = "Data Lake Inspector", favicon = "")
 	Resource(path = "/") home as Page(homeTemplate) Main
 
@@ -8,10 +7,14 @@ Template(layout=Vertical Flexible) homeTemplate as Decorated Relative(height=100
 	Block(layout=Vertical Flexible)
 		Header(color="white", format=airHeader separator, elevation=0) as Absolute(height=65px)
 			Stamp(template=header) header
-		Block(layout=Vertical) as Relative(width=100%)
-			Text mapper as Memo
-			Button(title = "review") review as Action
-			Frame(display=htmlViewer,format=fullWidth) table
+		Block(layout=Vertical Flexible) as Relative(width=100%)
+			Block(layout=Vertical Flexible, format=box) as Relative(width=100%)
+				Text(format=fullHeight codeEditor) mapper as Code(language=Java) Editable
+			Button(title="review") review as OpenDialog(reviewDialog)
+	Dialog(title="Review") reviewDialog as FullScreen
+		Block(layout=Vertical Flexible CenterCenter) loading as Relative(height=100%) > Spinner
+		MaterialIconButton(title="download", format=absolute, icon = "Archive", size =Large) downloadReview as Download
+		Frame(display=htmlViewer,format=fullWidth, visible=false) table
 
 Template(layout=Horizontal Center) header as Decorated
 	Block(layout=Horizontal Center Flexible, spacing=DP8)
@@ -21,7 +24,11 @@ Template(layout=Horizontal Center) header as Decorated
 Display htmlViewer
 	Notification refresh as Text
 
+Format("position:'absolute',zIndex:'2000',top:'0',marginTop:'7px',right:'0',marginRight:'60px',color:'white'") absolute
 Format("width:'100%'") fullWidth
+Format("height:'100%'") fullHeight
+Format("border:'2px solid black'") codeEditor
+Format("padding:'10px'") box
 Format("padding:'4px 20px'") airHeader
 Format("borderRight:'1px solid black'") separator
 Format("color:'#05673c',textShadow:'2px 2px 2px #fff',fontSize:'20pt'") h2

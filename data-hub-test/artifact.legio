@@ -1,12 +1,10 @@
 dsl Legio
 
 Artifact("org.example", "1.0.0") data-hub-test as Solution
-	Model("Ness", "4.2.6", "4.0.0")
+	Model("Ness", "4.3.0", "4.0.0")
 	Box("Konos", "8.2.11")
 	Imports
-		Compile("io.intino.alexandria", "core-framework", "2.0.4")
 		Test("junit", "junit", "LATEST")
-
 	IntinoPlugin("io.intino.ness:data-hub-accessor-plugin:2.3.4", "io.intino.ness.datahubaccessorplugin.DataHubAccessorsPluginLauncher")
 	Package(mode = ModulesAndLibrariesLinkedByManifest) as Runnable(mainClass = "org.example.datahubtest.box.Main")
 	Parameter("home")

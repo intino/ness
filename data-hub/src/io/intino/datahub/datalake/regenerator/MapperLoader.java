@@ -10,6 +10,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public class MapperLoader {
 	private final File home;
@@ -18,7 +19,7 @@ public class MapperLoader {
 		this.home = home;
 	}
 
-	public Mapper compileAndLoad(String mapperCode) throws Exception {
+	public Mapper compileAndLoad(String mapperCode) throws CompilationException, IOException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException {
 		mapperCode = mapperCode.trim();
 		if (mapperCode.startsWith("package")) mapperCode = mapperCode.substring(mapperCode.indexOf("\n"));
 		File home = new File(this.home, "mappers");
@@ -30,7 +31,7 @@ public class MapperLoader {
 		return load(home, className);
 	}
 
-	private void compile(File mapperJava) throws IOException {
+	private void compile(File mapperJava) throws CompilationException, IOException {
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 		StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
 		Iterable<? extends JavaFileObject> compilationUnits =
@@ -44,11 +45,10 @@ public class MapperLoader {
 				null,
 				compilationUnits);
 		task.call();
-		for (Diagnostic diagnostic : diagnostics.getDiagnostics())
-			System.out.format("Error on line %d: %s",
-					diagnostic.getLineNumber(),
-					diagnostic.getMessage(Locale.getDefault()));
 		fileManager.close();
+		if (!diagnostics.getDiagnostics().isEmpty()) {
+			throw new CompilationException(diagnostics.getDiagnostics().stream().map(d -> "Error on line " + d.getLineNumber() + ": " + d.getMessage(Locale.getDefault())).collect(Collectors.joining("\n")));
+		}
 	}
 
 	private Mapper load(File home, String className) throws MalformedURLException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException {
@@ -64,5 +64,27 @@ public class MapperLoader {
 		String class_ = "class ";
 		int index = mapperCode.indexOf(class_);
 		return mapperCode.substring(index + class_.length(), mapperCode.indexOf(" ", index + class_.length()));
+	}
+
+	public static class CompilationException extends Exception {
+
+		public CompilationException() {
+		}
+
+		public CompilationException(String message) {
+			super(message);
+		}
+
+		public CompilationException(String message, Throwable cause) {
+			super(message, cause);
+		}
+
+		public CompilationException(Throwable cause) {
+			super(cause);
+		}
+
+		public CompilationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+			super(message, cause, enableSuppression, writableStackTrace);
+		}
 	}
 }

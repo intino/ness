@@ -4,22 +4,23 @@ Datalake(Month, path = "") datalake
 	Context("") Divisiones
 		Context DA;Context DB;Context DC;Context DD;Context DF;Context DG;Context DJ;Context DK;Context DL;Context DM;Context DN;Context DP;Context DU;Context DV;Context DW;Context DX;
 	Context asemed
-	Tank(criterio) criterio as Event Contextual(asemed)
-	Tank(criterioBorrado) criterioBorrado as Event Contextual(asemed)
-	Tank(criterioModificado) criterioModificado as Event Contextual(asemed)
-	Tank(criterioSentencia) criterioSentencia as Event Contextual(asemed)
+	Tank(event = criterio) criterio as EventTank Contextual(asemed)
+	Tank(event = criterioBorrado) criterioBorrado as EventTank Contextual(asemed)
+	Tank(event = criterioModificado) criterioModificado as EventTank Contextual(asemed)
+	Tank(event = criterioSentencia) criterioSentencia as EventTank Contextual(asemed)
 
-	Tank (usuarioConectado)usuarioConectado as Event
-	Tank (usuarioDesconectado)usuarioDesconectado as Event
+	Tank(event = usuarioConectado)usuarioConectado as EventTank
+	Tank(event = usuarioDesconectado)usuarioDesconectado as EventTank
 
-	Tank (ajuste) ajuste as Event Contextual(Divisiones)
-	Tank (cierreAjuste) cierreAjuste as Event Contextual(Divisiones)
+	Tank(event = ajuste) ajuste as EventTank Contextual(Divisiones)
+	Tank(event = cierreAjuste) cierreAjuste as EventTank Contextual(Divisiones)
 
-	Tank (activos) activos as Set(type = Singleton) Contextual(Divisiones)
-	Tank (inactivos) inactivos as Set(type = Singleton) Contextual(Divisiones)
+	Tank activos as SetTank(type = Singleton) Contextual(Divisiones)
+	Tank inactivos as SetTank(type = Singleton) Contextual(Divisiones)
+
+	Tank(event = empty) sessionEvent as SessionEventTank Contextual(Divisiones)
 	Backup
 		Cron(pattern = "0 0 12 1/1 * ? *", timeZone = "Atlantic/Canary")
-
 
 Broker(port = 63000, secondaryPort = 1884, path = "./broker")
 	User(name = "user1", password = "1234")
@@ -31,8 +32,6 @@ Event criterio
 Event criterioBorrado
 Event criterioModificado
 Event criterioSentencia
-Event activos
-Event inactivos
 Event ajuste
 Event cierreAjuste
 Event usuarioConectado
