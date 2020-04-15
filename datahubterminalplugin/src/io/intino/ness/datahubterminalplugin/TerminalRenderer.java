@@ -54,14 +54,14 @@ class TerminalRenderer {
 		builder.add("event", new FrameBuilder("event").add("name", statusClassName).add("type", statusQn).toFrame());
 	}
 
-	private Frame frameOf(Datalake.Tank.EventType tank) {
+	private Frame frameOf(Datalake.Tank.EventTankType tank) {
 		return new FrameBuilder(contextsOf(tank).size() > 1 ? "multicontext" : "default").
 				add("type", Formatters.firstUpperCase(tank.event().name$())).
 				add("typeName", tank.event().name$()).
 				add("channel", tank.qn()).toFrame();
 	}
 
-	private List<Context> contextsOf(Datalake.Tank.EventType tank) {
+	private List<Context> contextsOf(Datalake.Tank.EventTankType tank) {
 		return tank.asTank().isContextual() ? tank.asTank().asContextual().context().leafs() : Collections.emptyList();
 	}
 
