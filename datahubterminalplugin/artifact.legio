@@ -1,8 +1,8 @@
 dsl Legio
 
-Artifact("io.intino.ness", "2.3.4") data-hub-terminal-plugin
+Artifact("io.intino.ness", "2.4.0") data-hub-terminal-plugin
 	Imports
-		Compile("io.intino", "data-hub", "4.2.7")
+		Compile("io.intino", "data-hub", "4.3.0")
 			Exclude("io.intino.alexandria", "exceptions")
 			Exclude("io.intino.alexandria", "jms")
 			Exclude("io.intino.alexandria", "jmx")
@@ -25,6 +25,6 @@ Artifact("io.intino.ness", "2.3.4") data-hub-terminal-plugin
 	Package(mode = ModulesAndLibrariesLinkedByManifest, attachSources = true)
 	Distribution(intino.builders, empty)
 
-Repository(identifier = "intino-maven") intino
+Repository("intino-maven") intino
 	Release("https://artifactory.intino.io/artifactory/releases")
 	Release("https://artifactory.intino.io/artifactory/release-libraries") builders

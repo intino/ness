@@ -43,7 +43,7 @@ Concept:{0..1} Datalake
 	Concept:{1..*}:AspectRequired Tank
 		Aspect TankType
         	sub SetTank > var word:{Multivalued Singleton} type = Multivalued
-        	sub EventType
+        	sub EventTankType
         		var Event event
 				var boolean sortingRequired = true
 				var string qn = @qn is private reactive
@@ -58,8 +58,8 @@ Concept:Named Terminal
 	Concept:{0..1} AllowsBpmIn
 		var string processStatusClass = "io.intino.alexandria.bpm.ProcessStatus" is private
 		var Datalake.Context context
-	Concept:{0..1} Publish > var Datalake.Tank.EventTank[] tanks
-	Concept:{0..1} Subscribe > var Datalake.Tank.EventTank[] tanks
+	Concept:{0..1} Publish > var Datalake.Tank.EventTankType[] tanks
+	Concept:{0..1} Subscribe > var Datalake.Tank.EventTankType[] tanks
 
 Concept Event
 	has Attribute

@@ -9,6 +9,7 @@ import io.intino.datahub.graph.Event;
 import io.intino.datahub.graph.Terminal;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
+import io.intino.magritte.framework.Layer;
 import io.intino.plugin.PluginLauncher;
 import org.apache.maven.shared.invoker.*;
 
@@ -27,9 +28,9 @@ class TerminalPublisher {
 	private final String basePackage;
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
-	private List<Tank.Event> tanks;
+	private List<Tank.EventTankType> tanks;
 
-	TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, Configuration configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
+	TerminalPublisher(File root, Terminal terminal, List<Tank.EventTankType> tanks, Configuration configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
 		this.terminal = terminal;
 		this.tanks = tanks;
@@ -63,8 +64,8 @@ class TerminalPublisher {
 	}
 
 	private void writeManifest(File srcDirectory) {
-		List<String> publish = terminal.publish() != null ? terminal.publish().tanks().stream().map(t -> t.asTank().event().name$()).collect(Collectors.toList()) : Collections.emptyList();
-		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().tanks().stream().map(t -> t.asTank().event().name$()).collect(Collectors.toList()) : Collections.emptyList();
+		List<String> publish = terminal.publish() != null ? terminal.publish().tanks().stream().map(t -> t.event().name$()).collect(Collectors.toList()) : Collections.emptyList();
+		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().tanks().stream().map(t -> t.event().name$()).collect(Collectors.toList()) : Collections.emptyList();
 		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses(), eventContexts());
 		try {
 			Files.write(new File(srcDirectory, "terminal.mf").toPath(), new Gson().toJson(manifest).getBytes());
@@ -88,9 +89,9 @@ class TerminalPublisher {
 		return eventContexts;
 	}
 
-	private Map<String, Set<String>> eventContextOf(List<Tank.Event> tanks) {
+	private Map<String, Set<String>> eventContextOf(List<Tank.EventTankType> tanks) {
 		return tanks.stream().
-				collect(Collectors.toMap(t -> t.asTank().event().name$(),
+				collect(Collectors.toMap(t -> t.event().name$(),
 						tank -> tank.asTank().isContextual() ? tank.asTank().asContextual().context().leafs().stream().map(Context::qn).collect(Collectors.toSet()) : Collections.emptySet(),
 						(a, b) -> b));
 	}
@@ -98,9 +99,9 @@ class TerminalPublisher {
 	private Map<String, String> tankClasses() {
 		Map<String, String> tankClasses = new HashMap<>();
 		if (terminal.publish() != null)
-			terminal.publish().tanks().forEach(t -> tankClasses.putIfAbsent(t.asTank().event().name$(), basePackage + ".events." + t.asTank().event().name$()));
+			terminal.publish().tanks().forEach(t -> tankClasses.putIfAbsent(t.event().name$(), basePackage + ".events." + t.event().name$()));
 		if (terminal.subscribe() != null)
-			terminal.subscribe().tanks().forEach(t -> tankClasses.putIfAbsent(t.asTank().event().name$(), basePackage + ".events." + t.asTank().event().name$()));
+			terminal.subscribe().tanks().forEach(t -> tankClasses.putIfAbsent(t.event().name$(), basePackage + ".events." + t.event().name$()));
 		if (terminal.allowsBpmIn() != null) {
 			Context context = terminal.allowsBpmIn().context();
 			String statusQn = terminal.allowsBpmIn().processStatusClass();
@@ -110,9 +111,9 @@ class TerminalPublisher {
 		return tankClasses;
 	}
 
-	private Map<Event, Context> collectEvents(List<Tank.Event> tanks) {
+	private Map<Event, Context> collectEvents(List<Tank.EventTankType> tanks) {
 		Map<Event, Context> events = new HashMap<>();
-		for (Tank.Event tank : tanks) {
+		for (Tank.EventTankType tank : tanks) {
 			List<Event> hierarchy = hierarchy(tank.event());
 			Context context = tank.asTank().isContextual() ? tank.asTank().asContextual().context() : null;
 			events.put(hierarchy.get(0), context);

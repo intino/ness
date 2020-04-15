@@ -155,8 +155,8 @@
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-runtime-config:5.15.9" level="project" />
     <orderEntry type="library" name="Intino: org.slf4j:slf4j-api:1.7.13" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:jmx:1.0.2" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.0.10" level="project" />
     <orderEntry type="module" module-name="datalake-inspector" />
     <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.0.11" level="project" />
   </component>
 </module>

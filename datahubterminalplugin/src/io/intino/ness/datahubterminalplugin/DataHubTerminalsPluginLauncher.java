@@ -40,7 +40,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		}
 		String[] stashes = Arrays.stream(Objects.requireNonNull(resDirectory.listFiles(f -> f.getName().endsWith(".stash")))).map(f -> f.getName().replace(".stash", "")).toArray(String[]::new);
 		Graph graph = new Graph(new FileSystemStore(resDirectory)).loadStashes(stashes);
-		if(graph== null){
+		if (graph == null) {
 			notifier().notifyError("Couldnt load graph. Please recompile module");
 			return;
 		}
@@ -96,12 +96,12 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		}
 	}
 
-	private List<Tank.Event> eventTanks(NessGraph nessGraph) {
-		return nessGraph.datalake().tankList().stream().filter(Tank::isEvent).map(Tank::asEvent).collect(Collectors.toList());
+	private List<Tank.EventTankType> eventTanks(NessGraph nessGraph) {
+		return nessGraph.datalake().tankList().stream().filter(Tank::isEventTankType).map(Tank::asEventTankType).collect(Collectors.toList());
 	}
 
-	private List<Tank.Event> tanks(Terminal terminal) {
-		List<Tank.Event> tanks = new ArrayList<>();
+	private List<Tank.EventTankType> tanks(Terminal terminal) {
+		List<Tank.EventTankType> tanks = new ArrayList<>();
 		if (terminal.publish() != null) tanks.addAll(terminal.publish().tanks());
 		if (terminal.subscribe() != null) tanks.addAll(terminal.subscribe().tanks());
 		return tanks;
