@@ -14,9 +14,9 @@ public class Model {
 		return prefix + self.label();
 	}
 
-	public static String qn(Datalake.Tank self) {
-		if (self.isContextual()) {
-			String contextQn = self.asContextual().context().qn();
+	public static String qn(Datalake.Tank.Event self) {
+		if (self.asTank().isContextual()) {
+			String contextQn = self.asTank().asContextual().context().qn();
 			return (contextQn.isEmpty() ? "" : contextQn + ".") + self.event().name$();
 		} else return self.event().name$();
 	}

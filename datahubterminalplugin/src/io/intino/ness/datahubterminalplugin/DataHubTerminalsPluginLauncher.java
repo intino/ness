@@ -40,11 +40,10 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		}
 		String[] stashes = Arrays.stream(Objects.requireNonNull(resDirectory.listFiles(f -> f.getName().endsWith(".stash")))).map(f -> f.getName().replace(".stash", "")).toArray(String[]::new);
 		Graph graph = new Graph(new FileSystemStore(resDirectory)).loadStashes(stashes);
-		if(graph== null){
-			notifier().notifyError("Couldnt load graph. Please recompile module");
+		if (graph == null) {
+			notifier().notifyError("Couldn't load graph. Please recompile module");
 			return;
 		}
-
 		publishOntology(graph.as(NessGraph.class), tempDir);
 		publishTerminals(graph.as(NessGraph.class), tempDir);
 	}

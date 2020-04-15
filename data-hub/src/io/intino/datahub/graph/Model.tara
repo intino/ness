@@ -41,12 +41,12 @@ Concept:{0..1} Datalake
 		var Context[] leafs = @leafs is private reactive
 		has:Named Context
 	Concept:{1..*}:AspectRequired Tank
-		var Event event
-		var boolean sortingRequired = true
-		var string qn = @qn is private reactive
 		Aspect TankType
         	sub Set > var word:{Multivalued Singleton} type = Multivalued
         	sub Event
+        		var Model.Event event
+				var boolean sortingRequired = true
+				var string qn = @qn is private reactive
         Aspect Contextual > var Context context
 
 Concept:Named Terminal
@@ -57,6 +57,8 @@ Concept:Named Terminal
 		var Datalake.Tank.Event[] tanks
 	Concept:{0..1} Subscribe
 		var Datalake.Tank.Event[] tanks
+
+Concept SessionEvent extends Event
 
 Concept Event
 	has Attribute

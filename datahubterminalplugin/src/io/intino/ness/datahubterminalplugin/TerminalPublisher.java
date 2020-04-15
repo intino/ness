@@ -63,8 +63,8 @@ class TerminalPublisher {
 	}
 
 	private void writeManifest(File srcDirectory) {
-		List<String> publish = terminal.publish() != null ? terminal.publish().tanks().stream().map(t -> t.asTank().event().name$()).collect(Collectors.toList()) : Collections.emptyList();
-		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().tanks().stream().map(t -> t.asTank().event().name$()).collect(Collectors.toList()) : Collections.emptyList();
+		List<String> publish = terminal.publish() != null ? terminal.publish().tanks().stream().map(t -> t.event().name$()).collect(Collectors.toList()) : Collections.emptyList();
+		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().tanks().stream().map(t -> t.event().name$()).collect(Collectors.toList()) : Collections.emptyList();
 		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses(), eventContexts());
 		try {
 			Files.write(new File(srcDirectory, "terminal.mf").toPath(), new Gson().toJson(manifest).getBytes());
@@ -90,7 +90,7 @@ class TerminalPublisher {
 
 	private Map<String, Set<String>> eventContextOf(List<Tank.Event> tanks) {
 		return tanks.stream().
-				collect(Collectors.toMap(t -> t.asTank().event().name$(),
+				collect(Collectors.toMap(t -> t.event().name$(),
 						tank -> tank.asTank().isContextual() ? tank.asTank().asContextual().context().leafs().stream().map(Context::qn).collect(Collectors.toSet()) : Collections.emptySet(),
 						(a, b) -> b));
 	}
@@ -98,9 +98,9 @@ class TerminalPublisher {
 	private Map<String, String> tankClasses() {
 		Map<String, String> tankClasses = new HashMap<>();
 		if (terminal.publish() != null)
-			terminal.publish().tanks().forEach(t -> tankClasses.putIfAbsent(t.asTank().event().name$(), basePackage + ".events." + t.asTank().event().name$()));
+			terminal.publish().tanks().forEach(t -> tankClasses.putIfAbsent(t.event().name$(), basePackage + ".events." + t.event().name$()));
 		if (terminal.subscribe() != null)
-			terminal.subscribe().tanks().forEach(t -> tankClasses.putIfAbsent(t.asTank().event().name$(), basePackage + ".events." + t.asTank().event().name$()));
+			terminal.subscribe().tanks().forEach(t -> tankClasses.putIfAbsent(t.event().name$(), basePackage + ".events." + t.event().name$()));
 		if (terminal.allowsBpmIn() != null) {
 			Context context = terminal.allowsBpmIn().context();
 			String statusQn = terminal.allowsBpmIn().processStatusClass();
