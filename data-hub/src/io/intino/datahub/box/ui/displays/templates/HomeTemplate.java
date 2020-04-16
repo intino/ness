@@ -15,7 +15,17 @@ import java.util.List;
 
 public class HomeTemplate extends AbstractHomeTemplate<DataHubBox> {
 
+	private static String template;
 	private HtmlViewer htmlViewer;
+	private File file;
+
+	static {
+		try {
+			template = new String(HomeTemplate.class.getResourceAsStream("/mapper.template").readAllBytes());
+		} catch (IOException e) {
+			Logger.error(e);
+		}
+	}
 
 	public HomeTemplate(DataHubBox box) {
 		super(box);
@@ -24,17 +34,22 @@ public class HomeTemplate extends AbstractHomeTemplate<DataHubBox> {
 	@Override
 	public void init() {
 		super.init();
+		mapper.value(template);
 		reviewDialog.onOpen(e -> {
 			htmlViewer = new HtmlViewer(box());
 			table.display(htmlViewer);
-			loadContent();
+			file = loadContent();
 			table.visible(true);
 			htmlViewer.refresh();
 			loading.visible(false);
 		});
+		reviewDialog.onClose(event -> {
+			if (file != null && file.exists()) file.delete();
+
+		});
 	}
 
-	private void loadContent() {
+	private File loadContent() {
 		try {
 			File reviewResult = calculateReview(mapper.value());
 			if (reviewResult != null) {
@@ -46,16 +61,20 @@ public class HomeTemplate extends AbstractHomeTemplate<DataHubBox> {
 					htmlViewer.content(content.substring(content.indexOf("<table"), content.indexOf("</table>")) + "</table>");
 				}
 			} else htmlViewer.content(wrap("Impossible to execute mapper."));
+			return reviewResult;
 		} catch (MapperLoader.CompilationException | IOException ex) {
 			htmlViewer.content(wrap(ex.getMessage()));
+			return null;
 		}
 	}
 
 	private File calculateReview(String mapperCode) throws MapperLoader.CompilationException {
 		DataHubBox box = box();
 		try {
-			Mapper mapper = new MapperLoader(box.configuration().home()).compileAndLoad(mapperCode);
+			MapperLoader mapperLoader = new MapperLoader(box.configuration().home());
+			Mapper mapper = mapperLoader.compileAndLoad(mapperCode);
 			List<File> review = new Regenerator(box.datalake(), new File(box.graph().datalake().backup().path(), "sessions"), new File(box.configuration().home(), "reviews")).review(mapper);
+			mapperLoader.delete(mapperCode);
 			return review.get(0);
 		} catch (IOException | InstantiationException | InvocationTargetException | IllegalAccessException | ClassNotFoundException ex) {
 			Logger.error(ex);

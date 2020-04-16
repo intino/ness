@@ -8,27 +8,31 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
-import java.util.Collections;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MapperLoader {
 	private final File home;
 
 	public MapperLoader(File home) {
-		this.home = home;
+		this.home = new File(home, "mappers");
 	}
 
 	public Mapper compileAndLoad(String mapperCode) throws CompilationException, IOException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException {
 		mapperCode = mapperCode.trim();
 		if (mapperCode.startsWith("package")) mapperCode = mapperCode.substring(mapperCode.indexOf("\n"));
-		File home = new File(this.home, "mappers");
 		home.mkdirs();
 		String className = nameOf(mapperCode);
-		File file = new File(home, className + ".java");
+		File file = javaFile(className);
 		Files.writeString(file.toPath(), mapperCode);
 		compile(file);
 		return load(home, className);
+	}
+
+	public void delete(String mapperCode) {
+		String name = nameOf(mapperCode);
+		javaFile(name).delete();
+		classFile(name).forEach(File::delete);
 	}
 
 	private void compile(File mapperJava) throws CompilationException, IOException {
@@ -64,6 +68,18 @@ public class MapperLoader {
 		String class_ = "class ";
 		int index = mapperCode.indexOf(class_);
 		return mapperCode.substring(index + class_.length(), mapperCode.indexOf(" ", index + class_.length()));
+	}
+
+	private File javaFile(String className) {
+		return new File(home, className + ".java");
+	}
+
+	private List<File> classFile(String className) {
+		List<File> files = new ArrayList<>();
+		File e = new File(home, className + ".class");
+		if (e.exists()) files.add(e);
+		files.addAll(Arrays.stream(home.listFiles()).filter(f -> f.getName().startsWith(className + "$") && f.getName().endsWith(".class")).collect(Collectors.toList()));
+		return files;
 	}
 
 	public static class CompilationException extends Exception {

@@ -1,0 +1,38 @@
+import io.intino.alexandria.Timetag;
+import io.intino.alexandria.datalake.Datalake;
+import io.intino.alexandria.event.Event;
+import io.intino.datahub.datalake.regenerator.Mapper;
+
+public class NewMapper implements Mapper {
+	public static final Filter FILTER = new Filter() {
+		@Override
+		public boolean allow(Event event) {
+			return true;
+		}
+
+		@Override
+		public boolean allow(Datalake.EventStore.Tank tank) {
+			return true;
+		}
+
+		@Override
+		public boolean allow(Datalake.EventStore.Tank tank, Timetag timetag) {
+			return true;
+		}
+	};
+
+	@Override
+	public Event apply(Event event) {
+		return event;
+	}
+
+	@Override
+	public Filter filter() {
+		return FILTER;
+	}
+
+	@Override
+	public String description() {
+		return "description";
+	}
+}
