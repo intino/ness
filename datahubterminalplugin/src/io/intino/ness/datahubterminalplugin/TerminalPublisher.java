@@ -23,17 +23,19 @@ class TerminalPublisher {
 	private final File root;
 	private final Terminal terminal;
 	private final Configuration conf;
+	private final String terminalJmsVersion;
 	private final PluginLauncher.SystemProperties systemProperties;
 	private final String basePackage;
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
 	private List<Tank.Event> tanks;
 
-	TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, Configuration configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
+	TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, Configuration configuration, String terminalJmsVersion, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
 		this.terminal = terminal;
 		this.tanks = tanks;
 		this.conf = configuration;
+		this.terminalJmsVersion = terminalJmsVersion;
 		this.systemProperties = systemProperties;
 		this.basePackage = configuration.artifact().groupId().toLowerCase() + "." + Formatters.snakeCaseToCamelCase().format(configuration.artifact().name()).toString().toLowerCase();
 		this.invokedPhase = invokedPhase;
@@ -167,11 +169,19 @@ class TerminalPublisher {
 	private File createPom(File root, String group, String artifact, String version) {
 		final FrameBuilder builder = new FrameBuilder("pom").add("group", group).add("artifact", artifact).add("version", version);
 		conf.repositories().stream().filter(r -> !(r instanceof Configuration.Repository.Language)).forEach(r -> buildRepoFrame(builder, r, conf.artifact().version().contains("SNAPSHOT")));
-		builder.add("ontology", new FrameBuilder("ontology").add("group", group).add("artifact", "ontology").add("version", version));
+		builder.add("ontology", ontologyFrame(group, version));
 		if (terminal.allowsBpmIn() != null) builder.add("hasBpm", ";");
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new AccessorPomTemplate().render(builder.toFrame()));
 		return pomFile;
+	}
+
+	private FrameBuilder ontologyFrame(String group, String version) {
+		return new FrameBuilder("ontology").
+				add("group", group).
+				add("artifact", "ontology").
+				add("terminalVersion", terminalJmsVersion).
+				add("version", version);
 	}
 
 	private void buildRepoFrame(FrameBuilder builder, Configuration.Repository r, boolean snapshot) {
