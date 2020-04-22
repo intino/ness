@@ -14,6 +14,7 @@ Artifact("io.intino.ness", "2.5.0") data-hub-terminal-plugin
 			Exclude("org.apache.activemq", "activemq-kahadb-store")
 			Exclude("org.apache.activemq", "activemq-jaas")
 			Exclude("org.apache.activemq", "activemq-runtime-config")
+			Exclude("io.intino", "datalake-inspector")
 		Compile("io.intino.alexandria", "json", "1.0.2")
 		Compile("io.intino", "plugin-interface", "2.0.0")
 		Compile("io.intino.itrules", "engine", "1.0.0")
