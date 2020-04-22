@@ -20,6 +20,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class DataHubTerminalsPluginLauncher extends PluginLauncher {
+	private static final String MINIMUM_TERMINAL_JMS_VERSION = "1.2.0";
+
 	@Override
 	public void run() {
 		if (invokedPhase.ordinal() < 2) return;
@@ -44,7 +46,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			notifier().notifyError("Couldn't load graph. Please recompile module");
 			return;
 		}
-		publishOntology(graph.as(NessGraph.class), tempDir);
+//		publishOntology(graph.as(NessGraph.class), tempDir);
 		publishTerminals(graph.as(NessGraph.class), tempDir);
 	}
 
@@ -62,9 +64,10 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 
 	private void publishTerminals(NessGraph nessGraph, File tempDir) {
 		try {
+			String terminalJmsVersion = terminalJmsVersion();
 			AtomicBoolean published = new AtomicBoolean(true);
 			nessGraph.terminalList().forEach(terminal -> {
-				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), systemProperties(), invokedPhase, logger()).publish() & published.get());
+				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), terminalJmsVersion, systemProperties(), invokedPhase, logger()).publish() & published.get());
 				if (published.get() && notifier() != null)
 					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), terminal.name$(), configuration().artifact().version()));
 			});
@@ -72,6 +75,11 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		} catch (IOException e) {
 			logger().println(e.getMessage());
 		}
+	}
+
+	private String terminalJmsVersion() {
+		List<String> terminalVersions = ArtifactoryConnector.terminalVersions();
+		return terminalVersions.isEmpty() ? MINIMUM_TERMINAL_JMS_VERSION : terminalVersions.get(terminalVersions.size() - 1);
 	}
 
 	private String participle() {

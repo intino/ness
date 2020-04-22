@@ -30,8 +30,12 @@ def type(terminal)
 
 		$subscribe...[$NL$NL]
 
+		public void start() {
+			eventHub.start();
+		}
+
 		public void stop() {
-			//eventHub.stop();
+			eventHub.stop();
 		}
 
 		private static final Object monitor = new Object();
