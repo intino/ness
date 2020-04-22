@@ -31,11 +31,11 @@ def type(terminal)
 		$subscribe...[$NL$NL]
 
 		public void start() {
-			eventHub.start();
+			if (eventHub instanceof io.intino.alexandria.event.JmsEventHub) ((io.intino.alexandria.event.JmsEventHub) eventHub).start();
 		}
 
 		public void stop() {
-			eventHub.stop();
+			if (eventHub instanceof io.intino.alexandria.event.JmsEventHub) ((io.intino.alexandria.event.JmsEventHub) eventHub).stop();
 		}
 
 		private static final Object monitor = new Object();
