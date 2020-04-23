@@ -196,6 +196,10 @@ public class JmsBrokerService implements BrokerService {
 		return textMessage;
 	}
 
+	private String tankQn(Datalake.Tank.Event t, Datalake.Context c) {
+		return (!c.qn().isEmpty() ? c.qn() + "." : "") + t.event().name$();
+	}
+
 	final class BrokerManager implements io.intino.datahub.broker.BrokerManager {
 		private final Map<String, JmsProducer> producers = new HashMap<>();
 		private final Map<String, List<JmsConsumer>> consumers = new HashMap<>();
@@ -248,9 +252,9 @@ public class JmsBrokerService implements BrokerService {
 		private void startTanks() {
 			if (graph.datalake() != null) {
 				brokerStage.mkdirs();
+				Scale scale = Scale.valueOf(graph.datalake().scale().name());
 				graph.datalake().tankList().stream().filter(Datalake.Tank::isEvent).map(Datalake.Tank::asEvent).
 						forEach(t -> {
-							Scale scale = Scale.valueOf(graph.datalake().scale().name());
 							if (!t.asTank().isContextual() || t.asTank().asContextual().context().isLeaf())
 								brokerManager.registerTopicConsumer(t.qn(), new TopicSaver(brokerStage, t.qn(), scale).create());
 							else {
@@ -259,6 +263,7 @@ public class JmsBrokerService implements BrokerService {
 								context.leafs().forEach(c -> register(t, scale, c));
 							}
 						});
+				brokerManager.registerTopicConsumer("Session", new TopicSaver(brokerStage, "Session", scale).create());
 			}
 		}
 
@@ -338,10 +343,6 @@ public class JmsBrokerService implements BrokerService {
 		private boolean closedSession() {
 			return ((ActiveMQSession) session).isClosed();
 		}
-	}
-
-	private String tankQn(Datalake.Tank.Event t, Datalake.Context c) {
-		return (!c.qn().isEmpty() ? c.qn() + "." : "") + t.event().name$();
 	}
 
 	private class PipeManager {

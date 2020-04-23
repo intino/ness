@@ -58,8 +58,6 @@ Concept:Named Terminal
 	Concept:{0..1} Subscribe
 		var Datalake.Tank.Event[] tanks
 
-Concept SessionEvent extends Event
-
 Concept Event
 	has Attribute
 	has Component
