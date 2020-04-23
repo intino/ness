@@ -1,7 +1,10 @@
 package io.intino.ness.datahubterminalplugin.event;
 
-import io.intino.datahub.graph.*;
+import io.intino.datahub.graph.Attribute;
+import io.intino.datahub.graph.Component;
+import io.intino.datahub.graph.Data;
 import io.intino.datahub.graph.Datalake.Context;
+import io.intino.datahub.graph.Event;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
@@ -19,7 +22,6 @@ import static java.util.Arrays.stream;
 
 public class EventRenderer {
 	private static final String EVENT = "io.intino.alexandria.event.Event";
-	private static final String SESSION_EVENT = "io.intino.alexandria.event.SessionEvent";
 	private final Event event;
 	private final Context context;
 	private final File destination;
@@ -42,9 +44,8 @@ public class EventRenderer {
 	private Frame createEventFrame(Event event, String packageName) {
 		FrameBuilder eventFrame = new FrameBuilder("event").
 				add("name", event.name$()).add("package", packageName).
-				add("parent", event.isExtensionOf() ? event.asExtensionOf().parent().name$() : parent());
+				add("parent", event.isExtensionOf() ? event.asExtensionOf().parent().name$() : EVENT);
 		if (event.isExtensionOf()) eventFrame.add("parentSuper", event.name$());
-		if (!(event instanceof SessionEvent)) eventFrame.add("ss", event.name$());
 		eventFrame.add("attribute", processAttributes(event.attributeList(), event.name$()));
 		Map<Component, Boolean> components = collectComponents(event);
 		if (!components.isEmpty()) eventFrame.add("component", processComponents(components, event.name$()));
@@ -53,10 +54,6 @@ public class EventRenderer {
 			eventFrame.add("context", new FrameBuilder().add("context").add("enum", enums(context, leafs)));
 		}
 		return eventFrame.toFrame();
-	}
-
-	private String parent() {
-		return ((event instanceof SessionEvent)) ? SESSION_EVENT : EVENT;
 	}
 
 	private FrameBuilder[] processAttributes(List<Attribute> attributes, String owner) {
