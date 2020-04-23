@@ -26,16 +26,12 @@
     <orderEntry type="library" name="Intino: org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1" level="project" />
     <orderEntry type="library" name="Intino: org.fusesource.hawtbuf:hawtbuf:1.11" level="project" />
     <orderEntry type="library" name="Intino: org.apache.geronimo.specs:geronimo-j2ee-management_1.1_spec:1.0.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:2.1.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:session:1.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:event:1.1.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zim:2.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:message:2.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.0.4" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zet:1.0.5" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:tris:1.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:2.1.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:2.1.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:mapp:1.0.0" level="project" />
     <orderEntry type="library" name="Intino: xalan:xalan:2.7.2" level="project" />
     <orderEntry type="library" name="Intino: xalan:serializer:2.7.2" level="project" />
@@ -146,5 +142,9 @@
     <orderEntry type="library" name="Intino: net.rforge:REngine:0.6-8.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:jms:1.2.0" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-client:5.15.8" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:2.2.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:event:1.2.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:2.2.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:2.2.0" level="project" />
   </component>
 </module>

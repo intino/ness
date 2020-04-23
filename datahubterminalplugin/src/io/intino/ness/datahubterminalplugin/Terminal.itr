@@ -26,6 +26,15 @@ def type(terminal)
 			return new BatchSession(dataHubStageDirectory, temporalStageDirectory);
 		}
 
+		public void publish(io.intino.alexandria.event.SessionEvent session) {
+			eventHub.sendEvent(io.intino.alexandria.event.SessionEvent.PATH, session);
+		}
+
+		public void subscribe(SessionEventConsumer onEventReceived) {
+			consumers.put(onEventReceived, event -> onEventReceived.accept(new io.intino.alexandria.event.SessionEvent(event.toMessage())));
+			eventHub.attachListener(io.intino.alexandria.event.SessionEvent.PATH, consumers.get(onEventReceived));
+		}
+
 		$publish...[$NL$NL]
 
 		$subscribe...[$NL$NL]
@@ -84,6 +93,9 @@ def type(terminal)
             	$publish+tankOf...[$NL]
             	return event.toMessage().type();
             }
+		}
+
+		public interface SessionEventConsumer extends java.util.function.Consumer<io.intino.alexandria.event.SessionEvent> {
 		}
 
 		$event+interface...[$NL$NL]

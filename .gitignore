@@ -8,5 +8,4 @@ node_modules
 package.json
 package-lock.json
 webpack.config.js
-babel.config.js
 gen
