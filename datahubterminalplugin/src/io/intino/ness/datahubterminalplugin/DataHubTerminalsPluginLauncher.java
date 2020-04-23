@@ -46,7 +46,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			notifier().notifyError("Couldn't load graph. Please recompile module");
 			return;
 		}
-//		publishOntology(graph.as(NessGraph.class), tempDir);
+		publishOntology(graph.as(NessGraph.class), tempDir);
 		publishTerminals(graph.as(NessGraph.class), tempDir);
 	}
 
