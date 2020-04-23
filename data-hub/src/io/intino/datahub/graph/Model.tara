@@ -42,7 +42,9 @@ Concept:{0..1} Datalake
 		has:Named Context
 	Concept:{1..*}:AspectRequired Tank
 		Aspect TankType
-        	sub Set > var word:{Multivalued Singleton} type = Multivalued
+        	sub Set
+        		var string tank
+				var word:{Multivalued Singleton} type = Multivalued
         	sub Event
         		var Model.Event event
 				var boolean sortingRequired = true
