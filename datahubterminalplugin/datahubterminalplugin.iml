@@ -127,7 +127,6 @@
     <orderEntry type="library" name="Intino: org.apache.commons:commons-collections4:4.4" level="project" />
     <orderEntry type="library" name="Intino: com.opencsv:opencsv:5.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.0.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:bpm-framework:1.2.0" level="project" />
     <orderEntry type="module" module-name="data-hub" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:exceptions:1.0.0" level="project" />
     <orderEntry type="library" name="Intino: xalan:xalan:2.7.2" level="project" />
@@ -158,5 +157,6 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:2.2.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:2.2.0" level="project" />
     <orderEntry type="module" module-name="datalake-inspector" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:bpm-framework:1.2.6" level="project" />
   </component>
 </module>

@@ -11,7 +11,7 @@ def type(terminal)
 		private static final Scale scale = Scale.$scale;
 		private final io.intino.alexandria.event.EventHub eventHub;
 		private java.util.Map<java.util.function.Consumer<?>, java.util.function.Consumer<io.intino.alexandria.event.Event>> consumers = new java.util.HashMap<>();
-
+		$bpm+contexts
 		public static String$[] subscriptionChannels = new String$[]{$subscribe+channel};
 
 		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.event.EventHub eventHub) {
@@ -102,52 +102,109 @@ def type(terminal)
 	}
 end
 
-def type(multicontext) trigger(if)
-	   if (event instanceof $type) publish(($type) event, $type+FirstUpperCase.Context.contextByQn(context));
-end
+def type(bpm) trigger(contexts)
+	public enum BpmContext {
+		$context+asEnum...[, ];
 
-def trigger(if)
-	   if (event instanceof $type) publish(($type) event);
-end
+		public abstract String qn();
 
-def type(multicontext) trigger(tankOf)
-	   if (event instanceof $type) return $type+FirstUpperCase.Context.contextByQn(context).qn() + ".$type";
-end
-
-def trigger(tankOf)
-	   if (event instanceof $type) return "$channel";
-end
-
-def type(multicontext) trigger(publish)
-	public void publish($type $typeName+firstLowerCase, $type+FirstUpperCase.Context context, $type+FirstUpperCase.Context... moreContexts) {
-		eventHub.sendEvent(context.qn() + ".$type", $typeName+firstLowerCase);
-		for ($type+FirstUpperCase.Context c : moreContexts)
-			eventHub.sendEvent(c.qn() + ".$type", $typeName+firstLowerCase);
+		public static BpmContext contextByQn(String qn) {
+			return java.util.Arrays.stream(values()).filter(c -> c.qn().equals(qn)).findFirst().orElse(null);
+		}
 	}
 end
 
-def trigger(publish)
+def trigger(asEnum)
+	$value+snakeCaseToCamelCase {
+		public String qn() {
+			return "$qn";
+		}
+	}
+end
+
+def type(multicontext & bpm) trigger(if)
+	if (event instanceof $type) publish(($type) event, BpmContext.contextByQn(context));
+end
+
+def type(multicontext) trigger(if)
+	if (event instanceof $type) publish(($type) event, $type.Context.contextByQn(context));
+end
+
+def trigger(if)
+	if (event instanceof $type) publish(($type) event);
+end
+
+def type(multicontext) !type(bpm) trigger(tankOf)
+	if (event instanceof $type) return $type.Context.contextByQn(context).qn() + ".$typeWithNamespace";
+end
+
+def !type(bpm) trigger(tankOf)
+	if (event instanceof $type) return "$channel";
+end
+
+def type(bpm & multicontext) trigger(publish)
+	public void publish($type $typeName+firstLowerCase, BpmContext context, BpmContext... moreContexts) {
+		eventHub.sendEvent(context.qn() + ".$typeWithNamespace", $typeName+firstLowerCase);
+		for (BpmContext c : moreContexts) eventHub.sendEvent(c.qn() + ".$typeWithNamespace", $typeName+firstLowerCase);
+	}
+end
+
+def type(bpm) trigger(publish)
 	public void publish($type $typeName+firstLowerCase) {
 		eventHub.sendEvent("$channel", $typeName+firstLowerCase);
 	}
 end
 
-def type(multiContext) trigger(subscribe)
-	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, $type+FirstUpperCase.Context context, $type+FirstUpperCase.Context... moreContexts) {
+def type(multicontext) !type(bpm) trigger(publish)
+	public void publish($type $typeName+firstLowerCase, $type.Context context, $type.Context... moreContexts) {
+		eventHub.sendEvent(context.qn() + ".$typeWithNamespace", $typeName+firstLowerCase);
+		for ($type.Context c : moreContexts)
+			eventHub.sendEvent(c.qn() + ".$typeWithNamespace", $typeName+firstLowerCase);
+	}
+end
+
+def !type(bpm) trigger(publish)
+	public void publish($type $typeName+firstLowerCase) {
+		eventHub.sendEvent("$channel", $typeName+firstLowerCase);
+	}
+end
+
+def type(bpm & multiContext) trigger(subscribe)
+	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, BpmContext context, BpmContext... moreContexts) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
-		eventHub.attachListener(context.qn() + ".$type", subscriberId, consumers.get(onEventReceived));
-		for ($type+FirstUpperCase.Context c : moreContexts)
-			eventHub.attachListener(c.qn() + ".$type", subscriberId, consumers.get(onEventReceived));
+		eventHub.attachListener(context.qn() + ".$typeName+FirstUpperCase", subscriberId, consumers.get(onEventReceived));
+		for (BpmContext c : moreContexts)
+			eventHub.attachListener(c.qn() + ".$typeName+FirstUpperCase", subscriberId, consumers.get(onEventReceived));
 	}
 
-	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, $type+FirstUpperCase.Context context, $type+FirstUpperCase.Context... moreContexts) {
+	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, BpmContext context, BpmContext... moreContexts) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
-		eventHub.attachListener(context.qn() + ".$type", consumers.get(onEventReceived));
-		for ($type+FirstUpperCase.Context c : moreContexts)
-			eventHub.attachListener(c.qn() + ".$type", consumers.get(onEventReceived));
+		eventHub.attachListener(context.qn() + ".$typeName+FirstUpperCase", consumers.get(onEventReceived));
+		for (BpmContext c : moreContexts)
+			eventHub.attachListener(c.qn() + ".$typeName+FirstUpperCase", consumers.get(onEventReceived));
 	}
 
-	public void unsubscribe($type+FirstUpperCase~Consumer onEventReceived) {
+	public void unsubscribe(ProcessStatusConsumer onEventReceived) {
+		eventHub.detachListeners(consumers.get(onEventReceived));
+	}
+end
+
+def type(multiContext) !type(bpm) trigger(subscribe)
+	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, $type.Context context, $type.Context... moreContexts) {
+		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
+		eventHub.attachListener(context.qn() + ".$typeWithNamespace", subscriberId, consumers.get(onEventReceived));
+		for ($type.Context c : moreContexts)
+			eventHub.attachListener(c.qn() + ".$typeWithNamespace", subscriberId, consumers.get(onEventReceived));
+	}
+
+	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, $type.Context context, $type.Context... moreContexts) {
+		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
+		eventHub.attachListener(context.qn() + ".$typeWithNamespace", consumers.get(onEventReceived));
+		for ($type.Context c : moreContexts)
+			eventHub.attachListener(c.qn() + ".$typeWithNamespace", consumers.get(onEventReceived));
+	}
+
+	public void unsubscribe($typeName~Consumer onEventReceived) {
 		eventHub.detachListeners(consumers.get(onEventReceived));
 	}
 end

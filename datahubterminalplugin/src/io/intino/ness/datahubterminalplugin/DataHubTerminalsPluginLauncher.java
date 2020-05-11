@@ -71,7 +71,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 				if (published.get() && notifier() != null)
 					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), terminal.name$(), configuration().artifact().version()));
 			});
-			if (published.get()) FileUtils.deleteDirectory(tempDir);
+			if (!published.get()) FileUtils.deleteDirectory(tempDir);
 		} catch (IOException e) {
 			logger().println(e.getMessage());
 		}

@@ -1,10 +1,7 @@
 package io.intino.ness.datahubterminalplugin.event;
 
-import io.intino.datahub.graph.Attribute;
-import io.intino.datahub.graph.Component;
-import io.intino.datahub.graph.Data;
+import io.intino.datahub.graph.*;
 import io.intino.datahub.graph.Datalake.Context;
-import io.intino.datahub.graph.Event;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
@@ -36,6 +33,8 @@ public class EventRenderer {
 
 	public void render() {
 		String rootPackage = eventsPackage();
+		if (event.core$().owner().is(Namespace.class))
+			rootPackage = rootPackage + "." + event.core$().ownerAs(Namespace.class).name$();
 		final File packageFolder = new File(destination, rootPackage.replace(".", File.separator));
 		final Frame frame = createEventFrame(event, rootPackage);
 		Commons.writeFrame(packageFolder, event.name$(), template().render(new FrameBuilder("root").add("root", rootPackage).add("package", rootPackage).add("event", frame)));
@@ -97,7 +96,6 @@ public class EventRenderer {
 		else if (attribute.isText()) return process(attribute.asText());
 		else if (attribute.isDateTime()) return process(attribute.asDateTime());
 		else if (attribute.isDate()) return process(attribute.asDate());
-		else if (attribute.isFile()) return process(attribute.asFile());
 		else if (attribute.isLongInteger()) return process(attribute.asLongInteger());
 		else if (attribute.isWord()) return process(attribute.asWord());
 		return null;
@@ -140,12 +138,6 @@ public class EventRenderer {
 				.add("defaultValue", attribute.defaultValue() + "L");
 	}
 
-	private FrameBuilder process(Data.File attribute) {
-		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
-				.add("name", attribute.a$(Attribute.class).name$())
-				.add("simpleType", attribute.type().substring(attribute.type().lastIndexOf(".") + 1))
-				.add("type", attribute.type());
-	}
 
 	private FrameBuilder process(Data.Bool attribute) {
 		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())

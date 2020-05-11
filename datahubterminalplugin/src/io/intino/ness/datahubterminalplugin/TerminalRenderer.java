@@ -2,13 +2,16 @@ package io.intino.ness.datahubterminalplugin;
 
 import io.intino.datahub.graph.Datalake;
 import io.intino.datahub.graph.Datalake.Context;
+import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.datahub.graph.Event;
+import io.intino.datahub.graph.Namespace;
 import io.intino.datahub.graph.Terminal;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -17,25 +20,25 @@ class TerminalRenderer {
 	private final Terminal terminal;
 	private final Map<Event, Context> eventWithContext;
 	private final File srcDir;
-	private final String basePackage;
+	private final String rootPackage;
 
-	TerminalRenderer(Terminal terminal, Map<Event, Context> eventWithContext, File srcDir, String basePackage) {
+	TerminalRenderer(Terminal terminal, Map<Event, Context> eventWithContext, File srcDir, String rootPackage) {
 		this.terminal = terminal;
 		this.eventWithContext = eventWithContext;
 		this.srcDir = srcDir;
-		this.basePackage = basePackage;
+		this.rootPackage = rootPackage;
 	}
 
 	void render() {
-		final File packageFolder = new File(srcDir, basePackage.replace(".", File.separator));
+		final File packageFolder = new File(srcDir, rootPackage.replace(".", File.separator));
 		Commons.writeFrame(packageFolder, Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString(), template().render(createTerminalFrame()));
 	}
 
 	private Frame createTerminalFrame() {
 		Datalake datalake = terminal.graph().datalake();
-		FrameBuilder builder = new FrameBuilder().add("terminal").add("package", basePackage).add("name", terminal.name$());
+		FrameBuilder builder = new FrameBuilder().add("terminal").add("package", rootPackage).add("name", terminal.name$());
 		if (datalake != null) builder.add("scale", datalake.scale().name());
-		builder.add("event", eventWithContext.keySet().stream().map(m -> new FrameBuilder("event").add("name", m.name$()).add("type", m.name$()).toFrame()).toArray(Frame[]::new));
+		builder.add("event", eventWithContext.keySet().stream().map(e -> new FrameBuilder("event").add("name", e.name$()).add("type", eventPackage(e) + "." + Formatters.firstUpperCase(e.name$())).toFrame()).toArray(Frame[]::new));
 		if (terminal.publish() != null)
 			terminal.publish().tanks().forEach(tank -> builder.add("publish", frameOf(tank)));
 		if (terminal.subscribe() != null)
@@ -46,22 +49,60 @@ class TerminalRenderer {
 
 	private void addBpm(FrameBuilder builder) {
 		Context context = terminal.allowsBpmIn().context();
+		List<Context> leafs = new ArrayList<>();
+		if (context != null) {
+			leafs.addAll(context.isLeaf() ? Collections.singletonList(context) : context.leafs());
+			builder.add("bpm", new FrameBuilder("bpm").add("context", enums(context, leafs)));
+		}
 		String statusQn = terminal.allowsBpmIn().processStatusClass();
-		String statusClassName = statusQn.substring(statusQn.lastIndexOf(".") + 1);
-		Frame frame = new FrameBuilder("default").add("type", statusQn).add("typeName", statusClassName).add("channel", (context != null ? context.qn() + "." : "") + statusClassName).toFrame();
-		builder.add("subscribe", frame);
-		builder.add("publish", frame);
-		builder.add("event", new FrameBuilder("event").add("name", statusClassName).add("type", statusQn).toFrame());
+		String processStatusQName = statusQn.substring(statusQn.lastIndexOf(".") + 1);
+		FrameBuilder bpmBuilder = new FrameBuilder(leafs.size() > 1 ? "multicontext" : "default", "bpm").
+				add("type", statusQn).
+				add("typeName", processStatusQName);
+		if (leafs.size() <= 1)
+			bpmBuilder.add("channel", (leafs.size() == 1 ? leafs.get(0).qn() + "." : "") + processStatusQName);
+		builder.add("subscribe", bpmBuilder);
+		builder.add("publish", bpmBuilder);
+		builder.add("event", new FrameBuilder("event").add("name", processStatusQName).add("type", statusQn).toFrame());
 	}
 
-	private Frame frameOf(Datalake.Tank.Event tank) {
-		return new FrameBuilder(contextsOf(tank).size() > 1 ? "multicontext" : "default").
-				add("type", Formatters.firstUpperCase(tank.event().name$())).
-				add("typeName", tank.event().name$()).
-				add("channel", tank.qn()).toFrame();
+	private Frame[] enums(Context realContext, List<Context> leafs) {
+		List<Frame> frames = new ArrayList<>();
+		if (!leafs.contains(realContext) && !realContext.label().isEmpty())
+			frames.add(new FrameBuilder("enum").add("value", realContext.qn().replace(".", "-")).toFrame());
+		for (Context leaf : leafs) {
+			FrameBuilder builder = new FrameBuilder("enum").add("value", leaf.qn().replace(".", "-")).add("qn", leaf.qn());
+			frames.add(builder.toFrame());
+		}
+		return frames.toArray(new Frame[0]);
 	}
 
-	private List<Context> contextsOf(Datalake.Tank.Event tank) {
+	private Frame frameOf(Tank.Event eventTank) {
+		String eventPackage = eventPackage(eventTank.event());
+		String namespace = eventNamespace(eventTank.event());
+		return new FrameBuilder(contextsOf(eventTank).size() > 1 ? "multicontext" : "default").
+				add("type", eventPackage + "." + Formatters.firstUpperCase(eventTank.event().name$())).
+				add("typeName", eventTank.event().name$()).
+				add("typeWithNamespace", (namespace.isEmpty() ? "" : namespace + ".") + Formatters.firstUpperCase(eventTank.event().name$())).
+				add("channel", eventTank.qn()).toFrame();
+	}
+
+	private String eventPackage(Event event) {
+		String eventPackage = eventsPackage();
+		if (event.core$().owner().is(Namespace.class))
+			eventPackage = eventPackage + "." + eventNamespace(event);
+		return eventPackage;
+	}
+
+	private String eventNamespace(Event event) {
+		return event.core$().owner().is(Namespace.class) ? event.core$().ownerAs(Namespace.class).name$().toLowerCase() : "";
+	}
+
+	private String eventsPackage() {
+		return rootPackage + ".events";
+	}
+
+	private List<Context> contextsOf(Tank.Event tank) {
 		return tank.asTank().isContextual() ? tank.asTank().asContextual().context().leafs() : Collections.emptyList();
 	}
 

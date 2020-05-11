@@ -60,6 +60,9 @@ Concept:Named Terminal
 	Concept:{0..1} Subscribe
 		var Datalake.Tank.Event[] tanks
 
+Concept Namespace
+	has:{1..*} Event
+
 Concept Event
 	has Attribute
 	has Component
@@ -107,6 +110,7 @@ Concept Data is abstract
 		sub Word
 			var string type = "java.lang.Enum" is reactive private
 			var string[] values;
-		sub File
-			var string type = "io.intino.alexandria.Resource" is reactive private
-			var word:{body path form header query} in = form
+		sub Table
+			var string type = "Table" is reactive private
+			Concept:RequiresAspect Column extends Data
+				var string name
