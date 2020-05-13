@@ -10,6 +10,8 @@
       <sourceFolder url="file://$MODULE_DIR$/temp/ontology/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/temp/generadorHub/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/temp/contratacionHub/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/temp/test/first/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/temp/test/ontology/src" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -47,9 +49,7 @@
     <orderEntry type="library" name="Intino: org.springframework:spring-core:4.3.18.RELEASE" level="project" />
     <orderEntry type="library" name="Intino: org.springframework:spring-expression:4.3.18.RELEASE" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.hamcrest:hamcrest-core:1.3" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:zim:2.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.0.4" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:message:2.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: junit:junit:4.13" level="project" />
     <orderEntry type="library" name="Intino: io.intino:plugin-interface:2.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino:configuration:1.0.0" level="project" />
@@ -119,7 +119,6 @@
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-pool:5.15.9" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-jms-pool:5.15.9" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.0.4" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:http:1.0.3" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zip:1.0.0" level="project" />
     <orderEntry type="library" name="Intino: commons-collections:commons-collections:3.2.2" level="project" />
     <orderEntry type="library" name="Intino: org.apache.commons:commons-text:1.8" level="project" />
@@ -149,14 +148,21 @@
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-kahadb-store:5.15.9" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-runtime-config:5.15.9" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:jmx:1.0.2" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.0.11" level="project" />
     <orderEntry type="library" name="Intino: org.slf4j:slf4j-api:1.7.13" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:jms:1.2.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:2.2.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:event:1.2.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:2.2.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:2.2.0" level="project" />
     <orderEntry type="module" module-name="datalake-inspector" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:bpm-framework:1.2.6" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.3.3" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:http:1.0.7" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:3.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:event:2.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:zim:3.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:message:3.0.0" level="project" />
+    <orderEntry type="library" name="Intino: org.antlr:antlr4-runtime:4.8" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:3.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:3.0.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:event:1.2.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zim:2.0.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:message:2.0.0" level="project" />
   </component>
 </module>

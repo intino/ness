@@ -64,7 +64,7 @@ Concept Namespace
 	has:{1..*} Event
 
 Concept Event
-	has Attribute
+	has:Named:RequiresAspect Attribute
 	has Component
 	Concept Has
 		var Component element
@@ -112,5 +112,4 @@ Concept Data is abstract
 			var string[] values;
 		sub Table
 			var string type = "Table" is reactive private
-			Concept:RequiresAspect Column extends Data
-				var string name
+			Concept:Named:RequiresAspect Column extends Data

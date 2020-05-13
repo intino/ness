@@ -24,18 +24,20 @@ class TerminalPublisher {
 	private final Terminal terminal;
 	private final Configuration conf;
 	private final String terminalJmsVersion;
+	private final  String bpmVersion;
 	private final PluginLauncher.SystemProperties systemProperties;
 	private final String basePackage;
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
-	private List<Tank.Event> tanks;
+	private final List<Tank.Event> tanks;
 
-	TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, Configuration configuration, String terminalJmsVersion, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
+	TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, Configuration configuration, String terminalJmsVersion,String bpmVersion, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
 		this.terminal = terminal;
 		this.tanks = tanks;
 		this.conf = configuration;
 		this.terminalJmsVersion = terminalJmsVersion;
+		this.bpmVersion = bpmVersion;
 		this.systemProperties = systemProperties;
 		this.basePackage = configuration.artifact().groupId().toLowerCase() + "." + Formatters.snakeCaseToCamelCase().format(configuration.artifact().name()).toString().toLowerCase();
 		this.invokedPhase = invokedPhase;
@@ -170,7 +172,7 @@ class TerminalPublisher {
 		final FrameBuilder builder = new FrameBuilder("pom").add("group", group).add("artifact", artifact).add("version", version);
 		conf.repositories().stream().filter(r -> !(r instanceof Configuration.Repository.Language)).forEach(r -> buildRepoFrame(builder, r, conf.artifact().version().contains("SNAPSHOT")));
 		builder.add("ontology", ontologyFrame(group, version));
-		if (terminal.allowsBpmIn() != null) builder.add("hasBpm", ";");
+		if (terminal.allowsBpmIn() != null) builder.add("hasBpm", this.bpmVersion);
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new AccessorPomTemplate().render(builder.toFrame()));
 		return pomFile;

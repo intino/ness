@@ -3,7 +3,7 @@ dsl Konos
 Service datalakeInspector as UI(port = "{ui_port}", title = "Data Lake Inspector", favicon = "")
 	Resource(path = "/") home as Page(homeTemplate) Main
 
-Template(layout=Vertical Flexible) homeTemplate as Decorated Relative(height=100%,width=100%)
+Template(layout=Vertical Flexible) homeTemplate as Relative(height=100%,width=100%)
 	Block(layout=Vertical Flexible)
 		Header(color="white", format=airHeader separator, elevation=0) as Absolute(height=65px)
 			Stamp(template=header) header
@@ -16,7 +16,7 @@ Template(layout=Vertical Flexible) homeTemplate as Decorated Relative(height=100
 		MaterialIconButton(title="download", format=absolute, icon = "Archive", size =Large) downloadReview as Download
 		Frame(display=htmlViewer,format=fullWidth, visible=false) table
 
-Template(layout=Horizontal Center) header as Decorated
+Template(layout=Horizontal Center) header
 	Block(layout=Horizontal Center Flexible, spacing=DP8)
 		Image(value="images/logo.jpeg") as Absolute(width=200px, 50px)
 		Text(value="Data Lake Inspector", format=h2)

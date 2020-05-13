@@ -34,6 +34,15 @@ public class ArtifactoryConnector {
 		}
 	}
 
+	public static List<String> bpmVersions() {
+		try {
+			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/bpm-framework/maven-metadata.xml");
+			return extractVersions(new String(read(connect(url)).toByteArray()));
+		} catch (Throwable e) {
+			return Collections.emptyList();
+		}
+	}
+
 	private static List<String> extractVersions(String metadata) {
 		if (!metadata.contains("<versions>")) return Collections.emptyList();
 		metadata = metadata.substring(metadata.indexOf("<versions>")).substring("<versions>".length() + 1);
