@@ -23,7 +23,6 @@ public class Model {
 		} else return prefix + self.event().name$();
 	}
 
-
 	private static String eventNamespace(Event event) {
 		return event.core$().owner().is(Namespace.class) ? event.core$().ownerAs(Namespace.class).name$().toLowerCase() : "";
 	}

@@ -32,7 +32,9 @@ Concept:{0..1} Datalake
     	Concept:{1..1} Cron
 			var string pattern
 			var string timeZone
-
+	Concept:{0..1} ProcessStatus
+		var string name = "ProcessStatus" is private final
+		var Context context
 	Concept:Named Context
 		var string label = 'self.name$()'
 		var string qn = @qn is private reactive
