@@ -263,12 +263,28 @@ public class JmsBrokerService implements BrokerService {
 								context.leafs().forEach(c -> register(t, scale, c));
 							}
 						});
+				Datalake.ProcessStatus processStatus = graph.datalake().processStatus();
+				if (processStatus != null) registerProcessStatus(scale, processStatus);
 				brokerManager.registerTopicConsumer("Session", new TopicSaver(brokerStage, "Session", scale).create());
 			}
 		}
 
+		private void registerProcessStatus(Scale scale, Datalake.ProcessStatus ps) {
+			if (ps.context() == null) {
+				String topic = processStatusQn(ps, ps.context());
+				brokerManager.registerTopicConsumer(topic, new TopicSaver(brokerStage, topic, scale).create());
+			} else ps.context().leafs().forEach(c -> {
+					String topic = processStatusQn(ps, c);
+					brokerManager.registerTopicConsumer(topic, new TopicSaver(brokerStage, topic, scale).create());
+				});
+		}
+
 		private void register(Datalake.Tank.Event t, Scale scale, Datalake.Context c) {
 			brokerManager.registerTopicConsumer(tankQn(t, c), new TopicSaver(brokerStage, tankQn(t, c), scale).create());
+		}
+
+		private String processStatusQn(Datalake.ProcessStatus ps, Datalake.Context c) {
+			return (c == null ? "" : c.qn() + ".") + ps.name();
 		}
 
 		private Session nessSession() {

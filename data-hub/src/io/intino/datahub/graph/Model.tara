@@ -32,7 +32,9 @@ Concept:{0..1} Datalake
     	Concept:{1..1} Cron
 			var string pattern
 			var string timeZone
-
+	Concept:{0..1} ProcessStatus
+		var string name = "ProcessStatus" is private final
+		var Context context
 	Concept:Named Context
 		var string label = 'self.name$()'
 		var string qn = @qn is private reactive
@@ -60,8 +62,11 @@ Concept:Named Terminal
 	Concept:{0..1} Subscribe
 		var Datalake.Tank.Event[] tanks
 
+Concept Namespace
+	has:{1..*} Event
+
 Concept Event
-	has Attribute
+	has:Named:RequiresAspect Attribute
 	has Component
 	Concept Has
 		var Component element
@@ -107,6 +112,6 @@ Concept Data is abstract
 		sub Word
 			var string type = "java.lang.Enum" is reactive private
 			var string[] values;
-		sub File
-			var string type = "io.intino.alexandria.Resource" is reactive private
-			var word:{body path form header query} in = form
+		sub Table
+			var string type = "Table" is reactive private
+			Concept:Named:RequiresAspect Column extends Data

@@ -40,7 +40,7 @@ public class BrokerSessions {
 				String name = file.getName().replace(".inl", "");
 				String[] split = name.split("#");
 				EventSession eventSession = handler.createEventSession();
-				for (Message message : new MessageReader(new BufferedInputStream(new FileInputStream(file))))
+				for (Message message : new MessageReader(new FileInputStream(file)))
 					eventSession.put(split[0], new Timetag(split[1]), new Event(message));
 				eventSession.close();
 				file.delete();

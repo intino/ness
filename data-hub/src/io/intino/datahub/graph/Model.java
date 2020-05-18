@@ -15,10 +15,16 @@ public class Model {
 	}
 
 	public static String qn(Datalake.Tank.Event self) {
+		String namespace = eventNamespace(self.event);
+		String prefix = namespace.isEmpty() ? "" : namespace + ".";
 		if (self.asTank().isContextual()) {
 			String contextQn = self.asTank().asContextual().context().qn();
-			return (contextQn.isEmpty() ? "" : contextQn + ".") + self.event().name$();
-		} else return self.event().name$();
+			return (contextQn.isEmpty() ? "" : contextQn + ".") + prefix + self.event().name$();
+		} else return prefix + self.event().name$();
+	}
+
+	private static String eventNamespace(Event event) {
+		return event.core$().owner().is(Namespace.class) ? event.core$().ownerAs(Namespace.class).name$().toLowerCase() : "";
 	}
 
 	public static boolean isRoot(Context self) {

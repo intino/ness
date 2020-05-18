@@ -11,6 +11,6 @@ public class RequiresAspect implements NodeRule {
 
 	@Override
 	public String errorMessage() {
-		return "This parameters should have a type as facet";
+		return "This parameters should have a type as aspect";
 	}
 }

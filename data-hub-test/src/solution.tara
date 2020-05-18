@@ -1,46 +1,64 @@
 dsl Ness
 
-Datalake(Month, path = "") datalake
+Datalake(Month, path = "") dl
 	Context("") Divisiones
 		Context DA;Context DB;Context DC;Context DD;Context DF;Context DG;Context DJ;Context DK;Context DL;Context DM;Context DN;Context DP;Context DU;Context DV;Context DW;Context DX;
 	Context asemed
-	Tank(event = criterio) criterio as Event Contextual(asemed)
-	Tank(event = criterioBorrado) criterioBorrado as Event Contextual(asemed)
-	Tank(event = criterioModificado) criterioModificado as Event Contextual(asemed)
-	Tank(event = criterioSentencia) criterioSentencia as Event Contextual(asemed)
-
-	Tank(event = usuarioConectado)usuarioConectado as Event
-	Tank(event = usuarioDesconectado)usuarioDesconectado as Event
-
-	Tank(event = ajuste) ajuste as Event Contextual(Divisiones)
-	Tank(event = cierreAjuste) cierreAjuste as Event Contextual(Divisiones)
-
-	Tank activos as Set(type = Singleton) Contextual(Divisiones)
-	Tank inactivos as Set(type = Singleton) Contextual(Divisiones)
-
-	Tank sessionEvent as Event(solution.sessionEvent)  Contextual(Divisiones)
+//	Tank(event = criterio) criterio as Event Contextual(asemed)
+//	Tank(event = criterioBorrado) criterioBorrado as Event Contextual(asemed)
+//	Tank(event = criterioModificado) criterioModificado as Event Contextual(asemed)
+//	Tank(event = criterioSentencia) criterioSentencia as Event Contextual(asemed)
+//
+//	Tank(event = usuarioConectado)usuarioConectado as Event
+//	Tank(event = usuarioDesconectado)usuarioDesconectado as Event
+//
+//	Tank(event = ajuste) ajuste as Event Contextual(Divisiones)
+//	Tank(event = cierreAjuste) cierreAjuste as Event Contextual(Divisiones)
+	Tank(event = Example) example as Event
+	ProcessStatus(context = Divisiones)
 	Backup
 		Cron(pattern = "0 0 12 1/1 * ? *", timeZone = "Atlantic/Canary")
+
 
 Broker(port = 63000, secondaryPort = 1884, path = "./broker")
 	User(name = "user1", password = "1234")
 
-Event criterio
-	Attribute ts as Bool
-	Attribute value as Text
-	Attribute id as Integer
-Event criterioBorrado
-Event criterioModificado
-Event criterioSentencia
-Event ajuste
+//Event criterio
+//	Attribute ts as Bool
+//	Attribute value as Text
+//	Attribute id as Integer
+//Event criterioBorrado
+//Event criterioModificado
+//Event criterioSentencia
+//Event ajuste
+//
+//Event cierreAjuste
+//Event usuarioConectado
+//Event usuarioDesconectado
 
-SessionEvent  sessionEvent
-	Attribute id as Text
-	Attribute userId as Text
-
-Event cierreAjuste
-Event usuarioConectado
-Event usuarioDesconectado
+Event Example
+	Attribute name as Text
+	Attribute remesa as Table
+		Column index as LongInteger
+		Column division as Text
+		Column centroGestor as Text
+		Column centroCoste as Text
+		Column municipio as Text
+		Column cuenta as Text
+		Column ejecutivo as Text
+		Column codigo as Text
+		Column rpu as Text
+		Column tipoMov as Text
+		Column periodo as Text
+		Column desde as DateTime
+		Column hasta as DateTime
+		Column consumo as Real
+		Column importe as Real
+		Column iva as Integer
+		Column dap as Real
+		Column errorTag as Word("Si" "No")
+		Column estado as Text
 
 Terminal  first
-	Publish(tanks = datalake.cierreAjuste)
+	Publish(tanks = dl.example)
+	Subscribe (tanks = dl.example)
