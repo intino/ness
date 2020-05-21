@@ -5,12 +5,12 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.sealing.FileSessionSealer;
 import io.intino.alexandria.sealing.SessionSealer;
 import io.intino.alexandria.ui.services.AuthService;
+import io.intino.datahub.box.service.jms.NessService;
+import io.intino.datahub.box.service.scheduling.Sentinels;
 import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.broker.jms.JmsBrokerService;
 import io.intino.datahub.datalake.BrokerSessions;
 import io.intino.datahub.graph.NessGraph;
-import io.intino.datahub.box.service.jms.NessService;
-import io.intino.datahub.box.service.scheduling.Sentinels;
 import io.intino.magritte.framework.Graph;
 
 import java.io.File;
@@ -63,11 +63,15 @@ public class DataHubBox extends AbstractBox {
 	}
 
 	private void injectJmsConfiguration() {
-		graph.datalake().path(configuration.datalakeDirectory());
-		if (graph.datalake().backup() != null) graph.datalake().backup().path(configuration.backupDirectory());
-		graph.broker().path(brokerDirectory().getAbsolutePath());
-		graph.broker().port(Integer.parseInt(configuration.brokerPort()));
-		graph.broker().secondaryPort(Integer.parseInt(configuration.brokerSecondaryPort()));
+		if (graph.datalake() != null) {
+			graph.datalake().path(configuration.datalakeDirectory());
+			if (graph.datalake().backup() != null) graph.datalake().backup().path(configuration.backupDirectory());
+		}
+		if (graph.broker() != null) {
+			graph.broker().path(brokerDirectory().getAbsolutePath());
+			graph.broker().port(Integer.parseInt(configuration.brokerPort()));
+			graph.broker().secondaryPort(Integer.parseInt(configuration.brokerSecondaryPort()));
+		}
 	}
 
 	private File brokerDirectory() {

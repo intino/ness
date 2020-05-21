@@ -21,7 +21,7 @@ Concept:{0..1} Broker
 		var string[] topics
 
 Concept:{0..1} Datalake
-	var word:{Year Month Day Hour Minute} scale
+	var word:Scale scale
 	var string path = empty
 	Concept:{0..1} Backup
     	var string path = empty
@@ -43,6 +43,7 @@ Concept:{0..1} Datalake
 		var Context[] leafs = @leafs is private reactive
 		has:Named Context
 	Concept:{1..*}:AspectRequired Tank
+		var word:Scale scale = empty
 		Aspect TankType
         	sub Set
         		var string tank
