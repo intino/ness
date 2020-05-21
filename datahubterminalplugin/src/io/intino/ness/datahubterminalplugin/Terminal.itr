@@ -40,14 +40,6 @@ def type(connector)
 
 		$subscribe...[$NL$NL]
 
-		public void start() {
-			if (connector instanceof io.intino.alexandria.terminal.JmsConnector) ((io.intino.alexandria.terminal.JmsConnector) connector).start();
-		}
-
-		public void stop() {
-			if (connector instanceof io.intino.alexandria.terminal.JmsConnector) ((io.intino.alexandria.terminal.JmsConnector) connector).stop();
-		}
-
 		private static final Object monitor = new Object();
 
 		public class BatchSession {
