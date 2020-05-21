@@ -12,15 +12,13 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class DataHubTerminalsPluginLauncher extends PluginLauncher {
-	private static final String MINIMUM_TERMINAL_JMS_VERSION = "2.0.0";
+	private static final String MINIMUM_TERMINAL_JMS_VERSION = "3.0.0";
+	private static final String MAX_TERMINAL_JMS_VERSION = "4.0.0";
 	private static final String MINIMUM_BPM_VERSION = "1.2.5";
 
 	@Override
@@ -69,7 +67,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			String bpmVersion = bpmVersion();
 			AtomicBoolean published = new AtomicBoolean(true);
 			nessGraph.terminalList().forEach(terminal -> {
-				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), terminalJmsVersion,bpmVersion, systemProperties(), invokedPhase, logger()).publish() & published.get());
+				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), terminalJmsVersion, bpmVersion, systemProperties(), invokedPhase, logger()).publish() & published.get());
 				if (published.get() && notifier() != null)
 					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), terminalNameArtifact(terminal), configuration().artifact().version()));
 			});
@@ -82,9 +80,16 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private String terminalNameArtifact(Terminal terminal) {
 		return Formatters.firstLowerCase(Formatters.camelCaseToSnakeCase().format(terminal.name$()).toString());
 	}
+
 	private String terminalJmsVersion() {
 		List<String> terminalVersions = ArtifactoryConnector.terminalVersions();
-		return MINIMUM_TERMINAL_JMS_VERSION;
+		Collections.reverse(terminalVersions);
+
+		return terminalVersions.isEmpty() ? MINIMUM_TERMINAL_JMS_VERSION : suitableVersion(terminalVersions);
+	}
+
+	private String suitableVersion(List<String> terminalVersions) {
+		return terminalVersions.stream().filter(version -> version.compareTo(MAX_TERMINAL_JMS_VERSION) < 0).findFirst().orElse(MINIMUM_TERMINAL_JMS_VERSION);
 	}
 
 	private String bpmVersion() {
@@ -114,6 +119,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	}
 
 	private List<Tank.Event> eventTanks(NessGraph nessGraph) {
+		if (nessGraph.datalake() == null) return Collections.emptyList();
 		return nessGraph.datalake().tankList().stream().filter(Tank::isEvent).map(Tank::asEvent).collect(Collectors.toList());
 	}
 
