@@ -252,21 +252,28 @@ public class JmsBrokerService implements BrokerService {
 		private void startTanks() {
 			if (graph.datalake() != null) {
 				brokerStage.mkdirs();
-				Scale scale = Scale.valueOf(graph.datalake().scale().name());
 				graph.datalake().tankList().stream().filter(Datalake.Tank::isEvent).map(Datalake.Tank::asEvent).
 						forEach(t -> {
 							if (!t.asTank().isContextual() || t.asTank().asContextual().context().isLeaf())
-								brokerManager.registerTopicConsumer(t.qn(), new TopicSaver(brokerStage, t.qn(), scale).create());
+								brokerManager.registerTopicConsumer(t.qn(), new TopicSaver(brokerStage, t.qn(), scale(t)).create());
 							else {
 								Datalake.Context context = t.asTank().asContextual().context();
-								register(t, scale, context);
-								context.leafs().forEach(c -> register(t, scale, c));
+								register(t, scale(t), context);
+								context.leafs().forEach(c -> register(t, scale(t), c));
 							}
 						});
 				Datalake.ProcessStatus processStatus = graph.datalake().processStatus();
-				if (processStatus != null) registerProcessStatus(scale, processStatus);
-				brokerManager.registerTopicConsumer("Session", new TopicSaver(brokerStage, "Session", scale).create());
+				if (processStatus != null) registerProcessStatus(datalakeScale(), processStatus);
+				brokerManager.registerTopicConsumer("Session", new TopicSaver(brokerStage, "Session", datalakeScale()).create());
 			}
+		}
+
+		private Scale scale(Datalake.Tank.Event t) {
+			return t.scale() != null ? Scale.valueOf(t.scale().name()) : datalakeScale();
+		}
+
+		private Scale datalakeScale() {
+			return Scale.valueOf(graph.datalake().scale().name());
 		}
 
 		private void registerProcessStatus(Scale scale, Datalake.ProcessStatus ps) {
@@ -274,9 +281,9 @@ public class JmsBrokerService implements BrokerService {
 				String topic = processStatusQn(ps, ps.context());
 				brokerManager.registerTopicConsumer(topic, new TopicSaver(brokerStage, topic, scale).create());
 			} else ps.context().leafs().forEach(c -> {
-					String topic = processStatusQn(ps, c);
-					brokerManager.registerTopicConsumer(topic, new TopicSaver(brokerStage, topic, scale).create());
-				});
+				String topic = processStatusQn(ps, c);
+				brokerManager.registerTopicConsumer(topic, new TopicSaver(brokerStage, topic, scale).create());
+			});
 		}
 
 		private void register(Datalake.Tank.Event t, Scale scale, Datalake.Context c) {

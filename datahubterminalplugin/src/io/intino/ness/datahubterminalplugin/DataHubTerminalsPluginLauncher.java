@@ -71,7 +71,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			nessGraph.terminalList().forEach(terminal -> {
 				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), terminalJmsVersion,bpmVersion, systemProperties(), invokedPhase, logger()).publish() & published.get());
 				if (published.get() && notifier() != null)
-					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), terminal.name$(), configuration().artifact().version()));
+					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), terminalNameArtifact(terminal), configuration().artifact().version()));
 			});
 			if (published.get()) FileUtils.deleteDirectory(tempDir);
 		} catch (IOException e) {
@@ -79,9 +79,12 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		}
 	}
 
+	private String terminalNameArtifact(Terminal terminal) {
+		return Formatters.firstLowerCase(Formatters.camelCaseToSnakeCase().format(terminal.name$()).toString());
+	}
 	private String terminalJmsVersion() {
 		List<String> terminalVersions = ArtifactoryConnector.terminalVersions();
-		return terminalVersions.isEmpty() ? MINIMUM_TERMINAL_JMS_VERSION : terminalVersions.get(terminalVersions.size() - 1);
+		return MINIMUM_TERMINAL_JMS_VERSION;
 	}
 
 	private String bpmVersion() {
