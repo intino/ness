@@ -216,7 +216,6 @@ public class JmsBrokerService implements BrokerService {
 		void start() {
 			startNessSession();
 			startTanks();
-			Logger.info("Tanks started!");
 		}
 
 		void stop() {
@@ -265,6 +264,7 @@ public class JmsBrokerService implements BrokerService {
 				Datalake.ProcessStatus processStatus = graph.datalake().processStatus();
 				if (processStatus != null) registerProcessStatus(datalakeScale(), processStatus);
 				brokerManager.registerTopicConsumer("Session", new TopicSaver(brokerStage, "Session", datalakeScale()).create());
+				Logger.info("Tanks started!");
 			}
 		}
 
