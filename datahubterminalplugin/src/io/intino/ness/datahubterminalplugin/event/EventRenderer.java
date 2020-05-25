@@ -180,9 +180,8 @@ public class EventRenderer {
 	}
 
 	private FrameBuilder process(Table table) {
-		final Attribute a = table.a$(Attribute.class);
 		return new FrameBuilder("table")
-				.add("name", a.name$())
+				.add("name", table.name$())
 				.add("column", columns(table.columnList()))
 				.add("type", "table");
 	}
