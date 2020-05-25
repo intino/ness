@@ -92,8 +92,8 @@ def type(table) trigger(table)
 			return new Row(table.get(index));
 		}
 
-		public java.util.stream.Stream<io.intino.alexandria.message.Message.Value$[]> rows() {
-			return table.stream();
+		public java.util.stream.Stream<Row> rows() {
+			return table.stream().map(r -> new Row(r));
 		}
 
 		$column+getter...[$NL$NL]
