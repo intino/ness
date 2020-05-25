@@ -115,4 +115,7 @@ Concept Data is abstract
 			var string[] values;
 		sub Table
 			var string type = "Table" is reactive private
-			Concept:Named:RequiresAspect Column extends Data
+			var Model.Table table
+
+Concept Table
+	Concept:Named:RequiresAspect Column extends Data
