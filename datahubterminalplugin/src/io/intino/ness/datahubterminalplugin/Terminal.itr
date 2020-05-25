@@ -1,4 +1,4 @@
-def type(connector)
+def type(terminal)
 	package $package+validPackage;
 
 	import io.intino.alexandria.Timetag;
