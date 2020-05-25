@@ -36,7 +36,7 @@ class TerminalRenderer {
 
 	private Frame createTerminalFrame() {
 		Datalake datalake = terminal.graph().datalake();
-		FrameBuilder builder = new FrameBuilder().add("terminal").add("package", rootPackage).add("name", terminal.name$());
+		FrameBuilder builder = new FrameBuilder("terminal").add("package", rootPackage).add("name", terminal.name$());
 		if (datalake != null) builder.add("scale", datalake.scale().name());
 		builder.add("event", eventWithContext.keySet().stream().map(e -> new FrameBuilder("event").add("name", e.name$()).add("type", eventPackage(e) + "." + Formatters.firstUpperCase(e.name$())).toFrame()).toArray(Frame[]::new));
 		if (terminal.publish() != null)
