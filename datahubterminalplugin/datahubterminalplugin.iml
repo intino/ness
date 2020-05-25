@@ -133,10 +133,6 @@
     <orderEntry type="library" name="Intino: org.antlr:antlr4-runtime:4.8" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:3.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:bpm-framework:1.3.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino:data-hub:4.5.1" level="project" />
-    <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-annotations:2.9.0" level="project" />
-    <orderEntry type="library" name="Intino: org.slf4j:slf4j-api:1.7.25" level="project" />
-    <orderEntry type="library" name="Intino: commons-logging:commons-logging:1.0.3" level="project" />
     <orderEntry type="module" module-name="data-hub" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:exceptions:1.0.0" level="project" />
     <orderEntry type="library" name="Intino: xalan:xalan:2.7.2" level="project" />

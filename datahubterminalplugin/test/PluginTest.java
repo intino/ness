@@ -10,10 +10,11 @@ import java.io.IOException;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
+
 @Ignore
 public class PluginTest {
 	@Test
-	public void should_build_accessors() throws IOException {
+	public void should_build_gc_terminals() throws IOException {
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
 		launcher.
 				moduleStructure(new PluginLauncher.ModuleStructure(singletonList(new File(System.getProperty("user.home") + "/workspace/gestioncomercial/data-hub/src")), singletonList(new File(System.getProperty("user.home") + "/workspace/ness/datahubterminalplugin/test-res")), new File(System.getProperty("user.home") + "/workspace/ness/out/data-hub-test/")))
