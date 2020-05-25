@@ -38,26 +38,27 @@ Broker(port = 63000, secondaryPort = 1884, path = "./broker")
 
 Event Example
 	Attribute name as Text
-	Attribute remesa as Table
-		Column index as LongInteger
-		Column division as Text
-		Column centroGestor as Text
-		Column centroCoste as Text
-		Column municipio as Text
-		Column cuenta as Text
-		Column ejecutivo as Text
-		Column codigo as Text
-		Column rpu as Text
-		Column tipoMov as Text
-		Column periodo as Text
-		Column desde as DateTime
-		Column hasta as DateTime
-		Column consumo as Real
-		Column importe as Real
-		Column iva as Integer
-		Column dap as Real
-		Column errorTag as Word("Si" "No")
-		Column estado as Text
+	Attribute remesa as Table(table = Remesas)
+Table Remesas
+	Column index as LongInteger
+	Column division as Text
+	Column centroGestor as Text
+	Column centroCoste as Text
+	Column municipio as Text
+	Column cuenta as Text
+	Column ejecutivo as Text
+	Column codigo as Text
+	Column rpu as Text
+	Column tipoMov as Text
+	Column periodo as Text
+	Column desde as DateTime
+	Column hasta as DateTime
+	Column consumo as Real
+	Column importe as Real
+	Column iva as Integer
+	Column dap as Real
+	Column errorTag as Word("Si" "No")
+	Column estado as Text
 
 Terminal  first
 	Publish(tanks = dl.example)
