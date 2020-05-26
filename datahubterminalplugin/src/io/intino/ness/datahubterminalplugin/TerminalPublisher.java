@@ -48,7 +48,9 @@ class TerminalPublisher {
 	boolean publish() {
 		if (!createSources()) return false;
 		try {
+			logger.println("Publishing " + terminal.name$() + "...");
 			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
+			logger.println("Terminal " + terminal.name$() + " published!");
 		} catch (IOException | MavenInvocationException e) {
 			logger.println(e.getMessage());
 			return false;
@@ -100,8 +102,7 @@ class TerminalPublisher {
 	private Map<String, Set<String>> eventContextOf(List<Tank.Event> tanks) {
 		return tanks.stream().
 				collect(Collectors.toMap(this::eventQn,
-						tank -> tank.asTank().isContextual() ? tank.asTank().asContextual().context().leafs().stream().map(Context::qn).collect(Collectors.toSet()) : Collections.emptySet(),
-						(a, b) -> b));
+						tank -> tank.asTank().isContextual() ? tank.asTank().asContextual().context().leafs().stream().map(Context::qn).collect(Collectors.toSet()) : Collections.emptySet(), (a, b) -> b));
 	}
 
 	private Map<String, String> tankClasses() {
@@ -158,7 +159,6 @@ class TerminalPublisher {
 		goals.add("install");
 		if (!goal.isEmpty()) goals.add(goal);
 		InvocationRequest request = new DefaultInvocationRequest().setPomFile(pom).setGoals(goals);
-		logger.println("Maven HOME: " + systemProperties.mavenHome.getAbsolutePath());
 		Invoker invoker = new DefaultInvoker().setMavenHome(systemProperties.mavenHome);
 		log(invoker);
 		config(request, systemProperties.mavenHome);
@@ -166,8 +166,11 @@ class TerminalPublisher {
 	}
 
 	private void log(Invoker invoker) {
-		invoker.setErrorHandler(logger::println);
-		invoker.setOutputHandler(logger::println);
+		invoker.setErrorHandler(l -> {
+			if (!l.startsWith("[WARN]")) logger.println(l);
+		});
+		invoker.setOutputHandler(s -> {
+		});
 	}
 
 	private void config(InvocationRequest request, File mavenHome) {
