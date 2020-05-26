@@ -163,14 +163,14 @@ def !type(bpm) trigger(publish)
 end
 
 def type(bpm & multiContext) trigger(subscribe)
-	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, BpmContext context, BpmContext... moreContexts) {
+	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, BpmContext context, BpmContext... moreContexts) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
 		connector.attachListener(context.qn() + ".$typeName+FirstUpperCase", subscriberId, consumers.get(onEventReceived));
 		for (BpmContext c : moreContexts)
 			connector.attachListener(c.qn() + ".$typeName+FirstUpperCase", subscriberId, consumers.get(onEventReceived));
 	}
 
-	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, BpmContext context, BpmContext... moreContexts) {
+	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, BpmContext context, BpmContext... moreContexts) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
 		connector.attachListener(context.qn() + ".$typeName+FirstUpperCase", consumers.get(onEventReceived));
 		for (BpmContext c : moreContexts)
@@ -183,37 +183,37 @@ def type(bpm & multiContext) trigger(subscribe)
 end
 
 def type(multiContext) !type(bpm) trigger(subscribe)
-	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, $type.Context context, $type.Context... moreContexts) {
+	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, $type.Context context, $type.Context... moreContexts) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
 		connector.attachListener(context.qn() + ".$typeWithNamespace", subscriberId, consumers.get(onEventReceived));
 		for ($type.Context c : moreContexts)
 			connector.attachListener(c.qn() + ".$typeWithNamespace", subscriberId, consumers.get(onEventReceived));
 	}
 
-	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, $type.Context context, $type.Context... moreContexts) {
+	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, $type.Context context, $type.Context... moreContexts) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
 		connector.attachListener(context.qn() + ".$typeWithNamespace", consumers.get(onEventReceived));
 		for ($type.Context c : moreContexts)
 			connector.attachListener(c.qn() + ".$typeWithNamespace", consumers.get(onEventReceived));
 	}
 
-	public void unsubscribe($typeName~Consumer onEventReceived) {
+	public void unsubscribe($namespace+firstUpperCase$typeName~Consumer onEventReceived) {
 		connector.detachListeners(consumers.get(onEventReceived));
 	}
 end
 
 def trigger(subscribe)
-	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId) {
+	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
 		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived));
 	}
 
-	public void subscribe($typeName+FirstUpperCase~Consumer onEventReceived) {
+	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
 		connector.attachListener("$channel", consumers.get(onEventReceived));
 	}
 
-	public void unsubscribe($typeName+FirstUpperCase~Consumer onEventReceived) {
+	public void unsubscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived) {
 		connector.detachListeners(consumers.get(onEventReceived));
 	}
 end
@@ -223,6 +223,6 @@ def trigger(quoted)
 end
 
 def trigger(interface)
-	public interface $name~Consumer extends java.util.function.Consumer<$type> {
+	public interface $namespace+firstUpperCase$name+firstUpperCase~Consumer extends java.util.function.Consumer<$type> {
 	}
 end
