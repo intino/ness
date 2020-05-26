@@ -38,7 +38,7 @@ class TerminalRenderer {
 		Datalake datalake = terminal.graph().datalake();
 		FrameBuilder builder = new FrameBuilder("terminal").add("package", rootPackage).add("name", terminal.name$());
 		if (datalake != null) builder.add("scale", datalake.scale().name());
-		builder.add("event", eventWithContext.keySet().stream().map(e -> new FrameBuilder("event").add("name", e.name$()).add("type", eventPackage(e) + "." + Formatters.firstUpperCase(e.name$())).toFrame()).toArray(Frame[]::new));
+		builder.add("event", eventWithContext.keySet().stream().map(e -> new FrameBuilder("event").add("namespace", eventNamespace(e)).add("name", e.name$()).add("type", eventPackage(e) + "." + Formatters.firstUpperCase(e.name$())).toFrame()).toArray(Frame[]::new));
 		if (terminal.publish() != null)
 			terminal.publish().tanks().forEach(tank -> builder.add("publish", frameOf(tank)));
 		if (terminal.subscribe() != null)
@@ -83,6 +83,7 @@ class TerminalRenderer {
 		return new FrameBuilder(contextsOf(eventTank).size() > 1 ? "multicontext" : "default").
 				add("type", eventPackage + "." + Formatters.firstUpperCase(eventTank.event().name$())).
 				add("typeName", eventTank.event().name$()).
+				add("namespace", namespace).
 				add("typeWithNamespace", (namespace.isEmpty() ? "" : namespace + ".") + Formatters.firstUpperCase(eventTank.event().name$())).
 				add("channel", eventTank.qn()).toFrame();
 	}

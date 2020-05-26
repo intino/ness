@@ -24,7 +24,7 @@ class OntologyPublisher {
 	private final String basePackage;
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
-	private List<Tank.Event> tanks;
+	private final List<Tank.Event> tanks;
 
 	OntologyPublisher(File root, List<Tank.Event> tanks, List<Event> events, Configuration configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
@@ -40,7 +40,9 @@ class OntologyPublisher {
 	boolean publish() {
 		if (!createSources()) return false;
 		try {
+			logger.println("Publishing ontology...");
 			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
+			logger.println("Ontology published!");
 		} catch (IOException | MavenInvocationException e) {
 			logger.println(e.getMessage());
 			return false;
@@ -95,7 +97,6 @@ class OntologyPublisher {
 		goals.add("install");
 		if (!goal.isEmpty()) goals.add(goal);
 		InvocationRequest request = new DefaultInvocationRequest().setPomFile(pom).setGoals(goals);
-		logger.println("Maven HOME: " + systemProperties.mavenHome.getAbsolutePath());
 		Invoker invoker = new DefaultInvoker().setMavenHome(systemProperties.mavenHome);
 		log(invoker);
 		config(request, systemProperties.mavenHome);
@@ -104,7 +105,8 @@ class OntologyPublisher {
 
 	private void log(Invoker invoker) {
 		invoker.setErrorHandler(logger::println);
-		invoker.setOutputHandler(logger::println);
+		invoker.setOutputHandler(s -> {
+		});
 	}
 
 	private void config(InvocationRequest request, File mavenHome) {

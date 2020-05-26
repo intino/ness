@@ -6,6 +6,7 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.graph.Datalake.Context;
 import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.datahub.graph.Event;
+import io.intino.datahub.graph.Namespace;
 import io.intino.datahub.graph.Terminal;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
@@ -24,14 +25,14 @@ class TerminalPublisher {
 	private final Terminal terminal;
 	private final Configuration conf;
 	private final String terminalJmsVersion;
-	private final  String bpmVersion;
+	private final String bpmVersion;
 	private final PluginLauncher.SystemProperties systemProperties;
 	private final String basePackage;
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
 	private final List<Tank.Event> tanks;
 
-	TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, Configuration configuration, String terminalJmsVersion,String bpmVersion, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
+	TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, Configuration configuration, String terminalJmsVersion, String bpmVersion, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
 		this.terminal = terminal;
 		this.tanks = tanks;
@@ -47,7 +48,9 @@ class TerminalPublisher {
 	boolean publish() {
 		if (!createSources()) return false;
 		try {
+			logger.println("Publishing " + terminal.name$() + "...");
 			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
+			logger.println("Terminal " + terminal.name$() + " published!");
 		} catch (IOException | MavenInvocationException e) {
 			logger.println(e.getMessage());
 			return false;
@@ -67,14 +70,18 @@ class TerminalPublisher {
 	}
 
 	private void writeManifest(File srcDirectory) {
-		List<String> publish = terminal.publish() != null ? terminal.publish().tanks().stream().map(t -> t.event().name$()).collect(Collectors.toList()) : Collections.emptyList();
-		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().tanks().stream().map(t -> t.event().name$()).collect(Collectors.toList()) : Collections.emptyList();
+		List<String> publish = terminal.publish() != null ? terminal.publish().tanks().stream().map(this::eventQn).collect(Collectors.toList()) : Collections.emptyList();
+		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().tanks().stream().map(this::eventQn).collect(Collectors.toList()) : Collections.emptyList();
 		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses(), eventContexts());
 		try {
 			Files.write(new File(srcDirectory, "terminal.mf").toPath(), new Gson().toJson(manifest).getBytes());
 		} catch (IOException e) {
 			Logger.error(e);
 		}
+	}
+
+	private String namespace(Event event) {
+		return event.core$().owner().is(Namespace.class) ? event.core$().owner().name() + "." : "";
 	}
 
 	private String terminalNameArtifact() {
@@ -94,17 +101,16 @@ class TerminalPublisher {
 
 	private Map<String, Set<String>> eventContextOf(List<Tank.Event> tanks) {
 		return tanks.stream().
-				collect(Collectors.toMap(t -> t.event().name$(),
-						tank -> tank.asTank().isContextual() ? tank.asTank().asContextual().context().leafs().stream().map(Context::qn).collect(Collectors.toSet()) : Collections.emptySet(),
-						(a, b) -> b));
+				collect(Collectors.toMap(this::eventQn,
+						tank -> tank.asTank().isContextual() ? tank.asTank().asContextual().context().leafs().stream().map(Context::qn).collect(Collectors.toSet()) : Collections.emptySet(), (a, b) -> b));
 	}
 
 	private Map<String, String> tankClasses() {
 		Map<String, String> tankClasses = new HashMap<>();
 		if (terminal.publish() != null)
-			terminal.publish().tanks().forEach(t -> tankClasses.putIfAbsent(t.event().name$(), basePackage + ".events." + t.event().name$()));
+			terminal.publish().tanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + namespace(t.event()).toLowerCase() + t.event().name$()));
 		if (terminal.subscribe() != null)
-			terminal.subscribe().tanks().forEach(t -> tankClasses.putIfAbsent(t.event().name$(), basePackage + ".events." + t.event().name$()));
+			terminal.subscribe().tanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + namespace(t.event()).toLowerCase() + t.event().name$()));
 		if (terminal.allowsBpmIn() != null) {
 			Context context = terminal.allowsBpmIn().context();
 			String statusQn = terminal.allowsBpmIn().processStatusClass();
@@ -112,6 +118,10 @@ class TerminalPublisher {
 			tankClasses.put((context != null ? context.qn() + "." : "") + statusClassName, statusQn);
 		}
 		return tankClasses;
+	}
+
+	private String eventQn(Tank.Event t) {
+		return namespace(t.event()) + t.event().name$();
 	}
 
 	private Map<Event, Context> collectEvents(List<Tank.Event> tanks) {
@@ -149,7 +159,6 @@ class TerminalPublisher {
 		goals.add("install");
 		if (!goal.isEmpty()) goals.add(goal);
 		InvocationRequest request = new DefaultInvocationRequest().setPomFile(pom).setGoals(goals);
-		logger.println("Maven HOME: " + systemProperties.mavenHome.getAbsolutePath());
 		Invoker invoker = new DefaultInvoker().setMavenHome(systemProperties.mavenHome);
 		log(invoker);
 		config(request, systemProperties.mavenHome);
@@ -157,8 +166,11 @@ class TerminalPublisher {
 	}
 
 	private void log(Invoker invoker) {
-		invoker.setErrorHandler(logger::println);
-		invoker.setOutputHandler(logger::println);
+		invoker.setErrorHandler(l -> {
+			if (!l.startsWith("[WARN]")) logger.println(l);
+		});
+		invoker.setOutputHandler(s -> {
+		});
 	}
 
 	private void config(InvocationRequest request, File mavenHome) {

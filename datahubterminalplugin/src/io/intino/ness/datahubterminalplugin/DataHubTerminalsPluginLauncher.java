@@ -30,6 +30,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	}
 
 	public void run(File tempDir) {
+		if (logger() != null) logger().println("Maven HOME: " + systemProperties.mavenHome.getAbsolutePath());
 		List<File> directories = moduleStructure().resDirectories;
 		File resDirectory = directories.stream().filter(d -> {
 			File[] files = d.getAbsoluteFile().listFiles(f -> f.getName().endsWith(".stash"));
@@ -66,7 +67,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			String terminalJmsVersion = terminalJmsVersion();
 			String bpmVersion = bpmVersion();
 			AtomicBoolean published = new AtomicBoolean(true);
-			nessGraph.terminalList().forEach(terminal -> {
+			nessGraph.terminalList().parallelStream().forEach(terminal -> {
 				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), terminalJmsVersion, bpmVersion, systemProperties(), invokedPhase, logger()).publish() & published.get());
 				if (published.get() && notifier() != null)
 					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), terminalNameArtifact(terminal), configuration().artifact().version()));
