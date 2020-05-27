@@ -41,9 +41,13 @@ def trigger(event)
 
 		[$component+setter...[$NL$NL]]
 
-		[$attribute+table...[$NL$NL]]
-
 		[$component...[$NL$NL]]
+
+		@Override
+		public io.intino.alexandria.message.Message toMessage() {
+			$attribute+serializeTable...[$NL]
+			return super.toMessage();
+		}
 	}
 end
 
@@ -74,58 +78,6 @@ def trigger(component)
 		public io.intino.alexandria.message.Message toMessage() {
 			return this.message;
 		}
-	}
-end
-
-def type(table) trigger(table)
-	public static class $name+firstUpperCase~Table implements java.io.Serializable {
-		private final java.util.List<io.intino.alexandria.message.Message.Value$[]> table;
-		public enum Column {$column+name...[, ]}
-
-		$column+enum...[$NL$NL]
-
-		public $name+firstUpperCase~Table(java.util.List<io.intino.alexandria.message.Message.Value$[]> table) {
-			this.table = table;
-		}
-
-		public Row row(int index) {
-			return new Row(table.get(index));
-		}
-
-		public java.util.stream.Stream<Row> rows() {
-			return table.stream().map(r -> new Row(r));
-		}
-
-		$column+getter...[$NL$NL]
-
-		public String toString() {
-			return table.stream().
-				map(r->String.join("\\t", java.util.Arrays.stream(r).map(io.intino.alexandria.message.Message.Value::asString).toArray(String$[]::new))).
-				collect(java.util.stream.Collectors.joining("\\n"));
-		}
-
-		public static class Row {
-			private io.intino.alexandria.message.Message.Value$[] values;
-
-			Row(io.intino.alexandria.message.Message.Value$[] values) {
-				this.values = values;
-			}
-
-
-			$column+rowGetter...[$NL$NL]
-
-			$column+rowSetter...[$NL$NL]
-		}
-	}
-end
-
-def type(column) trigger(name)
-	$name
-end
-
-def type(column & word) trigger(enum)
-	public enum $name+FirstUpperCase {
-		$word...[, ];
 	}
 end
 
@@ -172,6 +124,10 @@ def type(word & multiple) trigger(declaration)
 
 end
 
+def type(table) trigger(declaration)
+	private $package.$table+FirstUpperCase $name+firstLowerCase = null;
+end
+
 def type(component) trigger(declaration)
 	private java.util.List<$type> $name+firstLowerCase~List = null;
 end
@@ -190,40 +146,8 @@ def type(word & multiple) trigger(getter)
 end
 
 def type(table) trigger(getter)
-	public $name+FirstUpperCase~Table $name+firstLowerCase() {
-		return new $name+FirstUpperCase~Table(message.get("$name").asTable());
-	}
-end
-
-def type(column & word) trigger(getter)
-	public $simpleType+FirstUpperCase $name+firstLowerCase(int index) {
-		return $name+FirstUpperCase.valueOf(table.get(Column.$name.ordinal())$[index].asString());
-	}
-
-	public java.util.stream.Stream<$simpleType+FirstUpperCase> $name+firstLowerCase() {
-		return java.util.List.of(table.get(Column.errorTag.ordinal())).stream().map(v -> ErrorTag.valueOf(v.asString()));
-	}
-end
-
-def type(column & word) trigger(rowGetter)
-	public $name+FirstUpperCase $name+firstLowerCase() {
-		return $name+FirstUpperCase.valueOf(values$[(Column.$name.ordinal())].asString());
-	}
-end
-
-def type(column) trigger(rowGetter)
-	public $type $name+firstLowerCase() {
-		return values$[(Column.$name.ordinal())].as$simpleType();
-	}
-end
-
-def type(column) trigger(getter)
-	public $type $name+firstLowerCase(int index) {
-		return table.get(index)$[(Column.$name.ordinal())].as$simpleType();
-	}
-
-	public java.util.stream.Stream<$type> $name+firstLowerCase() {
-		return table.stream().map(r -> r$[Column.$name.ordinal()].as$simpleType());
+	public $package.$table+FirstUpperCase $name+firstLowerCase() {
+		return this.$name+FirstLowerCase == null ? this.$name+FirstLowerCase =  new $package.$table+FirstUpperCase(message.get("$name").asTable()) : this.$name+FirstLowerCase;
 	}
 end
 
@@ -301,6 +225,7 @@ def type(word & single) trigger(setter)
 		return this;
 	}
 end
+
 def type(word & multiple) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase(java.util.List<$type+FirstUpperCase> $name+firstLowerCase) {
 		this.message.remove("$name+firstLowerCase");
@@ -324,6 +249,13 @@ def type(primitive & single) trigger(setter)
 	}
 end
 
+def type(table) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase($package.$table+FirstUpperCase $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
+		return this;
+	}
+end
+
 def type(primitive & multiple) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase(java.util.List<$type> $name+firstLowerCase) {
 		this.message.remove("$name+firstLowerCase");
@@ -332,6 +264,13 @@ def type(primitive & multiple) trigger(setter)
 	}
 end
 
+def type(primitive & multiple) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase(java.util.List<$type> $name+firstLowerCase) {
+		this.message.remove("$name+firstLowerCase");
+		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v));
+		return this;
+	}
+end
 
 def type(component) !type(single) trigger(getter)
 	public java.util.List<$type> $name+firstLowerCase~List() {
@@ -410,4 +349,9 @@ def type(multiple & component) trigger(setter)
 		this.$name+firstLowerCase~List.addAll($name+firstLowerCase);
 		return this;
 	}
+end
+
+def type(table) trigger(serialize)
+	if (this.$name+firstLowerCase == null) this.message.remove("$name+firstLowerCase");
+	else this.message.set("$name+firstLowerCase", this.$name+firstLowerCase.serialize());
 end

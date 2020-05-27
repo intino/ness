@@ -98,7 +98,7 @@ public class EventRenderer {
 		else if (attribute.isDate()) return process(attribute.asDate());
 		else if (attribute.isLongInteger()) return process(attribute.asLongInteger());
 		else if (attribute.isWord()) return process(attribute.asWord());
-		else if (attribute.isTable()) return process(attribute.asTable().table());
+		else if (attribute.isTable()) return process(attribute.asTable());
 		return null;
 	}
 
@@ -179,28 +179,12 @@ public class EventRenderer {
 				.add("type", a.name$());
 	}
 
-	private FrameBuilder process(Table table) {
+	private FrameBuilder process(Data.Table attribute) {
 		return new FrameBuilder("table")
-				.add("name", table.name$())
-				.add("column", columns(table.columnList()))
+				.add("name", attribute.name$())
+				.add("table", attribute.table().name$())
+				.add("package", eventsPackage())
 				.add("type", "table");
-	}
-
-	private Frame[] columns(List<Table.Column> columns) {
-		return columns.stream().map(c -> {
-			FrameBuilder builder = new FrameBuilder("column", c.asType().getClass().getSimpleName()).
-					add("name", c.name$()).
-					add("simpleType", simpleType(c)).
-					add("type", c.asType().type());
-			if (c.isWord()) builder.add("word", c.asWord().values().toArray(String[]::new));
-			return builder.toFrame();
-		}).toArray(Frame[]::new);
-	}
-
-	private String simpleType(Table.Column c) {
-		if (c.isWord()) return c.name$();
-		String type = c.asType().type();
-		return type.contains(".") ? type.substring(type.lastIndexOf(".") + 1) : type;
 	}
 
 	private String eventsPackage() {
