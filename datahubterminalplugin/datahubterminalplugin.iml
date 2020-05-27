@@ -159,5 +159,8 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:event:2.0.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zim:3.0.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:message:3.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:3.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:3.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:mapp:1.0.0" level="project" />
   </component>
 </module>
