@@ -48,12 +48,13 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		}
 		publishOntology(graph.as(NessGraph.class), tempDir);
 		publishTerminals(graph.as(NessGraph.class), tempDir);
+		logger().println("Finished generation of terminals!");
 	}
 
 	private void publishOntology(NessGraph graph, File tempDir) {
 		try {
 			AtomicBoolean published = new AtomicBoolean(true);
-			published.set(new OntologyPublisher(new File(tempDir, "ontology"), eventTanks(graph), graph.eventList(), configuration(), systemProperties(), invokedPhase, logger()).publish() & published.get());
+			published.set(new OntologyPublisher(new File(tempDir, "ontology"), eventTanks(graph), graph.eventList(),graph.tableList(), configuration(), systemProperties(), invokedPhase, logger()).publish() & published.get());
 			if (published.get() && notifier() != null)
 				notifier().notify("Ontology " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), "ontology", configuration().artifact().version()));
 			if (published.get()) FileUtils.deleteDirectory(tempDir);

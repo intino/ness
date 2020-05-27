@@ -5,9 +5,11 @@ import io.intino.Configuration.Repository;
 import io.intino.datahub.graph.Datalake.Context;
 import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.datahub.graph.Event;
+import io.intino.datahub.graph.Table;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.ness.datahubterminalplugin.event.EventRenderer;
+import io.intino.ness.datahubterminalplugin.event.TableRenderer;
 import io.intino.plugin.PluginLauncher;
 import org.apache.maven.shared.invoker.*;
 
@@ -19,22 +21,26 @@ import java.util.*;
 class OntologyPublisher {
 	private final File root;
 	private final List<Event> events;
+	private final List<Table> tables;
 	private final Configuration conf;
 	private final PluginLauncher.SystemProperties systemProperties;
 	private final String basePackage;
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
 	private final List<Tank.Event> tanks;
+	private final StringBuilder errorStream;
 
-	OntologyPublisher(File root, List<Tank.Event> tanks, List<Event> events, Configuration configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
+	OntologyPublisher(File root, List<Tank.Event> tanks, List<Event> events, List<Table> tables, Configuration configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
 		this.tanks = tanks;
 		this.events = events;
+		this.tables = tables;
 		this.conf = configuration;
 		this.systemProperties = systemProperties;
 		this.basePackage = configuration.artifact().groupId().toLowerCase() + "." + Formatters.snakeCaseToCamelCase().format(configuration.artifact().name()).toString().toLowerCase();
 		this.invokedPhase = invokedPhase;
 		this.logger = logger;
+		errorStream = new StringBuilder();
 	}
 
 	boolean publish() {
@@ -45,6 +51,7 @@ class OntologyPublisher {
 			logger.println("Ontology published!");
 		} catch (IOException | MavenInvocationException e) {
 			logger.println(e.getMessage());
+			logger.println(errorStream.toString());
 			return false;
 		}
 		return true;
@@ -55,7 +62,8 @@ class OntologyPublisher {
 		srcDirectory.mkdirs();
 		Map<Event, Context> eventContextMap = collectEvents(tanks);
 		eventContextMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
-		events.stream().filter(event -> !eventContextMap.containsKey(event)).forEach(event -> new EventRenderer(event, null, srcDirectory, basePackage).render());
+		events.stream().filter(event -> !eventContextMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, basePackage).render());
+		tables.forEach(t -> new TableRenderer(t, srcDirectory, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
 		return true;
@@ -105,8 +113,8 @@ class OntologyPublisher {
 
 	private void log(Invoker invoker) {
 		invoker.setErrorHandler(logger::println);
-		invoker.setOutputHandler(s -> {
-		});
+//		invoker.setOutputHandler(logger::println);
+		invoker.setOutputHandler(s -> errorStream.append(s).append("\n"));
 	}
 
 	private void config(InvocationRequest request, File mavenHome) {
