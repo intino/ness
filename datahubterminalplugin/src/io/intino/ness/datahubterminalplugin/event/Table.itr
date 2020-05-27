@@ -19,7 +19,10 @@ def type(table)
 			return table.stream();
 		}
 
-
+		public $name+firstUpperCase add(Row row) {
+			this.table.add(row);
+			return this;
+		}
 
 		$column+getter...[$NL$NL]
 
@@ -114,50 +117,9 @@ def type(column) trigger(getter)
 		return table.stream().map(r -> r.$name());
 	}
 end
-
-
-def type(word & single) trigger(setter)
-	public $owner+firstUpperCase $name+firstLowerCase($type+FirstUpperCase $name+firstLowerCase) {
-		if ($name+firstLowerCase == null) this.message.remove("$name+firstLowerCase");
-		else this.message.set("$name+firstLowerCase", $name+firstLowerCase.name());
-		return this;
-	}
-end
-def type(word & multiple) trigger(setter)
-	public $owner+firstUpperCase $name+firstLowerCase(java.util.List<$type+FirstUpperCase> $name+firstLowerCase) {
-		this.message.remove("$name+firstLowerCase");
-		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v.name()));
-		return this;
-	}
-end
-
-def type(primitive & single) type(integer | double) trigger(setter)
-	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
-		this.message.set("$name+firstLowerCase", $name+firstLowerCase);
-		return this;
-	}
-end
-
-def type(primitive & single) trigger(setter)
-	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
-		if ($name+firstLowerCase == null) this.message.remove("$name+firstLowerCase");
-		else this.message.set("$name+firstLowerCase", $name+firstLowerCase);
-		return this;
-	}
-end
-
-def type(primitive & multiple) trigger(setter)
-	public $owner+firstUpperCase $name+firstLowerCase(java.util.List<$type> $name+firstLowerCase) {
-		this.message.remove("$name+firstLowerCase");
-		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v));
-		return this;
-	}
-end
-
-def type(primitive & multiple) trigger(setter)
-	public $owner+firstUpperCase $name+firstLowerCase(java.util.List<$type> $name+firstLowerCase) {
-		this.message.remove("$name+firstLowerCase");
-		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v));
+def type(column) trigger(rowSetter)
+	public Row $name+firstLowerCase($type $name+firstLowerCase) {
+		this.values$[$index] = new io.intino.alexandria.message.DataValue($name+firstLowerCase);
 		return this;
 	}
 end

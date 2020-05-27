@@ -9,6 +9,7 @@ import io.intino.ness.datahubterminalplugin.Formatters;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class TableRenderer {
 	private final Table table;
@@ -37,10 +38,12 @@ public class TableRenderer {
 	}
 
 	private Frame[] columns(List<Table.Column> columns) {
+		AtomicInteger index = new AtomicInteger();
 		return columns.stream().map(c -> {
 			FrameBuilder builder = new FrameBuilder("column", c.asType().getClass().getSimpleName()).
 					add("name", c.name$()).
 					add("simpleType", simpleType(c)).
+					add("index", index.getAndIncrement()).
 					add("type", c.asType().type());
 			if (c.isWord()) builder.add("word", c.asWord().values().toArray(String[]::new));
 			return builder.toFrame();
