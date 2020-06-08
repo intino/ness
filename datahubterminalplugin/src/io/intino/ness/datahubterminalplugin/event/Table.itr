@@ -49,6 +49,10 @@ def type(table)
 				values = new io.intino.alexandria.message.Message.Value$[] {$column+dataValue...[, ]};
 			}
 
+			public Row(Object$[] values) {
+				values = java.util.Arrays.stream(values).map(v -> new io.intino.alexandria.message.DataValue(v)).toArray(io.intino.alexandria.message.Message.Value$[]::new);
+			}
+
 			public String toString() {
 				return String.join("\\t", java.util.Arrays.stream(values).map(io.intino.alexandria.message.Message.Value::asString).toArray(String$[]::new));
 			}

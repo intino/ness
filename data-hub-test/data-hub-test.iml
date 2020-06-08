@@ -141,12 +141,12 @@
     <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.0.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.3.3" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:http:1.0.7" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:3.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:event:2.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:zim:3.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:message:3.0.0" level="project" />
     <orderEntry type="library" name="Intino: org.antlr:antlr4-runtime:4.8" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:3.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:3.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:3.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:event:2.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:zim:3.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:message:3.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:3.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:3.0.1" level="project" />
   </component>
 </module>
