@@ -93,6 +93,7 @@ class OntologyPublisher {
 		final File pom = createPom(root, basePackage, conf.artifact().version());
 		final InvocationResult result = invoke(pom, goal);
 		if (result != null && result.getExitCode() != 0) {
+			logger.println(errorStream.toString());
 			if (result.getExecutionException() != null)
 				throw new IOException("Failed to publish accessor.", result.getExecutionException());
 			else throw new IOException("Failed to publish accessor. Exit code: " + result.getExitCode());

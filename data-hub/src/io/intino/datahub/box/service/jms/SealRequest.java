@@ -7,8 +7,7 @@ import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.box.actions.SealAction;
 
 public class SealRequest implements RequestConsumer {
-
-	private DataHubBox box;
+	private final DataHubBox box;
 
 	public SealRequest(DataHubBox box) {
 		this.box = box;
