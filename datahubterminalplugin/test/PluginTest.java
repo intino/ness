@@ -96,6 +96,16 @@ public class PluginTest {
 					}
 
 					@Override
+					public String description() {
+						return null;
+					}
+
+					@Override
+					public String url() {
+						return null;
+					}
+
+					@Override
 					public void version(String s) {
 
 					}
@@ -146,9 +156,20 @@ public class PluginTest {
 					}
 
 					@Override
-					public Licence licence() {
+					public License license() {
 						return null;
 					}
+
+					@Override
+					public Scm scm() {
+						return null;
+					}
+
+					@Override
+					public List<Developer> developers() {
+						return null;
+					}
+
 
 					@Override
 					public QualityAnalytics qualityAnalytics() {
@@ -260,6 +281,16 @@ public class PluginTest {
 					}
 
 					@Override
+					public String description() {
+						return null;
+					}
+
+					@Override
+					public String url() {
+						return null;
+					}
+
+					@Override
 					public void version(String s) {
 
 					}
@@ -310,7 +341,17 @@ public class PluginTest {
 					}
 
 					@Override
-					public Licence licence() {
+					public License license() {
+						return null;
+					}
+
+					@Override
+					public Scm scm() {
+						return null;
+					}
+
+					@Override
+					public List<Developer> developers() {
 						return null;
 					}
 
@@ -424,6 +465,16 @@ public class PluginTest {
 					}
 
 					@Override
+					public String description() {
+						return null;
+					}
+
+					@Override
+					public String url() {
+						return null;
+					}
+
+					@Override
 					public void version(String s) {
 
 					}
@@ -474,7 +525,17 @@ public class PluginTest {
 					}
 
 					@Override
-					public Licence licence() {
+					public License license() {
+						return null;
+					}
+
+					@Override
+					public Scm scm() {
+						return null;
+					}
+
+					@Override
+					public List<Developer> developers() {
 						return null;
 					}
 
