@@ -8,7 +8,6 @@ import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.datahub.graph.Event;
 import io.intino.datahub.graph.Namespace;
 import io.intino.datahub.graph.Terminal;
-import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.plugin.PluginLauncher;
 import org.apache.maven.shared.invoker.*;
@@ -182,7 +181,10 @@ class TerminalPublisher {
 
 	private File createPom(File root, String group, String artifact, String version) {
 		final FrameBuilder builder = new FrameBuilder("pom").add("group", group).add("artifact", artifact).add("version", version);
-		conf.repositories().stream().filter(r -> !(r instanceof Configuration.Repository.Language)).forEach(r -> buildRepoFrame(builder, r, conf.artifact().version().contains("SNAPSHOT")));
+		conf.repositories().forEach(r -> buildRepoFrame(builder, r));
+		if (conf.artifact().distribution() != null) if (conf.artifact().version().contains("SNAPSHOT"))
+			buildDistroFrame(builder, conf.artifact().distribution().snapshot());
+		else buildDistroFrame(builder, conf.artifact().distribution().release());
 		builder.add("ontology", ontologyFrame(group, version));
 		if (terminal.allowsBpmIn() != null) builder.add("hasBpm", this.bpmVersion);
 		final File pomFile = new File(root, "pom.xml");
@@ -198,22 +200,19 @@ class TerminalPublisher {
 				add("version", version);
 	}
 
-	private void buildRepoFrame(FrameBuilder builder, Configuration.Repository r, boolean snapshot) {
-		builder.add("repository", createRepositoryFrame(r, snapshot));
+	private void buildRepoFrame(FrameBuilder builder, Configuration.Repository r) {
+		builder.add("repository", createRepositoryFrame(r).toFrame());
 	}
 
-	private Frame createRepositoryFrame(Configuration.Repository repository, boolean snapshot) {
-		return new FrameBuilder("repository", isDistribution(repository, snapshot) ? "distribution" : "release").
+	private void buildDistroFrame(FrameBuilder builder, Configuration.Repository r) {
+		builder.add("repository", createRepositoryFrame(r).add("distribution").toFrame());
+	}
+
+	private FrameBuilder createRepositoryFrame(Configuration.Repository repository) {
+		return new FrameBuilder("repository", repository.getClass().getSimpleName()).
 				add("name", repository.identifier()).
 				add("random", UUID.randomUUID().toString()).
-				add("url", repository.url()).toFrame();
+				add("url", repository.url());
 	}
 
-	private boolean isDistribution(Configuration.Repository repository, boolean snapshot) {
-		Configuration.Distribution distribution = conf.artifact().distribution();
-		if (distribution == null) return false;
-		Configuration.Repository repo = snapshot ? distribution.snapshot() : distribution.release();
-		return repo != null && repository.identifier().equals(repo.identifier()) &&
-				repository.url().equals(repo.url());
-	}
 }
