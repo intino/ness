@@ -116,7 +116,7 @@ public class EventRenderer {
 	private FrameBuilder process(Data.Real attribute) {
 		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", "double")
 				.add("name", attribute.a$(Attribute.class).name$())
-				.add("type", !multiple(attribute) ? "double" : attribute.type())
+				.add("type", attribute.type())
 				.add("simpleType", attribute.type().substring(attribute.type().lastIndexOf(".") + 1))
 				.add("objectType", attribute.type())
 				.add("defaultValue", attribute.defaultValue());
@@ -125,7 +125,7 @@ public class EventRenderer {
 	private FrameBuilder process(Data.Integer attribute) {
 		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
 				.add("name", attribute.a$(Attribute.class).name$())
-				.add("type", !multiple(attribute) ? "int" : attribute.type())
+				.add("type", attribute.type())
 				.add("simpleType", attribute.type().substring(attribute.type().lastIndexOf(".") + 1))
 				.add("objectType", attribute.type())
 				.add("defaultValue", attribute.defaultValue());
