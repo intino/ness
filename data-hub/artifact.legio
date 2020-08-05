@@ -25,8 +25,8 @@ Artifact("io.intino", "4.6.2") data-hub as Product
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
 	Distribution("intino-maven")
-		Release("https://artifactory.intino.io/artifactory/release-frameworks") frameworks
-		Snapshot("https://artifactory.intino.io/artifactory/snapshot-frameworks") snapshots
+		Release("https://artifactory.intino.io/artifactory/release-frameworks")
+		Snapshot("https://artifactory.intino.io/artifactory/snapshot-frameworks")
 	Parameter("home")
 	Parameter("backup_directory")
 	Parameter("datalake_directory")
@@ -34,5 +34,5 @@ Artifact("io.intino", "4.6.2") data-hub as Product
 	Parameter("broker_secondary_port")
 	Parameter("ui_port")
 
-Repository("intino-maven") intino
+Repository("intino-maven")
 	Release("https://artifactory.intino.io/artifactory/releases")

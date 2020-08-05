@@ -22,5 +22,4 @@ RunConfiguration dev
 	Argument("broker_secondary_port", "1884")
 
 Repository("intino-maven")
-	Language("https://artifactory.intino.io/artifactory/releases")
 	Release("https://artifactory.intino.io/artifactory/releases")
