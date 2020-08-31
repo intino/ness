@@ -1,7 +1,7 @@
 package io.intino.ness.datahubterminalplugin.event;
 
 import io.intino.datahub.graph.*;
-import io.intino.datahub.graph.Datalake.Context;
+import io.intino.datahub.graph.Datalake.Split;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
@@ -20,13 +20,13 @@ import static java.util.Arrays.stream;
 public class EventRenderer {
 	private static final String EVENT = "io.intino.alexandria.event.Event";
 	private final Event event;
-	private final Context context;
+	private final Split split;
 	private final File destination;
 	private final String rootPackage;
 
-	public EventRenderer(Event event, Context context, File destination, String rootPackage) {
+	public EventRenderer(Event event, Split split, File destination, String rootPackage) {
 		this.event = event;
-		this.context = context;
+		this.split = split;
 		this.destination = destination;
 		this.rootPackage = rootPackage;
 	}
@@ -48,9 +48,9 @@ public class EventRenderer {
 		eventFrame.add("attribute", processAttributes(event.attributeList(), event.name$()));
 		Map<Component, Boolean> components = collectComponents(event);
 		if (!components.isEmpty()) eventFrame.add("component", processComponents(components, event.name$()));
-		if (context != null) {
-			List<Context> leafs = context.isLeaf() ? Collections.singletonList(context) : context.leafs();
-			eventFrame.add("context", new FrameBuilder().add("context").add("enum", enums(context, leafs)));
+		if (split != null) {
+			List<Split> leafs = split.isLeaf() ? Collections.singletonList(split) : split.leafs();
+			eventFrame.add("split", new FrameBuilder().add("split").add("enum", enums(split, leafs)));
 		}
 		return eventFrame.toFrame();
 	}
@@ -102,11 +102,11 @@ public class EventRenderer {
 		return null;
 	}
 
-	private Frame[] enums(Context realContext, List<Context> leafs) {
+	private Frame[] enums(Split realSplit, List<Split> leafs) {
 		List<Frame> frames = new ArrayList<>();
-		if (!leafs.contains(realContext) && !realContext.label().isEmpty())
-			frames.add(new FrameBuilder("enum").add("value", realContext.qn().replace(".", "-")).toFrame());
-		for (Context leaf : leafs) {
+		if (!leafs.contains(realSplit) && !realSplit.label().isEmpty())
+			frames.add(new FrameBuilder("enum").add("value", realSplit.qn().replace(".", "-")).toFrame());
+		for (Split leaf : leafs) {
 			FrameBuilder builder = new FrameBuilder("enum").add("value", leaf.qn().replace(".", "-")).add("qn", leaf.qn());
 			frames.add(builder.toFrame());
 		}

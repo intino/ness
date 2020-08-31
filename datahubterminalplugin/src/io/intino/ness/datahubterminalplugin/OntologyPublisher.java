@@ -1,12 +1,10 @@
 package io.intino.ness.datahubterminalplugin;
 
 import io.intino.Configuration;
-import io.intino.Configuration.Repository;
-import io.intino.datahub.graph.Datalake.Context;
+import io.intino.datahub.graph.Datalake.Split;
 import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.datahub.graph.Event;
 import io.intino.datahub.graph.Table;
-import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.ness.datahubterminalplugin.event.EventRenderer;
 import io.intino.ness.datahubterminalplugin.event.TableRenderer;
@@ -60,9 +58,9 @@ class OntologyPublisher {
 	private boolean createSources() {
 		File srcDirectory = new File(root, "src");
 		srcDirectory.mkdirs();
-		Map<Event, Context> eventContextMap = collectEvents(tanks);
-		eventContextMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
-		events.stream().filter(event -> !eventContextMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, basePackage).render());
+		Map<Event, Split> eventSplitMap = collectEvents(tanks);
+		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
+		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, basePackage).render());
 		tables.forEach(t -> new TableRenderer(t, srcDirectory, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
@@ -70,12 +68,12 @@ class OntologyPublisher {
 	}
 
 
-	private Map<Event, Context> collectEvents(List<Tank.Event> tanks) {
-		Map<Event, Context> events = new HashMap<>();
+	private Map<Event, Split> collectEvents(List<Tank.Event> tanks) {
+		Map<Event, Split> events = new HashMap<>();
 		for (Tank.Event tank : tanks) {
 			List<Event> hierarchy = hierarchy(tank.event());
-			Context context = tank.asTank().isContextual() ? tank.asTank().asContextual().context() : null;
-			events.put(hierarchy.get(0), context);
+			Split split = tank.asTank().isSplitted() ? tank.asTank().asSplitted().split() : null;
+			events.put(hierarchy.get(0), split);
 			hierarchy.remove(0);
 			hierarchy.forEach(e -> events.put(e, null));
 		}

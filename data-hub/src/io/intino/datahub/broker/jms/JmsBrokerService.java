@@ -196,8 +196,8 @@ public class JmsBrokerService implements BrokerService {
 		return textMessage;
 	}
 
-	private String tankQn(Datalake.Tank.Event t, Datalake.Context c) {
-		return (!c.qn().isEmpty() ? c.qn() + "." : "") + t.event().name$();
+	private String tankQn(Datalake.Tank.Event t, Datalake.Split c) {
+		return t.event().name$() + (!c.qn().isEmpty() ? "." + c.qn() : "");
 	}
 
 	final class BrokerManager implements io.intino.datahub.broker.BrokerManager {
@@ -253,10 +253,10 @@ public class JmsBrokerService implements BrokerService {
 				brokerStage.mkdirs();
 				graph.datalake().tankList().stream().filter(Datalake.Tank::isEvent).map(Datalake.Tank::asEvent).
 						forEach(t -> {
-							if (!t.asTank().isContextual() || t.asTank().asContextual().context().isLeaf())
+							if (!t.asTank().isSplitted() || t.asTank().asSplitted().split().isLeaf())
 								brokerManager.registerTopicConsumer(t.qn(), new TopicSaver(brokerStage, t.qn(), scale(t)).create());
 							else {
-								Datalake.Context context = t.asTank().asContextual().context();
+								Datalake.Split context = t.asTank().asSplitted().split();
 								register(t, scale(t), context);
 								context.leafs().forEach(c -> register(t, scale(t), c));
 							}
@@ -277,21 +277,21 @@ public class JmsBrokerService implements BrokerService {
 		}
 
 		private void registerProcessStatus(Scale scale, Datalake.ProcessStatus ps) {
-			if (ps.context() == null) {
-				String topic = processStatusQn(ps, ps.context());
+			if (ps.split() == null) {
+				String topic = processStatusQn(ps, ps.split());
 				brokerManager.registerTopicConsumer(topic, new TopicSaver(brokerStage, topic, scale).create());
-			} else ps.context().leafs().forEach(c -> {
+			} else ps.split().leafs().forEach(c -> {
 				String topic = processStatusQn(ps, c);
 				brokerManager.registerTopicConsumer(topic, new TopicSaver(brokerStage, topic, scale).create());
 			});
 		}
 
-		private void register(Datalake.Tank.Event t, Scale scale, Datalake.Context c) {
+		private void register(Datalake.Tank.Event t, Scale scale, Datalake.Split c) {
 			brokerManager.registerTopicConsumer(tankQn(t, c), new TopicSaver(brokerStage, tankQn(t, c), scale).create());
 		}
 
-		private String processStatusQn(Datalake.ProcessStatus ps, Datalake.Context c) {
-			return (c == null ? "" : c.qn() + ".") + ps.name();
+		private String processStatusQn(Datalake.ProcessStatus ps, Datalake.Split c) {
+			return ps.name() + (c == null ? "" : "." + c.qn());
 		}
 
 		private Session nessSession() {
