@@ -11,14 +11,14 @@ def type(terminal)
 		private static final Scale scale = Scale.$scale;
 		private final io.intino.alexandria.terminal.Connector connector;
 		private java.util.Map<java.util.function.Consumer<?>, java.util.function.Consumer<io.intino.alexandria.event.Event>> consumers = new java.util.HashMap<>();
-		$bpm+contexts
+		$bpm+splits
 		public static String$[] subscriptionChannels = new String$[]{$subscribe+channel};
 
 		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector) {
 			this.connector = connector;
 		}
 
-		public void publish(Object event, String context) {
+		public void publish(Object event, String split) {
 			$publish+if...[$NL]
 		}
 
@@ -56,8 +56,8 @@ def type(terminal)
 				this.eventSession = sessionHandler.createEventSession();
 			}
 
-			public void feed(Event event, String context) {
-                eventSession.put(tankOf(event, context), Timetag.of(event.ts(), scale), event);
+			public void feed(Event event, String split) {
+                eventSession.put(tankOf(event, split), Timetag.of(event.ts(), scale), event);
 			}
 
 			public void push() {
@@ -82,7 +82,7 @@ def type(terminal)
 				}
             }
 
-            private String tankOf(Event event, String context) {
+            private String tankOf(Event event, String split) {
             	$publish+tankOf...[$NL]
             	return event.toMessage().type();
             }
@@ -95,13 +95,13 @@ def type(terminal)
 	}
 end
 
-def type(bpm) trigger(contexts)
-	public enum BpmContext {
-		$context+asEnum...[, ];
+def type(bpm) trigger(splits)
+	public enum BpmSplit {
+		$split+asEnum...[, ];
 
 		public abstract String qn();
 
-		public static BpmContext contextByQn(String qn) {
+		public static BpmSplit splitByQn(String qn) {
 			return java.util.Arrays.stream(values()).filter(c -> c.qn().equals(qn)).findFirst().orElse(null);
 		}
 	}
@@ -115,30 +115,30 @@ def trigger(asEnum)
 	}
 end
 
-def type(multicontext & bpm) trigger(if)
-	if (event instanceof $type) publish(($type) event, BpmContext.contextByQn(context));
+def type(multisplit & bpm) trigger(if)
+	if (event instanceof $type) publish(($type) event, BpmSplit.splitByQn(split));
 end
 
-def type(multicontext) trigger(if)
-	if (event instanceof $type) publish(($type) event, $type.Context.contextByQn(context));
+def type(multisplit) trigger(if)
+	if (event instanceof $type) publish(($type) event, $type.Split.splitByQn(split));
 end
 
 def trigger(if)
 	if (event instanceof $type) publish(($type) event);
 end
 
-def type(multicontext) !type(bpm) trigger(tankOf)
-	if (event instanceof $type) return $type.Context.contextByQn(context).qn() + ".$typeWithNamespace";
+def type(multisplit) !type(bpm) trigger(tankOf)
+	if (event instanceof $type) return "$typeWithNamespace." + $type.Split.splitByQn(split).qn();
 end
 
 def !type(bpm) trigger(tankOf)
 	if (event instanceof $type) return "$channel";
 end
 
-def type(bpm & multicontext) trigger(publish)
-	public void publish($type $typeName+firstLowerCase, BpmContext context, BpmContext... moreContexts) {
-		connector.sendEvent(context.qn() + ".$typeWithNamespace", $typeName+firstLowerCase);
-		for (BpmContext c : moreContexts) connector.sendEvent(c.qn() + ".$typeWithNamespace", $typeName+firstLowerCase);
+def type(bpm & multisplit) trigger(publish)
+	public void publish($type $typeName+firstLowerCase, BpmSplit split, BpmSplit... moreSplits) {
+		connector.sendEvent("$typeWithNamespace." + split.qn(), $typeName+firstLowerCase);
+		for (BpmSplit c : moreSplits) connector.sendEvent("$typeWithNamespace." + c.qn(), $typeName+firstLowerCase);
 	}
 end
 
@@ -148,11 +148,11 @@ def type(bpm) trigger(publish)
 	}
 end
 
-def type(multicontext) !type(bpm) trigger(publish)
-	public void publish($type $typeName+firstLowerCase, $type.Context context, $type.Context... moreContexts) {
-		connector.sendEvent(context.qn() + ".$typeWithNamespace", $typeName+firstLowerCase);
-		for ($type.Context c : moreContexts)
-			connector.sendEvent(c.qn() + ".$typeWithNamespace", $typeName+firstLowerCase);
+def type(multisplit) !type(bpm) trigger(publish)
+	public void publish($type $typeName+firstLowerCase, $type.Split split, $type.Split... moreSplits) {
+		connector.sendEvent("$typeWithNamespace." + split.qn(), $typeName+firstLowerCase);
+		for ($type.Split c : moreSplits)
+			connector.sendEvent("$typeWithNamespace." + c.qn(), $typeName+firstLowerCase);
 	}
 end
 
@@ -162,19 +162,19 @@ def !type(bpm) trigger(publish)
 	}
 end
 
-def type(bpm & multiContext) trigger(subscribe)
-	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, BpmContext context, BpmContext... moreContexts) {
+def type(bpm & multiSplit) trigger(subscribe)
+	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, BpmSplit split, BpmSplit... moreSplits) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
-		connector.attachListener(context.qn() + ".$typeName+FirstUpperCase", subscriberId, consumers.get(onEventReceived));
-		for (BpmContext c : moreContexts)
-			connector.attachListener(c.qn() + ".$typeName+FirstUpperCase", subscriberId, consumers.get(onEventReceived));
+		connector.attachListener("$typeName+FirstUpperCase." + split.qn(), subscriberId, consumers.get(onEventReceived));
+		for (BpmSplit c : moreSplits)
+			connector.attachListener("$typeName+FirstUpperCase." + c.qn(), subscriberId, consumers.get(onEventReceived));
 	}
 
-	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, BpmContext context, BpmContext... moreContexts) {
+	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, BpmSplit split, BpmSplit... moreSplits) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
-		connector.attachListener(context.qn() + ".$typeName+FirstUpperCase", consumers.get(onEventReceived));
-		for (BpmContext c : moreContexts)
-			connector.attachListener(c.qn() + ".$typeName+FirstUpperCase", consumers.get(onEventReceived));
+		connector.attachListener("$typeName+FirstUpperCase." + split.qn(), consumers.get(onEventReceived));
+		for (BpmSplit c : moreSplits)
+			connector.attachListener("$typeName+FirstUpperCase." + c.qn(), consumers.get(onEventReceived));
 	}
 
 	public void unsubscribe(ProcessStatusConsumer onEventReceived) {
@@ -182,19 +182,19 @@ def type(bpm & multiContext) trigger(subscribe)
 	}
 end
 
-def type(multiContext) !type(bpm) trigger(subscribe)
-	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, $type.Context context, $type.Context... moreContexts) {
+def type(multiSplit) !type(bpm) trigger(subscribe)
+	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, $type.Split split, $type.Split... moreSplits) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
-		connector.attachListener(context.qn() + ".$typeWithNamespace", subscriberId, consumers.get(onEventReceived));
-		for ($type.Context c : moreContexts)
-			connector.attachListener(c.qn() + ".$typeWithNamespace", subscriberId, consumers.get(onEventReceived));
+		connector.attachListener("$typeWithNamespace." + split.qn(), subscriberId, consumers.get(onEventReceived));
+		for ($type.Split c : moreSplits)
+			connector.attachListener("$typeWithNamespace." + c.qn(), subscriberId, consumers.get(onEventReceived));
 	}
 
-	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, $type.Context context, $type.Context... moreContexts) {
+	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, $type.Split split, $type.Split... moreSplits) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
-		connector.attachListener(context.qn() + ".$typeWithNamespace", consumers.get(onEventReceived));
-		for ($type.Context c : moreContexts)
-			connector.attachListener(c.qn() + ".$typeWithNamespace", consumers.get(onEventReceived));
+		connector.attachListener("$typeWithNamespace." + split.qn(), consumers.get(onEventReceived));
+		for ($type.Split c : moreSplits)
+			connector.attachListener("$typeWithNamespace." + c.qn(), consumers.get(onEventReceived));
 	}
 
 	public void unsubscribe($namespace+firstUpperCase$typeName~Consumer onEventReceived) {

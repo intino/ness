@@ -46,6 +46,10 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			notifier().notifyError("Couldn't load graph. Please recompile module");
 			return;
 		}
+		if (configuration().artifact().distribution().snapshot() == null && isSnapshotVersion()) {
+			notifier().notifyError("Snapshot distribution repository not found");
+			return;
+		}
 		publishOntology(graph.as(NessGraph.class), tempDir);
 		publishTerminals(graph.as(NessGraph.class), tempDir);
 		logger().println("Finished generation of terminals!");
@@ -54,7 +58,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private void publishOntology(NessGraph graph, File tempDir) {
 		try {
 			AtomicBoolean published = new AtomicBoolean(true);
-			published.set(new OntologyPublisher(new File(tempDir, "ontology"), eventTanks(graph), graph.eventList(),graph.tableList(), configuration(), systemProperties(), invokedPhase, logger()).publish() & published.get());
+			published.set(new OntologyPublisher(new File(tempDir, "ontology"), eventTanks(graph), graph.eventList(), graph.tableList(), configuration(), systemProperties(), invokedPhase, logger()).publish() & published.get());
 			if (published.get() && notifier() != null)
 				notifier().notify("Ontology " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), "ontology", configuration().artifact().version()));
 			if (published.get()) FileUtils.deleteDirectory(tempDir);
@@ -74,7 +78,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), terminalNameArtifact(terminal), configuration().artifact().version()));
 			});
 			if (published.get()) FileUtils.deleteDirectory(tempDir);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger().println(e.getMessage());
 		}
 	}
@@ -93,6 +97,12 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private String suitableVersion(List<String> terminalVersions) {
 		return terminalVersions.stream().filter(version -> version.compareTo(MAX_TERMINAL_JMS_VERSION) < 0).findFirst().orElse(MINIMUM_TERMINAL_JMS_VERSION);
 	}
+
+
+	private boolean isSnapshotVersion() {
+		return configuration().artifact().version().contains("SNAPSHOT");
+	}
+
 
 	private String bpmVersion() {
 		List<String> bpmVersions = ArtifactoryConnector.bpmVersions();

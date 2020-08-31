@@ -6,7 +6,7 @@ end
 
 def trigger(event)
 	public class $name+firstUpperCase [extends $parent] implements java.io.Serializable {
-		$context
+		$split
 
 		[$attribute+declaration...[$NL]]
 		[$component+declaration...[$NL]]
@@ -85,13 +85,13 @@ def type(default) trigger(super)
 	super(")
 end
 
-def trigger(context)
-	public enum Context {
+def trigger(split)
+	public enum Split {
 		$enum+asEnum...[, ];
 
 		public abstract String qn();
 
-		public static Context contextByQn(String qn) {
+		public static Split splitByQn(String qn) {
 			return java.util.Arrays.stream(values()).filter(c -> c.qn().equals(qn)).findFirst().orElse(null);
 		}
 	}

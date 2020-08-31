@@ -34,14 +34,14 @@ Concept:{0..1} Datalake
 			var string timeZone
 	Concept:{0..1} ProcessStatus
 		var string name = "ProcessStatus" is private final
-		var Context context
-	Concept:Named Context
+		var Split split
+	Concept:Named Split
 		var string label = 'self.name$()'
 		var string qn = @qn is private reactive
 		var boolean isLeaf = @isLeaf is private reactive
 		var boolean isRoot = @isRoot is private reactive
-		var Context[] leafs = @leafs is private reactive
-		has:Named Context
+		var Split[] leafs = @leafs is private reactive
+		has:Named Split
 	Concept:{1..*}:AspectRequired Tank
 		var word:Scale scale = empty
 		Aspect TankType
@@ -52,18 +52,20 @@ Concept:{0..1} Datalake
         		var Model.Event event
 				var boolean sortingRequired = true
 				var string qn = @qn is private reactive
-        Aspect Contextual > var Context context
+        Aspect Splitted > var Split split
 
 Concept:Named Terminal
-	Concept:{0..1} AllowsBpmIn
+	Concept:{0..1} Bpm
 		var string processStatusClass = "io.intino.alexandria.bpm.ProcessStatus" is private
-		var Datalake.Context context
+		var Datalake.Split split
 	Concept:{0..1} Publish
 		var Datalake.Tank.Event[] tanks
 	Concept:{0..1} Subscribe
 		var Datalake.Tank.Event[] tanks
 
 Concept Namespace
+	var string qn = @qn is private reactive
+	has Namespace
 	has:{1..*} Event
 
 Concept Event

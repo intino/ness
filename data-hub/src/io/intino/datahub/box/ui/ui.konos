@@ -6,7 +6,7 @@ Service datalakeInspector as UI(port = "{ui_port}", title = "Data Lake Inspector
 Template(layout=Vertical Flexible) homeTemplate as Relative(height=100%,width=100%)
 	Block(layout=Vertical Flexible)
 		Header(color="white", format=airHeader separator, elevation=0) as Absolute(height=65px)
-			Stamp(template=header) header
+			TemplateStamp(template=header) header
 		Block(layout=Vertical Flexible) as Relative(width=100%)
 			Block(layout=Vertical Flexible, format=box) as Relative(width=100%)
 				Text(format=fullHeight codeEditor) mapper as Code(language=Java) Editable
@@ -14,7 +14,7 @@ Template(layout=Vertical Flexible) homeTemplate as Relative(height=100%,width=10
 	Dialog(title="Review") reviewDialog as FullScreen
 		Block(layout=Vertical Flexible CenterCenter) loading as Relative(height=100%) > Spinner
 		MaterialIconButton(title="download", format=absolute, icon = "Archive", size =Large) downloadReview as Download
-		Frame(display=htmlViewer,format=fullWidth, visible=false) table
+		DisplayStamp(display=htmlViewer,format=fullWidth, visible=false) table
 
 Template(layout=Horizontal Center) header
 	Block(layout=Horizontal Center Flexible, spacing=DP8)

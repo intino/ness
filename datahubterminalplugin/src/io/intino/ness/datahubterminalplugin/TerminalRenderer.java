@@ -1,7 +1,7 @@
 package io.intino.ness.datahubterminalplugin;
 
 import io.intino.datahub.graph.Datalake;
-import io.intino.datahub.graph.Datalake.Context;
+import io.intino.datahub.graph.Datalake.Split;
 import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.datahub.graph.Event;
 import io.intino.datahub.graph.Namespace;
@@ -18,13 +18,13 @@ import java.util.Map;
 
 class TerminalRenderer {
 	private final Terminal terminal;
-	private final Map<Event, Context> eventWithContext;
+	private final Map<Event, Split> eventWithSplit;
 	private final File srcDir;
 	private final String rootPackage;
 
-	TerminalRenderer(Terminal terminal, Map<Event, Context> eventWithContext, File srcDir, String rootPackage) {
+	TerminalRenderer(Terminal terminal, Map<Event, Split> eventWithSplit, File srcDir, String rootPackage) {
 		this.terminal = terminal;
-		this.eventWithContext = eventWithContext;
+		this.eventWithSplit = eventWithSplit;
 		this.srcDir = srcDir;
 		this.rootPackage = rootPackage;
 	}
@@ -38,23 +38,23 @@ class TerminalRenderer {
 		Datalake datalake = terminal.graph().datalake();
 		FrameBuilder builder = new FrameBuilder("terminal").add("package", rootPackage).add("name", terminal.name$());
 		if (datalake != null) builder.add("datalake", "").add("scale", datalake.scale().name());
-		builder.add("event", eventWithContext.keySet().stream().map(e -> new FrameBuilder("event").add("namespace", eventNamespace(e)).add("name", e.name$()).add("type", eventPackage(e) + "." + Formatters.firstUpperCase(e.name$())).toFrame()).toArray(Frame[]::new));
+		builder.add("event", eventWithSplit.keySet().stream().map(e -> new FrameBuilder("event").add("namespace", eventNamespace(e)).add("name", e.name$()).add("type", eventPackage(e) + "." + Formatters.firstUpperCase(e.name$())).toFrame()).toArray(Frame[]::new));
 		if (terminal.publish() != null)
 			terminal.publish().tanks().forEach(tank -> builder.add("publish", frameOf(tank)));
 		if (terminal.subscribe() != null)
 			terminal.subscribe().tanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
-		if (terminal.allowsBpmIn() != null) addBpm(builder);
+		if (terminal.bpm() != null) addBpm(builder);
 		return builder.toFrame();
 	}
 
 	private void addBpm(FrameBuilder builder) {
-		Context context = terminal.allowsBpmIn().context();
-		List<Context> leafs = new ArrayList<>();
+		Split context = terminal.bpm().split();
+		List<Split> leafs = new ArrayList<>();
 		if (context != null) {
 			leafs.addAll(context.isLeaf() ? Collections.singletonList(context) : context.leafs());
 			builder.add("bpm", new FrameBuilder("bpm").add("context", enums(context, leafs)));
 		}
-		String statusQn = terminal.allowsBpmIn().processStatusClass();
+		String statusQn = terminal.bpm().processStatusClass();
 		String processStatusQName = statusQn.substring(statusQn.lastIndexOf(".") + 1);
 		FrameBuilder bpmBuilder = new FrameBuilder(leafs.size() > 1 ? "multicontext" : "default", "bpm").
 				add("type", statusQn).
@@ -66,11 +66,11 @@ class TerminalRenderer {
 		builder.add("event", new FrameBuilder("event").add("name", processStatusQName).add("type", statusQn).toFrame());
 	}
 
-	private Frame[] enums(Context realContext, List<Context> leafs) {
+	private Frame[] enums(Split realSplit, List<Split> leafs) {
 		List<Frame> frames = new ArrayList<>();
-		if (!leafs.contains(realContext) && !realContext.label().isEmpty())
-			frames.add(new FrameBuilder("enum").add("value", realContext.qn().replace(".", "-")).toFrame());
-		for (Context leaf : leafs) {
+		if (!leafs.contains(realSplit) && !realSplit.label().isEmpty())
+			frames.add(new FrameBuilder("enum").add("value", realSplit.qn().replace(".", "-")).toFrame());
+		for (Split leaf : leafs) {
 			FrameBuilder builder = new FrameBuilder("enum").add("value", leaf.qn().replace(".", "-")).add("qn", leaf.qn());
 			frames.add(builder.toFrame());
 		}
@@ -103,8 +103,8 @@ class TerminalRenderer {
 		return rootPackage + ".events";
 	}
 
-	private List<Context> contextsOf(Tank.Event tank) {
-		return tank.asTank().isContextual() ? tank.asTank().asContextual().context().leafs() : Collections.emptyList();
+	private List<Split> contextsOf(Tank.Event tank) {
+		return tank.asTank().isSplitted() ? tank.asTank().asSplitted().split().leafs() : Collections.emptyList();
 	}
 
 	private Template template() {

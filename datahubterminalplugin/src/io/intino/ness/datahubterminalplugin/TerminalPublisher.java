@@ -3,7 +3,8 @@ package io.intino.ness.datahubterminalplugin;
 import com.google.gson.Gson;
 import io.intino.Configuration;
 import io.intino.alexandria.logger.Logger;
-import io.intino.datahub.graph.Datalake.Context;
+import io.intino.datahub.graph.Datalake;
+import io.intino.datahub.graph.Datalake.Split;
 import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.datahub.graph.Event;
 import io.intino.datahub.graph.Namespace;
@@ -50,7 +51,7 @@ class TerminalPublisher {
 			logger.println("Publishing " + terminal.name$() + "...");
 			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
 			logger.println("Terminal " + terminal.name$() + " published!");
-		} catch (IOException | MavenInvocationException e) {
+		} catch (Exception e) {
 			logger.println(e.getMessage());
 			return false;
 		}
@@ -60,8 +61,8 @@ class TerminalPublisher {
 	private boolean createSources() {
 		File srcDirectory = new File(root, "src");
 		srcDirectory.mkdirs();
-		Map<Event, Context> eventContextMap = collectEvents(tanks);
-		new TerminalRenderer(terminal, eventContextMap, srcDirectory, basePackage).render();
+		Map<Event, Datalake.Split> eventSplitMap = collectEvents(tanks);
+		new TerminalRenderer(terminal, eventSplitMap, srcDirectory, basePackage).render();
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
 		writeManifest(resDirectory);
@@ -71,7 +72,7 @@ class TerminalPublisher {
 	private void writeManifest(File srcDirectory) {
 		List<String> publish = terminal.publish() != null ? terminal.publish().tanks().stream().map(this::eventQn).collect(Collectors.toList()) : Collections.emptyList();
 		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().tanks().stream().map(this::eventQn).collect(Collectors.toList()) : Collections.emptyList();
-		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses(), eventContexts());
+		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses(), eventSplits());
 		try {
 			Files.write(new File(srcDirectory, "terminal.mf").toPath(), new Gson().toJson(manifest).getBytes());
 		} catch (IOException e) {
@@ -87,21 +88,21 @@ class TerminalPublisher {
 		return Formatters.firstLowerCase(Formatters.camelCaseToSnakeCase().format(terminal.name$()).toString());
 	}
 
-	private Map<String, Set<String>> eventContexts() {
-		Map<String, Set<String>> eventContexts = terminal.publish() == null ? new HashMap<>() : eventContextOf(terminal.publish().tanks());
-		if (terminal.subscribe() == null) return eventContexts;
-		Map<String, Set<String>> subscribeEventContexts = eventContextOf(terminal.subscribe().tanks());
-		for (String eventType : subscribeEventContexts.keySet()) {
-			if (!eventContexts.containsKey(eventType)) eventContexts.put(eventType, new HashSet<>());
-			eventContexts.get(eventType).addAll(subscribeEventContexts.get(eventType));
+	private Map<String, Set<String>> eventSplits() {
+		Map<String, Set<String>> eventSplits = terminal.publish() == null ? new HashMap<>() : eventSplitOf(terminal.publish().tanks());
+		if (terminal.subscribe() == null) return eventSplits;
+		Map<String, Set<String>> subscribeEventSplits = eventSplitOf(terminal.subscribe().tanks());
+		for (String eventType : subscribeEventSplits.keySet()) {
+			if (!eventSplits.containsKey(eventType)) eventSplits.put(eventType, new HashSet<>());
+			eventSplits.get(eventType).addAll(subscribeEventSplits.get(eventType));
 		}
-		return eventContexts;
+		return eventSplits;
 	}
 
-	private Map<String, Set<String>> eventContextOf(List<Tank.Event> tanks) {
+	private Map<String, Set<String>> eventSplitOf(List<Tank.Event> tanks) {
 		return tanks.stream().
 				collect(Collectors.toMap(this::eventQn,
-						tank -> tank.asTank().isContextual() ? tank.asTank().asContextual().context().leafs().stream().map(Context::qn).collect(Collectors.toSet()) : Collections.emptySet(), (a, b) -> b));
+						tank -> tank.asTank().isSplitted() ? tank.asTank().asSplitted().split().leafs().stream().map(Split::qn).collect(Collectors.toSet()) : Collections.emptySet(), (a, b) -> b));
 	}
 
 	private Map<String, String> tankClasses() {
@@ -110,11 +111,11 @@ class TerminalPublisher {
 			terminal.publish().tanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + namespace(t.event()).toLowerCase() + t.event().name$()));
 		if (terminal.subscribe() != null)
 			terminal.subscribe().tanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + namespace(t.event()).toLowerCase() + t.event().name$()));
-		if (terminal.allowsBpmIn() != null) {
-			Context context = terminal.allowsBpmIn().context();
-			String statusQn = terminal.allowsBpmIn().processStatusClass();
+		if (terminal.bpm() != null) {
+			Split split = terminal.bpm().split();
+			String statusQn = terminal.bpm().processStatusClass();
 			String statusClassName = statusQn.substring(statusQn.lastIndexOf(".") + 1);
-			tankClasses.put((context != null ? context.qn() + "." : "") + statusClassName, statusQn);
+			tankClasses.put((split != null ? split.qn() + "." : "") + statusClassName, statusQn);
 		}
 		return tankClasses;
 	}
@@ -123,12 +124,12 @@ class TerminalPublisher {
 		return namespace(t.event()) + t.event().name$();
 	}
 
-	private Map<Event, Context> collectEvents(List<Tank.Event> tanks) {
-		Map<Event, Context> events = new HashMap<>();
+	private Map<Event, Split> collectEvents(List<Tank.Event> tanks) {
+		Map<Event, Split> events = new HashMap<>();
 		for (Tank.Event tank : tanks) {
 			List<Event> hierarchy = hierarchy(tank.event());
-			Context context = tank.asTank().isContextual() ? tank.asTank().asContextual().context() : null;
-			events.put(hierarchy.get(0), context);
+			Split split = tank.asTank().isSplitted() ? tank.asTank().asSplitted().split() : null;
+			events.put(hierarchy.get(0), split);
 			hierarchy.remove(0);
 			hierarchy.forEach(e -> events.put(e, null));
 		}
@@ -182,14 +183,19 @@ class TerminalPublisher {
 	private File createPom(File root, String group, String artifact, String version) {
 		final FrameBuilder builder = new FrameBuilder("pom").add("group", group).add("artifact", artifact).add("version", version);
 		conf.repositories().forEach(r -> buildRepoFrame(builder, r));
-		if (conf.artifact().distribution() != null) if (conf.artifact().version().contains("SNAPSHOT"))
-			buildDistroFrame(builder, conf.artifact().distribution().snapshot());
-		else buildDistroFrame(builder, conf.artifact().distribution().release());
+		if (conf.artifact().distribution() != null) {
+			if (isSnapshotVersion()) buildDistroFrame(builder, conf.artifact().distribution().snapshot());
+			else buildDistroFrame(builder, conf.artifact().distribution().release());
+		}
 		builder.add("ontology", ontologyFrame(group, version));
-		if (terminal.allowsBpmIn() != null) builder.add("hasBpm", this.bpmVersion);
+		if (terminal.bpm() != null) builder.add("hasBpm", this.bpmVersion);
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new AccessorPomTemplate().render(builder.toFrame()));
 		return pomFile;
+	}
+
+	private boolean isSnapshotVersion() {
+		return conf.artifact().version().contains("SNAPSHOT");
 	}
 
 	private FrameBuilder ontologyFrame(String group, String version) {
