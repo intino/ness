@@ -45,8 +45,6 @@ class OntologyPublisher {
 		if (!createSources()) return false;
 		try {
 			logger.println("Publishing ontology...");
-			if (conf.artifact().distribution().snapshot() == null && isSnapshotVersion())
-				throw new Exception("Snapshot distribution repository not found");
 			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
 			logger.println("Ontology published!");
 		} catch (Exception e) {

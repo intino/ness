@@ -49,8 +49,6 @@ class TerminalPublisher {
 		if (!createSources()) return false;
 		try {
 			logger.println("Publishing " + terminal.name$() + "...");
-			if (conf.artifact().distribution().snapshot() == null && isSnapshotVersion())
-				throw new Exception("Snapshot distribution repository not found");
 			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
 			logger.println("Terminal " + terminal.name$() + " published!");
 		} catch (Exception e) {
