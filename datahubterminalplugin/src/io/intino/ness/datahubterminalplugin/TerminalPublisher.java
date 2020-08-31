@@ -49,9 +49,11 @@ class TerminalPublisher {
 		if (!createSources()) return false;
 		try {
 			logger.println("Publishing " + terminal.name$() + "...");
+			if (conf.artifact().distribution().snapshot() == null && isSnapshotVersion())
+				throw new Exception("Snapshot distribution repository not found");
 			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
 			logger.println("Terminal " + terminal.name$() + " published!");
-		} catch (IOException | MavenInvocationException e) {
+		} catch (Exception e) {
 			logger.println(e.getMessage());
 			return false;
 		}
@@ -183,14 +185,19 @@ class TerminalPublisher {
 	private File createPom(File root, String group, String artifact, String version) {
 		final FrameBuilder builder = new FrameBuilder("pom").add("group", group).add("artifact", artifact).add("version", version);
 		conf.repositories().forEach(r -> buildRepoFrame(builder, r));
-		if (conf.artifact().distribution() != null) if (conf.artifact().version().contains("SNAPSHOT"))
-			buildDistroFrame(builder, conf.artifact().distribution().snapshot());
-		else buildDistroFrame(builder, conf.artifact().distribution().release());
+		if (conf.artifact().distribution() != null) {
+			if (isSnapshotVersion()) buildDistroFrame(builder, conf.artifact().distribution().snapshot());
+			else buildDistroFrame(builder, conf.artifact().distribution().release());
+		}
 		builder.add("ontology", ontologyFrame(group, version));
 		if (terminal.bpm() != null) builder.add("hasBpm", this.bpmVersion);
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new AccessorPomTemplate().render(builder.toFrame()));
 		return pomFile;
+	}
+
+	private boolean isSnapshotVersion() {
+		return conf.artifact().version().contains("SNAPSHOT");
 	}
 
 	private FrameBuilder ontologyFrame(String group, String version) {

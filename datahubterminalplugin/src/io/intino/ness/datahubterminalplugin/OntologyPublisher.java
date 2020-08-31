@@ -45,9 +45,11 @@ class OntologyPublisher {
 		if (!createSources()) return false;
 		try {
 			logger.println("Publishing ontology...");
+			if (conf.artifact().distribution().snapshot() == null && isSnapshotVersion())
+				throw new Exception("Snapshot distribution repository not found");
 			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
 			logger.println("Ontology published!");
-		} catch (IOException | MavenInvocationException e) {
+		} catch (Exception e) {
 			logger.println(e.getMessage());
 			logger.println(errorStream.toString());
 			return false;
@@ -125,13 +127,18 @@ class OntologyPublisher {
 	private File createPom(File root, String group, String version) {
 		final FrameBuilder builder = new FrameBuilder("pom").add("group", group).add("artifact", "ontology").add("version", version);
 		conf.repositories().forEach(r -> buildRepoFrame(builder, r));
-		if (conf.artifact().distribution() != null) if (conf.artifact().version().contains("SNAPSHOT"))
-			buildDistroFrame(builder, conf.artifact().distribution().snapshot());
-		else buildDistroFrame(builder, conf.artifact().distribution().release());
+		if (conf.artifact().distribution() != null) {
+			if (isSnapshotVersion()) buildDistroFrame(builder, conf.artifact().distribution().snapshot());
+			else buildDistroFrame(builder, conf.artifact().distribution().release());
+		}
 		builder.add("event", new FrameBuilder());
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new AccessorPomTemplate().render(builder.toFrame()));
 		return pomFile;
+	}
+
+	private boolean isSnapshotVersion() {
+		return conf.artifact().version().contains("SNAPSHOT");
 	}
 
 	private void buildRepoFrame(FrameBuilder builder, Configuration.Repository r) {
