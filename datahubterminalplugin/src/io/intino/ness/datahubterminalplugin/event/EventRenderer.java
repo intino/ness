@@ -57,10 +57,11 @@ public class EventRenderer {
 
 	private String parent(Event event) {
 		if (event.isExtensionOf()) {
+			Event parent = event.asExtensionOf().parent();
 			String eventPackage = eventsPackage();
-			if (event.core$().owner().is(Namespace.class))
-				eventPackage = eventPackage + "." + event.core$().ownerAs(Namespace.class).name$();
-			return eventPackage + "." + event.asExtensionOf().parent().name$();
+			if (parent.core$().owner().is(Namespace.class))
+				eventPackage = eventPackage + "." + parent.core$().ownerAs(Namespace.class).name$();
+			return eventPackage + "." + parent.name$();
 		}
 		return EVENT;
 	}
