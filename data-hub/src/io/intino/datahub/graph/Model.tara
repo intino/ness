@@ -66,7 +66,7 @@ Concept:Named Terminal
 Concept Namespace
 	var string qn = @qn is private reactive
 	has Namespace
-	has:{1..*} Event
+	has Event
 
 Concept Event
 	has:Named:RequiresAspect Attribute
