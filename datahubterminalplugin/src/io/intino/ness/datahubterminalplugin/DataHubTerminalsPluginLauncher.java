@@ -7,6 +7,7 @@ import io.intino.datahub.graph.Terminal;
 import io.intino.magritte.framework.Graph;
 import io.intino.magritte.framework.stores.FileSystemStore;
 import io.intino.plugin.PluginLauncher;
+import io.intino.plugin.project.Safe;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -46,7 +47,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			notifier().notifyError("Couldn't load graph. Please recompile module");
 			return;
 		}
-		if (configuration().artifact().distribution().snapshot() == null && isSnapshotVersion()) {
+		if (safe(() -> configuration().artifact().distribution()) != null && safe(() -> configuration().artifact().distribution().snapshot()) == null && isSnapshotVersion()) {
 			notifier().notifyError("Snapshot distribution repository not found");
 			return;
 		}
@@ -140,5 +141,13 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		if (terminal.publish() != null) tanks.addAll(terminal.publish().tanks());
 		if (terminal.subscribe() != null) tanks.addAll(terminal.subscribe().tanks());
 		return tanks;
+	}
+
+	public static <T> T safe(Safe.Wrapper<T> wrapper) {
+		try {
+			return wrapper.value();
+		} catch (Throwable var2) {
+			return null;
+		}
 	}
 }

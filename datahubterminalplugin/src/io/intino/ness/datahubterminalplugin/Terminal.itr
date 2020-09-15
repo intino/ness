@@ -47,21 +47,27 @@ def type(terminal)
 			private final java.io.File temporalStage;
 			private final io.intino.alexandria.ingestion.SessionHandler sessionHandler;
 			private final io.intino.alexandria.ingestion.EventSession eventSession;
-
+			private final io.intino.alexandria.ingestion.SetSession setSession;
 
 			public BatchSession(java.io.File dataHubStage, java.io.File temporalStage) {
 				this.dataHubStage = dataHubStage;
 				this.temporalStage = temporalStage;
 				this.sessionHandler = new io.intino.alexandria.ingestion.SessionHandler(temporalStage);
 				this.eventSession = sessionHandler.createEventSession();
+				this.setSession = sessionHandler.createSetSession();
 			}
 
 			public void feed(Event event, String split) {
                 eventSession.put(tankOf(event, split), Timetag.of(event.ts(), scale), event);
 			}
 
+			public void feed(String tank, Timetag timetag, String set, java.util.stream.Stream<Long> ids) {
+                setSession.put(tank, timetag, set, ids);
+			}
+
 			public void push() {
 				eventSession.close();
+				setSession.close();
 				sessionHandler.pushTo(this.dataHubStage);
 				//connector.sendEvent("service.ness.push", new Event(new io.intino.alexandria.message.Message("Push").set("stage", temporalStage.getName())));
 			}
