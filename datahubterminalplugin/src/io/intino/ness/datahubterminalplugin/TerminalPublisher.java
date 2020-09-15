@@ -167,9 +167,10 @@ class TerminalPublisher {
 
 	private void log(Invoker invoker) {
 		invoker.setErrorHandler(l -> {
-			if (!l.startsWith("[WARN]")) logger.println(l);
+			logger.println(l);
 		});
-		invoker.setOutputHandler(s -> {
+		invoker.setOutputHandler(l -> {
+			logger.println(l);
 		});
 	}
 

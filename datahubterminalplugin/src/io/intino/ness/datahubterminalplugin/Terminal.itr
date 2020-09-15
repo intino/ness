@@ -169,14 +169,14 @@ def !type(bpm) trigger(publish)
 end
 
 def type(bpm & multiSplit) trigger(subscribe)
-	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, BpmSplit split, BpmSplit... moreSplits) {
+	public void subscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, BpmSplit split, BpmSplit... moreSplits) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
 		connector.attachListener("$typeName+FirstUpperCase." + split.qn(), subscriberId, consumers.get(onEventReceived));
 		for (BpmSplit c : moreSplits)
 			connector.attachListener("$typeName+FirstUpperCase." + c.qn(), subscriberId, consumers.get(onEventReceived));
 	}
 
-	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, BpmSplit split, BpmSplit... moreSplits) {
+	public void subscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, BpmSplit split, BpmSplit... moreSplits) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
 		connector.attachListener("$typeName+FirstUpperCase." + split.qn(), consumers.get(onEventReceived));
 		for (BpmSplit c : moreSplits)
@@ -189,37 +189,37 @@ def type(bpm & multiSplit) trigger(subscribe)
 end
 
 def type(multiSplit) !type(bpm) trigger(subscribe)
-	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, $type.Split split, $type.Split... moreSplits) {
+	public void subscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, $type.Split split, $type.Split... moreSplits) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
 		connector.attachListener("$typeWithNamespace." + split.qn(), subscriberId, consumers.get(onEventReceived));
 		for ($type.Split c : moreSplits)
 			connector.attachListener("$typeWithNamespace." + c.qn(), subscriberId, consumers.get(onEventReceived));
 	}
 
-	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, $type.Split split, $type.Split... moreSplits) {
+	public void subscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, $type.Split split, $type.Split... moreSplits) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
 		connector.attachListener("$typeWithNamespace." + split.qn(), consumers.get(onEventReceived));
 		for ($type.Split c : moreSplits)
 			connector.attachListener("$typeWithNamespace." + c.qn(), consumers.get(onEventReceived));
 	}
 
-	public void unsubscribe($namespace+firstUpperCase$typeName~Consumer onEventReceived) {
+	public void unsubscribe($namespaceQn+firstUpperCase$typeName~Consumer onEventReceived) {
 		connector.detachListeners(consumers.get(onEventReceived));
 	}
 end
 
 def trigger(subscribe)
-	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId) {
+	public void subscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
 		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived));
 	}
 
-	public void subscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived) {
+	public void subscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived) {
 		consumers.put(onEventReceived, event -> onEventReceived.accept(new $type(event)));
 		connector.attachListener("$channel", consumers.get(onEventReceived));
 	}
 
-	public void unsubscribe($namespace+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived) {
+	public void unsubscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived) {
 		connector.detachListeners(consumers.get(onEventReceived));
 	}
 end
@@ -229,6 +229,6 @@ def trigger(quoted)
 end
 
 def trigger(interface)
-	public interface $namespace+firstUpperCase$name+firstUpperCase~Consumer extends java.util.function.Consumer<$type> {
+	public interface $namespaceQn+firstUpperCase$name+firstUpperCase~Consumer extends java.util.function.Consumer<$type> {
 	}
 end
