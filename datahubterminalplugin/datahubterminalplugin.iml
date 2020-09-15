@@ -126,5 +126,43 @@
     <orderEntry type="library" name="Intino: org.locationtech.jts:jts-core:1.16.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:driver:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: com.jcraft:jsch:0.1.55" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:proxy:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.httpcomponents:fluent-hc:4.5.7" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: net.rforge:Rserve:0.6-8.1" level="project" />
+    <orderEntry type="library" name="Intino: net.rforge:REngine:0.6-8.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:jms:1.2.0" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.activemq:activemq-client:5.15.8" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:zip:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:3.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:event:2.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:zim:3.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:message:3.0.1" level="project" />
+    <orderEntry type="library" name="Intino: org.antlr:antlr4-runtime:4.8" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:session:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:zet:1.0.5" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:tris:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:3.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:3.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:mapp:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.3.23" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:http:1.1.2" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:exceptions:2.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:rest-accessor:2.1.0" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.httpcomponents:httpcore:4.4.9" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.httpcomponents:httpmime:4.5.12" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.httpcomponents:httpclient:4.5.12" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.commons:commons-lang3:3.9" level="project" />
+    <orderEntry type="library" name="Intino: org.glassfish.tyrus:tyrus-client:1.16" level="project" />
+    <orderEntry type="library" name="Intino: org.glassfish.tyrus:tyrus-core:1.16" level="project" />
+    <orderEntry type="library" name="Intino: org.glassfish.tyrus:tyrus-spi:1.16" level="project" />
+    <orderEntry type="library" name="Intino: org.glassfish.tyrus:tyrus-container-grizzly-client:1.16" level="project" />
+    <orderEntry type="library" name="Intino: org.glassfish.grizzly:grizzly-framework:2.3.22" level="project" />
+    <orderEntry type="library" name="Intino: org.glassfish.grizzly:grizzly-http-server:2.3.22" level="project" />
+    <orderEntry type="library" name="Intino: org.glassfish.grizzly:grizzly-http:2.3.22" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:logger4j:1.0.1" level="project" />
+    <orderEntry type="library" name="Intino: com.opencsv:opencsv:5.2" level="project" />
+    <orderEntry type="library" name="Intino: com.auth0:java-jwt:3.10.3" level="project" />
   </component>
 </module>
