@@ -61,7 +61,7 @@ def type(terminal)
                 eventSession.put(tankOf(event, split), Timetag.of(event.ts(), scale), event);
 			}
 
-			public void feed(String tank, Timetag timetag, String set, Stream<Long> ids) {
+			public void feed(String tank, Timetag timetag, String set, java.util.stream.Stream<Long> ids) {
                 setSession.put(tank, timetag, set, ids);
 			}
 

@@ -48,11 +48,11 @@ class TerminalRenderer {
 	}
 
 	private void addBpm(FrameBuilder builder) {
-		Split context = terminal.bpm().split();
+		Split split = terminal.bpm().split();
 		List<Split> leafs = new ArrayList<>();
-		if (context != null) {
-			leafs.addAll(context.isLeaf() ? Collections.singletonList(context) : context.leafs());
-			builder.add("bpm", new FrameBuilder("bpm").add("context", enums(context, leafs)));
+		if (split != null) {
+			leafs.addAll(split.isLeaf() ? Collections.singletonList(split) : split.leafs());
+			builder.add("bpm", new FrameBuilder("bpm").add("split", enums(split, leafs)));
 		}
 		String statusQn = terminal.bpm().processStatusClass();
 		String processStatusQName = statusQn.substring(statusQn.lastIndexOf(".") + 1);
