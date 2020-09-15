@@ -38,7 +38,11 @@ class TerminalRenderer {
 		Datalake datalake = terminal.graph().datalake();
 		FrameBuilder builder = new FrameBuilder("terminal").add("package", rootPackage).add("name", terminal.name$());
 		if (datalake != null) builder.add("datalake", "").add("scale", datalake.scale().name());
-		builder.add("event", eventWithSplit.keySet().stream().map(e -> new FrameBuilder("event").add("namespace", eventNamespace(e)).add("name", e.name$()).add("type", eventPackage(e) + "." + Formatters.firstUpperCase(e.name$())).toFrame()).toArray(Frame[]::new));
+		builder.add("event", eventWithSplit.keySet().stream().map(e -> new FrameBuilder("event").
+				add("namespace", eventNamespace(e)).
+				add("namespaceQn", eventNamespace(e).replace(".", "")).
+				add("name", e.name$()).
+				add("type", eventPackage(e) + "." + Formatters.firstUpperCase(e.name$())).toFrame()).toArray(Frame[]::new));
 		if (terminal.publish() != null)
 			terminal.publish().tanks().forEach(tank -> builder.add("publish", frameOf(tank)));
 		if (terminal.subscribe() != null)
@@ -84,6 +88,7 @@ class TerminalRenderer {
 				add("type", eventPackage + "." + Formatters.firstUpperCase(eventTank.event().name$())).
 				add("typeName", eventTank.event().name$()).
 				add("namespace", namespace).
+				add("namespaceQn", namespace.replace(".", "")).
 				add("typeWithNamespace", (namespace.isEmpty() ? "" : namespace + ".") + Formatters.firstUpperCase(eventTank.event().name$())).
 				add("channel", eventTank.qn()).toFrame();
 	}
@@ -96,7 +101,7 @@ class TerminalRenderer {
 	}
 
 	private String eventNamespace(Event event) {
-		return event.core$().owner().is(Namespace.class) ? event.core$().ownerAs(Namespace.class).name$().toLowerCase() : "";
+		return event.core$().owner().is(Namespace.class) ? event.core$().ownerAs(Namespace.class).qn().toLowerCase() : "";
 	}
 
 	private String eventsPackage() {

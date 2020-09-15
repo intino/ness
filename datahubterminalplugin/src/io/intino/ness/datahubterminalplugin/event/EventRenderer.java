@@ -34,7 +34,7 @@ public class EventRenderer {
 	public void render() {
 		String rootPackage = eventsPackage();
 		if (event.core$().owner().is(Namespace.class))
-			rootPackage = rootPackage + "." + event.core$().ownerAs(Namespace.class).name$();
+			rootPackage = rootPackage + "." + event.core$().ownerAs(Namespace.class).qn();
 		final File packageFolder = new File(destination, rootPackage.replace(".", File.separator));
 		final Frame frame = createEventFrame(event, rootPackage);
 		Commons.writeFrame(packageFolder, event.name$(), template().render(new FrameBuilder("root").add("root", rootPackage).add("package", rootPackage).add("event", frame)));
@@ -60,7 +60,7 @@ public class EventRenderer {
 			Event parent = event.asExtensionOf().parent();
 			String eventPackage = eventsPackage();
 			if (parent.core$().owner().is(Namespace.class))
-				eventPackage = eventPackage + "." + parent.core$().ownerAs(Namespace.class).name$();
+				eventPackage = eventPackage + "." + parent.core$().ownerAs(Namespace.class).qn();
 			return eventPackage + "." + parent.name$();
 		}
 		return EVENT;
