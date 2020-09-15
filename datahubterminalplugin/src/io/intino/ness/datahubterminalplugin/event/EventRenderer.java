@@ -43,7 +43,7 @@ public class EventRenderer {
 	private Frame createEventFrame(Event event, String packageName) {
 		FrameBuilder eventFrame = new FrameBuilder("event").
 				add("name", event.name$()).add("package", packageName).
-				add("parent", event.isExtensionOf() ? event.asExtensionOf().parent().name$() : EVENT);
+				add("parent", parent(event));
 		if (event.isExtensionOf()) eventFrame.add("parentSuper", event.name$());
 		eventFrame.add("attribute", processAttributes(event.attributeList(), event.name$()));
 		Map<Component, Boolean> components = collectComponents(event);
@@ -53,6 +53,17 @@ public class EventRenderer {
 			eventFrame.add("split", new FrameBuilder().add("split").add("enum", enums(split, leafs)));
 		}
 		return eventFrame.toFrame();
+	}
+
+	private String parent(Event event) {
+		if (event.isExtensionOf()) {
+			Event parent = event.asExtensionOf().parent();
+			String eventPackage = eventsPackage();
+			if (parent.core$().owner().is(Namespace.class))
+				eventPackage = eventPackage + "." + parent.core$().ownerAs(Namespace.class).name$();
+			return eventPackage + "." + parent.name$();
+		}
+		return EVENT;
 	}
 
 	private FrameBuilder[] processAttributes(List<Attribute> attributes, String owner) {
