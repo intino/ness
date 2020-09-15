@@ -81,7 +81,7 @@ class TerminalPublisher {
 	}
 
 	private String namespace(Event event) {
-		return event.core$().owner().is(Namespace.class) ? event.core$().owner().name() + "." : "";
+		return event.core$().owner().is(Namespace.class) ? event.core$().ownerAs(Namespace.class).qn() + "." : "";
 	}
 
 	private String terminalNameArtifact() {
