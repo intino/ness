@@ -60,7 +60,7 @@ class TerminalRenderer {
 		}
 		String statusQn = terminal.bpm().processStatusClass();
 		String processStatusQName = statusQn.substring(statusQn.lastIndexOf(".") + 1);
-		FrameBuilder bpmBuilder = new FrameBuilder(leafs.size() > 1 ? "multicontext" : "default", "bpm").
+		FrameBuilder bpmBuilder = new FrameBuilder(leafs.size() > 1 ? "multisplit" : "default", "bpm").
 				add("type", statusQn).
 				add("typeName", processStatusQName);
 		if (leafs.size() <= 1)
@@ -84,7 +84,7 @@ class TerminalRenderer {
 	private Frame frameOf(Tank.Event eventTank) {
 		String eventPackage = eventPackage(eventTank.event());
 		String namespace = eventNamespace(eventTank.event());
-		return new FrameBuilder(contextsOf(eventTank).size() > 1 ? "multicontext" : "default").
+		return new FrameBuilder(contextsOf(eventTank).size() > 1 ? "multisplit" : "default").
 				add("type", eventPackage + "." + Formatters.firstUpperCase(eventTank.event().name$())).
 				add("typeName", eventTank.event().name$()).
 				add("namespace", namespace).

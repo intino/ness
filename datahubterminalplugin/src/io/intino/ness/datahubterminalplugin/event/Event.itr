@@ -129,7 +129,7 @@ def type(table) trigger(declaration)
 end
 
 def type(component) trigger(declaration)
-	private java.util.List<$type> $name+firstLowerCase~List = null;
+	private java.util.List<$type+FirstUpperCase> $name+firstLowerCase~List = null;
 end
 
 def type(word & single) trigger(getter)
@@ -164,17 +164,17 @@ def type(primitive & single) trigger(getter)
 end
 
 def type(primitive & multiple) trigger(getter)
-	public java.util.List<$type> $name+firstLowerCase() {
-		return new java.util.ArrayList<$type>(message.contains("$name+FirstLowerCase") ? java.util.Arrays.asList(message.get("$name+FirstLowerCase").as($type$[].class)) : java.util.Collections.emptyList()) {
+	public java.util.List<$type+FirstUpperCase> $name+firstLowerCase() {
+		return new java.util.ArrayList<$type+FirstUpperCase>(message.contains("$name+FirstLowerCase") ? java.util.Arrays.asList(message.get("$name+FirstLowerCase").as($type$[].class)) : java.util.Collections.emptyList()) {
 			@Override
-			public boolean add($type value) {
+			public boolean add($type+FirstUpperCase value) {
 				super.add(value);
 				message.append("$name+FirstLowerCase", value);
 				return true;
 			}
 
 			@Override
-			public void add(int index, $type element) {
+			public void add(int index, $type+FirstUpperCase element) {
 				throw new UnsupportedOperationException();
 			}
 
@@ -194,7 +194,7 @@ def type(primitive & multiple) trigger(getter)
 			}
 
 			@Override
-			public boolean removeIf(java.util.function.Predicate<? super $type> filter) {
+			public boolean removeIf(java.util.function.Predicate<? super $type+FirstUpperCase> filter) {
 				return removeAll(java.util.stream.IntStream.range(0, this.size()).filter(i -> filter.test(get(i))).mapToObj(this::get).collect(java.util.stream.Collectors.toList()));
 			}
 
@@ -205,14 +205,19 @@ def type(primitive & multiple) trigger(getter)
 			}
 
 			@Override
-			public boolean addAll(java.util.Collection<? extends $type> c) {
+			public boolean addAll(java.util.Collection<? extends $type+FirstUpperCase> c) {
 				c.forEach(this::add);
 				return true;
 			}
 
 			@Override
-			public boolean addAll(int index, java.util.Collection<? extends $type> c) {
+			public boolean addAll(int index, java.util.Collection<? extends $type+FirstUpperCase> c) {
 				throw new UnsupportedOperationException();
+			}
+
+			public void clear() {
+				super.clear();
+				message.remove("$name+FirstLowerCase");
 			}
 		};
 	}

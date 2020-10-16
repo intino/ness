@@ -196,8 +196,8 @@ public class JmsBrokerService implements BrokerService {
 		return textMessage;
 	}
 
-	private String tankQn(Datalake.Tank.Event t, Datalake.Split c) {
-		return t.event().name$() + (!c.qn().isEmpty() ? "." + c.qn() : "");
+	private String tankQn(Datalake.Tank.Event t, Datalake.Split split) {
+		return t.event().name$() + (!split.qn().isEmpty() ? "." + split.qn() : "");
 	}
 
 	final class BrokerManager implements io.intino.datahub.broker.BrokerManager {
@@ -370,7 +370,7 @@ public class JmsBrokerService implements BrokerService {
 
 	private class PipeManager {
 		private final List<Broker.Pipe> pipes;
-		private BrokerManager brokerManager;
+		private final BrokerManager brokerManager;
 
 		PipeManager(BrokerManager manager, List<Broker.Pipe> pipes) {
 			this.brokerManager = manager;

@@ -1,39 +1,49 @@
 package io.intino.ness.datahubterminalplugin;
 
 import io.intino.Configuration;
+import io.intino.alexandria.logger.Logger;
+import io.intino.datahub.graph.*;
 import io.intino.datahub.graph.Datalake.Split;
 import io.intino.datahub.graph.Datalake.Tank;
-import io.intino.datahub.graph.Event;
-import io.intino.datahub.graph.Table;
+import io.intino.datahub.graph.Datalake.Tank.Led;
 import io.intino.itrules.FrameBuilder;
 import io.intino.ness.datahubterminalplugin.event.EventRenderer;
 import io.intino.ness.datahubterminalplugin.event.TableRenderer;
+import io.intino.ness.datahubterminalplugin.schema.SchemaRenderer;
 import io.intino.plugin.PluginLauncher;
 import org.apache.maven.shared.invoker.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.stream.Collectors;
 
 class OntologyPublisher {
 	private final File root;
+	private final List<Tank.Event> eventTanks;
+	private final List<Led> ledTanks;
 	private final List<Event> events;
+	private final List<Schema> schemas;
 	private final List<Table> tables;
 	private final Configuration conf;
+	private final Map<String, String> versions;
 	private final PluginLauncher.SystemProperties systemProperties;
 	private final String basePackage;
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
-	private final List<Tank.Event> tanks;
 	private final StringBuilder errorStream;
 
-	OntologyPublisher(File root, List<Tank.Event> tanks, List<Event> events, List<Table> tables, Configuration configuration, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
+	OntologyPublisher(File root, NessGraph graph, Configuration configuration, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
-		this.tanks = tanks;
-		this.events = events;
-		this.tables = tables;
+		this.eventTanks = eventTanks(graph);
+		this.ledTanks = ledTanks(graph);
+		this.events = graph.eventList();
+		this.schemas = graph.schemaList();
+		this.tables = graph.tableList();
 		this.conf = configuration;
+		this.versions = versions;
 		this.systemProperties = systemProperties;
 		this.basePackage = configuration.artifact().groupId().toLowerCase() + "." + Formatters.snakeCaseToCamelCase().format(configuration.artifact().name()).toString().toLowerCase();
 		this.invokedPhase = invokedPhase;
@@ -58,19 +68,33 @@ class OntologyPublisher {
 	private boolean createSources() {
 		File srcDirectory = new File(root, "src");
 		srcDirectory.mkdirs();
-		Map<Event, Split> eventSplitMap = collectEvents(tanks);
+		Map<Event, Split> eventSplitMap = splitEvents();
+		Map<Schema, Split> ledSplitMap = collectSplitSchemas();
 		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
 		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, basePackage).render());
-		tables.forEach(t -> new TableRenderer(t, srcDirectory, basePackage).render());
+		schemas.stream().parallel().forEach(schema -> new SchemaRenderer(schema, conf, ledSplitMap.get(schema), srcDirectory, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
+		List<Attribute> resourceWordBags = schemas.stream().map(s -> s.attributeList().stream().filter(a -> a.isWordBag() && a.asWordBag().wordBag().isFromResource()).collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
+		resourceWordBags.stream().
+				map(a -> a.asWordBag().wordBag().asFromResource()).
+				forEach(w -> {
+					File source = new File(w.tsv().toString());
+					File destination = new File(resDirectory, conf.artifact().groupId().replace(".", "/") + "/ontology/" + source.getName());
+					destination.getParentFile().mkdirs();
+					try {
+						Files.copy(w.tsv().openStream(), destination.toPath());
+					} catch (IOException e) {
+						Logger.error(e);
+					}
+				});
+		tables.forEach(t -> new TableRenderer(t, srcDirectory, basePackage).render());
 		return true;
 	}
 
-
-	private Map<Event, Split> collectEvents(List<Tank.Event> tanks) {
+	private Map<Event, Split> splitEvents() {
 		Map<Event, Split> events = new HashMap<>();
-		for (Tank.Event tank : tanks) {
+		for (Tank.Event tank : eventTanks) {
 			List<Event> hierarchy = hierarchy(tank.event());
 			Split split = tank.asTank().isSplitted() ? tank.asTank().asSplitted().split() : null;
 			events.put(hierarchy.get(0), split);
@@ -80,12 +104,17 @@ class OntologyPublisher {
 		return events;
 	}
 
+	private Map<Schema, Split> collectSplitSchemas() {
+		return ledTanks.stream().collect(Collectors.toMap(Led::schema, tank -> tank.asTank().isSplitted() ? tank.asTank().asSplitted().split() : null, (a, b) -> b));
+	}
+
 	private List<Event> hierarchy(Event event) {
 		Set<Event> events = new LinkedHashSet<>();
 		events.add(event);
 		if (event.isExtensionOf()) events.addAll(hierarchy(event.asExtensionOf().parent()));
 		return new ArrayList<>(events);
 	}
+
 
 	private void mvn(String goal) throws IOException, MavenInvocationException {
 		final File pom = createPom(root, basePackage, conf.artifact().version());
@@ -129,7 +158,8 @@ class OntologyPublisher {
 			if (isSnapshotVersion()) buildDistroFrame(builder, conf.artifact().distribution().snapshot());
 			else buildDistroFrame(builder, conf.artifact().distribution().release());
 		}
-		builder.add("event", new FrameBuilder());
+		builder.add("event", new FrameBuilder().add("version", versions.get("event")));
+		builder.add("led", new FrameBuilder().add("version", versions.get("led")));
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new AccessorPomTemplate().render(builder.toFrame()));
 		return pomFile;
@@ -152,5 +182,15 @@ class OntologyPublisher {
 				add("name", repository.identifier()).
 				add("random", UUID.randomUUID().toString()).
 				add("url", repository.url());
+	}
+
+	private List<Tank.Event> eventTanks(NessGraph nessGraph) {
+		if (nessGraph.datalake() == null) return Collections.emptyList();
+		return nessGraph.datalake().tankList().stream().filter(Tank::isEvent).map(Tank::asEvent).collect(Collectors.toList());
+	}
+
+	private List<Led> ledTanks(NessGraph nessGraph) {
+		if (nessGraph.datalake() == null) return Collections.emptyList();
+		return nessGraph.datalake().tankList().stream().filter(Tank::isLed).map(Tank::asLed).collect(Collectors.toList());
 	}
 }

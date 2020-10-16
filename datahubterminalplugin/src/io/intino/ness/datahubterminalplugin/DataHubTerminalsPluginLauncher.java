@@ -15,12 +15,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 public class DataHubTerminalsPluginLauncher extends PluginLauncher {
-	private static final String MINIMUM_TERMINAL_JMS_VERSION = "3.0.0";
-	private static final String MAX_TERMINAL_JMS_VERSION = "4.0.0";
 	private static final String MINIMUM_BPM_VERSION = "1.2.5";
+	private static final String MINIMUM_LED_VERSION = "1.0.0";
+	private static final String MINIMUM_TERMINAL_JMS_VERSION = "3.0.6";
+	private static final String MINIMUM_EVENT_VERSION = "2.0.3";
+	private static final String MINIMUM_INGESTION_VERSION = "3.1.0";
+	private static final String MAX_TERMINAL_JMS_VERSION = "4.0.0";
+	private static final String MAX_INGESTION_VERSION = "4.0.0";
+	private static final String MAX_EVENT_VERSION = "3.0.0";
+	private static final String MAX_LED_VERSION = "2.0.0";
 
 	@Override
 	public void run() {
@@ -51,34 +56,33 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			notifier().notifyError("Snapshot distribution repository not found");
 			return;
 		}
-		publishOntology(graph.as(NessGraph.class), tempDir);
-		publishTerminals(graph.as(NessGraph.class), tempDir);
+		Map<String, String> versions = Map.of("terminal-jms", terminalJmsVersion(), "ingestion", ingestionVersion(), "bpm", bpmVersion(), "event", eventVersion(), "led", ledVersion());
+		publishOntology(graph.as(NessGraph.class), versions, tempDir);
+		publishTerminals(graph.as(NessGraph.class), versions, tempDir);
 		logger().println("Finished generation of terminals!");
 	}
 
-	private void publishOntology(NessGraph graph, File tempDir) {
+	private void publishOntology(NessGraph graph, Map<String, String> versions, File tempDir) {
 		try {
 			AtomicBoolean published = new AtomicBoolean(true);
-			published.set(new OntologyPublisher(new File(tempDir, "ontology"), eventTanks(graph), graph.eventList(), graph.tableList(), configuration(), systemProperties(), invokedPhase, logger()).publish() & published.get());
+			published.set(new OntologyPublisher(new File(tempDir, "ontology"), graph, configuration(), versions, systemProperties(), invokedPhase, logger()).publish() & published.get());
 			if (published.get() && notifier() != null)
 				notifier().notify("Ontology " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), "ontology", configuration().artifact().version()));
-			if (published.get()) FileUtils.deleteDirectory(tempDir);
-		} catch (IOException e) {
+//			if (published.get()) FileUtils.deleteDirectory(tempDir);
+		} catch (Exception e) {
 			logger().println(e.getMessage());
 		}
 	}
 
-	private void publishTerminals(NessGraph nessGraph, File tempDir) {
+	private void publishTerminals(NessGraph nessGraph, Map<String, String> versions, File tempDir) {
 		try {
-			String terminalJmsVersion = terminalJmsVersion();
-			String bpmVersion = bpmVersion();
 			AtomicBoolean published = new AtomicBoolean(true);
 			nessGraph.terminalList().parallelStream().forEach(terminal -> {
-				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), terminalJmsVersion, bpmVersion, systemProperties(), invokedPhase, logger()).publish() & published.get());
+				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), versions, systemProperties(), invokedPhase, logger()).publish() & published.get());
 				if (published.get() && notifier() != null)
 					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), terminalNameArtifact(terminal), configuration().artifact().version()));
 			});
-			if (published.get()) FileUtils.deleteDirectory(tempDir);
+//			if (published.get()) FileUtils.deleteDirectory(tempDir);
 		} catch (Exception e) {
 			logger().println(e.getMessage());
 		}
@@ -91,14 +95,42 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private String terminalJmsVersion() {
 		List<String> terminalVersions = ArtifactoryConnector.terminalVersions();
 		Collections.reverse(terminalVersions);
-
-		return terminalVersions.isEmpty() ? MINIMUM_TERMINAL_JMS_VERSION : suitableVersion(terminalVersions);
+		return terminalVersions.isEmpty() ? MINIMUM_TERMINAL_JMS_VERSION : suitableTerminalVersion(terminalVersions);
 	}
 
-	private String suitableVersion(List<String> terminalVersions) {
-		return terminalVersions.stream().filter(version -> version.compareTo(MAX_TERMINAL_JMS_VERSION) < 0).findFirst().orElse(MINIMUM_TERMINAL_JMS_VERSION);
+	private String ingestionVersion() {
+		List<String> versions = ArtifactoryConnector.ingestionVersions();
+		Collections.reverse(versions);
+		return versions.isEmpty() ? MINIMUM_INGESTION_VERSION : suitableIngestionVersion(versions);
 	}
 
+	private String eventVersion() {
+		List<String> versions = ArtifactoryConnector.eventVersions();
+		Collections.reverse(versions);
+		return versions.isEmpty() ? MINIMUM_EVENT_VERSION : suitableEventVersion(versions);
+	}
+
+	private String ledVersion() {
+		List<String> versions = ArtifactoryConnector.ledVersions();
+		Collections.reverse(versions);
+		return versions.isEmpty() ? MINIMUM_EVENT_VERSION : suitableIngestionVersion(versions);
+	}
+
+	private String suitableTerminalVersion(List<String> versions) {
+		return versions.stream().filter(version -> version.compareTo(MAX_TERMINAL_JMS_VERSION) < 0).findFirst().orElse(MINIMUM_TERMINAL_JMS_VERSION);
+	}
+
+	private String suitableIngestionVersion(List<String> versions) {
+		return versions.stream().filter(v -> v.compareTo(MAX_INGESTION_VERSION) < 0).findFirst().orElse(MINIMUM_INGESTION_VERSION);
+	}
+
+	private String suitableEventVersion(List<String> versions) {
+		return versions.stream().filter(v -> v.compareTo(MAX_EVENT_VERSION) < 0).findFirst().orElse(MINIMUM_EVENT_VERSION);
+	}
+
+	private String suitableLedVersion(List<String> versions) {
+		return versions.stream().filter(v -> v.compareTo(MAX_LED_VERSION) < 0).findFirst().orElse(MINIMUM_LED_VERSION);
+	}
 
 	private boolean isSnapshotVersion() {
 		return configuration().artifact().version().contains("SNAPSHOT");
@@ -131,10 +163,6 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		}
 	}
 
-	private List<Tank.Event> eventTanks(NessGraph nessGraph) {
-		if (nessGraph.datalake() == null) return Collections.emptyList();
-		return nessGraph.datalake().tankList().stream().filter(Tank::isEvent).map(Tank::asEvent).collect(Collectors.toList());
-	}
 
 	private List<Tank.Event> tanks(Terminal terminal) {
 		List<Tank.Event> tanks = new ArrayList<>();

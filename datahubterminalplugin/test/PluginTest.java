@@ -2,7 +2,6 @@ import io.intino.Configuration;
 import io.intino.ness.datahubterminalplugin.DataHubTerminalsPluginLauncher;
 import io.intino.plugin.PluginLauncher;
 import org.apache.commons.io.FileUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -11,23 +10,7 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 
-@Ignore
 public class PluginTest {
-	@Test
-	public void should_build_gc_terminals() throws IOException {
-		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
-		launcher.
-				moduleStructure(new PluginLauncher.ModuleStructure(singletonList(new File(System.getProperty("user.home") + "/workspace/b.cfe/gestioncomercial/data-hub-3/src")), singletonList(new File(System.getProperty("user.home") + "/workspace/b.cfe/gestioncomercial/data-hub-3/res")), new File(System.getProperty("user.home") + "/workspace/ness/out/data-hub-3-test/")))
-				.systemProperties(new PluginLauncher.SystemProperties(new File("/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3/"), new File("/Library/Java/JavaVirtualMachines/jdk-11.0.4.jdk/Contents/Home")))
-				.logger(System.out)
-				.invokedPhase(PluginLauncher.Phase.INSTALL)
-				.moduleConfiguration(gcConfiguration());
-		File temp = new File("/Users/oroncal/workspace/ness/datahubterminalplugin/temp/gc");
-		FileUtils.deleteDirectory(temp);
-		temp.mkdirs();
-		launcher.run(temp);
-	}
-
 	@Test
 	public void should_build_test_terminals() throws IOException {
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
@@ -38,6 +21,21 @@ public class PluginTest {
 				.invokedPhase(PluginLauncher.Phase.INSTALL)
 				.moduleConfiguration(gcConfiguration());
 		File temp = new File("/Users/oroncal/workspace/ness/datahubterminalplugin/temp/test");
+		FileUtils.deleteDirectory(temp);
+		temp.mkdirs();
+		launcher.run(temp);
+	}
+
+	@Test
+	public void should_build_gc_terminals() throws IOException {
+		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
+		launcher.
+				moduleStructure(new PluginLauncher.ModuleStructure(singletonList(new File(System.getProperty("user.home") + "/workspace/b.cfe/gestioncomercial/data-hub-3/src")), singletonList(new File(System.getProperty("user.home") + "/workspace/b.cfe/gestioncomercial/data-hub-3/res")), new File(System.getProperty("user.home") + "/workspace/ness/out/data-hub-3-test/")))
+				.systemProperties(new PluginLauncher.SystemProperties(new File("/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3/"), new File("/Library/Java/JavaVirtualMachines/jdk-11.0.4.jdk/Contents/Home")))
+				.logger(System.out)
+				.invokedPhase(PluginLauncher.Phase.INSTALL)
+				.moduleConfiguration(gcConfiguration());
+		File temp = new File("/Users/oroncal/workspace/ness/datahubterminalplugin/temp/gc");
 		FileUtils.deleteDirectory(temp);
 		temp.mkdirs();
 		launcher.run(temp);

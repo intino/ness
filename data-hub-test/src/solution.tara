@@ -1,21 +1,12 @@
 dsl Ness
 
 Datalake(Month, path = "") dl
-	Context("") Divisiones
-		Context DA;Context DB;Context DC;Context DD;Context DF;Context DG;Context DJ;Context DK;Context DL;Context DM;Context DN;Context DP;Context DU;Context DV;Context DW;Context DX;
-	Context asemed
-//	Tank(event = criterio) criterio as Event Contextual(asemed)
-//	Tank(event = criterioBorrado) criterioBorrado as Event Contextual(asemed)
-//	Tank(event = criterioModificado) criterioModificado as Event Contextual(asemed)
-//	Tank(event = criterioSentencia) criterioSentencia as Event Contextual(asemed)
-//
-//	Tank(event = usuarioConectado)usuarioConectado as Event
-//	Tank(event = usuarioDesconectado)usuarioDesconectado as Event
-//
-//	Tank(event = ajuste) ajuste as Event Contextual(Divisiones)
-//	Tank(event = cierreAjuste) cierreAjuste as Event Contextual(Divisiones)
-	Tank(event = Example) example as Event
-	ProcessStatus(context = Divisiones)
+	Split("") Divisiones
+		Split DA;Split DB;Split DC;Split DD;Split DF;Split DG;Split DJ;Split DK;Split DL;Split DM;Split DN;Split DP;Split DU;Split DV;Split DW;Split DX;
+	Split asemed
+	Tank example as Event(event = Example)
+	Tank pagos as Led(led = pagos) Splitted(split = Divisiones)
+	ProcessStatus(split = Divisiones)
 	Backup
 		Cron(pattern = "0 0 12 1/1 * ? *", timeZone = "Atlantic/Canary")
 
@@ -36,30 +27,40 @@ Broker(port = 63000, secondaryPort = 1884, path = "./broker")
 //Event usuarioConectado
 //Event usuarioDesconectado
 
+Schema pagos
+	Attribute a as LongInteger(size = 48bits)
+	Attribute b as Integer
+	Attribute c as DateTime
+	Attribute d as Bool
+	Attribute giro as WordBag(wordBag = Giro)
+	Attribute sector as WordBag(wordBag = Sector)
+	Attribute gestion as WordBag(wordBag = Gestion)
+	Attribute municipio as WordBag(wordBag = Municipio)
+
+WordBag Giro
+	Word(1) Federal
+	Word(2) Municipal
+	Word(3) Estatal
+	Word(4) ParaEstatal
+	Word(5) Publico
+WordBag Sector
+	Word(1) Comercial
+	Word(2) Agricola
+	Word(3) Industrial
+	Word(4) Alumbrado
+	Word(5) Residencial
+WordBag Gestion
+	Word(1) Rezago
+	Word(2) Convenio
+	Word(3) Incobrable
+	Word(4) Normal
+
+WordBag Municipio as  FromResource(tsv = "Municipios.tsv")
+
 Event Example
 	Attribute name as Text
-	Attribute remesa as Table(table = Remesas)
-Table Remesas
-	Column index as LongInteger
-	Column division as Text
-	Column centroGestor as Text
-	Column centroCoste as Text
-	Column municipio as Text
-	Column cuenta as Text
-	Column ejecutivo as Text
-	Column codigo as Text
-	Column rpu as Text
-	Column tipoMov as Text
-	Column periodo as Text
-	Column desde as DateTime
-	Column hasta as DateTime
-	Column consumo as Real
-	Column importe as Real
-	Column iva as Integer
-	Column dap as Real
-	Column errorTag as Word("Si" "No")
-	Column estado as Text
+	Attribute names as Text List
 
-Terminal  first
+Terminal first
 	Publish(tanks = dl.example)
 	Subscribe (tanks = dl.example)

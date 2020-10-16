@@ -34,9 +34,37 @@ public class ArtifactoryConnector {
 		}
 	}
 
+	public static List<String> ingestionVersions() {
+		try {
+			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/ingestion/maven-metadata.xml");
+			return extractVersions(new String(read(connect(url)).toByteArray()));
+		} catch (Throwable e) {
+			return Collections.emptyList();
+		}
+	}
+
+	public static List<String> eventVersions() {
+		try {
+			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/event/maven-metadata.xml");
+			return extractVersions(new String(read(connect(url)).toByteArray()));
+		} catch (Throwable e) {
+			return Collections.emptyList();
+		}
+	}
+
 	public static List<String> bpmVersions() {
 		try {
 			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/bpm-framework/maven-metadata.xml");
+			return extractVersions(new String(read(connect(url)).toByteArray()));
+		} catch (Throwable e) {
+			return Collections.emptyList();
+		}
+	}
+
+
+	public static List<String> ledVersions() {
+		try {
+			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/led/maven-metadata.xml");
 			return extractVersions(new String(read(connect(url)).toByteArray()));
 		} catch (Throwable e) {
 			return Collections.emptyList();

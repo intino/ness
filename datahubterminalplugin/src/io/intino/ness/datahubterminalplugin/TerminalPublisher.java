@@ -24,21 +24,19 @@ class TerminalPublisher {
 	private final File root;
 	private final Terminal terminal;
 	private final Configuration conf;
-	private final String terminalJmsVersion;
-	private final String bpmVersion;
+	private final Map<String, String> versions;
 	private final PluginLauncher.SystemProperties systemProperties;
 	private final String basePackage;
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
 	private final List<Tank.Event> tanks;
 
-	TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, Configuration configuration, String terminalJmsVersion, String bpmVersion, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
+	TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, Configuration configuration, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
 		this.terminal = terminal;
 		this.tanks = tanks;
 		this.conf = configuration;
-		this.terminalJmsVersion = terminalJmsVersion;
-		this.bpmVersion = bpmVersion;
+		this.versions = versions;
 		this.systemProperties = systemProperties;
 		this.basePackage = configuration.artifact().groupId().toLowerCase() + "." + Formatters.snakeCaseToCamelCase().format(configuration.artifact().name()).toString().toLowerCase();
 		this.invokedPhase = invokedPhase;
@@ -166,12 +164,8 @@ class TerminalPublisher {
 	}
 
 	private void log(Invoker invoker) {
-		invoker.setErrorHandler(l -> {
-			logger.println(l);
-		});
-		invoker.setOutputHandler(l -> {
-			logger.println(l);
-		});
+		invoker.setErrorHandler(logger::println);
+//		invoker.setOutputHandler(logger::println);
 	}
 
 	private void config(InvocationRequest request, File mavenHome) {
@@ -188,8 +182,8 @@ class TerminalPublisher {
 			if (isSnapshotVersion()) buildDistroFrame(builder, conf.artifact().distribution().snapshot());
 			else buildDistroFrame(builder, conf.artifact().distribution().release());
 		}
-		builder.add("ontology", ontologyFrame(group, version));
-		if (terminal.bpm() != null) builder.add("hasBpm", this.bpmVersion);
+		builder.add("terminal", terminalDependenciesFrame(group, version));
+		if (terminal.bpm() != null) builder.add("bpm", versions.get("bpm"));
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new AccessorPomTemplate().render(builder.toFrame()));
 		return pomFile;
@@ -199,11 +193,12 @@ class TerminalPublisher {
 		return conf.artifact().version().contains("SNAPSHOT");
 	}
 
-	private FrameBuilder ontologyFrame(String group, String version) {
-		return new FrameBuilder("ontology").
+	private FrameBuilder terminalDependenciesFrame(String group, String version) {
+		return new FrameBuilder("terminal").
 				add("group", group).
 				add("artifact", "ontology").
-				add("terminalVersion", terminalJmsVersion).
+				add("terminalVersion", versions.get("terminal-jms")).
+				add("ingestionVersion", versions.get("ingestion")).
 				add("version", version);
 	}
 

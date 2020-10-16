@@ -52,6 +52,9 @@ Concept:{0..1} Datalake
         		var Model.Event event
 				var boolean sortingRequired = true
 				var string qn = @qn is private reactive
+			sub Led
+				var Model.Schema schema
+				var string qn = @qn is private reactive
         Aspect Splitted > var Split split
 
 Concept:Named Terminal
@@ -91,33 +94,60 @@ Concept Data is abstract
 	Aspect List
 	Aspect Type
 		var string type is reactive private
+		var string primitive = 'self.type()' is reactive private
+		var integer:{bits} size = 0 bits
 		sub Real
 			var double defaultValue = 0
 			var string type = "Double" is reactive private
+			var string primitive = "double" is reactive private
+			var integer:{bits} size = 64 bits
 		sub Integer
 			var integer defaultValue = 0
 			var string type = "Integer" is reactive private
+			var string primitive = "int" is reactive private
+			var integer:{bits} size = 32 bits
 		sub LongInteger
 			var long defaultValue = 0
 			var string type = "Long" is reactive private
+			var string primitive = "long" is reactive private
+			var integer:{bits} size = 64 bits
 		sub Bool
 			var boolean defaultValue = false
 			var string type = "Boolean" is reactive private
+			var string primitive = "boolean" is reactive private
+			var integer:{bits} size = 1 bits
 		sub Text
 			var string defaultValue = empty
 			var string type = "String" is reactive private
 		sub Date
 			var string format = "dd/MM/yyyy"
 			var string type = "java.util.Date" is reactive private
+			var integer:{bits} size = 64 bits
 		sub DateTime
 			var string format = "dd/MM/yyyy HH:mm:ss"
 			var string type = "java.time.Instant" is reactive private
+			var integer:{bits} size = 64 bits
 		sub Word
 			var string type = "java.lang.Enum" is reactive private
 			var string[] values;
+			var integer:{bits} size = 16 bits
+		sub WordBag
+			var string type = "java.lang.Enum" is reactive private
+			var integer:{bits} size = 8 bits
+			var Model.WordBag wordBag;
+
 		sub Table
 			var string type = "Table" is reactive private
 			var Model.Table table
 
 Concept Table
 	Concept:Named:RequiresAspect Column extends Data
+
+Concept:Named WordBag
+	has:Named WordBag
+	Concept:Named Word > var integer value
+	Aspect FromResource
+		var resource:{tsv} tsv
+
+Concept:Named Schema
+	has:Named:RequiresAspect:OnlyNumeric Attribute

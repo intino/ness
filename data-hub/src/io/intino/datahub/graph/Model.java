@@ -19,12 +19,20 @@ public class Model {
 		return prefix + self.name$();
 	}
 
+	public static String qn(Datalake.Tank.Led self) {
+		String prefix = "";
+		if (self.asTank().isSplitted()) {
+			String split = self.asTank().asSplitted().split().qn();
+			return (split.isEmpty() ? "" : split + ".") + prefix + self.schema().name$();
+		} else return prefix + self.schema().name$();
+	}
+
 	public static String qn(Datalake.Tank.Event self) {
 		String namespace = eventNamespace(self.event);
 		String prefix = namespace.isEmpty() ? "" : namespace + ".";
 		if (self.asTank().isSplitted()) {
-			String contextQn = self.asTank().asSplitted().split().qn();
-			return (contextQn.isEmpty() ? "" : contextQn + ".") + prefix + self.event().name$();
+			String split = self.asTank().asSplitted().split().qn();
+			return (split.isEmpty() ? "" : split + ".") + prefix + self.event().name$();
 		} else return prefix + self.event().name$();
 	}
 

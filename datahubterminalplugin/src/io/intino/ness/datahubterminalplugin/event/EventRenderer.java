@@ -212,5 +212,4 @@ public class EventRenderer {
 			else return value;
 		});
 	}
-
 }

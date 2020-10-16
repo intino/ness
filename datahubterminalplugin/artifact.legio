@@ -1,8 +1,8 @@
 dsl Legio
 
-Artifact("io.intino.ness", "2.9.3") data-hub-terminal-plugin
+Artifact("io.intino.ness", "2.10.0") data-hub-terminal-plugin
 	Imports
-		Compile("io.intino", "data-hub", "5.0.1")
+		Compile("io.intino", "data-hub", "5.1.0")
 			Exclude("io.intino.alexandria", "exceptions")
 			Exclude("io.intino.alexandria", "jms")
 			Exclude("io.intino.alexandria", "jmx")
@@ -16,6 +16,7 @@ Artifact("io.intino.ness", "2.9.3") data-hub-terminal-plugin
 			Exclude("org.apache.activemq", "activemq-runtime-config")
 			Exclude("io.intino", "datalake-inspector")
 		Compile("io.intino.alexandria", "json", "1.0.2")
+		Compile("io.intino.alexandria", "datalake", "3.2.0")
 		Compile("io.intino", "plugin-interface", "2.0.1")
 		Compile("io.intino.itrules", "engine", "1.0.0")
 		Compile("org.apache.maven.shared", "maven-invoker", "3.0.1")
