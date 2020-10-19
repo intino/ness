@@ -48,6 +48,7 @@ def type(terminal)
 			private final io.intino.alexandria.ingestion.SessionHandler sessionHandler;
 			private final io.intino.alexandria.ingestion.EventSession eventSession;
 			private final io.intino.alexandria.ingestion.SetSession setSession;
+			private final io.intino.alexandria.ingestion.LedSession ledSession;
 
 			public BatchSession(java.io.File dataHubStage, java.io.File temporalStage) {
 				this.dataHubStage = dataHubStage;
@@ -55,6 +56,7 @@ def type(terminal)
 				this.sessionHandler = new io.intino.alexandria.ingestion.SessionHandler(temporalStage);
 				this.eventSession = sessionHandler.createEventSession();
 				this.setSession = sessionHandler.createSetSession();
+				this.ledSession = sessionHandler.createLedSession();
 			}
 
 			public void feed(Event event, String split) {
@@ -63,6 +65,10 @@ def type(terminal)
 
 			public void feed(String tank, Timetag timetag, String set, java.util.stream.Stream<Long> ids) {
                 setSession.put(tank, timetag, set, ids);
+			}
+
+			public void feed(String tank, Timetag timetag, Led<? extends io.intino.alexandria.led.Schema> led) {
+                ledSession.put(tank, timetag, led);
 			}
 
 			public void push() {

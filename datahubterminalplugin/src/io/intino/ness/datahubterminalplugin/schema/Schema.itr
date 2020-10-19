@@ -7,13 +7,13 @@ end
 def trigger(schema)
 	public class $name+firstUpperCase extends io.intino.alexandria.led.Schema {
 		[$split]
+		public static final int SIZE = $size;
 
 		[$attribute+declaration...[$NL$NL]]
 
 		public $name+firstUpperCase() {
 			super(defaultByteStore());
 		}
-
 
 		public $name+firstUpperCase(io.intino.alexandria.led.buffers.store.ByteStore store) {
 			super(store);
@@ -68,6 +68,20 @@ def type(attribute & integer) trigger(getter)
 end
 
 def type(attribute & integer) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
+		setInteger($offset, $bits, $name+firstLowerCase);
+		return this;
+	}
+end
+
+def type(attribute & boolean) trigger(getter)
+	public Boolean $name+firstLowerCase() {
+		int value= (int) getInteger($offset, 3)
+		return value== NULL ? null : value == 2;
+	}
+end
+
+def type(attribute & boolean) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
 		setInteger($offset, $bits, $name+firstLowerCase);
 		return this;

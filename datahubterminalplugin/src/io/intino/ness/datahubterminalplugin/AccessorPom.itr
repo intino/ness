@@ -55,9 +55,10 @@ def type(pom)
 	</distributionManagement>
 
 	<dependencies>
-		$event
-		$ontology
-		$hasBpm
+		[$event]
+		[$led]
+		[$terminal]
+		[$bpm]
 	</dependencies>
 </project>
 end
@@ -66,11 +67,19 @@ def trigger(event)
 	<dependency>
 		<groupId>io.intino.alexandria</groupId>
 		<artifactId>event</artifactId>
-		<version>2.0.1</version>
+		<version>$version</version>
 	</dependency>
 end
 
-def trigger(ontology)
+def trigger(led)
+	<dependency>
+		<groupId>io.intino.alexandria</groupId>
+		<artifactId>led</artifactId>
+		<version>$version</version>
+	</dependency>
+end
+
+def trigger(terminal)
 	<dependency>
 		<groupId>io.intino.alexandria</groupId>
 		<artifactId>terminal-jms</artifactId>
@@ -79,7 +88,7 @@ def trigger(ontology)
 	<dependency>
 		<groupId>io.intino.alexandria</groupId>
 		<artifactId>ingestion</artifactId>
-		<version>3.0.1</version>
+		<version>$ingestionVersion</version>
 	</dependency>
 	<dependency>
 		<groupId>$group+lowercase</groupId>
@@ -99,7 +108,7 @@ end
 def trigger(distribution)
 end
 
-def trigger(hasBpm)
+def trigger(bpm)
 	<dependency>
 		<groupId>io.intino.alexandria</groupId>
 		<artifactId>bpm-framework</artifactId>
