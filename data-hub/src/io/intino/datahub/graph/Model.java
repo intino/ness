@@ -19,12 +19,12 @@ public class Model {
 		return prefix + self.name$();
 	}
 
-	public static String qn(Datalake.Tank.Led self) {
+	public static String qn(Datalake.Tank.Transaction self) {
 		String prefix = "";
 		if (self.asTank().isSplitted()) {
 			String split = self.asTank().asSplitted().split().qn();
-			return (split.isEmpty() ? "" : split + ".") + prefix + self.schema().name$();
-		} else return prefix + self.schema().name$();
+			return (split.isEmpty() ? "" : split + ".") + prefix + self.transaction().name$();
+		} else return prefix + self.transaction().name$();
 	}
 
 	public static String qn(Datalake.Tank.Event self) {

@@ -52,8 +52,8 @@ Concept:{0..1} Datalake
         		var Model.Event event
 				var boolean sortingRequired = true
 				var string qn = @qn is private reactive
-			sub Led
-				var Model.Schema schema
+			sub Transaction
+				var Model.Transaction transaction
 				var string qn = @qn is private reactive
         Aspect Splitted > var Split split
 
@@ -135,7 +135,6 @@ Concept Data is abstract
 			var string type = "java.lang.Enum" is reactive private
 			var integer:{bits} size = 8 bits
 			var Model.WordBag wordBag;
-
 		sub Table
 			var string type = "Table" is reactive private
 			var Model.Table table
@@ -149,5 +148,5 @@ Concept:Named WordBag
 	Aspect FromResource
 		var resource:{tsv} tsv
 
-Concept:Named Schema
+Concept:Named Transaction
 	has:Named:RequiresAspect:OnlyNumeric Attribute
