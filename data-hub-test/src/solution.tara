@@ -5,11 +5,10 @@ Datalake(Month, path = "") dl
 		Split DA;Split DB;Split DC;Split DD;Split DF;Split DG;Split DJ;Split DK;Split DL;Split DM;Split DN;Split DP;Split DU;Split DV;Split DW;Split DX;
 	Split asemed
 	Tank example as Event(event = Example)
-	Tank pagos as Led(led = pagos) Splitted(split = Divisiones)
+	Tank pagos as Transaction(pagos) Splitted(split = Divisiones)
 	ProcessStatus(split = Divisiones)
 	Backup
 		Cron(pattern = "0 0 12 1/1 * ? *", timeZone = "Atlantic/Canary")
-
 
 Broker(port = 63000, secondaryPort = 1884, path = "./broker")
 	User(name = "user1", password = "1234")
@@ -27,7 +26,7 @@ Broker(port = 63000, secondaryPort = 1884, path = "./broker")
 //Event usuarioConectado
 //Event usuarioDesconectado
 
-Schema pagos
+Transaction  pagos
 	Attribute a as LongInteger(size = 48bits)
 	Attribute b as Integer
 	Attribute c as DateTime
