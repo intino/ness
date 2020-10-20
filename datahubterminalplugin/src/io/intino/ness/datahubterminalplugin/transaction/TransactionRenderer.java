@@ -18,14 +18,14 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 public class TransactionRenderer {
-	private final Schema schema;
+	private final Transaction transaction;
 	private final Configuration conf;
 	private final Split split;
 	private final File destination;
 	private final String rootPackage;
 
-	public TransactionRenderer(Schema schema, Configuration conf, Split split, File destination, String rootPackage) {
-		this.schema = schema;
+	public TransactionRenderer(Transaction transaction, Configuration conf, Split split, File destination, String rootPackage) {
+		this.transaction = transaction;
 		this.conf = conf;
 		this.split = split;
 		this.destination = destination;
@@ -33,28 +33,28 @@ public class TransactionRenderer {
 	}
 
 	public void render() {
-		String rootPackage = schemasPackage();
-		if (schema.core$().owner().is(Namespace.class))
-			rootPackage = rootPackage + "." + schema.core$().ownerAs(Namespace.class).qn();
+		String rootPackage = transactionsPackage();
+		if (transaction.core$().owner().is(Namespace.class))
+			rootPackage = rootPackage + "." + transaction.core$().ownerAs(Namespace.class).qn();
 		final File packageFolder = new File(destination, rootPackage.replace(".", File.separator));
-		final Frame frame = createSchemaFrame(schema, rootPackage);
-		Commons.writeFrame(packageFolder, schema.name$(), template().render(new FrameBuilder("root").add("root", rootPackage).add("package", rootPackage).add("schema", frame)));
+		final Frame frame = createTransactionFrame(transaction, rootPackage);
+		Commons.writeFrame(packageFolder, transaction.name$(), template().render(new FrameBuilder("root").add("root", rootPackage).add("package", rootPackage).add("transaction", frame)));
 	}
 
-	private Frame createSchemaFrame(Schema schema, String packageName) {
-		FrameBuilder builder = new FrameBuilder("schema").
-				add("name", schema.name$()).
+	private Frame createTransactionFrame(Transaction transaction, String packageName) {
+		FrameBuilder builder = new FrameBuilder("transaction").
+				add("name", transaction.name$()).
 				add("package", packageName).
-				add("size", sizeOf(schema));
+				add("size", sizeOf(transaction));
 
-		builder.add("attribute", processAttributes(schema.attributeList(), schema.name$()));
+		builder.add("attribute", processAttributes(transaction.attributeList(), transaction.name$()));
 		if (split != null) builder.add("split", new FrameBuilder().add("split").
 				add("split", splits(split, split.isLeaf() ? Collections.singletonList(split) : split.leafs())));
 		return builder.toFrame();
 	}
 
-	private int sizeOf(Schema schema) {
-		return schema.attributeList().stream().map(a -> !a.isWordBag() ? a.asType().size() : sizeOf(a.asWordBag().wordBag())).reduce(Integer::sum).get();
+	private int sizeOf(Transaction transaction) {
+		return transaction.attributeList().stream().map(a -> !a.isWordBag() ? a.asType().size() : sizeOf(a.asWordBag().wordBag())).reduce(Integer::sum).get();
 	}
 
 	private Integer sizeOf(WordBag wordBag) {
@@ -135,8 +135,8 @@ public class TransactionRenderer {
 				map(w -> w.name$() + "(" + w.value() + ")").toArray(String[]::new);
 	}
 
-	private String schemasPackage() {
-		return rootPackage + ".schemas";
+	private String transactionsPackage() {
+		return rootPackage + ".transaction";
 	}
 
 	private Template template() {

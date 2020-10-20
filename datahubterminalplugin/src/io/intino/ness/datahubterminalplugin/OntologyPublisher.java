@@ -5,7 +5,6 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.graph.*;
 import io.intino.datahub.graph.Datalake.Split;
 import io.intino.datahub.graph.Datalake.Tank;
-import io.intino.datahub.graph.Datalake.Tank.Led;
 import io.intino.itrules.FrameBuilder;
 import io.intino.ness.datahubterminalplugin.event.EventRenderer;
 import io.intino.ness.datahubterminalplugin.event.TableRenderer;
@@ -23,9 +22,9 @@ import java.util.stream.Collectors;
 class OntologyPublisher {
 	private final File root;
 	private final List<Tank.Event> eventTanks;
-	private final List<Led> ledTanks;
+	private final List<Tank.Transaction> transactionTanks;
 	private final List<Event> events;
-	private final List<Schema> schemas;
+	private final List<Transaction> transactions;
 	private final List<Table> tables;
 	private final Configuration conf;
 	private final Map<String, String> versions;
@@ -38,9 +37,9 @@ class OntologyPublisher {
 	OntologyPublisher(File root, NessGraph graph, Configuration configuration, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
 		this.eventTanks = eventTanks(graph);
-		this.ledTanks = ledTanks(graph);
+		this.transactionTanks = transactionTanks(graph);
 		this.events = graph.eventList();
-		this.schemas = graph.schemaList();
+		this.transactions = graph.transactionList();
 		this.tables = graph.tableList();
 		this.conf = configuration;
 		this.versions = versions;
@@ -69,13 +68,13 @@ class OntologyPublisher {
 		File srcDirectory = new File(root, "src");
 		srcDirectory.mkdirs();
 		Map<Event, Split> eventSplitMap = splitEvents();
-		Map<Schema, Split> ledSplitMap = collectSplitSchemas();
+		Map<Transaction, Split> ledSplitMap = collectSplitTransactions();
 		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
 		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, basePackage).render());
-		schemas.stream().parallel().forEach(schema -> new TransactionRenderer(schema, conf, ledSplitMap.get(schema), srcDirectory, basePackage).render());
+		transactions.stream().parallel().forEach(schema -> new TransactionRenderer(schema, conf, ledSplitMap.get(schema), srcDirectory, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
-		List<Attribute> resourceWordBags = schemas.stream().map(s -> s.attributeList().stream().filter(a -> a.isWordBag() && a.asWordBag().wordBag().isFromResource()).collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
+		List<Attribute> resourceWordBags = transactions.stream().map(s -> s.attributeList().stream().filter(a -> a.isWordBag() && a.asWordBag().wordBag().isFromResource()).collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
 		resourceWordBags.stream().
 				map(a -> a.asWordBag().wordBag().asFromResource()).
 				forEach(w -> {
@@ -104,8 +103,8 @@ class OntologyPublisher {
 		return events;
 	}
 
-	private Map<Schema, Split> collectSplitSchemas() {
-		return ledTanks.stream().collect(Collectors.toMap(Led::schema, tank -> tank.asTank().isSplitted() ? tank.asTank().asSplitted().split() : null, (a, b) -> b));
+	private Map<Transaction, Split> collectSplitTransactions() {
+		return transactionTanks.stream().collect(Collectors.toMap(Tank.Transaction::transaction, tank -> tank.asTank().isSplitted() ? tank.asTank().asSplitted().split() : null, (a, b) -> b));
 	}
 
 	private List<Event> hierarchy(Event event) {
@@ -189,8 +188,8 @@ class OntologyPublisher {
 		return nessGraph.datalake().tankList().stream().filter(Tank::isEvent).map(Tank::asEvent).collect(Collectors.toList());
 	}
 
-	private List<Led> ledTanks(NessGraph nessGraph) {
+	private List<Tank.Transaction> transactionTanks(NessGraph nessGraph) {
 		if (nessGraph.datalake() == null) return Collections.emptyList();
-		return nessGraph.datalake().tankList().stream().filter(Tank::isLed).map(Tank::asLed).collect(Collectors.toList());
+		return nessGraph.datalake().tankList().stream().filter(Tank::isTransaction).map(Tank::asTransaction).collect(Collectors.toList());
 	}
 }
