@@ -5,7 +5,7 @@ def type(root)
 end
 
 def trigger(schema)
-	public class $name+firstUpperCase extends io.intino.alexandria.led.Schema {
+	public class $name+firstUpperCase extends io.intino.alexandria.led.Transaction {
 		[$split]
 		public static final int SIZE = $size;
 

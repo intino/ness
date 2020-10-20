@@ -9,7 +9,7 @@ import io.intino.datahub.graph.Datalake.Tank.Led;
 import io.intino.itrules.FrameBuilder;
 import io.intino.ness.datahubterminalplugin.event.EventRenderer;
 import io.intino.ness.datahubterminalplugin.event.TableRenderer;
-import io.intino.ness.datahubterminalplugin.schema.SchemaRenderer;
+import io.intino.ness.datahubterminalplugin.transaction.TransactionRenderer;
 import io.intino.plugin.PluginLauncher;
 import org.apache.maven.shared.invoker.*;
 
@@ -72,7 +72,7 @@ class OntologyPublisher {
 		Map<Schema, Split> ledSplitMap = collectSplitSchemas();
 		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
 		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, basePackage).render());
-		schemas.stream().parallel().forEach(schema -> new SchemaRenderer(schema, conf, ledSplitMap.get(schema), srcDirectory, basePackage).render());
+		schemas.stream().parallel().forEach(schema -> new TransactionRenderer(schema, conf, ledSplitMap.get(schema), srcDirectory, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
 		List<Attribute> resourceWordBags = schemas.stream().map(s -> s.attributeList().stream().filter(a -> a.isWordBag() && a.asWordBag().wordBag().isFromResource()).collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
