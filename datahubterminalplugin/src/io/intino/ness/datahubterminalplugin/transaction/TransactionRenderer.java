@@ -1,4 +1,4 @@
-package io.intino.ness.datahubterminalplugin.schema;
+package io.intino.ness.datahubterminalplugin.transaction;
 
 import io.intino.Configuration;
 import io.intino.datahub.graph.*;
@@ -17,14 +17,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
-public class SchemaRenderer {
+public class TransactionRenderer {
 	private final Schema schema;
 	private final Configuration conf;
 	private final Split split;
 	private final File destination;
 	private final String rootPackage;
 
-	public SchemaRenderer(Schema schema, Configuration conf, Split split, File destination, String rootPackage) {
+	public TransactionRenderer(Schema schema, Configuration conf, Split split, File destination, String rootPackage) {
 		this.schema = schema;
 		this.conf = conf;
 		this.split = split;
@@ -140,7 +140,7 @@ public class SchemaRenderer {
 	}
 
 	private Template template() {
-		return Formatters.customize(new SchemaTemplate()).add("typeFormat", (value) -> {
+		return Formatters.customize(new TransactionTemplate()).add("typeFormat", (value) -> {
 			if (value.toString().contains(".")) return Formatters.firstLowerCase(value.toString());
 			else return value;
 		});
