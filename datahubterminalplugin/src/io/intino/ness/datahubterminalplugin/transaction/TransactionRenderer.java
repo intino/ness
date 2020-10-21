@@ -48,7 +48,7 @@ public class TransactionRenderer {
 				add("size", sizeOf(transaction));
 
 		builder.add("attribute", processAttributes(transaction.attributeList(), transaction.name$()));
-		if (split != null){
+		if (split != null) {
 			List<Split> leafs = split.isLeaf() ? Collections.singletonList(split) : split.leafs();
 			builder.add("split", new FrameBuilder().add("split").add("enum", enums(split, leafs)));
 
