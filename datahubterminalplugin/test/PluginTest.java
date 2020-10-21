@@ -31,7 +31,7 @@ public class PluginTest {
 	public void should_build_gc_terminals() throws IOException {
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
 		launcher.
-				moduleStructure(new PluginLauncher.ModuleStructure(singletonList(new File(System.getProperty("user.home") + "/workspace/b.cfe/gestioncomercial/data-hub-3/src")), singletonList(new File(System.getProperty("user.home") + "/workspace/b.cfe/gestioncomercial/data-hub-3/res")), new File(System.getProperty("user.home") + "/workspace/ness/out/data-hub-3-test/")))
+				moduleStructure(new PluginLauncher.ModuleStructure(singletonList(new File(System.getProperty("user.home") + "/workspace/b.cfe/gestioncomercial/data-hub-ng/src")), singletonList(new File(System.getProperty("user.home") + "/workspace/b.cfe/gestioncomercial/data-hub-ng/res")), new File(System.getProperty("user.home") + "/workspace/ness/out/data-hub-ng-test/")))
 				.systemProperties(new PluginLauncher.SystemProperties(new File("/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3/"), new File("/Library/Java/JavaVirtualMachines/jdk-11.0.4.jdk/Contents/Home")))
 				.logger(System.out)
 				.invokedPhase(PluginLauncher.Phase.INSTALL)
