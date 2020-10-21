@@ -43,7 +43,7 @@ end
 
 def trigger(split)
 	public enum Split {
-		$split+qn...[, ];
+		$enum+asEnum...[, ];
 
 		public abstract String qn();
 
@@ -53,7 +53,7 @@ def trigger(split)
 	}
 end
 
-def trigger(qn)
+def trigger(asEnum)
 	$value+snakeCaseToCamelCase {
 		public String qn() {
 			return "$qn";
