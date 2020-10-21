@@ -134,9 +134,10 @@ Concept Data is abstract
 			var integer:{bits} size = 16 bits
 		sub WordBag
 			var string type = "java.lang.Enum" is reactive private
-			var integer:{bits} size = 8 bits
 			var Model.WordBag wordBag;
+			var integer:{bits} size = 8 bits
 		sub Table
+			var integer:{bits} size = 0 bits
 			var string type = "Table" is reactive private
 			var Model.Table table
 
