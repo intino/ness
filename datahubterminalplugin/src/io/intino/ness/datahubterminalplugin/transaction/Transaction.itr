@@ -1,10 +1,10 @@
 def type(root)
 	package $package+ValidPackage;
 
-	$schema
+	$transaction
 end
 
-def trigger(schema)
+def trigger(transaction)
 	public class $name+firstUpperCase extends io.intino.alexandria.led.Transaction {
 		[$split]
 		public static final int SIZE = $size;
