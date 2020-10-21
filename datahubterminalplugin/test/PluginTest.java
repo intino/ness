@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
+
 @Ignore
 public class PluginTest {
 	@Test
@@ -21,7 +22,7 @@ public class PluginTest {
 				.logger(System.out)
 				.invokedPhase(PluginLauncher.Phase.INSTALL)
 				.moduleConfiguration(gcConfiguration());
-		File temp = new File("/Users/oroncal/workspace/ness/datahubterminalplugin/temp/test");
+		File temp = new File(System.getProperty("user.home") + "/workspace/ness/datahubterminalplugin/temp/test");
 		FileUtils.deleteDirectory(temp);
 		temp.mkdirs();
 		launcher.run(temp);
@@ -36,7 +37,7 @@ public class PluginTest {
 				.logger(System.out)
 				.invokedPhase(PluginLauncher.Phase.INSTALL)
 				.moduleConfiguration(gcConfiguration());
-		File temp = new File("/Users/oroncal/workspace/ness/datahubterminalplugin/temp/gc");
+		File temp = new File(System.getProperty("user.home") + "/workspace/ness/datahubterminalplugin/temp/gc");
 		FileUtils.deleteDirectory(temp);
 		temp.mkdirs();
 		launcher.run(temp);
@@ -52,7 +53,7 @@ public class PluginTest {
 				.notifier(notifier())
 				.invokedPhase(PluginLauncher.Phase.INSTALL)
 				.moduleConfiguration(cesarConfiguration());
-		File temp = new File("/Users/oroncal/workspace/ness/datahubterminalplugin/temp");
+		File temp = new File(System.getProperty("user.home") + "/workspace/ness/datahubterminalplugin/temp");
 		FileUtils.deleteDirectory(temp);
 
 		temp.mkdirs();
