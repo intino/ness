@@ -48,8 +48,11 @@ public class TransactionRenderer {
 				add("size", sizeOf(transaction));
 
 		builder.add("attribute", processAttributes(transaction.attributeList(), transaction.name$()));
-		if (split != null) builder.add("split", new FrameBuilder().add("split").
-				add("split", splits(split, split.isLeaf() ? Collections.singletonList(split) : split.leafs())));
+		if (split != null){
+			List<Split> leafs = split.isLeaf() ? Collections.singletonList(split) : split.leafs();
+			builder.add("split", new FrameBuilder().add("split").add("enum", enums(split, leafs)));
+
+		}
 		return builder.toFrame();
 	}
 
@@ -87,7 +90,7 @@ public class TransactionRenderer {
 		else return processAttribute(attribute.asType(), offset);
 	}
 
-	private Frame[] splits(Split realSplit, List<Split> leafs) {
+	private Frame[] enums(Split realSplit, List<Split> leafs) {
 		List<Frame> frames = new ArrayList<>();
 		if (!leafs.contains(realSplit) && !realSplit.label().isEmpty())
 			frames.add(new FrameBuilder("enum").add("value", realSplit.qn().replace(".", "-")).toFrame());

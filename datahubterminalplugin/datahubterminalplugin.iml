@@ -34,25 +34,6 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zim:3.0.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:message:3.0.1" level="project" />
     <orderEntry type="library" name="Intino: commons-io:commons-io:2.5" level="project" />
-    <orderEntry type="library" name="Intino: org.apache.geronimo.specs:geronimo-annotation_1.0_spec:1.1.1" level="project" />
-    <orderEntry type="library" name="Intino: xmlpull:xmlpull:1.1.3.1" level="project" />
-    <orderEntry type="library" name="Intino: xpp3:xpp3_min:1.1.4c" level="project" />
-    <orderEntry type="library" name="Intino: commons-net:commons-net:3.6" level="project" />
-    <orderEntry type="library" name="Intino: org.jvnet.jaxb2_commons:jaxb2-basics-runtime:0.6.4" level="project" />
-    <orderEntry type="library" name="Intino: commons-io:commons-io:2.6" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:scheduler-framework:1.1.0" level="project" />
-    <orderEntry type="library" name="Intino: org.quartz-scheduler:quartz:2.3.2" level="project" />
-    <orderEntry type="library" name="Intino: com.mchange:c3p0:0.9.5.4" level="project" />
-    <orderEntry type="library" name="Intino: com.mchange:mchange-commons-java:0.2.15" level="project" />
-    <orderEntry type="library" name="Intino: com.zaxxer:HikariCP-java7:2.4.13" level="project" />
-    <orderEntry type="library" name="Intino: org.quartz-scheduler:quartz-jobs:2.3.2" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.0.4" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.0.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.magritte:language:1.3.0" level="project" />
-    <orderEntry type="library" name="Intino: com.esotericsoftware:kryo:4.0.0" level="project" />
-    <orderEntry type="library" name="Intino: com.esotericsoftware:reflectasm:1.11.3" level="project" />
-    <orderEntry type="library" name="Intino: org.ow2.asm:asm:5.0.4" level="project" />
-    <orderEntry type="library" name="Intino: com.esotericsoftware:minlog:1.3.0" level="project" />
     <orderEntry type="library" name="Intino: org.objenesis:objenesis:2.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:jmx:1.0.2" level="project" />
     <orderEntry type="library" name="Intino: com.sun.xml.security:xml-security-impl:1.0" level="project" />
@@ -168,5 +149,24 @@
     <orderEntry type="library" name="Intino: org.apache.activemq.protobuf:activemq-protobuf:1.1" level="project" />
     <orderEntry type="library" name="Intino: org.fusesource.hawtdispatch:hawtdispatch-transport:1.22" level="project" />
     <orderEntry type="library" name="Intino: org.fusesource.hawtdispatch:hawtdispatch:1.22" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.geronimo.specs:geronimo-annotation_1.0_spec:1.1.1" level="project" />
+    <orderEntry type="library" name="Intino: xmlpull:xmlpull:1.1.3.1" level="project" />
+    <orderEntry type="library" name="Intino: xpp3:xpp3_min:1.1.4c" level="project" />
+    <orderEntry type="library" name="Intino: commons-net:commons-net:3.6" level="project" />
+    <orderEntry type="library" name="Intino: org.jvnet.jaxb2_commons:jaxb2-basics-runtime:0.6.4" level="project" />
+    <orderEntry type="library" name="Intino: commons-io:commons-io:2.6" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:scheduler-framework:1.1.0" level="project" />
+    <orderEntry type="library" name="Intino: org.quartz-scheduler:quartz:2.3.2" level="project" />
+    <orderEntry type="library" name="Intino: com.mchange:c3p0:0.9.5.4" level="project" />
+    <orderEntry type="library" name="Intino: com.mchange:mchange-commons-java:0.2.15" level="project" />
+    <orderEntry type="library" name="Intino: com.zaxxer:HikariCP-java7:2.4.13" level="project" />
+    <orderEntry type="library" name="Intino: org.quartz-scheduler:quartz-jobs:2.3.2" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.0.4" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.magritte:language:1.3.0" level="project" />
+    <orderEntry type="library" name="Intino: com.esotericsoftware:kryo:4.0.0" level="project" />
+    <orderEntry type="library" name="Intino: com.esotericsoftware:reflectasm:1.11.3" level="project" />
+    <orderEntry type="library" name="Intino: org.ow2.asm:asm:5.0.4" level="project" />
+    <orderEntry type="library" name="Intino: com.esotericsoftware:minlog:1.3.0" level="project" />
   </component>
 </module>
