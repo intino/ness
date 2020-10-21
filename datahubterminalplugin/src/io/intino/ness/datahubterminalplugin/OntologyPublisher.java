@@ -104,7 +104,10 @@ class OntologyPublisher {
 	}
 
 	private Map<Transaction, Split> collectSplitTransactions() {
-		return transactionTanks.stream().collect(Collectors.toMap(Tank.Transaction::transaction, tank -> tank.asTank().isSplitted() ? tank.asTank().asSplitted().split() : null, (a, b) -> b));
+		Map<Transaction, Split> map = new HashMap<>();
+		for (Tank.Transaction tank : transactionTanks)
+			map.put(tank.transaction(), tank.asTank().isSplitted() ? tank.asTank().asSplitted().split() : null);
+		return map;
 	}
 
 	private List<Event> hierarchy(Event event) {
