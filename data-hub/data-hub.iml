@@ -91,9 +91,6 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:jms:1.2.0" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-client:5.15.8" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zip:1.0.0" level="project" />
-    <orderEntry type="library" name="Intino: org.antlr:antlr4-runtime:4.8" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:zet:1.0.5" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:tris:1.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.3.23" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:http:1.1.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:exceptions:2.0.0" level="project" />
@@ -116,17 +113,6 @@
     <orderEntry type="library" scope="RUNTIME" name="Intino: com.fasterxml.jackson.core:jackson-annotations:2.10.3" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Intino: com.fasterxml.jackson.core:jackson-core:2.10.3" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:io:3.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:3.1.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:event:2.0.3" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:zim:3.0.2" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:message:3.0.2" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:session:1.1.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:led:1.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:3.2.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:3.2.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:mapp:1.1.0" level="project" />
-    <orderEntry type="library" name="Intino: org.xerial.snappy:snappy-java:1.1.7.7" level="project" />
-    <orderEntry type="library" name="Intino: org.openjdk.jol:jol-core:0.10" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-broker:5.16.0" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-openwire-legacy:5.16.0" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-jaas:5.16.0" level="project" />
@@ -152,5 +138,19 @@
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-pool:5.16.0" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-jms-pool:5.16.0" level="project" />
     <orderEntry type="library" name="Intino: org.apache.commons:commons-pool2:2.8.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:3.1.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:event:2.0.3" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:zim:3.0.2" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:message:3.0.2" level="project" />
+    <orderEntry type="library" name="Intino: org.antlr:antlr4-runtime:4.8" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:session:1.1.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:zet:1.0.5" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:led:1.0.1" level="project" />
+    <orderEntry type="library" name="Intino: org.xerial.snappy:snappy-java:1.1.7.7" level="project" />
+    <orderEntry type="library" name="Intino: org.openjdk.jol:jol-core:0.10" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:tris:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:3.2.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:3.2.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:mapp:1.1.0" level="project" />
   </component>
 </module>

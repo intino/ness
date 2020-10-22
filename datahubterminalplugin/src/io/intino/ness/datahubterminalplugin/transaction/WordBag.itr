@@ -1,0 +1,49 @@
+def type(root)
+	package $package+ValidPackage;
+
+	$wordBag
+end
+
+
+def type(wordBag & resource)
+	public static class $name+FirstUpperCase {
+		private static final java.util.Map<Integer, String> values;
+
+		static {
+			values = new java.io.BufferedReader(new java.io.InputStreamReader($name+firstUpperCase.class.getResourceAsStream("$resource"))).
+				lines().map(l -> l.split("\\t")).
+				collect(java.util.stream.Collectors.toMap(l -> Integer.parseInt(l$[0]), l -> l$[1]));
+		}
+
+		public static java.util.Map<Integer, String> values() {
+			return values;
+		}
+
+		public static int indexOf(String i) {
+			java.util.Map.Entry<Integer, String> e = values.entrySet().stream().filter(en -> en.getValue().equals(i)).findFirst().orElse(null);
+			return e == null ? 0 : e.getKey();
+		}
+	}
+end
+
+def type(wordBag)
+	public enum $name+firstUpperCase {
+		$word...[, ];
+		int value;
+
+		$name+firstUpperCase(int value) {
+			this.value = value;
+		}
+
+		public int value() {
+			return value;
+		}
+
+		public static $type+firstUpperCase nameOf(int value) {
+			return java.util.Arrays.stream(values()).filter(v -> v.value() == value).findFirst().orElse(null);
+		}
+	}
+end
+
+
+

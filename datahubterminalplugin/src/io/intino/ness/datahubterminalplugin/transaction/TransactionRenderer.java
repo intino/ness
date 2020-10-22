@@ -33,12 +33,14 @@ public class TransactionRenderer {
 	}
 
 	public void render() {
-		String rootPackage = transactionsPackage();
+		String transactionsPackage = transactionsPackage();
 		if (transaction.core$().owner().is(Namespace.class))
-			rootPackage = rootPackage + "." + transaction.core$().ownerAs(Namespace.class).qn();
-		final File packageFolder = new File(destination, rootPackage.replace(".", File.separator));
-		final Frame frame = createTransactionFrame(transaction, rootPackage);
-		Commons.writeFrame(packageFolder, transaction.name$(), template().render(new FrameBuilder("root").add("root", rootPackage).add("package", rootPackage).add("transaction", frame)));
+			transactionsPackage = transactionsPackage + "." + transaction.core$().ownerAs(Namespace.class).qn();
+		final File packageFolder = new File(destination, transactionsPackage.replace(".", File.separator));
+		final Frame frame = createTransactionFrame(transaction, transactionsPackage);
+		FrameBuilder builder = new FrameBuilder("root").add("root", transactionsPackage).add("package", transactionsPackage).add("transaction", frame);
+		if (!transaction.graph().wordBagList().isEmpty()) builder.add("wordbagsImport", this.rootPackage);
+		Commons.writeFrame(packageFolder, transaction.name$(), template().render(builder));
 	}
 
 	private Frame createTransactionFrame(Transaction transaction, String packageName) {
@@ -47,7 +49,7 @@ public class TransactionRenderer {
 				add("package", packageName).
 				add("size", sizeOf(transaction));
 
-		builder.add("attribute", processAttributes(transaction.attributeList(), transaction.name$()));
+		builder.add("attribute", processAttributes(new ArrayList<>(transaction.attributeList()), transaction.name$()));
 		if (split != null) {
 			List<Split> leafs = split.isLeaf() ? Collections.singletonList(split) : split.leafs();
 			builder.add("split", new FrameBuilder().add("split").add("enum", enums(split, leafs)));
@@ -62,7 +64,7 @@ public class TransactionRenderer {
 
 	private Integer sizeOf(WordBag wordBag) {
 		try {
-			return !wordBag.isFromResource() ? (int) Math.ceil(log2(wordBag.wordList().size())) : (int) Math.ceil(log2(countLines(wordBag)));
+			return !wordBag.isFromResource() ? (int) Math.ceil(log2(wordBag.wordList().size() + 1)) : (int) Math.ceil(log2(countLines(wordBag) + 1));
 		} catch (IOException e) {
 			return 0;
 		}
@@ -106,11 +108,11 @@ public class TransactionRenderer {
 	private FrameBuilder processAttribute(Data.Type attribute, int offset) {
 		FrameBuilder builder = new FrameBuilder("attribute")
 				.add("name", attribute.a$(Attribute.class).name$())
-				.add("bits", attribute.size())
 				.add("offset", offset)
 				.add("type", isPrimitive(attribute) ? attribute.primitive() : attribute.type());
 		attribute.core$().conceptList().stream().filter(Concept::isAspect).map(Predicate::name).forEach(builder::add);
 		if (isAligned(attribute, offset)) builder.add("aligned", "Aligned");
+		else builder.add("bits", attribute.size());
 		if (attribute.asData().isDateTime()) {
 			builder.add("precision", "");//TODO
 		} else if (attribute.asData().isDate()) {
@@ -155,10 +157,7 @@ public class TransactionRenderer {
 	}
 
 	private Template template() {
-		return Formatters.customize(new TransactionTemplate()).add("typeFormat", (value) -> {
-			if (value.toString().contains(".")) return Formatters.firstLowerCase(value.toString());
-			else return value;
-		});
+		return Formatters.customize(new TransactionTemplate());
 	}
 
 	public static double log2(int N) {

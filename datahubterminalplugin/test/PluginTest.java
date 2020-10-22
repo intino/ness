@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
-@Ignore
 public class PluginTest {
 	@Test
 	public void should_build_test_terminals() throws IOException {

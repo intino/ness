@@ -1,15 +1,19 @@
 def type(root)
 	package $package+ValidPackage;
 
+	[$wordBagsImport]
+
 	$transaction
+end
+
+def trigger(wordBagsImport)
+	import $this.wordbag.*;
 end
 
 def trigger(transaction)
 	public class $name+firstUpperCase extends io.intino.alexandria.led.Transaction {
 		[$split]
 		public static final int SIZE = $size;
-
-		[$attribute+declaration...[$NL$NL]]
 
 		public $name+firstUpperCase() {
 			super(defaultByteStore());
@@ -25,11 +29,11 @@ def trigger(transaction)
 
 		@Override
 		public long id() {
-			return getAlignedLong(0);
+			return bitBuffer.getAlignedLong(0);
 		}
 
-		public long id(long id) {
-			setAlignedLong(id);
+		public $name+firstUpperCase id(long id) {
+			bitBuffer.setAlignedLong(0, id);
 			return this;
 		}
 
@@ -66,139 +70,101 @@ def trigger(asEnum)
 	}
 end
 
+def trigger(nbits)
+	NBits
+end
+
 def type(attribute & integer) trigger(getter)
 	public Integer $name+firstLowerCase() {
-		return (int) get$aligned~Integer($offset, $bits);
+		return bitBuffer.get$aligned~Integer[$bits+nbits]($offset[, $bits]);
 	}
 end
 
 def type(attribute & integer) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
-		set$aligned~Integer($offset, $bits, $name+firstLowerCase);
+		bitBuffer.set$aligned~Integer[$bits+nbits]($offset[, $bits], $name+firstLowerCase);
 		return this;
 	}
 end
 
 def type(attribute & boolean) trigger(getter)
 	public Boolean $name+firstLowerCase() {
-		int value= (int) getInteger($offset, 3)
+		byte value = (int) bitBuffer.getByteNBits($offset, 2)
 		return value == NULL ? null : value == 2;
 	}
 end
 
 def type(attribute & boolean) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
-		setInteger($offset, $bits, $name+firstLowerCase);
+		bitBuffer.setByteNBits($offset, $bits, (byte) ($name+firstLowerCase ? 1 : 2));
 		return this;
 	}
 end
 
 def type(attribute & double) trigger(getter)
 	public Integer $name+firstLowerCase() {
-		return get$aligned~Double(io.intino.alexandria.led.util.BitUtils.byteIndex($offset));
+		return bitBuffer.get$aligned~Real$size~Bits($offset);
 	}
 end
 
 def type(attribute & double) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
-		set$aligned~Double(io.intino.alexandria.led.util.BitUtils.byteIndex($offset), $name+firstLowerCase);
+		bitBuffer.set$aligned~Real$size~Bits($offset, $name+firstLowerCase);
 		return this;
 	}
 end
 
 def type(attribute & long) trigger(getter)
 	public $type $name+firstLowerCase() {
-		return get$aligned~Long($offset / Byte.SIZE);
+		return bitBuffer.get$aligned~Long[$bits+nbits][$bits+nbits]($offset[, $bits]);
 	}
 end
 
 def type(attribute & long) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
-		set$aligned~Long($offset / Byte.SIZE, $name+firstLowerCase);
+		bitBuffer.set$aligned~Long[$bits+nbits]($offset, $name+firstLowerCase[,$bits]);
 		return this;
 	}
 end
 
 def type(attribute & datetime) trigger(getter)
 	public $type $name+firstLowerCase() {
-		return java.time.Instant.ofEpochMilli(get$aligned~Long($offset / Byte.SIZE));
+		return java.time.Instant.ofEpochMilli(bitBuffer.get$aligned~Long[$bits+nbits]($offset[, $bits]));
 	}
 end
 
 def type(attribute & datetime) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
-		setA$aligned~Long($offset / Byte.SIZE, $name+firstLowerCase.toEpochMilli());
+		bitBuffer.set$aligned~Long[$bits+nbits]($offset[, $bits], $name+firstLowerCase.toEpochMilli());
 		return this;
 	}
 end
 
 def type(attribute & wordbag & resource) trigger(getter)
 	public $type+firstUpperCase $name+firstLowerCase() {
-		final int value = (int) getInteger($offset, $bits);
+		final int value = bitBuffer.getIntegerNBits($offset, $bits);
 		return value == NULL ? null : $name+firstUpperCase.values().get(value);
-	}
+	}s
 end
 
 def type(attribute & wordbag & resource) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
-		set$aligned~Integer($offset, $bits, $name+firstLowerCase == null ? NULL : $name+firstLowerCase.indexOf($name+firstLowerCase));
+		bitBuffer.setIntegerNBits($offset, $bits, $name+firstLowerCase == null ? (int) NULL : $name+firstLowerCase.indexOf($name+firstLowerCase));
 		return this;
 	}
 end
 
 def type(attribute & wordbag) trigger(getter)
 	public $type+firstUpperCase $name+firstLowerCase() {
-		final int value = (int) get$aligned~Integer($offset, $bits);
+		final int value = (int) bitBuffer.get$aligned~Integer[$bits+nbits]($offset[, $bits]);
 		return value == NULL ? null : $name+firstUpperCase.nameOf(value);
 	}
 end
 
 def type(attribute & wordbag) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type+FirstUpperCase $name+firstLowerCase) {
-		set$aligned~Integer($offset, $bits, $name+firstLowerCase == null ? NULL : $name+firstLowerCase.value());
+		bitBuffer.set$aligned~Integer[$bits+nbits]($offset[, $bits], $name+firstLowerCase == null ? (int) NULL : $name+firstLowerCase.value());
 		return this;
-	}
-end
-
-
-def type(attribute & wordbag & resource) trigger(declaration)
-	public static class $name+FirstUpperCase {
-		private static final java.util.Map<Integer, String> values;
-
-		static {
-			values = new java.io.BufferedReader(new java.io.InputStreamReader($name+firstUpperCase.class.getResourceAsStream("$resource"))).
-				lines().map(l -> l.split("\\t")).
-				collect(java.util.stream.Collectors.toMap(l -> Integer.parseInt(l$[0]), l -> l$[1]));
-		}
-
-		public static java.util.Map<Integer, String> values() {
-			return values;
-		}
-
-		public static long indexOf(String i) {
-			java.util.Map.Entry<Integer, String> e = values.entrySet().stream().filter(en -> en.getValue().equals(i)).findFirst().orElse(null);
-			return e == null ? NULL : e.getKey();
-		}
-	}
-end
-
-
-def type(attribute & wordbag) trigger(declaration)
-	public enum $name+firstUpperCase {
-		$word...[, ];
-		int value;
-
-		$name+firstUpperCase(int value) {
-			this.value = value;
-		}
-
-		public int value() {
-			return value;
-		}
-
-		public static $type+firstUpperCase nameOf(int value) {
-			return java.util.Arrays.stream(values()).filter(v -> v.value() == value).findFirst().orElse(null);
-		}
 	}
 end
 

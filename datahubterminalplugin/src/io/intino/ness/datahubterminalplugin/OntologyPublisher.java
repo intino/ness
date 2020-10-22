@@ -9,6 +9,7 @@ import io.intino.itrules.FrameBuilder;
 import io.intino.ness.datahubterminalplugin.event.EventRenderer;
 import io.intino.ness.datahubterminalplugin.event.TableRenderer;
 import io.intino.ness.datahubterminalplugin.transaction.TransactionRenderer;
+import io.intino.ness.datahubterminalplugin.transaction.WordBagRenderer;
 import io.intino.plugin.PluginLauncher;
 import org.apache.maven.shared.invoker.*;
 
@@ -33,6 +34,7 @@ class OntologyPublisher {
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
 	private final StringBuilder errorStream;
+	private final List<WordBag> wordBags;
 
 	OntologyPublisher(File root, NessGraph graph, Configuration configuration, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
@@ -40,6 +42,7 @@ class OntologyPublisher {
 		this.transactionTanks = transactionTanks(graph);
 		this.events = graph.eventList();
 		this.transactions = graph.transactionList();
+		this.wordBags = graph.wordBagList();
 		this.tables = graph.tableList();
 		this.conf = configuration;
 		this.versions = versions;
@@ -71,7 +74,8 @@ class OntologyPublisher {
 		Map<Transaction, Split> ledSplitMap = collectSplitTransactions();
 		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
 		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, basePackage).render());
-		transactions.stream().parallel().forEach(schema -> new TransactionRenderer(schema, conf, ledSplitMap.get(schema), srcDirectory, basePackage).render());
+		transactions.stream().parallel().forEach(t -> new TransactionRenderer(t, conf, ledSplitMap.get(t), srcDirectory, basePackage).render());
+		wordBags.stream().parallel().forEach(w -> new WordBagRenderer(w, conf, srcDirectory, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
 		List<Attribute> resourceWordBags = transactions.stream().map(s -> s.attributeList().stream().filter(a -> a.isWordBag() && a.asWordBag().wordBag().isFromResource()).collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
@@ -116,7 +120,6 @@ class OntologyPublisher {
 		if (event.isExtensionOf()) events.addAll(hierarchy(event.asExtensionOf().parent()));
 		return new ArrayList<>(events);
 	}
-
 
 	private void mvn(String goal) throws IOException, MavenInvocationException {
 		final File pom = createPom(root, basePackage, conf.artifact().version());
