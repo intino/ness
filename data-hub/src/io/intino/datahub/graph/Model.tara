@@ -122,11 +122,12 @@ Concept Data is abstract
 		sub Date
 			var string format = "dd/MM/yyyy"
 			var string type = "java.util.Date" is reactive private
+			var word:{Days Months Years} precision = Days
 			var integer:{bits} size = 64 bits
 		sub DateTime
 			var string format = "dd/MM/yyyy HH:mm:ss"
 			var string type = "java.time.Instant" is reactive private
-			var word:{Millis Seconds Minutes Hours Days Years} precision = Millis
+			var word:{Millis Seconds Minutes Hours} precision = Millis
 			var integer:{bits} size = 64 bits
 		sub Word
 			var string type = "java.lang.Enum" is reactive private

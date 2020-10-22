@@ -62,7 +62,7 @@ public class TransactionRenderer {
 
 	private Integer sizeOf(WordBag wordBag) {
 		try {
-			return !wordBag.isFromResource() ? log2(wordBag.wordList().size()) : log2(countLines(wordBag));
+			return !wordBag.isFromResource() ? (int) Math.ceil(log2(wordBag.wordList().size())) : (int) Math.ceil(log2(countLines(wordBag)));
 		} catch (IOException e) {
 			return 0;
 		}
@@ -75,6 +75,8 @@ public class TransactionRenderer {
 	private FrameBuilder[] processAttributes(List<Attribute> attributes, String owner) {
 		List<FrameBuilder> list = new ArrayList<>();
 		int offset = 0;
+		attributes.sort(Comparator.comparingInt(a -> a.asType().size()));
+		Collections.reverse(attributes);
 		for (Attribute attribute : attributes) {
 			FrameBuilder b = process(attribute, offset);
 			if (b != null) {
@@ -108,7 +110,17 @@ public class TransactionRenderer {
 				.add("offset", offset)
 				.add("type", isPrimitive(attribute) ? attribute.primitive() : attribute.type());
 		attribute.core$().conceptList().stream().filter(Concept::isAspect).map(Predicate::name).forEach(builder::add);
+		if (isAligned(attribute, offset)) builder.add("aligned", "Aligned");
+		if (attribute.asData().isDateTime()) {
+			builder.add("precision", "");//TODO
+		} else if (attribute.asData().isDate()) {
+			builder.add("precision", "");//TODO
+		}
 		return builder;
+	}
+
+	private boolean isAligned(Data.Type attribute, int offset) {
+		return log2(offset) % 1 == 0 && log2(attribute.size()) % 1 == 0;
 	}
 
 	private FrameBuilder process(WordBag wordBag, int offset) {
@@ -149,7 +161,7 @@ public class TransactionRenderer {
 		});
 	}
 
-	public static int log2(int N) {
-		return (int) (Math.log(N) / Math.log(2));
+	public static double log2(int N) {
+		return (Math.log(N) / Math.log(2));
 	}
 }

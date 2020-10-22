@@ -28,6 +28,11 @@ def trigger(transaction)
 			return getAlignedLong(0);
 		}
 
+		public long id(long id) {
+			setAlignedLong(id);
+			return this;
+		}
+
 		[$attribute+getter...[$NL$NL]]
 
 		[$attribute+setter...[$NL$NL]]
@@ -63,13 +68,13 @@ end
 
 def type(attribute & integer) trigger(getter)
 	public Integer $name+firstLowerCase() {
-		return (int) getInteger($offset, $bits);
+		return (int) get$aligned~Integer($offset, $bits);
 	}
 end
 
 def type(attribute & integer) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
-		setInteger($offset, $bits, $name+firstLowerCase);
+		set$aligned~Integer($offset, $bits, $name+firstLowerCase);
 		return this;
 	}
 end
@@ -77,7 +82,7 @@ end
 def type(attribute & boolean) trigger(getter)
 	public Boolean $name+firstLowerCase() {
 		int value= (int) getInteger($offset, 3)
-		return value== NULL ? null : value == 2;
+		return value == NULL ? null : value == 2;
 	}
 end
 
@@ -90,39 +95,39 @@ end
 
 def type(attribute & double) trigger(getter)
 	public Integer $name+firstLowerCase() {
-		return getAlignedDouble(io.intino.alexandria.led.util.BitUtils.byteIndex($offset));
+		return get$aligned~Double(io.intino.alexandria.led.util.BitUtils.byteIndex($offset));
 	}
 end
 
 def type(attribute & double) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
-		setAlignedDouble(io.intino.alexandria.led.util.BitUtils.byteIndex($offset), $name+firstLowerCase);
+		set$aligned~Double(io.intino.alexandria.led.util.BitUtils.byteIndex($offset), $name+firstLowerCase);
 		return this;
 	}
 end
 
 def type(attribute & long) trigger(getter)
 	public $type $name+firstLowerCase() {
-		return getAlignedLong($offset / Byte.SIZE);
+		return get$aligned~Long($offset / Byte.SIZE);
 	}
 end
 
 def type(attribute & long) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
-		setAlignedLong($offset / Byte.SIZE, $name+firstLowerCase);
+		set$aligned~Long($offset / Byte.SIZE, $name+firstLowerCase);
 		return this;
 	}
 end
 
 def type(attribute & datetime) trigger(getter)
 	public $type $name+firstLowerCase() {
-		return java.time.Instant.ofEpochMilli(getAlignedLong($offset / Byte.SIZE));
+		return java.time.Instant.ofEpochMilli(get$aligned~Long($offset / Byte.SIZE));
 	}
 end
 
 def type(attribute & datetime) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
-		setAlignedLong($offset / Byte.SIZE, $name+firstLowerCase.toEpochMilli());
+		setA$aligned~Long($offset / Byte.SIZE, $name+firstLowerCase.toEpochMilli());
 		return this;
 	}
 end
@@ -136,21 +141,21 @@ end
 
 def type(attribute & wordbag & resource) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
-		setInteger($offset, $bits, $name+firstLowerCase == null ? NULL : $name+firstLowerCase.indexOf($name+firstLowerCase));
+		set$aligned~Integer($offset, $bits, $name+firstLowerCase == null ? NULL : $name+firstLowerCase.indexOf($name+firstLowerCase));
 		return this;
 	}
 end
 
 def type(attribute & wordbag) trigger(getter)
 	public $type+firstUpperCase $name+firstLowerCase() {
-		final int value = (int) getInteger($offset, $bits);
+		final int value = (int) get$aligned~Integer($offset, $bits);
 		return value == NULL ? null : $name+firstUpperCase.nameOf(value);
 	}
 end
 
 def type(attribute & wordbag) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type+FirstUpperCase $name+firstLowerCase) {
-		setInteger($offset, $bits, $name+firstLowerCase == null ? NULL : $name+firstLowerCase.value());
+		set$aligned~Integer($offset, $bits, $name+firstLowerCase == null ? NULL : $name+firstLowerCase.value());
 		return this;
 	}
 end
