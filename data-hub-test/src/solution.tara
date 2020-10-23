@@ -54,7 +54,7 @@ WordBag Gestion as FromCode
 	Word(3) Incobrable
 	Word(4) Normal
 
-WordBag Municipio as FromResource(tsv = "Municipios.tsv")
+WordBag Municipio as FromResource(tsv = "municipios/Municipios.tsv")
 	Attribute index as Integer
 	Attribute name as Text
 	Attribute extra1 as Real

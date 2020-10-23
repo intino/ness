@@ -17,12 +17,14 @@ public class WordBagRenderer {
 	private final WordBag wordBag;
 	private final Configuration conf;
 	private final File destination;
+	private final List<File> resDirectories;
 	private final String rootPackage;
 
-	public WordBagRenderer(WordBag wordBag, Configuration conf, File destination, String rootPackage) {
+	public WordBagRenderer(WordBag wordBag, Configuration conf, File destination, List<File> resDirectories, String rootPackage) {
 		this.wordBag = wordBag;
 		this.conf = conf;
 		this.destination = destination;
+		this.resDirectories = resDirectories;
 		this.rootPackage = rootPackage;
 	}
 
@@ -60,8 +62,9 @@ public class WordBagRenderer {
 	}
 
 	private String resource(WordBag wordBag) {
-		String s = wordBag.asFromResource().tsv().toString();
-		return conf.artifact().groupId().replace(".", "/") + "/ontology/" + new File(s).getName();
+		String file = wordBag.asFromResource().tsv().getPath();
+		for (File resDirectory : resDirectories) file = file.replace(resDirectory.getAbsolutePath(), "");
+		return file;
 	}
 
 
