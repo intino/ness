@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
@@ -15,7 +14,6 @@ import static java.util.Collections.singletonList;
 public class PluginTest {
 	@Test
 	public void should_build_test_terminals() throws IOException {
-		System.out.println(Instant.now().toEpochMilli());
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
 		launcher.
 				moduleStructure(new PluginLauncher.ModuleStructure(singletonList(new File(System.getProperty("user.home") + "/workspace/ness/data-hub-test/src")), singletonList(new File(System.getProperty("user.home") + "/workspace/ness/data-hub-test/res")), new File(System.getProperty("user.home") + "/workspace/ness/out/data-hub-test/")))
