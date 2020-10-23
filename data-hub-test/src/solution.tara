@@ -36,25 +36,32 @@ Transaction  pagos
 	Attribute gestion as WordBag(wordBag = Gestion)
 	Attribute municipio as WordBag(wordBag = Municipio)
 
-WordBag Giro
-	Word(1) Federal
+WordBag Giro as FromCode
+	Word(1, label = "sss") Federal
 	Word(2) Municipal
 	Word(3) Estatal
 	Word(4) ParaEstatal
 	Word(5) Publico
-WordBag Sector
+WordBag Sector as FromCode
 	Word(1) Comercial
 	Word(2) Agricola
 	Word(3) Industrial
 	Word(4) Alumbrado
 	Word(5) Residencial
-WordBag Gestion
+WordBag Gestion as FromCode
 	Word(1) Rezago
 	Word(2) Convenio
 	Word(3) Incobrable
 	Word(4) Normal
 
-WordBag Municipio as  FromResource(tsv = "Municipios.tsv")
+WordBag Municipio as FromResource(tsv = "Municipios.tsv")
+	Attribute index as Integer
+	Attribute name as Text
+	Attribute extra1 as Real
+	Attribute extra2 as Integer
+	Attribute extra3 as LongInteger
+	Attribute extra4 as Bool
+
 
 Event Example
 	Attribute name as Text

@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalDate;
 import java.util.*;
 
 public class TransactionRenderer {
@@ -62,17 +63,6 @@ public class TransactionRenderer {
 		return transaction.attributeList().stream().map(a -> !a.isWordBag() ? a.asType().size() : sizeOf(a.asWordBag().wordBag())).reduce(Integer::sum).get();
 	}
 
-	private Integer sizeOf(WordBag wordBag) {
-		try {
-			return !wordBag.isFromResource() ? (int) Math.ceil(log2(wordBag.wordList().size() + 1)) : (int) Math.ceil(log2(countLines(wordBag) + 1));
-		} catch (IOException e) {
-			return 0;
-		}
-	}
-
-	private int countLines(WordBag wordBag) throws IOException {
-		return (int) new BufferedReader(new InputStreamReader(wordBag.asFromResource().tsv().openStream())).lines().count();
-	}
 
 	private FrameBuilder[] processAttributes(List<Attribute> attributes, String owner) {
 		List<FrameBuilder> list = new ArrayList<>();
@@ -128,7 +118,7 @@ public class TransactionRenderer {
 	private FrameBuilder process(WordBag wordBag, int offset) {
 		FrameBuilder builder = new FrameBuilder("attribute", "wordbag").
 				add("name", wordBag.name$()).
-				add("type", wordBag.isFromResource() ? String.class.getSimpleName() : wordBag.name$()).
+				add("type", wordBag.name$()).
 				add("offset", offset).
 				add("bits", sizeOf(wordBag));
 		if (wordBag.isFromResource())
@@ -148,9 +138,22 @@ public class TransactionRenderer {
 	}
 
 	private String[] words(WordBag wordBag) {
-		return wordBag.wordList().stream().
+		return wordBag.asFromCode().wordList().stream().
 				map(w -> w.name$() + "(" + w.value() + ")").toArray(String[]::new);
 	}
+
+	private Integer sizeOf(WordBag wordBag) {
+		try {
+			return !wordBag.isFromResource() ? (int) Math.ceil(log2(wordBag.asFromCode().wordList().size() + 1)) : (int) Math.ceil(log2(countLines(wordBag) + 1));
+		} catch (IOException e) {
+			return 0;
+		}
+	}
+
+	private int countLines(WordBag wordBag) throws IOException {
+		return (int) new BufferedReader(new InputStreamReader(wordBag.asFromResource().tsv().openStream())).lines().count();
+	}
+
 
 	private String transactionsPackage() {
 		return rootPackage + ".transaction";

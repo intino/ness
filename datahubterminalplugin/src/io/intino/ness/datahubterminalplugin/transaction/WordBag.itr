@@ -1,49 +1,150 @@
 def type(root)
 	package $package+ValidPackage;
 
+	import java.util.ArrayList;
+	import java.util.List;
+
 	$wordBag
 end
 
 
 def type(wordBag & resource)
-	public static class $name+FirstUpperCase {
-		private static final java.util.Map<Integer, String> values;
+	public class $name+FirstUpperCase {
+		private static final java.util.Map<Integer, Word> words;
+		private static final java.util.Map<String, Word> wordsByName;
 
 		static {
-			values = new java.io.BufferedReader(new java.io.InputStreamReader($name+firstUpperCase.class.getResourceAsStream("$resource"))).
-				lines().map(l -> l.split("\\t")).
-				collect(java.util.stream.Collectors.toMap(l -> Integer.parseInt(l$[0]), l -> l$[1]));
+			words = new java.util.HashMap<>();
+			wordsByName = new java.util.HashMap<>();
+			new java.io.BufferedReader(new java.io.InputStreamReader($name+firstUpperCase.class.getResourceAsStream("$resource"))).lines().
+				map(l -> l.split("\\t")).
+				map(l -> new Word($column+constructor...[, ])).
+				forEach(w -> {words.put(w.index, w); wordsByName.put(w.name, w);});
 		}
 
-		public static java.util.Map<Integer, String> values() {
-			return values;
+		public static List<Word> words() {
+			return new ArrayList<>(words.values());
 		}
 
-		public static int indexOf(String i) {
-			java.util.Map.Entry<Integer, String> e = values.entrySet().stream().filter(en -> en.getValue().equals(i)).findFirst().orElse(null);
-			return e == null ? 0 : e.getKey();
+		public static Word wordByIndex(int index) {
+			return words.get(index);
+		}
+
+		public static Word wordByName(String name) {
+			return wordsByName.get(name);
+		}
+
+		$column+find...[$NL$NL]
+
+		public static class Word {
+			$column+declaration...[$NL]
+
+			Word($column+parameter...[, ]) {
+				$column+assign...[$NL]
+			}
 		}
 	}
 end
 
 def type(wordBag)
-	public enum $name+firstUpperCase {
-		$word...[, ];
-		int value;
+    import java.util.function.Predicate;
+    import java.util.stream.Collectors;
 
-		$name+firstUpperCase(int value) {
-			this.value = value;
+	public class $name+firstUpperCase {
+		private static final java.util.Map<Short, Word> words;
+		private static final java.util.Map<String, Word> wordsByName;
+
+		static {
+			words = new java.util.HashMap<>();
+			wordsByName = new java.util.HashMap<>();
+			Word w;
+			$word+put...[$NL]
 		}
 
-		public int value() {
-			return value;
+		public static List<Word> words() {
+			return new ArrayList<>(words.values());
 		}
 
-		public static $type+firstUpperCase nameOf(int value) {
-			return java.util.Arrays.stream(values()).filter(v -> v.value() == value).findFirst().orElse(null);
+		public static List<Word> words(Predicate<Word> filter) {
+			return words.values().stream().filter(filter).collect(Collectors.toList());
+		}
+
+		public static Word wordByIndex(short index) {
+			return words.get((short)index);
+		}
+
+		public static Word wordByName(String name) {
+			return wordsByName.get(name);
+		}
+
+		public static Word wordByLabel(String label) {
+			return words.values().stream().filter(c -> c.label.equals(label)).findFirst().orElse(new Word((short) 0, null));
+		}
+
+		public static class Word {
+			public final short index;
+			public final String name;
+			public final String label;
+
+			Word(short index, String name) {
+				this(index, name, name);
+			}
+
+			Word(short index, String name, String label) {
+				this.index = index;
+				this.name = name;
+				this.label = label;
+			}
 		}
 	}
 end
 
+def trigger(declaration)
+	public final $type $name+firstLowerCase;
+end
 
+def trigger(parameter)
+	$type $name+firstLowerCase
+end
 
+def type(string | text) trigger(constructor)
+	l$[$index]
+end
+
+def type(integer) trigger(constructor)
+	Integer.parseInt(l$[$index])
+end
+
+def type(real) trigger(constructor)
+	Double.parseDouble(l$[$index])
+end
+
+def type(longInteger | long) trigger(constructor)
+	Long.parseLong(l$[$index])
+end
+
+def type(boolean | bool) trigger(constructor)
+	Boolean.parseBoolean(l$[$index])
+end
+
+def trigger(assign)
+	this.$name+firstLowerCase = $name+firstLowerCase;
+end
+
+def type(primitive) !attribute(index:0) !attribute(index:1) trigger(find)
+	public static Word wordBy$name+firstUpperCase($type $name+firstLowerCase) {
+		return words.values().stream().filter(c -> c.$name+firstLowerCase == $name+firstLowerCase).findFirst().orElse(null);
+	}
+end
+
+def !attribute(index:0) !attribute(index:1) trigger(find)
+	public static Word wordBy$name+firstUpperCase($type $name+firstLowerCase) {
+		return words.values().stream().filter(c -> c.$name+firstLowerCase.equals($name+firstLowerCase)).findFirst().orElse(null);
+	}
+end
+
+def trigger(put)
+	w = new Word((short) $index, "$name"[, "$label"]);
+	words.put((short) $index, w);
+	wordsByName.put("$name", w);
+end

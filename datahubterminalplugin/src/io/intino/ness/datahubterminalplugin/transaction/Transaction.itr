@@ -140,30 +140,43 @@ def type(attribute & datetime) trigger(setter)
 	}
 end
 
+def type(attribute & date) trigger(getter)
+	public $type $name+firstLowerCase() {
+		return java.time.LocalDate.ofEpochDay(Short.toUnsignedInt(bitBuffer.get$aligned~Short[$bits+nbits]($offset[, $bits])));
+	}
+end
+
+def type(attribute & date) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
+		bitBuffer.set$aligned~Short[$bits+nbits]($offset[, $bits], (short) $name+firstLowerCase.toEpochDay());
+		return this;
+	}
+end
+
 def type(attribute & wordbag & resource) trigger(getter)
-	public $type+firstUpperCase $name+firstLowerCase() {
+	public $type+firstUpperCase.Word $name+firstLowerCase() {
 		final int value = bitBuffer.getIntegerNBits($offset, $bits);
-		return value == NULL ? null : $name+firstUpperCase.values().get(value);
-	}s
+		return value == NULL ? null : $name+firstUpperCase.wordByIndex(value);
+	}
 end
 
 def type(attribute & wordbag & resource) trigger(setter)
-	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
-		bitBuffer.setIntegerNBits($offset, $bits, $name+firstLowerCase == null ? (int) NULL : $name+firstLowerCase.indexOf($name+firstLowerCase));
+	public $owner+firstUpperCase $name+firstLowerCase(String $name+firstLowerCase) {
+		bitBuffer.setIntegerNBits($offset, $bits, $name+firstLowerCase == null ? (int) NULL : $name+firstUpperCase.wordByName($name+firstLowerCase).index);
 		return this;
 	}
 end
 
 def type(attribute & wordbag) trigger(getter)
-	public $type+firstUpperCase $name+firstLowerCase() {
-		final int value = (int) bitBuffer.get$aligned~Integer[$bits+nbits]($offset[, $bits]);
-		return value == NULL ? null : $name+firstUpperCase.nameOf(value);
+	public $type+firstUpperCase.Word $name+firstLowerCase() {
+		final short value = bitBuffer.get$aligned~Short[$bits+nbits]($offset[, $bits]);
+		return value == NULL ? null : $name+firstUpperCase.wordByIndex(value);
 	}
 end
 
 def type(attribute & wordbag) trigger(setter)
-	public $owner+firstUpperCase $name+firstLowerCase($type+FirstUpperCase $name+firstLowerCase) {
-		bitBuffer.set$aligned~Integer[$bits+nbits]($offset[, $bits], $name+firstLowerCase == null ? (int) NULL : $name+firstLowerCase.value());
+	public $owner+firstUpperCase $name+firstLowerCase(String $name+firstLowerCase) {
+		bitBuffer.set$aligned~Integer[$bits+nbits]($offset[, $bits], $name+firstLowerCase == null ? (int) NULL : $name+firstUpperCase.wordByName($name+firstLowerCase).index);
 		return this;
 	}
 end

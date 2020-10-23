@@ -5,10 +5,13 @@ import io.intino.datahub.graph.*;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
+import io.intino.magritte.framework.Concept;
+import io.intino.magritte.framework.Predicate;
 import io.intino.ness.datahubterminalplugin.Commons;
 import io.intino.ness.datahubterminalplugin.Formatters;
 
 import java.io.File;
+import java.util.List;
 
 public class WordBagRenderer {
 	private final WordBag wordBag;
@@ -34,11 +37,27 @@ public class WordBagRenderer {
 		FrameBuilder builder = new FrameBuilder("wordBag").
 				add("name", wordBag.name$()).
 				add("type", wordBag.isFromResource() ? String.class.getSimpleName() : wordBag.name$());
-		if (wordBag.isFromResource()) builder.add("resource").add("resource", resource(wordBag));
-		else builder.add("word", words(wordBag));
+		if (wordBag.isFromResource()) {
+			builder.add("resource").add("resource", resource(wordBag));
+			List<WordBag.FromResource.Attribute> columnList = wordBag.asFromResource().attributeList();
+			for (int i = 0; i < columnList.size(); i++) {
+				boolean primitive = isPrimitive(columnList.get(i).asType());
+				FrameBuilder b = new FrameBuilder("column").
+						add("name", columnList.get(i).name$()).
+						add("index", i).
+						add("type", primitive ? columnList.get(i).asType().primitive() : columnList.get(i).asType().type());
+				columnList.get(i).core$().conceptList().stream().filter(Concept::isAspect).map(Predicate::name).forEach(b::add);
+				if (primitive) b.add("primitive");
+				builder.add("column", b.toFrame());
+			}
+		} else builder.add("word", words(wordBag));
 		return builder.toFrame();
 	}
 
+	private boolean isPrimitive(Data.Type attribute) {
+		Data data = attribute.asData();
+		return data.isBool() || data.isInteger() || data.isLongInteger() || data.isReal();
+	}
 
 	private String resource(WordBag wordBag) {
 		String s = wordBag.asFromResource().tsv().toString();
@@ -46,9 +65,9 @@ public class WordBagRenderer {
 	}
 
 
-	private String[] words(WordBag wordBag) {
-		return wordBag.wordList().stream().
-				map(w -> w.name$() + "(" + w.value() + ")").toArray(String[]::new);
+	private Frame[] words(WordBag wordBag) {
+		return wordBag.asFromCode().wordList().stream().
+				map(w -> new FrameBuilder("word").add("name", w.name$()).add("index", w.value()).add("labal", w.label()).toFrame()).toArray(Frame[]::new);
 	}
 
 	private Template template() {

@@ -121,9 +121,8 @@ Concept Data is abstract
 			var string type = "String" is reactive private
 		sub Date
 			var string format = "dd/MM/yyyy"
-			var string type = "java.util.Date" is reactive private
-			var word:{Days Months Years} precision = Days
-			var integer:{bits} size = 64 bits
+			var string type = "java.time.LocalDate" is reactive private
+			var integer:{bits} size = 16 bits
 		sub DateTime
 			var string format = "dd/MM/yyyy HH:mm:ss"
 			var string type = "java.time.Instant" is reactive private
@@ -145,11 +144,14 @@ Concept Data is abstract
 Concept Table
 	Concept:Named:RequiresAspect Column extends Data
 
-Concept:Named WordBag
-	has:Named WordBag
-	Concept:Named Word > var integer value
+Concept:Named:RequiresAspect WordBag
+	Aspect FromCode
+		Concept:Named Word
+			var integer:{1..*} value
+			var string label = 'self.name$()'
 	Aspect FromResource
 		var resource:{tsv} tsv
+		Concept:{2..*}:Named:RequiresAspect Attribute extends Data
 
 Concept:Named Transaction
 	has:Named:RequiresAspect:OnlyNumeric Attribute
