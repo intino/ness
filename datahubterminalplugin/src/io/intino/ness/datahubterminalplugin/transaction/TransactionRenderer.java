@@ -80,7 +80,7 @@ public class TransactionRenderer {
 	}
 
 	private FrameBuilder process(Attribute attribute, int offset) {
-		if (attribute.isWordBag()) return process(attribute.asWordBag().wordBag(), offset);
+		if (attribute.isWordBag()) return process(attribute.asWordBag().wordBag(), attribute.name$(), offset);
 		else return processAttribute(attribute.asType(), offset);
 	}
 
@@ -115,9 +115,9 @@ public class TransactionRenderer {
 		return log2(offset) % 1 == 0 && log2(attribute.size()) % 1 == 0;
 	}
 
-	private FrameBuilder process(WordBag wordBag, int offset) {
+	private FrameBuilder process(WordBag wordBag, String name, int offset) {
 		FrameBuilder builder = new FrameBuilder("attribute", "wordbag").
-				add("name", wordBag.name$()).
+				add("name", name).
 				add("type", wordBag.name$()).
 				add("offset", offset).
 				add("bits", sizeOf(wordBag));
