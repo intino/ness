@@ -33,7 +33,6 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:event:2.0.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zim:3.0.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:message:3.0.1" level="project" />
-    <orderEntry type="library" name="Intino: commons-io:commons-io:2.5" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:logger:2.1.0" level="project" />
     <orderEntry type="library" name="Intino: org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1" level="project" />
     <orderEntry type="library" name="Intino: org.fusesource.hawtbuf:hawtbuf:1.11" level="project" />
