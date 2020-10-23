@@ -67,7 +67,6 @@ public class WordBagRenderer {
 		return file;
 	}
 
-
 	private Frame[] words(WordBag wordBag) {
 		return wordBag.asFromCode().wordList().stream().
 				map(w -> new FrameBuilder("word").add("name", w.name$()).add("index", w.value()).add("labal", w.label()).toFrame()).toArray(Frame[]::new);
