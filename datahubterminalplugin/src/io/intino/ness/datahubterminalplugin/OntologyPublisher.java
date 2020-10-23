@@ -77,24 +77,30 @@ class OntologyPublisher {
 		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
 		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, basePackage).render());
 		transactions.stream().parallel().forEach(t -> new TransactionRenderer(t, conf, ledSplitMap.get(t), srcDirectory, basePackage).render());
-		wordBags.stream().parallel().forEach(w -> new WordBagRenderer(w, conf, srcDirectory,resDirectories,  basePackage).render());
+		wordBags.stream().parallel().forEach(w -> new WordBagRenderer(w, conf, srcDirectory, resDirectories, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
 		List<Attribute> resourceWordBags = transactions.stream().map(s -> s.attributeList().stream().filter(a -> a.isWordBag() && a.asWordBag().wordBag().isFromResource()).collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
 		resourceWordBags.stream().
 				map(a -> a.asWordBag().wordBag().asFromResource()).
 				forEach(w -> {
-					File source = new File(w.tsv().toString());
-					File destination = new File(resDirectory, conf.artifact().groupId().replace(".", "/") + "/ontology/" + source.getName());
+					File source = new File(w.tsv().getPath());
+					File destination = new File(resDirectory, relativeResource(source));
 					destination.getParentFile().mkdirs();
 					try {
-						Files.copy(w.tsv().openStream(), destination.toPath());
+						if (!destination.exists()) Files.copy(w.tsv().openStream(), destination.toPath());
 					} catch (IOException e) {
 						Logger.error(e);
 					}
 				});
 		tables.forEach(t -> new TableRenderer(t, srcDirectory, basePackage).render());
 		return true;
+	}
+
+	private String relativeResource(File resourceFile) {
+		String file = resourceFile.getAbsolutePath();
+		for (File resDirectory : resDirectories) file = file.replace(resDirectory.getAbsolutePath(), "");
+		return file;
 	}
 
 	private Map<Event, Split> splitEvents() {

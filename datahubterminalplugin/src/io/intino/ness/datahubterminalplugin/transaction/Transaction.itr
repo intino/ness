@@ -156,13 +156,18 @@ end
 def type(attribute & wordbag & resource) trigger(getter)
 	public $type+firstUpperCase.Word $name+firstLowerCase() {
 		final int value = bitBuffer.getIntegerNBits($offset, $bits);
-		return value == NULL ? null : $name+firstUpperCase.wordByIndex(value);
+		return value == NULL ? null : $type+firstUpperCase.wordByIndex(value);
 	}
 end
 
 def type(attribute & wordbag & resource) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase(String $name+firstLowerCase) {
-		bitBuffer.setIntegerNBits($offset, $bits, $name+firstLowerCase == null ? (int) NULL : $name+firstUpperCase.wordByName($name+firstLowerCase).index);
+		bitBuffer.setIntegerNBits($offset, $bits, $name+firstLowerCase == null ? (int) NULL : $type+firstUpperCase.wordByName($name+firstLowerCase).index);
+		return this;
+	}
+
+	public $owner+firstUpperCase $name+firstLowerCase($type+firstUpperCase.Word $name+firstLowerCase) {
+		bitBuffer.setIntegerNBits($offset, $bits, $name+firstLowerCase == null ? (int) NULL : $name+firstLowerCase.index);
 		return this;
 	}
 end
@@ -170,16 +175,18 @@ end
 def type(attribute & wordbag) trigger(getter)
 	public $type+firstUpperCase.Word $name+firstLowerCase() {
 		final short value = bitBuffer.get$aligned~Short[$bits+nbits]($offset[, $bits]);
-		return value == NULL ? null : $name+firstUpperCase.wordByIndex(value);
+		return value == NULL ? null : $type+firstUpperCase.wordByIndex(value);
 	}
 end
 
 def type(attribute & wordbag) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase(String $name+firstLowerCase) {
-		bitBuffer.set$aligned~Integer[$bits+nbits]($offset[, $bits], $name+firstLowerCase == null ? (int) NULL : $name+firstUpperCase.wordByName($name+firstLowerCase).index);
+		bitBuffer.set$aligned~Integer[$bits+nbits]($offset[, $bits], $name+firstLowerCase == null ? (int) NULL : $type+firstUpperCase.wordByName($name+firstLowerCase).index);
+		return this;
+	}
+
+	public $owner+firstUpperCase $name+firstLowerCase($type+firstUpperCase.Word $name+firstLowerCase) {
+		bitBuffer.set$aligned~Integer[$bits+nbits]($offset[, $bits], $name+firstLowerCase == null ? (int) NULL : $name+firstLowerCase.index);
 		return this;
 	}
 end
-
-
-
