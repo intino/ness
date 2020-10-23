@@ -154,7 +154,6 @@ public class TransactionRenderer {
 		return (int) new BufferedReader(new InputStreamReader(wordBag.asFromResource().tsv().openStream())).lines().count();
 	}
 
-
 	private String transactionsPackage() {
 		return rootPackage + ".transaction";
 	}
