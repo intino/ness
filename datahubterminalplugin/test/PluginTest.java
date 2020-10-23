@@ -11,7 +11,6 @@ import java.time.Instant;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
-
 @Ignore
 public class PluginTest {
 	@Test
