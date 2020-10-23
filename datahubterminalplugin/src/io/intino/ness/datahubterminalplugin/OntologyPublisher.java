@@ -28,6 +28,7 @@ class OntologyPublisher {
 	private final List<Transaction> transactions;
 	private final List<Table> tables;
 	private final Configuration conf;
+	private final List<File> resDirectories;
 	private final Map<String, String> versions;
 	private final PluginLauncher.SystemProperties systemProperties;
 	private final String basePackage;
@@ -36,7 +37,7 @@ class OntologyPublisher {
 	private final StringBuilder errorStream;
 	private final List<WordBag> wordBags;
 
-	OntologyPublisher(File root, NessGraph graph, Configuration configuration, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
+	OntologyPublisher(File root, NessGraph graph, Configuration configuration, List<File> resDirectories, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
 		this.eventTanks = eventTanks(graph);
 		this.transactionTanks = transactionTanks(graph);
@@ -45,6 +46,7 @@ class OntologyPublisher {
 		this.wordBags = graph.wordBagList();
 		this.tables = graph.tableList();
 		this.conf = configuration;
+		this.resDirectories = resDirectories;
 		this.versions = versions;
 		this.systemProperties = systemProperties;
 		this.basePackage = configuration.artifact().groupId().toLowerCase() + "." + Formatters.snakeCaseToCamelCase().format(configuration.artifact().name()).toString().toLowerCase();
@@ -75,7 +77,7 @@ class OntologyPublisher {
 		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
 		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, basePackage).render());
 		transactions.stream().parallel().forEach(t -> new TransactionRenderer(t, conf, ledSplitMap.get(t), srcDirectory, basePackage).render());
-		wordBags.stream().parallel().forEach(w -> new WordBagRenderer(w, conf, srcDirectory, basePackage).render());
+		wordBags.stream().parallel().forEach(w -> new WordBagRenderer(w, conf, srcDirectory,resDirectories,  basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
 		List<Attribute> resourceWordBags = transactions.stream().map(s -> s.attributeList().stream().filter(a -> a.isWordBag() && a.asWordBag().wordBag().isFromResource()).collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
