@@ -13,7 +13,7 @@ end
 def trigger(transaction)
 	public class $name+firstUpperCase extends io.intino.alexandria.led.Transaction {
 		[$split]
-		public static final int SIZE = $size;
+		public static final int SIZE = (int) Math.ceil($size / (float) Byte.SIZE);
 
 		public $name+firstUpperCase() {
 			super(defaultByteStore());
@@ -24,7 +24,7 @@ def trigger(transaction)
         }
 
 		public int size() {
-			return $size;
+			return SIZE;
 		}
 
 		@Override

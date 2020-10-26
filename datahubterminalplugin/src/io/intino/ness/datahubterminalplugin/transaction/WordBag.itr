@@ -18,7 +18,7 @@ def type(wordBag & resource)
 		static {
 			words = new java.util.HashMap<>();
 			wordsByName = new java.util.HashMap<>();
-			try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(Municipios.class.getResourceAsStream("/$resource")))) {
+			try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader($name+FirstUpperCase.class.getResourceAsStream("/$resource")))) {
 				reader.lines().map(l -> l.split("\\t")).
 				map(l -> new Word($column+constructor...[, ])).
 				forEach(w -> {words.put(w.index, w); wordsByName.put(w.name, w);});
