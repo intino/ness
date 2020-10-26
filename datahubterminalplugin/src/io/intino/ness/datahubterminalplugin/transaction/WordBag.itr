@@ -23,7 +23,7 @@ def type(wordBag & resource)
 				map(l -> new Word($column+constructor...[, ])).
 				forEach(w -> {words.put(w.index, w); wordsByName.put(w.name, w);});
 			} catch (java.io.IOException e) {
-				Logger.error(e);
+				io.intino.alexandria.logger.Logger.error(e);
 			}
 		}
 
