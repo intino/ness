@@ -71,7 +71,7 @@ public class WordBagRenderer {
 			Path source = new File(wordBag.asFromResource().tsv().getPath()).getCanonicalFile().toPath();
 			for (File resDirectory : resDirectories) {
 				try {
-					return resDirectory.toPath().relativize(source).toFile().getPath();
+					return resDirectory.toPath().relativize(source).toFile().getPath().replace("\\","/");
 				} catch (IllegalArgumentException ex) {
 				}
 			}
