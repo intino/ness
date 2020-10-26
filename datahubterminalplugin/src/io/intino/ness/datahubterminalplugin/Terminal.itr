@@ -71,6 +71,10 @@ def type(terminal)
                 transactionSession.put(tank, timetag, led);
 			}
 
+			public void feed(String tank, Timetag timetag, io.intino.alexandria.led.LedStream<? extends io.intino.alexandria.led.Transaction> ledStream) {
+				transactionSession.put(tank, timetag, ledStream);
+			}
+
 			public void push() {
 				eventSession.close();
 				setSession.close();
