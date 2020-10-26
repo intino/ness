@@ -114,23 +114,23 @@ def trigger(parameter)
 end
 
 def type(string | text) trigger(constructor)
-	l$[$index]
+	l.length > $index ? l$[$index] : null
 end
 
 def type(integer) trigger(constructor)
-	Integer.parseInt(l$[$index])
+	l.length > $index ? Integer.parseInt(l$[$index]) : null
 end
 
 def type(real) trigger(constructor)
-	Double.parseDouble(l$[$index])
+	l.length > $index ? Double.parseDouble(l$[$index]) : null
 end
 
 def type(longInteger | long) trigger(constructor)
-	Long.parseLong(l$[$index])
+	l.length > $index ? Long.parseLong(l$[$index]) : null
 end
 
 def type(boolean | bool) trigger(constructor)
-	Boolean.parseBoolean(l$[$index])
+	l.length > $index ? Boolean.parseBoolean(l$[$index]) : null
 end
 
 def trigger(assign)
