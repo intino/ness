@@ -1,6 +1,7 @@
 package io.intino.ness.datahubterminalplugin.transaction;
 
 import io.intino.Configuration;
+import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.graph.*;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
@@ -11,6 +12,10 @@ import io.intino.ness.datahubterminalplugin.Commons;
 import io.intino.ness.datahubterminalplugin.Formatters;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 public class WordBagRenderer {
@@ -62,9 +67,18 @@ public class WordBagRenderer {
 	}
 
 	private String resource(WordBag wordBag) {
-		String file = wordBag.asFromResource().tsv().getPath();
-		for (File resDirectory : resDirectories) file = file.replace(resDirectory.getAbsolutePath(), "");
-		return file;
+		try {
+			Path source = new File(wordBag.asFromResource().tsv().getPath()).getCanonicalFile().toPath();
+			for (File resDirectory : resDirectories) {
+				try {
+					return resDirectory.toPath().relativize(source).toFile().getPath();
+				} catch (IllegalArgumentException ex) {
+				}
+			}
+		} catch (IOException e) {
+			Logger.error(e);
+		}
+		return null;
 	}
 
 	private Frame[] words(WordBag wordBag) {
