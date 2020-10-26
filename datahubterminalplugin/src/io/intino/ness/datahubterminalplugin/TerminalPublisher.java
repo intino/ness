@@ -185,7 +185,7 @@ class TerminalPublisher {
 		builder.add("terminal", terminalDependenciesFrame(group, version));
 		if (terminal.bpm() != null) builder.add("bpm", versions.get("bpm"));
 		final File pomFile = new File(root, "pom.xml");
-		Commons.write(pomFile.toPath(), new AccessorPomTemplate().render(builder.toFrame()));
+		Commons.write(pomFile.toPath(), new PomTemplate().render(builder.toFrame()));
 		return pomFile;
 	}
 

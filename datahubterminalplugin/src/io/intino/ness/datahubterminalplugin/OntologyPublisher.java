@@ -29,6 +29,7 @@ class OntologyPublisher {
 	private final List<Table> tables;
 	private final Configuration conf;
 	private final List<File> resDirectories;
+	private final List<File> sourceDirectories;
 	private final Map<String, String> versions;
 	private final PluginLauncher.SystemProperties systemProperties;
 	private final String basePackage;
@@ -37,7 +38,7 @@ class OntologyPublisher {
 	private final StringBuilder errorStream;
 	private final List<WordBag> wordBags;
 
-	OntologyPublisher(File root, NessGraph graph, Configuration configuration, List<File> resDirectories, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
+	OntologyPublisher(File root, NessGraph graph, Configuration configuration, PluginLauncher.ModuleStructure moduleStructure, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
 		this.eventTanks = eventTanks(graph);
 		this.transactionTanks = transactionTanks(graph);
@@ -46,7 +47,8 @@ class OntologyPublisher {
 		this.wordBags = graph.wordBagList();
 		this.tables = graph.tableList();
 		this.conf = configuration;
-		this.resDirectories = resDirectories;
+		this.resDirectories = moduleStructure.resDirectories;
+		this.sourceDirectories = moduleStructure.sourceDirectories;
 		this.versions = versions;
 		this.systemProperties = systemProperties;
 		this.basePackage = configuration.artifact().groupId().toLowerCase() + "." + Formatters.snakeCaseToCamelCase().format(configuration.artifact().name()).toString().toLowerCase();
@@ -70,7 +72,7 @@ class OntologyPublisher {
 	}
 
 	private boolean createSources() {
-		File srcDirectory = new File(root, "src");
+		File srcDirectory = sourceDirectory();
 		srcDirectory.mkdirs();
 		Map<Event, Split> eventSplitMap = splitEvents();
 		Map<Transaction, Split> ledSplitMap = collectSplitTransactions();
@@ -95,6 +97,10 @@ class OntologyPublisher {
 				});
 		tables.forEach(t -> new TableRenderer(t, srcDirectory, basePackage).render());
 		return true;
+	}
+
+	private File sourceDirectory() {
+		return new File(root, "src");
 	}
 
 	private String relativeResource(File resourceFile) {
@@ -171,10 +177,14 @@ class OntologyPublisher {
 			if (isSnapshotVersion()) buildDistroFrame(builder, conf.artifact().distribution().snapshot());
 			else buildDistroFrame(builder, conf.artifact().distribution().release());
 		}
+		builder.add("sourceDirectory", sourceDirectory().getAbsolutePath());
+		for (File sourceDirectory : sourceDirectories)
+			if (sourceDirectory.getName().equals("shared"))
+				builder.add("sourceDirectory", sourceDirectory.getAbsolutePath());
 		builder.add("event", new FrameBuilder().add("version", versions.get("event")));
 		builder.add("led", new FrameBuilder().add("version", versions.get("led")));
 		final File pomFile = new File(root, "pom.xml");
-		Commons.write(pomFile.toPath(), new AccessorPomTemplate().render(builder.toFrame()));
+		Commons.write(pomFile.toPath(), new PomTemplate().render(builder.toFrame()));
 		return pomFile;
 	}
 
