@@ -27,7 +27,20 @@ Broker(port = 63000, secondaryPort = 1884, path = "./broker")
 //Event usuarioDesconectado
 
 Transaction  pagos
+	Attribute a as Id(size = 48bits)
+	Attribute z as LongInteger(size = 48bits)
+	Attribute b as Integer
+	Attribute c as DateTime
+	Attribute d as Bool
+	Attribute giro as WordBag(wordBag = Giro)
+	Attribute sector as WordBag(wordBag = Sector)
+	Attribute gestion as WordBag(wordBag = Gestion)
+	Attribute municipio as WordBag(wordBag = Municipio)
+
+Transaction ventas
+	Attribute id as Id(size = 48bits)
 	Attribute a as LongInteger(size = 48bits)
+	Attribute z as LongInteger(size = 48bits)
 	Attribute b as Integer
 	Attribute c as DateTime
 	Attribute d as Bool
