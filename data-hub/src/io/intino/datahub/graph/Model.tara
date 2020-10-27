@@ -111,6 +111,11 @@ Concept Data is abstract
 			var string type = "Long" is reactive private
 			var string primitive = "long" is reactive private
 			var integer:{bits} size = 64 bits
+		sub Id
+			var long defaultValue = 0
+			var string type = "Long" is reactive private
+			var string primitive = "long" is reactive private
+			var integer:{bits} size = 64 bits
 		sub Bool
 			var boolean defaultValue = false
 			var string type = "Boolean" is reactive private
@@ -153,5 +158,5 @@ Concept:Named:RequiresAspect WordBag
 		var resource:{tsv} tsv
 		Concept:{2..*}:Named:RequiresAspect Attribute extends Data
 
-Concept:Named Transaction
+Concept:Named:RequiresId Transaction
 	has:Named:RequiresAspect:OnlyNumeric Attribute

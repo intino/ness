@@ -27,15 +27,9 @@ def trigger(transaction)
 			return SIZE;
 		}
 
-		@Override
-		public long id() {
-			return bitBuffer.getAlignedLong(0);
-		}
-
-		public $name+firstUpperCase id(long id) {
-			bitBuffer.setAlignedLong(0, id);
-			return this;
-		}
+		[protected long id() {
+			return $id();
+		}]
 
 		[$attribute+getter...[$NL$NL]]
 
