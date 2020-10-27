@@ -27,15 +27,9 @@ def trigger(transaction)
 			return SIZE;
 		}
 
-		@Override
-		public long id() {
-			return bitBuffer.getAlignedLong(0);
-		}
-
-		public $name+firstUpperCase id(long id) {
-			bitBuffer.setAlignedLong(0, id);
-			return this;
-		}
+		[protected long id() {
+			return $id();
+		}]
 
 		[$attribute+getter...[$NL$NL]]
 
@@ -87,14 +81,14 @@ def type(attribute & integer) trigger(setter)
 	}
 end
 
-def type(attribute & boolean) trigger(getter)
+def type(attribute & bool) trigger(getter)
 	public Boolean $name+firstLowerCase() {
-		byte value = (int) bitBuffer.getByteNBits($offset, 2)
+		byte value = bitBuffer.getByteNBits($offset, 2);
 		return value == NULL ? null : value == 2;
 	}
 end
 
-def type(attribute & boolean) trigger(setter)
+def type(attribute & bool) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
 		bitBuffer.setByteNBits($offset, $bits, (byte) ($name+firstLowerCase ? 1 : 2));
 		return this;
@@ -114,15 +108,15 @@ def type(attribute & double) trigger(setter)
 	}
 end
 
-def type(attribute & long) trigger(getter)
+def type(attribute) type(id | longInteger) trigger(getter)
 	public $type $name+firstLowerCase() {
-		return bitBuffer.get$aligned~Long[$bits+nbits][$bits+nbits]($offset[, $bits]);
+		return bitBuffer.get$aligned~Long[$bits+nbits]($offset[, $bits]);
 	}
 end
 
-def type(attribute & long) trigger(setter)
+def type(attribute) type(id | longInteger) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
-		bitBuffer.set$aligned~Long[$bits+nbits]($offset, $name+firstLowerCase[,$bits]);
+		bitBuffer.set$aligned~Long[$bits+nbits]($offset[, $bits], $name+firstLowerCase);
 		return this;
 	}
 end

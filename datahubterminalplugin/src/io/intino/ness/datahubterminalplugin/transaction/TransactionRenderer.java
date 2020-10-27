@@ -7,6 +7,7 @@ import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
 import io.intino.magritte.framework.Concept;
+import io.intino.magritte.framework.Layer;
 import io.intino.magritte.framework.Predicate;
 import io.intino.ness.datahubterminalplugin.Commons;
 import io.intino.ness.datahubterminalplugin.Formatters;
@@ -51,12 +52,12 @@ public class TransactionRenderer {
 				add("name", transaction.name$()).
 				add("package", packageName).
 				add("size", sizeOf(transaction));
-
+		if (transaction.attributeList().stream().noneMatch(a -> a.name$().equals("id")))
+			builder.add("id", transaction.attributeList().stream().filter(Data::isId).map(Layer::name$).findFirst().orElse(null));
 		builder.add("attribute", processAttributes(new ArrayList<>(transaction.attributeList()), transaction.name$()));
 		if (split != null) {
 			List<Split> leafs = split.isLeaf() ? Collections.singletonList(split) : split.leafs();
 			builder.add("split", new FrameBuilder().add("split").add("enum", enums(split, leafs)));
-
 		}
 		return builder.toFrame();
 	}
@@ -85,17 +86,6 @@ public class TransactionRenderer {
 		else return processAttribute(attribute.asType(), offset);
 	}
 
-	private Frame[] enums(Split realSplit, List<Split> leafs) {
-		List<Frame> frames = new ArrayList<>();
-		if (!leafs.contains(realSplit) && !realSplit.label().isEmpty())
-			frames.add(new FrameBuilder("enum").add("value", realSplit.qn().replace(".", "-")).toFrame());
-		for (Split leaf : leafs) {
-			FrameBuilder builder = new FrameBuilder("enum").add("value", leaf.qn().replace(".", "-")).add("qn", leaf.qn());
-			frames.add(builder.toFrame());
-		}
-		return frames.toArray(new Frame[0]);
-	}
-
 	private FrameBuilder processAttribute(Data.Type attribute, int offset) {
 		FrameBuilder builder = new FrameBuilder("attribute")
 				.add("name", attribute.a$(Attribute.class).name$())
@@ -110,6 +100,17 @@ public class TransactionRenderer {
 			builder.add("precision", "");//TODO
 		}
 		return builder;
+	}
+
+	private Frame[] enums(Split realSplit, List<Split> leafs) {
+		List<Frame> frames = new ArrayList<>();
+		if (!leafs.contains(realSplit) && !realSplit.label().isEmpty())
+			frames.add(new FrameBuilder("enum").add("value", realSplit.qn().replace(".", "-")).toFrame());
+		for (Split leaf : leafs) {
+			FrameBuilder builder = new FrameBuilder("enum").add("value", leaf.qn().replace(".", "-")).add("qn", leaf.qn());
+			frames.add(builder.toFrame());
+		}
+		return frames.toArray(new Frame[0]);
 	}
 
 	private boolean isAligned(Data.Type attribute, int offset) {
@@ -135,7 +136,7 @@ public class TransactionRenderer {
 
 	private boolean isPrimitive(Data.Type attribute) {
 		Data data = attribute.asData();
-		return data.isBool() || data.isInteger() || data.isLongInteger() || data.isReal();
+		return data.isBool() || data.isInteger() || data.isLongInteger() || data.isId() || data.isReal();
 	}
 
 	private String[] words(WordBag wordBag) {

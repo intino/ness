@@ -38,6 +38,25 @@ def type(pom)
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								$sourceDirectory...[$NL]
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -137,4 +156,9 @@ def type(BSD) trigger(license)
 		<name>BSD 3-Clause License</name>
 		<url>https://opensource.org/licenses/BSD-3-Clause</url>
 	</license>
+end
+
+
+def trigger(sourceDirectory)
+	<source>$this</source>
 end
