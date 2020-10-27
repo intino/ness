@@ -15,8 +15,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class TransactionRenderer {
 	private final Transaction transaction;
@@ -62,7 +64,6 @@ public class TransactionRenderer {
 	private int sizeOf(Transaction transaction) {
 		return transaction.attributeList().stream().map(a -> !a.isWordBag() ? a.asType().size() : sizeOf(a.asWordBag().wordBag())).reduce(Integer::sum).get();
 	}
-
 
 	private FrameBuilder[] processAttributes(List<Attribute> attributes, String owner) {
 		List<FrameBuilder> list = new ArrayList<>();
