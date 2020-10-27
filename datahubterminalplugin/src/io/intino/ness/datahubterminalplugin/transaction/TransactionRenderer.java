@@ -51,7 +51,7 @@ public class TransactionRenderer {
 		FrameBuilder builder = new FrameBuilder("transaction").
 				add("name", transaction.name$()).
 				add("package", packageName).
-				add("size", sizeOf(transaction));
+				add("size", (int) Math.ceil(sizeOf(transaction) / (float) Byte.SIZE));
 		if (transaction.attributeList().stream().noneMatch(a -> a.name$().equals("id")))
 			builder.add("id", transaction.attributeList().stream().filter(Data::isId).map(Layer::name$).findFirst().orElse(null));
 		builder.add("attribute", processAttributes(new ArrayList<>(transaction.attributeList()), transaction.name$()));

@@ -13,7 +13,7 @@ end
 def trigger(transaction)
 	public class $name+firstUpperCase extends io.intino.alexandria.led.Transaction {
 		[$split]
-		public static final int SIZE = (int) Math.ceil($size / (float) Byte.SIZE);
+		public static final int SIZE = $size;
 
 		public $name+firstUpperCase() {
 			super(defaultByteStore());
@@ -36,7 +36,7 @@ def trigger(transaction)
 		[$attribute+setter...[$NL$NL]]
 
 		private static io.intino.alexandria.led.buffers.store.ByteStore defaultByteStore() {
-			java.nio.ByteBuffer buffer = io.intino.alexandria.led.util.MemoryUtils.allocBuffer($size);
+			java.nio.ByteBuffer buffer = io.intino.alexandria.led.util.MemoryUtils.allocBuffer((long) SIZE);
 			io.intino.alexandria.led.util.MemoryAddress address = io.intino.alexandria.led.util.MemoryAddress.of(buffer);
 			return new io.intino.alexandria.led.buffers.store.ByteBufferStore(buffer, address, 0, buffer.capacity());
 		}
