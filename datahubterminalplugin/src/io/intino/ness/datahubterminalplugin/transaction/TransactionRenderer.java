@@ -114,7 +114,7 @@ public class TransactionRenderer {
 	}
 
 	private boolean isAligned(Data.Type attribute, int offset) {
-		return log2(offset) % 1 == 0 && log2(attribute.size()) % 1 == 0;
+		return (offset == 0 || log2(offset) % 1 == 0) && attribute.maxSize() == attribute.size();
 	}
 
 	private FrameBuilder process(WordBag wordBag, String name, int offset) {

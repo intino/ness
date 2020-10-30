@@ -96,6 +96,7 @@ Concept Data is abstract
 		var string type is reactive private
 		var string primitive = 'self.type()' is reactive private
 		var integer:{bits} size = 0 bits
+		var integer:{bits} maxSize = 64 bits is private
 		sub Real
 			var double defaultValue = 0
 			var string type = "Double" is reactive private
@@ -106,11 +107,13 @@ Concept Data is abstract
 			var string type = "Integer" is reactive private
 			var string primitive = "int" is reactive private
 			var integer:{bits} size = 32 bits
+			var integer:{bits} maxSize = 32 bits is final private
 		sub LongInteger
 			var long defaultValue = 0
 			var string type = "Long" is reactive private
 			var string primitive = "long" is reactive private
 			var integer:{bits} size = 64 bits
+			var integer:{bits} maxSize = 64 bits is final private
 		sub Id
 			var long defaultValue = 0
 			var string type = "Long" is reactive private
@@ -120,7 +123,7 @@ Concept Data is abstract
 			var boolean defaultValue = false
 			var string type = "Boolean" is reactive private
 			var string primitive = "boolean" is reactive private
-			var integer:{bits} size = 1 bits
+			var integer:{bits} size = 2 bits is final
 		sub Text
 			var string defaultValue = empty
 			var string type = "String" is reactive private
