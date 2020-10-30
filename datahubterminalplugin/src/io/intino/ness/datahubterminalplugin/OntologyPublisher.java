@@ -82,9 +82,7 @@ class OntologyPublisher {
 		wordBags.stream().parallel().forEach(w -> new WordBagRenderer(w, conf, srcDirectory, resDirectories, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
-		List<Attribute> resourceWordBags = transactions.stream().map(s -> s.attributeList().stream().filter(a -> a.isWordBag() && a.asWordBag().wordBag().isFromResource()).collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
-		resourceWordBags.stream().
-				map(a -> a.asWordBag().wordBag().asFromResource()).
+		wordBags.stream().filter(WordBag::isFromResource).map(WordBag::asFromResource).
 				forEach(w -> {
 					File source = new File(w.tsv().getPath());
 					File destination = new File(resDirectory, relativeResource(source));
