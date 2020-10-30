@@ -94,6 +94,7 @@ public class TransactionRenderer {
 		attribute.core$().conceptList().stream().filter(Concept::isAspect).map(Predicate::name).forEach(builder::add);
 		if (isAligned(attribute, offset)) builder.add("aligned", "Aligned");
 		else builder.add("bits", attribute.size());
+		builder.add("size", attribute.size());
 		if (attribute.asData().isDateTime()) {
 			builder.add("precision", "");//TODO
 		} else if (attribute.asData().isDate()) {

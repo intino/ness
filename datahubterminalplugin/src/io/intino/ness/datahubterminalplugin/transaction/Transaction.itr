@@ -95,13 +95,13 @@ def type(attribute & bool) trigger(setter)
 	}
 end
 
-def type(attribute & double) trigger(getter)
-	public Integer $name+firstLowerCase() {
+def type(attribute & real) trigger(getter)
+	public Double $name+firstLowerCase() {
 		return bitBuffer.get$aligned~Real$size~Bits($offset);
 	}
 end
 
-def type(attribute & double) trigger(setter)
+def type(attribute & real) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
 		bitBuffer.set$aligned~Real$size~Bits($offset, $name+firstLowerCase);
 		return this;
