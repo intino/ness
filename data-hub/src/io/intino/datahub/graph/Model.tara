@@ -101,7 +101,7 @@ Concept Data is abstract
 			var double defaultValue = 0
 			var string type = "Double" is reactive private
 			var string primitive = "double" is reactive private
-			var integer:{bits} size = 64 bits is final
+			var integer:{bits} size = 64 bits
 		sub Integer
 			var integer defaultValue = 0
 			var string type = "Integer" is reactive private
