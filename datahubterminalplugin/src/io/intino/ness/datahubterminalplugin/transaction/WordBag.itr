@@ -14,12 +14,12 @@ def type(wordBag & resource)
 	public class $name+FirstUpperCase {
 		private static final java.util.Map<Integer, Word> words;
 		private static final java.util.Map<String, Word> wordsByName;
-
+		public static final Word NA = new Word($column+defaultValue...[, ]);
 		static {
 			words = new java.util.HashMap<>();
 			wordsByName = new java.util.HashMap<>();
 			try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader($name+FirstUpperCase.class.getResourceAsStream("/$resource")))) {
-				reader.lines().map(l -> l.split("\\t")).
+				reader.lines().map(l -> l.split("\\t", -1)).
 				map(l -> new Word($column+constructor...[, ])).
 				forEach(w -> {words.put(w.index, w); wordsByName.put(w.name, w);});
 			} catch (java.io.IOException e) {
@@ -36,11 +36,11 @@ def type(wordBag & resource)
 		}
 
 		public static Word wordByIndex(int index) {
-			return words.get(index);
+			return words.getOrDefault(index, NA);
 		}
 
 		public static Word wordByName(String name) {
-			return wordsByName.get(name);
+			return wordsByName.getOrDefault(name, NA);
 		}
 
 		$column+find...[$NL$NL]
@@ -59,7 +59,7 @@ def type(wordBag)
 	public class $name+firstUpperCase {
 		private static final java.util.Map<Short, Word> words;
 		private static final java.util.Map<String, Word> wordsByName;
-
+		public static final Word NA = new Word((short) 0, "NA");
 		static {
 			words = new java.util.HashMap<>();
 			wordsByName = new java.util.HashMap<>();
@@ -76,15 +76,15 @@ def type(wordBag)
 		}
 
 		public static Word wordByIndex(short index) {
-			return words.get((short)index);
+			return words.getOrDefault((short) index, NA);
 		}
 
 		public static Word wordByName(String name) {
-			return wordsByName.get(name);
+			return wordsByName.getOrDefault(name, NA);
 		}
 
 		public static Word wordByLabel(String label) {
-			return words.values().stream().filter(c -> c.label.equals(label)).findFirst().orElse(new Word((short) 0, null));
+			return words.values().stream().filter(c -> c.label.equals(label)).findFirst().orElse(NA);
 		}
 
 		public static class Word {
@@ -114,23 +114,44 @@ def trigger(parameter)
 end
 
 def type(string | text) trigger(constructor)
-	l.length > $index ? l$[$index] : null
+	l.length > $index ? l$[$index] : "NA"
 end
 
 def type(integer) trigger(constructor)
-	l.length > $index ? Integer.parseInt(l$[$index]) : null
+	l.length > $index ? Integer.parseInt(l$[$index]) : -1
 end
 
 def type(real) trigger(constructor)
-	l.length > $index ? Double.parseDouble(l$[$index]) : null
+	l.length > $index ? Double.parseDouble(l$[$index]) : Double.NaN
 end
 
 def type(longInteger | long) trigger(constructor)
-	l.length > $index ? Long.parseLong(l$[$index]) : null
+	l.length > $index ? Long.parseLong(l$[$index]) : -1L
 end
 
 def type(boolean | bool) trigger(constructor)
-	l.length > $index ? Boolean.parseBoolean(l$[$index]) : null
+	l.length > $index ? Boolean.parseBoolean(l$[$index]) : false
+end
+
+
+def type(string | text) trigger(defaultValue)
+	"NA"
+end
+
+def type(integer) trigger(defaultValue)
+	0
+end
+
+def type(real) trigger(defaultValue)
+	0.
+end
+
+def type(longInteger | long) trigger(defaultValue)
+	0L
+end
+
+def type(boolean | bool) trigger(defaultValue)
+	false
 end
 
 def trigger(assign)
@@ -139,13 +160,13 @@ end
 
 def type(primitive) !attribute(index:0) !attribute(index:1) trigger(find)
 	public static Word wordBy$name+firstUpperCase($type $name+firstLowerCase) {
-		return words.values().stream().filter(c -> c.$name+firstLowerCase == $name+firstLowerCase).findFirst().orElse(null);
+		return words.values().stream().filter(c -> c.$name+firstLowerCase == $name+firstLowerCase).findFirst().orElse(NA);
 	}
 end
 
 def !attribute(index:0) !attribute(index:1) trigger(find)
 	public static Word wordBy$name+firstUpperCase($type $name+firstLowerCase) {
-		return words.values().stream().filter(c -> c.$name+firstLowerCase.equals($name+firstLowerCase)).findFirst().orElse(null);
+		return words.values().stream().filter(c -> c.$name+firstLowerCase.equals($name+firstLowerCase)).findFirst().orElse(NA);
 	}
 end
 
