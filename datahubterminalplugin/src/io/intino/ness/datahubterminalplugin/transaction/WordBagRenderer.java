@@ -82,7 +82,7 @@ public class WordBagRenderer {
 
 	private Frame[] words(WordBag wordBag) {
 		return wordBag.asFromCode().wordList().stream().
-				map(w -> new FrameBuilder("word").add("name", w.name$()).add("index", w.value()).add("labal", w.label()).toFrame()).toArray(Frame[]::new);
+				map(w -> new FrameBuilder("word").add("name", w.name$()).add("index", w.value()).add("label", w.label()).toFrame()).toArray(Frame[]::new);
 	}
 
 	private Template template() {
