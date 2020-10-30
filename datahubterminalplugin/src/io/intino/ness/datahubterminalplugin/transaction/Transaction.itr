@@ -95,9 +95,22 @@ def type(attribute & bool) trigger(setter)
 	}
 end
 
+def type(attribute & real) attribute(size:32)trigger(getter)
+	public Float $name+firstLowerCase() {
+		return bitBuffer.get$aligned~Real$size~Bits($offset);
+	}
+end
+
 def type(attribute & real) trigger(getter)
 	public Double $name+firstLowerCase() {
 		return bitBuffer.get$aligned~Real$size~Bits($offset);
+	}
+end
+
+def type(attribute & real) attribute(size:32) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase(Float $name+firstLowerCase) {
+		bitBuffer.set$aligned~Real$size~Bits($offset, $name+firstLowerCase);
+		return this;
 	}
 end
 
