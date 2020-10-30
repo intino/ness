@@ -2,7 +2,8 @@ package io.intino.ness.datahubterminalplugin.transaction;
 
 import io.intino.Configuration;
 import io.intino.alexandria.logger.Logger;
-import io.intino.datahub.graph.*;
+import io.intino.datahub.graph.Data;
+import io.intino.datahub.graph.WordBag;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
@@ -13,9 +14,7 @@ import io.intino.ness.datahubterminalplugin.Formatters;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 public class WordBagRenderer {
