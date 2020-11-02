@@ -163,7 +163,7 @@ end
 def type(attribute & wordbag & resource) trigger(getter)
 	public $type+firstUpperCase.Word $name+firstLowerCase() {
 		final int value = bitBuffer.getIntegerNBits($offset, $bits);
-		return value == NULL ? null : $type+firstUpperCase.wordByIndex(value);
+		return $type+firstUpperCase.wordByIndex(value);
 	}
 end
 
@@ -182,7 +182,7 @@ end
 def type(attribute & wordbag) trigger(getter)
 	public $type+firstUpperCase.Word $name+firstLowerCase() {
 		final short value = bitBuffer.get$aligned~Short[$bits+nbits]($offset[, $bits]);
-		return value == NULL ? null : $type+firstUpperCase.wordByIndex(value);
+		return $type+firstUpperCase.wordByIndex(value);
 	}
 end
 
