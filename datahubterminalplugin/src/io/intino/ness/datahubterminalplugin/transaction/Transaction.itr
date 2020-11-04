@@ -27,6 +27,12 @@ def trigger(transaction)
 			return SIZE;
 		}
 
+		public java.util.Map<String, Object> values() {
+			java.util.Map<String, Object> values = new java.util.LinkedHashMap<>();
+			[$attribute+map...[$NL]]
+			return values;
+		}
+
 		[protected long id() {
 			return $id();
 		}]
@@ -66,6 +72,10 @@ end
 
 def trigger(nbits)
 	NBits
+end
+
+def trigger(map)
+	values.put("$name", $name+firstLowerCase());
 end
 
 def type(attribute & integer) trigger(getter)
