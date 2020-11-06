@@ -43,7 +43,7 @@ class OntologyPublisher {
 		this.eventTanks = eventTanks(graph);
 		this.transactionTanks = transactionTanks(graph);
 		this.events = graph.eventList();
-		this.transactions = graph.transactionList();
+		this.transactions = graph.core$().find(Transaction.class);
 		this.wordBags = graph.wordBagList();
 		this.tables = graph.tableList();
 		this.conf = configuration;
@@ -75,10 +75,10 @@ class OntologyPublisher {
 		File srcDirectory = sourceDirectory();
 		srcDirectory.mkdirs();
 		Map<Event, Split> eventSplitMap = splitEvents();
-		Map<Transaction, Split> ledSplitMap = collectSplitTransactions();
+		Map<Transaction, Split> transactionsSplitMap = collectSplitTransactions();
 		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
 		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, basePackage).render());
-		transactions.stream().parallel().forEach(t -> new TransactionRenderer(t, conf, ledSplitMap.get(t), srcDirectory, basePackage).render());
+		transactions.stream().parallel().forEach(t -> new TransactionRenderer(t, conf, transactionsSplitMap.get(t), srcDirectory, basePackage).render());
 		wordBags.stream().parallel().forEach(w -> new WordBagRenderer(w, conf, srcDirectory, resDirectories, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
