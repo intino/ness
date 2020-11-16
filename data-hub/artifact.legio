@@ -1,26 +1,26 @@
 dsl Legio
 
-Artifact("io.intino", "5.2.0") data-hub as Product
+Artifact("io.intino", "5.3.0") data-hub as Product
 	Model("Proteo", "3.0.1", "4.1.1") > outLanguage = "Ness"
-	Box("Konos", "8.8.30")
+	Box("Konos", "8.8.33")
 	Imports
 		Compile("io.intino.alexandria", "core-framework", "2.0.4")
 		Compile("io.intino.alexandria", "jmx", "1.0.2")
-		Compile("io.intino.alexandria", "ui-framework", "4.3.23")
-		Compile("io.intino.alexandria", "exceptions", "1.0.0")
-		Compile("io.intino.alexandria", "jms", "1.2.0")
-		Compile("io.intino.alexandria", "zip", "1.0.0")
-		Compile("io.intino.alexandria", "ingestion", "3.1.6")
-		Compile("io.intino.alexandria", "sealing", "3.2.5")
-		Compile("io.intino.alexandria", "scheduler-framework", "1.1.0") > Exclude("org.slf4j", "slf4j-api")
+		Compile("io.intino.alexandria", "ui-framework", "4.5.18")
+		Compile("io.intino.alexandria", "exceptions", "2.0.0")
+		Compile("io.intino.alexandria", "jms", "1.2.4")
+		Compile("io.intino.alexandria", "zip", "1.0.4")
+		Compile("io.intino.alexandria", "ingestion", "3.1.9")
+		Compile("io.intino.alexandria", "sealing", "3.2.9")
+		Compile("io.intino.alexandria", "scheduler-framework", "1.1.1") > Exclude("org.slf4j", "slf4j-api")
 
 		Compile("org.apache.activemq", "activemq-broker", "5.16.0")
 		Compile("org.apache.activemq", "activemq-mqtt", "5.16.0")
 		Compile("org.apache.activemq", "activemq-kahadb-store", "5.16.0")
 		Compile("org.apache.activemq", "activemq-jaas", "5.16.0")
 		Compile("org.apache.activemq", "activemq-runtime-config", "5.16.0")
-		Compile("commons-io", "commons-io", "2.6")
-		Test("junit", "junit", "4.13")
+		Compile("commons-io", "commons-io", "2.8.0")
+		Test("junit", "junit", "4.13.1")
 		Web("io.intino", "datalake-inspector", "1.0.0")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
