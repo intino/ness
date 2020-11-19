@@ -171,8 +171,8 @@ def !attribute(index:0) !attribute(index:1) trigger(find)
 end
 
 def trigger(put)
-	words.put((short) $index, $name);
-	wordsByName.put("$name", $name);
+	words.put((short) $index, $name+FirstUpperCase);
+	wordsByName.put("$name", $name+FirstUpperCase);
 end
 
 
