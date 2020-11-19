@@ -60,10 +60,10 @@ def type(wordBag)
 		private static final java.util.Map<Short, Word> words;
 		private static final java.util.Map<String, Word> wordsByName;
 		public static final Word NA = new Word((short) 0, "NA");
+		$word+field...[$NL]
 		static {
 			words = new java.util.HashMap<>();
 			wordsByName = new java.util.HashMap<>();
-			Word w;
 			$word+put...[$NL]
 		}
 
@@ -76,7 +76,7 @@ def type(wordBag)
 		}
 
 		public static Word wordByIndex(short index) {
-			return words.getOrDefault((short) index, NA);
+			return words.getOrDefault(index, NA);
 		}
 
 		public static Word wordByName(String name) {
@@ -171,7 +171,11 @@ def !attribute(index:0) !attribute(index:1) trigger(find)
 end
 
 def trigger(put)
-	w = new Word((short) $index, "$name"[, "$label"]);
-	words.put((short) $index, w);
-	wordsByName.put("$name", w);
+	words.put((short) $index, $name);
+	wordsByName.put("$name", $name);
+end
+
+
+def trigger(field)
+	public static final Word $name+FirstUpperCase = new Word((short) $index, "$name"[, "$label"]);
 end
