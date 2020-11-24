@@ -44,16 +44,15 @@ class TerminalPublisher {
 	}
 
 	boolean publish() {
-		if (!createSources()) return false;
-		try {
-			logger.println("Publishing " + terminal.name$() + "...");
-			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
-			logger.println("Terminal " + terminal.name$() + " published!");
-		} catch (Exception e) {
-			logger.println(e.getMessage());
-			return false;
-		}
-		return true;
+		return createSources();
+//		try {
+//			logger.println("Publishing " + terminal.name$() + "...");
+//			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
+//			logger.println("Terminal " + terminal.name$() + " published!");
+//		} catch (Exception e) {
+//			logger.println(e.getMessage());
+//			return false;
+//		}
 	}
 
 	private boolean createSources() {

@@ -1,11 +1,8 @@
 package io.intino.ness.datahubterminalplugin;
 
-import io.intino.datahub.graph.Datalake;
+import io.intino.datahub.graph.*;
 import io.intino.datahub.graph.Datalake.Split;
 import io.intino.datahub.graph.Datalake.Tank;
-import io.intino.datahub.graph.Event;
-import io.intino.datahub.graph.Namespace;
-import io.intino.datahub.graph.Terminal;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
@@ -15,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static io.intino.ness.datahubterminalplugin.Formatters.firstUpperCase;
 
 class TerminalRenderer {
 	private final Terminal terminal;
@@ -42,13 +41,21 @@ class TerminalRenderer {
 				add("namespace", eventNamespace(e)).
 				add("namespaceQn", eventNamespace(e).replace(".", "")).
 				add("name", e.name$()).
-				add("type", eventPackage(e) + "." + Formatters.firstUpperCase(e.name$())).toFrame()).toArray(Frame[]::new));
+				add("type", eventPackage(e) + "." + firstUpperCase(e.name$())).toFrame()).toArray(Frame[]::new));
+		terminal.core$().graph().find(Transaction.class).forEach(t -> renderTransaction(builder, t));
 		if (terminal.publish() != null)
 			terminal.publish().tanks().forEach(tank -> builder.add("publish", frameOf(tank)));
 		if (terminal.subscribe() != null)
 			terminal.subscribe().tanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
 		if (terminal.bpm() != null) addBpm(builder);
 		return builder.toFrame();
+	}
+
+	private void renderTransaction(FrameBuilder builder, Transaction t) {
+		String transactionsPackage = rootPackage + ".transaction";
+		if (t.core$().owner().is(Namespace.class))
+			transactionsPackage = transactionsPackage + "." + t.core$().ownerAs(Namespace.class).qn();
+		builder.add("transaction", new FrameBuilder("transaction").add("qn", transactionsPackage + "." + firstUpperCase(t.name$())).add("name", t.name$()));
 	}
 
 	private void addBpm(FrameBuilder builder) {
@@ -85,11 +92,11 @@ class TerminalRenderer {
 		String eventPackage = eventPackage(eventTank.event());
 		String namespace = eventNamespace(eventTank.event());
 		return new FrameBuilder(contextsOf(eventTank).size() > 1 ? "multisplit" : "default").
-				add("type", eventPackage + "." + Formatters.firstUpperCase(eventTank.event().name$())).
+				add("type", eventPackage + "." + firstUpperCase(eventTank.event().name$())).
 				add("typeName", eventTank.event().name$()).
 				add("namespace", namespace).
 				add("namespaceQn", namespace.replace(".", "")).
-				add("typeWithNamespace", (namespace.isEmpty() ? "" : namespace + ".") + Formatters.firstUpperCase(eventTank.event().name$())).
+				add("typeWithNamespace", (namespace.isEmpty() ? "" : namespace + ".") + firstUpperCase(eventTank.event().name$())).
 				add("channel", eventTank.qn()).toFrame();
 	}
 

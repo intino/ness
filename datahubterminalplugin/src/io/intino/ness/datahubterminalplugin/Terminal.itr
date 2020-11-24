@@ -67,13 +67,7 @@ def type(terminal)
                 setSession.put(tank, timetag, set, ids);
 			}
 
-			public void feed(String tank, Timetag timetag, io.intino.alexandria.led.Led<? extends io.intino.alexandria.led.Transaction> led) {
-                transactionSession.put(tank, timetag, led);
-			}
-
-			public void feed(String tank, Timetag timetag, io.intino.alexandria.led.LedStream<? extends io.intino.alexandria.led.Transaction> ledStream) {
-				transactionSession.put(tank, timetag, ledStream);
-			}
+			$transaction+feed...[$NL]
 
 			public void push() {
 				eventSession.close();
@@ -231,6 +225,16 @@ def trigger(subscribe)
 
 	public void unsubscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived) {
 		connector.detachListeners(consumers.get(onEventReceived));
+	}
+end
+
+def trigger(feed)
+	public void feed$name+FirstUpperCase(String tank, Timetag timetag, java.util.function.Consumer<$qn> transaction) {
+		transactionSession.put(tank, timetag, $qn.class, transaction);
+	}
+
+	public void feed$name+FirstUpperCase(String tank, Timetag timetag, java.util.stream.Stream<Consumer<$qn>> stream) {
+		transactionSession.put(tank, timetag, $qn.class, stream);
 	}
 end
 
