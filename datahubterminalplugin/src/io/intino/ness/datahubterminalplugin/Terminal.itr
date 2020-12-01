@@ -71,6 +71,10 @@ def type(terminal)
 
 			$transaction+feed...[$NL$NL]
 
+			public void flush() {
+				transactionSession.close();
+			}
+
 			public void push() {
 				eventSession.close();
 				setSession.close();
