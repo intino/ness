@@ -9,7 +9,7 @@ import io.intino.itrules.FrameBuilder;
 import io.intino.ness.datahubterminalplugin.event.EventRenderer;
 import io.intino.ness.datahubterminalplugin.event.TableRenderer;
 import io.intino.ness.datahubterminalplugin.transaction.TransactionRenderer;
-import io.intino.ness.datahubterminalplugin.transaction.WordBagRenderer;
+import io.intino.ness.datahubterminalplugin.transaction.DimensionRenderer;
 import io.intino.plugin.PluginLauncher;
 import org.apache.maven.shared.invoker.*;
 
@@ -36,7 +36,7 @@ class OntologyPublisher {
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
 	private final StringBuilder errorStream;
-	private final List<WordBag> wordBags;
+	private final List<Dimension> dimensions;
 
 	OntologyPublisher(File root, NessGraph graph, Configuration configuration, PluginLauncher.ModuleStructure moduleStructure, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
@@ -44,7 +44,7 @@ class OntologyPublisher {
 		this.transactionTanks = transactionTanks(graph);
 		this.events = graph.eventList();
 		this.transactions = graph.core$().find(Transaction.class);
-		this.wordBags = graph.wordBagList();
+		this.dimensions = graph.dimensionList();
 		this.tables = graph.tableList();
 		this.conf = configuration;
 		this.resDirectories = moduleStructure.resDirectories;
@@ -79,10 +79,10 @@ class OntologyPublisher {
 		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
 		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, basePackage).render());
 		transactions.stream().parallel().forEach(t -> new TransactionRenderer(t, conf, transactionsSplitMap.get(t), srcDirectory, basePackage).render());
-		wordBags.stream().parallel().forEach(w -> new WordBagRenderer(w, conf, srcDirectory, resDirectories, basePackage).render());
+		dimensions.stream().parallel().forEach(w -> new DimensionRenderer(w, conf, srcDirectory, resDirectories, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
-		wordBags.stream().filter(WordBag::isFromResource).map(WordBag::asFromResource).
+		dimensions.stream().filter(Dimension::isInResource).map(Dimension::asInResource).
 				forEach(w -> {
 					File source = new File(w.tsv().getPath());
 					File destination = new File(resDirectory, relativeResource(source));

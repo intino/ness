@@ -43,7 +43,7 @@ public class TransactionRenderer {
 		final File packageFolder = new File(destination, transactionsPackage.replace(".", File.separator));
 		final Frame frame = createTransactionFrame(transaction, transactionsPackage);
 		FrameBuilder builder = new FrameBuilder("root").add("root", transactionsPackage).add("package", transactionsPackage).add("transaction", frame);
-		if (!transaction.graph().wordBagList().isEmpty()) builder.add("wordbagsImport", this.rootPackage);
+		if (!transaction.graph().dimensionList().isEmpty()) builder.add("wordbagsImport", this.rootPackage);
 		Commons.writeFrame(packageFolder, transaction.name$(), template().render(builder));
 	}
 
@@ -63,7 +63,7 @@ public class TransactionRenderer {
 	}
 
 	private int sizeOf(Transaction transaction) {
-		return transaction.attributeList().stream().map(a -> !a.isWordBag() ? a.asType().size() : sizeOf(a.asWordBag().wordBag())).reduce(Integer::sum).get();
+		return transaction.attributeList().stream().map(a -> !a.isDimension() ? a.asType().size() : sizeOf(a.asDimension().wordBag())).reduce(Integer::sum).get();
 	}
 
 	private FrameBuilder[] processAttributes(List<Attribute> attributes, String owner) {
@@ -74,7 +74,7 @@ public class TransactionRenderer {
 		for (Attribute attribute : attributes) {
 			FrameBuilder b = process(attribute, offset);
 			if (b != null) {
-				offset += attribute.isWordBag() ? sizeOf(attribute.asWordBag().wordBag()) : attribute.asType().size();
+				offset += attribute.isDimension() ? sizeOf(attribute.asDimension().wordBag()) : attribute.asType().size();
 				list.add(b.add("owner", owner));
 			}
 		}
@@ -82,7 +82,7 @@ public class TransactionRenderer {
 	}
 
 	private FrameBuilder process(Attribute attribute, int offset) {
-		if (attribute.isWordBag()) return process(attribute.asWordBag().wordBag(), attribute.name$(), offset);
+		if (attribute.isDimension()) return process(attribute.asDimension().wordBag(), attribute.name$(), offset);
 		else return processAttribute(attribute.asType(), offset);
 	}
 
@@ -118,20 +118,20 @@ public class TransactionRenderer {
 		return (offset == 0 || log2(offset) % 1 == 0) && attribute.maxSize() == attribute.size();
 	}
 
-	private FrameBuilder process(WordBag wordBag, String name, int offset) {
+	private FrameBuilder process(Dimension wordBag, String name, int offset) {
 		FrameBuilder builder = new FrameBuilder("attribute", "wordbag").
 				add("name", name).
 				add("type", wordBag.name$()).
 				add("offset", offset).
 				add("bits", sizeOf(wordBag));
-		if (wordBag.isFromResource())
+		if (wordBag.isInResource())
 			builder.add("resource").add("resource", resource(wordBag));
 		else builder.add("word", words(wordBag));
 		return builder;
 	}
 
-	private String resource(WordBag wordBag) {
-		String s = wordBag.asFromResource().tsv().toString();
+	private String resource(Dimension wordBag) {
+		String s = wordBag.asInResource().tsv().toString();
 		return conf.artifact().groupId().replace(".", "/") + "/ontology/" + new File(s).getName();
 	}
 
@@ -140,21 +140,21 @@ public class TransactionRenderer {
 		return data.isBool() || data.isInteger() || data.isLongInteger() || data.isId() || data.isReal();
 	}
 
-	private String[] words(WordBag wordBag) {
-		return wordBag.asFromCode().wordList().stream().
+	private String[] words(Dimension wordBag) {
+		return wordBag.asInline().categoryList().stream().
 				map(w -> w.name$() + "(" + w.value() + ")").toArray(String[]::new);
 	}
 
-	private Integer sizeOf(WordBag wordBag) {
+	private Integer sizeOf(Dimension wordBag) {
 		try {
-			return !wordBag.isFromResource() ? (int) Math.ceil(log2(wordBag.asFromCode().wordList().size() + 1)) : (int) Math.ceil(log2(countLines(wordBag) + 1));
+			return !wordBag.isInResource() ? (int) Math.ceil(log2(wordBag.asInline().categoryList().size() + 1)) : (int) Math.ceil(log2(countLines(wordBag) + 1));
 		} catch (IOException e) {
 			return 0;
 		}
 	}
 
-	private int countLines(WordBag wordBag) throws IOException {
-		return (int) new BufferedReader(new InputStreamReader(wordBag.asFromResource().tsv().openStream())).lines().count();
+	private int countLines(Dimension wordBag) throws IOException {
+		return (int) new BufferedReader(new InputStreamReader(wordBag.asInResource().tsv().openStream())).lines().count();
 	}
 
 	private String transactionsPackage() {

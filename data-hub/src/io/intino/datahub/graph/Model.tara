@@ -141,9 +141,9 @@ Concept Data is abstract
 			var string type = "java.lang.Enum" is reactive private
 			var string[] values;
 			var integer:{bits} size = 16 bits
-		sub WordBag
+		sub Dimension
 			var string type = "java.lang.Enum" is reactive private
-			var Model.WordBag wordBag;
+			var Model.Dimension wordBag;
 			var integer:{bits} size = 8 bits
 		sub Table
 			var integer:{bits} size = 0 bits
@@ -153,12 +153,12 @@ Concept Data is abstract
 Concept Table
 	Concept:Named:RequiresAspect Column extends Data
 
-Concept:Named:RequiresAspect WordBag
-	Aspect FromCode
-		Concept:Named Word
+Concept:Named:RequiresAspect Dimension
+	Aspect Inline
+		Concept:Named Category
 			var integer:{1..*} value
 			var string label = 'self.name$()'
-	Aspect FromResource
+	Aspect InResource
 		var resource:{tsv} tsv
 		Concept:{2..*}:Named:RequiresAspect Attribute extends Data
 
