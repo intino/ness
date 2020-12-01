@@ -1,13 +1,13 @@
 def type(root)
 	package $package+ValidPackage;
 
-	[$wordBagsImport]
+	[$dimensionsImport]
 
 	$transaction
 end
 
-def trigger(wordBagsImport)
-	import $this.wordbag.*;
+def trigger(dimensionsImport)
+	import $this.dimension.*;
 end
 
 def trigger(transaction)
@@ -170,39 +170,39 @@ def type(attribute & date) trigger(setter)
 	}
 end
 
-def type(attribute & wordbag & resource) trigger(getter)
-	public $type+firstUpperCase.Word $name+firstLowerCase() {
+def type(attribute & dimension & resource) trigger(getter)
+	public $type+firstUpperCase.Category $name+firstLowerCase() {
 		final int value = bitBuffer.getIntegerNBits($offset, $bits);
-		return $type+firstUpperCase.wordByIndex(value);
+		return $type+firstUpperCase.categoryByIndex(value);
 	}
 end
 
-def type(attribute & wordbag & resource) trigger(setter)
+def type(attribute & dimension & resource) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase(String $name+firstLowerCase) {
-		bitBuffer.setIntegerNBits($offset, $bits, $name+firstLowerCase == null ? (int) NULL : $type+firstUpperCase.wordByName($name+firstLowerCase).index);
+		bitBuffer.setIntegerNBits($offset, $bits, $name+firstLowerCase == null ? (int) NULL : $type+firstUpperCase.categoryByName($name+firstLowerCase).index);
 		return this;
 	}
 
-	public $owner+firstUpperCase $name+firstLowerCase($type+firstUpperCase.Word $name+firstLowerCase) {
+	public $owner+firstUpperCase $name+firstLowerCase($type+firstUpperCase.Category $name+firstLowerCase) {
 		bitBuffer.setIntegerNBits($offset, $bits, $name+firstLowerCase == null ? (int) NULL : $name+firstLowerCase.index);
 		return this;
 	}
 end
 
-def type(attribute & wordbag) trigger(getter)
-	public $type+firstUpperCase.Word $name+firstLowerCase() {
+def type(attribute & dimension) trigger(getter)
+	public $type+firstUpperCase.Category $name+firstLowerCase() {
 		final short value = bitBuffer.get$aligned~Short[$bits+nbits]($offset[, $bits]);
-		return $type+firstUpperCase.wordByIndex(value);
+		return $type+firstUpperCase.categoryByIndex(value);
 	}
 end
 
-def type(attribute & wordbag) trigger(setter)
+def type(attribute & dimension) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase(String $name+firstLowerCase) {
-		bitBuffer.set$aligned~Integer[$bits+nbits]($offset[, $bits], $name+firstLowerCase == null ? (int) NULL : $type+firstUpperCase.wordByName($name+firstLowerCase).index);
+		bitBuffer.set$aligned~Integer[$bits+nbits]($offset[, $bits], $name+firstLowerCase == null ? (int) NULL : $type+firstUpperCase.categoryByName($name+firstLowerCase).index);
 		return this;
 	}
 
-	public $owner+firstUpperCase $name+firstLowerCase($type+firstUpperCase.Word $name+firstLowerCase) {
+	public $owner+firstUpperCase $name+firstLowerCase($type+firstUpperCase.Category $name+firstLowerCase) {
 		bitBuffer.set$aligned~Integer[$bits+nbits]($offset[, $bits], $name+firstLowerCase == null ? (int) NULL : $name+firstLowerCase.index);
 		return this;
 	}

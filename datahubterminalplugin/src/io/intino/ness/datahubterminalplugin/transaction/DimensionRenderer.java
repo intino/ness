@@ -36,16 +36,16 @@ public class DimensionRenderer {
 		String rootPackage = wordBagPackage();
 		final File packageFolder = new File(destination, rootPackage.replace(".", File.separator));
 		final Frame frame = process(dimension);
-		Commons.writeFrame(packageFolder, dimension.name$(), template().render(new FrameBuilder("root").add("root", rootPackage).add("package", rootPackage).add("wordBag", frame)));
+		Commons.writeFrame(packageFolder, dimension.name$(), template().render(new FrameBuilder("root").add("root", rootPackage).add("package", rootPackage).add("dimension", frame)));
 	}
 
-	private Frame process(Dimension wordBag) {
-		FrameBuilder builder = new FrameBuilder("wordBag").
-				add("name", wordBag.name$()).
-				add("type", wordBag.isInResource() ? String.class.getSimpleName() : wordBag.name$());
-		if (wordBag.isInResource()) {
-			builder.add("resource").add("resource", resource(wordBag));
-			List<Dimension.InResource.Attribute> columnList = wordBag.asInResource().attributeList();
+	private Frame process(Dimension dimension) {
+		FrameBuilder builder = new FrameBuilder("dimension").
+				add("name", dimension.name$()).
+				add("type", dimension.isInResource() ? String.class.getSimpleName() : dimension.name$());
+		if (dimension.isInResource()) {
+			builder.add("resource").add("resource", resource(dimension));
+			List<Dimension.InResource.Attribute> columnList = dimension.asInResource().attributeList();
 			for (int i = 0; i < columnList.size(); i++) {
 				boolean primitive = isPrimitive(columnList.get(i).asType());
 				FrameBuilder b = new FrameBuilder("column").
@@ -56,7 +56,7 @@ public class DimensionRenderer {
 				if (primitive) b.add("primitive");
 				builder.add("column", b.toFrame());
 			}
-		} else builder.add("word", words(wordBag));
+		} else builder.add("category", categories(dimension));
 		return builder.toFrame();
 	}
 
@@ -65,9 +65,9 @@ public class DimensionRenderer {
 		return data.isBool() || data.isInteger() || data.isLongInteger() || data.isReal();
 	}
 
-	private String resource(Dimension wordBag) {
+	private String resource(Dimension dimension) {
 		try {
-			Path source = new File(wordBag.asInResource().tsv().getPath()).getCanonicalFile().toPath();
+			Path source = new File(dimension.asInResource().tsv().getPath()).getCanonicalFile().toPath();
 			for (File resDirectory : resDirectories) {
 				try {
 					return resDirectory.toPath().relativize(source).toFile().getPath().replace("\\","/");
@@ -80,9 +80,9 @@ public class DimensionRenderer {
 		return null;
 	}
 
-	private Frame[] words(Dimension wordBag) {
-		return wordBag.asInline().categoryList().stream().
-				map(w -> new FrameBuilder("word").add("name", w.name$()).add("index", w.value()).add("label", w.label()).toFrame()).toArray(Frame[]::new);
+	private Frame[] categories(Dimension dimension) {
+		return dimension.asInline().categoryList().stream().
+				map(w -> new FrameBuilder("category").add("name", w.name$()).add("index", w.value()).add("label", w.label()).toFrame()).toArray(Frame[]::new);
 	}
 
 	private Template template() {
@@ -90,6 +90,6 @@ public class DimensionRenderer {
 	}
 
 	private String wordBagPackage() {
-		return rootPackage + ".wordbag";
+		return rootPackage + ".dimension";
 	}
 }

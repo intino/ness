@@ -32,10 +32,10 @@ Transaction  pagos
 	Attribute b as Integer
 	Attribute c as DateTime
 	Attribute d as Bool
-	Attribute giro as WordBag(wordBag = Giro)
-	Attribute sector as WordBag(wordBag = Sector)
-	Attribute gestion as WordBag(wordBag = Gestion)
-	Attribute municipio as WordBag(wordBag = Municipio)
+	Attribute giro as Dimension(dimension = Giro)
+	Attribute sector as Dimension(dimension = Sector)
+	Attribute gestion as Dimension(dimension = Gestion)
+	Attribute municipio as Dimension(dimension = Municipio)
 
 Transaction ventas
 	Attribute id as Id(size = 48bits)
@@ -44,30 +44,30 @@ Transaction ventas
 	Attribute b as Integer
 	Attribute c as DateTime
 	Attribute d as Bool
-	Attribute giro as WordBag(wordBag = Giro)
-	Attribute sector as WordBag(wordBag = Sector)
-	Attribute gestion as WordBag(wordBag = Gestion)
-	Attribute municipio as WordBag(wordBag = Municipio)
+	Attribute giro as Dimension(dimension = Giro)
+	Attribute sector as Dimension(dimension = Sector)
+	Attribute gestion as Dimension(dimension = Gestion)
+	Attribute municipio as Dimension(dimension = Municipio)
 
-WordBag Giro as FromCode
-	Word(1, label = "sss") Federal
-	Word(2) Municipal
-	Word(3) Estatal
-	Word(4) ParaEstatal
-	Word(5) Publico
-WordBag Sector as FromCode
-	Word(1) Comercial
-	Word(2) Agricola
-	Word(3) Industrial
-	Word(4) Alumbrado
-	Word(5) Residencial
-WordBag Gestion as FromCode
-	Word(1) Rezago
-	Word(2) Convenio
-	Word(3) Incobrable
-	Word(4) Normal
+Dimension Giro as Inline
+	Category(1, label = "sss") Federal
+	Category(2) Municipal
+	Category(3) Estatal
+	Category(4) ParaEstatal
+	Category(5) Publico
+Dimension Sector as Inline
+	Category(1) Comercial
+	Category(2) Agricola
+	Category(3) Industrial
+	Category(4) Alumbrado
+	Category(5) Residencial
+Dimension Gestion as Inline
+	Category(1) Rezago
+	Category(2) Convenio
+	Category(3) Incobrable
+	Category(4) Normal
 
-WordBag Municipio as FromResource(tsv = "municipios/Municipios.tsv")
+Dimension Municipio as InResource(tsv = "municipios/Municipios.tsv")
 	Attribute index as Integer
 	Attribute name as Text
 	Attribute extra1 as Real

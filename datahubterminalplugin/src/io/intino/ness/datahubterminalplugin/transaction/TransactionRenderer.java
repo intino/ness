@@ -43,7 +43,7 @@ public class TransactionRenderer {
 		final File packageFolder = new File(destination, transactionsPackage.replace(".", File.separator));
 		final Frame frame = createTransactionFrame(transaction, transactionsPackage);
 		FrameBuilder builder = new FrameBuilder("root").add("root", transactionsPackage).add("package", transactionsPackage).add("transaction", frame);
-		if (!transaction.graph().dimensionList().isEmpty()) builder.add("wordbagsImport", this.rootPackage);
+		if (!transaction.graph().dimensionList().isEmpty()) builder.add("dimensionsImport", this.rootPackage);
 		Commons.writeFrame(packageFolder, transaction.name$(), template().render(builder));
 	}
 
@@ -63,7 +63,7 @@ public class TransactionRenderer {
 	}
 
 	private int sizeOf(Transaction transaction) {
-		return transaction.attributeList().stream().map(a -> !a.isDimension() ? a.asType().size() : sizeOf(a.asDimension().wordBag())).reduce(Integer::sum).get();
+		return transaction.attributeList().stream().map(a -> !a.isDimension() ? a.asType().size() : sizeOf(a.asDimension().dimension())).reduce(Integer::sum).get();
 	}
 
 	private FrameBuilder[] processAttributes(List<Attribute> attributes, String owner) {
@@ -74,7 +74,7 @@ public class TransactionRenderer {
 		for (Attribute attribute : attributes) {
 			FrameBuilder b = process(attribute, offset);
 			if (b != null) {
-				offset += attribute.isDimension() ? sizeOf(attribute.asDimension().wordBag()) : attribute.asType().size();
+				offset += attribute.isDimension() ? sizeOf(attribute.asDimension().dimension()) : attribute.asType().size();
 				list.add(b.add("owner", owner));
 			}
 		}
@@ -82,7 +82,7 @@ public class TransactionRenderer {
 	}
 
 	private FrameBuilder process(Attribute attribute, int offset) {
-		if (attribute.isDimension()) return process(attribute.asDimension().wordBag(), attribute.name$(), offset);
+		if (attribute.isDimension()) return process(attribute.asDimension().dimension(), attribute.name$(), offset);
 		else return processAttribute(attribute.asType(), offset);
 	}
 
@@ -118,20 +118,20 @@ public class TransactionRenderer {
 		return (offset == 0 || log2(offset) % 1 == 0) && attribute.maxSize() == attribute.size();
 	}
 
-	private FrameBuilder process(Dimension wordBag, String name, int offset) {
-		FrameBuilder builder = new FrameBuilder("attribute", "wordbag").
+	private FrameBuilder process(Dimension dimension, String name, int offset) {
+		FrameBuilder builder = new FrameBuilder("attribute", "dimension").
 				add("name", name).
-				add("type", wordBag.name$()).
+				add("type", dimension.name$()).
 				add("offset", offset).
-				add("bits", sizeOf(wordBag));
-		if (wordBag.isInResource())
-			builder.add("resource").add("resource", resource(wordBag));
-		else builder.add("word", words(wordBag));
+				add("bits", sizeOf(dimension));
+		if (dimension.isInResource())
+			builder.add("resource").add("resource", resource(dimension));
+		else builder.add("category", categories(dimension));
 		return builder;
 	}
 
-	private String resource(Dimension wordBag) {
-		String s = wordBag.asInResource().tsv().toString();
+	private String resource(Dimension dimension) {
+		String s = dimension.asInResource().tsv().toString();
 		return conf.artifact().groupId().replace(".", "/") + "/ontology/" + new File(s).getName();
 	}
 
@@ -140,21 +140,21 @@ public class TransactionRenderer {
 		return data.isBool() || data.isInteger() || data.isLongInteger() || data.isId() || data.isReal();
 	}
 
-	private String[] words(Dimension wordBag) {
+	private String[] categories(Dimension wordBag) {
 		return wordBag.asInline().categoryList().stream().
 				map(w -> w.name$() + "(" + w.value() + ")").toArray(String[]::new);
 	}
 
-	private Integer sizeOf(Dimension wordBag) {
+	private Integer sizeOf(Dimension dimension) {
 		try {
-			return !wordBag.isInResource() ? (int) Math.ceil(log2(wordBag.asInline().categoryList().size() + 1)) : (int) Math.ceil(log2(countLines(wordBag) + 1));
+			return !dimension.isInResource() ? (int) Math.ceil(log2(dimension.asInline().categoryList().size() + 1)) : (int) Math.ceil(log2(countLines(dimension) + 1));
 		} catch (IOException e) {
 			return 0;
 		}
 	}
 
-	private int countLines(Dimension wordBag) throws IOException {
-		return (int) new BufferedReader(new InputStreamReader(wordBag.asInResource().tsv().openStream())).lines().count();
+	private int countLines(Dimension dimension) throws IOException {
+		return (int) new BufferedReader(new InputStreamReader(dimension.asInResource().tsv().openStream())).lines().count();
 	}
 
 	private String transactionsPackage() {

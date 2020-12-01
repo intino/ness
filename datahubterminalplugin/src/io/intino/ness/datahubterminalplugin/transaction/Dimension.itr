@@ -6,100 +6,108 @@ def type(root)
 	import java.util.function.Predicate;
 	import java.util.stream.Collectors;
 
-	$wordBag
+	$dimension
 end
 
 
-def type(wordBag & resource)
+def type(dimension & resource)
 	public class $name+FirstUpperCase {
-		private static final java.util.Map<Integer, Word> words;
-		private static final java.util.Map<String, Word> wordsByName;
-		public static final Word NA = new Word($column+defaultValue...[, ]);
+		private static final java.util.Map<Integer, Category> categories;
+		private static final java.util.Map<String, Category> categoriesByName;
+		public static final Category NA = new Category($column+defaultValue...[, ]);
 		static {
-			words = new java.util.HashMap<>();
-			wordsByName = new java.util.HashMap<>();
+			categories = new java.util.HashMap<>();
+			categoriesByName = new java.util.HashMap<>();
 			try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader($name+FirstUpperCase.class.getResourceAsStream("/$resource")))) {
 				reader.lines().map(l -> l.split("\\t", -1)).
-				map(l -> new Word($column+constructor...[, ])).
-				forEach(w -> {words.put(w.index, w); wordsByName.put(w.name, w);});
+				map(l -> new Category($column+constructor...[, ])).
+				forEach(w -> {categories.put(w.index, w); categoriesByName.put(w.name, w);});
 			} catch (java.io.IOException e) {
 				io.intino.alexandria.logger.Logger.error(e);
 			}
 		}
 
-		public static List<Word> words() {
-			return new ArrayList<>(words.values());
+		public static List<Category> categories() {
+			return new ArrayList<>(categories.values());
 		}
 
-		public static List<Word> words(Predicate<Word> filter) {
-			return words.values().stream().filter(filter).collect(Collectors.toList());
+		public static List<Category> categories(Predicate<Category> filter) {
+			return categories.values().stream().filter(filter).collect(Collectors.toList());
 		}
 
-		public static Word wordByIndex(int index) {
-			return words.getOrDefault(index, NA);
+		public static Category categoryByIndex(int index) {
+			return categories.getOrDefault(index, NA);
 		}
 
-		public static Word wordByName(String name) {
-			return wordsByName.getOrDefault(name, NA);
+		public static Category categoryByName(String name) {
+			return categoriesByName.getOrDefault(name, NA);
 		}
 
 		$column+find...[$NL$NL]
 
-		public static class Word {
+		public static class Category {
 			$column+declaration...[$NL]
 
-			Word($column+parameter...[, ]) {
+			Category($column+parameter...[, ]) {
 				$column+assign...[$NL]
+			}
+
+			public boolean equals(Category category) {
+				return this.index == category.index;
 			}
 		}
 	}
 end
 
-def type(wordBag)
+def type(dimension)
 	public class $name+firstUpperCase {
-		private static final java.util.Map<Short, Word> words;
-		private static final java.util.Map<String, Word> wordsByName;
-		public static final Word NA = new Word((short) 0, "NA");
-		$word+field...[$NL]
+		private static final java.util.Map<Short, Category> categories;
+		private static final java.util.Map<String, Category> categoriesByName;
+		public static final Category NA = new Category((short) 0, "NA");
+		$category+field...[$NL]
 		static {
-			words = new java.util.HashMap<>();
-			wordsByName = new java.util.HashMap<>();
-			$word+put...[$NL]
+			categories = new java.util.HashMap<>();
+			categoriesByName = new java.util.HashMap<>();
+			$category+put...[$NL]
 		}
 
-		public static List<Word> words() {
-			return new ArrayList<>(words.values());
+		public static List<Category> categories() {
+			return new ArrayList<>(categories.values());
 		}
 
-		public static List<Word> words(Predicate<Word> filter) {
-			return words.values().stream().filter(filter).collect(Collectors.toList());
+		public static List<Category> categories(Predicate<Category> filter) {
+			return categories.values().stream().filter(filter).collect(Collectors.toList());
 		}
 
-		public static Word wordByIndex(short index) {
-			return words.getOrDefault(index, NA);
+		public static Category categoryByIndex(short index) {
+			return categories.getOrDefault(index, NA);
 		}
 
-		public static Word wordByName(String name) {
-			return wordsByName.getOrDefault(name, NA);
+		public static Category categoryByName(String name) {
+			return categoriesByName.getOrDefault(name, NA);
 		}
 
-		public static Word wordByLabel(String label) {
-			return words.values().stream().filter(c -> c.label.equals(label)).findFirst().orElse(NA);
+		public static Category categoryByLabel(String label) {
+			return categories.values().stream().filter(c -> c.label.equals(label)).findFirst().orElse(NA);
 		}
 
-		public static class Word {
+		public static class Category {
 			public final short index;
 			public final String name;
 			public final String label;
 
-			Word(short index, String name) {
+			Category(short index, String name) {
 				this(index, name, name);
 			}
 
-			Word(short index, String name, String label) {
+			Category(short index, String name, String label) {
 				this.index = index;
 				this.name = name;
 				this.label = label;
+			}
+
+			public boolean equals(Category category) {
+				return this.index == category.index;
 			}
 		}
 	}
@@ -159,23 +167,23 @@ def trigger(assign)
 end
 
 def type(primitive) !attribute(index:0) !attribute(index:1) trigger(find)
-	public static Word wordBy$name+firstUpperCase($type $name+firstLowerCase) {
-		return words.values().stream().filter(c -> c.$name+firstLowerCase == $name+firstLowerCase).findFirst().orElse(NA);
+	public static Category categoryBy$name+firstUpperCase($type $name+firstLowerCase) {
+		return categories.values().stream().filter(c -> c.$name+firstLowerCase == $name+firstLowerCase).findFirst().orElse(NA);
 	}
 end
 
 def !attribute(index:0) !attribute(index:1) trigger(find)
-	public static Word wordBy$name+firstUpperCase($type $name+firstLowerCase) {
-		return words.values().stream().filter(c -> c.$name+firstLowerCase.equals($name+firstLowerCase)).findFirst().orElse(NA);
+	public static Category categoryBy$name+firstUpperCase($type $name+firstLowerCase) {
+		return categories.values().stream().filter(c -> c.$name+firstLowerCase.equals($name+firstLowerCase)).findFirst().orElse(NA);
 	}
 end
 
 def trigger(put)
-	words.put((short) $index, $name+FirstUpperCase);
-	wordsByName.put("$name", $name+FirstUpperCase);
+	categories.put((short) $index, $name+FirstUpperCase);
+	categoriesByName.put("$name", $name+FirstUpperCase);
 end
 
 
 def trigger(field)
-	public static final Word $name+FirstUpperCase = new Word((short) $index, "$name"[, "$label"]);
+	public static final Category $name+FirstUpperCase = new Category((short) $index, "$name"[, "$label"]);
 end
