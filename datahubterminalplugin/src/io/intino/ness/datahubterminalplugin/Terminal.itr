@@ -71,8 +71,6 @@ def type(terminal)
 
 			$transaction+feed...[$NL$NL]
 
-			pub
-
 			public void push() {
 				eventSession.close();
 				setSession.close();
