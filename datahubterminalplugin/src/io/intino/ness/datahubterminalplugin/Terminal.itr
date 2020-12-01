@@ -5,6 +5,8 @@ def type(terminal)
 	import io.intino.alexandria.Scale;
 	import io.intino.alexandria.event.Event;
 	import $package+validPackage.events.*;
+
+	import java.util.function.Consumer;
 	import java.util.List;
 
 	public class $name+snakeCaseToCamelCase+firstUpperCase {
@@ -67,11 +69,14 @@ def type(terminal)
                 setSession.put(tank, timetag, set, ids);
 			}
 
-			$transaction+feed...[$NL]
+			$transaction+feed...[$NL$NL]
+
+			pub
 
 			public void push() {
 				eventSession.close();
 				setSession.close();
+				transactionSession.close();
 				sessionHandler.pushTo(this.dataHubStage);
 				//connector.sendEvent("service.ness.push", new Event(new io.intino.alexandria.message.Message("Push").set("stage", temporalStage.getName())));
 			}
@@ -229,11 +234,11 @@ def trigger(subscribe)
 end
 
 def trigger(feed)
-	public void feed$name+FirstUpperCase(String tank, Timetag timetag, java.util.function.Consumer<$qn> transaction) {
+	public void feed$namespace+FirstUpperCase$name+FirstUpperCase(String tank, Timetag timetag, java.util.function.Consumer<$qn> transaction) {
 		transactionSession.put(tank, timetag, $qn.class, transaction);
 	}
 
-	public void feed$name+FirstUpperCase(String tank, Timetag timetag, java.util.stream.Stream<Consumer<$qn>> stream) {
+	public void feed$namespace+FirstUpperCase$name+FirstUpperCase(String tank, Timetag timetag, java.util.stream.Stream<Consumer<$qn>> stream) {
 		transactionSession.put(tank, timetag, $qn.class, stream);
 	}
 end

@@ -47,7 +47,7 @@ class TerminalPublisher {
 		if (!createSources()) return false;
 		try {
 			logger.println("Publishing " + terminal.name$() + "...");
-			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "package" : "deploy");
+			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
 			logger.println("Terminal " + terminal.name$() + " published!");
 			return true;
 		} catch (Exception e) {

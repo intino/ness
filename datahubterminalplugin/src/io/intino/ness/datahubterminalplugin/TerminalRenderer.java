@@ -55,7 +55,10 @@ class TerminalRenderer {
 		String transactionsPackage = rootPackage + ".transaction";
 		if (t.core$().owner().is(Namespace.class))
 			transactionsPackage = transactionsPackage + "." + t.core$().ownerAs(Namespace.class).qn();
-		builder.add("transaction", new FrameBuilder("transaction").add("qn", transactionsPackage + "." + firstUpperCase(t.name$())).add("name", t.name$()));
+		builder.add("transaction", new FrameBuilder("transaction").
+				add("qn", transactionsPackage + "." + firstUpperCase(t.name$())).
+				add("namespace", t.core$().owner().is(Namespace.class) ? t.core$().ownerAs(Namespace.class).qn().replace(".", "") : "").
+				add("name", t.name$()));
 	}
 
 	private void addBpm(FrameBuilder builder) {
