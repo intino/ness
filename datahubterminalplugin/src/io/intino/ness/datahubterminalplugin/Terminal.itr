@@ -61,8 +61,8 @@ def type(terminal)
 				this.temporalStage = temporalStage;
 				this.sessionHandler = new io.intino.alexandria.ingestion.SessionHandler(temporalStage);
 				this.eventSession = sessionHandler.createEventSession();
-				this.setSession = sessionHandler.createSetSession();
-				this.transactionSession = sessionHandler.createTransactionSession();
+				this.setSession = sessionHandler.createSetSession(config.setsBufferSise);
+				this.transactionSession = sessionHandler.createTransactionSession(config.transactionsBufferSise);
 			}
 
 			public void feed(Event event, String split) {
@@ -107,19 +107,21 @@ def type(terminal)
             	$publish+tankOf...[$NL]
             	return event.toMessage().type();
             }
+		}
 
-            public static class Config {
-            	private int transactionsBufferSise = 1_000_000;
-				private int setsBufferSise = 1_000_000;
+		public static class Config {
+			private int transactionsBufferSise = 1_000_000;
+			private int setsBufferSise = 1_000_000;
 
-            	public Config transactionsBufferSise(int transactionsBufferSise) {
-            		this.transactionsBufferSise = transactionsBufferSise;
-            	}
+			public Config transactionsBufferSise(int transactionsBufferSise) {
+				this.transactionsBufferSise = transactionsBufferSise;
+				return this;
+			}
 
-				public Config setsBufferSise(int setsBufferSise) {
-					this.setsBufferSise = setsBufferSise;
-				}
-            }
+			public Config setsBufferSise(int setsBufferSise) {
+				this.setsBufferSise = setsBufferSise;
+				return this;
+			}
 		}
 
 		public interface SessionEventConsumer extends java.util.function.Consumer<io.intino.alexandria.event.SessionEvent> {
