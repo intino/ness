@@ -53,6 +53,10 @@ def type(terminal)
 			private final io.intino.alexandria.ingestion.TransactionSession transactionSession;
 
 			public BatchSession(java.io.File dataHubStage, java.io.File temporalStage) {
+				this(dataHubStage, temporalStage, new Config());
+			}
+
+			public BatchSession(java.io.File dataHubStage, java.io.File temporalStage, Config config) {
 				this.dataHubStage = dataHubStage;
 				this.temporalStage = temporalStage;
 				this.sessionHandler = new io.intino.alexandria.ingestion.SessionHandler(temporalStage);
@@ -102,6 +106,19 @@ def type(terminal)
             private String tankOf(Event event, String split) {
             	$publish+tankOf...[$NL]
             	return event.toMessage().type();
+            }
+
+            public static class Config {
+            	private int transactionsBufferSise = 1_000_000;
+				private int setsBufferSise = 1_000_000;
+
+            	public Config transactionsBufferSise(int transactionsBufferSise) {
+            		this.transactionsBufferSise = transactionsBufferSise;
+            	}
+
+				public Config setsBufferSise(int setsBufferSise) {
+					this.setsBufferSise = setsBufferSise;
+				}
             }
 		}
 
