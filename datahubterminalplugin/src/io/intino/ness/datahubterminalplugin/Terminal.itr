@@ -27,7 +27,12 @@ def type(terminal)
 		[$datalake
 		public BatchSession batch(java.io.File dataHubStageDirectory, java.io.File temporalStageDirectory) {
 			return new BatchSession(dataHubStageDirectory, temporalStageDirectory);
-		}]
+		}
+
+		public BatchSession batch(java.io.File dataHubStageDirectory, java.io.File temporalStageDirectory, Config config) {
+			return new BatchSession(dataHubStageDirectory, temporalStageDirectory, config);
+		}
+		]
 
 		public void publish(io.intino.alexandria.event.SessionEvent session) {
 			connector.sendEvent(io.intino.alexandria.event.SessionEvent.PATH, session);
