@@ -100,7 +100,7 @@ end
 
 def type(attribute & bool) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
-		bitBuffer.setByteNBits($offset, $bits, (byte) ($name+firstLowerCase ? 1 : 2));
+		bitBuffer.setByteNBits($offset, $bits, (byte) ($name+firstLowerCase ? 2 : 1));
 		return this;
 	}
 end
