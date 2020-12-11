@@ -1,0 +1,199 @@
+def type(root)
+	package $package+ValidPackage;
+
+	import io.intino.alexandria.logger.Logger;
+
+	import java.sql.*;
+
+	$lookup
+end
+
+def type(lookup & dynamic)
+	public class $name+FirstUpperCase {
+		private static final Entry NA = new Entry($column+defaultValue...[, ]);
+		private final java.sql.Connection connection;
+		private PreparedStatement insertStatement;
+		private PreparedStatement queryStatement;
+		$column+updateStatementField...[$NL]
+		private int count = 0;
+
+
+		public $name+FirstUpperCase(java.sql.Connection connection) {
+			this.connection = connection;
+			try {
+				this.connection.createStatement().execute("CREATE TABLE IF NOT EXISTS $name+FirstUpperCase ($column+createSql...[, ]);");
+				this.insertStatement = connection.prepareStatement("INSERT INTO contratos ($column+name...[, ]) VALUES($column+question...[, ]);");
+				this.queryStatement = connection.prepareStatement("SELECT * FROM contratos WHERE $column+idName=?;");
+				$column+updateStatement...[$NL]
+			} catch (SQLException throwables) {
+				Logger.error(throwables);
+			}
+		}
+
+		public Entry entry($column+idType $column+idName) {
+			try {
+				ResultSet rs = query($column+idName);
+				boolean next = rs.next();
+				if (!next) return NA;
+				$column+getResult...[$NL]
+				return new Entry($column+name...[, ]);
+			} catch (SQLException e) {
+				Logger.error(e);
+				return NA;
+			}
+		}
+
+		public void put($column+parameter...[, ]) {
+			try {
+				insertStatement.clearParameters();
+				$column+insert...[$NL]
+				insertStatement.addBatch();
+				executeStatement();
+			} catch (SQLException e) {
+				Logger.error(e);
+			}
+		}
+
+
+		[$column+setter...[$NL$NL]]
+
+		public void commit() {
+			try {
+				insertStatement.executeBatch();
+				$column+updateStatementExecute...[$NL]
+				connection.commit();
+			} catch (SQLException e) {
+				Logger.error(e);
+			}
+		}
+
+		public void close() {
+			try {
+				if (connection.isClosed()) return;
+				commit();
+				connection.close();
+			} catch (SQLException e) {
+				Logger.error(e);
+			}
+		}
+
+		private void executeStatement() throws SQLException {
+			if (++count % 100_000 != 0) return;
+			insertStatement.executeBatch();
+			$column+updateStatementExecute...[$NL]
+		}
+
+		private ResultSet query($column+idType index) throws SQLException {
+			queryStatement.clearParameters();
+			queryStatement.set$column+idType(1, index);
+			return queryStatement.executeQuery();
+		}
+
+		public static class Entry {
+			$column+declaration...[$NL]
+
+			Entry($column+parameter...[, ]) {
+				$column+assign...[$NL]
+			}
+		}
+	}
+end
+
+def type(column & id) trigger(createSql)
+	$name $type+sqlType NOT NULL PRIMARY_KEY
+end
+
+def type(column) trigger(createSql)
+	$name $type+sqlType $isRequired
+end
+
+def attribute(this:true) trigger(isRequired)
+	NOT NULL
+end
+
+def type(column & id) trigger(idName)
+	$name
+end
+def trigger(idName)
+end
+
+def type(column) trigger(name)
+	$name
+end
+
+def type(column & id) trigger(idType)
+	$type
+end
+def type(column) trigger(idType)
+end
+
+def type(column) trigger(defaultValue)
+	$defaultValue
+end
+
+def type(column) trigger(question)
+	?
+end
+
+def type(column) !type(id) trigger(updateStatementField)
+	private PreparedStatement update$name+FirstUpperCase~Statement;
+end
+
+
+def type(column) !type(id) trigger(updateStatementExecute)
+	update$name+FirstUpperCase~Statement.execute();
+end
+
+def type(column) !type(id) trigger(updateStatement)
+	this.update$name+FirstUpperCase~Statement = connection.prepareStatement("UPDATE $lookup SET $name=? WHERE $idColumnName=?;");
+end
+
+def type(column) trigger(parameter)
+	$type $name+firstLowerCase
+end
+
+def type(column) !type(id) type(category) trigger(getResult)
+	$type $name+firstLowerCase = $lookup.entryByIndex(rs.getInt($index));
+end
+
+def type(column) !type(id) trigger(getResult)
+	$type $name+firstLowerCase = rs.get$type+FirstUpperCase($index);
+end
+
+def attribute(this:boolean) trigger(sqlType)
+	int
+end
+
+def attribute(this:long) trigger(sqlType)
+	bigint
+end
+
+def attribute(this:string) trigger(sqlType)
+	text
+end
+
+def type(column) trigger(assign)
+	this.$name+firstLowerCase = $name+firstLowerCase;
+end
+
+def type(column) trigger(declaration)
+	public final $type $name+firstLowerCase;
+end
+
+def type(column) !type(id) trigger(setter)
+	public void $name+firstLowerCase($idColumnType $idColumnName, $type value) {
+		try {
+			update$name+FirstUpperCase~Statement.clearParameters();
+			update$name+FirstUpperCase~Statement.set$idColumnType+firstUpperCase(1, $idColumnName);
+			update$name+FirstUpperCase~Statement.set$typePrimitive+firstUpperCase(2, value);
+			update$name+FirstUpperCase~Statement.addBatch();
+			executeStatement();
+		} catch (SQLException e) {
+			Logger.error(e);
+		}
+	}
+end
+
+def type(column) trigger(insert)
+	insertStatement.set$typePrimitive+FirstUpperCase($index, $name+firstLowerCase);
+end

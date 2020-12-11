@@ -54,4 +54,16 @@ public class Model {
 		for (Datalake.Split sub : context.splitList()) contexts.addAll(leafs(sub));
 		return contexts;
 	}
+
+	public static String defaultValue(Data.Type self) {
+		Data data = self.asData();
+		if (data.isBool()) return String.valueOf(data.asBool().defaultValue());
+		if (data.isInteger() || data.isReal()) return "0";
+		if (data.isLongInteger()) return "0L";
+		if (data.isCategory()) {
+			Lookup lookup = data.asCategory().lookup();
+			return lookup == null ? "null": lookup.name$() + ".NA";
+		}
+		return "null";
+	}
 }

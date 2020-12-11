@@ -6,10 +6,10 @@ import io.intino.datahub.graph.*;
 import io.intino.datahub.graph.Datalake.Split;
 import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.itrules.FrameBuilder;
-import io.intino.ness.datahubterminalplugin.event.EventRenderer;
-import io.intino.ness.datahubterminalplugin.event.TableRenderer;
-import io.intino.ness.datahubterminalplugin.transaction.TransactionRenderer;
-import io.intino.ness.datahubterminalplugin.transaction.DimensionRenderer;
+import io.intino.ness.datahubterminalplugin.renders.Formatters;
+import io.intino.ness.datahubterminalplugin.renders.events.EventRenderer;
+import io.intino.ness.datahubterminalplugin.renders.lookups.LookupRenderer;
+import io.intino.ness.datahubterminalplugin.renders.transactions.TransactionRenderer;
 import io.intino.plugin.PluginLauncher;
 import org.apache.maven.shared.invoker.*;
 
@@ -26,7 +26,6 @@ class OntologyPublisher {
 	private final List<Tank.Transaction> transactionTanks;
 	private final List<Event> events;
 	private final List<Transaction> transactions;
-	private final List<Table> tables;
 	private final Configuration conf;
 	private final List<File> resDirectories;
 	private final List<File> sourceDirectories;
@@ -36,7 +35,7 @@ class OntologyPublisher {
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
 	private final StringBuilder errorStream;
-	private final List<Dimension> dimensions;
+	private final List<Lookup> lookups;
 
 	OntologyPublisher(File root, NessGraph graph, Configuration configuration, PluginLauncher.ModuleStructure moduleStructure, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
@@ -44,8 +43,7 @@ class OntologyPublisher {
 		this.transactionTanks = transactionTanks(graph);
 		this.events = graph.eventList();
 		this.transactions = graph.core$().find(Transaction.class);
-		this.dimensions = graph.dimensionList();
-		this.tables = graph.tableList();
+		this.lookups = graph.lookupList();
 		this.conf = configuration;
 		this.resDirectories = moduleStructure.resDirectories;
 		this.sourceDirectories = moduleStructure.sourceDirectories;
@@ -79,21 +77,20 @@ class OntologyPublisher {
 		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
 		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, basePackage).render());
 		transactions.stream().parallel().forEach(t -> new TransactionRenderer(t, conf, transactionsSplitMap.get(t), srcDirectory, basePackage).render());
-		dimensions.stream().parallel().forEach(w -> new DimensionRenderer(w, conf, srcDirectory, resDirectories, basePackage).render());
+		lookups.stream().parallel().forEach(l -> new LookupRenderer(l, conf, srcDirectory, resDirectories, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
-		dimensions.stream().filter(Dimension::isInResource).map(Dimension::asInResource).
-				forEach(w -> {
-					File source = new File(w.tsv().getPath());
+		lookups.stream().filter(Lookup::isResource).map(Lookup::asResource).
+				forEach(l -> {
+					File source = new File(l.tsv().getPath());
 					File destination = new File(resDirectory, relativeResource(source));
 					destination.getParentFile().mkdirs();
 					try {
-						if (!destination.exists()) Files.copy(w.tsv().openStream(), destination.toPath());
+						if (!destination.exists()) Files.copy(l.tsv().openStream(), destination.toPath());
 					} catch (IOException e) {
 						Logger.error(e);
 					}
 				});
-		tables.forEach(t -> new TableRenderer(t, srcDirectory, basePackage).render());
 		return true;
 	}
 

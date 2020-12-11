@@ -1,4 +1,4 @@
-package io.intino.ness.datahubterminalplugin.transaction;
+package io.intino.ness.datahubterminalplugin.renders.transactions;
 
 import io.intino.Configuration;
 import io.intino.datahub.graph.*;
@@ -10,7 +10,7 @@ import io.intino.magritte.framework.Concept;
 import io.intino.magritte.framework.Layer;
 import io.intino.magritte.framework.Predicate;
 import io.intino.ness.datahubterminalplugin.Commons;
-import io.intino.ness.datahubterminalplugin.Formatters;
+import io.intino.ness.datahubterminalplugin.renders.Formatters;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -43,7 +43,7 @@ public class TransactionRenderer {
 		final File packageFolder = new File(destination, transactionsPackage.replace(".", File.separator));
 		final Frame frame = createTransactionFrame(transaction, transactionsPackage);
 		FrameBuilder builder = new FrameBuilder("root").add("root", transactionsPackage).add("package", transactionsPackage).add("transaction", frame);
-		if (!transaction.graph().dimensionList().isEmpty()) builder.add("dimensionsImport", this.rootPackage);
+		if (!transaction.graph().lookupList().isEmpty()) builder.add("lookupsImport", this.rootPackage);
 		Commons.writeFrame(packageFolder, transaction.name$(), template().render(builder));
 	}
 
@@ -63,7 +63,7 @@ public class TransactionRenderer {
 	}
 
 	private int sizeOf(Transaction transaction) {
-		return transaction.attributeList().stream().map(a -> !a.isDimension() ? a.asType().size() : sizeOf(a.asDimension().dimension())).reduce(Integer::sum).get();
+		return transaction.attributeList().stream().map(a -> !a.isCategory() ? a.asType().size() : sizeOf(a.asCategory().lookup())).reduce(Integer::sum).get();
 	}
 
 	private FrameBuilder[] processAttributes(List<Attribute> attributes, String owner) {
@@ -74,7 +74,7 @@ public class TransactionRenderer {
 		for (Attribute attribute : attributes) {
 			FrameBuilder b = process(attribute, offset);
 			if (b != null) {
-				offset += attribute.isDimension() ? sizeOf(attribute.asDimension().dimension()) : attribute.asType().size();
+				offset += attribute.isCategory() ? sizeOf(attribute.asCategory().lookup()) : attribute.asType().size();
 				list.add(b.add("owner", owner));
 			}
 		}
@@ -82,7 +82,7 @@ public class TransactionRenderer {
 	}
 
 	private FrameBuilder process(Attribute attribute, int offset) {
-		if (attribute.isDimension()) return process(attribute.asDimension().dimension(), attribute.name$(), offset);
+		if (attribute.isCategory()) return process(attribute.asCategory().lookup(), attribute.name$(), offset);
 		else return processAttribute(attribute.asType(), offset);
 	}
 
@@ -118,20 +118,20 @@ public class TransactionRenderer {
 		return (offset == 0 || log2(offset) % 1 == 0) && attribute.maxSize() == attribute.size();
 	}
 
-	private FrameBuilder process(Dimension dimension, String name, int offset) {
-		FrameBuilder builder = new FrameBuilder("attribute", "dimension").
+	private FrameBuilder process(Lookup lookup, String name, int offset) {
+		FrameBuilder builder = new FrameBuilder("attribute", "lookup").
 				add("name", name).
-				add("type", dimension.name$()).
+				add("type", lookup.name$()).
 				add("offset", offset).
-				add("bits", sizeOf(dimension));
-		if (dimension.isInResource())
-			builder.add("resource").add("resource", resource(dimension));
-		else builder.add("category", categories(dimension));
+				add("bits", sizeOf(lookup));
+		if (lookup.isResource())
+			builder.add("resource").add("resource", resource(lookup));
+		else builder.add("category", categories(lookup));
 		return builder;
 	}
 
-	private String resource(Dimension dimension) {
-		String s = dimension.asInResource().tsv().toString();
+	private String resource(Lookup lookup) {
+		String s = lookup.asResource().tsv().toString();
 		return conf.artifact().groupId().replace(".", "/") + "/ontology/" + new File(s).getName();
 	}
 
@@ -140,25 +140,25 @@ public class TransactionRenderer {
 		return data.isBool() || data.isInteger() || data.isLongInteger() || data.isId() || data.isReal();
 	}
 
-	private String[] categories(Dimension wordBag) {
-		return wordBag.asInline().categoryList().stream().
-				map(w -> w.name$() + "(" + w.value() + ")").toArray(String[]::new);
+	private String[] categories(Lookup lookup) {
+		return lookup.asEnumerate().itemList().stream().
+				map(e -> e.name$() + "(" + e.index() + ")").toArray(String[]::new);
 	}
 
-	private Integer sizeOf(Dimension dimension) {
+	private Integer sizeOf(Lookup lookup) {
 		try {
-			return !dimension.isInResource() ? (int) Math.ceil(log2(dimension.asInline().categoryList().size() + 1)) : (int) Math.ceil(log2(countLines(dimension) + 1));
+			return !lookup.isResource() ? (int) Math.ceil(log2(lookup.asEnumerate().itemList().size() + 1)) : (int) Math.ceil(log2(countLines(lookup) + 1));
 		} catch (IOException e) {
 			return 0;
 		}
 	}
 
-	private int countLines(Dimension dimension) throws IOException {
-		return (int) new BufferedReader(new InputStreamReader(dimension.asInResource().tsv().openStream())).lines().count();
+	private int countLines(Lookup lookup) throws IOException {
+		return (int) new BufferedReader(new InputStreamReader(lookup.asResource().tsv().openStream())).lines().count();
 	}
 
 	private String transactionsPackage() {
-		return rootPackage + ".transaction";
+		return rootPackage + ".transactions";
 	}
 
 	private Template template() {

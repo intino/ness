@@ -98,6 +98,7 @@ Concept Data is abstract
 		var string primitive = 'self.type()' is reactive private
 		var integer:{bits} size = 0 bits
 		var integer:{bits} maxSize = 64 bits is private
+		var string defaultValueString = @defaultValue is private reactive
 		sub Real
 			var double defaultValue = 0
 			var string type = "Double" is reactive private
@@ -141,26 +142,25 @@ Concept Data is abstract
 			var string type = "java.lang.Enum" is reactive private
 			var string[] values;
 			var integer:{bits} size = 16 bits
-		sub Dimension
+		sub Category
 			var string type = "java.lang.Enum" is reactive private
-			var Model.Dimension dimension;
+			var Model.Lookup lookup;
 			var integer:{bits} size = 8 bits
-		sub Table
-			var integer:{bits} size = 0 bits
-			var string type = "Table" is reactive private
-			var Model.Table table
-
-Concept Table
-	Concept:Named:RequiresAspect Column extends Data
-
-Concept:Named:RequiresAspect Dimension
-	Aspect Inline
-		Concept:Named Category
-			var integer:{1..*} value
-			var string label = 'self.name$()'
-	Aspect InResource
-		var resource:{tsv} tsv
-		Concept:{2..*}:Named:RequiresAspect Attribute extends Data
 
 Concept:Named:RequiresId Transaction
 	has:Named:RequiresAspect:OnlyNumeric Attribute
+
+Concept:Named:RequiresAspect Lookup
+	Aspect Source
+		sub Enumerate
+			Concept Item
+				var integer index
+				var string label = 'self.name$()'
+		sub Resource
+			var resource:{tsv} tsv
+			Concept:{2..*}:Named:RequiresAspect Column extends Data
+		sub Dynamic
+			var string namespace
+			Concept:Named:RequiresAspect Column extends Data
+				var boolean isRequired = false
+	Aspect Volatile with Dynamic

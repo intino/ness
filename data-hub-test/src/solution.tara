@@ -32,10 +32,10 @@ Transaction  pagos
 	Attribute b as Integer
 	Attribute c as DateTime
 	Attribute d as Bool
-	Attribute giro as Dimension(dimension = Giro)
-	Attribute sector as Dimension(dimension = Sector)
-	Attribute gestion as Dimension(dimension = Gestion)
-	Attribute municipio as Dimension(dimension = Municipio)
+	Attribute giro as Category(lookup = Giros)
+	Attribute sector as Category(lookup = Sectores)
+	Attribute gestion as Category(lookup = Gestiones)
+	Attribute municipio as Category(lookup = Municipios)
 
 Transaction ventas
 	Attribute id as Id(size = 48bits)
@@ -44,37 +44,47 @@ Transaction ventas
 	Attribute b as Integer
 	Attribute c as DateTime
 	Attribute d as Bool
-	Attribute giro as Dimension(dimension = Giro)
-	Attribute sector as Dimension(dimension = Sector)
-	Attribute gestion as Dimension(dimension = Gestion)
-	Attribute municipio as Dimension(dimension = Municipio)
+	Attribute giro as Category(lookup = Giros)
+	Attribute sector as Category(lookup = Sectores)
+	Attribute gestion as Category(lookup = Gestiones)
+	Attribute municipio as Category(lookup = Municipios)
 
-Dimension Giro as Inline
-	Category(1, label = "sss") Federal
-	Category(2) Municipal
-	Category(3) Estatal
-	Category(4) ParaEstatal
-	Category(5) Publico
-Dimension Sector as Inline
-	Category(1) Comercial
-	Category(2) Agricola
-	Category(3) Industrial
-	Category(4) Alumbrado
-	Category(5) Residencial
-Dimension Gestion as Inline
-	Category(1) Rezago
-	Category(2) Convenio
-	Category(3) Incobrable
-	Category(4) Normal
+Lookup Giros as Enumerate
+	Item(1, label = "sss") Federal
+	Item(2) Municipal
+	Item(3) Estatal
+	Item(4) ParaEstatal
+	Item(5) Publico
 
-Dimension Municipio as InResource(tsv = "municipios/Municipios.tsv")
-	Attribute index as Integer
-	Attribute name as Text
-	Attribute extra1 as Real
-	Attribute extra2 as Integer
-	Attribute extra3 as LongInteger
-	Attribute extra4 as Bool
 
+Lookup Sectores as Enumerate
+	Item(1) Comercial
+	Item(2) Agricola
+	Item(3) Industrial
+	Item(4) Alumbrado
+	Item(5) Residencial
+Lookup Gestiones as Enumerate
+	Item(1) Rezago
+	Item(2) Convenio
+	Item(3) Incobrable
+	Item(4) Normal
+
+Lookup Municipios as Resource(tsv = "municipios/Municipios.tsv")
+	Column index as Integer
+	Column name as Text
+	Column extra1 as Real
+	Column extra2 as Integer
+	Column extra3 as LongInteger
+	Column extra4 as Bool
+
+Lookup Contratos as Dynamic(namespace = "namespace")
+	Column index as Id
+	Column(isRequired = true) name as Text
+	Column extra1 as Real
+	Column extra2 as Integer
+	Column extra3 as LongInteger
+	Column extra4 as Bool
+	Column gestion as Category(lookup = Gestiones)
 
 Event Example
 	Attribute name as Text

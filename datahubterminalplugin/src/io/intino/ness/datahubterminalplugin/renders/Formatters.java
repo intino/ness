@@ -1,4 +1,4 @@
-package io.intino.ness.datahubterminalplugin;
+package io.intino.ness.datahubterminalplugin.renders;
 
 
 import io.intino.itrules.Formatter;

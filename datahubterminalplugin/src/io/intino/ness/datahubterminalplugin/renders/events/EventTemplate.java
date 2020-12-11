@@ -1,4 +1,4 @@
-package io.intino.ness.datahubterminalplugin.event;
+package io.intino.ness.datahubterminalplugin.renders.events;
 
 import io.intino.itrules.RuleSet;
 import io.intino.itrules.Template;

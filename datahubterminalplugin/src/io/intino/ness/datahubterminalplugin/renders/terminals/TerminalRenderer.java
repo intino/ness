@@ -1,4 +1,4 @@
-package io.intino.ness.datahubterminalplugin;
+package io.intino.ness.datahubterminalplugin.renders.terminals;
 
 import io.intino.datahub.graph.*;
 import io.intino.datahub.graph.Datalake.Split;
@@ -6,6 +6,9 @@ import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
+import io.intino.ness.datahubterminalplugin.Commons;
+import io.intino.ness.datahubterminalplugin.renders.Formatters;
+import io.intino.ness.datahubterminalplugin.TerminalTemplate;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,22 +16,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static io.intino.ness.datahubterminalplugin.Formatters.firstUpperCase;
+import static io.intino.ness.datahubterminalplugin.renders.Formatters.firstUpperCase;
 
-class TerminalRenderer {
+public class TerminalRenderer {
 	private final Terminal terminal;
 	private final Map<Event, Split> eventWithSplit;
 	private final File srcDir;
 	private final String rootPackage;
 
-	TerminalRenderer(Terminal terminal, Map<Event, Split> eventWithSplit, File srcDir, String rootPackage) {
+	public TerminalRenderer(Terminal terminal, Map<Event, Split> eventWithSplit, File srcDir, String rootPackage) {
 		this.terminal = terminal;
 		this.eventWithSplit = eventWithSplit;
 		this.srcDir = srcDir;
 		this.rootPackage = rootPackage;
 	}
 
-	void render() {
+	public void render() {
 		final File packageFolder = new File(srcDir, rootPackage.replace(".", File.separator));
 		Commons.writeFrame(packageFolder, Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString(), template().render(createTerminalFrame()));
 	}
@@ -52,7 +55,7 @@ class TerminalRenderer {
 	}
 
 	private void renderTransaction(FrameBuilder builder, Transaction t) {
-		String transactionsPackage = rootPackage + ".transaction";
+		String transactionsPackage = rootPackage + ".transactions";
 		if (t.core$().owner().is(Namespace.class))
 			transactionsPackage = transactionsPackage + "." + t.core$().ownerAs(Namespace.class).qn();
 		builder.add("transaction", new FrameBuilder("transaction").

@@ -1,0 +1,192 @@
+def type(root)
+	package $package+ValidPackage;
+
+	$lookup
+end
+
+def type(lookup & resource)
+	import java.util.ArrayList;
+    import java.util.List;
+    import java.util.function.Predicate;
+    import java.util.stream.Collectors;
+
+	public class $name+FirstUpperCase {
+		public static final Entry NA = new Entry($column+defaultValue...[, ]);
+		private static final java.util.Map<Short, Entry> entries;
+		private static final java.util.Map<String, Entry> entriesByName;
+
+		static {
+			entries = new java.util.HashMap<>();
+			entriesByName = new java.util.HashMap<>();
+			try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader($name+FirstUpperCase.class.getResourceAsStream("/$resource")))) {
+				reader.lines().map(l -> l.split("\\t", -1)).
+				map(l -> new Entry($column+constructor...[, ])).
+				forEach(e -> {entries.put((short) e.index, e); entriesByName.put(e.name, e);});
+			} catch (java.io.IOException e) {
+				io.intino.alexandria.logger.Logger.error(e);
+			}
+		}
+
+		public static List<Entry> entries() {
+			return new ArrayList<>(entries.values());
+		}
+
+		public static List<Entry> entries(Predicate<Entry> filter) {
+			return entries.values().stream().filter(filter).collect(Collectors.toList());
+		}
+
+		public static Entry entryByIndex(int index) {
+			return entries.getOrDefault((short)index, NA);
+		}
+
+		public static Entry entryByName(String name) {
+			return entriesByName.getOrDefault(name, NA);
+		}
+
+		public static class Entry {
+			$column+declaration...[$NL]
+
+			Entry($column+parameter...[, ]) {
+				$column+assign...[$NL]
+			}
+
+			public boolean equals(Entry entry) {
+				return this.index == entry.index;
+			}
+		}
+	}
+end
+
+def type(lookup & enumerate)
+	import java.util.ArrayList;
+	import java.util.List;
+	import java.util.function.Predicate;
+	import java.util.stream.Collectors;
+
+	public class $name+firstUpperCase {
+		private static final java.util.Map<Short, Entry> entries;
+		private static final java.util.Map<String, Entry> entriesByName;
+		public static final Entry NA = new Entry((short) 0, "NA");
+		$entry+field...[$NL]
+		static {
+			entries = new java.util.HashMap<>();
+			entriesByName = new java.util.HashMap<>();
+			$entry+put...[$NL]
+		}
+
+		public static List<Entry> entries() {
+			return new ArrayList<>(entries.values());
+		}
+
+		public static List<Entry> entries(Predicate<Entry> filter) {
+			return entries.values().stream().filter(filter).collect(Collectors.toList());
+		}
+
+		public static Entry entryByIndex(int index) {
+			return entries.getOrDefault((short)index, NA);
+		}
+
+		public static Entry entryByName(String name) {
+			return entriesByName.getOrDefault(name, NA);
+		}
+
+		public static Entry entryByLabel(String label) {
+			return entries.values().stream().filter(c -> c.label.equals(label)).findFirst().orElse(NA);
+		}
+
+		public static class Entry {
+			public final short index;
+			public final String name;
+			public final String label;
+
+			Entry(short index, String name) {
+				this(index, name, name);
+			}
+
+			Entry(short index, String name, String label) {
+				this.index = index;
+				this.name = name;
+				this.label = label;
+			}
+
+			public boolean equals(Entry entry) {
+				return this.index == entry.index;
+			}
+		}
+	}
+end
+
+def trigger(declaration)
+	public final $type $name+firstLowerCase;
+end
+
+def trigger(parameter)
+	$type $name+firstLowerCase
+end
+
+def type(string | text) trigger(constructor)
+	l.length > $index ? l$[$index] : "NA"
+end
+
+def type(integer) trigger(constructor)
+	l.length > $index ? Integer.parseInt(l$[$index]) : -1
+end
+
+def type(real) trigger(constructor)
+	l.length > $index ? Double.parseDouble(l$[$index]) : Double.NaN
+end
+
+def type(longInteger | long) trigger(constructor)
+	l.length > $index ? Long.parseLong(l$[$index]) : -1L
+end
+
+def type(boolean | bool) trigger(constructor)
+	l.length > $index ? Boolean.parseBoolean(l$[$index]) : false
+end
+
+
+def type(string | text) trigger(defaultValue)
+	"NA"
+end
+
+def type(integer) trigger(defaultValue)
+	0
+end
+
+def type(real) trigger(defaultValue)
+	0.
+end
+
+def type(longInteger | long) trigger(defaultValue)
+	0L
+end
+
+def type(boolean | bool) trigger(defaultValue)
+	false
+end
+
+def trigger(assign)
+	this.$name+firstLowerCase = $name+firstLowerCase;
+end
+
+def type(primitive) !attribute(index:0) !attribute(index:1) trigger(find)
+	public static Entry entryBy$name+firstUpperCase($type $name+firstLowerCase) {
+		return entries.values().stream().filter(c -> c.$name+firstLowerCase == $name+firstLowerCase).findFirst().orElse(NA);
+	}
+end
+
+def !attribute(index:0) !attribute(index:1) trigger(find)
+	public static Entry entryBy$name+firstUpperCase($type $name+firstLowerCase) {
+		return entries.values().stream().filter(c -> c.$name+firstLowerCase.equals($name+firstLowerCase)).findFirst().orElse(NA);
+	}
+end
+
+def trigger(put)
+	entries.put((short) $index, $name+FirstUpperCase);
+	entriesByName.put("$name", $name+FirstUpperCase);
+end
+
+
+def trigger(field)
+	public static final Entry $name+FirstUpperCase = new Entry((short) $index, "$name"[, "$label"]);
+end
