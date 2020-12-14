@@ -173,13 +173,13 @@ end
 def type(attribute & lookup & resource) trigger(getter)
 	public $type+firstUpperCase.Entry $name+firstLowerCase() {
 		final int value = bitBuffer.getIntegerNBits($offset, $bits);
-		return $type+firstUpperCase.entryByIndex(value);
+		return $type+firstUpperCase.entry(value);
 	}
 end
 
 def type(attribute & lookup & resource) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase(String $name+firstLowerCase) {
-		bitBuffer.setIntegerNBits($offset, $bits, $name+firstLowerCase == null ? (int) NULL : $type+firstUpperCase.entryByName($name+firstLowerCase).index);
+		bitBuffer.setIntegerNBits($offset, $bits, $name+firstLowerCase == null ? (int) NULL : $type+firstUpperCase.entry($name+firstLowerCase).index);
 		return this;
 	}
 
@@ -192,13 +192,13 @@ end
 def type(attribute & lookup) trigger(getter)
 	public $type+firstUpperCase.Entry $name+firstLowerCase() {
 		final short value = bitBuffer.get$aligned~Short[$bits+nbits]($offset[, $bits]);
-		return $type+firstUpperCase.entryByIndex(value);
+		return $type+firstUpperCase.entry(value);
 	}
 end
 
 def type(attribute & lookup) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase(String $name+firstLowerCase) {
-		bitBuffer.set$aligned~Integer[$bits+nbits]($offset[, $bits], $name+firstLowerCase == null ? (int) NULL : $type+firstUpperCase.entryByName($name+firstLowerCase).index);
+		bitBuffer.set$aligned~Integer[$bits+nbits]($offset[, $bits], $name+firstLowerCase == null ? (int) NULL : $type+firstUpperCase.entry($name+firstLowerCase).index);
 		return this;
 	}
 

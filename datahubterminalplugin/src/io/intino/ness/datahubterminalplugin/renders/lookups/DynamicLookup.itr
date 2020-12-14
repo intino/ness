@@ -54,7 +54,7 @@ def type(lookup & dynamic)
 			}
 		}
 
-
+		[$column+getter...[$NL$NL]]
 		[$column+setter...[$NL$NL]]
 
 		public void commit() {
@@ -153,7 +153,7 @@ def type(column) trigger(parameter)
 end
 
 def type(column) !type(id) type(category) trigger(getResult)
-	$type $name+firstLowerCase = $lookup.entryByIndex(rs.getInt($index));
+	$type $name+firstLowerCase = $lookup.entry(rs.getInt($index));
 end
 
 def type(column) !type(id) trigger(getResult)
@@ -185,7 +185,7 @@ def type(column) !type(id) trigger(setter)
 		try {
 			update$name+FirstUpperCase~Statement.clearParameters();
 			update$name+FirstUpperCase~Statement.set$idColumnType+firstUpperCase(1, $idColumnName);
-			update$name+FirstUpperCase~Statement.set$typePrimitive+firstUpperCase(2, value);
+			update$name+FirstUpperCase~Statement.set$typePrimitive+firstUpperCase(2[$lookup+empty value.index?, value]);
 			update$name+FirstUpperCase~Statement.addBatch();
 			executeStatement();
 		} catch (SQLException e) {
@@ -194,6 +194,20 @@ def type(column) !type(id) trigger(setter)
 	}
 end
 
+def type(column) !type(id) trigger(getter)
+	public $type $name+firstLowerCase($idColumnType $idColumnName) {
+		return entry($idColumnName).$name+firstLowerCase;
+	}
+end
+
+def type(column & category) trigger(insert)
+	insertStatement.set$typePrimitive+FirstUpperCase($index, $name+firstLowerCase.index);
+end
+
 def type(column) trigger(insert)
 	insertStatement.set$typePrimitive+FirstUpperCase($index, $name+firstLowerCase);
+end
+
+def trigger(empty)
+	,
 end

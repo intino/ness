@@ -35,11 +35,11 @@ def type(lookup & resource)
 			return entries.values().stream().filter(filter).collect(Collectors.toList());
 		}
 
-		public static Entry entryByIndex(int index) {
+		public static Entry entry(int index) {
 			return entries.getOrDefault((short)index, NA);
 		}
 
-		public static Entry entryByName(String name) {
+		public static Entry entry(String name) {
 			return entriesByName.getOrDefault(name, NA);
 		}
 
@@ -82,16 +82,12 @@ def type(lookup & enumerate)
 			return entries.values().stream().filter(filter).collect(Collectors.toList());
 		}
 
-		public static Entry entryByIndex(int index) {
+		public static Entry entry(int index) {
 			return entries.getOrDefault((short)index, NA);
 		}
 
-		public static Entry entryByName(String name) {
+		public static Entry entry(String name) {
 			return entriesByName.getOrDefault(name, NA);
-		}
-
-		public static Entry entryByLabel(String label) {
-			return entries.values().stream().filter(c -> c.label.equals(label)).findFirst().orElse(NA);
 		}
 
 		public static class Entry {
@@ -167,18 +163,6 @@ end
 
 def trigger(assign)
 	this.$name+firstLowerCase = $name+firstLowerCase;
-end
-
-def type(primitive) !attribute(index:0) !attribute(index:1) trigger(find)
-	public static Entry entryBy$name+firstUpperCase($type $name+firstLowerCase) {
-		return entries.values().stream().filter(c -> c.$name+firstLowerCase == $name+firstLowerCase).findFirst().orElse(NA);
-	}
-end
-
-def !attribute(index:0) !attribute(index:1) trigger(find)
-	public static Entry entryBy$name+firstUpperCase($type $name+firstLowerCase) {
-		return entries.values().stream().filter(c -> c.$name+firstLowerCase.equals($name+firstLowerCase)).findFirst().orElse(NA);
-	}
 end
 
 def trigger(put)
