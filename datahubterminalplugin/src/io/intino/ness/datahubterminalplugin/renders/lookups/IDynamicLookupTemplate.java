@@ -7,7 +7,7 @@ public class IDynamicLookupTemplate extends Template {
 
 	public RuleSet ruleSet() {
 		return new RuleSet().add(
-			rule().condition((type("interface"))).output(literal("package ")).output(mark("package")).output(literal(";\n\npublic interface DynamicLookup {\n\tpublic void open();\n\tpublic void commit();\n\tpublic void close();\n}"))
+			rule().condition((type("interface"))).output(literal("package ")).output(mark("package")).output(literal(";\n\npublic interface DynamicLookup {\n\tvoid open();\n\tvoid commit();\n\tvoid close();\n}"))
 		);
 	}
 }

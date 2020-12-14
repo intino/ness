@@ -1,0 +1,38 @@
+def type(lookups)
+	package $package+validPackage;
+
+	public class Lookups {
+		private final java.io.File lookupsDirectory;
+		$namespace...[$NL]
+		$lookup+field...[$NL]
+
+		public Lookups(java.io.File lookupsDirectory) {
+			this.lookupsDirectory = lookupsDirectory;
+		}
+
+		$lookup+getter...[$NL]
+	}
+end
+
+def trigger(namespace)
+	private java.sql.Connection $this+firstLowerCase;
+end
+
+def type(lookup) trigger(field)
+	private $qn $name+firstLowerCase;
+end
+
+def type(lookup) trigger(getter)
+	public $qn $name+firstLowerCase() {
+		if (this.$namespace+firstLowerCase == null) {
+			try {
+				this.$namespace+firstLowerCase = java.sql.DriverManager.getConnection("jdbc:sqlite:" + new java.io.File(lookupsDirectory,  "$namespace+firstLowerCase.db"));
+        		this.$namespace+firstLowerCase.setAutoCommit(false);
+			} catch (java.sql.SQLException e) {
+				io.intino.alexandria.logger.Logger.error(e);
+			}
+		}
+		if (this.$name+firstLowerCase == null) this.$name+firstLowerCase = new $qn($namespace+firstLowerCase);
+		return this.$name+firstLowerCase;
+	}
+end

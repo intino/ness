@@ -6,16 +6,12 @@ import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
-import io.intino.ness.datahubterminalplugin.Commons;
 import io.intino.ness.datahubterminalplugin.renders.Formatters;
-import io.intino.ness.datahubterminalplugin.TerminalTemplate;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import static io.intino.ness.datahubterminalplugin.Commons.writeFrame;
 import static io.intino.ness.datahubterminalplugin.renders.Formatters.firstUpperCase;
 
 public class TerminalRenderer {
@@ -33,7 +29,17 @@ public class TerminalRenderer {
 
 	public void render() {
 		final File packageFolder = new File(srcDir, rootPackage.replace(".", File.separator));
-		Commons.writeFrame(packageFolder, Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString(), template().render(createTerminalFrame()));
+		writeLookups(packageFolder);
+		writeTerminal(packageFolder);
+	}
+
+	private void writeTerminal(File packageFolder) {
+		writeFrame(packageFolder, Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString(), terminalTemplate().render(createTerminalFrame()));
+	}
+
+	private void writeLookups(File packageFolder) {
+		List<Lookup.Dynamic> lookups = terminal.core$().graph().find(Lookup.Dynamic.class);
+		if (!lookups.isEmpty()) writeFrame(packageFolder, "Lookups", lookupsTemplate().render(createLookups(lookups)));
 	}
 
 	private Frame createTerminalFrame() {
@@ -46,13 +52,36 @@ public class TerminalRenderer {
 				add("name", e.name$()).
 				add("type", eventPackage(e) + "." + firstUpperCase(e.name$())).toFrame()).toArray(Frame[]::new));
 		terminal.core$().graph().find(Transaction.class).forEach(t -> renderTransaction(builder, t));
-		terminal.core$().graph().find(Lookup.class).forEach(l -> renderLookup(builder, l));
+		terminal.core$().graph().find(Lookup.Dynamic.class).forEach(l -> renderLookup(builder, l));
 		if (terminal.publish() != null)
 			terminal.publish().tanks().forEach(tank -> builder.add("publish", frameOf(tank)));
 		if (terminal.subscribe() != null)
 			terminal.subscribe().tanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
 		if (terminal.bpm() != null) addBpm(builder);
 		return builder.toFrame();
+	}
+
+	private void renderLookup(FrameBuilder fb, Lookup.Dynamic l) {
+		renderLookup(rootPackage + ".lookups", fb, l);
+	}
+
+	private Frame createLookups(List<Lookup.Dynamic> lookups) {
+		Set<String> namespaces = new LinkedHashSet<>();
+		FrameBuilder fb = new FrameBuilder("lookups");
+		fb.add("package", rootPackage);
+		for (Lookup.Dynamic l : lookups) {
+			renderLookup(rootPackage + ".lookups", fb, l);
+			namespaces.add(l.namespace());
+		}
+		fb.add("namespace", namespaces.toArray(new String[0]));
+		return fb.toFrame();
+	}
+
+	private void renderLookup(String lookupsPackage, FrameBuilder fb, Lookup.Dynamic l) {
+		fb.add("lookup", new FrameBuilder("lookup").
+				add("qn", lookupsPackage + "." + firstUpperCase(l.name$())).
+				add("namespace", l.namespace()).
+				add("name", l.name$()));
 	}
 
 	private void renderTransaction(FrameBuilder builder, Transaction t) {
@@ -63,16 +92,6 @@ public class TerminalRenderer {
 				add("qn", transactionsPackage + "." + firstUpperCase(t.name$())).
 				add("namespace", t.core$().owner().is(Namespace.class) ? t.core$().ownerAs(Namespace.class).qn().replace(".", "") : "").
 				add("name", t.name$()));
-	}
-
-	private void renderLookup(FrameBuilder builder, Lookup l) {
-		String lookupsPackage = rootPackage + ".lookups";
-		if (l.core$().owner().is(Namespace.class))
-			lookupsPackage = lookupsPackage + "." + l.core$().ownerAs(Namespace.class).qn();
-		builder.add("transaction", new FrameBuilder("transaction").
-				add("qn", lookupsPackage + "." + firstUpperCase(l.name$())).
-				add("namespace", l.core$().owner().is(Namespace.class) ? l.core$().ownerAs(Namespace.class).qn().replace(".", "") : "").
-				add("name", l.name$()));
 	}
 
 	private void addBpm(FrameBuilder builder) {
@@ -136,8 +155,15 @@ public class TerminalRenderer {
 		return tank.asTank().isSplitted() ? tank.asTank().asSplitted().split().leafs() : Collections.emptyList();
 	}
 
-	private Template template() {
+	private Template terminalTemplate() {
 		return Formatters.customize(new TerminalTemplate()).add("typeFormat", (value) -> {
+			if (value.toString().contains(".")) return Formatters.firstLowerCase(value.toString());
+			else return value;
+		});
+	}
+
+	private Template lookupsTemplate() {
+		return Formatters.customize(new LookupsTemplate()).add("typeFormat", (value) -> {
 			if (value.toString().contains(".")) return Formatters.firstLowerCase(value.toString());
 			else return value;
 		});

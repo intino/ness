@@ -77,7 +77,7 @@ Lookup Municipios as Resource(tsv = "municipios/Municipios.tsv")
 	Column extra3 as LongInteger
 	Column extra4 as Bool
 
-Lookup Contratos as Dynamic(namespace = "namespace")
+Lookup Contratos as Dynamic(namespace = "cfe")
 	Column index as Id
 	Column(isRequired = true) name as Text
 	Column extra1 as Real
