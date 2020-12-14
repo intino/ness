@@ -9,7 +9,7 @@ def type(root)
 end
 
 def type(lookup & dynamic)
-	public class $name+FirstUpperCase {
+	public class $name+FirstUpperCase implements $rootPackage.DynamicLookup {
 		private static final Entry NA = new Entry($column+defaultValue...[, ]);
 		private final java.sql.Connection connection;
 		private PreparedStatement insertStatement;
@@ -20,6 +20,9 @@ def type(lookup & dynamic)
 
 		public $name+FirstUpperCase(java.sql.Connection connection) {
 			this.connection = connection;
+		}
+
+		public void open() {
 			try {
 				this.connection.createStatement().execute("CREATE TABLE IF NOT EXISTS $name+FirstUpperCase ($column+createSql...[, ]);");
 				this.insertStatement = connection.prepareStatement("INSERT INTO contratos ($column+name...[, ]) VALUES($column+question...[, ]);");
@@ -55,6 +58,7 @@ def type(lookup & dynamic)
 		}
 
 		[$column+getter...[$NL$NL]]
+
 		[$column+setter...[$NL$NL]]
 
 		public void commit() {

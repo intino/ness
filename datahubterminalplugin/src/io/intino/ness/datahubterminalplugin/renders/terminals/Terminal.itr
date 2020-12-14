@@ -47,6 +47,8 @@ def type(terminal)
 
 		$subscribe...[$NL$NL]
 
+		$lookup...[$NL]
+
 		private static final Object monitor = new Object();
 
 		public class BatchSession {

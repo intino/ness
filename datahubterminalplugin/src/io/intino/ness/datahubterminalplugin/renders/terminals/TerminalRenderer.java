@@ -46,6 +46,7 @@ public class TerminalRenderer {
 				add("name", e.name$()).
 				add("type", eventPackage(e) + "." + firstUpperCase(e.name$())).toFrame()).toArray(Frame[]::new));
 		terminal.core$().graph().find(Transaction.class).forEach(t -> renderTransaction(builder, t));
+		terminal.core$().graph().find(Lookup.class).forEach(l -> renderLookup(builder, l));
 		if (terminal.publish() != null)
 			terminal.publish().tanks().forEach(tank -> builder.add("publish", frameOf(tank)));
 		if (terminal.subscribe() != null)
@@ -62,6 +63,16 @@ public class TerminalRenderer {
 				add("qn", transactionsPackage + "." + firstUpperCase(t.name$())).
 				add("namespace", t.core$().owner().is(Namespace.class) ? t.core$().ownerAs(Namespace.class).qn().replace(".", "") : "").
 				add("name", t.name$()));
+	}
+
+	private void renderLookup(FrameBuilder builder, Lookup l) {
+		String lookupsPackage = rootPackage + ".lookups";
+		if (l.core$().owner().is(Namespace.class))
+			lookupsPackage = lookupsPackage + "." + l.core$().ownerAs(Namespace.class).qn();
+		builder.add("transaction", new FrameBuilder("transaction").
+				add("qn", lookupsPackage + "." + firstUpperCase(l.name$())).
+				add("namespace", l.core$().owner().is(Namespace.class) ? l.core$().ownerAs(Namespace.class).qn().replace(".", "") : "").
+				add("name", l.name$()));
 	}
 
 	private void addBpm(FrameBuilder builder) {

@@ -45,6 +45,7 @@ public class LookupRenderer {
 		FrameBuilder builder = new FrameBuilder("lookup").
 				add("name", lookup.name$()).
 				add("type", lookup.isResource() ? String.class.getSimpleName() : lookup.name$());
+		builder.add("rootPackage", this.rootPackage);
 		if (lookup.isResource()) asResource(lookup, builder);
 		else if (lookup.isEnumerate()) asEnumerate(lookup, builder);
 		else if (lookup.isDynamic()) asDynamic(lookup, builder);

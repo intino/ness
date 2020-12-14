@@ -8,6 +8,7 @@ import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.itrules.FrameBuilder;
 import io.intino.ness.datahubterminalplugin.renders.Formatters;
 import io.intino.ness.datahubterminalplugin.renders.events.EventRenderer;
+import io.intino.ness.datahubterminalplugin.renders.lookups.IDynamicLookupTemplate;
 import io.intino.ness.datahubterminalplugin.renders.lookups.LookupRenderer;
 import io.intino.ness.datahubterminalplugin.renders.transactions.TransactionRenderer;
 import io.intino.plugin.PluginLauncher;
@@ -17,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -77,6 +79,7 @@ class OntologyPublisher {
 		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
 		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, basePackage).render());
 		transactions.stream().parallel().forEach(t -> new TransactionRenderer(t, conf, transactionsSplitMap.get(t), srcDirectory, basePackage).render());
+		if (lookups.stream().anyMatch(Lookup::isDynamic)) renderLookupInterface(srcDirectory, basePackage);
 		lookups.stream().parallel().forEach(l -> new LookupRenderer(l, conf, srcDirectory, resDirectories, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
@@ -92,6 +95,16 @@ class OntologyPublisher {
 					}
 				});
 		return true;
+	}
+
+	private void renderLookupInterface(File srcDirectory, String basePackage) {
+		final File destination =  new File(srcDirectory, basePackage.replace(".", File.separator) + File.separator + "DynamicLookup.java");
+		String render = new IDynamicLookupTemplate().render(new FrameBuilder("interface").add("package", basePackage));
+		try {
+			Files.write(destination.toPath(), render.getBytes());
+		} catch (IOException e) {
+			Logger.error(e);
+		}
 	}
 
 	private File sourceDirectory() {

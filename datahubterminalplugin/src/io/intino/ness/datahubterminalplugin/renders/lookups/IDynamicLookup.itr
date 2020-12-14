@@ -1,0 +1,9 @@
+def type(interface)
+	package $package;
+
+	public interface DynamicLookup {
+		public void open();
+		public void commit();
+		public void close();
+	}
+end
