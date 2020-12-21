@@ -25,10 +25,10 @@ def type(lookup & dynamic)
 		public void open() {
 			try {
 				this.connection.createStatement().execute("CREATE TABLE IF NOT EXISTS $name+FirstUpperCase ($column+createSql...[, ]);");
-				$index+createOnOpen...[$NL]
+				[$index+createOnOpen...[$NL]]
 				this.insertStatement = connection.prepareStatement("INSERT INTO $name+FirstUpperCase ($column+name...[, ]) VALUES($column+question...[, ]);");
 				this.queryStatement = connection.prepareStatement("SELECT * FROM $name+FirstUpperCase WHERE $column+idName=?;");
-				$column+updateStatement...[$NL]
+				[$column+updateStatement...[$NL]]
 			} catch (SQLException throwables) {
 				Logger.error(throwables);
 			}
@@ -75,7 +75,7 @@ def type(lookup & dynamic)
 		public void close() {
 			try {
 				if (connection.isClosed()) return;
-				$index+createOnClose...[$NL]
+				[$index+createOnClose...[$NL]]
 				commit();
 				connection.close();
 			} catch (SQLException e) {
@@ -86,7 +86,7 @@ def type(lookup & dynamic)
 		private void executeStatement() throws SQLException {
 			if (++count % 100_000 != 0) return;
 			insertStatement.executeBatch();
-			$column+updateStatementExecute...[$NL]
+			[$column+updateStatementExecute...[$NL]]
 		}
 
 		private ResultSet query($column+idType index) throws SQLException {
@@ -106,11 +106,11 @@ def type(lookup & dynamic)
 end
 
 def type(column & id) trigger(createSql)
-	$name $type+sqlType NOT NULL PRIMARY_KEY
+	$name+firstLowerCase $type+sqlType NOT NULL PRIMARY_KEY
 end
 
 def type(column) trigger(createSql)
-	$name+firstLowerCase $type+sqlType $isRequired
+	$name+firstLowerCase $type+sqlType[ $isRequired]
 end
 
 def attribute(this:true) trigger(isRequired)
@@ -151,7 +151,7 @@ def type(column) !type(id) trigger(updateStatementExecute)
 end
 
 def type(column) !type(id) trigger(updateStatement)
-	this.update$name+FirstUpperCase~Statement = connection.prepareStatement("UPDATE $lookup SET $name+firstLowerCase=? WHERE $idColumnName=?;");
+	this.update$name+FirstUpperCase~Statement = connection.prepareStatement("UPDATE $table SET $name+firstLowerCase=? WHERE $idColumnName+firstLowerCase=?;");
 end
 
 def type(column) trigger(parameter)
@@ -187,11 +187,11 @@ def type(column) trigger(declaration)
 end
 
 def type(onOpen) trigger(createOnOpen)
-	this.connection.createStatement().execute("CREATE INDEX IF NOT EXISTS idx_$name ON $table ($column...[, ]);");
+	this.connection.createStatement().execute("CREATE INDEX IF NOT EXISTS $name ON $table ($column+firstLowerCase...[, ]);");
 end
 
 def type(onClose) trigger(createOnClose)
-	this.connection.createStatement().execute("CREATE INDEX IF NOT EXISTS idx_$name ON $table ($column...[, ]);");
+	this.connection.createStatement().execute("CREATE INDEX IF NOT EXISTS $name ON $table ($column+firstLowerCase...[, ]);");
 end
 
 def type(column) !type(id) trigger(setter)

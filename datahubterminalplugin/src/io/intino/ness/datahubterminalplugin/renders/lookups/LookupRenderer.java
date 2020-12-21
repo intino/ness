@@ -98,6 +98,7 @@ public class LookupRenderer {
 		for (Lookup.Dynamic.Index index : indices) {
 			builder.add("index", new FrameBuilder("index", index.createOnClose() ? "onClose" : "onOpen")
 					.add("name", index.name$())
+					.add("table", index.core$().ownerAs(Lookup.class).name$())
 					.add("column", index.columns().stream().map(Layer::name$).toArray(String[]::new)));
 		}
 	}
@@ -121,7 +122,10 @@ public class LookupRenderer {
 		boolean idPrimitive = isPrimitive(idColumn.asType());
 		for (int i = 0; i < columnList.size(); i++) {
 			Lookup.Dynamic.Column column = columnList.get(i);
-			FrameBuilder b = new FrameBuilder("column").add(isPrimitive(column.asType()) ? "primitive" : "complex").add(column.isId() ? "id" : "regular").
+			FrameBuilder b = new FrameBuilder("column").
+					add(column.isId() ? "id" : "regular").
+					add(isPrimitive(column.asType()) ? "primitive" : "complex").
+					add("table", column.core$().ownerAs(Lookup.class).name$()).
 					add("name", column.name$()).
 					add("index", i).
 					add("type", type(column)).
@@ -158,7 +162,7 @@ public class LookupRenderer {
 			for (File resDirectory : resDirectories) {
 				try {
 					return resDirectory.toPath().relativize(source).toFile().getPath().replace("\\", "/");
-				} catch (IllegalArgumentException ex) {
+				} catch (IllegalArgumentException ignored) {
 				}
 			}
 		} catch (IOException e) {
@@ -169,7 +173,10 @@ public class LookupRenderer {
 
 	private Frame[] entries(Lookup lookup) {
 		return lookup.asEnumerate().itemList().stream().
-				map(e -> new FrameBuilder("entry").add("name", e.name$()).add("index", e.index()).add("label", e.label()).toFrame()).toArray(Frame[]::new);
+				map(e -> new FrameBuilder("entry").
+						add("name", e.name$()).
+						add("index", e.index()).
+						add("label", e.label()).toFrame()).toArray(Frame[]::new);
 	}
 
 	private Template template(Lookup lookup) {
