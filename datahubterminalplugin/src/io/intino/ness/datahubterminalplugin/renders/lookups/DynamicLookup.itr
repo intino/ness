@@ -25,6 +25,7 @@ def type(lookup & dynamic)
 		public void open() {
 			try {
 				this.connection.createStatement().execute("CREATE TABLE IF NOT EXISTS $name+FirstUpperCase ($column+createSql...[, ]);");
+				$index+createOnOpen...[$NL]
 				this.insertStatement = connection.prepareStatement("INSERT INTO contratos ($column+name...[, ]) VALUES($column+question...[, ]);");
 				this.queryStatement = connection.prepareStatement("SELECT * FROM contratos WHERE $column+idName=?;");
 				$column+updateStatement...[$NL]
@@ -74,6 +75,7 @@ def type(lookup & dynamic)
 		public void close() {
 			try {
 				if (connection.isClosed()) return;
+				$index+createOnClose...[$NL]
 				commit();
 				connection.close();
 			} catch (SQLException e) {
@@ -182,6 +184,14 @@ end
 
 def type(column) trigger(declaration)
 	public final $type $name+firstLowerCase;
+end
+
+def type(onOpen) trigger(createOnOpen)
+	this.connection.createStatement().execute("CREATE INDEX IF NOT EXISTS idx_$name ON $table ($column...[, ]);");
+end
+
+def type(onClose) trigger(createOnClose)
+	this.connection.createStatement().execute("CREATE INDEX IF NOT EXISTS idx_$name ON $table ($column...[, ]);");
 end
 
 def type(column) !type(id) trigger(setter)

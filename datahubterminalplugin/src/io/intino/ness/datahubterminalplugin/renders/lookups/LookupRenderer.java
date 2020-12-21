@@ -7,6 +7,7 @@ import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
 import io.intino.magritte.framework.Concept;
+import io.intino.magritte.framework.Layer;
 import io.intino.magritte.framework.Predicate;
 import io.intino.ness.datahubterminalplugin.Commons;
 import io.intino.ness.datahubterminalplugin.renders.Formatters;
@@ -89,7 +90,16 @@ public class LookupRenderer {
 
 	private void asDynamic(Lookup lookup, FrameBuilder builder) {
 		builder.add("dynamic");
+		addIndexes(builder, lookup.asDynamic().indexList());
 		addDynamicColumns(builder, lookup.asDynamic().columnList());
+	}
+
+	private void addIndexes(FrameBuilder builder, List<Lookup.Dynamic.Index> indices) {
+		for (Lookup.Dynamic.Index index : indices) {
+			builder.add("index", new FrameBuilder("index", index.createOnClose() ? "onClose" : "onOpen")
+					.add("name", index.name$())
+					.add("column", index.columns().stream().map(Layer::name$).toArray(String[]::new)));
+		}
 	}
 
 	private void addResourceColumns(FrameBuilder builder, List<Lookup.Resource.Column> columnList) {
