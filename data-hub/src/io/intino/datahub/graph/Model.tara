@@ -165,4 +165,5 @@ Concept:Named:RequiresAspect Lookup
 				var boolean isRequired = false
 			Concept:Named Index
 				var Column[] columns
+				var boolean createOnClose = false
 	Aspect Volatile with Dynamic
