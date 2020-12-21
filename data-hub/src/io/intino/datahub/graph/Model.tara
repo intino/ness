@@ -163,4 +163,6 @@ Concept:Named:RequiresAspect Lookup
 			var string namespace
 			Concept:Named:RequiresAspect Column extends Data
 				var boolean isRequired = false
+			Concept:Named Index
+				var Column[] columns
 	Aspect Volatile with Dynamic
