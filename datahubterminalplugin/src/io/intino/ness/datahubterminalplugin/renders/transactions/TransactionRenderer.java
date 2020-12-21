@@ -82,7 +82,8 @@ public class TransactionRenderer {
 	}
 
 	private FrameBuilder process(Attribute attribute, int offset) {
-		if (attribute.isCategory()) return process(attribute.asCategory().lookup(), attribute.name$(), offset);
+		if (attribute.isCategory())
+			return processCategoryAttribute(attribute.asCategory().lookup(), attribute.name$(), offset);
 		else return processAttribute(attribute.asType(), offset);
 	}
 
@@ -103,6 +104,16 @@ public class TransactionRenderer {
 		return builder;
 	}
 
+	private FrameBuilder processCategoryAttribute(Lookup lookup, String name, int offset) {
+		FrameBuilder builder = new FrameBuilder("attribute", "lookup").
+				add("name", name).
+				add("type", lookup.name$()).
+				add("offset", offset).
+				add("bits", sizeOf(lookup));
+		if (lookup.isResource()) builder.add("resource");
+		return builder;
+	}
+
 	private Frame[] enums(Split realSplit, List<Split> leafs) {
 		List<Frame> frames = new ArrayList<>();
 		if (!leafs.contains(realSplit) && !realSplit.label().isEmpty())
@@ -118,18 +129,6 @@ public class TransactionRenderer {
 		return (offset == 0 || log2(offset) % 1 == 0) && attribute.maxSize() == attribute.size();
 	}
 
-	private FrameBuilder process(Lookup lookup, String name, int offset) {
-		FrameBuilder builder = new FrameBuilder("attribute", "lookup").
-				add("name", name).
-				add("type", lookup.name$()).
-				add("offset", offset).
-				add("bits", sizeOf(lookup));
-		if (lookup.isResource())
-			builder.add("resource").add("resource", resource(lookup));
-		else builder.add("category", categories(lookup));
-		return builder;
-	}
-
 	private String resource(Lookup lookup) {
 		String s = lookup.asResource().tsv().toString();
 		return conf.artifact().groupId().replace(".", "/") + "/ontology/" + new File(s).getName();
@@ -138,11 +137,6 @@ public class TransactionRenderer {
 	private boolean isPrimitive(Data.Type attribute) {
 		Data data = attribute.asData();
 		return data.isBool() || data.isInteger() || data.isLongInteger() || data.isId() || data.isReal();
-	}
-
-	private String[] categories(Lookup lookup) {
-		return lookup.asEnumerate().itemList().stream().
-				map(e -> e.name$() + "(" + e.index() + ")").toArray(String[]::new);
 	}
 
 	private Integer sizeOf(Lookup lookup) {

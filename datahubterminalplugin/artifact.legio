@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "2.12.6") data-hub-terminal-plugin
+Artifact("io.intino.ness", "2.12.7") data-hub-terminal-plugin
 	Imports
 		Compile("io.intino", "data-hub", "5.5.0")
 			Exclude("io.intino.alexandria", "exceptions")
@@ -23,10 +23,10 @@ Artifact("io.intino.ness", "2.12.6") data-hub-terminal-plugin
 		Compile("org.apache.maven.shared", "maven-invoker", "3.0.1")
 
 		Test("io.intino.legio", "model", "3.2.0")
+		Test("io.intino.alexandria", "core-framework", "1.0.4")
 		Test("io.intino.alexandria", "bpm-framework", "1.3.1")
 		Test("io.intino.alexandria", "event", "2.0.3")
 		Test("io.intino.alexandria", "led", "1.1.4")
-		Test("io.intino.alexandria", "core-framework", "1.0.4")
 		Test("io.intino.alexandria", "terminal-jms", "3.0.14")
 		Test("junit", "junit", "4.13")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, attachSources = true)
