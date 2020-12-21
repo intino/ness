@@ -58,11 +58,12 @@ public class Model {
 	public static String defaultValue(Data.Type self) {
 		Data data = self.asData();
 		if (data.isBool()) return String.valueOf(data.asBool().defaultValue());
-		if (data.isInteger() || data.isReal()) return "0";
+		if (data.isInteger()) return "0";
+		else if (data.isReal()) return "0D";
 		if (data.isLongInteger()) return "0L";
 		if (data.isCategory()) {
 			Lookup lookup = data.asCategory().lookup();
-			return lookup == null ? "null": lookup.name$() + ".NA";
+			return lookup == null ? "null" : lookup.name$() + ".NA";
 		}
 		return "null";
 	}
