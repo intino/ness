@@ -1,6 +1,5 @@
 package io.intino.ness.datahubterminalplugin.renders.lookups;
 
-import io.intino.Configuration;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.graph.Data;
 import io.intino.datahub.graph.Lookup;
@@ -11,34 +10,60 @@ import io.intino.magritte.framework.Concept;
 import io.intino.magritte.framework.Predicate;
 import io.intino.ness.datahubterminalplugin.Commons;
 import io.intino.ness.datahubterminalplugin.renders.Formatters;
+import io.intino.ness.datahubterminalplugin.renders.terminals.LookupsTemplate;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
+import static io.intino.ness.datahubterminalplugin.Commons.writeFrame;
 import static io.intino.ness.datahubterminalplugin.renders.Formatters.firstUpperCase;
 
 public class LookupRenderer {
-	private final Lookup lookup;
-	private final Configuration conf;
 	private final File destination;
 	private final List<File> resDirectories;
 	private final String rootPackage;
 
-	public LookupRenderer(Lookup lookup, Configuration conf, File destination, List<File> resDirectories, String rootPackage) {
-		this.lookup = lookup;
-		this.conf = conf;
+	public LookupRenderer(File destination, List<File> resDirectories, String rootPackage) {
 		this.destination = destination;
 		this.resDirectories = resDirectories;
 		this.rootPackage = rootPackage;
 	}
 
-	public void render() {
+	public void render(Lookup lookup) {
 		String rootPackage = lookupsPackage();
 		final File packageFolder = new File(destination, rootPackage.replace(".", File.separator));
 		final Frame frame = buildFrame(lookup);
-		Commons.writeFrame(packageFolder, lookup.name$(), template().render(new FrameBuilder("root").add("root", rootPackage).add("package", rootPackage).add("lookup", frame)));
+		Commons.writeFrame(packageFolder, lookup.name$(), template(lookup).render(new FrameBuilder("root").add("root", rootPackage).add("package", rootPackage).add("lookup", frame)));
+	}
+
+	public void renderLookupsClass(List<Lookup> lookups) {
+		final File packageFolder = new File(destination, rootPackage.replace(".", File.separator));
+		if (!lookups.isEmpty())
+			writeFrame(packageFolder, "Lookups", lookupsClassTemplate().render(renderLookups(lookups.stream().filter(Lookup::isDynamic).map(Lookup::asDynamic))));
+	}
+
+	private Frame renderLookups(Stream<Lookup.Dynamic> lookups) {
+		Set<String> namespaces = new LinkedHashSet<>();
+		FrameBuilder fb = new FrameBuilder("lookups");
+		fb.add("package", rootPackage);
+		lookups.forEach(l -> {
+			renderLookup(rootPackage + ".lookups", fb, l);
+			namespaces.add(l.namespace());
+		});
+		fb.add("namespace", namespaces.toArray(new String[0]));
+		return fb.toFrame();
+	}
+
+	private void renderLookup(String lookupsPackage, FrameBuilder fb, Lookup.Dynamic l) {
+		fb.add("lookup", new FrameBuilder("lookup").
+				add("qn", lookupsPackage + "." + firstUpperCase(l.name$())).
+				add("namespace", l.namespace()).
+				add("name", l.name$()));
 	}
 
 	private Frame buildFrame(Lookup lookup) {
@@ -93,7 +118,7 @@ public class LookupRenderer {
 					add("typePrimitive", typePrimitive(column)).
 					add("defaultValue", column.asType().defaultValueString()).
 					add("idColumnName", idColumn.name$()).
-					add("idColumnType",  idPrimitive ? idColumn.asType().primitive() : idColumn.asType().type());
+					add("idColumnType", idPrimitive ? idColumn.asType().primitive() : idColumn.asType().type());
 			if (column.isCategory()) b.add("category").add("lookup", column.asCategory().lookup().name$());
 			column.core$().conceptList().stream().filter(Concept::isAspect).map(Predicate::name).forEach(b::add);
 			builder.add("column", b.toFrame());
@@ -137,11 +162,18 @@ public class LookupRenderer {
 				map(e -> new FrameBuilder("entry").add("name", e.name$()).add("index", e.index()).add("label", e.label()).toFrame()).toArray(Frame[]::new);
 	}
 
-	private Template template() {
+	private Template template(Lookup lookup) {
 		return Formatters.customize(lookup.isDynamic() ? new DynamicLookupTemplate() : new LookupTemplate());
 	}
 
 	private String lookupsPackage() {
 		return rootPackage + ".lookups";
+	}
+
+	private Template lookupsClassTemplate() {
+		return Formatters.customize(new LookupsTemplate()).add("typeFormat", (value) -> {
+			if (value.toString().contains(".")) return Formatters.firstLowerCase(value.toString());
+			else return value;
+		});
 	}
 }

@@ -29,17 +29,11 @@ public class TerminalRenderer {
 
 	public void render() {
 		final File packageFolder = new File(srcDir, rootPackage.replace(".", File.separator));
-		writeLookups(packageFolder);
 		writeTerminal(packageFolder);
 	}
 
 	private void writeTerminal(File packageFolder) {
 		writeFrame(packageFolder, Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString(), terminalTemplate().render(createTerminalFrame()));
-	}
-
-	private void writeLookups(File packageFolder) {
-		List<Lookup.Dynamic> lookups = terminal.core$().graph().find(Lookup.Dynamic.class);
-		if (!lookups.isEmpty()) writeFrame(packageFolder, "Lookups", lookupsTemplate().render(createLookups(lookups)));
 	}
 
 	private Frame createTerminalFrame() {
@@ -63,18 +57,6 @@ public class TerminalRenderer {
 
 	private void renderLookup(FrameBuilder fb, Lookup.Dynamic l) {
 		renderLookup(rootPackage + ".lookups", fb, l);
-	}
-
-	private Frame createLookups(List<Lookup.Dynamic> lookups) {
-		Set<String> namespaces = new LinkedHashSet<>();
-		FrameBuilder fb = new FrameBuilder("lookups");
-		fb.add("package", rootPackage);
-		for (Lookup.Dynamic l : lookups) {
-			renderLookup(rootPackage + ".lookups", fb, l);
-			namespaces.add(l.namespace());
-		}
-		fb.add("namespace", namespaces.toArray(new String[0]));
-		return fb.toFrame();
 	}
 
 	private void renderLookup(String lookupsPackage, FrameBuilder fb, Lookup.Dynamic l) {
@@ -157,13 +139,6 @@ public class TerminalRenderer {
 
 	private Template terminalTemplate() {
 		return Formatters.customize(new TerminalTemplate()).add("typeFormat", (value) -> {
-			if (value.toString().contains(".")) return Formatters.firstLowerCase(value.toString());
-			else return value;
-		});
-	}
-
-	private Template lookupsTemplate() {
-		return Formatters.customize(new LookupsTemplate()).add("typeFormat", (value) -> {
 			if (value.toString().contains(".")) return Formatters.firstLowerCase(value.toString());
 			else return value;
 		});

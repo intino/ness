@@ -32,7 +32,7 @@ class OntologyPublisher {
 	private final List<File> sourceDirectories;
 	private final Map<String, String> versions;
 	private final PluginLauncher.SystemProperties systemProperties;
-	private final String basePackage;
+	private final String rootPackage;
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
 	private final StringBuilder errorStream;
@@ -50,7 +50,7 @@ class OntologyPublisher {
 		this.sourceDirectories = moduleStructure.sourceDirectories;
 		this.versions = versions;
 		this.systemProperties = systemProperties;
-		this.basePackage = configuration.artifact().groupId().toLowerCase() + "." + Formatters.snakeCaseToCamelCase().format(configuration.artifact().name()).toString().toLowerCase();
+		this.rootPackage = configuration.artifact().groupId().toLowerCase() + "." + Formatters.snakeCaseToCamelCase().format(configuration.artifact().name()).toString().toLowerCase();
 		this.invokedPhase = invokedPhase;
 		this.logger = logger;
 		errorStream = new StringBuilder();
@@ -58,7 +58,6 @@ class OntologyPublisher {
 
 	boolean publish() {
 		if (!createSources()) return false;
-		if(true) return true;
 		try {
 			logger.println("Publishing ontology...");
 			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
@@ -76,11 +75,12 @@ class OntologyPublisher {
 		srcDirectory.mkdirs();
 		Map<Event, Split> eventSplitMap = splitEvents();
 		Map<Transaction, Split> transactionsSplitMap = collectSplitTransactions();
-		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
-		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, basePackage).render());
-		transactions.stream().parallel().forEach(t -> new TransactionRenderer(t, conf, transactionsSplitMap.get(t), srcDirectory, basePackage).render());
-		if (lookups.stream().anyMatch(Lookup::isDynamic)) renderLookupInterface(srcDirectory, basePackage);
-		lookups.stream().parallel().forEach(l -> new LookupRenderer(l, conf, srcDirectory, resDirectories, basePackage).render());
+		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, rootPackage).render());
+		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, rootPackage).render());
+		transactions.stream().parallel().forEach(t -> new TransactionRenderer(t, conf, transactionsSplitMap.get(t), srcDirectory, rootPackage).render());
+		if (lookups.stream().anyMatch(Lookup::isDynamic)) renderLookupInterface(srcDirectory, rootPackage);
+		LookupRenderer lookupRenderer = new LookupRenderer(srcDirectory, resDirectories, rootPackage);
+		lookups.stream().parallel().forEach(lookupRenderer::render);
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
 		lookups.stream().filter(Lookup::isResource).map(Lookup::asResource).
@@ -94,11 +94,18 @@ class OntologyPublisher {
 						Logger.error(e);
 					}
 				});
+
+		lookupRenderer.renderLookupsClass(lookups);
 		return true;
 	}
 
+	private void writeLookupsClass(File packageFolder) {
+
+	}
+
+
 	private void renderLookupInterface(File srcDirectory, String basePackage) {
-		final File destination =  new File(srcDirectory, basePackage.replace(".", File.separator) + File.separator + "DynamicLookup.java");
+		final File destination = new File(srcDirectory, basePackage.replace(".", File.separator) + File.separator + "DynamicLookup.java");
 		String render = new IDynamicLookupTemplate().render(new FrameBuilder("interface").add("package", basePackage));
 		try {
 			Files.write(destination.toPath(), render.getBytes());
@@ -144,7 +151,7 @@ class OntologyPublisher {
 	}
 
 	private void mvn(String goal) throws IOException, MavenInvocationException {
-		final File pom = createPom(root, basePackage, conf.artifact().version());
+		final File pom = createPom(root, rootPackage, conf.artifact().version());
 		final InvocationResult result = invoke(pom, goal);
 		if (result != null && result.getExitCode() != 0) {
 			logger.println(errorStream.toString());
