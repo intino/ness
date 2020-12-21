@@ -43,6 +43,10 @@ def type(lookup & resource)
 			return entriesByName.getOrDefault(name, NA);
 		}
 
+		public static Entry entry(Predicate<Entry> filter) {
+			return entries.values().stream().filter(filter).findFirst().orElse(NA);
+		}
+
 		public static class Entry {
 			$column+declaration...[$NL]
 
