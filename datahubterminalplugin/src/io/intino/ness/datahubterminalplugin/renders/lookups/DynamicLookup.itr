@@ -26,8 +26,8 @@ def type(lookup & dynamic)
 			try {
 				this.connection.createStatement().execute("CREATE TABLE IF NOT EXISTS $name+FirstUpperCase ($column+createSql...[, ]);");
 				$index+createOnOpen...[$NL]
-				this.insertStatement = connection.prepareStatement("INSERT INTO contratos ($column+name...[, ]) VALUES($column+question...[, ]);");
-				this.queryStatement = connection.prepareStatement("SELECT * FROM contratos WHERE $column+idName=?;");
+				this.insertStatement = connection.prepareStatement("INSERT INTO $name+FirstUpperCase ($column+name...[, ]) VALUES($column+question...[, ]);");
+				this.queryStatement = connection.prepareStatement("SELECT * FROM $name+FirstUpperCase WHERE $column+idName=?;");
 				$column+updateStatement...[$NL]
 			} catch (SQLException throwables) {
 				Logger.error(throwables);
@@ -110,7 +110,7 @@ def type(column & id) trigger(createSql)
 end
 
 def type(column) trigger(createSql)
-	$name $type+sqlType $isRequired
+	$name+firstLowerCase $type+sqlType $isRequired
 end
 
 def attribute(this:true) trigger(isRequired)
@@ -118,17 +118,17 @@ def attribute(this:true) trigger(isRequired)
 end
 
 def type(column & id) trigger(idName)
-	$name
+	$name+firstLowerCase
 end
 def trigger(idName)
 end
 
 def type(column) trigger(name)
-	$name
+	$name+firstLowerCase
 end
 
 def type(column & id) trigger(idType)
-	$type
+	$type+FirstUpperCase
 end
 def type(column) trigger(idType)
 end
@@ -151,7 +151,7 @@ def type(column) !type(id) trigger(updateStatementExecute)
 end
 
 def type(column) !type(id) trigger(updateStatement)
-	this.update$name+FirstUpperCase~Statement = connection.prepareStatement("UPDATE $lookup SET $name=? WHERE $idColumnName=?;");
+	this.update$name+FirstUpperCase~Statement = connection.prepareStatement("UPDATE $lookup SET $name+firstLowerCase=? WHERE $idColumnName=?;");
 end
 
 def type(column) trigger(parameter)
@@ -195,10 +195,10 @@ def type(onClose) trigger(createOnClose)
 end
 
 def type(column) !type(id) trigger(setter)
-	public void $name+firstLowerCase($idColumnType $idColumnName, $type value) {
+	public void $name+firstLowerCase($idColumnType $idColumnName+firstLowerCase, $type value) {
 		try {
 			update$name+FirstUpperCase~Statement.clearParameters();
-			update$name+FirstUpperCase~Statement.set$idColumnType+firstUpperCase(1, $idColumnName);
+			update$name+FirstUpperCase~Statement.set$idColumnType+firstUpperCase(1, $idColumnName+firstLowerCase);
 			update$name+FirstUpperCase~Statement.set$typePrimitive+firstUpperCase(2[$lookup+empty value.index?, value]);
 			update$name+FirstUpperCase~Statement.addBatch();
 			executeStatement();
@@ -209,8 +209,8 @@ def type(column) !type(id) trigger(setter)
 end
 
 def type(column) !type(id) trigger(getter)
-	public $type $name+firstLowerCase($idColumnType $idColumnName) {
-		return entry($idColumnName).$name+firstLowerCase;
+	public $type $name+firstLowerCase($idColumnType $idColumnName+firstLowerCase) {
+		return entry($idColumnName+firstLowerCase).$name+firstLowerCase;
 	}
 end
 

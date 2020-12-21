@@ -15,7 +15,7 @@ def type(lookups)
 end
 
 def trigger(namespace)
-	private java.sql.Connection $this+firstLowerCase;
+	private java.sql.Connection $this+validName+firstLowerCase;
 end
 
 def type(lookup) trigger(field)
@@ -24,15 +24,15 @@ end
 
 def type(lookup) trigger(getter)
 	public $qn $name+firstLowerCase() {
-		if (this.$namespace+firstLowerCase == null) {
+		if (this.$namespace+validName+firstLowerCase == null) {
 			try {
-				this.$namespace+firstLowerCase = java.sql.DriverManager.getConnection("jdbc:sqlite:" + new java.io.File(lookupsDirectory,  "$namespace+firstLowerCase.db"));
-        		this.$namespace+firstLowerCase.setAutoCommit(false);
+				this.$namespace+validName+firstLowerCase = java.sql.DriverManager.getConnection("jdbc:sqlite:" + new java.io.File(lookupsDirectory,  "$namespace+firstLowerCase.db"));
+        		this.$namespace+validName+firstLowerCase.setAutoCommit(false);
 			} catch (java.sql.SQLException e) {
 				io.intino.alexandria.logger.Logger.error(e);
 			}
 		}
-		if (this.$name+firstLowerCase == null) this.$name+firstLowerCase = new $qn($namespace+firstLowerCase);
+		if (this.$name+firstLowerCase == null) this.$name+firstLowerCase = new $qn($namespace+validName+firstLowerCase);
 		return this.$name+firstLowerCase;
 	}
 end

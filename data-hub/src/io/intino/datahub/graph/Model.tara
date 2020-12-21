@@ -116,11 +116,6 @@ Concept Data is abstract
 			var string primitive = "long" is reactive private
 			var integer:{bits} size = 64 bits
 			var integer:{bits} maxSize = 64 bits is final private
-		sub Id
-			var long defaultValue = 0
-			var string type = "Long" is reactive private
-			var string primitive = "long" is reactive private
-			var integer:{bits} size = 64 bits
 		sub Bool
 			var boolean defaultValue = false
 			var string type = "Boolean" is reactive private
@@ -148,7 +143,8 @@ Concept Data is abstract
 			var integer:{bits} size = 8 bits
 
 Concept:Named:RequiresId Transaction
-	has:Named:RequiresAspect:OnlyNumeric Attribute
+	Concept:Named:RequiresAspect:OnlyNumeric Attribute extends Data
+		Aspect id
 
 Concept:Named:RequiresAspect Lookup
 	Aspect Source
@@ -163,6 +159,7 @@ Concept:Named:RequiresAspect Lookup
 			var string namespace
 			Concept:Named:RequiresAspect Column extends Data
 				var boolean isRequired = false
+				Aspect id
 			Concept:Named Index
 				var Column[] columns
 				var boolean createOnClose = false

@@ -1,8 +1,11 @@
 package io.intino.ness.datahubterminalplugin.renders.transactions;
 
 import io.intino.Configuration;
-import io.intino.datahub.graph.*;
+import io.intino.datahub.graph.Data;
 import io.intino.datahub.graph.Datalake.Split;
+import io.intino.datahub.graph.Lookup;
+import io.intino.datahub.graph.Namespace;
+import io.intino.datahub.graph.Transaction;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
@@ -53,7 +56,7 @@ public class TransactionRenderer {
 				add("package", packageName).
 				add("size", (int) Math.ceil(sizeOf(transaction) / (float) Byte.SIZE));
 		if (transaction.attributeList().stream().noneMatch(a -> a.name$().equals("id")))
-			builder.add("id", transaction.attributeList().stream().filter(Data::isId).map(Layer::name$).findFirst().orElse(null));
+			builder.add("id", transaction.attributeList().stream().filter(Transaction.Attribute::isId).map(Layer::name$).findFirst().orElse(null));
 		builder.add("attribute", processAttributes(new ArrayList<>(transaction.attributeList()), transaction.name$()));
 		if (split != null) {
 			List<Split> leafs = split.isLeaf() ? Collections.singletonList(split) : split.leafs();
@@ -66,12 +69,12 @@ public class TransactionRenderer {
 		return transaction.attributeList().stream().map(a -> !a.isCategory() ? a.asType().size() : sizeOf(a.asCategory().lookup())).reduce(Integer::sum).get();
 	}
 
-	private FrameBuilder[] processAttributes(List<Attribute> attributes, String owner) {
+	private FrameBuilder[] processAttributes(List<Transaction.Attribute> attributes, String owner) {
 		List<FrameBuilder> list = new ArrayList<>();
 		int offset = 0;
 		attributes.sort(Comparator.comparingInt(a -> a.asType().size()));
 		Collections.reverse(attributes);
-		for (Attribute attribute : attributes) {
+		for (Transaction.Attribute attribute : attributes) {
 			FrameBuilder b = process(attribute, offset);
 			if (b != null) {
 				offset += attribute.isCategory() ? sizeOf(attribute.asCategory().lookup()) : attribute.asType().size();
@@ -81,24 +84,25 @@ public class TransactionRenderer {
 		return list.toArray(new FrameBuilder[0]);
 	}
 
-	private FrameBuilder process(Attribute attribute, int offset) {
+	private FrameBuilder process(Transaction.Attribute attribute, int offset) {
 		if (attribute.isCategory())
 			return processCategoryAttribute(attribute.asCategory().lookup(), attribute.name$(), offset);
-		else return processAttribute(attribute.asType(), offset);
+		else return processAttribute(attribute, offset);
 	}
 
-	private FrameBuilder processAttribute(Data.Type attribute, int offset) {
+	private FrameBuilder processAttribute(Transaction.Attribute attribute, int offset) {
+		Data.Type type = attribute.asType();
 		FrameBuilder builder = new FrameBuilder("attribute")
-				.add("name", attribute.a$(Attribute.class).name$())
+				.add("name", attribute.a$(Transaction.Attribute.class).name$())
 				.add("offset", offset)
-				.add("type", isPrimitive(attribute) ? attribute.primitive() : attribute.type());
+				.add("type", isPrimitive(type) ? type.primitive() : type.type());
 		attribute.core$().conceptList().stream().filter(Concept::isAspect).map(Predicate::name).forEach(builder::add);
-		if (isAligned(attribute, offset)) builder.add("aligned", "Aligned");
-		else builder.add("bits", attribute.size());
-		builder.add("size", attribute.size());
-		if (attribute.asData().isDateTime()) {
+		if (isAligned(type, offset)) builder.add("aligned", "Aligned");
+		else builder.add("bits", type.size());
+		builder.add("size", type.size());
+		if (type.asData().isDateTime()) {
 			builder.add("precision", "");//TODO
-		} else if (attribute.asData().isDate()) {
+		} else if (type.asData().isDate()) {
 			builder.add("precision", "");//TODO
 		}
 		return builder;
@@ -129,14 +133,9 @@ public class TransactionRenderer {
 		return (offset == 0 || log2(offset) % 1 == 0) && attribute.maxSize() == attribute.size();
 	}
 
-	private String resource(Lookup lookup) {
-		String s = lookup.asResource().tsv().toString();
-		return conf.artifact().groupId().replace(".", "/") + "/ontology/" + new File(s).getName();
-	}
-
 	private boolean isPrimitive(Data.Type attribute) {
 		Data data = attribute.asData();
-		return data.isBool() || data.isInteger() || data.isLongInteger() || data.isId() || data.isReal();
+		return data.isBool() || data.isInteger() || data.isLongInteger() || data.isReal();
 	}
 
 	private Integer sizeOf(Lookup lookup) {

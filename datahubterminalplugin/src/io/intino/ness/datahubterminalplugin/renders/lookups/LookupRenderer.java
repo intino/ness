@@ -116,7 +116,7 @@ public class LookupRenderer {
 	}
 
 	private void addDynamicColumns(FrameBuilder builder, List<Lookup.Dynamic.Column> columnList) {
-		Lookup.Dynamic.Column idColumn = columnList.stream().filter(Data::isId).findFirst().orElse(null);
+		Lookup.Dynamic.Column idColumn = columnList.stream().filter(Lookup.Dynamic.Column::isId).findFirst().orElse(null);
 		if (idColumn == null) return;
 		boolean idPrimitive = isPrimitive(idColumn.asType());
 		for (int i = 0; i < columnList.size(); i++) {
