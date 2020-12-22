@@ -12,8 +12,8 @@ def type(lookup & dynamic)
 	public class $name+FirstUpperCase implements $rootPackage.DynamicLookup {
 		private static final Entry NA = new Entry($column+defaultValue...[, ]);
 		private final java.sql.Connection connection;
-		private PreparedStatement queryStatement;
-		private Statement statement;
+		private Statement getStatement;
+		private Statement setStatement;
 		private int count = 0;
 
 
@@ -25,8 +25,8 @@ def type(lookup & dynamic)
 			try {
 				this.connection.createStatement().execute("CREATE TABLE IF NOT EXISTS $name+FirstUpperCase ($column+createSql...[, ]);");
 				[$index+createOnOpen...[$NL]]
-				this.queryStatement = connection.prepareStatement("SELECT * FROM $name+FirstUpperCase WHERE $column+idName=?;");
-				this.statement = connection.createStatement();
+				this.getStatement = connection.createStatement();
+				this.setStatement = connection.createStatement();
 			} catch (SQLException throwables) {
 				Logger.error(throwables);
 			}
@@ -34,7 +34,7 @@ def type(lookup & dynamic)
 
 		public Entry entry($column+idType $column+idName) {
 			try {
-				ResultSet rs = query($column+idName);
+				ResultSet rs = query("SELECT * FROM $name+FirstUpperCase WHERE $column+idName=" + $column+idName + ";");
 				boolean next = rs.next();
 				if (!next) return NA;
 				$column+getResult...[$NL]
@@ -45,9 +45,15 @@ def type(lookup & dynamic)
 			}
 		}
 
+		[$index+getter...[$NL$NL]]
+
+		[$column+getter...[$NL$NL]]
+
+		[$column+setter...[$NL$NL]]
+
 		public void put($column+parameter...[, ]) {
 			try {
-				statement.addBatch("INSERT INTO $name+FirstUpperCase ($column+name...[, ]) VALUES(" + $column+sqlValue...[+ ", " +] + ");");
+				setStatement.addBatch("INSERT INTO $name+FirstUpperCase ($column+name...[, ]) VALUES(" + $column+sqlValue...[ + ", " + ] + ");");
 				executeStatement();
 			} catch (SQLException e) {
 				Logger.error(e);
@@ -56,7 +62,7 @@ def type(lookup & dynamic)
 
 		public void delete($column+idType $column+idName) {
 			try {
-				statement.addBatch("DELETE FROM $name+FirstUpperCase WHERE $column+idName=" + $column+idName);
+				setStatement.addBatch("DELETE FROM $name+FirstUpperCase WHERE $column+idName=" + $column+idName);
 				executeStatement();
 			} catch (SQLException e) {
 				Logger.error(e);
@@ -67,20 +73,16 @@ def type(lookup & dynamic)
 			try {
 				String textStatement = "DELETE FROM $name+FirstUpperCase WHERE ";
 				$column+whereFilter...[ + " AND ";$NL];
-				statement.addBatch(textStatement);
+				setStatement.addBatch(textStatement);
 				executeStatement();
 			} catch (SQLException e) {
 				Logger.error(e);
 			}
 		}
 
-		[$column+getter...[$NL$NL]]
-
-		[$column+setter...[$NL$NL]]
-
 		public void commit() {
 			try {
-				statement.executeBatch();
+				setStatement.executeBatch();
 				connection.commit();
 			} catch (SQLException e) {
 				Logger.error(e);
@@ -100,13 +102,11 @@ def type(lookup & dynamic)
 
 		private void executeStatement() throws SQLException {
 			if (++count % 100_000 != 0) return;
-			statement.executeBatch();
+			setStatement.executeBatch();
 		}
 
-		private ResultSet query($column+idType index) throws SQLException {
-			queryStatement.clearParameters();
-			queryStatement.set$column+idType(1, index);
-			return queryStatement.executeQuery();
+		private ResultSet query(String query) throws SQLException {
+			return getStatement.executeQuery(query);
 		}
 
 		public static class Entry {
@@ -117,6 +117,11 @@ def type(lookup & dynamic)
 			}
 		}
 	}
+end
+
+
+def type(text) trigger(whereFilter)
+	if ($name+firstLowerCase != null) textStatement += "$name+firstLowerCase='" + $name+firstLowerCase + "'"
 end
 
 def trigger(whereFilter)
@@ -196,17 +201,51 @@ def type(column) trigger(declaration)
 end
 
 def type(onOpen) trigger(createOnOpen)
-	this.connection.createStatement().execute("CREATE INDEX IF NOT EXISTS $name ON $table ($column+firstLowerCase...[, ]);");
+	this.connection.createStatement().execute("CREATE INDEX IF NOT EXISTS $name ON $table+FirstUpperCase ($idxColumn+name...[, ]);");
 end
 
 def type(onClose) trigger(createOnClose)
-	this.connection.createStatement().execute("CREATE INDEX IF NOT EXISTS $name ON $table ($column+firstLowerCase...[, ]);");
+	this.connection.createStatement().execute("CREATE INDEX IF NOT EXISTS $name ON $table+FirstUpperCase ($idxColumn+name...[, ]);");
+end
+
+def type(text) trigger(whereFilterValue)
+	"$name+firstLowerCase='" + $name+firstLowerCase + "'"
+end
+
+def trigger(whereFilterValue)
+	"$name+firstLowerCase=" + $name+firstLowerCase
+end
+
+def type(column) !type(idx) trigger(localField)
+	$type $name+firstLowerCase;
+end
+
+def type(column) !type(idx) trigger(getResultList)
+	$name+firstLowerCase = rs.get$type+FirstUpperCase($index);
+end
+
+def type(index) trigger(getter)
+	public java.util.List<Entry> entriesBy$name+FirstUpperCase($idxColumn+parameter...[, ]) {
+		java.util.List<Entry> result = new java.util.ArrayList<>();
+		$column+localField...[$NL]
+		try {
+			ResultSet rs = query("SELECT * FROM $table+FirstUpperCase WHERE " + $idxColumn+whereFilterValue...[ + ] + ";");
+			while (rs.next()) {
+				$column+getResultList...[$NL]
+				result.add(new Entry($column+name...[, ]));
+			}
+			return result;
+		} catch (SQLException e) {
+			Logger.error(e);
+			return result;
+		}
+	}
 end
 
 def type(column & text) !type(id) trigger(setter)
 	public void $name+firstLowerCase($idColumnType $idColumnName+firstLowerCase, $type value) {
 		try {
-			this.statement.addBatch("UPDATE $table SET $name+firstLowerCase=? WHERE $idColumnName+firstLowerCase='" + value + "';");
+			this.setStatement.addBatch("UPDATE $table+FirstUpperCase SET $name+firstLowerCase=? WHERE $idColumnName+firstLowerCase='" + value + "';");
 			executeStatement();
 		} catch (SQLException e) {
 			Logger.error(e);
@@ -217,7 +256,7 @@ end
 def type(column) !type(id) trigger(setter)
 	public void $name+firstLowerCase($idColumnType $idColumnName+firstLowerCase, $type value) {
 		try {
-			this.statement.addBatch("UPDATE $table SET $name+firstLowerCase=? WHERE $idColumnName+firstLowerCase=" + value +";");
+			this.setStatement.addBatch("UPDATE $table+FirstUpperCase SET $name+firstLowerCase=? WHERE $idColumnName+firstLowerCase=" + value +";");
 			executeStatement();
 		} catch (SQLException e) {
 			Logger.error(e);
@@ -232,11 +271,11 @@ def type(column) !type(id) trigger(getter)
 end
 
 def type(column & category) trigger(insert)
-	statement.set$typePrimitive+FirstUpperCase($index, $name+firstLowerCase.index);
+	setStatement.set$typePrimitive+FirstUpperCase($index, $name+firstLowerCase.index);
 end
 
 def type(column) trigger(insert)
-	statement.set$typePrimitive+FirstUpperCase($index, $name+firstLowerCase);
+	setStatement.set$typePrimitive+FirstUpperCase($index, $name+firstLowerCase);
 end
 
 def trigger(empty)

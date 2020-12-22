@@ -6,16 +6,8 @@
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/res" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/test-res" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/first/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/ontology/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/generadorHub/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/contratacionHub/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/temp/test/first/src" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/test/ontology/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/gc/ontology/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/gc/bpmTerminal/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/gc/generadoresTerminal/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/cosmos/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/temp/gc/ontology/src" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/temp/gc/datahubTerminal/src" isTestSource="true" />
     </content>
     <orderEntry type="inheritedJdk" />

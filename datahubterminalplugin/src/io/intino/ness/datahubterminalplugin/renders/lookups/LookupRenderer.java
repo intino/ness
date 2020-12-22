@@ -96,11 +96,18 @@ public class LookupRenderer {
 
 	private void addIndexes(FrameBuilder builder, List<Lookup.Dynamic.Index> indices) {
 		for (Lookup.Dynamic.Index index : indices) {
+			Lookup.Dynamic lookup = index.core$().ownerAs(Lookup.Dynamic.class);
+			List<Lookup.Dynamic.Column> columns = index.columns();
 			builder.add("index", new FrameBuilder("index", index.createOnClose() ? "onClose" : "onOpen")
 					.add("name", index.name$())
 					.add("table", index.core$().ownerAs(Lookup.class).name$())
-					.add("column", index.columns().stream().map(Layer::name$).toArray(String[]::new)));
+					.add("idxColumn", columns.stream().map(c -> frameOf(c, indexOf(c))).toArray(FrameBuilder[]::new))
+					.add("column", lookup.columnList().stream().map(c -> frameOf(c, indexOf(c)).add(columns.contains(c)? "idx": "regular")).toArray(FrameBuilder[]::new)));
 		}
+	}
+
+	private int indexOf(Lookup.Dynamic.Column c) {
+		return c.core$().ownerAs(Lookup.Dynamic.class).columnList().indexOf(c);
 	}
 
 	private void addResourceColumns(FrameBuilder builder, List<Lookup.Resource.Column> columnList) {
@@ -122,21 +129,24 @@ public class LookupRenderer {
 		boolean idPrimitive = isPrimitive(idColumn.asType());
 		for (int i = 0; i < columnList.size(); i++) {
 			Lookup.Dynamic.Column column = columnList.get(i);
-			FrameBuilder b = new FrameBuilder("column").
-					add(column.isId() ? "id" : "regular").
-					add(isPrimitive(column.asType()) ? "primitive" : "complex").
-					add("table", column.core$().ownerAs(Lookup.class).name$()).
-					add("name", column.name$()).
-					add("index", i).
-					add("type", type(column)).
-					add("typePrimitive", typePrimitive(column)).
-					add("defaultValue", column.asType().defaultValueString()).
-					add("idColumnName", idColumn.name$()).
-					add("idColumnType", idPrimitive ? idColumn.asType().primitive() : idColumn.asType().type());
+			FrameBuilder b = frameOf(column, i);
+			b.add("idColumnName", idColumn.name$()).add("idColumnType", idPrimitive ? idColumn.asType().primitive() : idColumn.asType().type());
 			if (column.isCategory()) b.add("category").add("lookup", column.asCategory().lookup().name$());
 			column.core$().conceptList().stream().filter(Concept::isAspect).map(Predicate::name).forEach(b::add);
 			builder.add("column", b.toFrame());
 		}
+	}
+
+	private FrameBuilder frameOf(Lookup.Dynamic.Column column, int index) {
+		return new FrameBuilder("column").
+				add(column.isId() ? "id" : "regular").
+				add(isPrimitive(column.asType()) ? "primitive" : "complex").
+				add("table", column.core$().ownerAs(Lookup.class).name$()).
+				add("name", column.name$()).
+				add("index", index).
+				add("type", type(column)).
+				add("typePrimitive", typePrimitive(column)).
+				add("defaultValue", column.asType().defaultValueString());
 	}
 
 	private String typePrimitive(Lookup.Dynamic.Column column) {
