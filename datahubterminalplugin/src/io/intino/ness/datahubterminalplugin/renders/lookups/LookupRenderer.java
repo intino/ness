@@ -90,11 +90,16 @@ public class LookupRenderer {
 
 	private void asDynamic(Lookup lookup, FrameBuilder builder) {
 		builder.add("dynamic");
-		addIndexes(builder, lookup.asDynamic().indexList());
+		Lookup.Dynamic.Column idColumn = lookup.asDynamic().columnList().stream().filter(Lookup.Dynamic.Column::isId).findFirst().orElse(null);
+		addIndexes(builder, lookup.asDynamic().indexList(), idColumn);
 		addDynamicColumns(builder, lookup.asDynamic().columnList());
+		if (idColumn != null) {
+			boolean idPrimitive = isPrimitive(idColumn.asType());
+			builder.add("idColumnName", idColumn.name$()).add("idColumnType", idPrimitive ? idColumn.asType().primitive() : idColumn.asType().type());
+		}
 	}
 
-	private void addIndexes(FrameBuilder builder, List<Lookup.Dynamic.Index> indices) {
+	private void addIndexes(FrameBuilder builder, List<Lookup.Dynamic.Index> indices, Lookup.Dynamic.Column idColumn) {
 		for (Lookup.Dynamic.Index index : indices) {
 			Lookup.Dynamic lookup = index.core$().ownerAs(Lookup.Dynamic.class);
 			List<Lookup.Dynamic.Column> columns = index.columns();
@@ -102,8 +107,16 @@ public class LookupRenderer {
 					.add("name", index.name$())
 					.add("table", index.core$().ownerAs(Lookup.class).name$())
 					.add("idxColumn", columns.stream().map(c -> frameOf(c, indexOf(c))).toArray(FrameBuilder[]::new))
-					.add("column", lookup.columnList().stream().map(c -> frameOf(c, indexOf(c)).add(columns.contains(c)? "idx": "regular")).toArray(FrameBuilder[]::new)));
+					.add("column", lookup.columnList().stream().map(c -> frameOf(c, indexOf(c)).add(columns.contains(c) ? "idx" : "regular")).toArray(FrameBuilder[]::new)));
 		}
+		if (idColumn != null) {
+			builder.add("index", new FrameBuilder("index", "id", "onOpen")
+					.add("name", idColumn.name$())
+					.add("table", idColumn.core$().ownerAs(Lookup.class).name$())
+					.add("idxColumn", frameOf(idColumn, indexOf(idColumn)))
+					.add("column", idColumn.core$().ownerAs(Lookup.Dynamic.class).columnList().stream().map(c -> frameOf(c, indexOf(c)).add(c.equals(idColumn) ? "idx" : "regular")).toArray(FrameBuilder[]::new)));
+		}
+
 	}
 
 	private int indexOf(Lookup.Dynamic.Column c) {
@@ -125,20 +138,17 @@ public class LookupRenderer {
 
 	private void addDynamicColumns(FrameBuilder builder, List<Lookup.Dynamic.Column> columnList) {
 		Lookup.Dynamic.Column idColumn = columnList.stream().filter(Lookup.Dynamic.Column::isId).findFirst().orElse(null);
-		if (idColumn == null) return;
-		boolean idPrimitive = isPrimitive(idColumn.asType());
 		for (int i = 0; i < columnList.size(); i++) {
 			Lookup.Dynamic.Column column = columnList.get(i);
 			FrameBuilder b = frameOf(column, i);
-			b.add("idColumnName", idColumn.name$()).add("idColumnType", idPrimitive ? idColumn.asType().primitive() : idColumn.asType().type());
-			if (column.isCategory()) b.add("category").add("lookup", column.asCategory().lookup().name$());
-			column.core$().conceptList().stream().filter(Concept::isAspect).map(Predicate::name).forEach(b::add);
+			if (idColumn != null)
+				b.add("hasId").add("idColumnName", idColumn.name$()).add("idColumnType", isPrimitive(idColumn.asType()) ? idColumn.asType().primitive() : idColumn.asType().type());
 			builder.add("column", b.toFrame());
 		}
 	}
 
 	private FrameBuilder frameOf(Lookup.Dynamic.Column column, int index) {
-		return new FrameBuilder("column").
+		FrameBuilder builder = new FrameBuilder("column").
 				add(column.isId() ? "id" : "regular").
 				add(isPrimitive(column.asType()) ? "primitive" : "complex").
 				add("table", column.core$().ownerAs(Lookup.class).name$()).
@@ -147,6 +157,9 @@ public class LookupRenderer {
 				add("type", type(column)).
 				add("typePrimitive", typePrimitive(column)).
 				add("defaultValue", column.asType().defaultValueString());
+		column.core$().conceptList().stream().filter(Concept::isAspect).map(Predicate::name).forEach(builder::add);
+		if (column.isCategory()) builder.add("category").add("lookup", column.asCategory().lookup().name$());
+		return builder;
 	}
 
 	private String typePrimitive(Lookup.Dynamic.Column column) {
