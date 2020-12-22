@@ -1,38 +1,57 @@
 def type(lookups)
 	package $package+validPackage;
 
+	import java.util.Map;
+
 	public class Lookups {
-		private final java.io.File lookupsDirectory;
+		private final java.io.File directory;
 		$namespace...[$NL]
 		$lookup+field...[$NL]
 
-		public Lookups(java.io.File lookupsDirectory) {
-			this.lookupsDirectory = lookupsDirectory;
+		public Lookups(java.io.File directory) {
+			this.directory = directory;
 		}
 
-		$lookup+getter...[$NL]
+		$lookup+getter...[$NL$NL]
 	}
 end
 
 def trigger(namespace)
-	private java.sql.Connection $this+validName+firstLowerCase;
+	private Map<String, java.sql.Connection> $this+validName+firstLowerCase = new java.util.HashMap<>();
 end
 
 def type(lookup) trigger(field)
-	private $qn $name+firstLowerCase;
+	private Map<String, $qn> $name+firstLowerCase = new java.util.HashMap<>();
 end
 
 def type(lookup) trigger(getter)
 	public $qn $name+firstLowerCase() {
-		if (this.$namespace+validName+firstLowerCase == null) {
+		if (!this.$namespace+validName+firstLowerCase.containsKey("$namespace+firstLowerCase")) {
 			try {
-				this.$namespace+validName+firstLowerCase = java.sql.DriverManager.getConnection("jdbc:sqlite:" + new java.io.File(lookupsDirectory,  "$namespace+firstLowerCase.db"));
-        		this.$namespace+validName+firstLowerCase.setAutoCommit(false);
+				java.sql.Connection connection = java.sql.DriverManager.getConnection("jdbc:sqlite:" + new java.io.File(directory, "$namespace+firstLowerCase" + ".db"));
+				connection.setAutoCommit(false);
+				this.$namespace+validName+firstLowerCase.put("$namespace+firstLowerCase", connection);
 			} catch (java.sql.SQLException e) {
 				io.intino.alexandria.logger.Logger.error(e);
 			}
 		}
-		if (this.$name+firstLowerCase == null) this.$name+firstLowerCase = new $qn($namespace+validName+firstLowerCase);
-		return this.$name+firstLowerCase;
+		if (!this.$name+firstLowerCase.containsKey("$namespace+firstLowerCase"))
+			this.$name+firstLowerCase.put("$namespace+firstLowerCase", new $qn($namespace+validName+firstLowerCase.get("$namespace+firstLowerCase")));
+		return this.$name+firstLowerCase.get("$namespace+firstLowerCase");
+	}
+
+	public $qn $name+firstLowerCase(String split) {
+		if (!this.$namespace+validName+firstLowerCase.containsKey("$namespace+firstLowerCase." + split)) {
+			try {
+				java.sql.Connection connection = java.sql.DriverManager.getConnection("jdbc:sqlite:" + new java.io.File(directory, "$namespace+firstLowerCase." + split + ".db"));
+				connection.setAutoCommit(false);
+				this.$namespace+validName+firstLowerCase.put("$namespace+firstLowerCase." + split, connection);
+			} catch (java.sql.SQLException e) {
+				io.intino.alexandria.logger.Logger.error(e);
+			}
+		}
+		if (!this.$name+firstLowerCase.containsKey("$namespace+firstLowerCase." + split))
+			this.$name+firstLowerCase.put("$namespace+firstLowerCase." + split, new $qn($namespace+validName+firstLowerCase.get("$namespace+firstLowerCase." + split)));
+		return this.$name+firstLowerCase.get("$namespace+firstLowerCase." + split);
 	}
 end

@@ -129,7 +129,11 @@ def trigger(whereFilter)
 end
 
 def type(column & id) trigger(createSql)
-	$name+firstLowerCase $type+sqlType NOT NULL PRIMARY_KEY
+	$name+firstLowerCase $type+sqlType NOT NULL PRIMARY KEY
+end
+
+def type(column & category) trigger(createSql)
+	$name+firstLowerCase int[ $isRequired]
 end
 
 def type(column) trigger(createSql)
@@ -164,8 +168,28 @@ def type(column) type(text) trigger(sqlValue)
 	"'" + $name+firstLowerCase + "'"
 end
 
+def type(column) type(date) trigger(sqlValue)
+	$name+firstLowerCase.toEpochDay()
+end
+
+def type(column) type(datetime) trigger(sqlValue)
+	$name+firstLowerCase.toEpochMilli()
+end
+
+def type(column) type(category) trigger(sqlValue)
+	$name+firstLowerCase.index
+end
+
 def type(column) trigger(sqlValue)
 	$name+firstLowerCase
+end
+
+def type(column) attribute(type:int) trigger(parameter)
+	Integer $name+firstLowerCase
+end
+
+def type(column) type(date | datetime) trigger(parameter)
+	$type $name+firstLowerCase
 end
 
 def type(column) trigger(parameter)
@@ -176,15 +200,27 @@ def type(column) !type(id) type(category) trigger(getResult)
 	$type $name+firstLowerCase = $lookup.entry(rs.getInt($index));
 end
 
+def type(column) type(date) trigger(getResult)
+	$type $name+firstLowerCase = java.time.LocalDate.ofEpochDay(rs.getLong($index));
+end
+
+def type(column) type(datetime) trigger(getResult)
+	$type $name+firstLowerCase = java.time.Instant.ofEpochMilli(rs.getLong($index));
+end
+
 def type(column) !type(id) trigger(getResult)
 	$type $name+firstLowerCase = rs.get$type+FirstUpperCase($index);
 end
 
-def attribute(this:boolean) trigger(sqlType)
-	int
+def attribute(this:long) trigger(sqlType)
+	bigint
 end
 
-def attribute(this:long) trigger(sqlType)
+def attribute(this:java.time.LocalDate) trigger(sqlType)
+	bigint
+end
+
+def attribute(this:java.time.Instant) trigger(sqlType)
 	bigint
 end
 
@@ -197,7 +233,7 @@ def type(column) trigger(assign)
 end
 
 def type(column) trigger(declaration)
-	public final $type $name+firstLowerCase;
+	public $type $name+firstLowerCase;
 end
 
 def type(onOpen) trigger(createOnOpen)
@@ -245,7 +281,18 @@ end
 def type(column & text) !type(id) trigger(setter)
 	public void $name+firstLowerCase($idColumnType $idColumnName+firstLowerCase, $type value) {
 		try {
-			this.setStatement.addBatch("UPDATE $table+FirstUpperCase SET $name+firstLowerCase=? WHERE $idColumnName+firstLowerCase='" + value + "';");
+			this.setStatement.addBatch("UPDATE $table+FirstUpperCase SET $name+firstLowerCase='" + value + "' WHERE $idColumnName+firstLowerCase='" +  $idColumnName+firstLowerCas + "';");
+			executeStatement();
+		} catch (SQLException e) {
+			Logger.error(e);
+		}
+	}
+end
+
+def type(column & category) !type(id) trigger(setter)
+	public void $name+firstLowerCase($idColumnType $idColumnName+firstLowerCase, $type value) {
+		try {
+			this.setStatement.addBatch("UPDATE $table+FirstUpperCase SET $name+firstLowerCase=" + value.index + " WHERE $idColumnName+firstLowerCase=" +  $idColumnName+firstLowerCas +";");
 			executeStatement();
 		} catch (SQLException e) {
 			Logger.error(e);
@@ -256,7 +303,7 @@ end
 def type(column) !type(id) trigger(setter)
 	public void $name+firstLowerCase($idColumnType $idColumnName+firstLowerCase, $type value) {
 		try {
-			this.setStatement.addBatch("UPDATE $table+FirstUpperCase SET $name+firstLowerCase=? WHERE $idColumnName+firstLowerCase=" + value +";");
+			this.setStatement.addBatch("UPDATE $table+FirstUpperCase SET $name+firstLowerCase=" + value + " WHERE $idColumnName+firstLowerCase=" + $idColumnName+firstLowerCase +";");
 			executeStatement();
 		} catch (SQLException e) {
 			Logger.error(e);
