@@ -113,7 +113,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private String ledVersion() {
 		List<String> versions = ArtifactoryConnector.ledVersions();
 		Collections.reverse(versions);
-		return versions.isEmpty() ? MINIMUM_EVENT_VERSION : suitableIngestionVersion(versions);
+		return versions.isEmpty() ? MINIMUM_LED_VERSION : suitableLedVersion(versions);
 	}
 
 	private String suitableTerminalVersion(List<String> versions) {
