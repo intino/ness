@@ -151,6 +151,12 @@ def type(table) trigger(getter)
 	}
 end
 
+def type(primitive & single & date) !attribute(defaultValue:null) trigger(getter)
+	public $type $name+firstLowerCase() {
+		return $type.ofInstant(message.get("$name+FirstLowerCase").asInstant());
+	}
+end
+
 def type(primitive & single) !attribute(defaultValue:null) trigger(getter)
 	public $type $name+firstLowerCase() {
 		return message.get("$name+FirstLowerCase").as$simpleType();

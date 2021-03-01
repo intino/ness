@@ -134,7 +134,7 @@ public class EventRenderer {
 	}
 
 	private FrameBuilder process(Data.Integer attribute) {
-		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
+		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type(), "int")
 				.add("name", attribute.a$(Attribute.class).name$())
 				.add("type", attribute.type())
 				.add("simpleType", attribute.type().substring(attribute.type().lastIndexOf(".") + 1))
@@ -143,7 +143,7 @@ public class EventRenderer {
 	}
 
 	private FrameBuilder process(Data.LongInteger attribute) {
-		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
+		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type(), "long")
 				.add("name", attribute.a$(Attribute.class).name$())
 				.add("type", attribute.type())
 				.add("simpleType", attribute.type().substring(attribute.type().lastIndexOf(".") + 1))
@@ -152,7 +152,7 @@ public class EventRenderer {
 
 
 	private FrameBuilder process(Data.Bool attribute) {
-		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
+		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type(), "bool")
 				.add("name", attribute.a$(Attribute.class).name$())
 				.add("type", attribute.type())
 				.add("simpleType", attribute.type())
@@ -160,7 +160,7 @@ public class EventRenderer {
 	}
 
 	private FrameBuilder process(Data.Text attribute) {
-		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
+		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type(), "text")
 				.add("name", attribute.a$(Attribute.class).name$())
 				.add("type", attribute.type())
 				.add("simpleType", attribute.type())
@@ -168,7 +168,7 @@ public class EventRenderer {
 	}
 
 	private FrameBuilder process(Data.DateTime attribute) {
-		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
+		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type(), "datetime")
 				.add("name", attribute.a$(Attribute.class).name$())
 				.add("type", attribute.type())
 				.add("simpleType", attribute.type().substring(attribute.type().lastIndexOf(".") + 1))
@@ -176,7 +176,7 @@ public class EventRenderer {
 	}
 
 	private FrameBuilder process(Data.Date attribute) {
-		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type())
+		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type(), "date")
 				.add("name", attribute.a$(Attribute.class).name$())
 				.add("simpleType", attribute.type().substring(attribute.type().lastIndexOf(".") + 1))
 				.add("type", attribute.type());
