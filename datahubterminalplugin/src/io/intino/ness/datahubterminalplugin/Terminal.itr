@@ -54,7 +54,6 @@ def type(terminal)
 			private final io.intino.alexandria.ingestion.SessionHandler sessionHandler;
 			private final io.intino.alexandria.ingestion.EventSession eventSession;
 			private final io.intino.alexandria.ingestion.SetSession setSession;
-			private final io.intino.alexandria.ingestion.TransactionSession transactionSession;
 
 			public BatchSession(java.io.File dataHubStage, java.io.File temporalStage) {
 				this(dataHubStage, temporalStage, new Config());
@@ -66,7 +65,6 @@ def type(terminal)
 				this.sessionHandler = new io.intino.alexandria.ingestion.SessionHandler(temporalStage);
 				this.eventSession = sessionHandler.createEventSession();
 				this.setSession = sessionHandler.createSetSession(config.setsBufferSise);
-				this.transactionSession = sessionHandler.createTransactionSession(config.transactionsBufferSise);
 			}
 
 			public void feed(Event event, String split) {
@@ -77,20 +75,14 @@ def type(terminal)
 				eventSession.put(io.intino.alexandria.event.SessionEvent.PATH, Timetag.of(event.ts(), Scale.Day), event);
 			}
 
-			public void feed(String tank, Timetag timetag, String set, java.util.stream.Stream<Long> ids) {
-                setSession.put(tank, timetag, set, ids);
-			}
-
-			$transaction+feed...[$NL$NL]
-
 			public void flush() {
-				transactionSession.flush();
+				eventSession.flush();
+				setSession.flush();
 			}
 
 			public void push() {
 				eventSession.close();
 				setSession.close();
-				transactionSession.close();
 				sessionHandler.pushTo(this.dataHubStage);
 				//connector.sendEvent("service.ness.push", new Event(new io.intino.alexandria.message.Message("Push").set("stage", temporalStage.getName())));
 			}
@@ -118,11 +110,11 @@ def type(terminal)
 		}
 
 		public static class Config {
-			private int transactionsBufferSise = 1_000_000;
+			private int eventsBufferSise = 1_000_000;
 			private int setsBufferSise = 1_000_000;
 
-			public Config transactionsBufferSise(int transactionsBufferSise) {
-				this.transactionsBufferSise = transactionsBufferSise;
+			public Config eventsBufferSise(int eventsBufferSise) {
+				this.eventsBufferSise = eventsBufferSise;
 				return this;
 			}
 
@@ -262,15 +254,6 @@ def trigger(subscribe)
 	}
 end
 
-def trigger(feed)
-	public void feed$namespace+FirstUpperCase$name+FirstUpperCase(String tank, Timetag timetag, java.util.function.Consumer<$qn> transaction) {
-		transactionSession.put(tank, timetag, $qn.class, transaction);
-	}
-
-	public void feed$namespace+FirstUpperCase$name+FirstUpperCase(String tank, Timetag timetag, java.util.stream.Stream<Consumer<$qn>> stream) {
-		transactionSession.put(tank, timetag, $qn.class, stream);
-	}
-end
 
 def trigger(quoted)
 	"$this"

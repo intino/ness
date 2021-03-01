@@ -109,7 +109,7 @@ public class EventRenderer {
 		else if (attribute.isDate()) return process(attribute.asDate());
 		else if (attribute.isLongInteger()) return process(attribute.asLongInteger());
 		else if (attribute.isWord()) return process(attribute.asWord());
-		else if (attribute.isWordbag()) return process(attribute.asWordbag());
+		else if (attribute.isWordFromBag()) return process(attribute.asWordFromBag());
 		return null;
 	}
 
@@ -190,7 +190,7 @@ public class EventRenderer {
 				.add("type", a.name$());
 	}
 
-	private FrameBuilder process(Data.Wordbag attribute) {
+	private FrameBuilder process(Data.WordFromBag attribute) {
 		return new FrameBuilder("wordbag")
 				.add("name", attribute.name$())
 				.add("wordbag", attribute.wordbag().name$())
