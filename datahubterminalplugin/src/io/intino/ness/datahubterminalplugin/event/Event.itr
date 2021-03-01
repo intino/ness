@@ -153,7 +153,7 @@ end
 
 def type(primitive & single & date) !attribute(defaultValue:null) trigger(getter)
 	public $type $name+firstLowerCase() {
-		return $type.ofInstant(message.get("$name+FirstLowerCase").asInstant());
+		return $type.ofInstant(message.get("$name+FirstLowerCase").asInstant(), java.time.ZoneId.systemDefault());
 	}
 end
 
@@ -255,7 +255,7 @@ end
 def type(primitive & single & date) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
 		if ($name+firstLowerCase == null) this.message.remove("$name+firstLowerCase");
-		else this.message.set("$name+firstLowerCase", $name+firstLowerCase.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant(java.time.ZoneOffset.UTC));
+		else this.message.set("$name+firstLowerCase", $name+firstLowerCase.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant());
 		return this;
 	}
 end
