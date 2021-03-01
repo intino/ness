@@ -1,4 +1,4 @@
-package io.intino.ness.datahubterminalplugin.renders.terminals;
+package io.intino.ness.datahubterminalplugin;
 
 import io.intino.datahub.graph.*;
 import io.intino.datahub.graph.Datalake.Split;
@@ -6,34 +6,31 @@ import io.intino.datahub.graph.Datalake.Tank;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
-import io.intino.ness.datahubterminalplugin.renders.Formatters;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
-import static io.intino.ness.datahubterminalplugin.Commons.writeFrame;
-import static io.intino.ness.datahubterminalplugin.renders.Formatters.firstUpperCase;
+import static io.intino.ness.datahubterminalplugin.Formatters.firstUpperCase;
 
-public class TerminalRenderer {
+class TerminalRenderer {
 	private final Terminal terminal;
 	private final Map<Event, Split> eventWithSplit;
 	private final File srcDir;
 	private final String rootPackage;
 
-	public TerminalRenderer(Terminal terminal, Map<Event, Split> eventWithSplit, File srcDir, String rootPackage) {
+	TerminalRenderer(Terminal terminal, Map<Event, Split> eventWithSplit, File srcDir, String rootPackage) {
 		this.terminal = terminal;
 		this.eventWithSplit = eventWithSplit;
 		this.srcDir = srcDir;
 		this.rootPackage = rootPackage;
 	}
 
-	public void render() {
+	void render() {
 		final File packageFolder = new File(srcDir, rootPackage.replace(".", File.separator));
-		writeTerminal(packageFolder);
-	}
-
-	private void writeTerminal(File packageFolder) {
-		writeFrame(packageFolder, Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString(), terminalTemplate().render(createTerminalFrame()));
+		Commons.writeFrame(packageFolder, Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString(), template().render(createTerminalFrame()));
 	}
 
 	private Frame createTerminalFrame() {
@@ -46,7 +43,6 @@ public class TerminalRenderer {
 				add("name", e.name$()).
 				add("type", eventPackage(e) + "." + firstUpperCase(e.name$())).toFrame()).toArray(Frame[]::new));
 		terminal.core$().graph().find(Transaction.class).forEach(t -> renderTransaction(builder, t));
-		terminal.core$().graph().find(Lookup.Dynamic.class).forEach(l -> renderLookup(builder, l));
 		if (terminal.publish() != null)
 			terminal.publish().tanks().forEach(tank -> builder.add("publish", frameOf(tank)));
 		if (terminal.subscribe() != null)
@@ -55,19 +51,8 @@ public class TerminalRenderer {
 		return builder.toFrame();
 	}
 
-	private void renderLookup(FrameBuilder fb, Lookup.Dynamic l) {
-		renderLookup(rootPackage + ".lookups", fb, l);
-	}
-
-	private void renderLookup(String lookupsPackage, FrameBuilder fb, Lookup.Dynamic l) {
-		fb.add("lookup", new FrameBuilder("lookup").
-				add("qn", lookupsPackage + "." + firstUpperCase(l.name$())).
-				add("namespace", l.namespace()).
-				add("name", l.name$()));
-	}
-
 	private void renderTransaction(FrameBuilder builder, Transaction t) {
-		String transactionsPackage = rootPackage + ".transactions";
+		String transactionsPackage = rootPackage + ".transaction";
 		if (t.core$().owner().is(Namespace.class))
 			transactionsPackage = transactionsPackage + "." + t.core$().ownerAs(Namespace.class).qn();
 		builder.add("transaction", new FrameBuilder("transaction").
@@ -137,7 +122,7 @@ public class TerminalRenderer {
 		return tank.asTank().isSplitted() ? tank.asTank().asSplitted().split().leafs() : Collections.emptyList();
 	}
 
-	private Template terminalTemplate() {
+	private Template template() {
 		return Formatters.customize(new TerminalTemplate()).add("typeFormat", (value) -> {
 			if (value.toString().contains(".")) return Formatters.firstLowerCase(value.toString());
 			else return value;

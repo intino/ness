@@ -52,9 +52,6 @@ Concept:{0..1} Datalake
         		var Model.Event event
 				var boolean sortingRequired = true
 				var string qn = @qn is private reactive
-			sub Transaction
-				var Model.Transaction transaction
-				var string qn = @qn is private reactive
         Aspect Splitted > var Split split
 
 Concept:Named Terminal
@@ -70,7 +67,6 @@ Concept Namespace
 	var string qn = @qn is private reactive
 	has Namespace
 	has Event
-	has Transaction
 
 Concept Event
 	has:Named:RequiresAspect Attribute
@@ -98,7 +94,6 @@ Concept Data is abstract
 		var string primitive = 'self.type()' is reactive private
 		var integer:{bits} size = 0 bits
 		var integer:{bits} maxSize = 64 bits is private
-		var string defaultValueString = @defaultValue is private reactive
 		sub Real
 			var double defaultValue = 0
 			var string type = "Double" is reactive private
@@ -116,6 +111,11 @@ Concept Data is abstract
 			var string primitive = "long" is reactive private
 			var integer:{bits} size = 64 bits
 			var integer:{bits} maxSize = 64 bits is final private
+		sub Id
+			var long defaultValue = 0
+			var string type = "Long" is reactive private
+			var string primitive = "long" is reactive private
+			var integer:{bits} size = 64 bits
 		sub Bool
 			var boolean defaultValue = false
 			var string type = "Boolean" is reactive private
@@ -137,30 +137,26 @@ Concept Data is abstract
 			var string type = "java.lang.Enum" is reactive private
 			var string[] values;
 			var integer:{bits} size = 16 bits
-		sub Category
+		sub WordFromBag
 			var string type = "java.lang.Enum" is reactive private
-			var Model.Lookup lookup;
+			var Model.Wordbag wordbag;
 			var integer:{bits} size = 8 bits
 
-Concept:Named:RequiresId Transaction
-	Concept:Named:RequiresAspect:OnlyNumeric Attribute extends Data
-		Aspect id
+Concept:Named:RequiresAspect Wordbag
+	Aspect Inline
+		Concept:Named Word
+			var integer:{1..*} value
+			var string label = 'self.name$()'
+	Aspect InResource
+		var resource:{tsv} tsv
+		Concept:{2..*}:Named:RequiresAspect Attribute extends Data
 
-Concept:Named:RequiresAspect Lookup
-	Aspect Source
-		sub Enumerate
-			Concept Item
-				var integer index
-				var string label = 'self.name$()'
-		sub Resource
-			var resource:{tsv} tsv
-			Concept:{2..*}:Named:RequiresAspect Column extends Data
-		sub Dynamic
-			var string namespace
-			Concept:Named:RequiresAspect Column extends Data
-				var boolean isRequired = false
-				Aspect id
-			Concept:Named Index
-				var Column[] columns
-				var boolean createOnClose = false
-	Aspect Volatile with Dynamic
+
+Concept:Named Lookup
+	var string namespace
+	Concept:Named:RequiresAspect Column extends Data
+		var boolean isRequired = false
+	Concept:Named Index
+		var Column[] columns
+		var boolean createOnClose = false
+	Aspect Volatile

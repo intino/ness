@@ -1,4 +1,4 @@
-package io.intino.ness.datahubterminalplugin.renders.events;
+package io.intino.ness.datahubterminalplugin.event;
 
 import io.intino.datahub.graph.*;
 import io.intino.datahub.graph.Datalake.Split;
@@ -6,7 +6,7 @@ import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
 import io.intino.ness.datahubterminalplugin.Commons;
-import io.intino.ness.datahubterminalplugin.renders.Formatters;
+import io.intino.ness.datahubterminalplugin.Formatters;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -109,6 +109,7 @@ public class EventRenderer {
 		else if (attribute.isDate()) return process(attribute.asDate());
 		else if (attribute.isLongInteger()) return process(attribute.asLongInteger());
 		else if (attribute.isWord()) return process(attribute.asWord());
+		else if (attribute.isWordbag()) return process(attribute.asWordbag());
 		return null;
 	}
 
@@ -189,6 +190,14 @@ public class EventRenderer {
 				.add("type", a.name$());
 	}
 
+	private FrameBuilder process(Data.Wordbag attribute) {
+		return new FrameBuilder("wordbag")
+				.add("name", attribute.name$())
+				.add("wordbag", attribute.wordbag().name$())
+				.add("package", eventsPackage())
+				.add("type", "wordbag");
+	}
+
 	private String eventsPackage() {
 		return rootPackage + ".events";
 	}
@@ -203,5 +212,4 @@ public class EventRenderer {
 			else return value;
 		});
 	}
-
 }

@@ -9,7 +9,6 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.alexandria.message.MessageReader;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

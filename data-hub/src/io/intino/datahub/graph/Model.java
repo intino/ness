@@ -19,14 +19,6 @@ public class Model {
 		return prefix + self.name$();
 	}
 
-	public static String qn(Datalake.Tank.Transaction self) {
-		String prefix = "";
-		if (self.asTank().isSplitted()) {
-			String split = self.asTank().asSplitted().split().qn();
-			return (split.isEmpty() ? "" : split + ".") + prefix + self.transaction().name$();
-		} else return prefix + self.transaction().name$();
-	}
-
 	public static String qn(Datalake.Tank.Event self) {
 		String namespace = eventNamespace(self.event);
 		String prefix = namespace.isEmpty() ? "" : namespace + ".";
@@ -53,18 +45,5 @@ public class Model {
 		List<Datalake.Split> contexts = new ArrayList<>();
 		for (Datalake.Split sub : context.splitList()) contexts.addAll(leafs(sub));
 		return contexts;
-	}
-
-	public static String defaultValue(Data.Type self) {
-		Data data = self.asData();
-		if (data.isBool()) return String.valueOf(data.asBool().defaultValue());
-		if (data.isInteger()) return "0";
-		else if (data.isReal()) return "0D";
-		if (data.isLongInteger()) return "0L";
-		if (data.isCategory()) {
-			Lookup lookup = data.asCategory().lookup();
-			return lookup == null ? "null" : lookup.name$() + ".NA";
-		}
-		return "null";
 	}
 }

@@ -5,7 +5,6 @@ Datalake(Month, path = "") dl
 		Split DA;Split DB;Split DC;Split DD;Split DF;Split DG;Split DJ;Split DK;Split DL;Split DM;Split DN;Split DP;Split DU;Split DV;Split DW;Split DX;
 	Split asemed
 	Tank example as Event(event = Example)
-	Tank pagos as Transaction(pagos) Splitted(split = Divisiones)
 	ProcessStatus(split = Divisiones)
 	Backup
 		Cron(pattern = "0 0 12 1/1 * ? *", timeZone = "Atlantic/Canary")
@@ -13,78 +12,34 @@ Datalake(Month, path = "") dl
 Broker(port = 63000, secondaryPort = 1884, path = "./broker")
 	User(name = "user1", password = "1234")
 
-//Event criterio
-//	Attribute ts as Bool
-//	Attribute value as Text
-//	Attribute id as Integer
-//Event criterioBorrado
-//Event criterioModificado
-//Event criterioSentencia
-//Event ajuste
-//
-//Event cierreAjuste
-//Event usuarioConectado
-//Event usuarioDesconectado
+Event criterio
+	Attribute ts as Bool
+	Attribute value as Text
+	Attribute id as Integer
+Event criterioBorrado
+Event criterioModificado
+Event criterioSentencia
+Event ajuste
 
-Transaction  pagos
-	Attribute a as Id(size = 48bits)
-	Attribute z as LongInteger(size = 48bits)
-	Attribute b as Integer
-	Attribute c as DateTime
-	Attribute d as Bool
-	Attribute giro as Category(lookup = Giros)
-	Attribute sector as Category(lookup = Sectores)
-	Attribute gestion as Category(lookup = Gestiones)
-	Attribute municipio as Category(lookup = Municipios)
-
-Transaction ventas
-	Attribute id as Id(size = 48bits)
-	Attribute a as LongInteger(size = 48bits)
-	Attribute z as LongInteger(size = 48bits)
-	Attribute b as Integer
-	Attribute c as DateTime
-	Attribute d as Bool
-	Attribute giro as Category(lookup = Giros)
-	Attribute sector as Category(lookup = Sectores)
-	Attribute gestion as Category(lookup = Gestiones)
-	Attribute municipio as Category(lookup = Municipios)
-
-Lookup Giros as Enumerate
-	Item(1, label = "sss") Federal
-	Item(2) Municipal
-	Item(3) Estatal
-	Item(4) ParaEstatal
-	Item(5) Publico
+Event cierreAjuste
+Event usuarioConectado
+Event usuarioDesconectado
 
 
-Lookup Sectores as Enumerate
-	Item(1) Comercial
-	Item(2) Agricola
-	Item(3) Industrial
-	Item(4) Alumbrado
-	Item(5) Residencial
-Lookup Gestiones as Enumerate
-	Item(1) Rezago
-	Item(2) Convenio
-	Item(3) Incobrable
-	Item(4) Normal
+Wordbag Gestiones as Inline
+	Word(1) Rezago
+	Word(2) Convenio
+	Word(3) Incobrable
+	Word(4) Normal
 
-Lookup Municipios as Resource(tsv = "municipios/Municipios.tsv")
-	Column index as Integer
-	Column name as Text
-	Column extra1 as Real
-	Column extra2 as Integer
-	Column extra3 as LongInteger
-	Column extra4 as Bool
-
-Lookup Contratos as Dynamic(namespace = "cfe")
+Lookup(namespace = "cfe") Contratos
 	Column index as Id
 	Column(isRequired = true) name as Text
 	Column extra1 as Real
 	Column extra2 as Integer
 	Column extra3 as LongInteger
 	Column extra4 as Bool
-	Column gestion as Category(lookup = Gestiones)
+	Column gestion as WordFromBag(wordbag  = Gestiones)
 
 Event Example
 	Attribute name as Text

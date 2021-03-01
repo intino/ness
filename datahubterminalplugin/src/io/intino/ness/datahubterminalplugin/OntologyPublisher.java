@@ -2,15 +2,14 @@ package io.intino.ness.datahubterminalplugin;
 
 import io.intino.Configuration;
 import io.intino.alexandria.logger.Logger;
-import io.intino.datahub.graph.*;
 import io.intino.datahub.graph.Datalake.Split;
 import io.intino.datahub.graph.Datalake.Tank;
+import io.intino.datahub.graph.Event;
+import io.intino.datahub.graph.NessGraph;
+import io.intino.datahub.graph.Wordbag;
 import io.intino.itrules.FrameBuilder;
-import io.intino.ness.datahubterminalplugin.renders.Formatters;
-import io.intino.ness.datahubterminalplugin.renders.events.EventRenderer;
-import io.intino.ness.datahubterminalplugin.renders.lookups.IDynamicLookupTemplate;
-import io.intino.ness.datahubterminalplugin.renders.lookups.LookupRenderer;
-import io.intino.ness.datahubterminalplugin.renders.transactions.TransactionRenderer;
+import io.intino.ness.datahubterminalplugin.event.EventRenderer;
+import io.intino.ness.datahubterminalplugin.event.WordbagRenderer;
 import io.intino.plugin.PluginLauncher;
 import org.apache.maven.shared.invoker.*;
 
@@ -24,41 +23,37 @@ import java.util.stream.Collectors;
 class OntologyPublisher {
 	private final File root;
 	private final List<Tank.Event> eventTanks;
-	private final List<Tank.Transaction> transactionTanks;
 	private final List<Event> events;
-	private final List<Transaction> transactions;
 	private final Configuration conf;
 	private final List<File> resDirectories;
 	private final List<File> sourceDirectories;
 	private final Map<String, String> versions;
 	private final PluginLauncher.SystemProperties systemProperties;
-	private final String rootPackage;
+	private final String basePackage;
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
 	private final StringBuilder errorStream;
-	private final List<Lookup> lookups;
+	private final List<Wordbag> wordbags;
 
 	OntologyPublisher(File root, NessGraph graph, Configuration configuration, PluginLauncher.ModuleStructure moduleStructure, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
 		this.root = root;
 		this.eventTanks = eventTanks(graph);
-		this.transactionTanks = transactionTanks(graph);
 		this.events = graph.eventList();
-		this.transactions = graph.core$().find(Transaction.class);
-		this.lookups = graph.lookupList();
+		this.wordbags = graph.wordbagList();
 		this.conf = configuration;
 		this.resDirectories = moduleStructure.resDirectories;
 		this.sourceDirectories = moduleStructure.sourceDirectories;
 		this.versions = versions;
 		this.systemProperties = systemProperties;
-		this.rootPackage = configuration.artifact().groupId().toLowerCase() + "." + Formatters.snakeCaseToCamelCase().format(configuration.artifact().name()).toString().toLowerCase();
+		this.basePackage = configuration.artifact().groupId().toLowerCase() + "." + Formatters.snakeCaseToCamelCase().format(configuration.artifact().name()).toString().toLowerCase();
 		this.invokedPhase = invokedPhase;
 		this.logger = logger;
 		errorStream = new StringBuilder();
 	}
 
 	boolean publish() {
-		if (!createSources()) return false;
 		try {
+			if (!createSources()) return false;
 			logger.println("Publishing ontology...");
 			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
 			logger.println("Ontology published!");
@@ -74,44 +69,23 @@ class OntologyPublisher {
 		File srcDirectory = sourceDirectory();
 		srcDirectory.mkdirs();
 		Map<Event, Split> eventSplitMap = splitEvents();
-		Map<Transaction, Split> transactionsSplitMap = collectSplitTransactions();
-		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, rootPackage).render());
-		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, rootPackage).render());
-		transactions.stream().parallel().forEach(t -> new TransactionRenderer(t, conf, transactionsSplitMap.get(t), srcDirectory, rootPackage).render());
-		if (lookups.stream().anyMatch(Lookup::isDynamic)) renderLookupInterface(srcDirectory, rootPackage);
-		LookupRenderer lookupRenderer = new LookupRenderer(srcDirectory, resDirectories, rootPackage);
-		lookups.stream().parallel().forEach(lookupRenderer::render);
+		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
+		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, basePackage).render());
+		wordbags.stream().parallel().forEach(w -> new WordbagRenderer(w, conf, srcDirectory, resDirectories, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
-		lookups.stream().filter(Lookup::isResource).map(Lookup::asResource).
-				forEach(l -> {
-					File source = new File(l.tsv().getPath());
+		wordbags.stream().filter(Wordbag::isInResource).map(Wordbag::asInResource).
+				forEach(w -> {
+					File source = new File(w.tsv().getPath());
 					File destination = new File(resDirectory, relativeResource(source));
 					destination.getParentFile().mkdirs();
 					try {
-						if (!destination.exists()) Files.copy(l.tsv().openStream(), destination.toPath());
+						if (!destination.exists()) Files.copy(w.tsv().openStream(), destination.toPath());
 					} catch (IOException e) {
 						Logger.error(e);
 					}
 				});
-
-		lookupRenderer.renderLookupsClass(lookups);
 		return true;
-	}
-
-	private void writeLookupsClass(File packageFolder) {
-
-	}
-
-
-	private void renderLookupInterface(File srcDirectory, String basePackage) {
-		final File destination = new File(srcDirectory, basePackage.replace(".", File.separator) + File.separator + "DynamicLookup.java");
-		String render = new IDynamicLookupTemplate().render(new FrameBuilder("interface").add("package", basePackage));
-		try {
-			Files.write(destination.toPath(), render.getBytes());
-		} catch (IOException e) {
-			Logger.error(e);
-		}
 	}
 
 	private File sourceDirectory() {
@@ -136,13 +110,6 @@ class OntologyPublisher {
 		return events;
 	}
 
-	private Map<Transaction, Split> collectSplitTransactions() {
-		Map<Transaction, Split> map = new HashMap<>();
-		for (Tank.Transaction tank : transactionTanks)
-			map.put(tank.transaction(), tank.asTank().isSplitted() ? tank.asTank().asSplitted().split() : null);
-		return map;
-	}
-
 	private List<Event> hierarchy(Event event) {
 		Set<Event> events = new LinkedHashSet<>();
 		events.add(event);
@@ -151,7 +118,7 @@ class OntologyPublisher {
 	}
 
 	private void mvn(String goal) throws IOException, MavenInvocationException {
-		final File pom = createPom(root, rootPackage, conf.artifact().version());
+		final File pom = createPom(root, basePackage, conf.artifact().version());
 		final InvocationResult result = invoke(pom, goal);
 		if (result != null && result.getExitCode() != 0) {
 			logger.println(errorStream.toString());
@@ -225,10 +192,5 @@ class OntologyPublisher {
 	private List<Tank.Event> eventTanks(NessGraph nessGraph) {
 		if (nessGraph.datalake() == null) return Collections.emptyList();
 		return nessGraph.datalake().tankList().stream().filter(Tank::isEvent).map(Tank::asEvent).collect(Collectors.toList());
-	}
-
-	private List<Tank.Transaction> transactionTanks(NessGraph nessGraph) {
-		if (nessGraph.datalake() == null) return Collections.emptyList();
-		return nessGraph.datalake().tankList().stream().filter(Tank::isTransaction).map(Tank::asTransaction).collect(Collectors.toList());
 	}
 }
