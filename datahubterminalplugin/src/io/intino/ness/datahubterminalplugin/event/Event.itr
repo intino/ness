@@ -252,6 +252,14 @@ def type(primitive & single) type(integer | double) trigger(setter)
 	}
 end
 
+def type(primitive & single & date) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
+		if ($name+firstLowerCase == null) this.message.remove("$name+firstLowerCase");
+		else this.message.set("$name+firstLowerCase", $name+firstLowerCase.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant(java.time.ZoneOffset.UTC));
+		return this;
+	}
+end
+
 def type(primitive & single) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
 		if ($name+firstLowerCase == null) this.message.remove("$name+firstLowerCase");
