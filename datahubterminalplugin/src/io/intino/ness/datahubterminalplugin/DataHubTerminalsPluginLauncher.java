@@ -17,14 +17,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private static final String MINIMUM_BPM_VERSION = "1.2.5";
-	private static final String MINIMUM_LED_VERSION = "1.0.0";
-	private static final String MINIMUM_TERMINAL_JMS_VERSION = "3.0.6";
-	private static final String MINIMUM_EVENT_VERSION = "2.0.3";
-	private static final String MINIMUM_INGESTION_VERSION = "3.1.0";
-	private static final String MAX_TERMINAL_JMS_VERSION = "4.0.0";
-	private static final String MAX_INGESTION_VERSION = "4.0.0";
-	private static final String MAX_EVENT_VERSION = "3.0.0";
-	private static final String MAX_LED_VERSION = "2.0.0";
+	private static final String MINIMUM_TERMINAL_JMS_VERSION = "4.0.0";
+	private static final String MINIMUM_EVENT_VERSION = "3.0.0";
+	private static final String MINIMUM_INGESTION_VERSION = "4.0.0";
+	private static final String MAX_TERMINAL_JMS_VERSION = "5.0.0";
+	private static final String MAX_INGESTION_VERSION = "5.0.0";
+	private static final String MAX_EVENT_VERSION = "4.0.0";
 
 	@Override
 	public void run() {
@@ -55,7 +53,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			notifier().notifyError("Snapshot distribution repository not found");
 			return;
 		}
-		Map<String, String> versions = Map.of("terminal-jms", terminalJmsVersion(), "ingestion", ingestionVersion(), "bpm", bpmVersion(), "event", eventVersion(), "led", ledVersion());
+		Map<String, String> versions = Map.of("terminal-jms", terminalJmsVersion(), "ingestion", ingestionVersion(), "bpm", bpmVersion(), "event", eventVersion());
 		publishOntology(graph.as(NessGraph.class), versions, tempDir);
 		publishTerminals(graph.as(NessGraph.class), versions, tempDir);
 		logger().println("Finished generation of terminals!");
@@ -109,11 +107,6 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		return versions.isEmpty() ? MINIMUM_EVENT_VERSION : suitableEventVersion(versions);
 	}
 
-	private String ledVersion() {
-		List<String> versions = ArtifactoryConnector.ledVersions();
-		Collections.reverse(versions);
-		return versions.isEmpty() ? MINIMUM_LED_VERSION : suitableLedVersion(versions);
-	}
 
 	private String suitableTerminalVersion(List<String> versions) {
 		return versions.stream().filter(version -> version.compareTo(MAX_TERMINAL_JMS_VERSION) < 0).findFirst().orElse(MINIMUM_TERMINAL_JMS_VERSION);
@@ -125,10 +118,6 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 
 	private String suitableEventVersion(List<String> versions) {
 		return versions.stream().filter(v -> v.compareTo(MAX_EVENT_VERSION) < 0).findFirst().orElse(MINIMUM_EVENT_VERSION);
-	}
-
-	private String suitableLedVersion(List<String> versions) {
-		return versions.stream().filter(v -> v.compareTo(MAX_LED_VERSION) < 0).findFirst().orElse(MINIMUM_LED_VERSION);
 	}
 
 	private boolean isSnapshotVersion() {
