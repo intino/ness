@@ -76,7 +76,6 @@ def type(pom)
 
 	<dependencies>
 		[$event]
-		[$led]
 		[$terminal]
 		[$bpm]
 	</dependencies>
@@ -91,13 +90,6 @@ def trigger(event)
 	</dependency>
 end
 
-def trigger(led)
-	<dependency>
-		<groupId>io.intino.alexandria</groupId>
-		<artifactId>led</artifactId>
-		<version>$version</version>
-	</dependency>
-end
 
 def trigger(terminal)
 	<dependency>
