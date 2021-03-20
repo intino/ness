@@ -64,7 +64,7 @@ public class DataHubBox extends AbstractBox {
 
 	private void injectJmsConfiguration() {
 		if (graph.datalake() != null) {
-			graph.datalake().path(configuration.datalakeDirectory());
+			graph.datalake().path(datalakeDirectory().getAbsolutePath());
 			if (graph.datalake().backup() != null) graph.datalake().backup().path(configuration.backupDirectory());
 		}
 		if (graph.broker() != null) {
@@ -75,15 +75,15 @@ public class DataHubBox extends AbstractBox {
 	}
 
 	private File brokerDirectory() {
-		return new File(configuration.home(), "broker");
+		return new File(configuration.home(), "datahub/broker");
 	}
 
 	public File stageDirectory() {
-		return new File(configuration.home(), "stage");
+		return new File(configuration.home(), "datahub/stage");
 	}
 
 	public File mappersDirectory() {
-		File mappers = new File(configuration.home(), "mappers");
+		File mappers = new File(configuration.home(), "datahub/mappers");
 		mappers.mkdirs();
 		return mappers;
 	}
@@ -95,12 +95,16 @@ public class DataHubBox extends AbstractBox {
 	public void beforeStart() {
 		stageDirectory().mkdirs();
 		load();
-		if (graph.datalake() != null) this.datalake = new FileDatalake(new File(configuration.datalakeDirectory()));
+		if (graph.datalake() != null) this.datalake = new FileDatalake(datalakeDirectory());
 		if (graph.broker() != null) {
 			configureBroker();
 			nessService = new NessService(this);
 		}
 		sentinels = new Sentinels(this);
+	}
+
+	private File datalakeDirectory() {
+		return new File(configuration.home(), "datalake");
 	}
 
 	public void afterStart() {
