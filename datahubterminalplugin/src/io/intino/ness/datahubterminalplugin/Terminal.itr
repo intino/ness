@@ -50,14 +50,11 @@ def type(terminal)
 
 		public synchronized void requestSeal() {
 			synchronized(monitor) {
-				connector.requestResponse("service.ness.seal", new Event(new io.intino.alexandria.message.Message("Seal").ts(java.time.Instant.now())).toString(), s -> {
-						synchronized(monitor) {
-							monitor.notify();
-						}
-					}
-				);
+				connector.requestResponse("service.ness.seal", new Event(new io.intino.alexandria.message.Message("Seal")).ts(java.time.Instant.now()).toString(), s -> {
+					synchronized(monitor) {monitor.notify();}
+				});
 				try {
-					monitor.wait(1000*60*30);
+					monitor.wait(1000 * 60 * 30);
 				} catch (InterruptedException e) {
 					io.intino.alexandria.logger.Logger.error(e);
 				}
