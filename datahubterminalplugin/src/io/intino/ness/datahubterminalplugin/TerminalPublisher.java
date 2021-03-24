@@ -2,6 +2,7 @@ package io.intino.ness.datahubterminalplugin;
 
 import com.google.gson.Gson;
 import io.intino.Configuration;
+import io.intino.Configuration.Artifact;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.graph.Datalake;
 import io.intino.datahub.graph.Datalake.Split;
@@ -10,7 +11,9 @@ import io.intino.datahub.graph.Event;
 import io.intino.datahub.graph.Namespace;
 import io.intino.datahub.graph.Terminal;
 import io.intino.itrules.FrameBuilder;
+import io.intino.plugin.IntinoException;
 import io.intino.plugin.PluginLauncher;
+import io.intino.plugin.project.configuration.Version;
 import org.apache.maven.shared.invoker.*;
 
 import java.io.File;
@@ -19,6 +22,8 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static io.intino.plugin.PluginLauncher.Phase.*;
 
 class TerminalPublisher {
 	private final File root;
@@ -44,10 +49,10 @@ class TerminalPublisher {
 	}
 
 	boolean publish() {
-		if (!createSources()) return false;
+		if (!checkPublish() || !createSources()) return false;
 		try {
 			logger.println("Publishing " + terminal.name$() + "...");
-			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
+			mvn(invokedPhase == INSTALL ? "install" : "deploy");
 			logger.println("Terminal " + terminal.name$() + " published!");
 			return true;
 		} catch (Exception e) {
@@ -55,6 +60,18 @@ class TerminalPublisher {
 			return false;
 		}
 	}
+
+	private boolean checkPublish() {
+		try {
+			Version version = new Version(conf.artifact().version());
+			if (!version.isSnapshot() && (invokedPhase == DISTRIBUTE || invokedPhase == DEPLOY) && isDistributed(conf.artifact()))
+				return false;
+		} catch (IntinoException e) {
+			return false;
+		}
+		return true;
+	}
+
 
 	private boolean createSources() {
 		File srcDirectory = new File(root, "src");
@@ -216,5 +233,14 @@ class TerminalPublisher {
 				add("random", UUID.randomUUID().toString()).
 				add("url", repository.url());
 	}
+
+	protected boolean isDistributed(Artifact artifact) {
+		String identifier = artifact.groupId() + ":" + artifact.name().toLowerCase();
+		if (artifact.distribution() == null) return false;
+		if (true) return false; //TODO falta inyectar credenciales
+		List<String> versions = ArtifactoryConnector.versions(conf.artifact().distribution().release(), identifier);
+		return versions.contains(artifact.version());
+	}
+
 
 }

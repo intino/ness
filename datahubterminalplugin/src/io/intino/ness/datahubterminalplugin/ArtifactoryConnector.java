@@ -1,5 +1,7 @@
 package io.intino.ness.datahubterminalplugin;
 
+import io.intino.Configuration;
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URL;
@@ -28,7 +30,7 @@ public class ArtifactoryConnector {
 	public static List<String> terminalVersions() {
 		try {
 			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/terminal-jms/maven-metadata.xml");
-			return extractVersions(new String(read(connect(url)).toByteArray()));
+			return extractVersions(read(connect(url)).toString());
 		} catch (Throwable e) {
 			return Collections.emptyList();
 		}
@@ -37,7 +39,7 @@ public class ArtifactoryConnector {
 	public static List<String> ingestionVersions() {
 		try {
 			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/ingestion/maven-metadata.xml");
-			return extractVersions(new String(read(connect(url)).toByteArray()));
+			return extractVersions(read(connect(url)).toString());
 		} catch (Throwable e) {
 			return Collections.emptyList();
 		}
@@ -46,7 +48,7 @@ public class ArtifactoryConnector {
 	public static List<String> eventVersions() {
 		try {
 			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/event/maven-metadata.xml");
-			return extractVersions(new String(read(connect(url)).toByteArray()));
+			return extractVersions(read(connect(url)).toString());
 		} catch (Throwable e) {
 			return Collections.emptyList();
 		}
@@ -55,7 +57,7 @@ public class ArtifactoryConnector {
 	public static List<String> bpmVersions() {
 		try {
 			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/bpm-framework/maven-metadata.xml");
-			return extractVersions(new String(read(connect(url)).toByteArray()));
+			return extractVersions(read(connect(url)).toString());
 		} catch (Throwable e) {
 			return Collections.emptyList();
 		}
@@ -65,10 +67,27 @@ public class ArtifactoryConnector {
 	public static List<String> ledVersions() {
 		try {
 			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/led/maven-metadata.xml");
-			return extractVersions(new String(read(connect(url)).toByteArray()));
+			return extractVersions(read(connect(url)).toString());
 		} catch (Throwable e) {
 			return Collections.emptyList();
 		}
+	}
+
+	public static List<String> versions(Configuration.Repository repo, String artifact) {
+		try {
+			String spec = repo.url() + (repo.url().endsWith("/") ? "" : "/") + artifact.replace(":", "/").replace(".", "/") + "/maven-metadata.xml";
+			URL url = new URL(spec);
+			final String mavenMetadata = read(connect(repo.identifier(), url)).toString();
+			if (!mavenMetadata.isEmpty()) return extractVersions(mavenMetadata);
+		} catch (Throwable ignored) {
+		}
+		return Collections.emptyList();
+	}
+
+
+	private static  InputStream connect(String mavenId, URL url) {
+
+		return InputStream.nullInputStream();
 	}
 
 	private static List<String> extractVersions(String metadata) {
