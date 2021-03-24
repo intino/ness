@@ -50,7 +50,7 @@ def type(terminal)
 
 		public synchronized void requestSeal() {
 			synchronized(monitor) {
-				connector.requestResponse("service.ness.seal", new Event(new io.intino.alexandria.message.Message("Seal").ts(java.time.Instant.now()).toString(), s -> {
+				connector.requestResponse("service.ness.seal", new Event(new io.intino.alexandria.message.Message("Seal").ts(java.time.Instant.now())).toString(), s -> {
 						synchronized(monitor) {
 							monitor.notify();
 						}
