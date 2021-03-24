@@ -48,6 +48,22 @@ def type(terminal)
 
 		private static final Object monitor = new Object();
 
+		public synchronized void requestSeal() {
+			synchronized(monitor) {
+				connector.requestResponse("service.ness.seal", new Event(new io.intino.alexandria.message.Message("Seal").ts(java.time.Instant.now()).toString(), s -> {
+						synchronized(monitor) {
+							monitor.notify();
+						}
+					}
+				);
+				try {
+					monitor.wait();
+				} catch (InterruptedException e) {
+					io.intino.alexandria.logger.Logger.error(e);
+				}
+			}
+		}
+
 		public class BatchSession {
 			private final java.io.File dataHubStage;
 			private final java.io.File temporalStage;
