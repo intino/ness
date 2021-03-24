@@ -57,7 +57,7 @@ def type(terminal)
 					}
 				);
 				try {
-					monitor.wait();
+					monitor.wait(1000*60*30);
 				} catch (InterruptedException e) {
 					io.intino.alexandria.logger.Logger.error(e);
 				}

@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SealAction {
-	private static AtomicBoolean started = new AtomicBoolean(false);
+	private static final AtomicBoolean started = new AtomicBoolean(false);
 	public DataHubBox box;
 
 	public SealAction() {
