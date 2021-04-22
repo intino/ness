@@ -197,7 +197,7 @@ public class JmsBrokerService implements BrokerService {
 	}
 
 	private String tankQn(Datalake.Tank.Event t, Datalake.Split split) {
-		return t.event().name$() + (!split.qn().isEmpty() ? "." + split.qn() : "");
+		return t.qn() + (!split.qn().isEmpty() ? "." + split.qn() : "");
 	}
 
 	final class BrokerManager implements io.intino.datahub.broker.BrokerManager {
