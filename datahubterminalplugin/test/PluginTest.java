@@ -277,7 +277,7 @@ public class PluginTest {
 
 					@Override
 					public String version() {
-						return "3.0.0-SNAPSHOT";
+						return "3.1.0";
 					}
 
 					@Override

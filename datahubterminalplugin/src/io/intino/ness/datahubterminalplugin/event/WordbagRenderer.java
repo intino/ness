@@ -38,7 +38,7 @@ public class WordbagRenderer {
 	}
 
 	private Frame process(Wordbag dimension) {
-		FrameBuilder builder = new FrameBuilder("dimension").
+		FrameBuilder builder = new FrameBuilder("wordbag").
 				add("name", dimension.name$()).
 				add("type", dimension.isInResource() ? String.class.getSimpleName() : dimension.name$());
 		if (dimension.isInResource()) {
