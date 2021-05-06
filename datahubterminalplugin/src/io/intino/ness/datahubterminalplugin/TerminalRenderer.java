@@ -1,8 +1,11 @@
 package io.intino.ness.datahubterminalplugin;
 
-import io.intino.datahub.graph.*;
+import io.intino.datahub.graph.Datalake;
 import io.intino.datahub.graph.Datalake.Split;
 import io.intino.datahub.graph.Datalake.Tank;
+import io.intino.datahub.graph.Event;
+import io.intino.datahub.graph.Namespace;
+import io.intino.datahub.graph.Terminal;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
@@ -42,23 +45,12 @@ class TerminalRenderer {
 				add("namespaceQn", eventNamespace(e).replace(".", "")).
 				add("name", e.name$()).
 				add("type", eventPackage(e) + "." + firstUpperCase(e.name$())).toFrame()).toArray(Frame[]::new));
-		terminal.core$().graph().find(Transaction.class).forEach(t -> renderTransaction(builder, t));
 		if (terminal.publish() != null)
 			terminal.publish().tanks().forEach(tank -> builder.add("publish", frameOf(tank)));
 		if (terminal.subscribe() != null)
 			terminal.subscribe().tanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
 		if (terminal.bpm() != null) addBpm(builder);
 		return builder.toFrame();
-	}
-
-	private void renderTransaction(FrameBuilder builder, Transaction t) {
-		String transactionsPackage = rootPackage + ".transaction";
-		if (t.core$().owner().is(Namespace.class))
-			transactionsPackage = transactionsPackage + "." + t.core$().ownerAs(Namespace.class).qn();
-		builder.add("transaction", new FrameBuilder("transaction").
-				add("qn", transactionsPackage + "." + firstUpperCase(t.name$())).
-				add("namespace", t.core$().owner().is(Namespace.class) ? t.core$().ownerAs(Namespace.class).qn().replace(".", "") : "").
-				add("name", t.name$()));
 	}
 
 	private void addBpm(FrameBuilder builder) {
