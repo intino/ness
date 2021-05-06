@@ -226,10 +226,13 @@ def type(bpm & multiSplit) trigger(subscribe)
 	}
 
 	public void subscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, BpmSplit split, BpmSplit... moreSplits) {
-		consumers.put(onEventReceived, List.of(event -> onEventReceived.accept(new $type(event))));
+		consumers.put(onEventReceived, List.of(event -> onEventReceived.accept(new $type(event), "$typeName+FirstUpperCase." + split.qn())));
 		connector.attachListener("$typeName+FirstUpperCase." + split.qn(), consumers.get(onEventReceived).get(0));
-		for (BpmSplit c : moreSplits)
-			connector.attachListener("$typeName+FirstUpperCase." + c.qn(), consumers.get(onEventReceived).get(0));
+		for (BpmSplit c : moreSplits) {
+			consumer = event -> onEventReceived.accept(new $type(event), "$typeName+FirstUpperCase." + c.qn());
+			eventConsumers.add(consumer);
+			connector.attachListener("$typeName+FirstUpperCase." + c.qn(), consumer);
+		}
 	}
 
 	public void unsubscribe(ProcessStatusConsumer onEventReceived) {
