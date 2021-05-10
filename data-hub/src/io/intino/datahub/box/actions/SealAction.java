@@ -22,11 +22,15 @@ public class SealAction {
 
 	public synchronized String execute() {
 		if (started.get()) return "Sealing already started";
-		started.set(true);
-		box.brokerSessions().push();
-		cleanStage();
-		box.sessionSealer().seal();
-		Logger.info("Finished sealing!");
+		try {
+			started.set(true);
+			box.brokerSessions().push();
+			cleanStage();
+			box.sessionSealer().seal();
+			Logger.info("Finished sealing!");
+		} catch (Throwable e) {
+			Logger.error(e);
+		}
 		started.set(false);
 		return "Finished sealing!";
 	}
