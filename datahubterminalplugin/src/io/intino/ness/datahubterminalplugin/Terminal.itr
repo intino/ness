@@ -76,7 +76,7 @@ def type(terminal)
 				this.dataHubStage = dataHubStage;
 				this.temporalStage = temporalStage;
 				this.sessionHandler = new io.intino.alexandria.ingestion.SessionHandler(temporalStage);
-				this.eventSession = sessionHandler.createEventSession();
+				this.eventSession = sessionHandler.createEventSession(config.eventsBufferSize);
 				this.setSession = sessionHandler.createSetSession(config.setsBufferSize);
 			}
 
