@@ -18,7 +18,7 @@ public class ReviseAction {
 	public DataHubBox box;
 	public io.intino.alexandria.Context context = new io.intino.alexandria.Context();
 	public String mapper;
-	private static AtomicBoolean started = new AtomicBoolean(false);
+	private static final AtomicBoolean started = new AtomicBoolean(false);
 
 	public String execute() {
 		if (started.get()) return "Already started an action";

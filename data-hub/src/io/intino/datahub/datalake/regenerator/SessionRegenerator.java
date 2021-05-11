@@ -9,15 +9,14 @@ import io.intino.alexandria.event.Event;
 import io.intino.alexandria.event.EventReader;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.MessageWriter;
+import org.xerial.snappy.SnappyOutputStream;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.zip.GZIPOutputStream;
 
 import static org.apache.commons.io.FileUtils.listFiles;
 
@@ -138,9 +137,9 @@ public class SessionRegenerator {
 		}
 	}
 
-	private GZIPOutputStream zipStream(File file) {
+	private SnappyOutputStream zipStream(File file) {
 		try {
-			return new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+			return new SnappyOutputStream(new FileOutputStream(file));
 		} catch (IOException e) {
 			Logger.error(e);
 			return null;

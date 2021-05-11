@@ -9,14 +9,13 @@ import io.intino.alexandria.datalake.file.eventsourcing.FileEventPump;
 import io.intino.alexandria.event.Event;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.MessageWriter;
+import org.xerial.snappy.SnappyOutputStream;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Comparator;
-import java.util.zip.GZIPOutputStream;
 
 public class DatalakeRegenerator {
 	protected final FileDatalake datalake;
@@ -116,9 +115,9 @@ public class DatalakeRegenerator {
 		}
 	}
 
-	private GZIPOutputStream zipStream(File file) {
+	private SnappyOutputStream zipStream(File file) {
 		try {
-			return new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+			return new SnappyOutputStream(new FileOutputStream(file));
 		} catch (IOException e) {
 			Logger.error(e);
 			return null;
