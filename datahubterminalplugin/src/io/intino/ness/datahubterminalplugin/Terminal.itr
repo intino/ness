@@ -77,7 +77,7 @@ def type(terminal)
 				this.temporalStage = temporalStage;
 				this.sessionHandler = new io.intino.alexandria.ingestion.SessionHandler(temporalStage);
 				this.eventSession = sessionHandler.createEventSession();
-				this.setSession = sessionHandler.createSetSession(config.setsBufferSise);
+				this.setSession = sessionHandler.createSetSession(config.setsBufferSize);
 			}
 
 			public void feed(Event event, String split) {
@@ -123,16 +123,16 @@ def type(terminal)
 		}
 
 		public static class Config {
-			private int eventsBufferSise = 1_000_000;
-			private int setsBufferSise = 1_000_000;
+			private int eventsBufferSize = 1_000_000;
+			private int setsBufferSize = 1_000_000;
 
-			public Config eventsBufferSise(int eventsBufferSise) {
-				this.eventsBufferSise = eventsBufferSise;
+			public Config eventsBufferSize(int eventsBufferSize) {
+				this.eventsBufferSize = eventsBufferSize;
 				return this;
 			}
 
-			public Config setsBufferSise(int setsBufferSise) {
-				this.setsBufferSise = setsBufferSise;
+			public Config setsBufferSize(int setsBufferSize) {
+				this.setsBufferSize = setsBufferSize;
 				return this;
 			}
 		}
