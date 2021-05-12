@@ -68,6 +68,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 //			if (published.get()) FileUtils.deleteDirectory(tempDir);
 		} catch (Throwable e) {
 			logger().println(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
@@ -82,6 +83,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 //			if (published.get()) FileUtils.deleteDirectory(tempDir);
 		} catch (Throwable e) {
 			logger().println(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 

@@ -56,6 +56,7 @@ class TerminalPublisher {
 			logger.println("Terminal " + terminal.name$() + " published!");
 			return true;
 		} catch (Throwable e) {
+			e.printStackTrace();
 			logger.println(e.getMessage());
 			return false;
 		}
