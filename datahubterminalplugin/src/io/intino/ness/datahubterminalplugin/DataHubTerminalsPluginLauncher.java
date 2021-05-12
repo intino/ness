@@ -66,7 +66,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			if (published.get() && notifier() != null)
 				notifier().notify("Ontology " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), "ontology", configuration().artifact().version()));
 //			if (published.get()) FileUtils.deleteDirectory(tempDir);
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			logger().println(e.getMessage());
 		}
 	}
@@ -80,7 +80,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), terminalNameArtifact(terminal), configuration().artifact().version()));
 			});
 //			if (published.get()) FileUtils.deleteDirectory(tempDir);
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			logger().println(e.getMessage());
 		}
 	}

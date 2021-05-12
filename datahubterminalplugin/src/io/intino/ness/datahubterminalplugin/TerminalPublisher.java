@@ -49,13 +49,13 @@ class TerminalPublisher {
 	}
 
 	boolean publish() {
-		if (!checkPublish() || !createSources()) return false;
 		try {
+			if (!checkPublish() || !createSources()) return false;
 			logger.println("Publishing " + terminal.name$() + "...");
 			mvn(invokedPhase == INSTALL ? "install" : "deploy");
 			logger.println("Terminal " + terminal.name$() + " published!");
 			return true;
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			logger.println(e.getMessage());
 			return false;
 		}
