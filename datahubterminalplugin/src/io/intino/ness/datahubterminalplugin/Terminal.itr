@@ -247,9 +247,9 @@ def type(multiSplit) !type(bpm) trigger(subscribe)
 		java.util.function.Consumer<io.intino.alexandria.event.Event> consumer = event -> onEventReceived.accept(new $type(event), "$typeWithNamespace." + split.qn());
 		connector.attachListener("$typeWithNamespace." + split.qn(), subscriberId + "_" + split.qn(), consumer);
 		eventConsumers.add(consumer);
-		for ($type.Split c : moreSplits) {
-			consumer = event -> onEventReceived.accept(new $type(event), "$typeWithNamespace." + split.qn());
-			connector.attachListener("$typeWithNamespace." + c.qn(), subscriberId + "_" + c.qn(), consumer);
+		for ($type.Split s : moreSplits) {
+			consumer = event -> onEventReceived.accept(new $type(event), "$typeWithNamespace." + s.qn());
+			connector.attachListener("$typeWithNamespace." + s.qn(), subscriberId + "_" + s.qn(), consumer);
 			eventConsumers.add(consumer);
 		}
 	}
@@ -260,9 +260,9 @@ def type(multiSplit) !type(bpm) trigger(subscribe)
 		java.util.function.Consumer<io.intino.alexandria.event.Event> consumer = event -> onEventReceived.accept(new $type(event), "$typeWithNamespace." + split.qn());
 		connector.attachListener("$typeWithNamespace." + split.qn(), consumer);
 		eventConsumers.add(consumer);
-		for ($type.Split c : moreSplits) {
-			consumer = event -> onEventReceived.accept(new $type(event), "$typeWithNamespace." + split.qn());
-			connector.attachListener("$typeWithNamespace." + c.qn(), consumer);
+		for ($type.Split s : moreSplits) {
+			consumer = event -> onEventReceived.accept(new $type(event), "$typeWithNamespace." + s.qn());
+			connector.attachListener("$typeWithNamespace." + s.qn(), consumer);
 			eventConsumers.add(consumer);
 		}
 	}
