@@ -91,6 +91,8 @@ public class JmsBrokerService implements BrokerService {
 			service = new org.apache.activemq.broker.BrokerService();
 			service.setBrokerName(NESS);
 			service.setPersistent(true);
+			service.setOfflineDurableSubscriberTaskSchedule(3600000);
+			service.setOfflineDurableSubscriberTimeout(86400000);
 			service.setPersistenceAdapter(persistenceAdapter());
 			service.setDataDirectory(new File(root, "activemq-data").getAbsolutePath());
 			service.setRestartAllowed(true);
