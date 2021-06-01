@@ -227,7 +227,10 @@ def type(bpm & multiSplit) trigger(subscribe)
 
 	public void subscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, BpmSplit split, BpmSplit... moreSplits) {
 		consumers.put(onEventReceived, List.of(event -> onEventReceived.accept(new $type(event), "$typeName+FirstUpperCase." + split.qn())));
-		connector.attachListener("$typeName+FirstUpperCase." + split.qn(), consumers.get(onEventReceived).get(0));
+		List<java.util.function.Consumer<io.intino.alexandria.event.Event>> eventConsumers = consumers.get(onEventReceived);
+		java.util.function.Consumer<io.intino.alexandria.event.Event> consumer = event -> onEventReceived.accept(new $type(event), "$typeName." + split.qn());
+		connector.attachListener("$typeName+FirstUpperCase." + split.qn(), consumer);
+		eventConsumers.add(consumer);
 		for (BpmSplit c : moreSplits) {
 			consumer = event -> onEventReceived.accept(new $type(event), "$typeName+FirstUpperCase." + c.qn());
 			eventConsumers.add(consumer);
