@@ -147,6 +147,6 @@
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-pool:5.16.2" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-jms-pool:5.16.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: junit:junit:4.13.2" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.magritte:io:3.1.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.magritte:io:3.3.4" level="project" />
   </component>
 </module>
