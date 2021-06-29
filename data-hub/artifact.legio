@@ -1,7 +1,7 @@
 dsl Legio
 
-Artifact("io.intino", "5.6.1") data-hub as Product
-	Model("Proteo", "3.0.1", "4.1.1") > outLanguage = "Ness"
+Artifact("io.intino", "5.6.2") data-hub as Product
+	Model("Proteo", "3.3.4", "4.1.1") > outLanguage = "Ness"
 	Box("Konos", "8.12.2")
 	Imports
 		Compile("io.intino.alexandria", "core-framework", "2.1.0")

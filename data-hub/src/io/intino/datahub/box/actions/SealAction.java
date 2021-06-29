@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SealAction {
 	private static final AtomicBoolean started = new AtomicBoolean(false);
+	private static final Object monitor = new Object();
 	public DataHubBox box;
 
 	public SealAction() {
@@ -20,19 +21,21 @@ public class SealAction {
 		this.box = box;
 	}
 
-	public synchronized String execute() {
-		if (started.get()) return "Sealing already started";
-		try {
-			started.set(true);
-			box.brokerSessions().push();
-			cleanStage();
-			box.sessionSealer().seal();
-			Logger.info("Finished sealing!");
-		} catch (Throwable e) {
-			Logger.error(e);
+	public String execute() {
+		synchronized (monitor) {
+			if (started.get()) return "Sealing already started";
+			try {
+				started.set(true);
+				box.brokerSessions().push();
+				cleanStage();
+				box.sessionSealer().seal();
+				Logger.info("Finished sealing!");
+				started.set(false);
+			} catch (Throwable e) {
+				Logger.error(e);
+			}
+			return "Finished sealing!";
 		}
-		started.set(false);
-		return "Finished sealing!";
 	}
 
 	public synchronized void execute(String stage) {
