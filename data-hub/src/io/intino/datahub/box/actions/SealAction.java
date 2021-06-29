@@ -6,6 +6,8 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -29,6 +31,7 @@ public class SealAction {
 				box.brokerSessions().push();
 				cleanStage();
 				box.sessionSealer().seal();
+				if (box.graph().datalake().backup() == null) cleanTreated();
 				Logger.info("Finished sealing!");
 				started.set(false);
 			} catch (Throwable e) {
@@ -57,7 +60,14 @@ public class SealAction {
 					Logger.error(e);
 				}
 			}
-
 		}
+	}
+
+	private void cleanTreated() {
+		Instant lastWeek = Instant.now().minus(7, ChronoUnit.DAYS);
+		FileUtils.listFiles(box.stageDirectory(), new String[]{"treated"}, true).forEach(f -> {
+			if (Instant.ofEpochMilli(f.lastModified()).isBefore(lastWeek)) f.delete();
+		});
+
 	}
 }
