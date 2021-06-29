@@ -6,7 +6,6 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SealAction {
@@ -49,15 +48,11 @@ public class SealAction {
 
 
 	private void cleanStage() {
-		for (File file : Objects.requireNonNull(box.stageDirectory().listFiles())) {
-			if (file.isDirectory() && Objects.requireNonNull(file.listFiles()).length == 0) {
-				try {
-					FileUtils.deleteDirectory(file);
-				} catch (IOException e) {
-					Logger.error(e);
-				}
-			}
-
+		try {
+			FileUtils.deleteDirectory(box.stageDirectory());
+			box.stageDirectory().mkdirs();
+		} catch (IOException e) {
+			Logger.error(e);
 		}
 	}
 }
