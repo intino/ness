@@ -4,9 +4,13 @@ def type(terminal)
 	import io.intino.alexandria.Timetag;
 	import io.intino.alexandria.Scale;
 	import io.intino.alexandria.event.Event;
+	import io.intino.alexandria.logger.Logger;
 
 	import java.util.function.Consumer;
 	import java.util.List;
+	import java.util.stream.Collectors;
+	import java.util.stream.Stream;
+	import java.io.File;
 
 	public class $name+snakeCaseToCamelCase+firstUpperCase {
 		private static final Scale scale = Scale.$scale;
@@ -24,12 +28,12 @@ def type(terminal)
 		}
 
 		[$datalake
-		public BatchSession batch(java.io.File dataHubStageDirectory, java.io.File temporalStageDirectory) {
-			return new BatchSession(dataHubStageDirectory, temporalStageDirectory);
+		public BatchSession batch(java.io.File temporalStageDirectory) {
+			return new BatchSession(temporalStageDirectory);
 		}
 
-		public BatchSession batch(java.io.File dataHubStageDirectory, java.io.File temporalStageDirectory, Config config) {
-			return new BatchSession(dataHubStageDirectory, temporalStageDirectory, config);
+		public BatchSession batch(java.io.File temporalStageDirectory, Config config) {
+			return new BatchSession(temporalStageDirectory, config);
 		}
 		]
 
@@ -62,18 +66,16 @@ def type(terminal)
 		}
 
 		public class BatchSession {
-			private final java.io.File dataHubStage;
 			private final java.io.File temporalStage;
 			private final io.intino.alexandria.ingestion.SessionHandler sessionHandler;
 			private final io.intino.alexandria.ingestion.EventSession eventSession;
 			private final io.intino.alexandria.ingestion.SetSession setSession;
 
-			public BatchSession(java.io.File dataHubStage, java.io.File temporalStage) {
-				this(dataHubStage, temporalStage, new Config());
+			public BatchSession(java.io.File temporalStage) {
+				this(temporalStage, new Config());
 			}
 
-			public BatchSession(java.io.File dataHubStage, java.io.File temporalStage, Config config) {
-				this.dataHubStage = dataHubStage;
+			public BatchSession(java.io.File temporalStage, Config config) {
 				this.temporalStage = temporalStage;
 				this.sessionHandler = new io.intino.alexandria.ingestion.SessionHandler(temporalStage);
 				this.eventSession = sessionHandler.createEventSession(config.eventsBufferSize);
@@ -93,11 +95,19 @@ def type(terminal)
 				setSession.flush();
 			}
 
-			public void push() {
+			public void push(File dataHubStage) {
 				eventSession.close();
 				setSession.close();
-				sessionHandler.pushTo(this.dataHubStage);
+				sessionHandler.pushTo(dataHubStage);
 				//connector.sendEvent("service.ness.push", new Event(new io.intino.alexandria.message.Message("Push").set("stage", temporalStage.getName())));
+			}
+
+			public void push(String host, String user, String dataHubStageAbsolutePath) {
+				eventSession.close();
+				setSession.close();
+				List<File> files = io.intino.alexandria.ingestion.FS.allFilesIn(temporalStage, path -> path.getName().endsWith(io.intino.alexandria.Session.SessionExtension)).collect(Collectors.toList());
+				upload(files, host, user, dataHubStageAbsolutePath);
+				temporalStage.renameTo(new File(temporalStage.getParentFile(), temporalStage.getName() + ".treated"));
 			}
 
 			public synchronized void seal() {
@@ -115,6 +125,22 @@ def type(terminal)
 					}
 				}
             }
+
+            private void upload(List<File> sessions, String host, String user, String dataHubStageAbsolutePath) {
+				try {
+					String connectionChain = user + "@" + host + ":" + dataHubStageAbsolutePath;
+					Logger.info("Uploading sessions to " + connectionChain + "...");
+					for (File s : sessions) {
+						Process process = new ProcessBuilder("scp", s.getAbsolutePath(), connectionChain)
+								.inheritIO()
+								.start();
+						process.waitFor(1, java.util.concurrent.TimeUnit.HOURS);
+					}
+					Logger.info("sessions uploaded");
+				} catch (java.io.IOException | InterruptedException ignored) {
+				}
+
+			}
 
             private String tankOf(Event event, String split) {
             	$publish+tankOf...[$NL]

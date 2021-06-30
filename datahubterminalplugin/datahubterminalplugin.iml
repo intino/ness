@@ -7,6 +7,8 @@
       <sourceFolder url="file://$MODULE_DIR$/res" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/test-res" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/temp/gc/bpmTerminal/src" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/temp/test/first/src" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/temp/test/ontology/src" isTestSource="true" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
