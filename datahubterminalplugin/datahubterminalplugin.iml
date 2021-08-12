@@ -15,6 +15,7 @@
       <sourceFolder url="file://$MODULE_DIR$/temp/gc/ontology/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/temp/gc/bpmTerminal/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/temp/gc/generadoresTerminal/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/temp/gc/cosmosTerminal/src" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -35,7 +36,6 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:message:3.0.1" level="project" />
     <orderEntry type="module" module-name="data-hub" />
     <orderEntry type="module" module-name="datalake-inspector" />
-    <orderEntry type="library" name="Intino: commons-io:commons-io:2.5" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:logger:2.1.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:io:3.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.0.1" level="project" />
@@ -170,5 +170,6 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:3.2.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:led:1.1.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:3.3.0" level="project" />
+    <orderEntry type="library" name="Intino: commons-io:commons-io:2.5" level="project" />
   </component>
 </module>

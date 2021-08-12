@@ -8,7 +8,6 @@ import io.intino.magritte.framework.Graph;
 import io.intino.magritte.framework.stores.FileSystemStore;
 import io.intino.plugin.PluginLauncher;
 import io.intino.plugin.project.Safe;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;

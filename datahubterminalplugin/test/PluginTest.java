@@ -32,7 +32,7 @@ public class PluginTest {
 	public void should_build_gc_terminals() throws IOException {
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
 		launcher.
-				moduleStructure(new PluginLauncher.ModuleStructure(List.of(new File(System.getProperty("user.home") + "/workspace/b.cfe/gestioncomercial/data-hub-ng/src"), new File(System.getProperty("user.home") + "/workspace/b.cfe/gestioncomercial/data-hub-ng/shared")), singletonList(new File(System.getProperty("user.home") + "/workspace/b.cfe/gestioncomercial/data-hub-ng/res")), new File(System.getProperty("user.home") + "/workspace/ness/out/data-hub-ng-test/")))
+				moduleStructure(new PluginLauncher.ModuleStructure(List.of(new File(System.getProperty("user.home") + "/workspace/cfe/suministro/core/data-hub-ng/src"), new File(System.getProperty("user.home") + "/workspace/cfe/suministro/core/data-hub-ng/shared")), singletonList(new File(System.getProperty("user.home") + "/workspace/cfe/suministro/core/data-hub-ng/res")), new File(System.getProperty("user.home") + "/workspace/ness/out/data-hub-ng-test/")))
 				.systemProperties(new PluginLauncher.SystemProperties(new File("/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3/"), new File("/Library/Java/JavaVirtualMachines/jdk-11.0.4.jdk/Contents/Home")))
 				.logger(System.out)
 				.invokedPhase(PluginLauncher.Phase.INSTALL)
@@ -277,7 +277,7 @@ public class PluginTest {
 
 					@Override
 					public String version() {
-						return "3.0.0-SNAPSHOT";
+						return "3.0.90";
 					}
 
 					@Override
