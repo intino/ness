@@ -7,20 +7,22 @@ import org.apache.activemq.command.ActiveMQTextMessage;
 
 import javax.jms.MessageNotWriteableException;
 import javax.jms.TextMessage;
+import java.util.Collections;
+import java.util.Iterator;
 
 public class MessageTranslator {
 
-	public static Message toInlMessage(javax.jms.Message message) {
+	public static Iterator<Message> toInlMessages(javax.jms.Message message) {
 		try {
-			return readMessage(((TextMessage) message).getText());
+			return readMessages(((TextMessage) message).getText());
 		} catch (Throwable e) {
 			Logger.error(e.getMessage(), e);
-			return null;
+			return Collections.emptyIterator();
 		}
 	}
 
-	private static Message readMessage(String text) {
-		return new MessageReader(text).next();
+	private static Iterator<Message> readMessages(String text) {
+		return new MessageReader(text).iterator();
 	}
 
 	public static javax.jms.Message toJmsMessage(String message) {

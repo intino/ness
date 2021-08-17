@@ -8,7 +8,10 @@ import io.intino.alexandria.message.Message;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.time.Instant;
+import java.util.Iterator;
 import java.util.function.Consumer;
 
 import static io.intino.alexandria.Timetag.of;
@@ -29,12 +32,16 @@ class TopicSaver {
 	}
 
 	Consumer<javax.jms.Message> create() {
-		return message -> save(MessageTranslator.toInlMessage(message));
+		return message -> save(MessageTranslator.toInlMessages(message));
 	}
 
-	private void save(Message message) {
+	private void save(Iterator<Message> messages) {
+		messages.forEachRemaining(m -> write(destination(tank, m).toPath(), m));
+	}
+
+	private void write(Path path, Message message) {
 		try {
-			Files.write(destination(tank, message).toPath(), (message.toString() + "\n\n").getBytes(), APPEND, CREATE);
+			Files.writeString(path, message.toString() + "\n\n", CREATE, APPEND);
 		} catch (IOException e) {
 			Logger.error(e);
 		}
