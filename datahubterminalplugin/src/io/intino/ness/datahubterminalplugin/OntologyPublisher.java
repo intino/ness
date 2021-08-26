@@ -58,8 +58,8 @@ class OntologyPublisher {
 	}
 
 	boolean publish() {
-		if (!createSources()) return false;
 		try {
+			if (!createSources()) return false;
 			logger.println("Publishing ontology...");
 			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
 			logger.println("Ontology published!");
