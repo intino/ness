@@ -16,10 +16,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class TransactionRenderer {
 	private final Transaction transaction;
@@ -27,6 +24,7 @@ public class TransactionRenderer {
 	private final Split split;
 	private final File destination;
 	private final String rootPackage;
+	private final Map<String, Integer> dimensionSizes = new HashMap<>();
 
 	public TransactionRenderer(Transaction transaction, Configuration conf, Split split, File destination, String rootPackage) {
 		this.transaction = transaction;
@@ -48,12 +46,12 @@ public class TransactionRenderer {
 	}
 
 	private Frame createTransactionFrame(Transaction transaction, String packageName) {
+		calculateAttributeSizes(transaction.attributeList());
 		FrameBuilder builder = new FrameBuilder("transaction").
 				add("name", transaction.name$()).
 				add("package", packageName).
 				add("size", (int) Math.ceil(sizeOf(transaction) / (float) Byte.SIZE));
-		if (transaction.attributeList().stream().noneMatch(a -> a.name$().equals("id")))
-			builder.add("id", transaction.attributeList().stream().filter(Data::isId).map(Layer::name$).findFirst().orElse(null));
+		builder.add("id", transaction.attributeList().stream().filter(Data::isId).map(Layer::name$).findFirst().orElse(null));
 		builder.add("attribute", processAttributes(new ArrayList<>(transaction.attributeList()), transaction.name$()));
 		if (split != null) {
 			List<Split> leafs = split.isLeaf() ? Collections.singletonList(split) : split.leafs();
@@ -63,26 +61,39 @@ public class TransactionRenderer {
 	}
 
 	private int sizeOf(Transaction transaction) {
-		return transaction.attributeList().stream().map(a -> !a.isDimension() ? a.asType().size() : sizeOf(a.asDimension().dimension())).reduce(Integer::sum).get();
+		return transaction.attributeList().stream().map(a -> a.asType().size()).reduce(Integer::sum).get();
 	}
 
 	private FrameBuilder[] processAttributes(List<Attribute> attributes, String owner) {
-		List<FrameBuilder> list = new ArrayList<>();
+		List<FrameBuilder> frameBuilders = new ArrayList<>();
 		int offset = 0;
+		Attribute idAttribute = attributes.stream().filter(Data::isId).findFirst().orElse(null);
+		if (idAttribute != null)
+			offset = processAttribute(owner, frameBuilders, offset, idAttribute);
+		attributes.remove(idAttribute);
 		attributes.sort(Comparator.comparingInt(a -> a.asType().size()));
 		Collections.reverse(attributes);
-		for (Attribute attribute : attributes) {
-			FrameBuilder b = process(attribute, offset);
-			if (b != null) {
-				offset += attribute.isDimension() ? sizeOf(attribute.asDimension().dimension()) : attribute.asType().size();
-				list.add(b.add("owner", owner));
-			}
+		for (Attribute attribute : attributes) offset = processAttribute(owner, frameBuilders, offset, attribute);
+		return frameBuilders.toArray(new FrameBuilder[0]);
+	}
+
+	private int processAttribute(String owner, List<FrameBuilder> frameBuilders, int offset, Attribute attribute) {
+		FrameBuilder b = process(attribute, offset);
+		if (b != null) {
+			offset += attribute.asType().size();
+			frameBuilders.add(b.add("owner", owner));
 		}
-		return list.toArray(new FrameBuilder[0]);
+		return offset;
+	}
+
+	private void calculateAttributeSizes(List<Attribute> attributes) {
+		for (Attribute attribute : attributes)
+			if (attribute.isDimension())
+				attribute.asType().size(sizeOf(attribute.asDimension().dimension()));
 	}
 
 	private FrameBuilder process(Attribute attribute, int offset) {
-		if (attribute.isDimension()) return process(attribute.asDimension().dimension(), attribute.name$(), offset);
+		if (attribute.isDimension()) return process(attribute.asDimension(), offset);
 		else return processAttribute(attribute.asType(), offset);
 	}
 
@@ -115,18 +126,18 @@ public class TransactionRenderer {
 	}
 
 	private boolean isAligned(Data.Type attribute, int offset) {
-		return (offset == 0 || log2(offset) % 1 == 0) && attribute.maxSize() == attribute.size();
+		return (offset % 8 == 0) && attribute.maxSize() == attribute.size();
 	}
 
-	private FrameBuilder process(Dimension dimension, String name, int offset) {
+	private FrameBuilder process(Data.Dimension attribute, int offset) {
 		FrameBuilder builder = new FrameBuilder("attribute", "dimension").
-				add("name", name).
-				add("type", dimension.name$()).
+				add("name", attribute.name$()).
+				add("type", attribute.dimension().name$()).
 				add("offset", offset).
-				add("bits", sizeOf(dimension));
-		if (dimension.isInResource())
-			builder.add("resource").add("resource", resource(dimension));
-		else builder.add("category", categories(dimension));
+				add("bits", attribute.size());
+		if (attribute.dimension().isInResource())
+			builder.add("resource").add("resource", resource(attribute.dimension()));
+		else builder.add("category", categories(attribute.dimension()));
 		return builder;
 	}
 
@@ -147,14 +158,17 @@ public class TransactionRenderer {
 
 	private Integer sizeOf(Dimension dimension) {
 		try {
-			return !dimension.isInResource() ? (int) Math.ceil(log2(dimension.asInline().categoryList().size() + 1)) : (int) Math.ceil(log2(countLines(dimension) + 1));
+			if (dimension.isInline()) return (int) Math.ceil(log2(dimension.asInline().categoryList().size() + 1));
+			if (!dimensionSizes.containsKey(dimension.name$()))
+				dimensionSizes.put(dimension.name$(), (int) Math.ceil(log2(countLines(dimension.asInResource()) + 1)));
+			return dimensionSizes.get(dimension.name$());
 		} catch (IOException e) {
 			return 0;
 		}
 	}
 
-	private int countLines(Dimension dimension) throws IOException {
-		return (int) new BufferedReader(new InputStreamReader(dimension.asInResource().tsv().openStream())).lines().count();
+	private int countLines(Dimension.InResource dimension) throws IOException {
+		return (int) new BufferedReader(new InputStreamReader(dimension.tsv().openStream())).lines().count();
 	}
 
 	private String transactionsPackage() {
