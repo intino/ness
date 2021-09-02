@@ -36,7 +36,7 @@ public class BrokerSessions {
 
 	private void pushTemporalSessions() {
 		try {
-			SessionHandler handler = new SessionHandler(brokerStageDirectory);
+			SessionHandler handler = new SessionHandler(stageDirectory);
 			File tmp = new File(stageDirectory, "tmp");
 			tmp.mkdirs();
 			for (File file : requireNonNull(brokerStageDirectory.listFiles(f -> f.getName().endsWith(".inl"))))
@@ -53,7 +53,6 @@ public class BrokerSessions {
 				eventSession.close();
 				file.delete();
 			}
-			new SessionHandler(tmp).pushTo(stageDirectory);
 		} catch (FileNotFoundException e) {
 			Logger.error(e);
 		}
