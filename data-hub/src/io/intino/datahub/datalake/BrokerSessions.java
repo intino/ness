@@ -12,6 +12,8 @@ import io.intino.alexandria.message.MessageReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 
 import static java.util.Objects.requireNonNull;
@@ -35,19 +37,32 @@ public class BrokerSessions {
 	private void pushTemporalSessions() {
 		try {
 			SessionHandler handler = new SessionHandler(brokerStageDirectory);
-			File[] files = requireNonNull(brokerStageDirectory.listFiles(f -> f.getName().endsWith(".inl")));
-			for (File file : files) {
+			File tmp = new File(stageDirectory, "tmp");
+			tmp.mkdirs();
+			for (File file : requireNonNull(brokerStageDirectory.listFiles(f -> f.getName().endsWith(".inl"))))
+				moveToTmp(file, tmp);
+			File[] tmpFiles = requireNonNull(tmp.listFiles(f -> f.getName().endsWith(".inl")));
+			for (File file : tmpFiles) {
 				String name = file.getName().replace(".inl", "");
 				String[] split = name.split("#");
 				EventSession eventSession = handler.createEventSession();
-				for (Message message : new MessageReader(new FileInputStream(file)))
+				MessageReader messages = new MessageReader(new FileInputStream(file));
+				for (Message message : messages)
 					eventSession.put(split[0], new Timetag(split[1]), new Event(message));
+				messages.close();
 				eventSession.close();
+				file.delete();
 			}
-			new SessionHandler(brokerStageDirectory).pushTo(stageDirectory);
-			Arrays.stream(requireNonNull(brokerStageDirectory.listFiles(f -> f.getName().endsWith(Session.EventSessionExtension)))).forEach(File::delete);
-			for (File file : files) file.delete();
+			new SessionHandler(tmp).pushTo(stageDirectory);
 		} catch (FileNotFoundException e) {
+			Logger.error(e);
+		}
+	}
+
+	private void moveToTmp(File file, File tmp) {
+		try {
+			Files.move(file.toPath(), new File(tmp, file.getName()).toPath());
+		} catch (IOException e) {
 			Logger.error(e);
 		}
 	}
