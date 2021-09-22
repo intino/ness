@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino", "5.7.2") data-hub as Product
+Artifact("io.intino", "5.7.3") data-hub as Product
 	Model("Proteo", "3.3.4", "4.1.1") > outLanguage = "Ness"
 	Box("Konos", "8.12.2")
 	Imports
@@ -10,8 +10,8 @@ Artifact("io.intino", "5.7.2") data-hub as Product
 		Compile("io.intino.alexandria", "exceptions", "2.0.1")
 		Compile("io.intino.alexandria", "jms", "1.2.5")
 		Compile("io.intino.alexandria", "zip", "1.0.4")
-		Compile("io.intino.alexandria", "ingestion", "4.0.3")
-		Compile("io.intino.alexandria", "sealing", "4.0.3")
+		Compile("io.intino.alexandria", "ingestion", "4.0.5")
+		Compile("io.intino.alexandria", "sealing", "4.0.4")
 		Compile("io.intino.alexandria", "scheduler-framework", "1.1.1") > Exclude("org.slf4j", "slf4j-api")
 
 		Compile("commons-io", "commons-io", "2.8.0")
