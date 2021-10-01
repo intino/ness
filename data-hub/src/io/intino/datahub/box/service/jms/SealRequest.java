@@ -17,9 +17,10 @@ public class SealRequest implements RequestConsumer {
 		try {
 			Message next = new MessageReader(request).next();
 			String stage = next.get("stage").data();
-			if (stage != null) new SealAction(box).execute(stage);
-			else new SealAction(box).execute();
-			return String.valueOf(true);
+			String result;
+			if (stage != null) result = new SealAction(box).execute(stage);
+			else result = new SealAction(box).execute();
+			return result.replace(SealAction.MESSAGE_PREFIX, "");
 		} catch (Throwable e) {
 			io.intino.alexandria.logger.Logger.error(e.getMessage(), e);
 			return null;
