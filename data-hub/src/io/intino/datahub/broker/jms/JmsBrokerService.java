@@ -15,6 +15,7 @@ import org.apache.activemq.broker.region.policy.ConstantPendingMessageLimitStrat
 import org.apache.activemq.broker.region.policy.PolicyEntry;
 import org.apache.activemq.broker.region.policy.PolicyMap;
 import org.apache.activemq.broker.region.virtual.VirtualDestinationInterceptor;
+import org.apache.activemq.broker.util.TimeStampingBrokerPlugin;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.activemq.network.jms.InboundTopicBridge;
 import org.apache.activemq.network.jms.SimpleJmsTopicConnector;
@@ -99,7 +100,7 @@ public class JmsBrokerService implements BrokerService {
 			service.setUseJmx(true);
 			service.setUseShutdownHook(true);
 			service.setAdvisorySupport(true);
-			service.setPlugins(new BrokerPlugin[]{new SimpleAuthenticationPlugin(registerUsers()), new JavaRuntimeConfigurationPlugin()});
+			service.setPlugins(new BrokerPlugin[]{new SimpleAuthenticationPlugin(registerUsers()), new JavaRuntimeConfigurationPlugin(), new TimeStampingBrokerPlugin()});
 			addPolicies();
 			addTCPConnector();
 			addMQTTConnector();
