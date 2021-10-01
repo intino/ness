@@ -1,6 +1,5 @@
 package io.intino.datahub.datalake;
 
-import io.intino.alexandria.Session;
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.event.Event;
 import io.intino.alexandria.ingestion.EventSession;
@@ -14,7 +13,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Arrays;
 
 import static java.util.Objects.requireNonNull;
 

@@ -15,6 +15,7 @@ import io.intino.magritte.framework.Graph;
 
 import java.io.File;
 import java.net.URL;
+import java.time.Instant;
 
 public class DataHubBox extends AbstractBox {
 	private FileDatalake datalake;
@@ -23,6 +24,7 @@ public class DataHubBox extends AbstractBox {
 	private NessService nessService;
 	private Sentinels sentinels;
 	private NessGraph graph;
+	private Instant lastSeal;
 
 	public DataHubBox(String[] args) {
 		super(args);
@@ -145,5 +147,13 @@ public class DataHubBox extends AbstractBox {
 
 	public FileDatalake datalake() {
 		return datalake;
+	}
+
+	public void lastSeal(Instant now) {
+		this.lastSeal = now;
+	}
+
+	public Instant lastSeal() {
+		return lastSeal;
 	}
 }
