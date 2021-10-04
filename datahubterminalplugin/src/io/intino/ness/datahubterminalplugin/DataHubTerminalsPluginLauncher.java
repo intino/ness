@@ -8,6 +8,7 @@ import io.intino.magritte.framework.Graph;
 import io.intino.magritte.framework.stores.FileSystemStore;
 import io.intino.plugin.PluginLauncher;
 import io.intino.plugin.project.Safe;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,9 +18,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private static final String MINIMUM_BPM_VERSION = "1.2.5";
-	private static final String MINIMUM_TERMINAL_JMS_VERSION = "4.0.0";
+	private static final String MINIMUM_TERMINAL_JMS_VERSION = "4.4.0";
 	private static final String MINIMUM_EVENT_VERSION = "3.0.0";
-	private static final String MINIMUM_INGESTION_VERSION = "4.0.0";
+	private static final String MINIMUM_INGESTION_VERSION = "4.0.5";
 	private static final String MAX_TERMINAL_JMS_VERSION = "5.0.0";
 	private static final String MAX_INGESTION_VERSION = "5.0.0";
 	private static final String MAX_EVENT_VERSION = "4.0.0";
@@ -65,7 +66,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			published.set(new OntologyPublisher(new File(tempDir, "ontology"), graph, configuration(), moduleStructure(), versions, systemProperties(), invokedPhase, logger()).publish() & published.get());
 			if (published.get() && notifier() != null)
 				notifier().notify("Ontology " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), "ontology", configuration().artifact().version()));
-//			if (published.get()) FileUtils.deleteDirectory(tempDir);
+			if (published.get()) FileUtils.deleteDirectory(tempDir);
 		} catch (Throwable e) {
 			logger().println(e.getMessage());
 			e.printStackTrace();
@@ -75,12 +76,12 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private void publishTerminals(NessGraph nessGraph, Map<String, String> versions, File tempDir) {
 		try {
 			AtomicBoolean published = new AtomicBoolean(true);
-			nessGraph.terminalList().parallelStream().forEach(terminal -> {
+			nessGraph.terminalList().forEach(terminal -> {
 				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), versions, systemProperties(), invokedPhase, logger()).publish() & published.get());
 				if (published.get() && notifier() != null)
 					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), terminalNameArtifact(terminal), configuration().artifact().version()));
 			});
-//			if (published.get()) FileUtils.deleteDirectory(tempDir);
+			if (published.get()) FileUtils.deleteDirectory(tempDir);
 		} catch (Throwable e) {
 			logger().println(e.getMessage());
 			e.printStackTrace();
