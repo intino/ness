@@ -73,7 +73,7 @@ def type(terminal)
 			synchronized(monitor) {
 				connector.requestResponse("service.ness.seal.last", new Event(new io.intino.alexandria.message.Message("LastSeal")).ts(java.time.Instant.now()).toString(), s -> {
 					synchronized(monitor) {
-						timestamp.set(Instant.parse(s));
+						if (s != null) timestamp.set(Instant.parse(s));
 						monitor.notify();
 					}
 				});
