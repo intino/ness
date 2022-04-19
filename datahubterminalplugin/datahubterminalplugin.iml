@@ -104,8 +104,6 @@
     <orderEntry type="library" name="Intino: org.springframework:spring-core:4.3.30.RELEASE" level="project" />
     <orderEntry type="library" name="Intino: org.springframework:spring-expression:4.3.30.RELEASE" level="project" />
     <orderEntry type="library" name="Intino: org.apache.commons:commons-pool2:2.9.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.2.5" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.0.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:1.7.25" level="project" />
     <orderEntry type="library" name="Intino: commons-io:commons-io:2.8.0" level="project" />
     <orderEntry type="library" name="Intino: org.slf4j:slf4j-api:1.7.30" level="project" />

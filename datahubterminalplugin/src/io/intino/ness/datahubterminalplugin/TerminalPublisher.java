@@ -34,9 +34,10 @@ class TerminalPublisher {
 	private final String basePackage;
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
+	private final PluginLauncher.Notifier notifier;
 	private final List<Tank.Event> tanks;
 
-	TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, Configuration configuration, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
+	TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, Configuration configuration, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger, PluginLauncher.Notifier notifier) {
 		this.root = root;
 		this.terminal = terminal;
 		this.tanks = tanks;
@@ -46,6 +47,7 @@ class TerminalPublisher {
 		this.basePackage = configuration.artifact().groupId().toLowerCase() + "." + Formatters.snakeCaseToCamelCase().format(configuration.artifact().name()).toString().toLowerCase();
 		this.invokedPhase = invokedPhase;
 		this.logger = logger;
+		this.notifier = notifier;
 	}
 
 	boolean publish() {
@@ -56,8 +58,8 @@ class TerminalPublisher {
 			logger.println("Terminal " + terminal.name$() + " published!");
 			return true;
 		} catch (Throwable e) {
+			logger.println(e.getMessage() == null ? e.toString() : e.getMessage());
 			e.printStackTrace();
-			logger.println(e.getMessage());
 			return false;
 		}
 	}
@@ -73,16 +75,37 @@ class TerminalPublisher {
 		return true;
 	}
 
-
 	private boolean createSources() {
 		File srcDirectory = new File(root, "src");
 		srcDirectory.mkdirs();
 		Map<Event, Datalake.Split> eventSplitMap = collectEvents(tanks);
+		if (duplicatedEvents()) return false;
 		new TerminalRenderer(terminal, eventSplitMap, srcDirectory, basePackage).render();
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
 		writeManifest(resDirectory);
 		return true;
+	}
+
+	private boolean duplicatedEvents() {
+		final Set<String> duplicatedPublish = terminal.publish() != null ? findDuplicates(terminal.publish().tanks().stream().map(Tank.Event::qn).collect(Collectors.toList())) : Collections.emptySet();
+		final Set<String> duplicatedSubscribe = terminal.subscribe() != null ? findDuplicates(terminal.subscribe().tanks().stream().map(Tank.Event::qn).collect(Collectors.toList())) : Collections.emptySet();
+		if (!duplicatedPublish.isEmpty()) {
+			logger.println("Duplicated publishing event in terminal " + terminal.name$() + ": " + String.join(", ", duplicatedPublish));
+			notifier.notifyError("Duplicated publishing event in terminal " + terminal.name$() + ": " + String.join(", ", duplicatedPublish));
+			return true;
+		}
+		if (!duplicatedSubscribe.isEmpty()) {
+			logger.println("Duplicated subscription event in terminal " + terminal.name$() + ": " + String.join(", ", duplicatedPublish));
+			notifier.notifyError("Duplicated subscription event in terminal " + terminal.name$() + ": " + String.join(", ", duplicatedPublish));
+			return true;
+		}
+		return false;
+	}
+
+	public Set<String> findDuplicates(List<String> listContainingDuplicates) {
+		final Set<String> set = new HashSet<>();
+		return listContainingDuplicates.stream().filter(yourInt -> !set.add(yourInt)).collect(Collectors.toSet());
 	}
 
 	private void writeManifest(File srcDirectory) {
