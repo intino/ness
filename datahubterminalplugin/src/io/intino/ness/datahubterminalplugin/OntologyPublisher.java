@@ -35,7 +35,7 @@ class OntologyPublisher {
 	private final StringBuilder errorStream;
 	private final List<Wordbag> wordbags;
 
-	OntologyPublisher(File root, NessGraph graph, Configuration configuration, PluginLauncher.ModuleStructure moduleStructure, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger) {
+	OntologyPublisher(File root, NessGraph graph, Configuration configuration, PluginLauncher.ModuleStructure moduleStructure, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger, PluginLauncher.Notifier notifier) {
 		this.root = root;
 		this.eventTanks = eventTanks(graph);
 		this.events = graph.eventList();
