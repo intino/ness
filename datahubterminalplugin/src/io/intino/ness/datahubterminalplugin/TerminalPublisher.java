@@ -11,9 +11,7 @@ import io.intino.datahub.graph.Event;
 import io.intino.datahub.graph.Namespace;
 import io.intino.datahub.graph.Terminal;
 import io.intino.itrules.FrameBuilder;
-import io.intino.plugin.IntinoException;
 import io.intino.plugin.PluginLauncher;
-import io.intino.plugin.project.configuration.Version;
 import org.apache.maven.shared.invoker.*;
 
 import java.io.File;
