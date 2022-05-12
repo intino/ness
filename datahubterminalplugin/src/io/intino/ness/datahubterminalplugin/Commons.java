@@ -8,8 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class Commons {
-
-
 	public static void writeFrame(File packageFolder, String name, String text) {
 		try {
 			packageFolder.mkdirs();

@@ -40,7 +40,9 @@ public class ReviewAction {
 			File sessionsDirectory = backup == null ? null : new File(backup.path(), "sessions");
 			List<File> review = new Regenerator(box.datalake(), sessionsDirectory, reviewsDirectory).review(mapper);
 			started.set(false);
-			return Files.readString(review.get(0).toPath());
+			if (review.get(0).length() > 500_000)
+				return "Review is too large. You can find it on: " + review.get(0).getAbsolutePath();
+			else return Files.readString(review.get(0).toPath());
 		} catch (Throwable e) {
 			Logger.error(e);
 			started.set(false);
