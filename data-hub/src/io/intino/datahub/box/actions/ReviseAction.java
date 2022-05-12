@@ -40,7 +40,9 @@ public class ReviseAction {
 			reviewsDirectory.mkdirs();
 			List<File> revise = new Regenerator(box.datalake(), sessionsDirectory, reviewsDirectory).revise(mapper);
 			started.set(false);
-			return Files.readString(revise.get(0).toPath());
+			if (revise.get(0).length() > 500_000)
+				return "Review is too large. You can find it on: " + revise.get(0).getAbsolutePath();
+			else return Files.readString(revise.get(0).toPath());
 		} catch (Exception e) {
 			Logger.error(e);
 			started.set(false);
