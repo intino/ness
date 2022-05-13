@@ -59,7 +59,8 @@ class OntologyPublisher {
 		try {
 			if (invokedPhase.equals(DISTRIBUTE) && !isSnapshotVersion() && isDistributed(conf.artifact())) {
 				logger.println("This Version Already Exists");
-				notifier.notifyError("The Version " + conf.artifact().version() + " Already Exists");
+				notifier.notifyError("The Version " + conf.artifact().version() + " is Already Distributed.");
+				return false;
 			}
 			if (!createSources()) return false;
 			logger.println("Publishing ontology...");
@@ -74,7 +75,7 @@ class OntologyPublisher {
 	}
 
 	private boolean isDistributed(Configuration.Artifact artifact) {
-		String identifier = artifact.groupId() + ":" + artifact.name().toLowerCase();
+		String identifier = basePackage + ":ontology";
 		if (artifact.distribution() == null) return false;
 		List<String> versions = ArtifactoryConnector.versions(artifact.distribution().release(), identifier);
 		return versions.contains(artifact.version());
