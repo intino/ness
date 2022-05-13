@@ -20,6 +20,8 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.intino.plugin.PluginLauncher.Phase.DISTRIBUTE;
+
 class OntologyPublisher {
 	private final File root;
 	private final List<Tank.Event> eventTanks;
@@ -32,6 +34,7 @@ class OntologyPublisher {
 	private final String basePackage;
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
+	private PluginLauncher.Notifier notifier;
 	private final StringBuilder errorStream;
 	private final List<Wordbag> wordbags;
 
@@ -48,11 +51,16 @@ class OntologyPublisher {
 		this.basePackage = configuration.artifact().groupId().toLowerCase() + "." + Formatters.snakeCaseToCamelCase().format(configuration.artifact().name()).toString().toLowerCase();
 		this.invokedPhase = invokedPhase;
 		this.logger = logger;
-		errorStream = new StringBuilder();
+		this.notifier = notifier;
+		this.errorStream = new StringBuilder();
 	}
 
 	boolean publish() {
 		try {
+			if (invokedPhase.equals(DISTRIBUTE) && !isSnapshotVersion() && isDistributed(conf.artifact())) {
+				logger.println("This Version Already Exists");
+				notifier.notifyError("The Version " + conf.artifact().version() + " Already Exists");
+			}
 			if (!createSources()) return false;
 			logger.println("Publishing ontology...");
 			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
@@ -63,6 +71,13 @@ class OntologyPublisher {
 			return false;
 		}
 		return true;
+	}
+
+	private boolean isDistributed(Configuration.Artifact artifact) {
+		String identifier = artifact.groupId() + ":" + artifact.name().toLowerCase();
+		if (artifact.distribution() == null) return false;
+		List<String> versions = ArtifactoryConnector.versions(artifact.distribution().release(), identifier);
+		return versions.contains(artifact.version());
 	}
 
 	private boolean createSources() {

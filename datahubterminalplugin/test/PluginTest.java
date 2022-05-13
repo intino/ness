@@ -131,6 +131,11 @@ public class PluginTest {
 					}
 
 					@Override
+					public Dependency.Archetype archetype() {
+						return null;
+					}
+
+					@Override
 					public List<Dependency> dependencies() {
 						return null;
 					}
@@ -227,6 +232,16 @@ public class PluginTest {
 					}
 
 					@Override
+					public String user() {
+						return null;
+					}
+
+					@Override
+					public String password() {
+						return null;
+					}
+
+					@Override
 					public Configuration root() {
 						return null;
 					}
@@ -244,6 +259,16 @@ public class PluginTest {
 					@Override
 					public String url() {
 						return "https://artifactory.intino.io/artifactory/release-libraries";
+					}
+
+					@Override
+					public String user() {
+						return null;
+					}
+
+					@Override
+					public String password() {
+						return null;
 					}
 
 					@Override
@@ -316,6 +341,11 @@ public class PluginTest {
 					}
 
 					@Override
+					public Dependency.Archetype archetype() {
+						return null;
+					}
+
+					@Override
 					public List<Dependency> dependencies() {
 						return null;
 					}
@@ -411,6 +441,16 @@ public class PluginTest {
 					}
 
 					@Override
+					public String user() {
+						return null;
+					}
+
+					@Override
+					public String password() {
+						return null;
+					}
+
+					@Override
 					public Configuration root() {
 						return null;
 					}
@@ -428,6 +468,16 @@ public class PluginTest {
 					@Override
 					public String url() {
 						return "https://artifactory.intino.io/artifactory/release-libraries";
+					}
+
+					@Override
+					public String user() {
+						return null;
+					}
+
+					@Override
+					public String password() {
+						return null;
 					}
 
 					@Override
@@ -500,6 +550,11 @@ public class PluginTest {
 					}
 
 					@Override
+					public Dependency.Archetype archetype() {
+						return null;
+					}
+
+					@Override
 					public List<Dependency> dependencies() {
 						return null;
 					}
@@ -595,6 +650,16 @@ public class PluginTest {
 					}
 
 					@Override
+					public String user() {
+						return null;
+					}
+
+					@Override
+					public String password() {
+						return null;
+					}
+
+					@Override
 					public Configuration root() {
 						return null;
 					}
@@ -612,6 +677,16 @@ public class PluginTest {
 					@Override
 					public String url() {
 						return "https://artifactory.intino.io/artifactory/release-libraries";
+					}
+
+					@Override
+					public String user() {
+						return null;
+					}
+
+					@Override
+					public String password() {
+						return null;
 					}
 
 					@Override
