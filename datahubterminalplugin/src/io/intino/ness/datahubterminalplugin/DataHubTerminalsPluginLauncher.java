@@ -27,7 +27,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	@Override
 	public void run() {
 		if (invokedPhase.ordinal() < 2) return;
-		logger().println("Building " + configuration().artifact().name() + " terminal");
+		logger().println("Building " + configuration().artifact().name() + " terminals...");
 		File tempDir = tempDirectory();
 		run(tempDir);
 	}
@@ -54,21 +54,24 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			return;
 		}
 		Map<String, String> versions = Map.of("terminal-jms", terminalJmsVersion(), "ingestion", ingestionVersion(), "bpm", bpmVersion(), "event", eventVersion());
-		publishOntology(graph.as(NessGraph.class), versions, tempDir);
+		final boolean published = publishOntology(graph.as(NessGraph.class), versions, tempDir);
+		if (!published) return;
 		publishTerminals(graph.as(NessGraph.class), versions, tempDir);
 		logger().println("Finished generation of terminals!");
 	}
 
-	private void publishOntology(NessGraph graph, Map<String, String> versions, File tempDir) {
+	private boolean publishOntology(NessGraph graph, Map<String, String> versions, File tempDir) {
 		try {
 			AtomicBoolean published = new AtomicBoolean(true);
 			published.set(new OntologyPublisher(new File(tempDir, "ontology"), graph, configuration(), moduleStructure(), versions, systemProperties(), invokedPhase, logger(), notifier()).publish() & published.get());
 			if (published.get() && notifier() != null)
 				notifier().notify("Ontology " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), "ontology", configuration().artifact().version()));
 			if (published.get()) FileUtils.deleteDirectory(tempDir);
+			return published.get();
 		} catch (Throwable e) {
 			logger().println(e.getMessage());
 			e.printStackTrace();
+			return false;
 		}
 	}
 
