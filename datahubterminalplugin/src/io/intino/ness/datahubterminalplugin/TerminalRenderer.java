@@ -56,7 +56,7 @@ class TerminalRenderer {
 	}
 
 	private Frame createDatalakeFrame() {
-		FrameBuilder datalake = new FrameBuilder().add("datalake");
+		FrameBuilder datalake = new FrameBuilder().add("datalake").add("package", rootPackage);
 		terminal.graph().datalake().tankList().forEach(t -> datalake.add("tank", tank(t)));
 		return datalake.toFrame();
 	}

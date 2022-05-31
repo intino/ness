@@ -1,34 +1,25 @@
 def type(datalake)
 	package $package+validPackage;
 
-	import io.intino.alexandria.Timetag;
-	import io.intino.alexandria.Scale;
-	import io.intino.alexandria.event.Event;
 	import io.intino.alexandria.logger.Logger;
 
 	import java.io.File;
-
-	import java.time.Instant;
-
-	import java.util.function.Consumer;
-	import java.util.List;
-	import java.util.stream.Collectors;
-	import java.util.stream.Stream;
-	import java.io.File;
+	import io.intino.alexandria.datalake.Datalake.EventStore.Tank;
+	import io.intino.alexandria.datalake.file.FileDatalake;
 
 	public class Datalake {
-
-		FileDatalake datalake;
+		private final io.intino.alexandria.datalake.Datalake datalake;
 
 		public Datalake(File file) {
-			this.datalake = new io.intino.alexandria.FileDatalake(file);
+			this.datalake = new FileDatalake(file);
 		}
 
-		$tank...[$NL]
+		$tank...[$NL$NL]
+	}
 end
 
 def trigger(tank)
 	public Tank $name() {
-		return datalake.events().tank("$qn");
+		return this.datalake.eventStore().tank("$qn");
 	}
 end
