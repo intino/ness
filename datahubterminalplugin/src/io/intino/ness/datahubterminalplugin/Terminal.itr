@@ -31,6 +31,10 @@ def type(terminal)
 		}
 
 		[$datalake
+		public Datalake datalake(java.io.File directory) {
+			return new Datalake(directory);
+		}
+
 		public BatchSession batch(java.io.File temporalStageDirectory) {
 			return new BatchSession(temporalStageDirectory);
 		}
