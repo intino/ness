@@ -103,6 +103,11 @@ def trigger(terminal)
 		<version>$ingestionVersion</version>
 	</dependency>
 	<dependency>
+		<groupId>io.intino.alexandria</groupId>
+		<artifactId>datalake</artifactId>
+		<version>4.0.5</version>
+	</dependency>
+	<dependency>
 		<groupId>$group+lowercase</groupId>
 		<artifactId>$artifact+lowercase</artifactId>
 		<version>$version</version>
