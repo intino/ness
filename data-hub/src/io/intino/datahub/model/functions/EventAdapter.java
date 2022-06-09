@@ -1,4 +1,4 @@
-package io.intino.datahub.graph.functions;
+package io.intino.datahub.model.functions;
 
 import io.intino.alexandria.zim.ZimStream;
 import io.intino.datahub.datalake.adapter.Context;

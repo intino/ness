@@ -6,7 +6,7 @@ import io.intino.datahub.datalake.regenerator.Mapper;
 import io.intino.datahub.datalake.regenerator.MapperLoader;
 import io.intino.datahub.datalake.regenerator.MapperReader;
 import io.intino.datahub.datalake.regenerator.Regenerator;
-import io.intino.datahub.graph.Datalake;
+import io.intino.datahub.model.Datalake;
 
 import java.io.File;
 import java.nio.file.Files;
