@@ -17,7 +17,7 @@ public class RestoreDatalakeAction {
 	public String execute() {
 		File root = box.datalake().root();
 		root.renameTo(new File(root.getParentFile(), root.getName() + "_removed_" + instant()));
-		String backupDirectory = box.configuration().backupDirectory();
+		File backupDirectory = box.configuration().backupDirectory();
 		File origin = new File(backupDirectory, "datalake" + File.separator + timetag + ".zip");
 		if (!origin.exists()) return "This timetag doesn't exist";
 		try {

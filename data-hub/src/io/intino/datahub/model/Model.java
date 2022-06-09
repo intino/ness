@@ -1,6 +1,4 @@
-package io.intino.datahub.graph;
-
-import io.intino.datahub.graph.Datalake.Split;
+package io.intino.datahub.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,8 +7,8 @@ import static java.util.Collections.singletonList;
 
 public class Model {
 
-	public static String qn(Split self) {
-		String prefix = self.core$().owner().is(Split.class) && !self.core$().ownerAs(Split.class).qn().isEmpty() ? self.core$().ownerAs(Split.class).qn() + "." : "";
+	public static String qn(Datalake.Split self) {
+		String prefix = self.core$().owner().is(Datalake.Split.class) && !self.core$().ownerAs(Datalake.Split.class).qn().isEmpty() ? self.core$().ownerAs(Datalake.Split.class).qn() + "." : "";
 		return prefix + self.label();
 	}
 
@@ -32,15 +30,15 @@ public class Model {
 		return event.core$().owner().is(Namespace.class) ? event.core$().ownerAs(Namespace.class).qn() : "";
 	}
 
-	public static boolean isRoot(Split self) {
-		return !self.core$().owner().is(Split.class);
+	public static boolean isRoot(Datalake.Split self) {
+		return !self.core$().owner().is(Datalake.Split.class);
 	}
 
-	public static boolean isLeaf(Split self) {
+	public static boolean isLeaf(Datalake.Split self) {
 		return self.core$().componentList().isEmpty();
 	}
 
-	public static List<Split> leafs(Split context) {
+	public static List<Datalake.Split> leafs(Datalake.Split context) {
 		if (context.isLeaf()) return singletonList(context);
 		List<Datalake.Split> contexts = new ArrayList<>();
 		for (Datalake.Split sub : context.splitList()) contexts.addAll(leafs(sub));
