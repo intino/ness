@@ -34,7 +34,7 @@ class OntologyPublisher {
 	private final String basePackage;
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
-	private PluginLauncher.Notifier notifier;
+	private final PluginLauncher.Notifier notifier;
 	private final StringBuilder errorStream;
 	private final List<Wordbag> wordbags;
 
