@@ -141,7 +141,7 @@ end
 def type(word & multiple) trigger(getter)
 	public java.util.List<$type+FirstUpperCase> $name+FirstLowerCase() {
 		if (!message.contains("$name+FirstLowerCase")) return java.util.Collections.emptyList();
-		return java.util.Collections.unmodifiableList(java.util.Arrays.asList(message.get("$name+FirstLowerCase").as(String$[].class)).map(v -> $name+FirstUpperCase.valueOf(v)).collect(java.util.stream.Collectors.toList()));
+		return java.util.Arrays.stream(message.get("$name+FirstLowerCase").as(String$[].class)).map($name+FirstUpperCase::valueOf).collect(java.util.stream.Collectors.toUnmodifiableList());
 	}
 end
 

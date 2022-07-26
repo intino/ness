@@ -68,7 +68,7 @@ public class PluginTest {
 				.notifier(notifier())
 				.invokedPhase(PluginLauncher.Phase.INSTALL)
 				.moduleConfiguration(cesarConfiguration());
-		File temp = new File(System.getProperty("user.home") + "/workspace/ness/datahubterminalplugin/temp");
+		File temp = new File(System.getProperty("user.home") + "/workspace/ness/datahubterminalplugin/temp/cesar");
 		FileUtils.deleteDirectory(temp);
 
 		temp.mkdirs();
