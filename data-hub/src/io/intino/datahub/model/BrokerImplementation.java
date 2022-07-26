@@ -1,4 +1,4 @@
-package io.intino.datahub.graph;
+package io.intino.datahub.model;
 
 import io.intino.datahub.broker.BrokerService;
 

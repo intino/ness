@@ -2,7 +2,9 @@ package io.intino.datahub.datalake.regenerator;
 
 import io.intino.alexandria.logger.Logger;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,6 +50,7 @@ public class RegeneratorReporter {
 	private static final String htmlTableSuffix = "</table>\n" +
 			"</body></html>";
 	private final Path destination;
+	private BufferedWriter writer;
 
 
 	public RegeneratorReporter(File destination) {
@@ -55,6 +58,7 @@ public class RegeneratorReporter {
 		destination.getParentFile().mkdirs();
 		try {
 			Files.write(this.destination, htmlTablePrefix.getBytes());
+			writer = new BufferedWriter(new FileWriter(destination));
 		} catch (IOException e) {
 			Logger.error(e);
 		}
@@ -67,7 +71,7 @@ public class RegeneratorReporter {
 				append("\t<td>\n").append("<pre>").append(before).append("</pre>\n</td>\n").append("<td>\n").append(after == null ? "REMOVE" : "<pre>" + after + "<pre>").append("\n</td>\n").
 				append("</tr>");
 		try {
-			Files.write(destination, builder.toString().getBytes(), StandardOpenOption.APPEND);
+			writer.write(builder.toString());
 		} catch (IOException e) {
 			Logger.error(e);
 		}
@@ -76,7 +80,8 @@ public class RegeneratorReporter {
 
 	public void commit() {
 		try {
-			Files.write(destination, htmlTableSuffix.getBytes(), StandardOpenOption.APPEND);
+			writer.write(htmlTableSuffix);
+			writer.close();
 		} catch (IOException e) {
 			Logger.error(e);
 		}

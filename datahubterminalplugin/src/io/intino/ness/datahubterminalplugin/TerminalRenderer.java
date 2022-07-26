@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.intino.ness.datahubterminalplugin.Formatters.firstUpperCase;
+import static io.intino.ness.datahubterminalplugin.Formatters.snakeCaseToCamelCase;
 
 class TerminalRenderer {
 	private final Terminal terminal;
@@ -33,7 +34,8 @@ class TerminalRenderer {
 
 	void render() {
 		final File packageFolder = new File(srcDir, rootPackage.replace(".", File.separator));
-		Commons.writeFrame(packageFolder, Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString(), template().render(createTerminalFrame()));
+		Commons.writeFrame(packageFolder, snakeCaseToCamelCase().format(terminal.name$()).toString(), template().render(createTerminalFrame()));
+		Commons.writeFrame(packageFolder, "Datalake", new DatalakeTemplate().render(createDatalakeFrame()));
 	}
 
 	private Frame createTerminalFrame() {
@@ -51,6 +53,16 @@ class TerminalRenderer {
 			terminal.subscribe().tanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
 		if (terminal.bpm() != null) addBpm(builder);
 		return builder.toFrame();
+	}
+
+	private Frame createDatalakeFrame() {
+		FrameBuilder datalake = new FrameBuilder().add("datalake").add("package", rootPackage);
+		terminal.graph().datalake().tankList().forEach(t -> datalake.add("tank", tank(t)));
+		return datalake.toFrame();
+	}
+
+	private FrameBuilder tank(Tank t) {
+		return new FrameBuilder("tank").add("name", t.name$()).add("qn", t.asEvent().qn());
 	}
 
 	private void addBpm(FrameBuilder builder) {

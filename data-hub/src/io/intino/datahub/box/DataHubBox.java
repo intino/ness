@@ -10,7 +10,7 @@ import io.intino.datahub.box.service.scheduling.Sentinels;
 import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.broker.jms.JmsBrokerService;
 import io.intino.datahub.datalake.BrokerSessions;
-import io.intino.datahub.graph.NessGraph;
+import io.intino.datahub.model.NessGraph;
 import io.intino.magritte.framework.Graph;
 
 import java.io.File;
@@ -67,7 +67,8 @@ public class DataHubBox extends AbstractBox {
 	private void injectJmsConfiguration() {
 		if (graph.datalake() != null) {
 			graph.datalake().path(datalakeDirectory().getAbsolutePath());
-			if (graph.datalake().backup() != null) graph.datalake().backup().path(configuration.backupDirectory());
+			if (graph.datalake().backup() != null)
+				graph.datalake().backup().path(configuration.backupDirectory().getAbsolutePath());
 		}
 		if (graph.broker() != null) {
 			graph.broker().path(brokerDirectory().getAbsolutePath());

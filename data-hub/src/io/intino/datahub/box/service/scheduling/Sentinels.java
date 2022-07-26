@@ -6,7 +6,7 @@ import io.intino.alexandria.scheduler.ScheduledTrigger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.box.actions.BackupAction;
 import io.intino.datahub.box.actions.SealAction;
-import io.intino.datahub.graph.Datalake;
+import io.intino.datahub.model.Datalake;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.SchedulerException;
