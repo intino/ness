@@ -1,5 +1,6 @@
 import io.intino.builder.NessRunner;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -32,6 +33,7 @@ public class NesscRunnerTest {
 	}
 
 	@Test
+	@Ignore
 	public void cinepolisM1() {
 //		FileSystemUtils.removeDir("C:\\Users\\naits\\Desktop\\IntinoDev\\master\\test\\gen\\com\\cinepolis\\master\\model");
 		NessRunner.main(new String[]{temp(home + "cinepolis.txt")});
@@ -40,6 +42,7 @@ public class NesscRunnerTest {
 
 
 	@Test
+	@Ignore
 	public void testM1() {
 //		FileSystemUtils.removeDir("C:\\Users\\naits\\Desktop\\IntinoDev\\master\\test\\gen\\com\\cinepolis\\master\\model");
 		NessRunner.main(new String[]{temp(home + "test.txt")});
