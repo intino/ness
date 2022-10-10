@@ -5,9 +5,7 @@ Artifact("io.intino.ness", "1.0.0") builder
 		Compile("io.intino.magritte", "builder", "4.2.0")
 		Test("junit", "junit", "4.13")
 	Package(mode = ModulesAndLibrariesLinkedByManifest) as Runnable ("io.intino.ness.builder.NessRunner")
-	Distribution > Artifactory("intino-maven")
-			Release("https://artifactory.intino.io/artifactory/release-frameworks")
-			Snapshot("https://artifactory.intino.io/artifactory/snapshot-frameworks")
+	Distribution > Artifactory("intino-maven") > Release("https://artifactory.intino.io/artifactory/release-builders")
 
 Repository("intino-maven") > Release("https://artifactory.intino.io/artifactory/releases")
 
