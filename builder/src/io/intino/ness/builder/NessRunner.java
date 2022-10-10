@@ -1,7 +1,7 @@
-package io.intino.builder;
+package io.intino.ness.builder;
 
 
-import io.intino.builder.operations.MasterNodeCodeGenerationOperation;
+import io.intino.ness.builder.operations.MasterNodeCodeGenerationOperation;
 import io.intino.magritte.builder.TaraCompilerRunner;
 import io.intino.magritte.builder.compiler.operations.StashGenerationOperation;
 import io.intino.magritte.builder.core.errorcollection.TaraException;
