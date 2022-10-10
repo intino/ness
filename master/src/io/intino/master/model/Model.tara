@@ -1,0 +1,42 @@
+dsl Proteo
+
+Concept:Named Entity
+	Concept:Named:RequiresAspect Attribute extends Data
+	Aspect ExtensionOf > var Entity entity
+
+Concept:Named Struct
+	Concept:Named:RequiresAspect Attribute extends Data
+	Aspect ExtensionOf > var Struct struct
+
+Concept Data is abstract
+	Aspect Optional
+	Aspect List
+	Aspect Type
+		var string type is reactive private
+		sub Double
+			var double defaultValue = empty
+		sub Integer
+			var integer defaultValue = empty
+		sub Long
+			var long defaultValue = empty
+		sub Boolean
+			var boolean defaultValue = empty
+		sub String
+			var string defaultValue = empty
+		sub Date
+			var string format = "dd/MM/yyyy"
+		sub DateTime
+			var string format = "dd/MM/yyyy HH:mm:ss"
+		sub Instant
+			var instant defaultValue = empty
+		sub Word
+			var string[] values
+			var string defaultValue= empty
+		sub Struct
+			var Model.Struct struct
+		sub Entity
+			var Model.Entity entity
+		sub Map
+			var string type = "java.util.Map" is reactive private
+			Concept:{1..1}:RequiresAspect Key extends Data
+			Concept:{1..1}:RequiresAspect Value extends Data
