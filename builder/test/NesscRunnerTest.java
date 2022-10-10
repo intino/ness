@@ -1,4 +1,4 @@
-import io.intino.builder.NessRunner;
+import io.intino.ness.builder.NessRunner;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

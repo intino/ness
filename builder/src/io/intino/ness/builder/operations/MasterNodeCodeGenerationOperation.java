@@ -1,4 +1,4 @@
-package io.intino.builder.operations;
+package io.intino.ness.builder.operations;
 
 import io.intino.builder.operations.codegeneration.*;
 import io.intino.itrules.Frame;
@@ -11,6 +11,7 @@ import io.intino.magritte.builder.core.operation.model.ModelOperation;
 import io.intino.magritte.builder.model.Model;
 import io.intino.magritte.builder.model.NodeImpl;
 import io.intino.magritte.lang.model.Node;
+import io.intino.ness.builder.operations.codegeneration.*;
 
 import java.io.BufferedWriter;
 import java.io.File;

@@ -1,4 +1,4 @@
-package io.intino.builder.operations.codegeneration;
+package io.intino.ness.builder.operations.codegeneration;
 
 
 import io.intino.itrules.Frame;
