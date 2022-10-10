@@ -1,4 +1,4 @@
-package org.example.datahubtest.box;
+package org.example.test.box;
 
 
 import io.intino.master.data.DefaultDatalakeLoader;

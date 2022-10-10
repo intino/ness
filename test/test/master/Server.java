@@ -2,7 +2,7 @@ package master;
 
 import io.intino.master.core.Master;
 import io.intino.master.core.MasterConfig;
-import org.example.datahubtest.box.TestDatalakeLoader;
+import org.example.test.box.TestDatalakeLoader;
 
 import java.io.File;
 
