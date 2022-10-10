@@ -9,9 +9,9 @@ Concept:{0..1} Broker
 		var string name
 		var string password
 	Concept Pipe
-    	var string origin
-    	var string destination
-    Concept Bridge
+		var string origin
+		var string destination
+	Concept Bridge
 		Concept:{1..1} ExternalBus
 			var string url
 			var string user
@@ -24,12 +24,12 @@ Concept:{0..1} Datalake
 	var word:Scale scale
 	var string path = empty
 	Concept:{0..1} Backup
-    	var string path = empty
-    	Concept:{1..1} Cron
-    		var string pattern
-    		var string timeZone
-    Concept:{0..1} Seal
-    	Concept:{1..1} Cron
+		var string path = empty
+		Concept:{1..1} Cron
+			var string pattern
+			var string timeZone
+	Concept:{0..1} Seal
+		Concept:{1..1} Cron
 			var string pattern
 			var string timeZone
 	Concept:{0..1} ProcessStatus
@@ -45,14 +45,12 @@ Concept:{0..1} Datalake
 	Concept:{1..*}:AspectRequired Tank
 		var word:Scale scale = empty
 		Aspect TankType
-        	sub Set
-        		var string tank
-				var word:{Multivalued Singleton} type = Multivalued
-        	sub Event
-        		var Model.Event event
+			sub Entity > var Entities.Entity event
+			sub Event
+				var Model.Event event
 				var boolean sortingRequired = true
 				var string qn = @qn is private reactive
-        Aspect Splitted > var Split split
+		Aspect Splitted > var Split split
 
 Concept:Named Terminal
 	Concept:{0..1} Bpm

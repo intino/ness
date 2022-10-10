@@ -1,0 +1,151 @@
+dsl Ness
+
+Entity Employee
+	Attribute base as String
+	Attribute foreman as String
+	Attribute name as String
+	Attribute phone as String
+	Attribute photo as String
+	Attribute role as String
+	Attribute area as Entity(Area) // Area es el id del area, pero a la hora de obtenerlo se devuelve el objeto
+	Attribute email as String
+	Attribute language as String
+	Attribute enabled as Boolean(true) // Valor por defecto
+	Attribute date as Date
+	Attribute datetime as DateTime("dd/MM/yyyy HH:mm:ss")
+	Attribute ins as Instant
+	Attribute map as Map
+		Key key as String
+		Value value as Integer
+
+Entity Place is abstract
+
+Entity Country as ExtensionOf(Place) is decorable
+	Attribute name as String
+	Attribute language as String
+	Attribute dst as Struct(Dst)
+	Attribute hasDst as Boolean
+
+Struct Dst
+	Attribute from as String
+	Attribute to as String
+
+Entity Area as ExtensionOf(Place)
+	Attribute type as Word("inner" "outer")
+
+Entity Region as ExtensionOf(Place)
+	Attribute name as String
+	Attribute country as Entity(Country)
+	Attribute timeOffset as Double
+	Attribute hasDst as Boolean
+//	Attribute timeOffsetHours as Function -> Integer
+//	Attribute timeOffsetMinutes as Function -> Integer
+//	Attribute timeOffsetOn as Function(date as Date) -> Double
+
+Struct GeoPoint
+	Attribute latitude as Double
+	Attribute longitude as Double
+//	Attribute distanceTo as Function(point as GeoPoint) -> Integer
+
+Entity Theater as ExtensionOf(Place) is decorable
+	Attribute address as String
+    Attribute city as String
+    Attribute coordinates as Struct(GeoPoint)
+    Attribute email as String
+    Attribute exhibitor as String
+    Attribute idVista as String
+    Attribute manager as String
+    Attribute name as String
+    Attribute postalCode as String
+    Attribute region as Entity(Region)
+    Attribute screens as String
+    Attribute ipOrder as String
+    Attribute ipSegment as String
+    Attribute ipTms as String
+    Attribute shared as String
+    Attribute telephone as String Optional
+    Attribute territory as String
+    Attribute type as String
+    Attribute area as Entity(Area)
+    Attribute enabled as Boolean(defaultValue= true)
+//    Attribute screenList as Function -> Entity(Screen) List
+
+Entity Screen as ExtensionOf(Place)
+	Attribute theater as Entity(Theater)
+	Attribute seats as Integer
+	Attribute ipOffset as Integer
+	Attribute optimized as Boolean(defaultValue = false)
+	Attribute type as Word("STANDARD" "LED" "LASER" "MACRO_XE" "IMAX" "VR", defaultValue = "STANDARD")
+	Attribute tech3D as Word("IMAX" "IMAXbarco" "IMAXchristie" "REALD")
+	Attribute tech4D as Word("_4DX")
+	Attribute setup as Word("STANDARD" "JUNIOR" "PREMIUM", defaultValue = "STANDARD")
+	Attribute screenDocks as Entity(ScreenDock)
+	Attribute twin as String
+
+Entity Dock as ExtensionOf(Place)
+	Attribute ip as String
+
+Entity ScreenDock as ExtensionOf(Dock)
+	Attribute screen as Entity(Screen)
+	Attribute category as Word("Player" "Projector" "Lamp")
+	Attribute type as Word("STANDARD" "NONE" "IMAX" "CP2000" "UNTRACEABLE" "LASER" "LED", defaultValue = "STANDARD")
+
+Entity Depot as ExtensionOf(Place)
+	Attribute name as String
+
+Entity Office as ExtensionOf(Place)
+	Attribute name as String
+
+Entity Desk as ExtensionOf(Place)
+//	Attribute office as Function -> Entity(Office)
+//	Attribute theater as Function -> Entity(Theater)
+
+Entity Asset
+	Attribute sn as String
+	Attribute type as String
+	Attribute model as String
+	Attribute warranty as String
+	Attribute place as Entity(Place)
+	Attribute status as Word("Delivering" "Delivered" "Installed")
+//	Attribute isGhost as Function -> Bool
+
+Entity DualAsset as ExtensionOf(Asset)
+//	Attribute assets as Function
+//		===
+//			public List<Asset> assets() {
+//				return null;
+//			}
+//		===
+//	Attribute missingAssets as String List
+//	Attribute attribute as Function(key as String) -> String
+
+Entity CheckField is decorable component
+	Attribute name as String
+	Attribute type as Word("String" "Number" "Date" "Option" "MultiOption" "Image" "Entity" "Package" "Note" "Marker" "Section" "Validation" "Signature")
+	Attribute code as String
+	Attribute optional as Boolean
+	Attribute conditional as String
+
+Entity OrderType is decorable
+	Attribute code as String
+    Attribute labelEn as String
+    Attribute labelEs as String
+    Attribute labelPt as String
+    Attribute hintEn as String
+    Attribute hintEs as String
+    Attribute hintPt as String
+    Attribute target as Word("theater" "screen" "lamp" "projector" "player")
+    Attribute effort as Integer
+    Attribute input as String
+    Attribute calculations as String
+    Attribute annexes as String
+    Attribute channel as Word("web" "app" "both")
+    Attribute assertionCode as String
+    Attribute parent as String
+    Attribute checklist as Entity(CheckField) List
+    Attribute singleCheck as Entity(CheckField)
+    Attribute booleanList as Boolean List
+    Attribute intList as Integer List
+    Attribute doubleList as Double List
+    Attribute stringList as String List
+    Attribute entityList as Entity(Theater) List
