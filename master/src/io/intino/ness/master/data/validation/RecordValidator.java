@@ -1,6 +1,6 @@
 package io.intino.ness.master.data.validation;
 
-import io.intino.ness.master.model.Triple;
+import io.intino.ness.master.model.Triplet;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -30,7 +30,7 @@ public interface RecordValidator {
 		}
 
 		public String type() {
-			return Triple.typeOf(id);
+			return Triplet.typeOf(id);
 		}
 
 		public Map<String, List<Value>> attributes() {

@@ -11,8 +11,8 @@ import io.intino.ness.master.data.DatalakeLoader;
 import io.intino.ness.master.data.RecordTransformer;
 import io.intino.ness.master.io.TriplesFileReader;
 import io.intino.ness.master.io.TriplesFileWriter;
-import io.intino.ness.master.model.Triple;
-import io.intino.ness.master.model.TripleRecord;
+import io.intino.ness.master.model.Triplet;
+import io.intino.ness.master.model.TripletRecord;
 import io.intino.ness.master.serialization.MasterSerializer;
 
 import java.io.File;
@@ -43,7 +43,7 @@ public class Master {
 	public void start() {
 		Logger.info("Initializing Master...");
 		{
-			Map<String, TripleRecord> data = loadData();
+			Map<String, TripletRecord> data = loadData();
 			initHazelcast();
 			initMaps(data);
 			setupListeners();
@@ -55,7 +55,7 @@ public class Master {
 
 	private String histogram() {
 		Map<String, Integer> histogram = new HashMap<>();
-		masterMap.keySet().stream().map(Triple::typeOf).map(t -> "\"" + t + "\"").forEach(key -> histogram.compute(key, (k, v) -> v == null ? 1 : v + 1));
+		masterMap.keySet().stream().map(Triplet::typeOf).map(t -> "\"" + t + "\"").forEach(key -> histogram.compute(key, (k, v) -> v == null ? 1 : v + 1));
 		return "  " + histogram.entrySet()
 				.stream()
 				.sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
@@ -68,7 +68,7 @@ public class Master {
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> hazelcast.shutdown(), "Master-Shutdown"));
 	}
 
-	protected void initMaps(Map<String, TripleRecord> data) {
+	protected void initMaps(Map<String, TripletRecord> data) {
 		MasterSerializer serializer = serializer();
 
 		metadataMap = hazelcast.getMap(METADATA_MAP_NAME);
@@ -82,11 +82,11 @@ public class Master {
 		masterMap = hazelcast.getMap(MASTER_MAP_NAME);
 
 		masterMap.setAll(data.entrySet().stream()
-				.map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), serializer.serialize(e.getValue().attributes())))
+				.map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), serializer.serialize(e.getValue())))
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
 	}
 
-	protected Map<String, TripleRecord> loadData() {
+	protected Map<String, TripletRecord> loadData() {
 		Logger.info("Loading data...");
 		long start = System.currentTimeMillis();
 		int numTriples;
@@ -110,10 +110,6 @@ public class Master {
 		Logger.info("Hazelcast initialized");
 	}
 
-	protected List<Triple> readTriplesIn(File folder) {
-		return new TriplesFileReader(folder).triples();
-	}
-
 	protected void handleRequestMessage(Message<Object> message) {
 		String[] info = message.getMessageObject().toString().split(MESSAGE_SEPARATOR, -1);
 		String publisher = info[0];
@@ -123,37 +119,37 @@ public class Master {
 	}
 
 	public boolean add(String publisher, String tripleLine) {
-		return add(publisher, new Triple(tripleLine));
+		return add(publisher, new Triplet(tripleLine));
 	}
 
-	public boolean add(String publisher, Triple triple) {
-		Map<String, String> record = getRecord(triple.subject());
-		if(Objects.equals(record.get(triple.predicate()), triple.value())) return false;
+	public boolean add(String publisher, Triplet triplet) {
+		TripletRecord record = getRecord(triplet.subject());
+		if(record.contains(triplet)) return false;
 
-		record.put(triple.predicate(), triple.value());
-		updateRecord(triple.subject(), record);
+		record.put(triplet);
+		updateRecord(triplet.subject(), record);
 
-		save(publisher, triple);
+		save(publisher, triplet);
 		return true;
 	}
 
-	protected void updateRecord(String id, Map<String, String> record) {
+	protected void updateRecord(String id, TripletRecord record) {
 		masterMap.set(id, serializer().serialize(record));
 	}
 
-	protected Map<String, String> getRecord(String subject) {
+	protected TripletRecord getRecord(String subject) {
 		String serializedRecord = masterMap.get(subject);
-		if(serializedRecord == null) return new HashMap<>();
+		if(serializedRecord == null) return new TripletRecord(subject);
 		return serializer().deserialize(serializedRecord);
 	}
 
 	private synchronized void save(String publisher, String tripleLine) {
-		save(publisher, new Triple(tripleLine));
+		save(publisher, new Triplet(tripleLine));
 	}
 
-	protected synchronized void save(String publisher, Triple triple) {
+	protected synchronized void save(String publisher, Triplet triplet) {
 		try(TriplesFileWriter writer = new TriplesFileWriter(config.dataDirectory(), publisher)) {
-			writer.write(triple);
+			writer.write(triplet);
 		} catch (Exception e) {
 			Logger.error(e);
 		}

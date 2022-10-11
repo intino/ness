@@ -1,6 +1,6 @@
 package io.intino.ness.master.io;
 
-import io.intino.ness.master.model.Triple;
+import io.intino.ness.master.model.Triplet;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -20,8 +20,8 @@ public class TriplesFileWriter implements AutoCloseable {
 		this.writer = new BufferedWriter(new FileWriter(file(), true));
 	}
 
-	public void write(Triple triple) throws IOException {
-		writer.write(triple.toString());
+	public void write(Triplet triplet) throws IOException {
+		writer.write(triplet.toString());
 		writer.newLine();
 	}
 

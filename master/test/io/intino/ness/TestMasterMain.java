@@ -5,7 +5,7 @@ import io.intino.ness.master.core.MasterConfig;
 import io.intino.ness.master.data.validation.*;
 import io.intino.ness.master.data.validation.validators.DuplicatedTripleRecordValidator;
 import io.intino.ness.master.data.validation.validators.SyntaxTripleValidator;
-import io.intino.ness.master.model.Triple;
+import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.serialization.MasterSerializers;
 
 import java.io.File;
@@ -57,16 +57,16 @@ public class TestMasterMain {
 //		master.add("test", new Triple("1234567:theater", "ipSegment", "123"));
 	}
 
-	private static Stream<Issue> validateTheaterIpSegment(Triple triple, TripleSource source) {
-		if(!triple.type().equals("theater")) return null;
-		if(!triple.predicate().equals("ipSegment")) return null;
+	private static Stream<Issue> validateTheaterIpSegment(Triplet triplet, TripleSource source) {
+		if(!triplet.type().equals("theater")) return null;
+		if(!triplet.predicate().equals("ipSegment")) return null;
 
-		return triple.value().endsWith(".") ? null : Stream.of(Issue.error(INVALID_VALUE, "IpSegment must end with ."));
+		return triplet.value().endsWith(".") ? null : Stream.of(Issue.error(INVALID_VALUE, "IpSegment must end with ."));
 	}
 
-	private static Stream<Issue> validateTheaterId(Triple triple, TripleSource source) {
-		if(!triple.type().equals("theater")) return null;
-		if(!isInt(triple.subject()) || triple.subject().length() != 7) return Stream.of(Issue.error(INVALID_VALUE, "Theater id must be an integer of 7 digits").source(source));
+	private static Stream<Issue> validateTheaterId(Triplet triplet, TripleSource source) {
+		if(!triplet.type().equals("theater")) return null;
+		if(!isInt(triplet.subject()) || triplet.subject().length() != 7) return Stream.of(Issue.error(INVALID_VALUE, "Theater id must be an integer of 7 digits").source(source));
 		return null;
 	}
 

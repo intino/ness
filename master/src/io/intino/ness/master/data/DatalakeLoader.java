@@ -1,6 +1,6 @@
 package io.intino.ness.master.data;
 
-import io.intino.ness.master.model.TripleRecord;
+import io.intino.ness.master.model.TripletRecord;
 import io.intino.ness.master.serialization.MasterSerializer;
 
 import java.io.File;
@@ -24,7 +24,7 @@ public interface DatalakeLoader {
 		List<File> filesRead();
 		long linesRead();
 		long triplesRead();
-		Map<String, TripleRecord> records();
+		Map<String, TripletRecord> records();
 	}
 
 	class WritableLoadResult implements LoadResult {
@@ -33,7 +33,7 @@ public interface DatalakeLoader {
 		private long linesRead;
 		private long triplesRead;
 		private int numRecords;
-		private Map<String, TripleRecord> records = new HashMap<>();
+		private Map<String, TripletRecord> records = new HashMap<>();
 
 		public List<File> filesRead() {
 			return filesRead;
@@ -60,11 +60,11 @@ public interface DatalakeLoader {
 		}
 
 		@Override
-		public Map<String, TripleRecord> records() {
+		public Map<String, TripletRecord> records() {
 			return records;
 		}
 
-		public WritableLoadResult records(Map<String, TripleRecord> records) {
+		public WritableLoadResult records(Map<String, TripletRecord> records) {
 			this.records = records;
 			return this;
 		}
