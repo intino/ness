@@ -21,7 +21,7 @@ public abstract class SeparatorMasterSerializer implements MasterSerializer {
 
 	@Override
 	public String serialize(TripletRecord record) {
-		return record.triplets().values().stream()
+		return record.triplets()
 				.map(triplet -> String.join(separator, triplet.attributes()))
 				.collect(Collectors.joining(FIELD_SEPARATOR));
 	}

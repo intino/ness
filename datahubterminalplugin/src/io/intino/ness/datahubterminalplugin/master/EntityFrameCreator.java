@@ -5,12 +5,11 @@ import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.NessGraph;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
-import io.intino.magritte.lang.model.Aspect;
-import io.intino.magritte.lang.model.Node;
-import io.intino.magritte.lang.model.Parameter;
-import io.intino.magritte.lang.model.Tag;
+import io.intino.magritte.framework.Concept;
+import io.intino.magritte.framework.Node;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
@@ -45,9 +44,8 @@ public class EntityFrameCreator {
 
 	public Map<String, Frame> create(Entity node) {
 		Map<String, Frame> map = new HashMap<>(4);
-		map.put(calculateEntityPath(node, workingPackage), frameOf(node).toFrame());
-		if (node.is(Tag.Decorable))
-			map.put(calculateDecorableEntityPath(node, workingPackage), frameOf(node).add("decorable").toFrame());
+		map.put(calculateEntityPath(node.core$(), workingPackage), frameOf(node.core$()).toFrame());
+//		if (node.is(Tag.Decorable)) map.put(calculateDecorableEntityPath(node, workingPackage), frameOf(node).add("decorable").toFrame());
 		return map;
 	}
 
@@ -55,20 +53,20 @@ public class EntityFrameCreator {
 		FrameBuilder builder = new FrameBuilder("entity", "class")
 				.add("package", workingPackage)
 				.add("name", node.name())
-				.add("attribute", node.components().stream().map(this::attrFrameOf).toArray());
+				.add("attribute", node.componentList().stream().map(this::attrFrameOf).toArray());
 		final Parameter parent = parameter(node, "entity");
 		builder.add("parent", parent != null ? ((Node) parent.values().get(0)).name() : "io.intino.master.model.Entity");
-		if (node.is(Tag.Decorable) || node.isAbstract()) builder.add("isAbstract", "abstract");
-		if (node.is(Tag.Decorable)) builder.add("abstract", "abstract");
+//		if (node.is(Tag.Decorable) || node.isAbstract()) builder.add("isAbstract", "abstract");
+//		if (node.is(Tag.Decorable)) builder.add("abstract", "abstract");
 		return builder;
 	}
 
 	private Frame attrFrameOf(Node node) {
 		FrameBuilder builder = new FrameBuilder().add("attribute");
-		node.appliedAspects().forEach(aspect -> builder.add(aspect.type()));
+		node.conceptList().forEach(aspect -> builder.add(aspect.name()));
 		String type = type(node);
-		builder.add("name", node.name()).add("owner", node.container().name()).add("type", type).add("package", workingPackage);
-		builder.add("index", node.container().components().indexOf(node));
+		builder.add("name", node.name()).add("owner", node.owner().name()).add("type", type).add("package", workingPackage);
+		builder.add("index", node.owner().componentList().indexOf(node));
 		processParameters(node, builder, type);
 		return builder.toFrame();
 	}
@@ -86,7 +84,7 @@ public class EntityFrameCreator {
 			String name = ((Node) entity.values().get(0)).name();
 			builder.add("entity", name);
 			Entity reference = model.entityList().stream().filter(e -> e.name$().equals(name)).findFirst().orElse(null);
-			if (reference != null && reference.flags().stream().anyMatch(t -> t.name().equals("Component"))) {
+			if (reference != null && reference.core$().conceptList().stream().anyMatch(c -> c.name().equals("Component"))) {
 				builder.add("component");
 			}
 		}
@@ -103,12 +101,12 @@ public class EntityFrameCreator {
 		return new FrameBuilder("struct")
 				.add("name", node.name())
 				.add("package", workingPackage)
-				.add("attribute", node.components().stream().map(this::attrFrameOf).toArray())
+				.add("attribute", node.componentList().stream().map(this::attrFrameOf).toArray())
 				.toFrame();
 	}
 
 	private Frame defaultValue(Node c, String type, Parameter defaultValue) {
-		FrameBuilder builder = new FrameBuilder(c.appliedAspects().stream().map(Aspect::type).toArray(String[]::new));
+		FrameBuilder builder = new FrameBuilder(c.conceptList().stream().map(Concept::name).toArray(String[]::new));
 		return builder
 				.add("type", type)
 				.add("value", defaultValue.values().get(0).toString())
@@ -116,19 +114,22 @@ public class EntityFrameCreator {
 	}
 
 	private String type(Node node) {
-		String aspect = node.appliedAspects().stream().map(Aspect::type).filter(a -> !a.equals("List")).findFirst().orElse("");
-		boolean list = node.appliedAspects().stream().anyMatch(a -> a.type().equals("List"));
+		String aspect = node.conceptList().stream().map(Concept::name).filter(a -> !a.equals("List")).findFirst().orElse("");
+		boolean list = node.conceptList().stream().anyMatch(a -> a.name().equals("List"));
 		if (!list) return types.getOrDefault(aspect, firstUpperCase().format(node.name()).toString());
 		return listTypes.getOrDefault(aspect, "List<" + firstUpperCase().format(node.name()).toString() + ">");
 
 	}
 
 	private Parameter parameter(Node c, String name) {
-		return c.parameters().stream().filter(p -> p.name().equals(name)).findFirst().orElse(null);
+		List<?> values = c.variables().get(name);
+		return values == null ? null : Parameter.of(values);
 	}
 
 	private String calculateEntityPath(Node node, String aPackage) {
-		return aPackage + DOT + "entities" + DOT + (node.is(Tag.Decorable) ? "Abstract" : "") + firstUpperCase().format(javaValidName().format(node.name()).toString());
+		return aPackage + DOT + "entities" + DOT
+//				+ (node.is(Tag.Decorable) ? "Abstract" : "")
+				+ firstUpperCase().format(javaValidName().format(node.name()).toString());
 	}
 
 	private String calculateDecorableEntityPath(Node node, String aPackage) {

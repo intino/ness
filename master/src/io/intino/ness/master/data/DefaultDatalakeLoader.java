@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 public class DefaultDatalakeLoader implements DatalakeLoader {
 
-	public static final String TRIPLES_EXTENSION = ".triples";
+	public static final String TRIPLETS_EXTENSION = ".triples";
 
 	@Override
 	public LoadResult load(File rootDirectory, MasterSerializer serializer) {
@@ -30,15 +30,15 @@ public class DefaultDatalakeLoader implements DatalakeLoader {
 		Map<String, TripletRecord> records = result.records();
 		try(Stream<Path> files = Files.walk(rootDirectory.toPath())) {
 			files.map(Path::toFile)
-					.filter(f -> f.isFile() && f.getName().endsWith(TRIPLES_EXTENSION))
-					.flatMap(file -> readTriplesFromFile(file, result))
-					.forEach(triple -> records.computeIfAbsent(triple.subject(), TripletRecord::new).setAttribute(triple.predicate(), triple.value()));
+					.filter(f -> f.isFile() && f.getName().endsWith(TRIPLETS_EXTENSION))
+					.flatMap(file -> readTripletsFromFile(file, result))
+					.forEach(t -> records.computeIfAbsent(t.subject(), TripletRecord::new).put(t));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	protected Stream<Triplet> readTriplesFromFile(File file, WritableLoadResult result) {
+	protected Stream<Triplet> readTripletsFromFile(File file, WritableLoadResult result) {
 		result.filesRead().add(file);
 
 		List<Triplet> triplets = new ArrayList<>();

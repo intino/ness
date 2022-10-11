@@ -1,10 +1,10 @@
 package org.example.test.box;
 
 
-import io.intino.master.data.DefaultDatalakeLoader;
-import io.intino.master.model.Triple;
-import io.intino.master.model.TripleRecord;
-import io.intino.master.serialization.MasterSerializer;
+import io.intino.ness.master.data.DefaultDatalakeLoader;
+import io.intino.ness.master.model.Triplet;
+import io.intino.ness.master.model.TripletRecord;
+import io.intino.ness.master.serialization.MasterSerializer;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,30 +24,30 @@ public class TestDatalakeLoader extends DefaultDatalakeLoader {
 	}
 
 	protected void loadRecordsFromDisk(File rootDirectory, WritableLoadResult result, MasterSerializer serializer) {
-		Map<String, TripleRecord> entities = result.records();
-		Map<String, TripleRecord> components = new HashMap<>();
+		Map<String, TripletRecord> entities = result.records();
+		Map<String, TripletRecord> components = new HashMap<>();
 
 		loadFromDisk(rootDirectory, result, entities, components);
 
 		handleComponents(entities, components, serializer);
 	}
 
-	private void handleComponents(Map<String, TripleRecord> entities, Map<String, TripleRecord> components, MasterSerializer serializer) {
-		for(TripleRecord entity : entities.values()) {
+	private void handleComponents(Map<String, TripletRecord> entities, Map<String, TripletRecord> components, MasterSerializer serializer) {
+		for(TripletRecord entity : entities.values()) {
 			if(hasComponents(entity)) setEntityComponents(entity, components, serializer);
 		}
 	}
 
-	private void setEntityComponents(TripleRecord entity, Map<String, TripleRecord> components, MasterSerializer serializer) {
+	private void setEntityComponents(TripletRecord entity, Map<String, TripletRecord> components, MasterSerializer serializer) {
 		String entityId = entity.id().substring(0, entity.id().indexOf(':'));
-		for(TripleRecord component : components.values()) {
+		for(TripletRecord component : components.values()) {
 			if(isComponentOfEntity(component, entityId)) {
 				addComponentToEntity(component, entity, serializer);
 			}
 		}
 	}
 
-	private void addComponentToEntity(TripleRecord component, TripleRecord entity, MasterSerializer serializer) {
+	private void addComponentToEntity(TripletRecord component, TripletRecord entity, MasterSerializer serializer) {
 		if(!ComponentsByEntityType.containsKey(entity.type())) return;
 		String componentType = component.type();
 		for(ComponentAttributeDefinition def : ComponentsByEntityType.get(entity.type())) {
@@ -62,9 +62,9 @@ public class TestDatalakeLoader extends DefaultDatalakeLoader {
 		}
 	}
 
-	private void updateEntityComponentMap(String name, TripleRecord component, TripleRecord entity, MasterSerializer serializer) {
+	private void updateEntityComponentMap(String name, TripletRecord component, TripletRecord entity, MasterSerializer serializer) {
 		String listSep = ",";// TODO check conflicts
-		String attrib = entity.getAttribute(name);
+		String attrib = entity.getValue(name);
 
 		Map<String, String> map;
 		if(attrib == null) map = new HashMap<>(1);
@@ -72,26 +72,26 @@ public class TestDatalakeLoader extends DefaultDatalakeLoader {
 				.map(s -> s.split("="))
 				.collect(Collectors.toMap(s -> s[0], s -> s[1]));
 
-		map.put(component.id(), serializer.serialize(component.attributes()));
+		map.put(component.id(), serializer.serialize(component));
 
-		entity.setAttribute(name, map.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining(listSep)));
+		entity.put(new Triplet(entity.id(), name, map.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining(listSep))));
 	}
 
-	private void updateEntityComponentList(String name, TripleRecord component, TripleRecord entity, MasterSerializer serializer) {
+	private void updateEntityComponentList(String name, TripletRecord component, TripletRecord entity, MasterSerializer serializer) {
 		String listSep = ",";// TODO check conflicts
-		String attrib = entity.getAttribute(name);
+		String attrib = entity.getValue(name);
 
 		List<String> list;
 		if(attrib == null) list = new ArrayList<>();
 		else list = Arrays.asList(attrib.split(listSep));
 
-		list.add(serializer.serialize(component.attributes()));
+		list.add(serializer.serialize(component));
 
-		entity.setAttribute(name, String.join(listSep, list));
+		entity.put(new Triplet(entity.id(), name, String.join(listSep, list)));
 	}
 
-	private void setEntityComponent(String name, TripleRecord component, TripleRecord entity, MasterSerializer serializer) {
-		entity.setAttribute(name, serializer.serialize(component.attributes()));
+	private void setEntityComponent(String name, TripletRecord component, TripletRecord entity, MasterSerializer serializer) {
+		entity.put(new Triplet(entity.id(), name, serializer.serialize(component)));
 	}
 
 	private static final Map<String, List<ComponentAttributeDefinition>> ComponentsByEntityType = new HashMap<>() {{
@@ -101,34 +101,34 @@ public class TestDatalakeLoader extends DefaultDatalakeLoader {
 		));
 	}};
 
-	private boolean isComponentOfEntity(TripleRecord component, String entityId) {
+	private boolean isComponentOfEntity(TripletRecord component, String entityId) {
 		return component.id().startsWith(entityId);
 	}
 
 	private static final Set<String> TypesWithComponents = Set.of();
-	private boolean hasComponents(TripleRecord entity) {
+	private boolean hasComponents(TripletRecord entity) {
 		return TypesWithComponents.contains(entity.type());
 	}
 
-	private void loadFromDisk(File rootDirectory, WritableLoadResult result, Map<String, TripleRecord> entities, Map<String, TripleRecord> components) {
+	private void loadFromDisk(File rootDirectory, WritableLoadResult result, Map<String, TripletRecord> entities, Map<String, TripletRecord> components) {
 		try(Stream<Path> files = Files.walk(rootDirectory.toPath())) {
 			files.map(Path::toFile)
 					.filter(f -> f.isFile() && f.getName().endsWith(TRIPLES_EXTENSION))
 					.flatMap(file -> readTriplesFromFile(file, result))
-					.forEach(triple -> register(entities, components, triple));
+					.forEach(t -> register(entities, components, t));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private void register(Map<String, TripleRecord> entities, Map<String, TripleRecord> components, Triple triple) {
-		Map<String, TripleRecord> map = isComponent(triple.type()) ? components : entities;
-		map.computeIfAbsent(triple.subject(), TripleRecord::new).setAttribute(triple.predicate(), triple.value());
+	private void register(Map<String, TripletRecord> entities, Map<String, TripletRecord> components, Triplet triplet) {
+		Map<String, TripletRecord> map = isComponent(triplet.type()) ? components : entities;
+		map.computeIfAbsent(triplet.subject(), TripletRecord::new).put(triplet);
 	}
 
 	private static final Set<String> ComponentTypes = Set.of("check");
 	private boolean isComponent(String id) {
-		return ComponentTypes.contains(Triple.typeOf(id));
+		return ComponentTypes.contains(Triplet.typeOf(id));
 	}
 
 	private static class ComponentAttributeDefinition {

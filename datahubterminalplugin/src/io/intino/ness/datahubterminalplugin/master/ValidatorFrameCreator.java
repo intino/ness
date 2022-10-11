@@ -4,10 +4,8 @@ package io.intino.ness.datahubterminalplugin.master;
 import io.intino.datahub.model.Entity;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
-import io.intino.magritte.lang.model.Aspect;
-import io.intino.magritte.lang.model.Node;
-import io.intino.magritte.lang.model.Parameter;
-import io.intino.magritte.lang.model.Tag;
+import io.intino.magritte.framework.Concept;
+import io.intino.magritte.framework.Node;
 
 import java.util.*;
 
@@ -51,11 +49,10 @@ public class ValidatorFrameCreator {
 
 
 	public Map<String, Frame> create(Entity node) {
-		if (node.is(Tag.Abstract)) return Map.of();
+//		if (node.is(Tag.Abstract)) return Collections.emptyMap();
 		Map<String, Frame> map = new HashMap<>(4);
-		map.put(calculateValidatorPath(node, workingPackage), frameOf(node).toFrame());
-		if (node.is(Tag.Decorable))
-			map.put(calculateDecorableValidatorPath(node, workingPackage), frameOf(node).add("decorable").toFrame());
+		map.put(calculateValidatorPath(node, workingPackage), frameOf(node.core$()).toFrame());
+//		if (node.is(Tag.Decorable)) map.put(calculateDecorableValidatorPath(node, workingPackage), frameOf(node).add("decorable").toFrame());
 		return map;
 	}
 
@@ -64,12 +61,12 @@ public class ValidatorFrameCreator {
 		FrameBuilder builder = new FrameBuilder("validator", "class")
 				.add("package", workingPackage + DOT + "validators")
 				.add("name", node.name())
-				.add("attribute", node.components().stream().map(this::attrFrameOf).toArray())
-				.add("type", node.components().stream().map(c -> typeFrameOf(c, node)).filter(Objects::nonNull).toArray());
+				.add("attribute", node.componentList().stream().map(this::attrFrameOf).toArray())
+				.add("type", node.componentList().stream().map(c -> typeFrameOf(c, node)).filter(Objects::nonNull).toArray());
 		final Parameter parent = parameter(node, "entity");
 		builder.add("parent", parent != null ? ((Node) parent.values().get(0)).name() : "io.intino.master.model.Entity");
-		if (node.is(Tag.Decorable) || node.isAbstract()) builder.add("isAbstract", "abstract");
-		if (node.is(Tag.Decorable)) builder.add("abstract", "abstract");
+//		if (node.is(Tag.Decorable) || node.isAbstract()) builder.add("isAbstract", "abstract");
+//		if (node.is(Tag.Decorable)) builder.add("abstract", "abstract");
 		return builder;
 	}
 
@@ -82,7 +79,7 @@ public class ValidatorFrameCreator {
 				.add("name", typename(type))
 				.add("nameBoxed", boxed(type));
 
-		if (node.appliedAspects().stream().anyMatch(a -> a.type().equals("Word")))
+		if (node.conceptList().stream().anyMatch(a -> a.name().equals("Word")))
 			builder.add("word").add("package", workingPackage + ".entities." + parent.name());
 
 		Parameter struct = parameter(node, "struct");
@@ -107,14 +104,14 @@ public class ValidatorFrameCreator {
 
 	private Frame attrFrameOf(Node node) {
 		FrameBuilder builder = new FrameBuilder().add("attribute");
-		node.appliedAspects().forEach(aspect -> builder.add(aspect.type()));
+		node.conceptList().forEach(aspect -> builder.add(aspect.name()));
 		String type = type(node);
-		builder.add("name", node.name()).add("owner", node.container().name()).add("type", type).add("package", workingPackage);
-		builder.add("index", node.container().components().indexOf(node));
+		builder.add("name", node.name()).add("owner", node.owner().name()).add("type", type).add("package", workingPackage);
+		builder.add("index", node.owner().componentList().indexOf(node));
 
 		builder.add("typename", typename(type));
 
-		boolean optional = node.appliedAspects().stream().anyMatch(a -> a.type().equals("Optional"));
+		boolean optional = node.conceptList().stream().anyMatch(a -> a.name().equals("Optional"));
 		if (optional)
 			builder.add("optional", new FrameBuilder("optional", "warning").add("name", node.name()).toFrame());
 
@@ -149,12 +146,12 @@ public class ValidatorFrameCreator {
 		return new FrameBuilder("struct")
 				.add("name", node.name())
 				.add("package", workingPackage)
-				.add("attribute", node.components().stream().map(this::attrFrameOf).toArray())
+				.add("attribute", node.componentList().stream().map(this::attrFrameOf).toArray())
 				.toFrame();
 	}
 
 	private Frame defaultValue(Node c, String type, Parameter defaultValue) {
-		FrameBuilder builder = new FrameBuilder(c.appliedAspects().stream().map(Aspect::type).toArray(String[]::new));
+		FrameBuilder builder = new FrameBuilder(c.conceptList().stream().map(Concept::name).toArray(String[]::new));
 		return builder
 				.add("type", type)
 				.add("value", defaultValue.values().get(0).toString())
@@ -162,23 +159,27 @@ public class ValidatorFrameCreator {
 	}
 
 	private String type(Node node) {
-		String aspect = node.appliedAspects().stream().map(Aspect::type).filter(a -> !a.equals("List")).findFirst().orElse("");
-		boolean list = node.appliedAspects().stream().anyMatch(a -> a.type().equals("List"));
+		String aspect = node.conceptList().stream().map(Concept::name).filter(a -> !a.equals("List")).findFirst().orElse("");
+		boolean list = node.conceptList().stream().anyMatch(a -> a.name().equals("List"));
 		if (!list) return types.getOrDefault(aspect, firstUpperCase().format(node.name()).toString());
 		return listTypes.getOrDefault(aspect, "List<" + firstUpperCase().format(node.name()).toString() + ">");
 	}
 
 	private Parameter parameter(Node c, String name) {
-		return c.parameters().stream().filter(p -> p.name().equals(name)).findFirst().orElse(null);
+		List<?> values = c.variables().get(name);
+		return values == null ? null : Parameter.of(values);
 	}
 
-	private String calculateValidatorPath(Node node, String aPackage) {
-		return aPackage + DOT + "validators" + DOT + (node.is(Tag.Decorable) ? "Abstract" : "") + firstUpperCase()
-				.format(javaValidName().format(node.name() + "Validator").toString());
+	private String calculateValidatorPath(Entity node, String aPackage) {
+		return aPackage + DOT + "validators" + DOT
+//				+ (node.is(Tag.Decorable) ? "Abstract" : "")
+				+ firstUpperCase()
+				.format(javaValidName().format(node.name$() + "Validator").toString());
 	}
 
-	private String calculateDecorableValidatorPath(Node node, String aPackage) {
+	private String calculateDecorableValidatorPath(Entity node, String aPackage) {
 		return aPackage + DOT + "validators" + DOT + firstUpperCase()
-				.format(javaValidName().format(node.name() + "Validator").toString());
+				.format(javaValidName().format(node.name$() + "Validator").toString());
 	}
+
 }

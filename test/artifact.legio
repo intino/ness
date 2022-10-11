@@ -3,6 +3,7 @@ dsl Legio
 Artifact("org.example", "1.0.0") test as Solution
 	Model("Ness", "6.0.0", sdkVersion="1.0.0", sdk = "io.intino.ness:builder")
 	Imports
+		Compile("io.intino.ness", "master", "1.0.0")
 		Test("junit", "junit", "4.13")
 	IntinoPlugin("io.intino.ness:data-hub-accessor-plugin:2.3.4", "io.intino.ness.datahubaccessorplugin.DataHubAccessorsPluginLauncher")
 	Package(mode = ModulesAndLibrariesLinkedByManifest) as Runnable(mainClass = "org.example.test.box.Main")
