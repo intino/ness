@@ -2,8 +2,8 @@ package io.intino.ness.datahubterminalplugin.event;
 
 import io.intino.Configuration;
 import io.intino.alexandria.logger.Logger;
-import io.intino.datahub.graph.Data;
-import io.intino.datahub.graph.Wordbag;
+import io.intino.datahub.model.Data;
+import io.intino.datahub.model.Wordbag;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;

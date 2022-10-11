@@ -1,14 +1,18 @@
-package io.intino.ness.datahubterminalplugin;
+package io.intino.ness.datahubterminalplugin.terminal;
 
-import io.intino.datahub.graph.Datalake;
-import io.intino.datahub.graph.Datalake.Split;
-import io.intino.datahub.graph.Datalake.Tank;
-import io.intino.datahub.graph.Event;
-import io.intino.datahub.graph.Namespace;
-import io.intino.datahub.graph.Terminal;
+import io.intino.datahub.model.Datalake;
+import io.intino.datahub.model.Datalake.Split;
+import io.intino.datahub.model.Datalake.Tank;
+import io.intino.datahub.model.Event;
+import io.intino.datahub.model.Namespace;
+import io.intino.datahub.model.Terminal;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
+import io.intino.ness.datahubterminalplugin.Commons;
+import io.intino.ness.datahubterminalplugin.DatalakeTemplate;
+import io.intino.ness.datahubterminalplugin.Formatters;
+import io.intino.ness.datahubterminalplugin.TerminalTemplate;
 
 import java.io.File;
 import java.util.ArrayList;

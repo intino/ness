@@ -1,31 +1,28 @@
-package io.intino.ness.datahubterminalplugin;
+package io.intino.ness.datahubterminalplugin.ontology;
 
 import io.intino.Configuration;
-import io.intino.alexandria.logger.Logger;
-import io.intino.datahub.graph.Datalake.Split;
-import io.intino.datahub.graph.Datalake.Tank;
-import io.intino.datahub.graph.Event;
-import io.intino.datahub.graph.NessGraph;
-import io.intino.datahub.graph.Wordbag;
+import io.intino.datahub.model.NessGraph;
 import io.intino.itrules.FrameBuilder;
-import io.intino.ness.datahubterminalplugin.event.EventRenderer;
-import io.intino.ness.datahubterminalplugin.event.WordbagRenderer;
+import io.intino.ness.datahubterminalplugin.ArtifactoryConnector;
+import io.intino.ness.datahubterminalplugin.Commons;
+import io.intino.ness.datahubterminalplugin.Formatters;
+import io.intino.ness.datahubterminalplugin.PomTemplate;
 import io.intino.plugin.PluginLauncher;
 import org.apache.maven.shared.invoker.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.Files;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static io.intino.plugin.PluginLauncher.Phase.DISTRIBUTE;
 
-class OntologyPublisher {
+public class OntologyPublisher {
 	private final File root;
-	private final List<Tank.Event> eventTanks;
-	private final List<Event> events;
+	private final NessGraph graph;
 	private final Configuration conf;
 	private final List<File> resDirectories;
 	private final List<File> sourceDirectories;
@@ -36,13 +33,10 @@ class OntologyPublisher {
 	private final PrintStream logger;
 	private final PluginLauncher.Notifier notifier;
 	private final StringBuilder errorStream;
-	private final List<Wordbag> wordbags;
 
-	OntologyPublisher(File root, NessGraph graph, Configuration configuration, PluginLauncher.ModuleStructure moduleStructure, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger, PluginLauncher.Notifier notifier) {
+	public OntologyPublisher(File root, NessGraph graph, Configuration configuration, PluginLauncher.ModuleStructure moduleStructure, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger, PluginLauncher.Notifier notifier) {
 		this.root = root;
-		this.eventTanks = eventTanks(graph);
-		this.events = graph.eventList();
-		this.wordbags = graph.wordbagList();
+		this.graph = graph;
 		this.conf = configuration;
 		this.resDirectories = moduleStructure.resDirectories;
 		this.sourceDirectories = moduleStructure.sourceDirectories;
@@ -55,14 +49,15 @@ class OntologyPublisher {
 		this.errorStream = new StringBuilder();
 	}
 
-	boolean publish() {
+	public boolean publish() {
 		try {
 			if (invokedPhase.equals(DISTRIBUTE) && !isSnapshotVersion() && isDistributed(conf.artifact())) {
 				logger.println("This Version Already Exists");
 				notifier.notifyError("The Version " + conf.artifact().version() + " is Already Distributed.");
 				return false;
 			}
-			if (!createSources()) return false;
+			if (!new OntologyRenderer(graph, conf, root, sourceDirectory(), resDirectories, basePackage).render())
+				return false;
 			logger.println("Publishing ontology...");
 			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
 			logger.println("Ontology published!");
@@ -81,56 +76,8 @@ class OntologyPublisher {
 		return versions.contains(artifact.version());
 	}
 
-	private boolean createSources() {
-		File srcDirectory = sourceDirectory();
-		srcDirectory.mkdirs();
-		Map<Event, Split> eventSplitMap = splitEvents();
-		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDirectory, basePackage).render());
-		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDirectory, basePackage).render());
-		wordbags.stream().parallel().forEach(w -> new WordbagRenderer(w, conf, srcDirectory, resDirectories, basePackage).render());
-		File resDirectory = new File(root, "res");
-		resDirectory.mkdirs();
-		wordbags.stream().filter(Wordbag::isInResource).map(Wordbag::asInResource).
-				forEach(w -> {
-					File source = new File(w.tsv().getPath());
-					File destination = new File(resDirectory, relativeResource(source));
-					destination.getParentFile().mkdirs();
-					try {
-						if (!destination.exists()) Files.copy(w.tsv().openStream(), destination.toPath());
-					} catch (IOException e) {
-						Logger.error(e);
-					}
-				});
-		return true;
-	}
-
 	private File sourceDirectory() {
 		return new File(root, "src");
-	}
-
-	private String relativeResource(File resourceFile) {
-		String file = resourceFile.getAbsolutePath();
-		for (File resDirectory : resDirectories) file = file.replace(resDirectory.getAbsolutePath(), "");
-		return file;
-	}
-
-	private Map<Event, Split> splitEvents() {
-		Map<Event, Split> events = new HashMap<>();
-		for (Tank.Event tank : eventTanks) {
-			List<Event> hierarchy = hierarchy(tank.event());
-			Split split = tank.asTank().isSplitted() ? tank.asTank().asSplitted().split() : null;
-			events.put(hierarchy.get(0), split);
-			hierarchy.remove(0);
-			hierarchy.forEach(e -> events.put(e, null));
-		}
-		return events;
-	}
-
-	private List<Event> hierarchy(Event event) {
-		Set<Event> events = new LinkedHashSet<>();
-		events.add(event);
-		if (event.isExtensionOf()) events.addAll(hierarchy(event.asExtensionOf().parent()));
-		return new ArrayList<>(events);
 	}
 
 	private void mvn(String goal) throws IOException, MavenInvocationException {
@@ -203,10 +150,5 @@ class OntologyPublisher {
 				add("name", repository.identifier()).
 				add("random", UUID.randomUUID().toString()).
 				add("url", repository.url());
-	}
-
-	private List<Tank.Event> eventTanks(NessGraph nessGraph) {
-		if (nessGraph.datalake() == null) return Collections.emptyList();
-		return nessGraph.datalake().tankList().stream().filter(Tank::isEvent).map(Tank::asEvent).collect(Collectors.toList());
 	}
 }

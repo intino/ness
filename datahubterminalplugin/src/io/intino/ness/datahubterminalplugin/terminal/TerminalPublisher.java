@@ -1,16 +1,17 @@
-package io.intino.ness.datahubterminalplugin;
+package io.intino.ness.datahubterminalplugin.terminal;
 
 import com.google.gson.Gson;
 import io.intino.Configuration;
 import io.intino.Configuration.Artifact;
 import io.intino.alexandria.logger.Logger;
-import io.intino.datahub.graph.Datalake;
-import io.intino.datahub.graph.Datalake.Split;
-import io.intino.datahub.graph.Datalake.Tank;
-import io.intino.datahub.graph.Event;
-import io.intino.datahub.graph.Namespace;
-import io.intino.datahub.graph.Terminal;
+import io.intino.datahub.model.Datalake;
+import io.intino.datahub.model.Datalake.Split;
+import io.intino.datahub.model.Datalake.Tank;
+import io.intino.datahub.model.Event;
+import io.intino.datahub.model.Namespace;
+import io.intino.datahub.model.Terminal;
 import io.intino.itrules.FrameBuilder;
+import io.intino.ness.datahubterminalplugin.*;
 import io.intino.plugin.PluginLauncher;
 import org.apache.maven.shared.invoker.*;
 
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 
 import static io.intino.plugin.PluginLauncher.Phase.*;
 
-class TerminalPublisher {
+public class TerminalPublisher {
 	private final File root;
 	private final Terminal terminal;
 	private final Configuration conf;
@@ -35,7 +36,7 @@ class TerminalPublisher {
 	private final PluginLauncher.Notifier notifier;
 	private final List<Tank.Event> tanks;
 
-	TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, Configuration configuration, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger, PluginLauncher.Notifier notifier) {
+	public TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, Configuration configuration, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger, PluginLauncher.Notifier notifier) {
 		this.root = root;
 		this.terminal = terminal;
 		this.tanks = tanks;
@@ -48,7 +49,7 @@ class TerminalPublisher {
 		this.notifier = notifier;
 	}
 
-	boolean publish() {
+	public boolean publish() {
 		try {
 			if (!checkPublish() || !createSources()) return false;
 			logger.println("Publishing " + terminal.name$() + "...");

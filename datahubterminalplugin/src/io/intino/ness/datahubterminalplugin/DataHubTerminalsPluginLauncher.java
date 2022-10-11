@@ -1,11 +1,13 @@
 package io.intino.ness.datahubterminalplugin;
 
 import io.intino.alexandria.logger.Logger;
-import io.intino.datahub.graph.Datalake.Tank;
-import io.intino.datahub.graph.NessGraph;
-import io.intino.datahub.graph.Terminal;
+import io.intino.datahub.model.Datalake.Tank;
+import io.intino.datahub.model.NessGraph;
+import io.intino.datahub.model.Terminal;
 import io.intino.magritte.framework.Graph;
 import io.intino.magritte.framework.stores.FileSystemStore;
+import io.intino.ness.datahubterminalplugin.ontology.OntologyPublisher;
+import io.intino.ness.datahubterminalplugin.terminal.TerminalPublisher;
 import io.intino.plugin.PluginLauncher;
 import org.apache.commons.io.FileUtils;
 
