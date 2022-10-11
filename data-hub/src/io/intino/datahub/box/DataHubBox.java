@@ -12,6 +12,8 @@ import io.intino.datahub.broker.jms.JmsBrokerService;
 import io.intino.datahub.datalake.BrokerSessions;
 import io.intino.datahub.model.NessGraph;
 import io.intino.magritte.framework.Graph;
+import io.intino.master.core.Master;
+import io.intino.master.core.MasterConfig;
 
 import java.io.File;
 import java.net.URL;
@@ -25,6 +27,7 @@ public class DataHubBox extends AbstractBox {
 	private Sentinels sentinels;
 	private NessGraph graph;
 	private Instant lastSeal;
+	private Master master;
 
 	public DataHubBox(String[] args) {
 		super(args);
@@ -103,7 +106,13 @@ public class DataHubBox extends AbstractBox {
 			configureBroker();
 			nessService = new NessService(this);
 		}
+		initMaster();
 		sentinels = new Sentinels(this);
+	}
+
+	private void initMaster() {
+		master = new Master(new MasterConfig().dataDirectory(datalakeDirectory()));
+		master.start();//TODO
 	}
 
 	private File datalakeDirectory() {
