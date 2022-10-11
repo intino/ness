@@ -1,7 +1,7 @@
 package io.intino.ness.datahubterminalplugin.event;
 
-import io.intino.datahub.graph.*;
-import io.intino.datahub.graph.Datalake.Split;
+import io.intino.datahub.model.*;
+import io.intino.datahub.model.Datalake.Split;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;

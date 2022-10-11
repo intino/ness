@@ -1,7 +1,7 @@
 package io.intino.ness.datahubterminalplugin.lookups;
 
-import io.intino.datahub.graph.Data;
-import io.intino.datahub.graph.Lookup;
+import io.intino.datahub.model.Data;
+import io.intino.datahub.model.Lookup;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;

@@ -3,8 +3,10 @@ package io.intino.ness.datahubterminalplugin;
 
 import io.intino.itrules.Formatter;
 import io.intino.itrules.Template;
+import io.intino.itrules.formatters.StringFormatters;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -96,4 +98,42 @@ public class Formatters {
 		if (string.isEmpty()) return string;
 		return IntStream.range(1, string.length()).mapToObj(i -> String.valueOf(Character.isUpperCase(string.charAt(i)) ? "-" + Character.toLowerCase(string.charAt(i)) : string.charAt(i))).collect(Collectors.joining("", String.valueOf(Character.toLowerCase(string.charAt(0))), ""));
 	}
+
+	public static Formatter javaValidName() {
+		return (s) -> {
+			String value = s.toString();
+			return javaValidWord().format(toCamelCaseWithoutFirstChange(value, "-"));
+		};
+	}
+
+	private static Object toCamelCaseWithoutFirstChange(String value, String regex) {
+		if (value.isEmpty()) {
+			return "";
+		} else {
+			String[] parts = value.split(regex);
+			if (parts.length == 1) {
+				return value;
+			} else {
+				StringBuilder caseString = new StringBuilder(parts[0]);
+
+				for(int i = 1; i < parts.length; ++i) {
+					caseString.append(capitalize(parts[i]));
+				}
+
+				return caseString.toString();
+			}
+		}
+	}
+
+	public static Formatter javaValidWord() {
+		return (s) -> {
+			String value = s.toString();
+			return JavaKeywords.isKeyword(value) ? value + "$" : value;
+		};
+	}
+
+	public static String capitalize(String value) {
+		return value.isEmpty() ? "" : ((Formatter) StringFormatters.get(Locale.getDefault()).get("capitalize")).format(value).toString();
+	}
+
 }
