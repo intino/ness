@@ -1,7 +1,6 @@
 package io.intino.ness;
 
 import io.intino.ness.master.core.Master;
-import io.intino.ness.master.core.MasterConfig;
 import io.intino.ness.master.data.validation.*;
 import io.intino.ness.master.data.validation.validators.DuplicatedTripleRecordValidator;
 import io.intino.ness.master.data.validation.validators.SyntaxTripleValidator;
@@ -19,9 +18,8 @@ import static io.intino.ness.master.data.validation.Issue.Type.MISSING_ATTRIBUTE
 public class TestMasterMain {
 
 	public static void main(String[] args) {
-		MasterConfig config = new MasterConfig();
-		config.dataDirectory(new File("temp/cinepolis-data/datasets"));
-		config.logDirectory(new File("temp/logs/master"));
+		Master.Config config = new Master.Config();
+		config.datalakeRootPath(new File("temp/cinepolis-data/datasets"));
 		config.instanceName("Master");
 		config.serializer(MasterSerializers.getDefault());
 		config.port(62555);
@@ -31,9 +29,8 @@ public class TestMasterMain {
 	}
 
 	public static void main1(String[] args) {
-		MasterConfig config = new MasterConfig();
-		config.dataDirectory(new File("temp/cinepolis-data/datasets"));
-		config.logDirectory(new File("temp/logs/master"));
+		Master.Config config = new Master.Config();
+		config.datalakeRootPath(new File("temp/cinepolis-data/datasets"));
 		config.instanceName("Master");
 		config.serializer(MasterSerializers.getDefault());
 		config.port(62555);

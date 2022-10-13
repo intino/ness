@@ -11,16 +11,28 @@ import io.intino.datahub.box.service.scheduling.Sentinels;
 import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.broker.jms.JmsBrokerService;
 import io.intino.datahub.datalake.BrokerSessions;
+import io.intino.datahub.model.Entity;
+import io.intino.datahub.model.EntityData;
 import io.intino.datahub.model.NessGraph;
 import io.intino.magritte.framework.Graph;
+import io.intino.magritte.framework.Node;
 import io.intino.ness.master.core.Master;
-import io.intino.ness.master.core.MasterConfig;
+import io.intino.ness.master.data.ComponentAttributeDefinition;
+import io.intino.ness.master.data.ComponentsDatalakeLoader;
+import io.intino.ness.master.data.DatalakeLoader;
+import io.intino.ness.master.serialization.MasterSerializers;
 
 import java.io.File;
 import java.net.URL;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DataHubBox extends AbstractBox {
+
 	private FileDatalake datalake;
 	private BrokerService brokerService;
 	private BrokerSessions brokerSessions;
@@ -112,8 +124,19 @@ public class DataHubBox extends AbstractBox {
 	}
 
 	private void initMaster() {
-		master = new Master(new MasterConfig().dataDirectory(datalakeDirectory()));
-		master.start();//TODO
+		master = new Master(getMasterConfig());
+		master.start();
+	}
+
+	private Master.Config getMasterConfig() {
+		Master.Config config = new Master.Config();
+		config.datalakeRootPath(datalakeDirectory());
+		config.instanceName(configuration.masterInstanceName());
+		config.host(configuration.masterHost());
+		config.port(configuration.masterPort());
+		config.serializer(MasterSerializers.getOrDefault(configuration.masterSerializer()));
+		config.datalakeLoader(new DatalakeLoaderFactory().create());
+		return config;
 	}
 
 	private File datalakeDirectory() {
@@ -166,5 +189,69 @@ public class DataHubBox extends AbstractBox {
 
 	public Instant lastSeal() {
 		return lastSeal;
+	}
+
+	private class DatalakeLoaderFactory {
+
+		// TODO: test
+		private DatalakeLoader create() {
+			List<Entity> typesWithComponents = typesWithComponents();
+			if(typesWithComponents.isEmpty()) return DatalakeLoader.createDefault();
+			return new ComponentsDatalakeLoader(
+					componentsByEntityType(typesWithComponents),
+					typesWithComponents.stream().map(this::subjectType).collect(Collectors.toSet()),
+					componentTypes().stream().map(this::subjectType).collect(Collectors.toSet())
+			);
+		}
+
+		private String subjectType(Entity entity) {
+			return entity.name$().toLowerCase();
+		}
+
+		private Map<String, List<ComponentAttributeDefinition>> componentsByEntityType(List<Entity> typesWithComponents) {
+			Map<String, List<ComponentAttributeDefinition>> componentsByEntityType = new HashMap<>();
+			for(Entity entity : typesWithComponents) {
+				List<ComponentAttributeDefinition> definitions = getComponentsOf(entity)
+						.map(c -> new ComponentAttributeDefinition(
+								c.name$(),
+								c.asEntity().name$(),
+								type(c.asEntity().type())
+						)).collect(Collectors.toList());
+
+				componentsByEntityType.put(entity.name$(), definitions);
+			}
+			return componentsByEntityType;
+		}
+
+		private ComponentAttributeDefinition.Type type(String type) {
+			if(type.contains("List")) return ComponentAttributeDefinition.Type.List;
+			if(type.contains("Map")) return ComponentAttributeDefinition.Type.Map;
+			return ComponentAttributeDefinition.Type.Reference;
+		}
+
+		private Stream<Entity.Attribute> getComponentsOf(Entity e) {
+			return e.attributeList().stream().filter(EntityData::isEntity).filter(a -> isComponent(a.asEntity().core$()));
+		}
+
+		private List<Entity> typesWithComponents() {
+			return graph.entityList().stream()
+					.filter(e -> !isComponent(e.core$()))
+					.filter(this::hasComponents)
+					.collect(Collectors.toList());
+		}
+
+		private List<Entity> componentTypes() {
+			return graph.entityList().stream()
+					.filter(e -> isComponent(e.core$()))
+					.collect(Collectors.toList());
+		}
+
+		private boolean hasComponents(Entity entity) {
+			return entity.attributeList().stream().anyMatch(a -> a.isEntity() && isComponent(a.core$()));
+		}
+
+		private boolean isComponent(Node entity) {
+			return entity.conceptList().stream().anyMatch(c -> c.isAspect && c.name().contains("Component"));
+		}
 	}
 }

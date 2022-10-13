@@ -1,6 +1,5 @@
 package io.intino.ness.master.core;
 
-import com.hazelcast.config.Config;
 import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
@@ -8,12 +7,11 @@ import com.hazelcast.map.IMap;
 import com.hazelcast.topic.Message;
 import io.intino.alexandria.logger.Logger;
 import io.intino.ness.master.data.DatalakeLoader;
-import io.intino.ness.master.data.RecordTransformer;
-import io.intino.ness.master.io.TriplesFileReader;
 import io.intino.ness.master.io.TriplesFileWriter;
 import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.model.TripletRecord;
 import io.intino.ness.master.serialization.MasterSerializer;
+import io.intino.ness.master.serialization.MasterSerializers;
 
 import java.io.File;
 import java.util.*;
@@ -31,11 +29,11 @@ public class Master {
 	public static final String NONE_TYPE = "";
 
 	private HazelcastInstance hazelcast;
-	private final MasterConfig config;
+	private final Config config;
 	private IMap<String, String> metadataMap;
 	private IMap<String, String> masterMap;
 
-	public Master(MasterConfig config) {
+	public Master(Config config) {
 		this.config = requireNonNull(config);
 		checkConfigValues();
 	}
@@ -76,8 +74,7 @@ public class Master {
 		metadataMap.set("port", String.valueOf(config.port()));
 		metadataMap.set("host", config.host());
 		metadataMap.set("serializer", serializer.name());
-		metadataMap.set("dataDirectory", config.dataDirectory().getPath());
-		metadataMap.set("logDirectory", config.logDirectory().getPath());
+		metadataMap.set("datalakeRootPath", config.datalakeRootPath().getPath());
 
 		masterMap = hazelcast.getMap(MASTER_MAP_NAME);
 
@@ -91,7 +88,7 @@ public class Master {
 		long start = System.currentTimeMillis();
 		int numTriples;
 
-		DatalakeLoader.LoadResult result = config.datalakeLoader().load(config.dataDirectory(), serializer());
+		DatalakeLoader.LoadResult result = config.datalakeLoader().load(config.datalakeRootPath(), serializer());
 
 		numTriples = (int) result.triplesRead();
 
@@ -148,7 +145,7 @@ public class Master {
 	}
 
 	protected synchronized void save(String publisher, Triplet triplet) {
-		try(TriplesFileWriter writer = new TriplesFileWriter(config.dataDirectory(), publisher)) {
+		try(TriplesFileWriter writer = new TriplesFileWriter(config.datalakeRootPath(), publisher)) {
 			writer.write(triplet);
 		} catch (Exception e) {
 			Logger.error(e);
@@ -159,12 +156,8 @@ public class Master {
 		return config.serializer();
 	}
 
-	public RecordTransformer transformer() {
-		return config.transformer();
-	}
-
-	protected Config getHazelcastConfig() {
-		Config hzConfig = new Config();
+	protected com.hazelcast.config.Config getHazelcastConfig() {
+		com.hazelcast.config.Config hzConfig = new com.hazelcast.config.Config();
 		hzConfig.setInstanceName(config.instanceName());
 		hzConfig.setNetworkConfig(new NetworkConfig().setPort(config.port()));
 		return hzConfig;
@@ -172,8 +165,7 @@ public class Master {
 
 	private void checkConfigValues() {
 		if(config.instanceName() == null) throw new MasterInitializationException("Instance name cannot be null");
-		if(config.dataDirectory() == null) throw new MasterInitializationException("Data directory cannot be null");
-		if(config.logDirectory() == null) throw new MasterInitializationException("Log directory cannot be null");
+		if(config.datalakeRootPath() == null) throw new MasterInitializationException("Data directory cannot be null");
 		if(config.port() <= 0) throw new MasterInitializationException("Port is invalid");
 		if(config.serializer() == null) throw new MasterInitializationException("Serializer cannot be null");
 		if(config.serializer().name() == null) throw new MasterInitializationException("Serializer name cannot be null");
@@ -183,5 +175,91 @@ public class Master {
 		long metadata = metadataMap.getLocalMapStats().getOwnedEntryMemoryCost();
 		long data = masterMap.getLocalMapStats().getOwnedEntryMemoryCost();
 		return (metadata + data) / 1024.0f / 1024.0f;
+	}
+
+	public static class Config {
+
+		private File datalakeRootPath;
+		private String instanceName = "master";
+		private int port = 5701;
+		private String host = "localhost";
+		private MasterSerializer serializer = MasterSerializers.getDefault();
+		private DatalakeLoader datalakeLoader = DatalakeLoader.createDefault();
+
+		public Config() {
+		}
+
+		public Config(Map<String, String> arguments) {
+			this.datalakeRootPath = new File(arguments.get("datalake_path"));
+			this.instanceName = arguments.getOrDefault("master_instance_name", instanceName);
+			this.port = Integer.parseInt(arguments.getOrDefault("port", String.valueOf(port)));
+			this.serializer = MasterSerializers.get(arguments.getOrDefault("serializer", MasterSerializers.Standard.getDefault()));
+			this.host = arguments.getOrDefault("host", host);
+		}
+
+		public Config(String[] args) {
+			this(toMap(args));
+		}
+
+		public File datalakeRootPath() {
+			return datalakeRootPath;
+		}
+
+		public Config datalakeRootPath(File datalakeRootPath) {
+			this.datalakeRootPath = datalakeRootPath;
+			return this;
+		}
+
+		public String instanceName() {
+			return instanceName;
+		}
+
+		public Config instanceName(String instanceName) {
+			this.instanceName = instanceName;
+			return this;
+		}
+
+		public int port() {
+			return port;
+		}
+
+		public Config port(int port) {
+			this.port = port;
+			return this;
+		}
+
+		public String host() {
+			return host;
+		}
+
+		public Config host(String host) {
+			this.host = host;
+			return this;
+		}
+
+		public MasterSerializer serializer() {
+			return serializer;
+		}
+
+		public Config serializer(MasterSerializer serializer) {
+			this.serializer = serializer;
+			return this;
+		}
+
+		private static Map<String, String> toMap(String[] args) {
+			return Arrays.stream(args).map(s -> s.split("=")).collect(Collectors.toMap(
+					s -> s[0].trim(),
+					s -> s[1].trim()
+			));
+		}
+
+		public DatalakeLoader datalakeLoader() {
+			return datalakeLoader;
+		}
+
+		public Config datalakeLoader(DatalakeLoader datalakeLoader) {
+			this.datalakeLoader = datalakeLoader;
+			return this;
+		}
 	}
 }

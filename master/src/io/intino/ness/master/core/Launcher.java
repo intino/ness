@@ -12,13 +12,13 @@ import static java.util.stream.Collectors.toMap;
 
 public class Launcher {
 
-	private Function<MasterConfig, Master> masterImpl = Master::new;
+	private Function<Master.Config, Master> masterImpl = Master::new;
 	private Runnable loggerConfigurator = this::configureLogger;
 
 	public void launch(String[] args) {
 		Map<String, String> arguments = asMap(args);
 		configureLogger();
-		Master master = masterImpl.apply(new MasterConfig(arguments));
+		Master master = masterImpl.apply(new Master.Config(arguments));
 		master.start();
 	}
 
@@ -39,7 +39,7 @@ public class Launcher {
 				.collect(toMap(s -> s[0].trim(), s -> s[1].trim()));
 	}
 
-	public Launcher setMasterImpl(Function<MasterConfig, Master> masterImpl) {
+	public Launcher setMasterImpl(Function<Master.Config, Master> masterImpl) {
 		this.masterImpl = masterImpl == null ? Master::new : masterImpl;
 		return this;
 	}
