@@ -1,6 +1,5 @@
 package io.intino.datahub.box;
 
-import io.intino.alexandria.AbstractBox;
 import io.intino.alexandria.datalake.file.FileDatalake;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.sealing.FileSessionSealer;
@@ -133,7 +132,7 @@ public class DataHubBox extends AbstractBox {
 		config.datalakeRootPath(datalakeDirectory());
 		config.instanceName(configuration.masterInstanceName());
 		config.host(configuration.masterHost());
-		config.port(configuration.masterPort());
+		config.port(Integer.parseInt(configuration.masterPort()));
 		config.serializer(MasterSerializers.getOrDefault(configuration.masterSerializer()));
 		config.datalakeLoader(new DatalakeLoaderFactory().create());
 		return config;

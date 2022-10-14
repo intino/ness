@@ -124,6 +124,11 @@ public class PluginTest {
 					}
 
 					@Override
+					public void name(String s) {
+
+					}
+
+					@Override
 					public String version() {
 						return "1.0.0";
 					}
@@ -331,6 +336,11 @@ public class PluginTest {
 					@Override
 					public String name() {
 						return "datahub";
+					}
+
+					@Override
+					public void name(String s) {
+
 					}
 
 					@Override
@@ -543,6 +553,11 @@ public class PluginTest {
 					}
 
 					@Override
+					public void name(String s) {
+
+					}
+
+					@Override
 					public String version() {
 						return "1.2.0";
 					}
@@ -749,6 +764,11 @@ public class PluginTest {
 					@Override
 					public String name() {
 						return "datahub-test";
+					}
+
+					@Override
+					public void name(String s) {
+
 					}
 
 					@Override
