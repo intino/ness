@@ -12,7 +12,6 @@ import io.intino.itrules.Template;
 import io.intino.ness.datahubterminalplugin.Commons;
 import io.intino.ness.datahubterminalplugin.DatalakeTemplate;
 import io.intino.ness.datahubterminalplugin.Formatters;
-import io.intino.ness.datahubterminalplugin.TerminalTemplate;
 
 import java.io.File;
 import java.util.ArrayList;

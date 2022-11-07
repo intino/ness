@@ -1,5 +1,6 @@
 package io.intino.datahub.box;
 
+import io.intino.alexandria.datalake.Datalake;
 import io.intino.alexandria.datalake.file.FileDatalake;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.sealing.FileSessionSealer;
@@ -17,8 +18,11 @@ import io.intino.magritte.framework.Graph;
 import io.intino.magritte.framework.Node;
 import io.intino.ness.master.core.Master;
 import io.intino.ness.master.data.ComponentAttributeDefinition;
-import io.intino.ness.master.data.ComponentsDatalakeLoader;
-import io.intino.ness.master.data.DatalakeLoader;
+import io.intino.ness.master.data.ComponentsTripletsDigester;
+import io.intino.ness.master.data.MasterTripletsDigester;
+import io.intino.ness.master.data.MasterTripletsDigester.Result.Stats;
+import io.intino.ness.master.data.TripletLoader;
+import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.serialization.MasterSerializers;
 
 import java.io.File;
@@ -134,7 +138,8 @@ public class DataHubBox extends AbstractBox {
 		config.host(configuration.masterHost());
 		config.port(Integer.parseInt(configuration.masterPort()));
 		config.serializer(MasterSerializers.getOrDefault(configuration.masterSerializer()));
-		config.datalakeLoader(new DatalakeLoaderFactory().create());
+		config.tripletsDigester(new DatahubTripletDigesterFactory().create());
+		config.tripletsLoader(new DatahubTripletLoader(datalake.tripletsStore()));
 		return config;
 	}
 
@@ -190,13 +195,36 @@ public class DataHubBox extends AbstractBox {
 		return lastSeal;
 	}
 
-	private class DatalakeLoaderFactory {
+	private static class DatahubTripletLoader implements TripletLoader {
 
-		// TODO: test
-		private DatalakeLoader create() {
+		private final Datalake.TripletStore store;
+
+		public DatahubTripletLoader(Datalake.TripletStore store) {
+			this.store = store;
+		}
+
+		@Override
+		public Stream<Triplet> loadTriplets(Stats stats) {
+			return store.tanks()
+					.peek(t -> stats.increment("Tanks read"))
+					.flatMap(Datalake.TripletStore.Tank::tubs)
+					.flatMap(tub -> readTripletsFrom(tub, stats));
+		}
+
+		private Stream<Triplet> readTripletsFrom(Datalake.TripletStore.Tub tub, Stats stats) {
+			stats.increment(Stats.FILES_READ);
+			return tub.triplets()
+					.map(t -> new Triplet(t.subject(), t.verb(), t.object()))
+					.peek(t -> stats.increment(Stats.TRIPLETS_READ));
+		}
+	}
+
+	private class DatahubTripletDigesterFactory {
+
+		private MasterTripletsDigester create() {
 			List<Entity> typesWithComponents = typesWithComponents();
-			if(typesWithComponents.isEmpty()) return DatalakeLoader.createDefault();
-			return new ComponentsDatalakeLoader(
+			if(typesWithComponents.isEmpty()) return MasterTripletsDigester.createDefault();
+			return new ComponentsTripletsDigester(
 					componentsByEntityType(typesWithComponents),
 					typesWithComponents.stream().map(this::subjectType).collect(Collectors.toSet()),
 					componentTypes().stream().map(this::subjectType).collect(Collectors.toSet())

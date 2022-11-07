@@ -57,20 +57,21 @@ public class PluginTest {
 
 	@Test
 	public void should_build_cinepolis_terminals() throws IOException {
+		new File(WORKSPACE_ROOT, "IntinoDev/ness/out/datahub-cinepolis/").mkdirs();
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
 		launcher.
 				moduleStructure(new PluginLauncher.ModuleStructure(List.of(
-						new File(WORKSPACE_ROOT + "MonentiaDev/cinepolis/datahub/src"),
-						new File(WORKSPACE_ROOT + "MonentiaDev/cinepolis/datahub/shared")),
-						singletonList(new File(WORKSPACE_ROOT + "/MonentiaDev//cinepolis/datahub/res")),
-						new File(WORKSPACE_ROOT + "IntinoDev/ness/out/datahub-cinepolis/")))
+						new File(WORKSPACE_ROOT, "MonentiaDev/cinepolis/datahub/src"),
+						new File(WORKSPACE_ROOT, "MonentiaDev/cinepolis/datahub/shared")),
+						singletonList(new File(WORKSPACE_ROOT,"MonentiaDev/cinepolis/datahub/res")),
+						new File(WORKSPACE_ROOT, "IntinoDev/ness/out/datahub-cinepolis/")))
 				.systemProperties(new PluginLauncher.SystemProperties(
 						new File(INTELLIJ_MAVEN_PLUGIN),
 						new File(JAVA_HOME)))
 				.logger(System.out)
 				.invokedPhase(PluginLauncher.Phase.INSTALL)
 				.moduleConfiguration(gcConfiguration());
-		File temp = new File(WORKSPACE_ROOT + "IntinoDev/ness/datahubterminalplugin/temp/cinepolis");
+		File temp = new File(WORKSPACE_ROOT, "IntinoDev/ness/datahubterminalplugin/temp/cinepolis");
 		FileUtils.deleteDirectory(temp);
 		temp.mkdirs();
 		launcher.run(temp);
@@ -121,11 +122,6 @@ public class PluginTest {
 					@Override
 					public String name() {
 						return "datahub";
-					}
-
-					@Override
-					public void name(String s) {
-
 					}
 
 					@Override
@@ -339,11 +335,6 @@ public class PluginTest {
 					}
 
 					@Override
-					public void name(String s) {
-
-					}
-
-					@Override
 					public String version() {
 						return "3.1.0";
 					}
@@ -553,11 +544,6 @@ public class PluginTest {
 					}
 
 					@Override
-					public void name(String s) {
-
-					}
-
-					@Override
 					public String version() {
 						return "1.2.0";
 					}
@@ -764,11 +750,6 @@ public class PluginTest {
 					@Override
 					public String name() {
 						return "datahub-test";
-					}
-
-					@Override
-					public void name(String s) {
-
 					}
 
 					@Override

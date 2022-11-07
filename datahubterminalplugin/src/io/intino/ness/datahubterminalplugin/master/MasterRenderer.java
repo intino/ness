@@ -92,9 +92,9 @@ public class MasterRenderer {
 	}
 
 	private Map<String, String> masterClass() {
-		String cQn = workingPackage + DOT + firstUpperCase().format(javaValidName().format("FullLoadMasterClient").toString());
-		String lQn = workingPackage + DOT + firstUpperCase().format(javaValidName().format("LazyLoadMasterClient").toString());
-		String iQn = workingPackage + DOT + firstUpperCase().format(javaValidName().format("MasterClient").toString());
+		String cQn = workingPackage + DOT + firstUpperCase().format(javaValidName().format("FullLoadMasterTerminal").toString());
+		String lQn = workingPackage + DOT + firstUpperCase().format(javaValidName().format("LazyLoadMasterTerminal").toString());
+		String iQn = workingPackage + DOT + firstUpperCase().format(javaValidName().format("MasterTerminal").toString());
 
 		return Map.of(
 				destination(cQn), customize(new MasterClientTemplate()).render(masterFrameBuilder("cached").toFrame()),

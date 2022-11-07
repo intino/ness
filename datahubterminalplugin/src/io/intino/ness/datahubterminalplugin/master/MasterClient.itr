@@ -10,16 +10,16 @@ def type(master & interface)
 	import io.intino.master.model.Triple;
 	import com.hazelcast.core.EntryListener;
 
-	public interface MasterClient {
+	public interface MasterTerminal {
 
-		static MasterClient create() {
-			return create(new MasterClient.Config());
+		static MasterTerminal create() {
+			return create(new MasterTerminal.Config());
 		}
 
-		static MasterClient create(MasterClient.Config config) {
-			if(config.type() == Type.FullLoad) return new FullLoadMasterClient(config);
-			if(config.type() == Type.LazyLoad) return new LazyLoadMasterClient(config);
-			throw new IllegalArgumentException("Unknown MasterClient type " + config.type());
+		static MasterTerminal create(MasterTerminal.Config config) {
+			if(config.type() == Type.FullLoad) return new FullLoadMasterTerminal(config);
+			if(config.type() == Type.LazyLoad) return new LazyLoadMasterTerminal(config);
+			throw new IllegalArgumentException("Unknown MasterTerminal type " + config.type());
 		}
 
 		void start();
@@ -27,7 +27,7 @@ def type(master & interface)
 
 		void publish(String senderName, Triple triple);
 
-		MasterClient.Config config();
+		MasterTerminal.Config config();
 
 		void addEntryListener(EntryListener<String, String> listener);
 
@@ -51,7 +51,7 @@ def type(master & interface)
     	}
 
     	final class Config {
-    		private String instanceName = "$package.MasterClient-" + UUID.randomUUID();
+    		private String instanceName = "$package.MasterTerminal-" + UUID.randomUUID();
     		private List<String> addresses = List.of("localhost:5701");
     		private Type type = Type.getDefault();
     		private boolean readOnly = true;
@@ -142,14 +142,14 @@ def type(master & cached)
 	import java.util.logging.Level;
 	import java.util.logging.LogManager;
 
-	public class FullLoadMasterClient implements MasterClient {
+	public class FullLoadMasterTerminal implements MasterTerminal {
 
     	$entity+map...[$NL]
 
-    	private final MasterClient.Config config;
+    	private final MasterTerminal.Config config;
 		private HazelcastInstance hazelcast;
 
-    	public FullLoadMasterClient(MasterClient.Config config) {
+    	public FullLoadMasterTerminal(MasterTerminal.Config config) {
     		this.config = requireNonNull(config);
     	}
 
@@ -178,8 +178,8 @@ def type(master & cached)
         }
 
     	@Override
-    	public MasterClient.Config config() {
-    		return new MasterClient.Config(config);
+    	public MasterTerminal.Config config() {
+    		return new MasterTerminal.Config(config);
     	}
 
     	$entity+getter...[$NL$NL]
@@ -325,14 +325,14 @@ def type(master & lazy)
 	import java.util.logging.Level;
 	import java.util.logging.LogManager;
 
-	public class LazyLoadMasterClient implements MasterClient {
+	public class LazyLoadMasterTerminal implements MasterTerminal {
 
-    	private final MasterClient.Config config;
+    	private final MasterTerminal.Config config;
 		private HazelcastInstance hazelcast;
 		private IMap<String, String> masterMap;
 		private MasterSerializer serializer;
 
-    	public LazyLoadMasterClient(MasterClient.Config config) {
+    	public LazyLoadMasterTerminal(MasterTerminal.Config config) {
     		this.config = requireNonNull(config);
     	}
 
@@ -358,8 +358,8 @@ def type(master & lazy)
         }
 
     	@Override
-    	public MasterClient.Config config() {
-    		return new MasterClient.Config(config);
+    	public MasterTerminal.Config config() {
+    		return new MasterTerminal.Config(config);
     	}
 
     	$entity+getter...[$NL$NL]
@@ -370,7 +370,7 @@ def type(master & lazy)
         	return serializer.deserialize(serializedRecord);
         }
 
-       	private <T extends Entity> T entity(BiFunction<String, MasterClient, T> constructor, String id, Map<String, String> record) {
+       	private <T extends Entity> T entity(BiFunction<String, MasterTerminal, T> constructor, String id, Map<String, String> record) {
        		T entity = constructor.apply(id, this);
        		record.entrySet().stream().map(e -> new Triple(id, e.getKey(), e.getValue())).forEach(entity::add);
        		return entity;

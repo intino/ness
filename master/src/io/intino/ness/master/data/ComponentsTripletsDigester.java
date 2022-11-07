@@ -5,15 +5,10 @@ import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.model.TripletRecord;
 import io.intino.ness.master.serialization.MasterSerializer;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class ComponentsDatalakeLoader extends DefaultDatalakeLoader {
+public class ComponentsTripletsDigester extends DefaultTripletsDigester {
 
 	protected static final String LIST_ENTRY_SEPARATOR = ",";
 	protected static final String MAP_ENTRY_SEPARATOR = ",";
@@ -22,28 +17,31 @@ public class ComponentsDatalakeLoader extends DefaultDatalakeLoader {
 	private final Set<String> typesWithComponents;
 	private final Set<String> componentTypes;
 
-	public ComponentsDatalakeLoader(Map<String, List<ComponentAttributeDefinition>> componentsByEntityType,
-									Set<String> typesWithComponents,
-									Set<String> componentTypes) {
+	public ComponentsTripletsDigester(Map<String, List<ComponentAttributeDefinition>> componentsByEntityType,
+									  Set<String> typesWithComponents,
+									  Set<String> componentTypes) {
 		this.componentsByEntityType = componentsByEntityType;
 		this.typesWithComponents = typesWithComponents;
 		this.componentTypes = componentTypes;
 	}
 
 	@Override
-	public LoadResult load(File rootDirectory, MasterSerializer serializer) {
-		WritableLoadResult result = LoadResult.create();
-		loadRecordsFromDisk(rootDirectory, result, serializer);
-		return result;
-	}
+	public Result load(TripletLoader tripletLoader, MasterSerializer serializer) throws Exception {
+		WritableResult result = Result.create();
 
-	protected void loadRecordsFromDisk(File rootDirectory, WritableLoadResult result, MasterSerializer serializer) {
 		Map<String, TripletRecord> entities = result.records();
 		Map<String, TripletRecord> components = new HashMap<>();
 
-		loadFromDisk(rootDirectory, result, entities, components);
+		tripletLoader.loadTriplets(result.stats()).forEach(t -> register(entities, components, t));
 
 		handleComponents(entities, components, serializer);
+
+		return result;
+	}
+
+	private void register(Map<String, TripletRecord> entities, Map<String, TripletRecord> components, Triplet triplet) {
+		Map<String, TripletRecord> map = isComponent(triplet.type()) ? components : entities;
+		map.computeIfAbsent(triplet.subject(), TripletRecord::new).put(triplet);
 	}
 
 	private void handleComponents(Map<String, TripletRecord> entities, Map<String, TripletRecord> components, MasterSerializer serializer) {
@@ -112,22 +110,6 @@ public class ComponentsDatalakeLoader extends DefaultDatalakeLoader {
 
 	private boolean hasComponents(TripletRecord entity) {
 		return typesWithComponents.contains(entity.type());
-	}
-
-	private void loadFromDisk(File rootDirectory, WritableLoadResult result, Map<String, TripletRecord> entities, Map<String, TripletRecord> components) {
-		try(Stream<Path> files = Files.walk(rootDirectory.toPath())) {
-			files.map(Path::toFile)
-					.filter(f -> f.isFile() && f.getName().endsWith(TRIPLETS_EXTENSION))
-					.flatMap(file -> readTripletsFromFile(file, result))
-					.forEach(t -> register(entities, components, t));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private void register(Map<String, TripletRecord> entities, Map<String, TripletRecord> components, Triplet triplet) {
-		Map<String, TripletRecord> map = isComponent(triplet.type()) ? components : entities;
-		map.computeIfAbsent(triplet.subject(), TripletRecord::new).put(triplet);
 	}
 
 //	private static final Set<String> ComponentTypes = Set.of("check");

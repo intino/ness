@@ -5,8 +5,11 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 import com.hazelcast.topic.Message;
+import io.intino.alexandria.Json;
 import io.intino.alexandria.logger.Logger;
-import io.intino.ness.master.data.DatalakeLoader;
+import io.intino.ness.master.data.FileTripletLoader;
+import io.intino.ness.master.data.MasterTripletsDigester;
+import io.intino.ness.master.data.TripletLoader;
 import io.intino.ness.master.io.TriplesFileWriter;
 import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.model.TripletRecord;
@@ -84,22 +87,22 @@ public class Master {
 	}
 
 	protected Map<String, TripletRecord> loadData() {
-		Logger.info("Loading data...");
-		long start = System.currentTimeMillis();
-		int numTriples;
+		try {
+			Logger.info("Loading data...");
+			long start = System.currentTimeMillis();
 
-		DatalakeLoader.LoadResult result = config.datalakeLoader().load(config.datalakeRootPath(), serializer());
+			MasterTripletsDigester.Result result = config.tripletsDigester().load(config.tripletLoader(), serializer());
+			result.stats().put("Num records", result.records().size());
 
-		numTriples = (int) result.triplesRead();
+			final long time = System.currentTimeMillis() - start;
 
-		final long time = System.currentTimeMillis() - start;
+			Logger.info("Data loaded after " + time + " ms. Stats:\n" + Json.toJsonPretty(result.stats().map()));
 
-		Logger.info("Data loaded after " + time + " ms."
-				+ " Num records: " + result.records().size()
-				+ ", Num triples: " + numTriples
-		);
+			return result.records();
 
-		return result.records();
+		} catch (Exception e) {
+			throw new MasterInitializationException("Could not load master data due to a " + e.getClass().getSimpleName() + ": " + e.getMessage(), e);
+		}
 	}
 
 	protected void setupListeners() {
@@ -169,6 +172,8 @@ public class Master {
 		if(config.port() <= 0) throw new MasterInitializationException("Port is invalid");
 		if(config.serializer() == null) throw new MasterInitializationException("Serializer cannot be null");
 		if(config.serializer().name() == null) throw new MasterInitializationException("Serializer name cannot be null");
+		if(config.tripletsDigester() == null) throw new MasterInitializationException("Triplet digester cannot be null");
+		if(config.tripletLoader() == null) throw new MasterInitializationException("Triplet loader cannot be null");
 	}
 
 	private float getHazelcastMemoryUsedMB() {
@@ -184,7 +189,8 @@ public class Master {
 		private int port = 5701;
 		private String host = "localhost";
 		private MasterSerializer serializer = MasterSerializers.getDefault();
-		private DatalakeLoader datalakeLoader = DatalakeLoader.createDefault();
+		private MasterTripletsDigester tripletsDigester = MasterTripletsDigester.createDefault();
+		private TripletLoader tripletLoader;
 
 		public Config() {
 		}
@@ -195,6 +201,7 @@ public class Master {
 			this.port = Integer.parseInt(arguments.getOrDefault("port", String.valueOf(port)));
 			this.serializer = MasterSerializers.get(arguments.getOrDefault("serializer", MasterSerializers.Standard.getDefault()));
 			this.host = arguments.getOrDefault("host", host);
+			this.tripletLoader = new FileTripletLoader(datalakeRootPath);
 		}
 
 		public Config(String[] args) {
@@ -253,12 +260,21 @@ public class Master {
 			));
 		}
 
-		public DatalakeLoader datalakeLoader() {
-			return datalakeLoader;
+		public MasterTripletsDigester tripletsDigester() {
+			return tripletsDigester;
 		}
 
-		public Config datalakeLoader(DatalakeLoader datalakeLoader) {
-			this.datalakeLoader = datalakeLoader;
+		public Config tripletsDigester(MasterTripletsDigester digester) {
+			this.tripletsDigester = digester;
+			return this;
+		}
+
+		public TripletLoader tripletLoader() {
+			return tripletLoader;
+		}
+
+		public Config tripletsLoader(TripletLoader tripletLoader) {
+			this.tripletLoader = tripletLoader;
 			return this;
 		}
 	}
