@@ -6,6 +6,7 @@ import io.intino.datahub.model.NessGraph;
 import io.intino.datahub.model.Terminal;
 import io.intino.magritte.framework.Graph;
 import io.intino.magritte.framework.stores.FileSystemStore;
+import io.intino.ness.datahubterminalplugin.master.MasterPublisher;
 import io.intino.ness.datahubterminalplugin.ontology.OntologyPublisher;
 import io.intino.ness.datahubterminalplugin.terminal.TerminalPublisher;
 import io.intino.plugin.PluginLauncher;
@@ -22,6 +23,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private static final String MINIMUM_TERMINAL_JMS_VERSION = "4.4.0";
 	private static final String MINIMUM_EVENT_VERSION = "3.0.0";
 	private static final String MINIMUM_INGESTION_VERSION = "4.0.5";
+	private static final String MINIMUM_MASTER_VERSION = "1.0.0";
 	private static final String MAX_TERMINAL_JMS_VERSION = "5.0.0";
 	private static final String MAX_INGESTION_VERSION = "5.0.0";
 	private static final String MAX_EVENT_VERSION = "4.0.0";
@@ -36,30 +38,23 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 
 	public void run(File tempDir) {
 		if (logger() != null) logger().println("Maven HOME: " + systemProperties.mavenHome.getAbsolutePath());
-		List<File> directories = moduleStructure().resDirectories;
-		File resDirectory = directories.stream().filter(d -> {
-			File[] files = d.getAbsoluteFile().listFiles(f -> f.getName().endsWith(".stash"));
-			return files != null && files.length > 0;
-		}).findFirst().orElse(null);
-		if (resDirectory == null) {
-			notifier().notifyError("Stashes not found. Please compile module");
-			return;
-		}
-		String[] stashes = Arrays.stream(Objects.requireNonNull(resDirectory.listFiles(f -> f.getName().endsWith(".stash")))).map(f -> f.getName().replace(".stash", "")).toArray(String[]::new);
-		Graph graph = new Graph(new FileSystemStore(resDirectory)).loadStashes(stashes);
-		if (graph == null) {
-			notifier().notifyError("Couldn't load graph. Please recompile module");
-			return;
-		}
-		if (safe(() -> configuration().artifact().distribution()) != null && safe(() -> configuration().artifact().distribution().snapshot()) == null && isSnapshotVersion()) {
-			notifier().notifyError("Snapshot distribution repository not found");
-			return;
-		}
-		Map<String, String> versions = Map.of("terminal-jms", terminalJmsVersion(), "ingestion", ingestionVersion(), "bpm", bpmVersion(), "event", eventVersion());
-		final boolean published = publishOntology(graph.as(NessGraph.class), versions, tempDir);
-		if (!published) return;
+		File resDirectory = resDirectory(moduleStructure().resDirectories);
+		if (resDirectory == null) return;
+		Graph graph = loadGraph(resDirectory);
+		if (hasErrors(graph)) return;
+		Map<String, String> versions = versions();
+		if (!publishOntology(graph.as(NessGraph.class), versions, tempDir)) return;
 		publishTerminals(graph.as(NessGraph.class), versions, tempDir);
+		publishMasterTerminal(graph.as(NessGraph.class), versions, tempDir);
 		logger().println("Finished generation of terminals!");
+	}
+
+	private Map<String, String> versions() {
+		return Map.of("terminal-jms", terminalJmsVersion(),
+				"ingestion", ingestionVersion(),
+				"bpm", bpmVersion(),
+				"master", masterVersion(),
+				"event", eventVersion());
 	}
 
 	private boolean publishOntology(NessGraph graph, Map<String, String> versions, File tempDir) {
@@ -92,6 +87,48 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		}
 	}
 
+	private void publishMasterTerminal(NessGraph graph, Map<String, String> versions, File tempDir) {
+		try {
+			AtomicBoolean published = new AtomicBoolean(true);
+			published.set(new MasterPublisher(new File(tempDir, "master"), graph, configuration(), versions, systemProperties(), invokedPhase, logger(), notifier()).publish());
+			if (published.get() && notifier() != null)
+				notifier().notify("Master Terminal " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), "master-terminal", configuration().artifact().version()));
+			if (published.get()) FileUtils.deleteDirectory(tempDir);
+		} catch (Throwable e) {
+			logger().println(e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+	private static Graph loadGraph(File resDirectory) {
+		String[] stashes = Arrays.stream(Objects.requireNonNull(resDirectory.listFiles(f -> f.getName().endsWith(".stash")))).map(f -> f.getName().replace(".stash", "")).toArray(String[]::new);
+		return new Graph(new FileSystemStore(resDirectory)).loadStashes(stashes);
+	}
+
+	private boolean hasErrors(Graph graph) {
+		if (graph == null) {
+			notifier().notifyError("Couldn't load graph. Please recompile module");
+			return true;
+		}
+		if (safe(() -> configuration().artifact().distribution()) != null && safe(() -> configuration().artifact().distribution().snapshot()) == null && isSnapshotVersion()) {
+			notifier().notifyError("Snapshot distribution repository not found");
+			return true;
+		}
+		return false;
+	}
+
+	private File resDirectory(List<File> directories) {
+		File resDirectory = directories.stream().filter(d -> {
+			File[] files = d.getAbsoluteFile().listFiles(f -> f.getName().endsWith(".stash"));
+			return files != null && files.length > 0;
+		}).findFirst().orElse(null);
+		if (resDirectory == null) {
+			notifier().notifyError("Stashes not found. Please compile module");
+			return null;
+		}
+		return resDirectory;
+	}
+
 	private String terminalNameArtifact(Terminal terminal) {
 		return Formatters.firstLowerCase(Formatters.camelCaseToSnakeCase().format(terminal.name$()).toString());
 	}
@@ -106,6 +143,12 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		List<String> versions = ArtifactoryConnector.ingestionVersions();
 		Collections.reverse(versions);
 		return versions.isEmpty() ? MINIMUM_INGESTION_VERSION : suitableIngestionVersion(versions);
+	}
+
+	private String masterVersion() {
+		List<String> versions = ArtifactoryConnector.masterVersions();
+		Collections.reverse(versions);
+		return versions.isEmpty() ? MINIMUM_MASTER_VERSION : suitableIngestionVersion(versions);
 	}
 
 	private String eventVersion() {
@@ -157,7 +200,6 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			return new File("");
 		}
 	}
-
 
 	private List<Tank.Event> tanks(Terminal terminal) {
 		List<Tank.Event> tanks = new ArrayList<>();

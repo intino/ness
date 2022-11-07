@@ -13,6 +13,7 @@ public class PomTemplate extends Template {
 			rule().condition((allTypes("repository","distribution")), (trigger("distribution"))).output(literal("<repository>\n\t<id>")).output(mark("name")).output(literal("</id>\n\t<name>")).output(mark("name")).output(literal("</name>\n\t<url>")).output(mark("url")).output(literal("</url>\n</repository>")),
 			rule().condition((trigger("distribution"))),
 			rule().condition((trigger("bpm"))).output(literal("<dependency>\n\t<groupId>io.intino.alexandria</groupId>\n\t<artifactId>bpm-framework</artifactId>\n\t<version>")).output(mark("")).output(literal("</version>\n\t<scope>provided</scope>\n</dependency>")),
+			rule().condition((trigger("master"))).output(literal("<dependency>\n\t<groupId>io.intino.ness</groupId>\n\t<artifactId>master</artifactId>\n\t<version>")).output(mark("")).output(literal("</version>\n</dependency>")),
 			rule().condition((type("repository")), not(type("distribution")), (trigger("release"))).output(literal("<repository>\n\t<id>")).output(mark("name")).output(literal("-")).output(mark("random")).output(literal("</id>\n\t<url>")).output(mark("url")).output(literal("</url>\n</repository>")),
 			rule().condition((type("GPL")), (trigger("license"))).output(literal("<license>\n\t<name>The GNU General Public License v3.0</name>\n\t<url>https://www.gnu.org/licenses/gpl-3.0.txt</url>\n</license>")),
 			rule().condition((type("BSD")), (trigger("license"))).output(literal("<license>\n\t<name>BSD 3-Clause License</name>\n\t<url>https://opensource.org/licenses/BSD-3-Clause</url>\n</license>")),

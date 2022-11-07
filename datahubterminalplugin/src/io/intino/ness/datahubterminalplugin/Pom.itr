@@ -134,6 +134,14 @@ def trigger(bpm)
 	</dependency>
 end
 
+def trigger(master)
+	<dependency>
+		<groupId>io.intino.ness</groupId>
+		<artifactId>master</artifactId>
+		<version>$this</version>
+	</dependency>
+end
+
 def type(repository) !type(distribution) trigger(release)
 	<repository>
 		<id>$name-~$random</id>

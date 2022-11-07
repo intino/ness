@@ -13,7 +13,6 @@ Broker(port = 63000, secondaryPort = 1884, path = "./broker")
 	User(name = "user1", password = "1234")
 
 Event criterio
-	Attribute ts as Bool
 	Attribute value as Text
 	Attribute id as Integer
 Event criterioBorrado

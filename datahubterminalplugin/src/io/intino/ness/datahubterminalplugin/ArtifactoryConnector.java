@@ -46,6 +46,15 @@ public class ArtifactoryConnector {
 		}
 	}
 
+	public static List<String> masterVersions() {
+		try {
+			URL url = new URL(INTINO_RELEASES + "/io/intino/ness/master/maven-metadata.xml");
+			return extractVersions(read(connect(url)).toString());
+		} catch (Throwable e) {
+			return Collections.emptyList();
+		}
+	}
+
 	public static List<String> eventVersions() {
 		try {
 			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/event/maven-metadata.xml");

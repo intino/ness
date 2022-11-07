@@ -1,6 +1,8 @@
 import io.intino.Configuration;
 import io.intino.ness.datahubterminalplugin.DataHubTerminalsPluginLauncher;
 import io.intino.plugin.PluginLauncher;
+import io.intino.plugin.PluginLauncher.ModuleStructure;
+import io.intino.plugin.PluginLauncher.SystemProperties;
 import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -20,19 +22,20 @@ public class PluginTest {
 	private static final File ModuleFile = new File(MODULE_DIR);
 	private static final String USER_HOME = System.getProperty("user.home");
 	private static final String WORKSPACE_ROOT = "C:/Users/naits/Desktop/";
-//	public static final String INTELLIJ_MAVEN_PLUGIN = "/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3/";
-	private static final String INTELLIJ_MAVEN_PLUGIN = "C:/Users/naits/AppData/Local/JetBrains/Toolbox/apps/IDEA-C/ch-0/222.3739.54/plugins/maven/lib/maven3";
-//	private static final String JAVA_HOME = "/Library/Java/JavaVirtualMachines/jdk-11.0.10.jdk/Contents/Home";
-	private static final String JAVA_HOME = "C:/Program Files/Java/jdk-11.0.2";
+	public static final String INTELLIJ_MAVEN_PLUGIN = "/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3/";
+	private static final String JAVA_HOME = "/Library/Java/JavaVirtualMachines/jdk-11.0.10.jdk/Contents/Home";
+//	private static final String JAVA_HOME = "C:/Program Files/Java/jdk-11.0.2";
+//	private static final String INTELLIJ_MAVEN_PLUGIN = "C:/Users/naits/AppData/Local/JetBrains/Toolbox/apps/IDEA-C/ch-0/222.3739.54/plugins/maven/lib/maven3";
 
 	@Test
 	public void should_build_test_terminals() throws IOException {
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
-		launcher.
-				moduleStructure(new PluginLauncher.ModuleStructure(singletonList(new File(USER_HOME + "/workspace/ness/data-hub-test/src")), singletonList(new File(USER_HOME + "/workspace/ness/data-hub-test/res")), new File(USER_HOME + "/workspace/ness/out/data-hub-test/")))
-				.systemProperties(new PluginLauncher.SystemProperties(new File("/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3/"), new File("/Library/Java/JavaVirtualMachines/jdk-11.0.4.jdk/Contents/Home")))
+		launcher.moduleStructure(new ModuleStructure(List.of(new File(USER_HOME + "/workspace/ness/test/src")), List.of(new File(USER_HOME + "/workspace/ness/test/res")), new File(USER_HOME + "/workspace/ness/out/test/")))
+				.systemProperties(new SystemProperties(new File("/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3/"),
+						new File(JAVA_HOME)))
 				.logger(System.out)
 				.invokedPhase(PluginLauncher.Phase.INSTALL)
+				.notifier(notifier())
 				.moduleConfiguration(testConfiguration());
 		File temp = new File(USER_HOME + "/workspace/ness/datahubterminalplugin/temp/test");
 		FileUtils.deleteDirectory(temp);
@@ -44,8 +47,8 @@ public class PluginTest {
 	public void should_build_gc_terminals() throws IOException {
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
 		launcher.
-				moduleStructure(new PluginLauncher.ModuleStructure(List.of(new File(USER_HOME + "/workspace/cfe/suministro/core/data-hub-ng/src"), new File(USER_HOME + "/workspace/cfe/suministro/core/data-hub-ng/shared")), singletonList(new File(USER_HOME + "/workspace/cfe/suministro/core/data-hub-ng/res")), new File(USER_HOME + "/workspace/ness/out/data-hub-ng-test/")))
-				.systemProperties(new PluginLauncher.SystemProperties(new File("/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3/"), new File("/Library/Java/JavaVirtualMachines/jdk-11.0.4.jdk/Contents/Home")))
+				moduleStructure(new ModuleStructure(List.of(new File(USER_HOME + "/workspace/cfe/suministro/core/data-hub-ng/src"), new File(USER_HOME + "/workspace/cfe/suministro/core/data-hub-ng/shared")), singletonList(new File(USER_HOME + "/workspace/cfe/suministro/core/data-hub-ng/res")), new File(USER_HOME + "/workspace/ness/out/data-hub-ng-test/")))
+				.systemProperties(new SystemProperties(new File("/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3/"), new File("/Library/Java/JavaVirtualMachines/jdk-11.0.4.jdk/Contents/Home")))
 				.logger(System.out)
 				.invokedPhase(PluginLauncher.Phase.INSTALL)
 				.moduleConfiguration(gcConfiguration());
@@ -59,13 +62,12 @@ public class PluginTest {
 	public void should_build_cinepolis_terminals() throws IOException {
 		new File(WORKSPACE_ROOT, "IntinoDev/ness/out/datahub-cinepolis/").mkdirs();
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
-		launcher.
-				moduleStructure(new PluginLauncher.ModuleStructure(List.of(
+		launcher.moduleStructure(new ModuleStructure(List.of(
 						new File(WORKSPACE_ROOT, "MonentiaDev/cinepolis/datahub/src"),
 						new File(WORKSPACE_ROOT, "MonentiaDev/cinepolis/datahub/shared")),
-						singletonList(new File(WORKSPACE_ROOT,"MonentiaDev/cinepolis/datahub/res")),
+						singletonList(new File(WORKSPACE_ROOT, "MonentiaDev/cinepolis/datahub/res")),
 						new File(WORKSPACE_ROOT, "IntinoDev/ness/out/datahub-cinepolis/")))
-				.systemProperties(new PluginLauncher.SystemProperties(
+				.systemProperties(new SystemProperties(
 						new File(INTELLIJ_MAVEN_PLUGIN),
 						new File(JAVA_HOME)))
 				.logger(System.out)
@@ -81,8 +83,8 @@ public class PluginTest {
 	public void should_build_cesar_terminal() throws IOException {
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
 		launcher.
-				moduleStructure(new PluginLauncher.ModuleStructure(singletonList(new File(USER_HOME + "/workspace/cesar/data-hub/src")), singletonList(new File(USER_HOME + "/workspace/cesar/data-hub/res")), new File(USER_HOME + "/workspace/ness/out/data-hub-test/")))
-				.systemProperties(new PluginLauncher.SystemProperties(new File("/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven/lib/maven3/"), new File("/Library/Java/JavaVirtualMachines/jdk-11.0.4.jdk/Contents/Home")))
+				moduleStructure(new ModuleStructure(singletonList(new File(USER_HOME + "/workspace/cesar/data-hub/src")), singletonList(new File(USER_HOME + "/workspace/cesar/data-hub/res")), new File(USER_HOME + "/workspace/ness/out/test/")))
+				.systemProperties(new SystemProperties(new File("/Applications/IntelliJ IDEA CE.app/Contents/plugins/maven/lib/maven3/"), new File("/Library/Java/JavaVirtualMachines/jdk-11.0.4.jdk/Contents/Home")))
 				.logger(System.out)
 				.notifier(notifier())
 				.invokedPhase(PluginLauncher.Phase.INSTALL)
@@ -122,6 +124,11 @@ public class PluginTest {
 					@Override
 					public String name() {
 						return "datahub";
+					}
+
+					@Override
+					public void name(String s) {
+
 					}
 
 					@Override
@@ -335,6 +342,11 @@ public class PluginTest {
 					}
 
 					@Override
+					public void name(String s) {
+
+					}
+
+					@Override
 					public String version() {
 						return "3.1.0";
 					}
@@ -541,6 +553,11 @@ public class PluginTest {
 					@Override
 					public String name() {
 						return "datahub";
+					}
+
+					@Override
+					public void name(String s) {
+
 					}
 
 					@Override
@@ -753,6 +770,11 @@ public class PluginTest {
 					}
 
 					@Override
+					public void name(String s) {
+
+					}
+
+					@Override
 					public String version() {
 						return "1.0.0-SNAPSHOT";
 					}
@@ -774,7 +796,27 @@ public class PluginTest {
 
 					@Override
 					public Code code() {
-						return null;
+						return new Code() {
+							@Override
+							public String generationPackage() {
+								return "org.example.test.model";
+							}
+
+							@Override
+							public String nativeLanguage() {
+								return null;
+							}
+
+							@Override
+							public Configuration root() {
+								return null;
+							}
+
+							@Override
+							public ConfigurationNode owner() {
+								return null;
+							}
+						};
 					}
 
 					@Override
