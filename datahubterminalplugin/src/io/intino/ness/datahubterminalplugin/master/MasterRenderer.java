@@ -97,9 +97,9 @@ public class MasterRenderer {
 		String iQn = workingPackage + DOT + firstUpperCase().format(javaValidName().format("MasterTerminal").toString());
 
 		return Map.of(
-				destination(cQn), customize(new MasterClientTemplate()).render(masterFrameBuilder("cached").toFrame()),
-				destination(lQn), customize(new MasterClientTemplate()).render(masterFrameBuilder("lazy").toFrame()),
-				destination(iQn), customize(new MasterClientTemplate()).render(masterFrameBuilder("interface").toFrame())
+				destination(cQn), customize(new MasterTerminalTemplate()).render(masterFrameBuilder("cached").toFrame()),
+				destination(lQn), customize(new MasterTerminalTemplate()).render(masterFrameBuilder("lazy").toFrame()),
+				destination(iQn), customize(new MasterTerminalTemplate()).render(masterFrameBuilder("interface").toFrame())
 		);
 	}
 

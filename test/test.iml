@@ -148,7 +148,5 @@
     <orderEntry type="library" name="Intino: com.hazelcast:hazelcast:5.1.3" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:5.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:5.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
   </component>
 </module>

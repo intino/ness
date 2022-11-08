@@ -1,4 +1,4 @@
-//package io.intino.master;
+//package io.intino.ness.master;
 //
 //import com.google.gson.Gson;
 //import com.hazelcast.config.Config;
@@ -7,9 +7,9 @@
 //import com.hazelcast.internal.util.MutableInteger;
 //import com.hazelcast.map.IMap;
 //import io.intino.alexandria.logger.Logger;
-//import io.intino.master.core.Launcher;
-//import io.intino.master.core.Master;
-//import io.intino.master.model.Triple;
+//import io.intino.ness.master.core.Launcher;
+//import io.intino.ness.master.core.Master;
+//import io.intino.ness.master.model.Triple;
 //import org.xerial.snappy.Snappy;
 //
 //import java.io.BufferedWriter;
@@ -20,7 +20,7 @@
 //import java.util.*;
 //import java.util.stream.Collectors;
 //
-//import static io.intino.master.model.Triple.TRIPLE_SEPARATOR;
+//import static io.intino.ness.master.model.Triple.TRIPLE_SEPARATOR;
 //import static java.util.stream.Collectors.groupingBy;
 //import static java.util.stream.Collectors.toMap;
 //
