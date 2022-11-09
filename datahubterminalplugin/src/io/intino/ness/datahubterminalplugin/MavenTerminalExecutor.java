@@ -80,11 +80,16 @@ public class MavenTerminalExecutor {
 		if (target.equals(Target.Events) || target.equals(Target.EventsAndMaster))
 			builder.add("terminal", terminalDependenciesFrame(group, version));
 		if (target.equals(Target.Bpm)) builder.add("bpm", versions.get("bpm"));
-		if (target.equals(Target.Master) || target.equals(Target.EventsAndMaster))
-			builder.add("master", versions.get("master"));
+		if (target.equals(Target.Master)) builder.add("master", versions.get("master"));
+		if (target.equals(Target.EventsAndMaster))
+			builder.add("masterTerminal", masterTerminalFrame(group, version));
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new PomTemplate().render(builder.toFrame()));
 		return pomFile;
+	}
+
+	private static FrameBuilder masterTerminalFrame(String group, String version) {
+		return new FrameBuilder().add("group", group).add("version", version);
 	}
 
 	private boolean isSnapshotVersion() {
