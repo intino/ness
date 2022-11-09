@@ -3,6 +3,9 @@ dsl Proteo
 Concept:Named Entity
 	Concept:Named:RequiresAspect Attribute extends EntityData
 	Aspect ExtensionOf > var Entity entity
+	Aspect Abstract
+	Aspect Decorable
+	Aspect Component
 
 Concept:Named Struct
 	Concept:Named:RequiresAspect Attribute extends EntityData

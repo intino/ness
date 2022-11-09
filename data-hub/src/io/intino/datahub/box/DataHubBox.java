@@ -15,7 +15,6 @@ import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.EntityData;
 import io.intino.datahub.model.NessGraph;
 import io.intino.magritte.framework.Graph;
-import io.intino.magritte.framework.Node;
 import io.intino.ness.master.core.Master;
 import io.intino.ness.master.data.ComponentAttributeDefinition;
 import io.intino.ness.master.data.ComponentsTripletsDigester;
@@ -257,28 +256,28 @@ public class DataHubBox extends AbstractBox {
 		}
 
 		private Stream<Entity.Attribute> getComponentsOf(Entity e) {
-			return e.attributeList().stream().filter(EntityData::isEntity).filter(a -> isComponent(a.asEntity().core$()));
+			return e.attributeList().stream().filter(EntityData::isEntity).filter(a -> isComponent(a.asEntity().entity()));
 		}
 
 		private List<Entity> typesWithComponents() {
 			return graph.entityList().stream()
-					.filter(e -> !isComponent(e.core$()))
+					.filter(e -> !isComponent(e))
 					.filter(this::hasComponents)
 					.collect(Collectors.toList());
 		}
 
 		private List<Entity> componentTypes() {
 			return graph.entityList().stream()
-					.filter(e -> isComponent(e.core$()))
+					.filter(this::isComponent)
 					.collect(Collectors.toList());
 		}
 
 		private boolean hasComponents(Entity entity) {
-			return entity.attributeList().stream().anyMatch(a -> a.isEntity() && isComponent(a.core$()));
+			return entity.attributeList().stream().anyMatch(a -> a.isEntity() && isComponent(a.asEntity().entity()));
 		}
 
-		private boolean isComponent(Node entity) {
-			return entity.conceptList().stream().anyMatch(c -> c.isAspect && c.name().contains("Component"));
+		private boolean isComponent(Entity entity) {
+			return entity.isComponent();
 		}
 	}
 }

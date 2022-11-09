@@ -7,7 +7,7 @@ def type(master & interface)
 	import java.util.stream.Stream;
 	import java.util.stream.Collectors;
 	import $package.entities.*;
-	import io.intino.master.model.Triple;
+	import io.intino.ness.master.model.Triplet;
 	import com.hazelcast.core.EntryListener;
 
 	public interface MasterTerminal {
@@ -25,13 +25,13 @@ def type(master & interface)
 		void start();
 		void stop();
 
-		void publish(String senderName, Triple triple);
+		void publish(String senderName, Triplet Triplet);
 
 		MasterTerminal.Config config();
 
 		void addEntryListener(EntryListener<String, String> listener);
 
-		io.intino.master.serialization.MasterSerializer serializer();
+		io.intino.ness.master.serialization.MasterSerializer serializer();
 
 		$entity+getterSignature...[$NL$NL]
 
@@ -107,7 +107,7 @@ end
 def type(master & cached)
 	package $package;
 
-	import static io.intino.master.core.Master.*;
+	import static io.intino.ness.master.core.Master.*;
 	import static java.util.Objects.requireNonNull;
 
 	import com.hazelcast.client.HazelcastClient;
@@ -119,14 +119,14 @@ def type(master & cached)
 	import com.hazelcast.core.HazelcastInstance;
 	import com.hazelcast.map.IMap;
 	import io.intino.alexandria.logger.Logger;
-	import io.intino.master.model.Triple;
-	import static io.intino.master.model.Triple.SEPARATOR;
-	import io.intino.master.model.TripleRecord;
-	import io.intino.master.model.Triple;
+	import io.intino.ness.master.model.Triplet;
+	import static io.intino.ness.master.model.Triplet.TRIPLET_SEPARATOR;
+	import io.intino.ness.master.model.TripletRecord;
+	import io.intino.ness.master.model.Triplet;
 
 	import $package.entities.*;
-	import io.intino.master.serialization.MasterSerializer;
-	import io.intino.master.serialization.MasterSerializers;
+	import io.intino.ness.master.serialization.MasterSerializer;
+	import io.intino.ness.master.serialization.MasterSerializers;
 
 	import java.util.concurrent.ConcurrentHashMap;
 	import java.util.HashMap;
@@ -184,21 +184,21 @@ def type(master & cached)
 
     	$entity+getter...[$NL$NL]
 
-    	public void publish(String publisherName, Triple triple) {
+    	public void publish(String publisherName, Triplet Triplet) {
     		if(config.readOnly()) throw new UnsupportedOperationException("This master client cannot publish because it is configured as read only");
 			if(publisherName == null) throw new NullPointerException("Publisher name cannot be null");
-			if(triple == null) throw new NullPointerException("Triple cannot be null");
-			hazelcast.getTopic(REQUESTS_TOPIC).publish(publisherName + MESSAGE_SEPARATOR + triple);
+			if(Triplet == null) throw new NullPointerException("Triplet cannot be null");
+			hazelcast.getTopic(REQUESTS_TOPIC).publish(publisherName + MESSAGE_SEPARATOR + Triplet);
     	}
 
-    	private void add(TripleRecord record) {
+    	private void add(TripletRecord record) {
     		switch(record.type()) {
     			$entity+adder...[$NL]
     		}
     	}
 
     	private void remove(String id) {
-    		switch(Triple.typeOf(id)) {
+    		switch(Triplet.typeOf(id)) {
     			$entity+remover...[$NL]
     		}
     	}
@@ -232,14 +232,14 @@ def type(master & cached)
 		}
 
 		private void loadDataSingleThread(IMap<String, String> master, MasterSerializer serializer) {
-			master.forEach((id, serializedRecord) -> add(new TripleRecord(id, serializer.deserialize(serializedRecord))));
+			master.forEach((id, serializedRecord) -> add(serializer.deserialize(serializedRecord)));
 		}
 
 		private void loadDataMultiThread(IMap<String, String> master, MasterSerializer serializer) {
 			try {
 				ExecutorService threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
 
-				master.forEach((id, serializedRecord) -> threadPool.submit(() -> add(new TripleRecord(id, serializer.deserialize(serializedRecord)))));
+				master.forEach((id, serializedRecord) -> threadPool.submit(() -> add(serializer.deserialize(serializedRecord))));
 
 				threadPool.shutdown();
 				threadPool.awaitTermination(1, TimeUnit.HOURS);
@@ -283,7 +283,7 @@ def type(master & cached)
 
 			private void addOrUpdateRecord(String id, String serializedRecord) {
 				MasterSerializer serializer = serializer();
-				add(new TripleRecord(id, serializer.deserialize(serializedRecord)));
+				add(serializer.deserialize(serializedRecord));
 			}
     	}
     }
@@ -293,7 +293,7 @@ end
 def type(master & lazy)
 	package $package;
 
-	import static io.intino.master.core.Master.*;
+	import static io.intino.ness.master.core.Master.*;
 	import static java.util.Objects.requireNonNull;
 
 	import com.hazelcast.client.HazelcastClient;
@@ -305,15 +305,15 @@ def type(master & lazy)
 	import com.hazelcast.core.HazelcastInstance;
 	import com.hazelcast.map.IMap;
 	import io.intino.alexandria.logger.Logger;
-	import io.intino.master.model.Triple;
-	import static io.intino.master.model.Triple.SEPARATOR;
-	import io.intino.master.model.TripleRecord;
-	import io.intino.master.model.Triple;
+	import io.intino.ness.master.model.Triplet;
+	import static io.intino.ness.master.model.Triplet.TRIPLET_SEPARATOR;
+	import io.intino.ness.master.model.TripletRecord;
+	import io.intino.ness.master.model.Triplet;
 
-	import io.intino.master.model.Entity;
+	import io.intino.ness.master.model.Entity;
 	import $package.entities.*;
-	import io.intino.master.serialization.MasterSerializer;
-	import io.intino.master.serialization.MasterSerializers;
+	import io.intino.ness.master.serialization.MasterSerializer;
+	import io.intino.ness.master.serialization.MasterSerializers;
 
 	import java.util.List;
 	import java.util.Map;
@@ -364,23 +364,23 @@ def type(master & lazy)
 
     	$entity+getter...[$NL$NL]
 
-    	private Map<String, String> getRecord(String id) {
+    	private TripletRecord getRecord(String id) {
         	String serializedRecord = masterMap.get(id);
         	if(serializedRecord == null) return null;
         	return serializer.deserialize(serializedRecord);
         }
 
-       	private <T extends Entity> T entity(BiFunction<String, MasterTerminal, T> constructor, String id, Map<String, String> record) {
-       		T entity = constructor.apply(id, this);
-       		record.entrySet().stream().map(e -> new Triple(id, e.getKey(), e.getValue())).forEach(entity::add);
-       		return entity;
-       	}
+   		private <T extends Entity> T entity(BiFunction<String, MasterTerminal, T> constructor, String id, TripletRecord record) {
+   			T entity = constructor.apply(id, this);
+   			record.triplets().forEach(entity::add);
+   			return entity;
+   		}
 
-    	public void publish(String publisherName, Triple triple) {
+    	public void publish(String publisherName, Triplet Triplet) {
     		if(config.readOnly()) throw new UnsupportedOperationException("This master client cannot publish because it is configured as read only");
 			if(publisherName == null) throw new NullPointerException("Publisher name cannot be null");
-			if(triple == null) throw new NullPointerException("Triple cannot be null");
-			hazelcast.getTopic(REQUESTS_TOPIC).publish(publisherName + MESSAGE_SEPARATOR + triple);
+			if(Triplet == null) throw new NullPointerException("Triplet cannot be null");
+			hazelcast.getTopic(REQUESTS_TOPIC).publish(publisherName + MESSAGE_SEPARATOR + Triplet);
     	}
 
     	private void initHazelcastClient() {
@@ -422,9 +422,9 @@ def !type(abstract) trigger(map)
 end
 
 def !type(abstract) trigger(add)
-	private void addTo$name+FirstUpperCase(TripleRecord record) {
+	private void addTo$name+FirstUpperCase(TripletRecord record) {
 		$name+FirstUpperCase entity = new $name+FirstUpperCase(record.id(), this);
-    	record.triples().forEach(entity::add);
+    	record.triplets().forEach(entity::add);
     	$name+firstLowerCase~Map.put(record.id(), entity);
     }
 end
@@ -446,7 +446,7 @@ end
 def type(abstract) trigger(getter)
 	@Override
 	public $name+FirstUpperCase $name+firstLowerCase(String id) {
-    	switch(Triple.typeOf(id)) {
+    	switch(Triplet.typeOf(id)) {
     		$subclass+getById...[$NL]
     	}
     	return null;
@@ -475,7 +475,7 @@ end
 def !type(abstract) type(lazy) trigger(getter)
 	@Override
 	public $name+FirstUpperCase $name+firstLowerCase(String id) {
-		Map<String, String> record = getRecord(id);
+		TripletRecord record = getRecord(id);
     	return record != null ? entity($name+FirstUpperCase::new, id, record) : null;
 	}
 

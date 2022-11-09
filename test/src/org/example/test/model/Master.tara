@@ -18,9 +18,9 @@ Entity Employee
 		Key key as String
 		Value value as Integer
 
-Entity Place is abstract
+Entity Place as Abstract
 
-Entity Country as ExtensionOf(Place) is decorable
+Entity Country as ExtensionOf(Place) Decorable
 	Attribute name as String
 	Attribute language as String
 	Attribute dst as Struct(Dst)
@@ -47,7 +47,7 @@ Struct GeoPoint
 	Attribute longitude as Double
 //	Attribute distanceTo as Function(point as GeoPoint) -> Integer
 
-Entity Theater as ExtensionOf(Place) is decorable
+Entity Theater as ExtensionOf(Place) Decorable
 	Attribute address as String
     Attribute city as String
     Attribute coordinates as Struct(GeoPoint)
@@ -63,7 +63,7 @@ Entity Theater as ExtensionOf(Place) is decorable
     Attribute ipSegment as String
     Attribute ipTms as String
     Attribute shared as String
-    Attribute telephone as String Optional
+    Attribute telephone as String // Optional
     Attribute territory as String
     Attribute type as String
     Attribute area as Entity(Area)
@@ -119,14 +119,14 @@ Entity DualAsset as ExtensionOf(Asset)
 //	Attribute missingAssets as String List
 //	Attribute attribute as Function(key as String) -> String
 
-Entity CheckField is decorable component
+Entity CheckField as Decorable Component
 	Attribute name as String
 	Attribute type as Word("String" "Number" "Date" "Option" "MultiOption" "Image" "Entity" "Package" "Note" "Marker" "Section" "Validation" "Signature")
 	Attribute code as String
 	Attribute optional as Boolean
 	Attribute conditional as String
 
-Entity OrderType is decorable
+Entity OrderType as Decorable
 	Attribute code as String
     Attribute labelEn as String
     Attribute labelEs as String

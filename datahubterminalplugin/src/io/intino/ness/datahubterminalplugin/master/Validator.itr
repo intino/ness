@@ -1,7 +1,7 @@
 def type(validationLayer & class)
 	package $package;
 
-    public class $module+FirstUpperCase~RecordValidationLayer extends io.intino.master.data.validation.RecordValidationLayer {
+    public class $module+FirstUpperCase~RecordValidationLayer extends io.intino.ness.master.data.validation.RecordValidationLayer {
 
     	public $module+FirstUpperCase~RecordValidationLayer() {
     		[$entity+putValidator...[$NL]]
@@ -20,17 +20,18 @@ end
 def type(validator & class)
 	package $package;
 
-	import io.intino.master.data.validation.Issue;
-	import io.intino.master.data.validation.RecordValidator;
-	import io.intino.master.data.validation.FieldValidator;
-	import io.intino.master.data.validation.TripleRecordStore;
+	import io.intino.ness.master.data.validation.Issue;
+	import io.intino.ness.master.data.validation.RecordValidator;
+	import io.intino.ness.master.data.validation.RecordValidator.TripletRecord;
+	import io.intino.ness.master.data.validation.FieldValidator;
+	import io.intino.ness.master.data.validation.TripletRecordStore;
 
 	import java.util.List;
 	import java.util.Map;
 	import java.util.Objects;
 	import java.util.stream.Stream;
 
-	import static io.intino.master.data.validation.Issue.Type.*;
+	import static io.intino.ness.master.data.validation.Issue.Type.*;
 
 	public [ $isAbstract+firstLowerCase] class $abstract+FirstUpperCase~$name+FirstUpperCase~Validator implements RecordValidator {
 
@@ -39,20 +40,33 @@ def type(validator & class)
 		}
 
 		@Override
-		public Stream<Issue> validate(TripleRecord record, TripleRecordStore store) {
+		public Stream<Issue> validate(TripletRecord record, TripletRecordStore store) {
 			return record.attributes().entrySet().stream()
 				.map(e -> validate(e, record, store))
 				.filter(Objects::nonNull)
 				.reduce(Stream::concat).orElse(Stream.empty());
 		}
 
-		protected Stream<Issue> validate(Map.Entry<String, List<TripleRecord.Value>> attrib, TripleRecord record, TripleRecordStore store) {
+		protected Stream<Issue> validate(Map.Entry<String, List<TripletRecord.Value>> attrib, TripletRecord record, TripletRecordStore store) {
 			return validatorsPerField.getOrDefault(attrib.getKey(), FieldValidator.none()).validate(attrib.getValue(), record, store);
 		}
 
 		[$attribute+validationMethod...[$NL$NL]]
 
 		[$type+checkType...[$NL$NL]]
+
+		protected boolean isListOfString(String value, TripletRecordStore store) {
+			try {
+    			java.util.Arrays.stream(value.split(LIST_SEPARATOR)).collect(java.util.stream.Collectors.toList());
+    			return true;
+    		} catch(Exception e) {
+    		 	return false;
+    		}
+		}
+
+		protected boolean isEntity(String id, TripletRecordStore store) {
+			return store.get(id) != null;
+		}
 	}
 end
 
@@ -60,8 +74,19 @@ def type(attribute) trigger(attribValidatorMap)
 	validatorsPerField.put("$name+firstLowerCase", this::validate$name+FirstUpperCase);
 end
 
+def type(attribute & list) trigger(validationMethod)
+	protected Stream<Issue> validate$name+FirstUpperCase~(List<TripletRecord.Value> values, TripletRecord record, TripletRecordStore store) {
+		[$required+attributeNotDefined]
+		[$optional+attributeNotDefined]
+		if(values.size() > 1) return Stream.of(Issue.error(DUPLICATED_ATTRIBUTE, "{"+record.id()+"} " + "$name is defined " + values.size() + " times.").source(values.get(0).source()));
+		return isListOf$typeParameter+FirstUpperCase~(values.get(0).get(), store)
+			? Stream.empty()
+			: Stream.of(Issue.error(INVALID_VALUE, "{"+record.id()+"} " + "$name is an invalid $type: " + values.get(0).get()).source(values.get(0).source()));
+	}
+end
+
 def type(attribute & entity) trigger(validationMethod)
-	protected Stream<Issue> validate$name+FirstUpperCase~(List<TripleRecord.Value> values, TripleRecord record, TripleRecordStore store) {
+	protected Stream<Issue> validate$name+FirstUpperCase~(List<TripletRecord.Value> values, TripletRecord record, TripletRecordStore store) {
 		[$required+attributeNotDefined]
 		[$optional+attributeNotDefined]
 		if(values.size() > 1) return Stream.of(Issue.error(DUPLICATED_ATTRIBUTE, "{"+record.id()+"} " + "$name is defined " + values.size() + " times.").source(values.get(0).source()));
@@ -72,18 +97,18 @@ def type(attribute & entity) trigger(validationMethod)
 end
 
 def type(attribute) !type(string) trigger(validationMethod)
-	protected Stream<Issue> validate$name+FirstUpperCase~(List<TripleRecord.Value> values, TripleRecord record, TripleRecordStore store) {
+	protected Stream<Issue> validate$name+FirstUpperCase~(List<TripletRecord.Value> values, TripletRecord record, TripletRecordStore store) {
 		[$required+attributeNotDefined]
 		[$optional+attributeNotDefined]
 		if(values.size() > 1) return Stream.of(Issue.error(DUPLICATED_ATTRIBUTE, "{"+record.id()+"} " + "$name is defined " + values.size() + " times.").source(values.get(0).source()));
-		return is$typename+FirstUpperCase~(values.get(0).get())
+		return is$typename+FirstUpperCase~(values.get(0).get(), store)
 			? Stream.empty()
 			: Stream.of(Issue.error(INVALID_VALUE, "{"+record.id()+"} " + "$name is an invalid $type: " + values.get(0).get()).source(values.get(0).source()));
 	}
 end
 
 def type(attribute) type(string) trigger(validationMethod)
-	protected Stream<Issue> validate$name+FirstUpperCase~(List<TripleRecord.Value> values, TripleRecord record, TripleRecordStore store) {
+	protected Stream<Issue> validate$name+FirstUpperCase~(List<TripletRecord.Value> values, TripletRecord record, TripletRecordStore store) {
 		[$required+attributeNotDefined]
 		[$optional+attributeNotDefined]
 		if(values.size() > 1) return Stream.of(Issue.error(DUPLICATED_ATTRIBUTE, "{"+record.id()+"} " + "$name is defined " + values.size() + " times.").source(values.get(0).source()));
@@ -103,8 +128,8 @@ def type(optional) trigger(attributeNotDefined)
 	if(values.isEmpty() || values.get(0).isEmpty()) return Stream.empty();
 end
 
-def type(type) type(double | int | long | boolean) trigger(checkType)
-	protected boolean is$name+FirstUpperCase~(String value) {
+def type(type) type(double | long | boolean) trigger(checkType)
+	protected boolean is$name+FirstUpperCase~(String value, TripletRecordStore store) {
 		try {
 			$nameBoxed+FirstUpperCase~.parse$name+FirstUpperCase~(value);
 			return true;
@@ -114,8 +139,19 @@ def type(type) type(double | int | long | boolean) trigger(checkType)
 	}
 end
 
+def type(type) type(integer) trigger(checkType)
+	protected boolean isInteger(String value, TripletRecordStore store) {
+		try {
+			Integer.parseInt(value);
+			return true;
+		} catch(Exception e) {
+		 	return false;
+		}
+	}
+end
+
 def type(type) type(localdate) trigger(checkType)
-	protected boolean is$name+FirstUpperCase~(String value) {
+	protected boolean is$name+FirstUpperCase~(String value, TripletRecordStore store) {
 		try {
 			java.time.LocalDate.parse(value, java.time.format.DateTimeFormatter.ofPattern("$format"));
 			return true;
@@ -126,7 +162,7 @@ def type(type) type(localdate) trigger(checkType)
 end
 
 def type(type) type(localdatetime) trigger(checkType)
-	protected boolean is$name+FirstUpperCase~(String value) {
+	protected boolean is$name+FirstUpperCase~(String value, TripletRecordStore store) {
 		try {
 			java.time.LocalDateTime.parse(value, java.time.format.DateTimeFormatter.ofPattern("$format"));
 			return true;
@@ -137,7 +173,7 @@ def type(type) type(localdatetime) trigger(checkType)
 end
 
 def type(type) type(instant) trigger(checkType)
-	protected boolean is$name+FirstUpperCase~(String value) {
+	protected boolean is$name+FirstUpperCase~(String value, TripletRecordStore store) {
 		try {
 			java.time.Instant.ofEpochMilli(Long.parseLong(value));
 			return true;
@@ -148,11 +184,11 @@ def type(type) type(instant) trigger(checkType)
 end
 
 def type(type) type(list) trigger(checkType)
-	protected boolean is$name+FirstUpperCase~(String value) {
+	protected boolean is$typename+FirstUpperCase~Of$typeParameter+FirstUpperCase(String value, TripletRecordStore store) {
 		try {
-			List<String> list = java.util.Arrays.stream(value.split(";"));
+			List<String> list = java.util.Arrays.stream(value.split(LIST_SEPARATOR)).collect(java.util.stream.Collectors.toList());
 			for(String item : list)
-				if(!is$typeParameter+FirstUpperCase(item))
+				if(!is$typeParameter+FirstUpperCase(item, store))
 					return false;
 			return true;
 		} catch(Exception e) {
@@ -162,10 +198,10 @@ def type(type) type(list) trigger(checkType)
 end
 
 def type(type) type(map) trigger(checkType)
-	protected boolean is$name+FirstUpperCase~(String value) {
+	protected boolean is$name+FirstUpperCase~(String value, TripletRecordStore store) {
 		try {
-			java.util.Arrays.stream(value.split(";"))
-				.map(e -> e.split("="))
+			java.util.Arrays.stream(value.split(LIST_SEPARATOR))
+				.map(e -> e.split(MAP_KEY_VALUE_SEPARATOR))
 				.collect(java.util.stream.Collectors.toMap(e -> e$[0$].trim(), e -> e$[1$].trim()));
 			return true;
 		} catch(Exception e) {
@@ -175,9 +211,9 @@ def type(type) type(map) trigger(checkType)
 end
 
 def type(struct) trigger(checkType)
-	protected boolean is$name+FirstUpperCase~(String value) {
+	protected boolean is$name+FirstUpperCase~(String value, TripletRecordStore store) {
 		try {
-        	List<String> values = java.util.Arrays.stream(value.split(",", -1)).map(v -> v.trim()).collect(java.util.stream.Collectors.toList());
+        	List<String> values = java.util.Arrays.stream(value.split(STRUCT_FIELD_SEPARATOR, -1)).map(v -> v.trim()).collect(java.util.stream.Collectors.toList());
             $struct+call;
             return true;
         } catch(Exception e) {
@@ -187,7 +223,7 @@ def type(struct) trigger(checkType)
 end
 
 def type(word) trigger(checkType)
-	protected boolean is$name+FirstUpperCase~(String value) {
+	protected boolean is$name+FirstUpperCase~(String value, TripletRecordStore store) {
 		try {
         	$package.$name+FirstUpperCase~.valueOf(value);
             return true;
@@ -205,7 +241,7 @@ def type(boolean) trigger(parse)
 	Boolean.parseBoolean(values.get($index))
 end
 
-def type(int) trigger(parse)
+def type(integer) trigger(parse)
 	Integer.parseInt(values.get($index))
 end
 

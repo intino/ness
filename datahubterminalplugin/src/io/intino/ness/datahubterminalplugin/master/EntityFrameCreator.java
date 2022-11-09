@@ -3,6 +3,7 @@ package io.intino.ness.datahubterminalplugin.master;
 
 import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.NessGraph;
+import io.intino.datahub.model.Struct;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.magritte.framework.Concept;
@@ -22,7 +23,7 @@ public class EntityFrameCreator {
 			"Double", "double",
 			"Integer", "int",
 			"Boolean", "boolean",
-			"Entity", "io.intino.master.model.Entity",
+			"Entity", "io.intino.ness.master.model.Entity",
 			"Long", "long"
 	);
 
@@ -31,7 +32,7 @@ public class EntityFrameCreator {
 			"Double", "List<Double>",
 			"Integer", "List<Integer>",
 			"Boolean", "List<Boolean>",
-			"Entity", "List<io.intino.master.model.Entity>",
+			"Entity", "List<io.intino.ness.master.model.Entity>",
 			"Long", "List<Long>"
 	);
 	private final String workingPackage;
@@ -42,22 +43,23 @@ public class EntityFrameCreator {
 		this.model = model;
 	}
 
-	public Map<String, Frame> create(Entity node) {
+	public Map<String, Frame> create(Entity entity) {
 		Map<String, Frame> map = new HashMap<>(4);
-		map.put(calculateEntityPath(node.core$(), workingPackage), frameOf(node.core$()).toFrame());
-//		if (node.is(Tag.Decorable)) map.put(calculateDecorableEntityPath(node, workingPackage), frameOf(node).add("decorable").toFrame());
+		map.put(calculateEntityPath(entity, workingPackage), frameOf(entity).toFrame());
+		if (entity.isDecorable())
+			map.put(calculateDecorableEntityPath(entity.core$(), workingPackage), frameOf(entity).add("decorable").toFrame());
 		return map;
 	}
 
-	private FrameBuilder frameOf(Node node) {
+	private FrameBuilder frameOf(Entity entity) {
 		FrameBuilder builder = new FrameBuilder("entity", "class")
 				.add("package", workingPackage)
-				.add("name", node.name())
-				.add("attribute", node.componentList().stream().map(this::attrFrameOf).toArray());
-		final Parameter parent = parameter(node, "entity");
-		builder.add("parent", parent != null ? ((Node) parent.values().get(0)).name() : "io.intino.master.model.Entity");
-//		if (node.is(Tag.Decorable) || node.isAbstract()) builder.add("isAbstract", "abstract");
-//		if (node.is(Tag.Decorable)) builder.add("abstract", "abstract");
+				.add("name", entity.core$().name())
+				.add("attribute", entity.core$().componentList().stream().map(this::attrFrameOf).toArray());
+		final Parameter parent = parameter(entity.core$(), "entity");
+		builder.add("parent", parent != null ? ((Entity) parent.values().get(0)).name$() : "io.intino.ness.master.model.Entity");
+		if (entity.isDecorable() || entity.isAbstract()) builder.add("isAbstract", "abstract");
+		if (entity.isDecorable()) builder.add("abstract", "abstract");
 		return builder;
 	}
 
@@ -74,22 +76,26 @@ public class EntityFrameCreator {
 	private void processParameters(Node node, FrameBuilder builder, String type) {
 		Parameter values = parameter(node, "values");
 		if (values != null) builder.add("value", values.values().stream().map(Object::toString).toArray());
-		Parameter defaultValue = parameter(node, "defaultValue");
+
+		Parameter defaultValue = DefaultValueHelper.getDefaultValue(node);
 		if (defaultValue != null) builder.add("defaultValue", defaultValue(node, type, defaultValue));
+
 		Parameter format = parameter(node, "format");
 		if (format != null) builder.add("format", format.values().get(0));
 		else if (type.startsWith("Date")) builder.add("format", defaultFormat(type));
+
 		Parameter entity = parameter(node, "entity");
 		if (entity != null) {
-			String name = ((Node) entity.values().get(0)).name();
+			String name = ((Entity) entity.values().get(0)).name$(); // TODO: check
 			builder.add("entity", name);
 			Entity reference = model.entityList().stream().filter(e -> e.name$().equals(name)).findFirst().orElse(null);
 			if (reference != null && reference.core$().conceptList().stream().anyMatch(c -> c.name().equals("Component"))) {
 				builder.add("component");
 			}
 		}
+
 		Parameter struct = parameter(node, "struct");
-		if (struct != null) builder.add("struct", structFrame(((Node) struct.values().get(0))));
+		if (struct != null) builder.add("struct", structFrame(((Struct) struct.values().get(0)).core$()));
 		builder.add("attribute", builder.toFrame());
 	}
 
@@ -109,8 +115,14 @@ public class EntityFrameCreator {
 		FrameBuilder builder = new FrameBuilder(c.conceptList().stream().map(Concept::name).toArray(String[]::new));
 		return builder
 				.add("type", type)
-				.add("value", defaultValue.values().get(0).toString())
+				.add("value", defaultValueOf(type, defaultValue))
 				.toFrame();
+	}
+
+	private static String defaultValueOf(String type, Parameter defaultValue) {
+		if(type.contains("List<")) return "new java.util.ArrayList<>()";
+		if(type.contains("Map<")) return "new java.util.HashMap<>()";
+		return defaultValue.values().get(0).toString();
 	}
 
 	private String type(Node node) {
@@ -118,7 +130,6 @@ public class EntityFrameCreator {
 		boolean list = node.conceptList().stream().anyMatch(a -> a.name().equals("List"));
 		if (!list) return types.getOrDefault(aspect, firstUpperCase().format(node.name()).toString());
 		return listTypes.getOrDefault(aspect, "List<" + firstUpperCase().format(node.name()).toString() + ">");
-
 	}
 
 	private Parameter parameter(Node c, String name) {
@@ -126,10 +137,10 @@ public class EntityFrameCreator {
 		return values == null ? null : Parameter.of(values);
 	}
 
-	private String calculateEntityPath(Node node, String aPackage) {
+	private String calculateEntityPath(Entity entity, String aPackage) {
 		return aPackage + DOT + "entities" + DOT
-//				+ (node.is(Tag.Decorable) ? "Abstract" : "")
-				+ firstUpperCase().format(javaValidName().format(node.name()).toString());
+				+ (entity.isDecorable() ? "Abstract" : "")
+				+ firstUpperCase().format(javaValidName().format(entity.core$().name()).toString());
 	}
 
 	private String calculateDecorableEntityPath(Node node, String aPackage) {

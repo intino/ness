@@ -44,7 +44,7 @@ public class PluginTest {
 				.invokedPhase(PluginLauncher.Phase.INSTALL)
 				.notifier(notifier())
 				.moduleConfiguration(testConfiguration());
-		File temp = new File(NESS_DIR + "/out/test");
+		File temp = new File(NESS_DIR + "/datahubterminalplugin/temp/test");
 		FileUtils.deleteDirectory(temp);
 		temp.mkdirs();
 		launcher.run(temp);

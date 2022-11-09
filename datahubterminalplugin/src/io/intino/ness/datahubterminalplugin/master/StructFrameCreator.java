@@ -6,11 +6,8 @@ import io.intino.datahub.model.Struct.Attribute;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.magritte.framework.Predicate;
-import io.intino.magritte.lang.model.Parameter;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
 import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
@@ -22,7 +19,7 @@ public class StructFrameCreator {
 			"Double", "double",
 			"Integer", "int",
 			"Boolean", "boolean",
-			"Entity", "io.intino.master.model.Entity",
+			"Entity", "io.intino.ness.master.model.Entity",
 			"Long", "long"
 	);
 
@@ -31,7 +28,7 @@ public class StructFrameCreator {
 			"Double", "List<Double>",
 			"Integer", "List<Integer>",
 			"Boolean", "List<Boolean",
-			"Entity", "List<io.intino.master.model.Entity>",
+			"Entity", "List<io.intino.ness.master.model.Entity>",
 			"Long", "List<Long>"
 	);
 	private final String workingPackage;
@@ -55,14 +52,19 @@ public class StructFrameCreator {
 
 	private Frame attrFrameOf(Attribute attr) {
 		FrameBuilder builder = new FrameBuilder().add("attribute");
-		builder.add(attr.asType().type());
-		if (attr.isList()) builder.add("list");
 		String type = type(attr);
+		builder.add(type);
+
 		builder.add("name", attr.name$()).add("owner", attr.core$().owner().name()).add("type", type);
+
+		if (attr.isList()) builder.add("list");
+
 		List<String> values = attr.isWord() ? attr.asWord().values() : null;
 		if (values != null) builder.add("value", values.toArray());
-		Parameter defaultValue = null;// parameter(attr, "defaultValue");//TODO
+
+		Parameter defaultValue = DefaultValueHelper.getDefaultValue(attr.core$());
 		if (defaultValue != null) builder.add("defaultValue", defaultValue(attr, type, defaultValue));
+
 		String entity = attr.isEntity() ? attr.asEntity().entity().name$() : null;
 		if (entity != null) builder.add("entity", entity);
 		return builder.toFrame();
@@ -77,10 +79,20 @@ public class StructFrameCreator {
 	}
 
 	private String type(Attribute attribute) {
-		String type = attribute.asType().type();
+		String type = getType(attribute);
 		if (!attribute.isList()) return types.getOrDefault(type, firstUpperCase().format(attribute.name$()).toString());
 		return listTypes.getOrDefault(type, "List<" + firstUpperCase().format(attribute.name$()).toString() + ">");
 
+	}
+
+	private static String getType(Attribute attribute) {
+		Optional<String> type = attribute.core$().layerList().stream().filter(StructFrameCreator::isEntityData).findFirst();
+		if(type.isEmpty()) throw new IllegalStateException("Cannot find type of attribute " + attribute + " in " + attribute.core$().owner().name());
+		return type.get().substring(type.get().indexOf("$") + 1);
+	}
+
+	private static boolean isEntityData(String layer) {
+		return layer.startsWith("EntityData$") && !layer.equals("EntityData$Type");
 	}
 
 	private String calculateStructPath(Struct struct, String aPackage) {

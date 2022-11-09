@@ -3,26 +3,26 @@ package io.intino.ness.master.data.validation;
 /**
  * Indicates the source of a triple. It can refer to a file or a publisher (from other application).
  * */
-public interface TripleSource {
+public interface TripletSource {
 
-	static TripleSource ofFile(String path, int line) {
-		return new FileTripleSource(path, line);
+	static TripletSource ofFile(String path, int line) {
+		return new FileTripletSource(path, line);
 	}
 
-	static TripleSource ofPublisher(String senderName) {
-		return new PublisherTripleSource(senderName);
+	static TripletSource ofPublisher(String senderName) {
+		return new PublisherTripletSource(senderName);
 	}
 
 	String name();
 
 	String get();
 
-	class FileTripleSource implements TripleSource {
+	class FileTripletSource implements TripletSource {
 
 		private final String path;
 		private final int line;
 
-		public FileTripleSource(String path, int line) {
+		public FileTripletSource(String path, int line) {
 			this.path = path;
 			this.line = line;
 		}
@@ -51,11 +51,11 @@ public interface TripleSource {
 		}
 	}
 
-	class PublisherTripleSource implements TripleSource {
+	class PublisherTripletSource implements TripletSource {
 
 		private final String senderName;
 
-		public PublisherTripleSource(String senderName) {
+		public PublisherTripletSource(String senderName) {
 			this.senderName = senderName;
 		}
 

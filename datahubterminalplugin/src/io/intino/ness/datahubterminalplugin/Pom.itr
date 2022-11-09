@@ -78,6 +78,7 @@ def type(pom)
 		[$event]
 		[$terminal]
 		[$bpm]
+		[$master]
 	</dependencies>
 </project>
 end

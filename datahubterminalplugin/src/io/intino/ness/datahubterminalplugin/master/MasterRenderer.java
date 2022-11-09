@@ -7,6 +7,7 @@ import io.intino.datahub.model.Struct;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
+import io.intino.ness.datahubterminalplugin.util.ErrorUtils;
 import io.intino.plugin.PluginLauncher;
 
 import java.io.*;
@@ -55,7 +56,7 @@ public class MasterRenderer {
 			write(masterClass());
 			write(validationLayerClass());
 		} catch (Throwable e) {
-			notifier.notifyError("Error during java className generation: " + e.getMessage());
+			notifier.notifyError("Error during java className generation: " + ErrorUtils.getMessage(e));
 		}
 	}
 
@@ -114,7 +115,7 @@ public class MasterRenderer {
 		return model.entityList().stream()
 				.map(c -> {
 					final FrameBuilder b = new FrameBuilder("entity").add("name", c.name$());
-					if (c.getClass().isInterface()) {//TODO check
+					if (c.isAbstract()) {
 						b.add("abstract");
 						Frame[] subclasses = subclassesOf(c);
 						if (subclasses.length > 0) b.add("subclass", subclasses);

@@ -1,8 +1,8 @@
 package io.intino.ness.master.data.validation.validators;
 
 import io.intino.ness.master.data.validation.Issue;
-import io.intino.ness.master.data.validation.TripleSource;
-import io.intino.ness.master.data.validation.TripleValidator;
+import io.intino.ness.master.data.validation.TripletSource;
+import io.intino.ness.master.data.validation.TripletValidator;
 import io.intino.ness.master.model.Triplet;
 
 import java.util.ArrayList;
@@ -11,20 +11,20 @@ import java.util.stream.Stream;
 
 import static io.intino.ness.master.data.validation.Issue.Type.SYNTAX_ERROR;
 
-public class SyntaxTripleValidator implements TripleValidator {
+public class SyntaxTripletValidator implements TripletValidator {
 
 	private final Issue.Level level;
 
-	public SyntaxTripleValidator() {
+	public SyntaxTripletValidator() {
 		this(Issue.Level.Error);
 	}
 
-	public SyntaxTripleValidator(Issue.Level level) {
+	public SyntaxTripletValidator(Issue.Level level) {
 		this.level = level;
 	}
 
 	@Override
-	public Stream<Issue> validate(String tripleLine, TripleSource source) {
+	public Stream<Issue> validate(String tripleLine, TripletSource source) {
 		String[] rawTriple = tripleLine.split(Triplet.TRIPLET_SEPARATOR);
 		if (rawTriple.length != 3)
 			return Stream.of(Issue.create(level, SYNTAX_ERROR, "Triple (" + tripleLine + ") is malformed: it should have 3 fields separated by TAB, but has " + rawTriple.length).source(source));
