@@ -43,7 +43,7 @@ public class MasterPublisher {
 		try {
 			if (!checkPublish() || !createSources()) return false;
 			logger.println("Publishing master...");
-			new MavenTerminalExecutor(root, basePackage, Master, "master", versions, conf, systemProperties, logger)
+			new MavenTerminalExecutor(root, basePackage, Master, "master-terminal", versions, conf, systemProperties, logger)
 					.mvn(invokedPhase == INSTALL ? "install" : "deploy");
 			logger.println("Terminal master published!");
 			return true;

@@ -44,6 +44,6 @@ Event Example
 	Attribute name as Text
 	Attribute names as Text List
 
-Terminal first
+Terminal testTerminal
 	Publish(tanks = dl.example)
 	Subscribe (tanks = dl.example)
