@@ -12,7 +12,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.Map;
 
-import static io.intino.ness.datahubterminalplugin.MavenTerminalExecutor.Type.Master;
+import static io.intino.ness.datahubterminalplugin.MavenTerminalExecutor.Target.Master;
 import static io.intino.plugin.PluginLauncher.Phase.*;
 
 public class MasterPublisher {
@@ -55,8 +55,7 @@ public class MasterPublisher {
 	}
 
 	private boolean createSources() {
-		new MasterRenderer(root, model, conf, logger, notifier).render();
-		return true;
+		return new MasterRenderer(root, model, conf, logger, notifier).render();
 	}
 
 	private boolean checkPublish() {

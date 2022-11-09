@@ -10,6 +10,7 @@ import io.intino.datahub.model.Event;
 import io.intino.datahub.model.Namespace;
 import io.intino.datahub.model.Terminal;
 import io.intino.ness.datahubterminalplugin.*;
+import io.intino.ness.datahubterminalplugin.MavenTerminalExecutor.Target;
 import io.intino.plugin.PluginLauncher;
 
 import java.io.File;
@@ -31,9 +32,10 @@ public class TerminalPublisher {
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
 	private final PluginLauncher.Notifier notifier;
+	private final boolean includeMaster;
 	private final List<Tank.Event> tanks;
 
-	public TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, Configuration configuration, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger, PluginLauncher.Notifier notifier) {
+	public TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, Configuration configuration, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger, PluginLauncher.Notifier notifier, boolean includeMaster) {
 		this.root = root;
 		this.terminal = terminal;
 		this.tanks = tanks;
@@ -44,13 +46,14 @@ public class TerminalPublisher {
 		this.invokedPhase = invokedPhase;
 		this.logger = logger;
 		this.notifier = notifier;
+		this.includeMaster = includeMaster;
 	}
 
 	public boolean publish() {
 		try {
 			if (!checkPublish() || !createSources()) return false;
 			logger.println("Publishing " + terminal.name$() + "...");
-			new MavenTerminalExecutor(root, basePackage, MavenTerminalExecutor.Type.Regular, terminalNameArtifact(), versions, conf, systemProperties, logger).mvn(invokedPhase == INSTALL ? "install" : "deploy");
+			new MavenTerminalExecutor(root, basePackage, includeMaster ? Target.EventsAndMaster : Target.Events, terminalNameArtifact(), versions, conf, systemProperties, logger).mvn(invokedPhase == INSTALL ? "install" : "deploy");
 			logger.println("Terminal " + terminal.name$() + " published!");
 			return true;
 		} catch (Throwable e) {

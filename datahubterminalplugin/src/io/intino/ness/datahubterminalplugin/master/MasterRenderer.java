@@ -48,15 +48,18 @@ public class MasterRenderer {
 		workingPackage = this.conf.artifact().code().generationPackage();
 	}
 
-	void render() {
+	boolean render() {
 		try {
-			logger.println(" Generating Entities...");
+			if (model.entityList().isEmpty()) return false;
+			logger.println("Generating Entities...");
 			write(entityClasses());
 			write(structClasses());
 			write(masterClass());
 			write(validationLayerClass());
+			return true;
 		} catch (Throwable e) {
 			notifier.notifyError("Error during java className generation: " + ErrorUtils.getMessage(e));
+			return false;
 		}
 	}
 

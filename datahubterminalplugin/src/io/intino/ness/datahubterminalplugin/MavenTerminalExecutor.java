@@ -16,19 +16,19 @@ import java.util.UUID;
 public class MavenTerminalExecutor {
 	private final File root;
 	private final String basePackage;
-	private final Type type;
+	private final Target target;
 	private final String terminalName;
 	private final Map<String, String> versions;
 	private final Configuration conf;
 	private final SystemProperties systemProperties;
 	private final PrintStream logger;
 
-	public enum Type {Regular, Bpm, Master}
+	public enum Target {EventsAndMaster, Events, Bpm, Master}
 
-	public MavenTerminalExecutor(File root, String basePackage, Type type, String terminalName, Map<String, String> versions, Configuration conf, SystemProperties systemProperties, PrintStream logger) {
+	public MavenTerminalExecutor(File root, String basePackage, Target target, String terminalName, Map<String, String> versions, Configuration conf, SystemProperties systemProperties, PrintStream logger) {
 		this.root = root;
 		this.basePackage = basePackage;
-		this.type = type;
+		this.target = target;
 		this.terminalName = terminalName;
 		this.versions = versions;
 		this.conf = conf;
@@ -77,9 +77,11 @@ public class MavenTerminalExecutor {
 			if (isSnapshotVersion()) buildDistroFrame(builder, conf.artifact().distribution().snapshot());
 			else buildDistroFrame(builder, conf.artifact().distribution().release());
 		}
-		if (type != Type.Master) builder.add("terminal", terminalDependenciesFrame(group, version));
-		if (type.equals(Type.Bpm)) builder.add("bpm", versions.get("bpm"));
-		else if (type.equals(Type.Master)) builder.add("master", versions.get("master"));
+		if (target.equals(Target.Events) || target.equals(Target.EventsAndMaster))
+			builder.add("terminal", terminalDependenciesFrame(group, version));
+		if (target.equals(Target.Bpm)) builder.add("bpm", versions.get("bpm"));
+		if (target.equals(Target.Master) || target.equals(Target.EventsAndMaster))
+			builder.add("master", versions.get("master"));
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new PomTemplate().render(builder.toFrame()));
 		return pomFile;

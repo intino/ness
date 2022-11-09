@@ -43,9 +43,9 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		Graph graph = loadGraph(resDirectory);
 		if (hasErrors(graph)) return;
 		Map<String, String> versions = versions();
+		boolean publishedMaster = publishMasterTerminal(graph.as(NessGraph.class), versions, tempDir);
 		if (!publishOntology(graph.as(NessGraph.class), versions, tempDir)) return;
-		publishTerminals(graph.as(NessGraph.class), versions, tempDir);
-		publishMasterTerminal(graph.as(NessGraph.class), versions, tempDir);
+		publishTerminals(graph.as(NessGraph.class), versions, tempDir, publishedMaster);
 		logger().println("Finished generation of terminals!");
 	}
 
@@ -72,11 +72,11 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		}
 	}
 
-	private void publishTerminals(NessGraph nessGraph, Map<String, String> versions, File tempDir) {
+	private void publishTerminals(NessGraph nessGraph, Map<String, String> versions, File tempDir, boolean includeMaster) {
 		try {
 			AtomicBoolean published = new AtomicBoolean(true);
 			nessGraph.terminalList().parallelStream().forEach(terminal -> {
-				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), versions, systemProperties(), invokedPhase, logger(), notifier()).publish() & published.get());
+				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), versions, systemProperties(), invokedPhase, logger(), notifier(), includeMaster).publish() & published.get());
 				if (published.get() && notifier() != null)
 					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), terminalNameArtifact(terminal), configuration().artifact().version()));
 			});
@@ -87,16 +87,18 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		}
 	}
 
-	private void publishMasterTerminal(NessGraph graph, Map<String, String> versions, File tempDir) {
+	private boolean publishMasterTerminal(NessGraph graph, Map<String, String> versions, File tempDir) {
 		try {
 			AtomicBoolean published = new AtomicBoolean(true);
 			published.set(new MasterPublisher(new File(tempDir, "master"), graph, configuration(), versions, systemProperties(), invokedPhase, logger(), notifier()).publish());
 			if (published.get() && notifier() != null)
 				notifier().notify("Master Terminal " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), "master-terminal", configuration().artifact().version()));
 			if (published.get()) FileUtils.deleteDirectory(tempDir);
+			return published.get();
 		} catch (Throwable e) {
 			logger().println(e.getMessage());
 			e.printStackTrace();
+			return false;
 		}
 	}
 
