@@ -38,7 +38,6 @@ public class MasterPublisher {
 		this.notifier = notifier;
 	}
 
-
 	public boolean publish() {
 		try {
 			if (!checkPublish() || !createSources()) return false;

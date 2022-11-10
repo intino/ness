@@ -73,14 +73,14 @@ public class PluginTest {
 						new File(WORKSPACE_ROOT, "MonentiaDev/cinepolis/datahub/src"),
 						new File(WORKSPACE_ROOT, "MonentiaDev/cinepolis/datahub/shared")),
 						singletonList(new File(WORKSPACE_ROOT, "MonentiaDev/cinepolis/datahub/res")),
-						new File(WORKSPACE_ROOT, "IntinoDev/ness/out/datahub-cinepolis/")))
+						new File(WORKSPACE_ROOT,"MonentiaDev/cinepolis/out")))
 				.systemProperties(new SystemProperties(
 						new File(INTELLIJ_MAVEN_PLUGIN),
 						new File(JAVA_HOME)))
 				.logger(System.out)
 				.invokedPhase(PluginLauncher.Phase.INSTALL)
-				.moduleConfiguration(gcConfiguration());
-		File temp = new File(WORKSPACE_ROOT, "IntinoDev/ness/datahubterminalplugin/temp/cinepolis");
+				.moduleConfiguration(cinepolisConfiguration());
+		File temp = new File(NESS_DIR + "/datahubterminalplugin/temp/cinepolis");
 		FileUtils.deleteDirectory(temp);
 		temp.mkdirs();
 		launcher.run(temp);
@@ -143,7 +143,8 @@ public class PluginTest {
 				.artifactBegin()
 					.groupId("com.cinepolis")
 					.name("datahub")
-					.version("1.2.0")
+					.version("2.0.0")
+					.codeGenerationPackage("com.cinepolis.datahub")
 				.artifactEnd()
 				.build();
 	}

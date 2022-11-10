@@ -31,7 +31,7 @@ public abstract class SeparatorMasterSerializer implements MasterSerializer {
 		Map<String, Triplet> triplets = Arrays.stream(str.split(FIELD_SEPARATOR))
 				.map(line -> line.split(separator))
 				.map(Triplet::new)
-				.collect(Collectors.toMap(t -> t.subject(), Function.identity()));
+				.collect(Collectors.toMap(Triplet::predicate, Function.identity(), (t1, t2) -> t2));
 		return new TripletRecord(triplets);
 	}
 
