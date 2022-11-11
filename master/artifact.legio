@@ -8,7 +8,7 @@ Artifact("io.intino.ness", "1.0.0") master
 		Compile("io.intino.alexandria", "json", "1.1.1")
 		Test("junit", "junit", "4.13")
 		Test("org.apache.commons", "commons-text", "1.10.0")
-	Package(mode = ModulesAndLibrariesLinkedByManifest)
+	Package(mode = ModulesAndLibrariesLinkedByManifest, attachSources =true)
 	Distribution > Artifactory("intino-maven")
 			Release("https://artifactory.intino.io/artifactory/release-libraries")
 			Snapshot("https://artifactory.intino.io/artifactory/snapshot-libraries")
