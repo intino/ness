@@ -54,7 +54,8 @@ def type(master & interface)
     		private String instanceName = "$package.MasterTerminal-" + UUID.randomUUID();
     		private List<String> addresses = List.of("localhost:5701");
     		private Type type = Type.getDefault();
-    		private boolean readOnly = true;
+    		private boolean allowWriting = false;
+    		private boolean multithreadLoading = true;
 
     		public Config() {}
 
@@ -62,7 +63,8 @@ def type(master & interface)
     			this.instanceName = other.instanceName;
     			this.addresses = other.addresses == null ? null : List.copyOf(other.addresses);
     			this.type = other.type;
-    			this.readOnly = other.readOnly;
+    			this.allowWriting = other.allowWriting;
+    			this.multithreadLoading = other.multithreadLoading;
     		}
 
     		public String instanceName() {
@@ -92,12 +94,21 @@ def type(master & interface)
     			return this;
     		}
 
-    		public boolean readOnly() {
-    			return readOnly;
+    		public boolean allowWriting() {
+    			return allowWriting;
     		}
 
-    		public Config readOnly(boolean readOnly) {
-    			this.readOnly = readOnly;
+    		public Config allowWriting(boolean allowWriting) {
+    			this.allowWriting = allowWriting;
+    			return this;
+    		}
+
+    		public boolean multithreadLoading() {
+    			return multithreadLoading;
+    		}
+
+    		public Config multithreadLoading(boolean multithreadLoading) {
+    			this.multithreadLoading = multithreadLoading;
     			return this;
     		}
     	}
@@ -185,7 +196,7 @@ def type(master & cached)
     	$entity+getter...[$NL$NL]
 
     	public void publish(String publisherName, Triplet Triplet) {
-    		if(config.readOnly()) throw new UnsupportedOperationException("This master client cannot publish because it is configured as read only");
+    		if(!config.allowWriting()) throw new UnsupportedOperationException("This master client cannot publish because it is configured as read only");
 			if(publisherName == null) throw new NullPointerException("Publisher name cannot be null");
 			if(Triplet == null) throw new NullPointerException("Triplet cannot be null");
 			hazelcast.getTopic(REQUESTS_TOPIC).publish(publisherName + MESSAGE_SEPARATOR + Triplet);
@@ -222,13 +233,16 @@ def type(master & cached)
 			IMap<String, String> master = hazelcast.getMap(MASTER_MAP_NAME);
 			MasterSerializer serializer = serializer();
 
-			Logger.info("Loading data from master (serializer=" + serializer.name() + ")");
+			Logger.debug("Loading data from master (serializer=" + serializer.name() + ")");
 			long start = System.currentTimeMillis();
 
-			loadDataMultiThread(master, serializer);
+			if(config.multithreadLoading())
+				loadDataMultiThread(master, serializer);
+			else
+				loadDataSingleThread(master, serializer);
 
 			long time = System.currentTimeMillis() - start;
-			Logger.info("Data from master loaded in " + time + " ms => " + this);
+			Logger.info("Data from master loaded in " + time + " ms");
 		}
 
 		private void loadDataSingleThread(IMap<String, String> master, MasterSerializer serializer) {
@@ -377,7 +391,7 @@ def type(master & lazy)
    		}
 
     	public void publish(String publisherName, Triplet Triplet) {
-    		if(config.readOnly()) throw new UnsupportedOperationException("This master client cannot publish because it is configured as read only");
+    		if(!config.allowWriting()) throw new UnsupportedOperationException("This master client cannot publish because it is configured as read only");
 			if(publisherName == null) throw new NullPointerException("Publisher name cannot be null");
 			if(Triplet == null) throw new NullPointerException("Triplet cannot be null");
 			hazelcast.getTopic(REQUESTS_TOPIC).publish(publisherName + MESSAGE_SEPARATOR + Triplet);

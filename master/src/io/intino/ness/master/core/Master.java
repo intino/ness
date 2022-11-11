@@ -161,6 +161,7 @@ public class Master {
 
 	protected com.hazelcast.config.Config getHazelcastConfig() {
 		com.hazelcast.config.Config hzConfig = new com.hazelcast.config.Config();
+		hzConfig.setProperty("hazelcast.logging.type", "log4j");
 		hzConfig.setInstanceName(config.instanceName());
 		hzConfig.setNetworkConfig(new NetworkConfig().setPort(config.port()));
 		return hzConfig;
@@ -169,6 +170,7 @@ public class Master {
 	private void checkConfigValues() {
 		if(config.instanceName() == null) throw new MasterInitializationException("Instance name cannot be null");
 		if(config.datalakeRootPath() == null) throw new MasterInitializationException("Data directory cannot be null");
+		if(config.host() == null) throw new MasterInitializationException("Host cannot be null");
 		if(config.port() <= 0) throw new MasterInitializationException("Port is invalid");
 		if(config.serializer() == null) throw new MasterInitializationException("Serializer cannot be null");
 		if(config.serializer().name() == null) throw new MasterInitializationException("Serializer name cannot be null");
@@ -184,10 +186,14 @@ public class Master {
 
 	public static class Config {
 
+		public static final int DEFAULT_PORT = 5701;
+		public static final String DEFAULT_INSTANCE_NAME = "master";
+		public static final String DEFAULT_HOST = "localhost";
+
 		private File datalakeRootPath;
-		private String instanceName = "master";
-		private int port = 5701;
-		private String host = "localhost";
+		private String instanceName = DEFAULT_INSTANCE_NAME;
+		private int port = DEFAULT_PORT;
+		private String host = DEFAULT_HOST;
 		private MasterSerializer serializer = MasterSerializers.getDefault();
 		private MasterTripletsDigester tripletsDigester = MasterTripletsDigester.createDefault();
 		private TripletLoader tripletLoader;
@@ -222,7 +228,7 @@ public class Master {
 		}
 
 		public Config instanceName(String instanceName) {
-			this.instanceName = instanceName;
+			this.instanceName = instanceName == null ? DEFAULT_INSTANCE_NAME : instanceName;
 			return this;
 		}
 
@@ -230,8 +236,8 @@ public class Master {
 			return port;
 		}
 
-		public Config port(int port) {
-			this.port = port;
+		public Config port(Integer port) {
+			this.port = port == null ? DEFAULT_PORT : port;
 			return this;
 		}
 
@@ -240,7 +246,7 @@ public class Master {
 		}
 
 		public Config host(String host) {
-			this.host = host;
+			this.host = host == null ? DEFAULT_HOST : host;
 			return this;
 		}
 
@@ -249,7 +255,7 @@ public class Master {
 		}
 
 		public Config serializer(MasterSerializer serializer) {
-			this.serializer = serializer;
+			this.serializer = serializer == null ? MasterSerializers.getDefault() : serializer;
 			return this;
 		}
 

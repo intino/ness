@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "1.0.0-SNAPSHOT") master
+Artifact("io.intino.ness", "1.0.0") master
 	Imports
 		Compile("com.hazelcast", "hazelcast", "5.1.3")
 		Compile("io.intino.alexandria", "logger", "2.1.0")
