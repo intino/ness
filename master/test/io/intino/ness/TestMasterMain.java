@@ -50,7 +50,7 @@ public class TestMasterMain {
 		Master master = new Master(config);
 		master.start();
 
-		master.add("test", "Hola\tQu e\tTal");
+		master.addTriplet("test", "Hola\tQu e\tTal");
 //		master.add("test", new Triple("1234567:theater", "ipSegment", "123"));
 	}
 
