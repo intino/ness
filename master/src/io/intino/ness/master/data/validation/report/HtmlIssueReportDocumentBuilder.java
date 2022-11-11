@@ -1,9 +1,9 @@
 package io.intino.ness.master.data.validation.report;
 
 import io.intino.ness.master.data.validation.Issue;
-import io.intino.ness.master.data.validation.TripleSource;
+import io.intino.ness.master.data.validation.TripletSource;
 import io.intino.ness.master.data.validation.report.IssueReport.IssuesCount;
-import io.intino.ness.master.data.validation.validators.DuplicatedTripleRecordValidator;
+import io.intino.ness.master.data.validation.validators.DuplicatedTripletRecordValidator;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -112,11 +112,11 @@ public class HtmlIssueReportDocumentBuilder {
 	}
 
 	private Comparator<? super Issue> sortByLine() {
-		return Comparator.comparing(issue -> !(issue.source() instanceof TripleSource.FileTripleSource) ? Integer.MAX_VALUE : ((TripleSource.FileTripleSource) issue.source()).line());
+		return Comparator.comparing(issue -> !(issue.source() instanceof TripletSource.FileTripletSource) ? Integer.MAX_VALUE : ((TripletSource.FileTripletSource) issue.source()).line());
 	}
 
 	private String render(Issue issue) {
-		if(issue.source() instanceof DuplicatedTripleRecordValidator.CombinedTripleSource) return renderIssueCombinedSource(issue);
+		if(issue.source() instanceof DuplicatedTripletRecordValidator.CombinedTripletSource) return renderIssueCombinedSource(issue);
 		String level = issue.level() == Issue.Level.Error ? "danger" : "warning";
 		return "<div class=\"list-group-item list-group-item-" + level + " mb-1\">"
 				+ "<div><i class=\"fa-solid fa-skating fa-fw\" style=\"background:DodgerBlue\"></i>" + issue.levelMsg() + "</div>"
@@ -130,7 +130,7 @@ public class HtmlIssueReportDocumentBuilder {
 		StringBuilder sb = new StringBuilder("<div class=\"list-group-item list-group-item-" + level + " mb-1\">");
 		sb.append("<p><b>[").append(issue.level().name()).append("]</b> ").append(issue.message()).append("</p>");
 
-		for(String name : ((DuplicatedTripleRecordValidator.CombinedTripleSource)issue.source()).names()) {
+		for(String name : ((DuplicatedTripletRecordValidator.CombinedTripletSource)issue.source()).names()) {
 			sb.append("<p><small>At ").append(name).append("</small></p>");
 		}
 

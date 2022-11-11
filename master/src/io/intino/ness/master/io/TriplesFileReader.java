@@ -1,7 +1,7 @@
 package io.intino.ness.master.io;
 
 import io.intino.alexandria.logger.Logger;
-import io.intino.ness.master.model.Triple;
+import io.intino.ness.master.model.Triplet;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,8 +20,8 @@ public class TriplesFileReader {
 		this.folder = folder;
 	}
 
-	private Triple tripleOf(String line) {
-		return new Triple(line);
+	private Triplet tripleOf(String line) {
+		return new Triplet(line);
 	}
 
 	private Stream<String> linesOf(Path path) {
@@ -33,7 +33,7 @@ public class TriplesFileReader {
 		}
 	}
 
-	public List<Triple> triples() {
+	public List<Triplet> triples() {
 		try (Stream<Path> stream = Files.walk(folder.toPath())) {
 			return stream.filter(f -> f.toFile().getName().endsWith(".triples"))
 					.flatMap(this::linesOf)

@@ -1,6 +1,5 @@
 package io.intino.ness.master.model;
 
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +10,7 @@ import static java.util.Objects.requireNonNull;
 public abstract class Entity {
 
 	private final Id id;
-	private final Map<String, String> extraAttributes = new HashMap<>(3);
+	private final Map<String, Triplet> extraTriplets = new HashMap<>(0);
 
 	public Entity(String id) {
 		this.id = new Id(id);
@@ -21,26 +20,26 @@ public abstract class Entity {
 		return id;
 	}
 
-	public Entity add(Triple t) {
-		extraAttributes.put(t.predicate(), t.value());
+	public Entity add(Triplet t) {
+		extraTriplets.put(t.predicate(), t);
 		return this;
 	}
 
-	public Entity remove(Triple t) {
-		extraAttributes.remove(t.predicate());
+	public Entity remove(Triplet t) {
+		extraTriplets.remove(t.predicate());
 		return this;
 	}
 
-	public Map<String, String> extraAttributes() {
-		return Collections.unmodifiableMap(extraAttributes);
+	public Map<String, Triplet> extraTriplets() {
+		return Collections.unmodifiableMap(extraTriplets);
 	}
 
-	public String extraAttribute(String name) {
-		return extraAttributes.get(name);
+	public Triplet getExtraTriplet(String predicate) {
+		return extraTriplets.get(predicate);
 	}
 
-	public boolean hasExtraAttribute(String name) {
-		return extraAttributes.containsKey(name);
+	public boolean hasExtraAttribute(String predicate) {
+		return extraTriplets.containsKey(predicate);
 	}
 
 	@Override
@@ -61,16 +60,6 @@ public abstract class Entity {
 		return id.toString();
 	}
 
-	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-	public DateTimeFormatter dateFormatter() {
-		return DATE_FORMATTER;
-	}
-
-	private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-	public DateTimeFormatter dateTimeFormatter() {
-		return DATETIME_FORMATTER;
-	}
-
 	public static final class Id {
 
 		private final String id;
@@ -89,7 +78,7 @@ public abstract class Entity {
 		}
 
 		public String type() {
-			return Triple.typeOf(id);
+			return Triplet.typeOf(id);
 		}
 
 		@Override
@@ -107,7 +96,7 @@ public abstract class Entity {
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(id);
+			return id.hashCode();
 		}
 	}
 }

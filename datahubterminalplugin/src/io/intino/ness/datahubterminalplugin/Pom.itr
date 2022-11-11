@@ -78,6 +78,8 @@ def type(pom)
 		[$event]
 		[$terminal]
 		[$bpm]
+		[$master]
+		[$masterTerminal]
 	</dependencies>
 </project>
 end
@@ -131,6 +133,22 @@ def trigger(bpm)
 		<artifactId>bpm-framework</artifactId>
 		<version>$this</version>
 		<scope>provided</scope>
+	</dependency>
+end
+
+def trigger(master)
+	<dependency>
+		<groupId>io.intino.ness</groupId>
+		<artifactId>master</artifactId>
+		<version>$this</version>
+	</dependency>
+end
+
+def trigger(masterTerminal)
+	<dependency>
+		<groupId>$group+lowercase</groupId>
+		<artifactId>master-terminal</artifactId>
+		<version>$version</version>
 	</dependency>
 end
 

@@ -20,7 +20,7 @@ public class Issue implements Comparable<Issue> {
 	private final Level level;
 	private final String message;
 	private ValidationLayers.Scope scope;
-	private TripleSource source;
+	private TripletSource source;
 
 	public Issue(String type, Level level, String message) {
 		this.type = requireNonNull(type);
@@ -45,11 +45,11 @@ public class Issue implements Comparable<Issue> {
 		return this;
 	}
 
-	public TripleSource source() {
+	public TripletSource source() {
 		return source;
 	}
 
-	public Issue source(TripleSource source) {
+	public Issue source(TripletSource source) {
 		this.source = source;
 		return this;
 	}
@@ -69,13 +69,13 @@ public class Issue implements Comparable<Issue> {
 		return level == o.level ? compareSources(o.source) : level.compareTo(o.level);
 	}
 
-	private int compareSources(TripleSource otherSource) {
+	private int compareSources(TripletSource otherSource) {
 		if(source == null) return 1;
 		if(otherSource == null) return -1;
-		if(source instanceof TripleSource.PublisherTripleSource) return 1;
-		if(otherSource instanceof TripleSource.PublisherTripleSource) return 1;
-		if(source instanceof TripleSource.FileTripleSource && otherSource instanceof TripleSource.FileTripleSource)
-			return Integer.compare(((TripleSource.FileTripleSource) source).line(), ((TripleSource.FileTripleSource) otherSource).line());
+		if(source instanceof TripletSource.PublisherTripletSource) return 1;
+		if(otherSource instanceof TripletSource.PublisherTripletSource) return 1;
+		if(source instanceof TripletSource.FileTripletSource && otherSource instanceof TripletSource.FileTripletSource)
+			return Integer.compare(((TripletSource.FileTripletSource) source).line(), ((TripletSource.FileTripletSource) otherSource).line());
 		return 0;
 	}
 

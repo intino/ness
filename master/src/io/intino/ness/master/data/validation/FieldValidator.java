@@ -7,5 +7,5 @@ public interface FieldValidator {
 
 	static FieldValidator none() {return (v, r, s) -> Stream.empty();}
 
-	Stream<Issue> validate(List<RecordValidator.TripleRecord.Value> values, RecordValidator.TripleRecord record, TripleRecordStore store);
+	Stream<Issue> validate(List<RecordValidator.TripletRecord.Value> values, RecordValidator.TripletRecord record, TripletRecordStore store);
 }

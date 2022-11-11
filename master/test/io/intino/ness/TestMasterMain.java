@@ -1,11 +1,10 @@
 package io.intino.ness;
 
 import io.intino.ness.master.core.Master;
-import io.intino.ness.master.core.MasterConfig;
 import io.intino.ness.master.data.validation.*;
-import io.intino.ness.master.data.validation.validators.DuplicatedTripleRecordValidator;
-import io.intino.ness.master.data.validation.validators.SyntaxTripleValidator;
-import io.intino.ness.master.model.Triple;
+import io.intino.ness.master.data.validation.validators.DuplicatedTripletRecordValidator;
+import io.intino.ness.master.data.validation.validators.SyntaxTripletValidator;
+import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.serialization.MasterSerializers;
 
 import java.io.File;
@@ -19,9 +18,8 @@ import static io.intino.ness.master.data.validation.Issue.Type.MISSING_ATTRIBUTE
 public class TestMasterMain {
 
 	public static void main(String[] args) {
-		MasterConfig config = new MasterConfig();
-		config.dataDirectory(new File("temp/cinepolis-data/datasets"));
-		config.logDirectory(new File("temp/logs/master"));
+		Master.Config config = new Master.Config();
+		config.datalakeRootPath(new File("temp/cinepolis-data/datasets"));
 		config.instanceName("Master");
 		config.serializer(MasterSerializers.getDefault());
 		config.port(62555);
@@ -31,19 +29,18 @@ public class TestMasterMain {
 	}
 
 	public static void main1(String[] args) {
-		MasterConfig config = new MasterConfig();
-		config.dataDirectory(new File("temp/cinepolis-data/datasets"));
-		config.logDirectory(new File("temp/logs/master"));
+		Master.Config config = new Master.Config();
+		config.datalakeRootPath(new File("temp/cinepolis-data/datasets"));
 		config.instanceName("Master");
 		config.serializer(MasterSerializers.getDefault());
 		config.port(62555);
 
 		ValidationLayers validationLayers = new ValidationLayers();
-		validationLayers.tripleValidationLayer().addValidator(new SyntaxTripleValidator());
+		validationLayers.tripleValidationLayer().addValidator(new SyntaxTripletValidator());
 
 		validationLayers.recordValidationLayer().setValidator("theater", (record, store) -> {
 			if(record.get("ipSegment").isEmpty()) return Stream.of(Issue.warning(MISSING_ATTRIBUTE, "Theater does not have ipSegment").source(record.source()));
-			RecordValidator.TripleRecord.Value value = record.get("ipSegment").get(0);
+			RecordValidator.TripletRecord.Value value = record.get("ipSegment").get(0);
 			if(!value.get().endsWith(".")) return Stream.of(Issue.error(INVALID_VALUE, "ipSegment must end with .").source(value.source()));
 			return Stream.empty();
 		});
@@ -57,16 +54,16 @@ public class TestMasterMain {
 //		master.add("test", new Triple("1234567:theater", "ipSegment", "123"));
 	}
 
-	private static Stream<Issue> validateTheaterIpSegment(Triple triple, TripleSource source) {
-		if(!triple.type().equals("theater")) return null;
-		if(!triple.predicate().equals("ipSegment")) return null;
+	private static Stream<Issue> validateTheaterIpSegment(Triplet triplet, TripletSource source) {
+		if(!triplet.type().equals("theater")) return null;
+		if(!triplet.predicate().equals("ipSegment")) return null;
 
-		return triple.value().endsWith(".") ? null : Stream.of(Issue.error(INVALID_VALUE, "IpSegment must end with ."));
+		return triplet.value().endsWith(".") ? null : Stream.of(Issue.error(INVALID_VALUE, "IpSegment must end with ."));
 	}
 
-	private static Stream<Issue> validateTheaterId(Triple triple, TripleSource source) {
-		if(!triple.type().equals("theater")) return null;
-		if(!isInt(triple.subject()) || triple.subject().length() != 7) return Stream.of(Issue.error(INVALID_VALUE, "Theater id must be an integer of 7 digits").source(source));
+	private static Stream<Issue> validateTheaterId(Triplet triplet, TripletSource source) {
+		if(!triplet.type().equals("theater")) return null;
+		if(!isInt(triplet.subject()) || triplet.subject().length() != 7) return Stream.of(Issue.error(INVALID_VALUE, "Theater id must be an integer of 7 digits").source(source));
 		return null;
 	}
 
@@ -81,25 +78,25 @@ public class TestMasterMain {
 
 	public static class TheaterValidator implements RecordValidator {
 
-		private final DuplicatedTripleRecordValidator duplicatedTripleRecordValidator = new DuplicatedTripleRecordValidator();
+		private final DuplicatedTripletRecordValidator duplicatedTripletRecordValidator = new DuplicatedTripletRecordValidator();
 
 		@Override
-		public Stream<Issue> validate(TripleRecord record, TripleRecordStore store) {
+		public Stream<Issue> validate(TripletRecord record, TripletRecordStore store) {
 			return Stream.concat(
 					generalValidation(record, store),
 					validationPerField(record, store)
 			);
 		}
 
-		private Stream<Issue> generalValidation(TripleRecord record, TripleRecordStore store) {
-			return duplicatedTripleRecordValidator.validate(record, store);
+		private Stream<Issue> generalValidation(TripletRecord record, TripletRecordStore store) {
+			return duplicatedTripletRecordValidator.validate(record, store);
 		}
 
-		private Stream<Issue> validationPerField(TripleRecord record, TripleRecordStore store) {
+		private Stream<Issue> validationPerField(TripletRecord record, TripletRecordStore store) {
 			return record.attributes().entrySet().stream().map(e -> validate(e, record, store)).reduce(Stream::concat).orElse(Stream.empty());
 		}
 
-		private Stream<Issue> validate(Map.Entry<String, List<TripleRecord.Value>> attrib, TripleRecord record, TripleRecordStore store) {
+		private Stream<Issue> validate(Map.Entry<String, List<TripletRecord.Value>> attrib, TripletRecord record, TripletRecordStore store) {
 			switch(attrib.getKey()) {
 //				case "address": return validateAddress(attrib.getValue(), record, store);
 //				case "city": return validateCity(attrib.getValue(), record, store);
@@ -125,22 +122,22 @@ public class TestMasterMain {
 			}
 		}
 
-		private Stream<Issue> validateCoordinates(List<TripleRecord.Value> value, TripleRecord record, TripleRecordStore store) {
+		private Stream<Issue> validateCoordinates(List<TripletRecord.Value> value, TripletRecord record, TripletRecordStore store) {
 			return Stream.empty();
 		}
 
-		private Stream<Issue> validateArea(List<TripleRecord.Value> value, TripleRecord record, TripleRecordStore store) {
+		private Stream<Issue> validateArea(List<TripletRecord.Value> value, TripletRecord record, TripletRecordStore store) {
 			if(value.isEmpty()) throw new RuntimeException();
-			TripleRecord.Value v = value.get(0);
+			TripletRecord.Value v = value.get(0);
 			if(v.isEmpty()) throw new RuntimeException();
-			TripleRecord area = store.get(v.get());
+			TripletRecord area = store.get(v.get());
 			if(area == null) throw new RuntimeException();
 			return Stream.empty();
 		}
 
-		private Stream<Issue> validateEnabled(List<TripleRecord.Value> value, TripleRecord record, TripleRecordStore store) {
+		private Stream<Issue> validateEnabled(List<TripletRecord.Value> value, TripletRecord record, TripletRecordStore store) {
 			if(value.isEmpty()) return Stream.empty();
-			TripleRecord.Value v = value.get(0);
+			TripletRecord.Value v = value.get(0);
 			if(v.isEmpty()) return Stream.empty();
 			if(!isBoolean(v.get())) return Stream.of(Issue.error(INVALID_VALUE, "Theater.enabled must be a boolean [false, true], but was " + v.get()).source(v.source()));
 			return Stream.empty();

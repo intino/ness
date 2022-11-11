@@ -1,5 +1,7 @@
 package io.intino.ness.master.serialization;
 
+import io.intino.ness.master.model.TripletRecord;
+
 import java.util.Map;
 
 /**
@@ -10,7 +12,7 @@ public interface MasterSerializer {
 
 	String name();
 
-	String serialize(Map<String, String> record);
+	String serialize(TripletRecord record);
 
-	Map<String, String> deserialize(String str);
+	TripletRecord deserialize(String str);
 }

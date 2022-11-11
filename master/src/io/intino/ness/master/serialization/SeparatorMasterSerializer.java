@@ -1,7 +1,11 @@
 package io.intino.ness.master.serialization;
 
+import io.intino.ness.master.model.Triplet;
+import io.intino.ness.master.model.TripletRecord;
+
 import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class SeparatorMasterSerializer implements MasterSerializer {
@@ -16,13 +20,19 @@ public abstract class SeparatorMasterSerializer implements MasterSerializer {
 	}
 
 	@Override
-	public String serialize(Map<String, String> record) {
-		return record.entrySet().stream().map(field -> field.getKey() + separator + field.getValue()).collect(Collectors.joining(FIELD_SEPARATOR));
+	public String serialize(TripletRecord record) {
+		return record.triplets()
+				.map(triplet -> String.join(separator, triplet.attributes()))
+				.collect(Collectors.joining(FIELD_SEPARATOR));
 	}
 
 	@Override
-	public Map<String, String> deserialize(String str) {
-		return Arrays.stream(str.split(FIELD_SEPARATOR)).map(line -> line.split(separator)).collect(Collectors.toMap(f -> f[0], f -> f[1]));
+	public TripletRecord deserialize(String str) {
+		Map<String, Triplet> triplets = Arrays.stream(str.split(FIELD_SEPARATOR))
+				.map(line -> line.split(separator))
+				.map(Triplet::new)
+				.collect(Collectors.toMap(Triplet::predicate, Function.identity(), (t1, t2) -> t2));
+		return new TripletRecord(triplets);
 	}
 
 	public static final class Csv extends SeparatorMasterSerializer {

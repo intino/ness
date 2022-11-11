@@ -1,23 +1,27 @@
 package io.intino.ness.master.data.validation;
 
-import io.intino.ness.master.model.Triple;
+import io.intino.ness.master.model.Triplet;
 
 import java.util.*;
 import java.util.stream.Stream;
 
 public interface RecordValidator {
 
+	String LIST_SEPARATOR = ";";
+	String MAP_KEY_VALUE_SEPARATOR = "=";
+	String STRUCT_FIELD_SEPARATOR = ",";
+
 	static RecordValidator none() { return (r, s) -> Stream.empty(); }
 
-	Stream<Issue> validate(TripleRecord record, TripleRecordStore store);
+	Stream<Issue> validate(TripletRecord record, TripletRecordStore store);
 
-	class TripleRecord {
+	class TripletRecord {
 
 		private final String id;
 		private final Map<String, List<Value>> attributes = new LinkedHashMap<>();
-		private TripleSource source;
+		private TripletSource source;
 
-		public TripleRecord(String id) {
+		public TripletRecord(String id) {
 			this.id = id;
 		}
 
@@ -30,7 +34,7 @@ public interface RecordValidator {
 		}
 
 		public String type() {
-			return Triple.typeOf(id);
+			return Triplet.typeOf(id);
 		}
 
 		public Map<String, List<Value>> attributes() {
@@ -41,11 +45,11 @@ public interface RecordValidator {
 			return attributes.getOrDefault(attribute, Collections.emptyList());
 		}
 
-		public TripleSource source() {
+		public TripletSource source() {
 			return source;
 		}
 
-		public TripleRecord source(TripleSource source) {
+		public TripletRecord source(TripletSource source) {
 			this.source = source;
 			return this;
 		}
@@ -53,7 +57,7 @@ public interface RecordValidator {
 		public static class Value {
 
 			private final String value;
-			private TripleSource source;
+			private TripletSource source;
 
 			public Value(String value) {
 				this.value = value;
@@ -67,11 +71,11 @@ public interface RecordValidator {
 				return value;
 			}
 
-			public TripleSource source() {
+			public TripletSource source() {
 				return source;
 			}
 
-			public Value source(TripleSource source) {
+			public Value source(TripletSource source) {
 				this.source = source;
 				return this;
 			}

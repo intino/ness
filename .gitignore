@@ -1,3 +1,5 @@
+.idea/libraries
+.idea/codeStyles/codeStyleConfig.xml
 datalake-examples/*
 activemq-data
 .intino/

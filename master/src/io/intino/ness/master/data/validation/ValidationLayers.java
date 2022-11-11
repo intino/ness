@@ -1,26 +1,26 @@
 package io.intino.ness.master.data.validation;
 
-import io.intino.ness.master.data.validation.validators.DuplicatedTripleRecordValidator;
-import io.intino.ness.master.data.validation.validators.SyntaxTripleValidator;
+import io.intino.ness.master.data.validation.validators.DuplicatedTripletRecordValidator;
+import io.intino.ness.master.data.validation.validators.SyntaxTripletValidator;
 
 public class ValidationLayers {
 
 	public static ValidationLayers createDefault() {
 		ValidationLayers validationLayers = new ValidationLayers();
-		validationLayers.tripleValidationLayer.addValidator(new SyntaxTripleValidator());
-		validationLayers.recordValidationLayer.addValidator(new DuplicatedTripleRecordValidator());
+		validationLayers.tripletValidationLayer.addValidator(new SyntaxTripletValidator());
+		validationLayers.recordValidationLayer.addValidator(new DuplicatedTripletRecordValidator());
 		return validationLayers;
 	}
 
-	private volatile TripleValidationLayer tripleValidationLayer = new TripleValidationLayer();
+	private volatile TripletValidationLayer tripletValidationLayer = new TripletValidationLayer();
 	private volatile RecordValidationLayer recordValidationLayer = new RecordValidationLayer();
 
-	public TripleValidationLayer tripleValidationLayer() {
-		return tripleValidationLayer;
+	public TripletValidationLayer tripleValidationLayer() {
+		return tripletValidationLayer;
 	}
 
-	public ValidationLayers tripleValidationLayer(TripleValidationLayer tripleValidationLayer) {
-		this.tripleValidationLayer = tripleValidationLayer == null ? new TripleValidationLayer() : tripleValidationLayer;
+	public ValidationLayers tripleValidationLayer(TripletValidationLayer tripletValidationLayer) {
+		this.tripletValidationLayer = tripletValidationLayer == null ? new TripletValidationLayer() : tripletValidationLayer;
 		return this;
 	}
 
