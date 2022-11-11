@@ -33,7 +33,6 @@ public class ConfigurationBuilder {
 	}
 
 	public class ArtifactBuilder {
-
 		private String groupId;
 		private String name;
 		private String version;
