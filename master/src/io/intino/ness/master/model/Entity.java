@@ -1,15 +1,13 @@
 package io.intino.ness.master.model;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static java.util.Objects.requireNonNull;
 
 public abstract class Entity {
 
 	private final Id id;
+	private boolean enabled = true;
 	private final Map<String, Triplet> extraTriplets = new HashMap<>(0);
 
 	public Entity(String id) {
@@ -20,14 +18,47 @@ public abstract class Entity {
 		return id;
 	}
 
+	public boolean enabled() {
+		return enabled;
+	}
+
+	public final void setEnabled(boolean enabled) {
+		final boolean oldValue = this.enabled;
+		if(oldValue == enabled) return;
+
+		this.enabled = enabled;
+
+		if(enabled)
+			onEnable();
+		else
+			onDisable();
+	}
+
+	protected void onEnable() {}
+	protected void onDisable() {}
+
 	public Entity add(Triplet t) {
+		if(t.predicate().equals("enabled"))
+			setEnabled(parseBoolean(t.value()));
 		extraTriplets.put(t.predicate(), t);
 		return this;
+	}
+
+	private boolean parseBoolean(String value) {
+		return value.trim().equalsIgnoreCase("true");
 	}
 
 	public Entity remove(Triplet t) {
 		extraTriplets.remove(t.predicate());
 		return this;
+	}
+
+	public List<Triplet> triplets() {
+		return new ArrayList<>(0);
+	}
+
+	public TripletRecord asTripletRecord() {
+		return new TripletRecord(id.id, triplets());
 	}
 
 	public Map<String, Triplet> extraTriplets() {

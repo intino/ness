@@ -39,6 +39,11 @@ public class AbstractConfiguration implements Configuration {
 		}
 
 		@Override
+		public void name(String s) {
+
+		}
+
+		@Override
 		public String version() {
 			return null;
 		}

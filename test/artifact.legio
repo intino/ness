@@ -7,7 +7,7 @@ Artifact("org.example", "1.0.0") test as Solution
 		Compile("io.intino.ness", "master", "1.0.0")
 		Test("junit", "junit", "4.13")
 	IntinoPlugin("io.intino.ness:data-hub-accessor-plugin:2.3.4", "io.intino.ness.datahubaccessorplugin.DataHubAccessorsPluginLauncher")
-	Package(mode = ModulesAndLibrariesLinkedByManifest) as Runnable(mainClass = "org.example.test.box.Main")
+	Package(mode = ModulesAndLibrariesLinkedByManifest) as Runnable(mainClass = "org.example.test.model.Main")
 	Parameter("home")
 	Parameter("backup_directory")
 	Parameter("datalake_directory")

@@ -55,7 +55,7 @@ public class EntityFrameCreator {
 		FrameBuilder builder = new FrameBuilder("entity", "class")
 				.add("package", workingPackage)
 				.add("name", entity.core$().name())
-				.add("attribute", entity.core$().componentList().stream().map(this::attrFrameOf).toArray());
+				.add("attribute", entity.core$().componentList().stream().map(a -> attrFrameOf(a, entity.core$())).toArray());
 		final Parameter parent = parameter(entity.core$(), "entity");
 		builder.add("parent", parent != null ? ((Entity) parent.values().get(0)).name$() : "io.intino.ness.master.model.Entity");
 		if (entity.isDecorable() || entity.isAbstract()) builder.add("isAbstract", "abstract");
@@ -63,12 +63,15 @@ public class EntityFrameCreator {
 		return builder;
 	}
 
-	private Frame attrFrameOf(Node node) {
+	private Frame attrFrameOf(Node node, Node owner) {
 		FrameBuilder builder = new FrameBuilder().add("attribute");
 		node.conceptList().forEach(aspect -> builder.add(aspect.name()));
 		String type = type(node);
 		builder.add("name", node.name()).add("owner", node.owner().name()).add("type", type).add("package", workingPackage);
 		builder.add("index", node.owner().componentList().indexOf(node));
+		builder.add("entityOwner", owner.name());
+		if(owner.is(Entity.Abstract.class) || owner.is(Entity.Decorable.class))
+			builder.add("castToSubclass", "(" + owner.name() + ")");
 		processParameters(node, builder, type);
 		return builder.toFrame();
 	}
@@ -107,7 +110,7 @@ public class EntityFrameCreator {
 		return new FrameBuilder("struct")
 				.add("name", node.name())
 				.add("package", workingPackage)
-				.add("attribute", node.componentList().stream().map(this::attrFrameOf).toArray())
+				.add("attribute", node.componentList().stream().map(node1 -> attrFrameOf(node1, node)).toArray())
 				.toFrame();
 	}
 
