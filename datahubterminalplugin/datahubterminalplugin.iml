@@ -53,5 +53,6 @@
     <orderEntry type="library" name="Intino: io.intino.magritte:io:3.0.0" level="project" />
     <orderEntry type="library" name="Intino: commons-io:commons-io:2.5" level="project" />
     <orderEntry type="library" name="Intino: commons-codec:commons-codec:1.15" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.0.5" level="project" />
   </component>
 </module>
