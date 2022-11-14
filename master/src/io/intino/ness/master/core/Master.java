@@ -10,13 +10,16 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.ness.master.data.FileTripletLoader;
 import io.intino.ness.master.data.MasterTripletsDigester;
 import io.intino.ness.master.data.TripletLoader;
-import io.intino.ness.master.io.TriplesFileWriter;
+import io.intino.ness.master.data.update.MasterMessageHandler;
+import io.intino.ness.master.data.update.MasterMessageHandler.MasterMessage;
+import io.intino.ness.master.data.update.MasterPublishError;
 import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.model.TripletRecord;
 import io.intino.ness.master.serialization.MasterSerializer;
 import io.intino.ness.master.serialization.MasterSerializers;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,6 +31,7 @@ public class Master {
 	public static final String METADATA_MAP_NAME = "metadata";
 	public static final String MASTER_MAP_NAME = "master";
 	public static final String REQUESTS_TOPIC = "requests";
+	public static final String ERRORS_TOPIC = "errors";
 	public static final String MESSAGE_SEPARATOR = "##";
 	public static final String NONE_TYPE = "";
 
@@ -41,8 +45,40 @@ public class Master {
 		checkConfigValues();
 	}
 
+	public IMap<String, String> masterMap() {
+		return masterMap;
+	}
+
+	public IMap<String, String> metadataMap() {
+		return metadataMap;
+	}
+
+	public File datalakeRootPath() {
+		return config.datalakeRootPath();
+	}
+
+	public String instanceName() {
+		return config.instanceName();
+	}
+
+	public int port() {
+		return config.port();
+	}
+
+	public String host() {
+		return config.host();
+	}
+
+	public MasterTripletsDigester tripletsDigester() {
+		return config.tripletsDigester();
+	}
+
+	public TripletLoader tripletLoader() {
+		return config.tripletLoader();
+	}
+
 	public void start() {
-		Logger.info("Initializing Master...");
+		Logger.trace("Initializing Master...");
 		{
 			Map<String, TripletRecord> data = loadData();
 			initHazelcast();
@@ -50,21 +86,12 @@ public class Master {
 			setupListeners();
 		}
 		System.gc();
-		Logger.info("Data loaded into Master:\n" + histogram());
+		Logger.trace("Data loaded into Master:\n" + histogram());
 		Logger.info("Master initialized. Using " + getHazelcastMemoryUsedMB() + " MB");
 	}
 
-	private String histogram() {
-		Map<String, Integer> histogram = new HashMap<>();
-		masterMap.keySet().stream().map(Triplet::typeOf).map(t -> "\"" + t + "\"").forEach(key -> histogram.compute(key, (k, v) -> v == null ? 1 : v + 1));
-		return "  " + histogram.entrySet()
-				.stream()
-				.sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
-				.map(e -> e.getKey() + ": " + e.getValue()).collect(Collectors.joining("\n  "));
-	}
-
 	private void initHazelcast() {
-		Logger.info("Initializing hazelcast instance...");
+		Logger.trace("Initializing hazelcast instance...");
 		hazelcast = Hazelcast.newHazelcastInstance(getHazelcastConfig());
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> hazelcast.shutdown(), "Master-Shutdown"));
 	}
@@ -88,7 +115,7 @@ public class Master {
 
 	protected Map<String, TripletRecord> loadData() {
 		try {
-			Logger.info("Loading data...");
+			Logger.trace("Loading data...");
 			long start = System.currentTimeMillis();
 
 			MasterTripletsDigester.Result result = config.tripletsDigester().load(config.tripletLoader(), serializer());
@@ -96,7 +123,7 @@ public class Master {
 
 			final long time = System.currentTimeMillis() - start;
 
-			Logger.info("Data loaded after " + time + " ms. Stats:\n" + Json.toJsonPretty(result.stats().map()));
+			Logger.debug("Data loaded after " + time + " ms. Stats:\n" + Json.toJsonPretty(result.stats().map()));
 
 			return result.records();
 
@@ -107,52 +134,34 @@ public class Master {
 
 	protected void setupListeners() {
 		hazelcast.getTopic(REQUESTS_TOPIC).addMessageListener(this::handleRequestMessage);
-		Logger.info("Hazelcast initialized");
+		Logger.trace("Hazelcast initialized");
 	}
 
-	protected void handleRequestMessage(Message<Object> message) {
-		String[] info = message.getMessageObject().toString().split(MESSAGE_SEPARATOR, -1);
-		String publisher = info[0];
-		String tripleLine = info[1];
-		if(add(publisher, tripleLine))
-			save(publisher, tripleLine);
-	}
-
-	public boolean add(String publisher, String tripleLine) {
-		return add(publisher, new Triplet(tripleLine));
-	}
-
-	public boolean add(String publisher, Triplet triplet) {
-		TripletRecord record = getRecord(triplet.subject());
-		if(record.contains(triplet)) return false;
-
-		record.put(triplet);
-		updateRecord(triplet.subject(), record);
-
-		save(publisher, triplet);
-		return true;
-	}
-
-	protected void updateRecord(String id, TripletRecord record) {
-		masterMap.set(id, serializer().serialize(record));
-	}
-
-	protected TripletRecord getRecord(String subject) {
-		String serializedRecord = masterMap.get(subject);
-		if(serializedRecord == null) return new TripletRecord(subject);
-		return serializer().deserialize(serializedRecord);
-	}
-
-	private synchronized void save(String publisher, String tripleLine) {
-		save(publisher, new Triplet(tripleLine));
-	}
-
-	protected synchronized void save(String publisher, Triplet triplet) {
-		try(TriplesFileWriter writer = new TriplesFileWriter(config.datalakeRootPath(), publisher)) {
-			writer.write(triplet);
+	protected void handleRequestMessage(Message<Object> hzMessage) {
+		MasterMessage message = asMasterMessage(hzMessage);
+		try {
+			new MasterMessageHandler(this).handle(message);
 		} catch (Exception e) {
-			Logger.error(e);
+			hazelcast.getTopic(ERRORS_TOPIC).publish(errorMessage(message, e));
 		}
+	}
+
+	private static String errorMessage(MasterMessage message, Exception e) {
+		return message.publisherName
+				+ MESSAGE_SEPARATOR + message.serializedRecord
+				+ MESSAGE_SEPARATOR + message.ts
+				+ MESSAGE_SEPARATOR + e.getClass().getName()
+				+ MESSAGE_SEPARATOR + e.getMessage();
+	}
+
+	private MasterMessage asMasterMessage(Message<Object> hzMessage) {
+		String record = String.valueOf(hzMessage.getMessageObject().toString());
+		return new MasterMessage(
+				serializer().deserialize(record),
+				record,
+				hzMessage.getPublishingMember().getAttribute("name"), // TODO: check
+				Instant.ofEpochMilli(hzMessage.getPublishTime())
+		);
 	}
 
 	public MasterSerializer serializer() {
@@ -182,6 +191,15 @@ public class Master {
 		long metadata = metadataMap.getLocalMapStats().getOwnedEntryMemoryCost();
 		long data = masterMap.getLocalMapStats().getOwnedEntryMemoryCost();
 		return (metadata + data) / 1024.0f / 1024.0f;
+	}
+
+	private String histogram() {
+		Map<String, Integer> histogram = new HashMap<>();
+		masterMap.keySet().stream().map(Triplet::typeOf).map(t -> "\"" + t + "\"").forEach(key -> histogram.compute(key, (k, v) -> v == null ? 1 : v + 1));
+		return "  " + histogram.entrySet()
+				.stream()
+				.sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
+				.map(e -> e.getKey() + ": " + e.getValue()).collect(Collectors.joining("\n  "));
 	}
 
 	public static class Config {

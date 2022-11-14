@@ -2,21 +2,19 @@ package io.intino.ness.master.data;
 
 import io.intino.ness.master.model.Entity;
 
-import java.time.Instant;
-
-public interface EntryListener<T extends Entity> {
+public interface EntityListener<T extends Entity> {
 
 	void notify(Event<T> event);
 
-	static <E extends Entity> EntryListener<E> onCreate(EntryListener<E> listener) {
+	static <E extends Entity> EntityListener<E> onCreate(EntityListener<E> listener) {
 		return event -> { if(event.type() == Event.Type.Create) listener.notify(event); };
 	}
 
-	static <E extends Entity> EntryListener<E> onUpdate(EntryListener<E> listener) {
+	static <E extends Entity> EntityListener<E> onUpdate(EntityListener<E> listener) {
 		return event -> { if(event.type() == Event.Type.Update) listener.notify(event); };
 	}
 
-	static <E extends Entity> EntryListener<E> onRemove(EntryListener<E> listener) {
+	static <E extends Entity> EntityListener<E> onRemove(EntityListener<E> listener) {
 		return event -> { if(event.type() == Event.Type.Remove) listener.notify(event); };
 	}
 
@@ -25,10 +23,6 @@ public interface EntryListener<T extends Entity> {
 		Type type();
 
 		T entity();
-
-		String author();
-
-		Instant ts();
 
 		enum Type {
 			Create, Update, Remove
