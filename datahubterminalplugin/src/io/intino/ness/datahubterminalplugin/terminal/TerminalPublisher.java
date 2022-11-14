@@ -51,7 +51,7 @@ public class TerminalPublisher {
 
 	public boolean publish() {
 		try {
-			if (!checkPublish() || !createSources()) return false;
+			if (!createSources()) return false;
 			logger.println("Publishing " + terminal.name$() + "...");
 			new MavenTerminalExecutor(root, basePackage, includeMaster ? Target.EventsAndMaster : Target.Events, terminalNameArtifact(), versions, conf, systemProperties, logger).mvn(invokedPhase == INSTALL ? "install" : "deploy");
 			logger.println("Terminal " + terminal.name$() + " published!");
