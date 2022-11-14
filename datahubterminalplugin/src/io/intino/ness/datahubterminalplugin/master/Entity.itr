@@ -6,6 +6,10 @@ def type(entity & decorable)
 		public $name+FirstUpperCase(String id, $package.MasterTerminal master) {
 			super(id, master);
 		}
+
+		public $name+FirstUpperCase(io.intino.ness.master.model.TripletRecord record, $package.MasterTerminal master) {
+			super(record, master);
+		}
 	}
 end
 
@@ -38,27 +42,32 @@ def type(entity & class)
 			this.master = java.util.Objects.requireNonNull(master);
 		}
 
-		[$attribute+getter...[$NL$NL]]
+		public $abstract~$name+FirstUpperCase(TripletRecord record, $package.MasterTerminal master) {
+			this(record.id(), master);
+			record.triplets().forEach(this::add);
+		}
 
-		public $name+FirstUpperCase add(Triplet Triplet) {
-			switch(Triplet.predicate()) {
+		[$attribute+getterAndSetter...[$NL$NL]]
+
+		public $name+FirstUpperCase add(Triplet triplet) {
+			switch(triplet.predicate()) {
 				[$attribute+addSwitchCase...[$NL]]
-				default: super.add(Triplet); break;
+				default: super.add(triplet); break;
 			}
 			return ($name+FirstUpperCase) this;
 		}
 
-		public $name+FirstUpperCase remove(Triplet Triplet) {
-			switch(Triplet.predicate()) {
+		public $name+FirstUpperCase remove(Triplet triplet) {
+			switch(triplet.predicate()) {
 				[$attribute+removeSwitchCase...[$NL]]
-				default: super.remove(Triplet); break;
+				default: super.remove(triplet); break;
 			}
 			return ($name+FirstUpperCase) this;
 		}
 
-		[public List<Triplet> asTriplets() {
+		[public List<Triplet> triplets() {
 			final java.util.ArrayList<Triplet> triplets = new java.util.ArrayList<>();
-			$attribute+asTriplet...[$NL]
+			$attribute+astriplet...[$NL]
 			triplets.addAll(super.extraTriplets().values());
 			return triplets;
 		}]
@@ -76,55 +85,55 @@ def trigger(super)
 end
 
 def trigger(addSwitchCase)
-	case "$name": add$name+FirstUpperCase~(Triplet); break;
+	case "$name": add$name+FirstUpperCase~(triplet); break;
 end
 
 def trigger(removeSwitchCase)
-	case "$name": remove$name+FirstUpperCase~(Triplet); break;
+	case "$name": remove$name+FirstUpperCase~(triplet); break;
 end
 
 def trigger(addAndRemoveMethod)
-	protected void add$name+FirstUpperCase~(Triplet Triplet) {
+	protected void add$name+FirstUpperCase~(Triplet triplet) {
 		$attribute+add
 	}
 
-	protected void remove$name+FirstUpperCase~(Triplet Triplet) {
+	protected void remove$name+FirstUpperCase~(Triplet triplet) {
     	$attribute+remove
     }
 end
 
 def type(boolean) type(list) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : Arrays.stream(Triplet.value().split(LIST_SEP)).map(String::trim).map(Boolean::parseBoolean).collect(Collectors.toList());
+	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Boolean::parseBoolean).collect(Collectors.toList());
 end
 
 def type(integer) type(list) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : Arrays.stream(Triplet.value().split(LIST_SEP)).map(String::trim).map(Integer::parseInt).collect(Collectors.toList());
+	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Integer::parseInt).collect(Collectors.toList());
 end
 
 def type(double) type(list) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : Arrays.stream(Triplet.value().split(LIST_SEP)).map(String::trim).map(Double::parseDouble).collect(Collectors.toList());
+	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Double::parseDouble).collect(Collectors.toList());
 end
 
 def type(long) type(list) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : Arrays.stream(Triplet.value().split(LIST_SEP)).map(String::trim).map(Long::parseLong).collect(Collectors.toList());
+	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Long::parseLong).collect(Collectors.toList());
 end
 
 def type(word) type(list) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : Arrays.stream(Triplet.value().split(LIST_SEP)).map(String::trim).map($type+firstUpperCase::valueOf).collect(Collectors.toList());
+	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map($type+firstUpperCase::valueOf).collect(Collectors.toList());
 end
 
 def type(string) type(list) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : Arrays.stream(Triplet.value().split(LIST_SEP)).map(String::trim).collect(Collectors.toList());
+	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).collect(Collectors.toList());
 end
 
 def type(entity) type(list) type(component) trigger(add)
-	if(Triplet.value() == null) {
+	if(triplet.value() == null) {
 		this.$name+firstLowerCase = null;
 		return;
 	}
 
 	io.intino.ness.master.serialization.MasterSerializer serializer = master.serializer();
-	String$[$] items = Triplet.value().split(LIST_SEP);
+	String$[$] items = triplet.value().split(LIST_SEP);
 	this.$name+firstLowerCase = new ArrayList<>(items.length);
 
 	for(String serializedItem : items) {
@@ -135,86 +144,86 @@ def type(entity) type(list) type(component) trigger(add)
 end
 
 def type(entity) type(list) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : Arrays.stream(Triplet.value().split(LIST_SEP)).map(String::trim).collect(Collectors.toList());
+	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).collect(Collectors.toList());
 end
 
 def type(date) type(list) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : Arrays.stream(Triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.LocalDate.parse(s, java.time.format.DateTimeFormatter.ofPattern("$format"))).collect(Collectors.toList()));
+	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.LocalDate.parse(s, java.time.format.DateTimeFormatter.ofPattern("$format"))).collect(Collectors.toList()));
 end
 
 def type(datetime) type(list) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : Arrays.stream(Triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.LocalDateTime.parse(s, java.time.format.DateTimeFormatter.ofPattern("$format"))).collect(Collectors.toList()));
+	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.LocalDateTime.parse(s, java.time.format.DateTimeFormatter.ofPattern("$format"))).collect(Collectors.toList()));
 end
 
 def type(instant) type(list) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : Arrays.stream(Triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.Instant.ofEpochMilli(Long.parseLong(s))).collect(Collectors.toList()));
-	this.$name+firstLowerCase = Triplet.value() == null ? null : java.time.Instant.ofEpochMilli(Long.parseLong(Triplet.value()));
+	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.Instant.ofEpochMilli(Long.parseLong(s))).collect(Collectors.toList()));
+	this.$name+firstLowerCase = triplet.value() == null ? null : java.time.Instant.ofEpochMilli(Long.parseLong(triplet.value()));
 end
 
 def type(boolean) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : Boolean.parseBoolean(Triplet.value());
+	this.$name+firstLowerCase = triplet.value() == null ? null : Boolean.parseBoolean(triplet.value());
 end
 
 def type(integer) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : Integer.parseInt(Triplet.value());
+	this.$name+firstLowerCase = triplet.value() == null ? null : Integer.parseInt(triplet.value());
 end
 
 def type(double) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : Double.parseDouble(Triplet.value());
+	this.$name+firstLowerCase = triplet.value() == null ? null : Double.parseDouble(triplet.value());
 end
 
 def type(long) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : Long.parseLong(Triplet.value());
+	this.$name+firstLowerCase = triplet.value() == null ? null : Long.parseLong(triplet.value());
 end
 
 def type(word) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : $type+firstUpperCase.valueOf(Triplet.value());
+	this.$name+firstLowerCase = triplet.value() == null ? null : $type+firstUpperCase.valueOf(triplet.value());
 end
 
 def type(string) trigger(add)
-	this.$name+firstLowerCase = Triplet.value();
+	this.$name+firstLowerCase = triplet.value();
 end
 
 def type(entity) type(component) trigger(add)
-	if(Triplet.value() == null) {
+	if(triplet.value() == null) {
 		this.$name+firstLowerCase = null;
 		return;
 	}
 
-	TripletRecord r = master.serializer().deserialize(Triplet.value().trim());
+	TripletRecord r = master.serializer().deserialize(triplet.value().trim());
 	this.$name+firstLowerCase = new $entity+FirstUpperCase(r.id(), master);
 end
 
 def type(entity) trigger(add)
-	this.$name+firstLowerCase~Reference = Triplet.value();
+	this.$name+firstLowerCase~Reference = triplet.value();
 end
 
 def type(date) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : java.time.LocalDate.parse(Triplet.value(), java.time.format.DateTimeFormatter.ofPattern("$format"));
+	this.$name+firstLowerCase = triplet.value() == null ? null : java.time.LocalDate.parse(triplet.value(), java.time.format.DateTimeFormatter.ofPattern("$format"));
 end
 
 def type(datetime) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : java.time.LocalDateTime.parse(Triplet.value(), java.time.format.DateTimeFormatter.ofPattern("$format"));
+	this.$name+firstLowerCase = triplet.value() == null ? null : java.time.LocalDateTime.parse(triplet.value(), java.time.format.DateTimeFormatter.ofPattern("$format"));
 end
 
 def type(instant) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null ? null : java.time.Instant.ofEpochMilli(Long.parseLong(Triplet.value()));
+	this.$name+firstLowerCase = triplet.value() == null ? null : java.time.Instant.ofEpochMilli(Long.parseLong(triplet.value()));
 end
 
 def type(map) trigger(add)
-	this.$name+firstLowerCase = Triplet.value() == null
+	this.$name+firstLowerCase = triplet.value() == null
 		? null
-		: java.util.Arrays.stream(Triplet.value().split(";"))
+		: java.util.Arrays.stream(triplet.value().split(";"))
 			.map(e -> e.split("="))
 			.collect(java.util.stream.Collectors.toMap(e -> e$[0].trim(), e -> e$[1].trim()));
 end
 
 def type(struct) trigger(add)
-	if (Triplet.value() == null) {
+	if (triplet.value() == null) {
 		this.$name+firstLowerCase = null;
 	} else {
-		List<String> values = java.util.Arrays.stream(Triplet.value().split(",", -1)).map(v -> v.trim()).collect(java.util.stream.Collectors.toList());
-		this.$name+firstLowerCase = Triplet.value() == null ? null : $struct+call;
+		List<String> values = java.util.Arrays.stream(triplet.value().split(",", -1)).map(v -> v.trim()).collect(java.util.stream.Collectors.toList());
+		this.$name+firstLowerCase = triplet.value() == null ? null : $struct+call;
 	}
 end
 
@@ -259,7 +268,7 @@ def type(word) trigger(asTriplet)
 end
 
 def type(entity) type(component) type(list) trigger(asTriplet)
-	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", master.serializer().serialize(new TripletRecord($name+firstLowerCase.stream().flatMap(e -> e.asTriplets().stream()).collect(Collectors.toMap(Triplet::subject, t->t))))));
+	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", master.serializer().serialize(new TripletRecord($name+firstLowerCase.stream().flatMap(e -> e.triplets().stream()).collect(Collectors.toMap(Triplet::subject, t->t))))));
 end
 
 def type(entity) type(component) trigger(asTriplet)
@@ -334,57 +343,102 @@ def trigger(defaultValue)
 	$value
 end
 
-def type(struct) trigger(getter)
+def type(struct) trigger(getterAndSetter)
 	public $package.structs.$struct+structName $name+firstLowerCase() {
 		return this.$name+firstLowerCase;
 	}
+
+	public $entityOwner+firstUpperCase $name+firstLowerCase($package.structs.$struct+structName $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
+		return $castToSubclass~this;
+	}
 end
 
-def type(entity) type(component) type(list) trigger(getter)
+def type(entity) type(component) type(list) trigger(getterAndSetter)
 	public List<$entity+firstUpperCase> $name+firstLowerCase() {
 		return $name+firstLowerCase;
 	}
-end
 
-def type(entity) type(component) trigger(getter)
-	public $entity+firstUpperCase $name+firstLowerCase() {
-		return $name+firstLowerCase;
+	public $entityOwner+firstUpperCase $name+firstLowerCase(List<$entity+firstUpperCase> $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
+		return $castToSubclass~this;
 	}
 end
 
-def type(entity) type(list) trigger(getter)
+def type(entity) type(component) trigger(getterAndSetter)
+	public $entity+firstUpperCase $name+firstLowerCase() {
+		return $name+firstLowerCase;
+	}
+
+	public $entityOwner+firstUpperCase $name+firstLowerCase($entity+firstUpperCase $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
+		return $castToSubclass~this;
+	}
+end
+
+def type(entity) type(list) trigger(getterAndSetter)
 	public List<$entity+firstUpperCase> $name+firstLowerCase() {
 		return $name+firstLowerCase.stream().map(master::$entity+firstLowerCase).collect(Collectors.toList());
 	}
+
+	public $entityOwner+firstUpperCase $name+firstLowerCase(List<String> $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
+		return $castToSubclass~this;
+	}
 end
 
-def type(entity) trigger(getter)
+def type(entity) trigger(getterAndSetter)
 	public $entity+firstUpperCase $name+firstLowerCase() {
 		return master.$entity+firstLowerCase($name+firstLowerCase~Reference);
 	}
+
+	public $entityOwner+firstUpperCase $name+firstLowerCase(String $name+firstLowerCase~Id) {
+		$name+firstLowerCase~Reference = $name+firstLowerCase~Id;
+		return $castToSubclass~this;
+	}
 end
 
-def type(date) trigger(getter)
+def type(date) trigger(getterAndSetter)
 	public java.time.LocalDate $name+firstLowerCase() {
 		return this.$name+firstLowerCase;
 	}
+
+	public $entityOwner+firstUpperCase $name+firstLowerCase(java.time.LocalDate $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
+		return $castToSubclass~this;
+	}
 end
 
-def type(datetime) trigger(getter)
+def type(datetime) trigger(getterAndSetter)
 	public java.time.LocalDateTime $name+firstLowerCase() {
 		return this.$name+firstLowerCase;
 	}
-end
 
-def type(instant) trigger(getter)
-	public java.time.Instant $name+firstLowerCase() {
-		return this.$name+firstLowerCase;
+	public $entityOwner+firstUpperCase $name+firstLowerCase(java.time.LocalDateTime $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
+		return $castToSubclass~this;
 	}
 end
 
-def trigger(getter)
+def type(instant) trigger(getterAndSetter)
+	public java.time.Instant $name+firstLowerCase() {
+		return this.$name+firstLowerCase;
+	}
+
+	public $entityOwner+firstUpperCase $name+firstLowerCase(java.time.Instant $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
+		return $castToSubclass~this;
+	}
+end
+
+def trigger(getterAndSetter)
 	public $type $name+firstLowerCase() {
 		return $name+firstLowerCase;
+	}
+
+	public $entityOwner $name+firstLowerCase($type $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
+		return $castToSubclass~this;
 	}
 end
 

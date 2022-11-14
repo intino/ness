@@ -12,7 +12,6 @@ import io.intino.ness.master.data.MasterTripletsDigester;
 import io.intino.ness.master.data.TripletLoader;
 import io.intino.ness.master.data.update.MasterMessageHandler;
 import io.intino.ness.master.data.update.MasterMessageHandler.MasterMessage;
-import io.intino.ness.master.data.update.MasterPublishError;
 import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.model.TripletRecord;
 import io.intino.ness.master.serialization.MasterSerializer;
@@ -155,11 +154,13 @@ public class Master {
 	}
 
 	private MasterMessage asMasterMessage(Message<Object> hzMessage) {
-		String record = String.valueOf(hzMessage.getMessageObject().toString());
+		String[] info = String.valueOf(hzMessage.getMessageObject().toString()).split(MESSAGE_SEPARATOR);
+		String publisherName = info[0];
+		String record = info[1];
 		return new MasterMessage(
 				serializer().deserialize(record),
 				record,
-				hzMessage.getPublishingMember().getAttribute("name"), // TODO: check
+				publisherName,
 				Instant.ofEpochMilli(hzMessage.getPublishTime())
 		);
 	}

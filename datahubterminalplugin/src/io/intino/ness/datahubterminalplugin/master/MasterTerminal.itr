@@ -8,7 +8,9 @@ def type(master & interface)
 	import java.util.stream.Collectors;
 	import $package.entities.*;
 	import io.intino.ness.master.model.Triplet;
-	import com.hazelcast.core.EntryListener;
+	import io.intino.ness.master.model.TripletRecord;
+	import io.intino.ness.master.data.EntityListener;
+	import io.intino.ness.master.model.Entity;
 
 	public interface MasterTerminal {
 
@@ -25,15 +27,25 @@ def type(master & interface)
 		void start();
 		void stop();
 
-		void publish(String senderName, Triplet Triplet);
+		void publish(Entity entity);
 
 		MasterTerminal.Config config();
 
-		void addEntryListener(EntryListener<String, String> listener);
-
 		io.intino.ness.master.serialization.MasterSerializer serializer();
 
+		<T extends Entity> void addEntityListener(String type, EntityListener<T> listener);
+
+		$entity+entityListener...[$NL$NL]
+
 		$entity+getterSignature...[$NL$NL]
+
+		@SuppressWarnings("unchecked")
+		default <T extends Entity> T asEntity(TripletRecord record) {
+			switch(record.type()) {
+				$entity+asEntitySwitchCase...[$NL]
+				default: throw new IllegalArgumentException("Unknown entity type " + record.type());
+			}
+		}
 
 		enum Type {
 			/**
@@ -118,33 +130,28 @@ end
 def type(master & cached)
 	package $package;
 
-	import static io.intino.ness.master.core.Master.*;
-	import static java.util.Objects.requireNonNull;
-
 	import com.hazelcast.client.HazelcastClient;
 	import com.hazelcast.client.config.ClientConfig;
 	import com.hazelcast.client.config.ClientNetworkConfig;
 	import com.hazelcast.core.EntryAdapter;
 	import com.hazelcast.core.EntryEvent;
-	import com.hazelcast.core.EntryListener;
 	import com.hazelcast.core.HazelcastInstance;
 	import com.hazelcast.map.IMap;
 	import io.intino.alexandria.logger.Logger;
+	import io.intino.ness.master.data.EntityListener;
+	import io.intino.ness.master.data.EntityListener.Event;
+	import io.intino.ness.master.model.Entity;
 	import io.intino.ness.master.model.Triplet;
-	import static io.intino.ness.master.model.Triplet.TRIPLET_SEPARATOR;
 	import io.intino.ness.master.model.TripletRecord;
-	import io.intino.ness.master.model.Triplet;
-
-	import $package.entities.*;
 	import io.intino.ness.master.serialization.MasterSerializer;
 	import io.intino.ness.master.serialization.MasterSerializers;
+	import org.example.test.model.entities.*;
 
-	import java.util.concurrent.ConcurrentHashMap;
+	import java.util.ArrayList;
 	import java.util.HashMap;
 	import java.util.List;
 	import java.util.Map;
-	import java.util.stream.Stream;
-
+	import java.util.concurrent.ConcurrentHashMap;
 	import java.util.concurrent.ExecutorService;
 	import java.util.concurrent.Executors;
 	import java.util.concurrent.TimeUnit;
@@ -152,6 +159,10 @@ def type(master & cached)
 	import java.util.logging.Handler;
 	import java.util.logging.Level;
 	import java.util.logging.LogManager;
+	import java.util.stream.Stream;
+
+	import static io.intino.ness.master.core.Master.*;
+	import static java.util.Objects.requireNonNull;
 
 	public class FullLoadMasterTerminal implements MasterTerminal {
 
@@ -159,6 +170,8 @@ def type(master & cached)
 
     	private final MasterTerminal.Config config;
 		private HazelcastInstance hazelcast;
+		@SuppressWarnings("rawtypes")
+		private final Map<String, List<EntityListener>> entityListeners = new HashMap<>();
 
     	public FullLoadMasterTerminal(MasterTerminal.Config config) {
     		this.config = requireNonNull(config);
@@ -178,8 +191,10 @@ def type(master & cached)
     	}
 
 		@Override
-    	public void addEntryListener(EntryListener<String, String> listener) {
-    		hazelcast.<String, String>getMap(MASTER_MAP_NAME).addEntryListener(listener, true);
+    	public <T extends Entity> void addEntityListener(String type, EntityListener<T> listener) {
+    		if(type == null) throw new NullPointerException("Type cannot be null");
+    		if(listener == null) throw new NullPointerException("EntryListener cannot be null");
+    		entityListeners.computeIfAbsent(type, k -> new ArrayList<>()).add(listener);
     	}
 
 		@Override
@@ -195,14 +210,17 @@ def type(master & cached)
 
     	$entity+getter...[$NL$NL]
 
-    	public void publish(String publisherName, Triplet Triplet) {
+		@Override
+    	public void publish(Entity entity) {
     		if(!config.allowWriting()) throw new UnsupportedOperationException("This master client cannot publish because it is configured as read only");
-			if(publisherName == null) throw new NullPointerException("Publisher name cannot be null");
-			if(Triplet == null) throw new NullPointerException("Triplet cannot be null");
-			hazelcast.getTopic(REQUESTS_TOPIC).publish(publisherName + MESSAGE_SEPARATOR + Triplet);
+			if(entity == null) throw new NullPointerException("Entity cannot be null");
+			hazelcast.getTopic(REQUESTS_TOPIC).publish(config.instanceName() + MESSAGE_SEPARATOR + serializer().serialize(entity.asTripletRecord()));
     	}
 
     	private void add(TripletRecord record) {
+    		String enabledValue = record.getValue("enabled");
+    		if(enabledValue != null && !"true".equalsIgnoreCase(enabledValue)) return;
+
     		switch(record.type()) {
     			$entity+adder...[$NL]
     		}
@@ -226,7 +244,7 @@ def type(master & cached)
     	}
 
 		private void initListeners() {
-			hazelcast.getMap(MASTER_MAP_NAME).addEntryListener(new TripleEntryDispatcher(), true);
+			hazelcast.getMap(MASTER_MAP_NAME).addEntryListener(new BaseEntryListener(), true);
 		}
 
 		private void loadData() {
@@ -273,33 +291,65 @@ def type(master & cached)
 			rootLogger.addHandler(handler);
 		}
 
-    	public class TripleEntryDispatcher extends EntryAdapter<String, String> {
+    	public class BaseEntryListener extends EntryAdapter<String, String> {
 
 			@Override
 			public void entryAdded(EntryEvent<String, String> event) {
 				addOrUpdateRecord(event.getKey(), event.getValue());
+				notifyEntityListeners(event, Event.Type.Create);
 			}
 
 			@Override
 			public void entryUpdated(EntryEvent<String, String> event) {
 				addOrUpdateRecord(event.getKey(), event.getValue());
+				notifyEntityListeners(event, Event.Type.Update);
 			}
 
 			@Override
 			public void entryRemoved(EntryEvent<String, String> event) {
 				remove(event.getKey());
+				notifyEntityListeners(event, Event.Type.Remove);
 			}
 
 			@Override
 			public void entryEvicted(EntryEvent<String, String> event) {
-				remove(event.getKey());
+				entryRemoved(event);
 			}
 
 			private void addOrUpdateRecord(String id, String serializedRecord) {
 				MasterSerializer serializer = serializer();
 				add(serializer.deserialize(serializedRecord));
 			}
+
+			@SuppressWarnings("all")
+			private void notifyEntityListeners(EntryEvent<String, String> e, Event.Type type) {
+				TripletRecord record = serializer().deserialize(e.getValue());
+				MasterEntityEvent<?> event = new MasterEntityEvent<>(type, asEntity(record));
+				List<EntityListener> listeners = entityListeners.get(record.type());
+				if(listeners != null) listeners.forEach(listener -> listener.notify(event));
+			}
     	}
+
+		public static class MasterEntityEvent<T extends Entity> implements Event<T> {
+
+			private final Type type;
+			private final T entity;
+
+			private MasterEntityEvent(Type type, T entity) {
+				this.type = type;
+				this.entity = entity;
+			}
+
+			@Override
+			public Type type() {
+				return type;
+			}
+
+			@Override
+			public T entity() {
+				return entity;
+			}
+		}
     }
 end
 
@@ -307,37 +357,35 @@ end
 def type(master & lazy)
 	package $package;
 
-	import static io.intino.ness.master.core.Master.*;
-	import static java.util.Objects.requireNonNull;
-
 	import com.hazelcast.client.HazelcastClient;
 	import com.hazelcast.client.config.ClientConfig;
 	import com.hazelcast.client.config.ClientNetworkConfig;
 	import com.hazelcast.core.EntryAdapter;
 	import com.hazelcast.core.EntryEvent;
-	import com.hazelcast.core.EntryListener;
 	import com.hazelcast.core.HazelcastInstance;
 	import com.hazelcast.map.IMap;
-	import io.intino.alexandria.logger.Logger;
-	import io.intino.ness.master.model.Triplet;
-	import static io.intino.ness.master.model.Triplet.TRIPLET_SEPARATOR;
-	import io.intino.ness.master.model.TripletRecord;
-	import io.intino.ness.master.model.Triplet;
-
+	import io.intino.ness.master.data.EntityListener;
+	import io.intino.ness.master.data.EntityListener.Event;
 	import io.intino.ness.master.model.Entity;
-	import $package.entities.*;
+	import io.intino.ness.master.model.Triplet;
+	import io.intino.ness.master.model.TripletRecord;
 	import io.intino.ness.master.serialization.MasterSerializer;
 	import io.intino.ness.master.serialization.MasterSerializers;
+	import org.example.test.model.entities.*;
 
+	import java.util.ArrayList;
+	import java.util.HashMap;
 	import java.util.List;
 	import java.util.Map;
-	import java.util.stream.Stream;
 	import java.util.function.BiFunction;
-
 	import java.util.logging.ConsoleHandler;
 	import java.util.logging.Handler;
 	import java.util.logging.Level;
 	import java.util.logging.LogManager;
+	import java.util.stream.Stream;
+
+	import static io.intino.ness.master.core.Master.*;
+	import static java.util.Objects.requireNonNull;
 
 	public class LazyLoadMasterTerminal implements MasterTerminal {
 
@@ -345,6 +393,8 @@ def type(master & lazy)
 		private HazelcastInstance hazelcast;
 		private IMap<String, String> masterMap;
 		private MasterSerializer serializer;
+		@SuppressWarnings("rawtypes")
+		private final Map<String, List<EntityListener>> entityListeners = new HashMap<>();
 
     	public LazyLoadMasterTerminal(MasterTerminal.Config config) {
     		this.config = requireNonNull(config);
@@ -362,8 +412,10 @@ def type(master & lazy)
     	}
 
 		@Override
-    	public void addEntryListener(EntryListener<String, String> listener) {
-    		hazelcast.<String, String>getMap(MASTER_MAP_NAME).addEntryListener(listener, true);
+    	public <T extends Entity> void addEntityListener(String type, EntityListener<T> listener) {
+    		if(type == null) throw new NullPointerException("Type cannot be null");
+    		if(listener == null) throw new NullPointerException("EntryListener cannot be null");
+    		entityListeners.computeIfAbsent(type, k -> new ArrayList<>()).add(listener);
     	}
 
     	@Override
@@ -390,11 +442,11 @@ def type(master & lazy)
    			return entity;
    		}
 
-    	public void publish(String publisherName, Triplet Triplet) {
+		@Override
+    	public void publish(Entity entity) {
     		if(!config.allowWriting()) throw new UnsupportedOperationException("This master client cannot publish because it is configured as read only");
-			if(publisherName == null) throw new NullPointerException("Publisher name cannot be null");
-			if(Triplet == null) throw new NullPointerException("Triplet cannot be null");
-			hazelcast.getTopic(REQUESTS_TOPIC).publish(publisherName + MESSAGE_SEPARATOR + Triplet);
+			if(entity == null) throw new NullPointerException("Entity cannot be null");
+			hazelcast.getTopic(REQUESTS_TOPIC).publish(config.instanceName() + MESSAGE_SEPARATOR + serializer().serialize(entity.asTripletRecord()));
     	}
 
     	private void initHazelcastClient() {
@@ -407,7 +459,13 @@ def type(master & lazy)
         	masterMap = hazelcast.getMap(MASTER_MAP_NAME);
         	IMap<String, String> metadata = hazelcast.getMap(METADATA_MAP_NAME);
         	serializer = MasterSerializers.get(metadata.get("serializer"));
+
+        	initListeners();
     	}
+
+		private void initListeners() {
+			hazelcast.getMap(MASTER_MAP_NAME).addEntryListener(new BaseEntryListener(), true);
+		}
 
     	private static void configureLogger() {
 			java.util.logging.Logger rootLogger = LogManager.getLogManager().getLogger("");
@@ -418,6 +476,58 @@ def type(master & lazy)
 			handler.setFormatter(new io.intino.alexandria.logger.Formatter());
 			rootLogger.setUseParentHandlers(false);
 			rootLogger.addHandler(handler);
+		}
+
+    	public class BaseEntryListener extends EntryAdapter<String, String> {
+
+			@Override
+			public void entryAdded(EntryEvent<String, String> event) {
+				notifyEntityListeners(event, Event.Type.Create);
+			}
+
+			@Override
+			public void entryUpdated(EntryEvent<String, String> event) {
+				notifyEntityListeners(event, Event.Type.Update);
+			}
+
+			@Override
+			public void entryRemoved(EntryEvent<String, String> event) {
+				notifyEntityListeners(event, Event.Type.Remove);
+			}
+
+			@Override
+			public void entryEvicted(EntryEvent<String, String> event) {
+				entryRemoved(event);
+			}
+
+			@SuppressWarnings("all")
+			private void notifyEntityListeners(EntryEvent<String, String> e, Event.Type type) {
+				TripletRecord record = serializer().deserialize(e.getValue());
+				MasterEntityEvent<?> event = new MasterEntityEvent<>(type, asEntity(record));
+				List<EntityListener> listeners = entityListeners.get(record.type());
+				if(listeners != null) listeners.forEach(listener -> listener.notify(event));
+			}
+    	}
+
+		public static class MasterEntityEvent<T extends Entity> implements Event<T> {
+
+			private final Type type;
+			private final T entity;
+
+			private MasterEntityEvent(Type type, T entity) {
+				this.type = type;
+				this.entity = entity;
+			}
+
+			@Override
+			public Type type() {
+				return type;
+			}
+
+			@Override
+			public T entity() {
+				return entity;
+			}
 		}
     }
 end
@@ -502,7 +612,17 @@ def !type(abstract) type(lazy) trigger(getter)
 end
 
 def trigger(getterSignature)
-	public $name+FirstUpperCase $name+firstLowerCase(String id);
-	public Stream<$name+FirstUpperCase> $name+Plural+firstLowerCase();
+	$name+FirstUpperCase $name+firstLowerCase(String id);
+	Stream<$name+FirstUpperCase> $name+Plural+firstLowerCase();
 	default List<$name+FirstUpperCase> $name+firstLowerCase~List() {return $name+Plural+firstLowerCase().collect(Collectors.toList());}
+end
+
+def trigger(entityListener)
+	default void add$name+FirstUpperCase~EntityListener(EntityListener<$name+FirstUpperCase> listener) {
+		addEntityListener("$name+firstLowerCase", listener);
+	}
+end
+
+def type(entity) type(!abstract) trigger(asEntitySwitchCase)
+	case "$name+firstLowerCase": return (T) new $name+FirstUpperCase(record, this);
 end

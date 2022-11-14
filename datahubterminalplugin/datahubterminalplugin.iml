@@ -45,12 +45,13 @@
     <orderEntry type="library" name="Intino: org.slf4j:slf4j-log4j12:1.7.25" level="project" />
     <orderEntry type="library" name="Intino: log4j:log4j:1.2.17" level="project" />
     <orderEntry type="module" module-name="data-hub" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.xerial.snappy:snappy-java:1.1.8.2" level="project" />
     <orderEntry type="library" name="Intino: org.slf4j:slf4j-api:1.7.25" level="project" />
+    <orderEntry type="module" module-name="datalake-inspector" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.0.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.0.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:io:3.0.0" level="project" />
     <orderEntry type="library" name="Intino: commons-io:commons-io:2.5" level="project" />
     <orderEntry type="library" name="Intino: commons-codec:commons-codec:1.15" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: org.xerial.snappy:snappy-java:1.1.8.2" level="project" />
   </component>
 </module>

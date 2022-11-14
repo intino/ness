@@ -1,8 +1,10 @@
 package io.intino.ness.master.model;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -16,6 +18,11 @@ public class TripletRecord {
 	public TripletRecord(String id, Map<String, Triplet> triplets) {
 		this.id = requireNonNull(id);
 		this.triplets = triplets == null ? new LinkedHashMap<>() : triplets;
+	}
+
+	public TripletRecord(String id, List<Triplet> triplets) {
+		this.id = requireNonNull(id);
+		this.triplets = triplets == null ? new LinkedHashMap<>() : triplets.stream().collect(Collectors.toMap(Triplet::predicate, Function.identity(), (a, b) -> b));
 	}
 
 	public TripletRecord(Map<String, Triplet> triplets) {
