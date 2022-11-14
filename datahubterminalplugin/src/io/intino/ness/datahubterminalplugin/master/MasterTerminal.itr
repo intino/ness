@@ -145,7 +145,7 @@ def type(master & cached)
 	import io.intino.ness.master.model.TripletRecord;
 	import io.intino.ness.master.serialization.MasterSerializer;
 	import io.intino.ness.master.serialization.MasterSerializers;
-	import org.example.test.model.entities.*;
+	import $package.entities.*;
 
 	import java.util.ArrayList;
 	import java.util.HashMap;
@@ -371,7 +371,7 @@ def type(master & lazy)
 	import io.intino.ness.master.model.TripletRecord;
 	import io.intino.ness.master.serialization.MasterSerializer;
 	import io.intino.ness.master.serialization.MasterSerializers;
-	import org.example.test.model.entities.*;
+	import $package.entities.*;
 
 	import java.util.ArrayList;
 	import java.util.HashMap;
