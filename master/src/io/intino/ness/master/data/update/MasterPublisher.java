@@ -14,8 +14,7 @@ import java.util.stream.Collectors;
 
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.WRITE;
+import static java.nio.file.StandardOpenOption.*;
 import static java.util.Objects.requireNonNull;
 
 public class MasterPublisher {
@@ -37,7 +36,7 @@ public class MasterPublisher {
 	}
 
 	private void publish(String tank, List<Triplet> triplets) throws IOException {
-		File tankDir = new File(datalakeTripletsPath, tank);
+		File tankDir = new File(datalakeTripletsPath, capitalize(tank));
 		tankDir.mkdirs();
 
 		File file = new File(tankDir, todaysTimetag() + TRIPLETS_EXTENSION);
@@ -45,11 +44,16 @@ public class MasterPublisher {
 		tmp.deleteOnExit();
 
 		try {
-			Files.write(tmp.toPath(), serialize(triplets), CREATE, WRITE);
+			Files.copy(file.toPath(), tmp.toPath(), REPLACE_EXISTING);
+			Files.write(tmp.toPath(), serialize(triplets), CREATE, WRITE, APPEND);
 			Files.move(tmp.toPath(), file.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
 		} finally {
 			tmp.delete();
 		}
+	}
+
+	private String capitalize(String s) {
+		return Character.toUpperCase(s.charAt(0)) + s.substring(1);
 	}
 
 	private Iterable<String> serialize(List<Triplet> triplets) {
