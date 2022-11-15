@@ -29,8 +29,10 @@ public class MasterPublisher {
 	}
 
 	public void publish(List<Triplet> triplets) throws IOException {
-		for (Map.Entry<String, List<Triplet>> entry : groupByType(triplets)) {
-			publish(entry.getKey(), entry.getValue());
+		synchronized (MasterPublisher.class) {
+			for (Map.Entry<String, List<Triplet>> entry : groupByType(triplets)) {
+				publish(entry.getKey(), entry.getValue());
+			}
 		}
 	}
 
