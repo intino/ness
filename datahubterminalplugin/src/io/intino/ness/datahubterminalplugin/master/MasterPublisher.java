@@ -3,9 +3,7 @@ package io.intino.ness.datahubterminalplugin.master;
 import io.intino.Configuration;
 import io.intino.datahub.model.NessGraph;
 import io.intino.ness.datahubterminalplugin.Formatters;
-import io.intino.ness.datahubterminalplugin.IntinoException;
 import io.intino.ness.datahubterminalplugin.MavenTerminalExecutor;
-import io.intino.ness.datahubterminalplugin.Version;
 import io.intino.plugin.PluginLauncher;
 
 import java.io.File;
@@ -13,7 +11,7 @@ import java.io.PrintStream;
 import java.util.Map;
 
 import static io.intino.ness.datahubterminalplugin.MavenTerminalExecutor.Target.Master;
-import static io.intino.plugin.PluginLauncher.Phase.*;
+import static io.intino.plugin.PluginLauncher.Phase.INSTALL;
 
 public class MasterPublisher {
 	private final NessGraph model;
@@ -40,7 +38,7 @@ public class MasterPublisher {
 
 	public boolean publish() {
 		try {
-			if (!checkPublish() || !createSources()) return false;
+			if (!createSources()) return false;
 			logger.println("Publishing master...");
 			new MavenTerminalExecutor(root, basePackage, Master, "master-terminal", versions, conf, systemProperties, logger)
 					.mvn(invokedPhase == INSTALL ? "install" : "deploy");
@@ -56,16 +54,4 @@ public class MasterPublisher {
 	private boolean createSources() {
 		return new MasterRenderer(root, model, conf, logger, notifier).render();
 	}
-
-	private boolean checkPublish() {
-		try {
-			Version version = new Version(conf.artifact().version());
-			if (!version.isSnapshot() && (invokedPhase == DISTRIBUTE || invokedPhase == DEPLOY))
-				return false;
-		} catch (IntinoException e) {
-			return false;
-		}
-		return true;
-	}
-
 }

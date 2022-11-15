@@ -32,7 +32,7 @@ public class PluginTest {
 //	private static final String JAVA_HOME = "C:/Program Files/Java/jdk-11.0.2";
 
 	@Test
-	public void should_build_test_terminals() throws IOException {
+	public void should_build_test_terminals() {
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
 		launcher.moduleStructure(new ModuleStructure(List.of(
 						new File(TEST_MODULE_PATH + "/src")),
