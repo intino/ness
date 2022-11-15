@@ -623,6 +623,6 @@ def trigger(entityListener)
 	}
 end
 
-def type(entity) type(!abstract) trigger(asEntitySwitchCase)
+def type(entity) !type(abstract) trigger(asEntitySwitchCase)
 	case "$name+firstLowerCase": return (T) new $name+FirstUpperCase(record, this);
 end

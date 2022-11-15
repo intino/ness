@@ -1,6 +1,5 @@
 package io.intino.ness.master.data.update;
 
-import com.hazelcast.topic.Message;
 import io.intino.ness.master.core.Master;
 import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.model.TripletRecord;
@@ -40,7 +39,9 @@ public class MasterMessageHandler {
 	}
 
 	private void updateMasterMap(MasterMessage message) {
-		master.masterMap().set(message.record.id(), message.serializedRecord);
+		synchronized (MasterMessageHandler.class) {
+			master.masterMap().set(message.record.id(), message.serializedRecord);
+		}
 	}
 
 	public static class MasterMessage {
