@@ -44,7 +44,7 @@ public class MasterPublisher {
 		tmp.deleteOnExit();
 
 		try {
-			Files.copy(file.toPath(), tmp.toPath(), REPLACE_EXISTING);
+			if(file.exists()) Files.copy(file.toPath(), tmp.toPath(), REPLACE_EXISTING);
 			Files.write(tmp.toPath(), serialize(triplets), CREATE, WRITE, APPEND);
 			Files.move(tmp.toPath(), file.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
 		} finally {
