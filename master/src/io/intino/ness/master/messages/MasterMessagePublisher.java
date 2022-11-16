@@ -1,10 +1,10 @@
 package io.intino.ness.master.messages;
 
-import io.intino.ness.master.core.Master;
+import com.hazelcast.core.HazelcastInstance;
 
 public class MasterMessagePublisher {
 
-	public static void publishMessage(Master master, String topic, MasterMessage message) {
-		master.hazelcast().getTopic(topic).publish(MasterMessageSerializer.serialize(message));
+	public static void publishMessage(HazelcastInstance hz, String topic, MasterMessage message) {
+		hz.getTopic(topic).publish(MasterMessageSerializer.serialize(message));
 	}
 }

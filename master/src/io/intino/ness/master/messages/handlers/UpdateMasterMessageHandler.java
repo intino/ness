@@ -89,7 +89,7 @@ public class UpdateMasterMessageHandler implements MasterMessageHandler<UpdateMa
 	}
 
 	private void publishListenerMessage(String author, Action action, String updateMessageId, String record) {
-		MasterMessagePublisher.publishMessage(master, MASTER_LISTENER_TOPIC, new ListenerMasterMessage(
+		MasterMessagePublisher.publishMessage(master.hazelcast(), MASTER_LISTENER_TOPIC, new ListenerMasterMessage(
 				author,
 				action,
 				updateMessageId,

@@ -147,7 +147,7 @@ public class Master {
 
 	private void notifyError(MasterMessageException error) {
 		try {
-			MasterMessagePublisher.publishMessage(this, MASTER_ERROR_TOPIC, new ErrorMasterMessage(error, Instant.now()));
+			MasterMessagePublisher.publishMessage(hazelcast, MASTER_ERROR_TOPIC, new ErrorMasterMessage(error, Instant.now()));
 		} catch (Throwable e) {
 			Logger.error(e);
 		}
