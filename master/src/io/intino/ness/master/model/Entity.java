@@ -7,11 +7,11 @@ import static java.util.Objects.requireNonNull;
 public abstract class Entity {
 
 	private final Id id;
-	private boolean enabled = true;
-	private final Map<String, Triplet> extraTriplets = new HashMap<>(0);
+	private final Map<String, Triplet> extraTriplets = new HashMap<>(1);
 
 	public Entity(String id) {
 		this.id = new Id(id);
+		extraTriplets.put("enabled", new Triplet(id, "enabled", "true"));
 	}
 
 	public Id id() {
@@ -19,14 +19,12 @@ public abstract class Entity {
 	}
 
 	public boolean enabled() {
-		return enabled;
+		return "true".equalsIgnoreCase(getExtraAttribute("enabled"));
 	}
 
-	public final void setEnabled(boolean enabled) {
-		final boolean oldValue = this.enabled;
+	private void setEnabled(boolean enabled) {
+		final boolean oldValue = this.enabled();
 		if(oldValue == enabled) return;
-
-		this.enabled = enabled;
 
 		if(enabled)
 			onEnable();
@@ -38,8 +36,7 @@ public abstract class Entity {
 	protected void onDisable() {}
 
 	public Entity add(Triplet t) {
-		if(t.predicate().equals("enabled"))
-			setEnabled(parseBoolean(t.value()));
+		if(t.predicate().equals("enabled")) setEnabled(parseBoolean(t.value()));
 		extraTriplets.put(t.predicate(), t);
 		return this;
 	}
@@ -71,6 +68,10 @@ public abstract class Entity {
 
 	public boolean hasExtraAttribute(String predicate) {
 		return extraTriplets.containsKey(predicate);
+	}
+
+	public String getExtraAttribute(String predicate) {
+		return hasExtraAttribute(predicate) ? getExtraTriplet(predicate).value() : null;
 	}
 
 	@Override

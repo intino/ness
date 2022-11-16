@@ -1,4 +1,4 @@
-package io.intino.ness.master.data.update;
+package io.intino.ness.master.persistence;
 
 import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
@@ -17,18 +17,18 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.nio.file.StandardOpenOption.*;
 import static java.util.Objects.requireNonNull;
 
-public class MasterPublisher {
+public class MasterTripletWriter {
 
 	private static final String TRIPLETS_EXTENSION = ".triplets";
 
 	private final File datalakeTripletsPath;
 
-	public MasterPublisher(File datalakeTripletsPath) {
+	public MasterTripletWriter(File datalakeTripletsPath) {
 		this.datalakeTripletsPath = requireNonNull(datalakeTripletsPath);
 	}
 
 	public void publish(List<Triplet> triplets) throws IOException {
-		synchronized (MasterPublisher.class) {
+		synchronized (MasterTripletWriter.class) {
 			for (Map.Entry<String, List<Triplet>> entry : groupByType(triplets)) {
 				publish(entry.getKey(), entry.getValue());
 			}

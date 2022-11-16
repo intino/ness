@@ -1,6 +1,7 @@
 package io.intino.ness;
 
 import io.intino.ness.master.core.Master;
+import io.intino.ness.master.data.FileTripletLoader;
 import io.intino.ness.master.data.validation.*;
 import io.intino.ness.master.data.validation.validators.DuplicatedTripletRecordValidator;
 import io.intino.ness.master.data.validation.validators.SyntaxTripletValidator;
@@ -15,13 +16,14 @@ import java.util.stream.Stream;
 import static io.intino.ness.master.data.validation.Issue.Type.INVALID_VALUE;
 import static io.intino.ness.master.data.validation.Issue.Type.MISSING_ATTRIBUTE;
 
-public class TestMasterMain {
+public class MasterServer_ {
 
 	public static void main(String[] args) {
 		Master.Config config = new Master.Config();
 		config.datalakeRootPath(new File("temp/cinepolis-data/datasets"));
 		config.instanceName("Master");
 		config.serializer(MasterSerializers.getDefault());
+		config.tripletsLoader(new FileTripletLoader(new File("temp/cinepolis-data/datasets")));
 		config.port(62555);
 
 		Master master = new Master(config);
