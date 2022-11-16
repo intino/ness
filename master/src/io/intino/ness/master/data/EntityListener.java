@@ -34,6 +34,7 @@ public interface EntityListener<T extends Entity> {
 		Type type();
 		T entity();
 		Instant ts();
+		String messageId();
 
 		enum Type {
 			Create, Update, Enable, Disable, Remove
