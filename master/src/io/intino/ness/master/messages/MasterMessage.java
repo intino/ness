@@ -3,11 +3,10 @@ package io.intino.ness.master.messages;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
-import java.util.UUID;
 
 public abstract class MasterMessage implements Serializable {
 
-	private final String id = UUID.randomUUID().toString();
+	private final String id = MasterMessageIdGenerator.generate(getClass());
 
 	public final String id() {
 		return id;

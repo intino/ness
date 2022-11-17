@@ -22,9 +22,13 @@ def type(master & interface)
 	import java.util.HashMap;
 	import java.util.List;
 	import java.util.UUID;
+	import java.util.concurrent.Future;
+	import java.util.concurrent.CompletableFuture;
 	import org.example.test.model.entities.*;
 	import io.intino.ness.master.model.TripletRecord;
-	import io.intino.ness.master.data.EntityListener;
+	import io.intino.ness.master.messages.listeners.EntityListener;
+	import io.intino.ness.master.messages.listeners.ErrorListener;
+	import io.intino.ness.master.messages.Response;
 	import io.intino.ness.master.model.Entity;
 
 	public interface MasterTerminal extends MasterView {
@@ -42,9 +46,9 @@ def type(master & interface)
 		void start();
 		void stop();
 
-		void enable(String entityId);
-		void disable(String entityId);
-		void publish(Entity entity);
+		<T extends Entity> Future<Response<T>> enable(String entityId);
+		<T extends Entity> Future<Response<T>> disable(String entityId);
+		<T extends Entity> Future<Response<T>> publish(Entity entity);
 
 		MasterView disabled();
 
@@ -52,12 +56,15 @@ def type(master & interface)
 
 		io.intino.ness.master.serialization.MasterSerializer serializer();
 
+		void addErrorListener(ErrorListener listener);
+
 		<T extends Entity> void addEntityListener(String type, EntityListener<T> listener);
 
 		$entity+entityListener...[$NL$NL]
 
 		@SuppressWarnings("unchecked")
 		default <T extends Entity> T asEntity(TripletRecord record) {
+			if(record == null) return null;
 			switch(record.type()) {
 				$entity+asEntitySwitchCase...[$NL]
 				default: throw new IllegalArgumentException("Unknown entity type " + record.type());
@@ -105,6 +112,7 @@ def type(master & interface)
     			this.allowWriting = other.allowWriting;
     			this.multithreadLoading = other.multithreadLoading;
     			this.filter = other.filter;
+    			this.cacheDisabledView = other.cacheDisabledView;
     		}
 
     		public String instanceName() {
@@ -193,12 +201,10 @@ def type(master & cached)
 	import com.hazelcast.topic.Message;
 	import com.hazelcast.topic.MessageListener;
 	import io.intino.alexandria.logger.Logger;
-	import io.intino.ness.master.data.EntityListener;
-	import io.intino.ness.master.data.EntityListener.Event;
-	import io.intino.ness.master.messages.ListenerMasterMessage;
-	import io.intino.ness.master.messages.MasterMessagePublisher;
-	import io.intino.ness.master.messages.MasterMessageSerializer;
-	import io.intino.ness.master.messages.UpdateMasterMessage;
+	import io.intino.ness.master.messages.*;
+	import io.intino.ness.master.messages.listeners.EntityListener;
+	import io.intino.ness.master.messages.listeners.EntityListener.Event;
+	import io.intino.ness.master.messages.listeners.ErrorListener;
 	import io.intino.ness.master.model.Entity;
 	import io.intino.ness.master.model.Triplet;
 	import io.intino.ness.master.model.TripletRecord;
@@ -207,13 +213,10 @@ def type(master & cached)
 
 	import java.time.Instant;
 	import java.util.ArrayList;
-	import java.util.HashMap;
+	import java.util.Collections;
 	import java.util.List;
 	import java.util.Map;
-	import java.util.concurrent.ConcurrentHashMap;
-	import java.util.concurrent.ExecutorService;
-	import java.util.concurrent.Executors;
-	import java.util.concurrent.TimeUnit;
+	import java.util.concurrent.*;
 	import java.util.concurrent.atomic.AtomicBoolean;
 	import java.util.logging.ConsoleHandler;
 	import java.util.logging.Handler;
@@ -223,12 +226,12 @@ def type(master & cached)
 
 	import static io.intino.ness.master.core.Master.MASTER_MAP_NAME;
 	import static io.intino.ness.master.core.Master.METADATA_MAP_NAME;
-	import static io.intino.ness.master.messages.MasterTopics.MASTER_LISTENER_TOPIC;
-	import static io.intino.ness.master.messages.MasterTopics.MASTER_UPDATE_TOPIC;
+	import static io.intino.ness.master.messages.MasterTopics.*;
 	import static java.util.Objects.requireNonNull;
 
 	import $package.entities.*;
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public class FullLoadMasterTerminal implements MasterTerminal {
 
     	$entity+map...[$NL]
@@ -236,8 +239,9 @@ def type(master & cached)
 		private final AtomicBoolean initialized = new AtomicBoolean(false);
     	private final MasterTerminal.Config config;
 		protected HazelcastInstance hazelcast;
-		@SuppressWarnings("rawtypes")
-		private final Map<String, List<EntityListener>> entityListeners = new HashMap<>();
+		private final Map<String, List<EntityListener>> entityListeners = new ConcurrentHashMap<>();
+		private final List<ErrorListener> errorListeners = Collections.synchronizedList(new ArrayList<>());
+		private final Map<String, CompletableFuture> futures = new ConcurrentHashMap<>();
 		private DisabledView disabledView;
 
     	public FullLoadMasterTerminal(MasterTerminal.Config config) {
@@ -264,6 +268,12 @@ def type(master & cached)
     	}
 
 		@Override
+		public void addErrorListener(ErrorListener listener) {
+			if(listener == null) throw new NullPointerException("ErrorListener cannot be null");
+			errorListeners.add(listener);
+		}
+
+		@Override
     	public <T extends Entity> void addEntityListener(String type, EntityListener<T> listener) {
     		if(type == null) throw new NullPointerException("Type cannot be null");
     		if(listener == null) throw new NullPointerException("EntryListener cannot be null");
@@ -284,29 +294,46 @@ def type(master & cached)
     	$entity+getter...[$NL$NL]
 
     	@Override
-    	public void enable(String id) {
+    	public <T extends Entity> Future<Response<T>> enable(String id) {
     		if(!config.allowWriting()) throw new UnsupportedOperationException("This master client is configured as read only");
             if(id == null) throw new NullPointerException("Entity id cannot be null");
-            MasterMessagePublisher.publishMessage(hazelcast, MASTER_UPDATE_TOPIC, createMessage(UpdateMasterMessage.Action.Enable, id));
+            UpdateMasterMessage message = createMessage(UpdateMasterMessage.Action.Enable, id);
+            CompletableFuture<Response<T>> future = new CompletableFuture<>();
+            futures.put(message.id(), future);
+            MasterMessagePublisher.publishMessage(hazelcast, MASTER_UPDATE_TOPIC, message);
+            return future;
     	}
 
       	@Override
-      	public void disable(String id) {
+      	public <T extends Entity> Future<Response<T>> disable(String id) {
       		if(!config.allowWriting()) throw new UnsupportedOperationException("This master client is configured as read only");
-              if(id == null) throw new NullPointerException("Entity id cannot be null");
-              MasterMessagePublisher.publishMessage(hazelcast, MASTER_UPDATE_TOPIC, createMessage(UpdateMasterMessage.Action.Disable, id));
+            if(id == null) throw new NullPointerException("Entity id cannot be null");
+            UpdateMasterMessage message = createMessage(UpdateMasterMessage.Action.Disable, id);
+            CompletableFuture<Response<T>> future = new CompletableFuture<>();
+            futures.put(message.id(), future);
+            MasterMessagePublisher.publishMessage(hazelcast, MASTER_UPDATE_TOPIC, message);
+            return future;
       	}
 
 		@Override
-    	public void publish(Entity entity) {
+    	public <T extends Entity> Future<Response<T>> publish(Entity entity) {
     		if(!config.allowWriting()) throw new UnsupportedOperationException("This master client is configured as read only");
 			if(entity == null) throw new NullPointerException("Entity cannot be null");
-			MasterMessagePublisher.publishMessage(hazelcast, MASTER_UPDATE_TOPIC, createMessage(UpdateMasterMessage.Action.Publish, serializer().serialize(entity.asTripletRecord())));
+			UpdateMasterMessage message = createMessage(UpdateMasterMessage.Action.Publish, serializer().serialize(entity.asTripletRecord()));
+            CompletableFuture<Response<T>> future = new CompletableFuture<>();
+            futures.put(message.id(), future);
+			MasterMessagePublisher.publishMessage(hazelcast, MASTER_UPDATE_TOPIC, message);
+			return future;
     	}
 
     	@Override
     	public synchronized MasterView disabled() {
-    		if(!config.cacheDisabledView()) return new DisabledView(this);
+      		if(config.filter() == MasterTerminal.EntityFilter.OnlyDisabled) return this;
+    		if(!config.cacheDisabledView()) {
+    			DisabledView view = new DisabledView(this);
+    			view.start();
+    			return view;
+    		}
     		if(disabledView == null) {
     			disabledView = new DisabledView(this);
     			disabledView.start();
@@ -360,6 +387,7 @@ def type(master & cached)
 
 		protected void initListeners() {
 			hazelcast.getTopic(MASTER_LISTENER_TOPIC).addMessageListener(new ListenerTopicMessageListener());
+			hazelcast.getTopic(MASTER_ERROR_TOPIC).addMessageListener(new ErrorTopicMessageListener());
 		}
 
 		private void loadData() {
@@ -406,13 +434,52 @@ def type(master & cached)
 			rootLogger.addHandler(handler);
 		}
 
+		private class ErrorTopicMessageListener implements MessageListener<Object> {
+
+			@Override
+			public void onMessage(Message<Object> rawMessage) {
+				ErrorMasterMessage message = MasterMessageSerializer.deserialize(String.valueOf(rawMessage.getMessageObject()), ErrorMasterMessage.class);
+            	notifyErrorListeners(new MasterError(message.ts(), message.error()));
+			}
+
+			protected void notifyErrorListeners(ErrorListener.Error error) {
+				if(error.messageId() != null) {
+					CompletableFuture<Response<?>> future = futures.remove(error.messageId());
+					if(future != null) future.complete(Response.ofFailure(error));
+				}
+
+				errorListeners.forEach(listener -> listener.notify(error));
+			}
+
+			protected class MasterError implements ErrorListener.Error {
+
+				private final Instant ts;
+				private final MasterMessageException error;
+
+				private MasterError(Instant ts, MasterMessageException error) {
+					this.ts = ts;
+					this.error = error;
+				}
+
+				@Override
+				public Instant ts() {
+					return ts;
+				}
+
+				@Override
+				public MasterMessageException cause() {
+					return error;
+				}
+			}
+		}
+
 		private class ListenerTopicMessageListener implements MessageListener<Object> {
 
 			@Override
 			public void onMessage(Message<Object> rawMessage) {
 				ListenerMasterMessage message = MasterMessageSerializer.deserialize(String.valueOf(rawMessage.getMessageObject()), ListenerMasterMessage.class);
-				TripletRecord record = serializer().deserialize(message.record());
-				Event<?> event = new MasterEntityEvent<>(message.author(), asEventType(message.action()), asEntity(record), message.ts(), message.id());
+				TripletRecord record = message.action() == ListenerMasterMessage.Action.None ? null : serializer().deserialize(message.record());
+				Event<?> event = new MasterEntityEvent<>(message.author(), asEventType(message.action()), asEntity(record), message.record(), message.ts(), message.id());
 				process(event, record);
 				notifyEntityListeners(event);
 			}
@@ -438,12 +505,16 @@ def type(master & cached)
 					case Enabled: return Event.Type.Enable;
 					case Disabled: return Event.Type.Disable;
 					case Removed: return Event.Type.Remove;
+					case None: return Event.Type.None;
 					default: throw new IllegalArgumentException("Unknown listener action " + action);
 				}
 			}
 
 			@SuppressWarnings("all")
 			protected void notifyEntityListeners(Event<?> event) {
+				CompletableFuture<Response<?>> future = futures.remove(event.messageId());
+				if(future != null) future.complete(Response.ofSuccessful(event));
+
 				List<EntityListener> listeners = entityListeners.get(event.entity().id().type());
 				if(listeners != null) listeners.forEach(listener -> listener.notify(event));
 			}
@@ -453,6 +524,11 @@ def type(master & cached)
 
 			public DisabledView(FullLoadMasterTerminal original) {
 				super(new Config(original.config()).allowWriting(false).filter(EntityFilter.OnlyDisabled), original.hazelcast);
+			}
+
+			@Override
+			public void addErrorListener(ErrorListener listener) {
+				throw new UnsupportedOperationException();
 			}
 
 			@Override
@@ -500,13 +576,15 @@ def type(master & cached)
 			private final String author;
 			private final Type type;
 			private final T entity;
+			private final String value;
 			private final Instant ts;
 			private final String messageId;
 
-			private MasterEntityEvent(String author, Type type, T entity, Instant ts, String messageId) {
+			private MasterEntityEvent(String author, Type type, T entity, String value, Instant ts, String messageId) {
 				this.author = author;
 				this.type = type;
 				this.entity = entity;
+				this.value = value;
 				this.ts = ts;
 				this.messageId = messageId;
 			}
@@ -524,6 +602,11 @@ def type(master & cached)
 			@Override
 			public T entity() {
 				return entity;
+			}
+
+			@Override
+			public String value() {
+				return value;
 			}
 
 			@Override
@@ -550,26 +633,25 @@ def type(master & lazy)
 	import com.hazelcast.map.IMap;
 	import com.hazelcast.topic.Message;
 	import com.hazelcast.topic.MessageListener;
-	import io.intino.ness.master.data.EntityListener;
-	import io.intino.ness.master.data.EntityListener.Event;
-	import io.intino.ness.master.messages.ListenerMasterMessage;
-	import io.intino.ness.master.messages.MasterMessagePublisher;
-	import io.intino.ness.master.messages.MasterMessageSerializer;
-	import io.intino.ness.master.messages.UpdateMasterMessage;
+	import io.intino.alexandria.logger.Logger;
+	import io.intino.ness.master.messages.*;
+	import io.intino.ness.master.messages.listeners.EntityListener;
+	import io.intino.ness.master.messages.listeners.EntityListener.Event;
+	import io.intino.ness.master.messages.listeners.ErrorListener;
 	import io.intino.ness.master.model.Entity;
 	import io.intino.ness.master.model.Triplet;
 	import io.intino.ness.master.model.TripletRecord;
 	import io.intino.ness.master.serialization.MasterSerializer;
 	import io.intino.ness.master.serialization.MasterSerializers;
-	import org.example.test.model.entities.*;
 
 	import java.time.Instant;
 	import java.util.ArrayList;
-	import java.util.HashMap;
+	import java.util.Collections;
 	import java.util.List;
 	import java.util.Map;
-	import java.util.concurrent.atomic.AtomicBoolean;
 	import java.util.function.BiFunction;
+	import java.util.concurrent.*;
+	import java.util.concurrent.atomic.AtomicBoolean;
 	import java.util.logging.ConsoleHandler;
 	import java.util.logging.Handler;
 	import java.util.logging.Level;
@@ -578,12 +660,12 @@ def type(master & lazy)
 
 	import static io.intino.ness.master.core.Master.MASTER_MAP_NAME;
 	import static io.intino.ness.master.core.Master.METADATA_MAP_NAME;
-	import static io.intino.ness.master.messages.MasterTopics.MASTER_LISTENER_TOPIC;
-	import static io.intino.ness.master.messages.MasterTopics.MASTER_UPDATE_TOPIC;
+	import static io.intino.ness.master.messages.MasterTopics.*;
 	import static java.util.Objects.requireNonNull;
 
 	import $package.entities.*;
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public class LazyLoadMasterTerminal implements MasterTerminal {
 
 		private final AtomicBoolean initialized = new AtomicBoolean(false);
@@ -591,8 +673,9 @@ def type(master & lazy)
 		protected HazelcastInstance hazelcast;
 		private IMap<String, String> masterMap;
 		private MasterSerializer serializer;
-		@SuppressWarnings("rawtypes")
-		private final Map<String, List<EntityListener>> entityListeners = new HashMap<>();
+		private final Map<String, List<EntityListener>> entityListeners = new ConcurrentHashMap<>();
+		private final List<ErrorListener> errorListeners = Collections.synchronizedList(new ArrayList<>());
+		private final Map<String, CompletableFuture> futures = new ConcurrentHashMap<>();
 		private DisabledView disabledView;
 
     	public LazyLoadMasterTerminal(MasterTerminal.Config config) {
@@ -617,6 +700,12 @@ def type(master & lazy)
     	}
 
 		@Override
+		public void addErrorListener(ErrorListener listener) {
+			if(listener == null) throw new NullPointerException("ErrorListener cannot be null");
+			errorListeners.add(listener);
+		}
+
+		@Override
     	public <T extends Entity> void addEntityListener(String type, EntityListener<T> listener) {
     		if(type == null) throw new NullPointerException("Type cannot be null");
     		if(listener == null) throw new NullPointerException("EntryListener cannot be null");
@@ -634,29 +723,46 @@ def type(master & lazy)
     	}
 
     	@Override
-    	public void enable(String id) {
+    	public <T extends Entity> Future<Response<T>> enable(String id) {
     		if(!config.allowWriting()) throw new UnsupportedOperationException("This master client is configured as read only");
             if(id == null) throw new NullPointerException("Entity id cannot be null");
-            MasterMessagePublisher.publishMessage(hazelcast, MASTER_UPDATE_TOPIC, createMessage(UpdateMasterMessage.Action.Enable, id));
+            UpdateMasterMessage message = createMessage(UpdateMasterMessage.Action.Enable, id);
+            CompletableFuture<Response<T>> future = new CompletableFuture<>();
+            futures.put(message.id(), future);
+            MasterMessagePublisher.publishMessage(hazelcast, MASTER_UPDATE_TOPIC, message);
+            return future;
     	}
 
       	@Override
-      	public void disable(String id) {
+      	public <T extends Entity> Future<Response<T>> disable(String id) {
       		if(!config.allowWriting()) throw new UnsupportedOperationException("This master client is configured as read only");
-              if(id == null) throw new NullPointerException("Entity id cannot be null");
-              MasterMessagePublisher.publishMessage(hazelcast, MASTER_UPDATE_TOPIC, createMessage(UpdateMasterMessage.Action.Disable, id));
+            if(id == null) throw new NullPointerException("Entity id cannot be null");
+            UpdateMasterMessage message = createMessage(UpdateMasterMessage.Action.Disable, id);
+            CompletableFuture<Response<T>> future = new CompletableFuture<>();
+            futures.put(message.id(), future);
+            MasterMessagePublisher.publishMessage(hazelcast, MASTER_UPDATE_TOPIC, message);
+            return future;
       	}
 
 		@Override
-    	public void publish(Entity entity) {
+    	public <T extends Entity> Future<Response<T>> publish(Entity entity) {
     		if(!config.allowWriting()) throw new UnsupportedOperationException("This master client is configured as read only");
 			if(entity == null) throw new NullPointerException("Entity cannot be null");
-			MasterMessagePublisher.publishMessage(hazelcast, MASTER_UPDATE_TOPIC, createMessage(UpdateMasterMessage.Action.Publish, serializer().serialize(entity.asTripletRecord())));
+			UpdateMasterMessage message = createMessage(UpdateMasterMessage.Action.Publish, serializer().serialize(entity.asTripletRecord()));
+            CompletableFuture<Response<T>> future = new CompletableFuture<>();
+            futures.put(message.id(), future);
+			MasterMessagePublisher.publishMessage(hazelcast, MASTER_UPDATE_TOPIC, message);
+			return future;
     	}
 
     	@Override
     	public synchronized MasterView disabled() {
-    		if(!config.cacheDisabledView()) return new DisabledView(this);
+      		if(config.filter() == MasterTerminal.EntityFilter.OnlyDisabled) return this;
+    		if(!config.cacheDisabledView()) {
+    			DisabledView view = new DisabledView(this);
+    			view.start();
+    			return view;
+    		}
     		if(disabledView == null) {
     			disabledView = new DisabledView(this);
     			disabledView.start();
@@ -672,7 +778,7 @@ def type(master & lazy)
 
     	private TripletRecord getRecord(String id) {
         	String serializedRecord = masterMap.get(id);
-        	if(serializedRecord == null) return null;
+        	if(serializedRecord == null || isFiltered(serializedRecord)) return null;
         	return serializer.deserialize(serializedRecord);
         }
 
@@ -681,6 +787,23 @@ def type(master & lazy)
    			record.triplets().forEach(entity::add);
    			return entity;
    		}
+
+		private boolean accepts(String serializedRecord) {
+			return !isFiltered(serializedRecord);
+		}
+
+   		private boolean isFiltered(String serializedRecord) {
+    		if(config.filter() == MasterTerminal.EntityFilter.All) return false;
+    		TripletRecord record = serializer.deserialize(serializedRecord);
+    		final boolean enabled = isEnabled(record);
+    		return (enabled && config.filter() == MasterTerminal.EntityFilter.OnlyEnabled)
+    			|| (!enabled && config.filter() == MasterTerminal.EntityFilter.OnlyDisabled);
+   		}
+
+    	private boolean isEnabled(TripletRecord record) {
+    		String enabledValue = record.getValue("enabled");
+            return enabledValue == null || "true".equalsIgnoreCase(enabledValue);
+    	}
 
     	private void initHazelcastClient() {
     		ClientConfig config = new ClientConfig();
@@ -698,6 +821,7 @@ def type(master & lazy)
 
 		protected void initListeners() {
 			hazelcast.getTopic(MASTER_LISTENER_TOPIC).addMessageListener(new ListenerTopicMessageListener());
+			hazelcast.getTopic(MASTER_ERROR_TOPIC).addMessageListener(new ErrorTopicMessageListener());
 		}
 
     	private static void configureLogger() {
@@ -711,13 +835,53 @@ def type(master & lazy)
 			rootLogger.addHandler(handler);
 		}
 
+		private class ErrorTopicMessageListener implements MessageListener<Object> {
+
+			@Override
+			public void onMessage(Message<Object> rawMessage) {
+				ErrorMasterMessage message = MasterMessageSerializer.deserialize(String.valueOf(rawMessage.getMessageObject()), ErrorMasterMessage.class);
+            	notifyErrorListeners(new MasterError(message.ts(), message.error()));
+			}
+
+			protected void notifyErrorListeners(ErrorListener.Error error) {
+				if(error.messageId() != null) {
+					CompletableFuture<Response<?>> future = futures.remove(error.messageId());
+					if(future != null) future.complete(Response.ofFailure(error));
+				}
+
+				errorListeners.forEach(listener -> listener.notify(error));
+			}
+
+			protected class MasterError implements ErrorListener.Error {
+
+				private final Instant ts;
+				private final MasterMessageException error;
+
+				private MasterError(Instant ts, MasterMessageException error) {
+					this.ts = ts;
+					this.error = error;
+				}
+
+				@Override
+				public Instant ts() {
+					return ts;
+				}
+
+				@Override
+				public MasterMessageException cause() {
+					return error;
+				}
+			}
+		}
+
+
 		private class ListenerTopicMessageListener implements MessageListener<Object> {
 
 			@Override
 			public void onMessage(Message<Object> rawMessage) {
 				ListenerMasterMessage message = MasterMessageSerializer.deserialize(String.valueOf(rawMessage.getMessageObject()), ListenerMasterMessage.class);
-				TripletRecord record = serializer().deserialize(message.record());
-				Event<?> event = new MasterEntityEvent<>(message.author(), asEventType(message.action()), asEntity(record), message.ts(), message.id());
+				TripletRecord record = message.action() == ListenerMasterMessage.Action.None ? null : serializer().deserialize(message.record());
+				Event<?> event = new MasterEntityEvent<>(message.author(), asEventType(message.action()), asEntity(record), message.record(), message.ts(), message.id());
 				notifyEntityListeners(event);
 			}
 
@@ -728,12 +892,16 @@ def type(master & lazy)
 					case Enabled: return Event.Type.Enable;
 					case Disabled: return Event.Type.Disable;
 					case Removed: return Event.Type.Remove;
+					case None: return Event.Type.None;
 					default: throw new IllegalArgumentException("Unknown listener action " + action);
 				}
 			}
 
 			@SuppressWarnings("all")
 			protected void notifyEntityListeners(Event<?> event) {
+				CompletableFuture<Response<?>> future = futures.remove(event.messageId());
+				if(future != null) future.complete(Response.ofSuccessful(event));
+
 				List<EntityListener> listeners = entityListeners.get(event.entity().id().type());
 				if(listeners != null) listeners.forEach(listener -> listener.notify(event));
 			}
@@ -775,13 +943,15 @@ def type(master & lazy)
 			private final String author;
 			private final Type type;
 			private final T entity;
+			private final String value;
 			private final Instant ts;
 			private final String messageId;
 
-			private MasterEntityEvent(String author, Type type, T entity, Instant ts, String messageId) {
+			private MasterEntityEvent(String author, Type type, T entity, String value, Instant ts, String messageId) {
 				this.author = author;
 				this.type = type;
 				this.entity = entity;
+				this.value = value;
 				this.ts = ts;
 				this.messageId = messageId;
 			}
@@ -799,6 +969,11 @@ def type(master & lazy)
 			@Override
 			public T entity() {
 				return entity;
+			}
+
+			@Override
+			public String value() {
+				return value;
 			}
 
 			@Override
@@ -889,6 +1064,7 @@ def !type(abstract) type(lazy) trigger(getter)
 	public Stream<$name+FirstUpperCase> $name+Plural+firstLowerCase() {
 		return masterMap.entrySet().stream()
 				.filter(e -> e.getKey().endsWith(":$name+firstLowerCase"))
+				.filter(e -> accepts(e.getValue()))
 				.map(e -> entity($name+FirstUpperCase::new, e.getKey(), serializer.deserialize(e.getValue())));
 	}
 end

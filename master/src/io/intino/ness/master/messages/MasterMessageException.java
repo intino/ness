@@ -2,6 +2,7 @@ package io.intino.ness.master.messages;
 
 public class MasterMessageException extends Exception {
 
+	private String author;
 	private String originalMessage;
 
 	public MasterMessageException() {
@@ -21,6 +22,15 @@ public class MasterMessageException extends Exception {
 
 	public MasterMessageException originalMessage(MasterMessage originalMessage) {
 		this.originalMessage = MasterMessageSerializer.serialize(originalMessage);
+		return this;
+	}
+
+	public String author() {
+		return author;
+	}
+
+	public MasterMessageException author(String author) {
+		this.author = author;
 		return this;
 	}
 }

@@ -10,6 +10,7 @@ public class Messages_ {
 	public static void main(String[] args) {
 
 		ErrorMasterMessage m = new ErrorMasterMessage(new MasterMessageException("AAA")
+				.author("the author")
 				.originalMessage(new UpdateMasterMessage("abc", UpdateMasterMessage.Action.Enable, "r", Instant.now())),
 				Instant.now());
 

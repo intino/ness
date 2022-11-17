@@ -1,9 +1,10 @@
-package io.intino.ness.master.data;
+package io.intino.ness.master.messages.listeners;
 
 import io.intino.ness.master.model.Entity;
 
 import java.time.Instant;
 
+@FunctionalInterface
 public interface EntityListener<T extends Entity> {
 
 	void notify(Event<T> event);
@@ -28,16 +29,53 @@ public interface EntityListener<T extends Entity> {
 		return event -> { if(event.type() == Event.Type.Remove) listener.notify(event); };
 	}
 
+	static <E extends Entity> EntityListener<E> onNone(EntityListener<E> listener) {
+		return event -> { if(event.type() == Event.Type.None) listener.notify(event); };
+	}
+
+	/**
+	 * Indicates the response of an update request in master server
+	 * */
 	interface Event<T extends Entity> {
 
+		/**
+		 * Returns the client name that sent the request
+		 * */
 		String author();
+		/**
+		 * Indicates which type of action was performed. This can differ from the original intention of the request.
+		 * */
 		Type type();
+		/**
+		 * The entity upon the operation was performed. Will be null if type is None
+		 * */
 		T entity();
+		/**
+		 * The original value of the message that was sent to the server.
+		 * */
+		String value();
+		/**
+		 * The instant at which the request was processed.
+		 * */
 		Instant ts();
+		/**
+		 * The request message id that triggered this event.
+		 * */
 		String messageId();
 
 		enum Type {
-			Create, Update, Enable, Disable, Remove
+			/**A new entity was created in master*/
+			Create,
+			/**The entity was updated*/
+			Update,
+			/**The entity was enabled*/
+			Enable,
+			/**The entity was disabled*/
+			Disable,
+			/**The entity was removed from master*/
+			Remove,
+			/**No operation was performed*/
+			None
 		}
 	}
 }

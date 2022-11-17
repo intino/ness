@@ -40,6 +40,6 @@ public class ListenerMasterMessage extends MasterMessage {
 	}
 
 	public enum Action {
-		Created, Updated, Enabled, Disabled, Removed
+		Created, Updated, Enabled, Disabled, Removed, None
 	}
 }

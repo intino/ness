@@ -43,7 +43,9 @@ public class UpdateMasterMessageHandler implements MasterMessageHandler<UpdateMa
 				}
 			}
 		} catch (Throwable e) {
-			throw new MasterMessageException("Error while processing the UpdateMasterMessage " + message.id(), e).originalMessage(message);
+			throw new MasterMessageException("Error while processing the UpdateMasterMessage " + message.id(), e)
+					.author(message.author())
+					.originalMessage(message);
 		}
 	}
 
@@ -53,25 +55,29 @@ public class UpdateMasterMessageHandler implements MasterMessageHandler<UpdateMa
 			boolean wasAlreadyCreated = master.masterMap().containsKey(record.id());
 			master.masterMap().set(record.id(), message.value());
 			publishListenerMessage(message.author(), wasAlreadyCreated ? Action.Updated : Action.Created, message.id(), message.value());
+		} else {
+			publishListenerMessage(message.author(), Action.None, message.id(), message.value());
 		}
 	}
 
 	private void handleEnable(UpdateMasterMessage message) throws IOException {
-		setEnableOrDisable(message, true);
+		if(!setEnableOrDisable(message, true))
+			publishListenerMessage(message.author(), Action.None, message.id(), message.value());
 	}
 
 	private void handleDisable(UpdateMasterMessage message) throws IOException {
-		setEnableOrDisable(message, false);
+		if(!setEnableOrDisable(message, false))
+			publishListenerMessage(message.author(), Action.None, message.id(), message.value());
 	}
 
-	private void setEnableOrDisable(UpdateMasterMessage message, boolean enabledNewValue) throws IOException {
+	private boolean setEnableOrDisable(UpdateMasterMessage message, boolean enabledNewValue) throws IOException {
 		String serializedRecord = master.masterMap().get(message.value());
-		if(serializedRecord == null) return;
+		if(serializedRecord == null) return false;
 
 		TripletRecord record = master.serializer().deserialize(serializedRecord);
 
 		boolean wasEnabled = "true".equals(record.getValueOrDefault("enabled", "true"));
-		if(wasEnabled == enabledNewValue) return;
+		if(wasEnabled == enabledNewValue) return false;
 
 		record.put(new Triplet(record.id(), "enabled", String.valueOf(enabledNewValue)));
 		serializedRecord = master.serializer().serialize(record);
@@ -80,10 +86,15 @@ public class UpdateMasterMessageHandler implements MasterMessageHandler<UpdateMa
 		new MasterTripletWriter(new File(master.datalakeRootPath(), "triplets")).publish(List.of(record.getTriplet("enabled")));
 
 		publishListenerMessage(message.author(), enabledNewValue ? Action.Enabled : Action.Disabled, message.id(), serializedRecord);
+
+		return true;
 	}
 
 	private void handleRemove(UpdateMasterMessage message) {
-		if(!master.masterMap().containsKey(message.value())) return;
+		if(!master.masterMap().containsKey(message.value())) {
+			publishListenerMessage(message.author(), Action.None, message.id(), message.value());
+			return;
+		}
 		String removedRecord = master.masterMap().remove(message.value());
 		publishListenerMessage(message.author(), Action.Removed, message.id(), removedRecord);
 	}

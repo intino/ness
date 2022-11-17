@@ -16,6 +16,7 @@ public class ErrorMasterMessage extends MasterMessage {
 		return error;
 	}
 
+	@Override
 	public Instant ts() {
 		return ts;
 	}
