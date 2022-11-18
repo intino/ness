@@ -14,20 +14,22 @@ import java.util.concurrent.Future;
 /**
  * Examples of how to modify master data
  *
- * If you want to see how subscribe to changes asynchronously, see ListenersMasterExample
+ * To use these methods, your MasterTerminal instance configuration must define allowWriting as true
+ *
+ * If you want to see how to subscribe to changes asynchronously, see ListenersMasterExample
  *
  * */
-public class ModifyingMasterData {
+public class D_ModifyingMasterData {
 
 	private MasterTerminal terminal;
 
 	/**
-	 * Create or update the specified entity. If the entity was already registered, it will update it contents.
+	 * Create or update the specified entity. If the entity was already registered, it will update its contents.
 	 * If the entity does not change at all, nothing will be updated and the event type will be None
 	 *
-	 * The changes will be visible to all cluster members.
+	 * The changes will be visible to all members of master.
 	 *
-	 * This operation is asynchronous. This means the changes will not be visible until the server has processed the request.
+	 * This operation is asynchronous. This means that the changes will not be visible until the server has processed the request.
 	 * Use the returned Future object to block until it has been processed by the server.
 	 *
 	 * In FullLoad implementation, the local state will be updated when the server notifies the terminal.
@@ -40,12 +42,11 @@ public class ModifyingMasterData {
 				.email("user123@email.com")
 				.datetime(LocalDateTime.now());
 
-		// Async
+		// Asynchronous
 		terminal.publish(employee);
 
 		// Synchronous
 		Future<Response<Employee>> future = terminal.publish(employee);
-
 		Response<Employee> response = future.get();
 
 		if(response.success()) {

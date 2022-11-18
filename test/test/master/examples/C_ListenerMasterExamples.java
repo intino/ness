@@ -11,12 +11,12 @@ import java.time.Instant;
  * Examples of asynchronous listeners. The server will notify all clients when a request is processed or an error occurred.
  *
  * These listeners will be called even if your terminal didn't send the original request. While this is convenient in many cases,
- * such as when updating the application's state, you may want to only listen to responses of YOUR requests. For those cases, use the Future
+ * such as when updating the application's state, you may want to only listen to responses to YOUR requests. For those cases, use the Future
  * object returned from the MasterTerminal.publish, MasterTerminal.enable or MasterTerminal.disable methods.
  * See ModifyingMasterExamples for details.
  *
  * */
-public class ListenerMasterExamples {
+public class C_ListenerMasterExamples {
 
 	private MasterTerminal terminal;
 
@@ -38,7 +38,7 @@ public class ListenerMasterExamples {
 	}
 
 	/**
-	 * You can specify multiple listeners to subscribe when an error occur on server side when processing an update request.
+	 * You can specify multiple listeners to subscribe to when an error occur on server side when processing an update request.
 	 *
 	 * */
 	public void errorListeners() {
@@ -48,7 +48,6 @@ public class ListenerMasterExamples {
 			Instant ts = error.ts();
 			MasterMessageException cause = error.cause();
 
-			// if(!terminal.config().instanceName().equals(author)) return;
 			// ...
 		});
 	}

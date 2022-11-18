@@ -13,7 +13,7 @@ import java.util.List;
  *
  * When calling start, the terminal will block the caller thread until it is completely initialized.
  * */
-public class CreateMasterTerminal {
+public class A_CreateMasterTerminal {
 
 	/**
 	 * This will create a MasterTerminal with its default configuration
@@ -36,9 +36,9 @@ public class CreateMasterTerminal {
 				.type(MasterTerminal.Type.FullLoad) // Selects the implementation of the MasterTerminal instance
 				.addresses(List.of("address to master server (<datahub-host>:<master-port>)")) // List of addresses to master server cluster members
 				.multithreadLoading(true) // Load the data from master using multiple threads. Only applicable if the instance is FullLoad
-				.filter(MasterTerminal.EntityFilter.OnlyEnabled) // Only show entities that passes this filter. The default is OnlyEnabled
+				.filter(MasterTerminal.EntityFilter.OnlyEnabled) // Only show entities that pass this filter. The default is OnlyEnabled
 				.cacheDisabledView(true) // Tells whether the terminal should cache the disabled view instance. Recommended when using FullLoad implementation. The default value is true
-				.putProperty("some other property", "value"); // Specify other properties (specially useful for timeouts, see https://docs.hazelcast.com/hazelcast/5.1/fault-tolerance/timeouts)
+				.putProperty("some other property", "value"); // Specify other properties (especially useful for timeouts, see https://docs.hazelcast.com/hazelcast/5.1/fault-tolerance/timeouts)
 
 		return MasterTerminal.create(config);
 	}

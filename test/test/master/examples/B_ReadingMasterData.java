@@ -8,7 +8,7 @@ import org.example.test.model.entities.Theater;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ReadingMasterData {
+public class B_ReadingMasterData {
 
 	private MasterTerminal terminal;
 
@@ -18,7 +18,7 @@ public class ReadingMasterData {
 	 *
 	 * Notes:
 	 *
-	 * Lists are immutable. If you modify the list itself, it won't affect the internal state of MasterTerminal not the server data
+	 * Lists are immutable. If you modify the list itself, it won't affect the internal state of MasterTerminal nor the server data
 	 *
 	 * The entities returned are meant to be read-only. This means that, if you change an entity by calling a setter, you will only be
 	 * changing the object in local memory. The original object in the master server will not be modified.
@@ -28,8 +28,8 @@ public class ReadingMasterData {
 	 * */
 	public void getEntities() {
 		Employee employee = terminal.employee("123:employee"); // Get by id. Returns null if not found
-		Stream<Employee> employees = terminal.employees(); // Get stream of entities. Empty stream if any entity was found
-		List<Employee> employeeList = terminal.employeeList(); // Get list of entities. Empty list if any entity was found
+		Stream<Employee> employees = terminal.employees(); // Get stream of entities. Empty stream if no entities were found
+		List<Employee> employeeList = terminal.employeeList(); // Get list of entities. Empty list if no entities were found
 
 		// If you want to use the terminal as a read-only accessor to master, cast it to a MasterView interface
 		MasterView masterView = terminal;
@@ -46,7 +46,7 @@ public class ReadingMasterData {
 	 * If the filter already was OnlyDisabled, it will return itself.
 	 *
 	 * Implementation is dependent on the original MasterTerminal implementation. Please note that if config.cacheDisabledView was set
-	 * to false, it will create a new instance every time MasterTerminal.disabled() is called. This is specially critical if the implementation
+	 * to false, it will create a new instance every time MasterTerminal.disabled() is called. This is especially critical if the implementation
 	 * is FullLoad, because it will download all the required entities from master to local memory on creation.
 	 *
 	 * */
