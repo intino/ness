@@ -92,7 +92,7 @@ def type(master & interface)
 
     	final class Config {
 
-    		private String instanceName = "$package.MasterTerminal-" + UUID.randomUUID();
+    		private String clientName = "$package.MasterTerminal-" + UUID.randomUUID();
     		private List<String> addresses = List.of("localhost:5701");
     		private Type type = Type.getDefault();
     		private boolean allowWriting = false;
@@ -101,26 +101,28 @@ def type(master & interface)
     		private boolean cacheDisabledView = true;
     		private final Map<String, String> properties = new HashMap<>() {{
     			put("hazelcast.logging.type", "none");
+    			put("master.log.initialization_complete", "true");
     		}};
 
     		public Config() {}
 
     		public Config(Config other) {
-    			this.instanceName = other.instanceName;
+    			this.clientName = other.clientName;
     			this.addresses = other.addresses == null ? null : List.copyOf(other.addresses);
     			this.type = other.type;
     			this.allowWriting = other.allowWriting;
     			this.multithreadLoading = other.multithreadLoading;
     			this.filter = other.filter;
     			this.cacheDisabledView = other.cacheDisabledView;
+    			this.properties.putAll(other.properties);
     		}
 
-    		public String instanceName() {
-    			return instanceName;
+    		public String clientName() {
+    			return clientName;
     		}
 
-    		public Config instanceName(String instanceName) {
-    			this.instanceName = instanceName;
+    		public Config clientName(String clientName) {
+    			this.clientName = clientName;
     			return this;
     		}
 
@@ -186,6 +188,12 @@ def type(master & interface)
     			this.properties.put(key, value);
     			return this;
     		}
+
+    		public Config removeProperty(String key) {
+    			this.properties.remove(key);
+    			return this;
+    		}
+
     	}
 	}
 end
@@ -260,6 +268,8 @@ def type(master & cached)
 			initHazelcastClient();
 			loadData();
 			initListeners();
+			if("true".equals(config.properties().getOrDefault("master.log.initialization_complete", "true")))
+				Logger.info("MasterTerminal " + config.clientName() + " initialized successfully. (" + getClass().getSimpleName() + ")");
 		}
 
 		@Override
@@ -330,26 +340,26 @@ def type(master & cached)
     	public synchronized MasterView disabled() {
       		if(config.filter() == MasterTerminal.EntityFilter.OnlyDisabled) return this;
     		if(!config.cacheDisabledView()) {
-    			DisabledView view = new DisabledView(this);
+    			DisabledView view = new DisabledView(config, hazelcast);
     			view.start();
     			return view;
     		}
     		if(disabledView == null) {
-    			disabledView = new DisabledView(this);
+    			disabledView = new DisabledView(config, hazelcast);
     			disabledView.start();
     		}
     		return disabledView;
     	}
 
     	private UpdateMasterMessage createMessage(UpdateMasterMessage.Action action, String value) {
-    		return new UpdateMasterMessage(config.instanceName(), action, value);
+    		return new UpdateMasterMessage(config.clientName(), action, value);
     	}
 
-    	private boolean isFiltered(TripletRecord record) {
+    	private boolean isIgnored(TripletRecord record) {
     		if(config.filter() == MasterTerminal.EntityFilter.All) return false;
-    		final boolean enabled = isEnabled(record);
-    		return (enabled && config.filter() == MasterTerminal.EntityFilter.OnlyEnabled)
-    			|| (!enabled && config.filter() == MasterTerminal.EntityFilter.OnlyDisabled);
+    		return isEnabled(record)
+    			? config.filter() == MasterTerminal.EntityFilter.OnlyDisabled
+    			: config.filter() == MasterTerminal.EntityFilter.OnlyEnabled;
     	}
 
     	private boolean isEnabled(TripletRecord record) {
@@ -358,7 +368,7 @@ def type(master & cached)
     	}
 
     	protected void add(TripletRecord record) {
-    		if(isFiltered(record)) return;
+    		if(isIgnored(record)) return;
     		switch(record.type()) {
     			$entity+adder...[$NL]
     		}
@@ -378,7 +388,7 @@ def type(master & cached)
     		if(hazelcast != null) return;
 
 			ClientConfig config = new ClientConfig();
-			config.setInstanceName(this.config.instanceName());
+			config.setInstanceName(this.config.clientName());
 			config.setNetworkConfig(new ClientNetworkConfig().setAddresses(this.config.addresses()));
 			this.config.properties().forEach(config::setProperty);
 
@@ -403,7 +413,7 @@ def type(master & cached)
 				loadDataSingleThread(master, serializer);
 
 			long time = System.currentTimeMillis() - start;
-			Logger.info("Data from master loaded in " + time + " ms");
+			Logger.debug("Data from master loaded in " + time + " ms");
 		}
 
 		private void loadDataSingleThread(IMap<String, String> master, MasterSerializer serializer) {
@@ -523,10 +533,15 @@ def type(master & cached)
 			}
 		}
 
-		private static class DisabledView extends FullLoadMasterTerminal {
+		static class DisabledView extends FullLoadMasterTerminal {
 
-			public DisabledView(FullLoadMasterTerminal original) {
-				super(new Config(original.config()).allowWriting(false).filter(EntityFilter.OnlyDisabled), original.hazelcast);
+			public DisabledView(Config config, HazelcastInstance hazelcast) {
+				super(
+					new Config(config)
+						.allowWriting(false)
+						.filter(EntityFilter.OnlyDisabled)
+						.putProperty("master.log.initialization_complete", "false"),
+					hazelcast);
 			}
 
 			@Override
@@ -709,6 +724,8 @@ def type(master & lazy)
 			if(!initialized.compareAndSet(false, true)) return;
 			configureLogger();
 			initHazelcastClient();
+			if("true".equals(config.properties().getOrDefault("master.log.initialization_complete", "true")))
+				Logger.info("MasterTerminal " + config.clientName() + " initialized successfully. (" + getClass().getSimpleName() + ")");
 		}
 
 		@Override
@@ -776,26 +793,26 @@ def type(master & lazy)
     	public synchronized MasterView disabled() {
       		if(config.filter() == MasterTerminal.EntityFilter.OnlyDisabled) return this;
     		if(!config.cacheDisabledView()) {
-    			DisabledView view = new DisabledView(this);
+    			DisabledView view = new DisabledView(config, hazelcast);
     			view.start();
     			return view;
     		}
     		if(disabledView == null) {
-    			disabledView = new DisabledView(this);
+    			disabledView = new DisabledView(config, hazelcast);
     			disabledView.start();
     		}
     		return disabledView;
     	}
 
     	private UpdateMasterMessage createMessage(UpdateMasterMessage.Action action, String value) {
-    		return new UpdateMasterMessage(config.instanceName(), action, value);
+    		return new UpdateMasterMessage(config.clientName(), action, value);
     	}
 
     	$entity+getter...[$NL$NL]
 
     	private TripletRecord getRecord(String id) {
         	String serializedRecord = masterMap.get(id);
-        	if(serializedRecord == null || isFiltered(serializedRecord)) return null;
+        	if(serializedRecord == null || isIgnored(serializedRecord)) return null;
         	return serializer.deserialize(serializedRecord);
         }
 
@@ -806,15 +823,14 @@ def type(master & lazy)
    		}
 
 		private boolean accepts(String serializedRecord) {
-			return !isFiltered(serializedRecord);
+			return !isIgnored(serializedRecord);
 		}
 
-   		private boolean isFiltered(String serializedRecord) {
+		private boolean isIgnored(String serializedRecord) {
     		if(config.filter() == MasterTerminal.EntityFilter.All) return false;
-    		TripletRecord record = serializer.deserialize(serializedRecord);
-    		final boolean enabled = isEnabled(record);
-    		return (enabled && config.filter() == MasterTerminal.EntityFilter.OnlyEnabled)
-    			|| (!enabled && config.filter() == MasterTerminal.EntityFilter.OnlyDisabled);
+    		return isEnabled(serializer.deserialize(serializedRecord))
+    			? config.filter() == MasterTerminal.EntityFilter.OnlyDisabled
+    			: config.filter() == MasterTerminal.EntityFilter.OnlyEnabled;
    		}
 
     	private boolean isEnabled(TripletRecord record) {
@@ -824,7 +840,7 @@ def type(master & lazy)
 
     	private void initHazelcastClient() {
     		ClientConfig config = new ClientConfig();
-        	config.setInstanceName(this.config.instanceName());
+        	config.setInstanceName(this.config.clientName());
         	config.setNetworkConfig(new ClientNetworkConfig().setAddresses(this.config.addresses()));
 
         	hazelcast = HazelcastClient.newHazelcastClient(config);
@@ -927,10 +943,15 @@ def type(master & lazy)
 			}
 		}
 
-		private static class DisabledView extends LazyLoadMasterTerminal {
+		static class DisabledView extends LazyLoadMasterTerminal {
 
-			public DisabledView(LazyLoadMasterTerminal original) {
-				super(new Config(original.config()).allowWriting(false).filter(EntityFilter.OnlyDisabled), original.hazelcast);
+			public DisabledView(Config config, HazelcastInstance hazelcast) {
+				super(
+					new Config(config)
+						.allowWriting(false)
+						.filter(EntityFilter.OnlyDisabled)
+						.putProperty("master.log.initialization_complete", "false"),
+					hazelcast);
 			}
 
 			@Override

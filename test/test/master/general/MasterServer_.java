@@ -1,4 +1,4 @@
-package io.intino.ness;
+package master.general;
 
 import io.intino.ness.master.core.Master;
 import io.intino.ness.master.data.FileTripletLoader;

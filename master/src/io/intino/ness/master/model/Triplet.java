@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static io.intino.ness.master.core.Master.NONE_TYPE;
 
@@ -27,7 +28,7 @@ public class Triplet implements Serializable {
 
 	public static final String TRIPLET_SEPARATOR = "\t";
 	public static final int TRIPLET_MIN_SIZE = 3;
-	public static final String NULL = "@NULL";
+	public static final String NULL = "<null>";
 
 	public static String stringValueOf(Object obj) {
 		return obj == null ? NULL : String.valueOf(obj);
@@ -45,6 +46,13 @@ public class Triplet implements Serializable {
 
 	public static String typeOf(Triplet triplet) {
 		return triplet.type();
+	}
+
+	public static Triplet withAuthor(Triplet triplet, String author) {
+		if(Objects.equals(triplet.author(), author)) return triplet;
+		String[] attributes = Arrays.copyOf(triplet.attributes, triplet.attributes.length + 1);
+		attributes[3] = toNormalized(author);
+		return new Triplet(attributes);
 	}
 
 	private final String[] attributes;
@@ -136,9 +144,18 @@ public class Triplet implements Serializable {
 	private void validate() {
 		if(attributes.length < TRIPLET_MIN_SIZE) throw new MalformedException("Triplets must have at least 3 fields " +
 				"(subject, predicate and value), but it has " + attributes.length + ": " + Arrays.toString(attributes));
+		checkIfAnyAttributeContainIllegalCharacters(attributes);
 		if(isNullOrBlank(attributes[0])) throw new NullPointerException("Subject cannot be null nor blank");
 		if(isNullOrBlank(id())) throw new NullPointerException("Id cannot be null nor blank");
 		if(isNullOrBlank(attributes[1])) throw new NullPointerException("Predicate cannot be null nor blank");
+	}
+
+	private void checkIfAnyAttributeContainIllegalCharacters(String[] attributes) {
+		for (int i = 0; i < attributes.length; i++) {
+			String attribute = attributes[i];
+			if (attribute.contains(TRIPLET_SEPARATOR))
+				throw new MalformedException("Attribute (column=" + i + ") contains the triplet separator character (TAB).");
+		}
 	}
 
 	private boolean isNullOrBlank(String s) {

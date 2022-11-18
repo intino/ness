@@ -27,15 +27,15 @@ public class MasterTripletWriter {
 		this.datalakeTripletsPath = requireNonNull(datalakeTripletsPath);
 	}
 
-	public void publish(List<Triplet> triplets) throws IOException {
+	public void write(List<Triplet> triplets) throws IOException {
 		synchronized (MasterTripletWriter.class) {
 			for (Map.Entry<String, List<Triplet>> entry : groupByType(triplets)) {
-				publish(entry.getKey(), entry.getValue());
+				write(entry.getKey(), entry.getValue());
 			}
 		}
 	}
 
-	private void publish(String tank, List<Triplet> triplets) throws IOException {
+	private void write(String tank, List<Triplet> triplets) throws IOException {
 		File tankDir = new File(datalakeTripletsPath, capitalize(tank));
 		tankDir.mkdirs();
 
@@ -57,7 +57,9 @@ public class MasterTripletWriter {
 	}
 
 	private Iterable<String> serialize(List<Triplet> triplets) {
-		return triplets.stream().map(Triplet::toString).collect(Collectors.toList());
+		List<String> lines = triplets.stream().map(Triplet::toString).collect(Collectors.toList());
+		lines.add("");
+		return lines;
 	}
 
 	private static Iterable<Map.Entry<String, List<Triplet>>> groupByType(List<Triplet> triplets) {

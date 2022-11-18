@@ -12,6 +12,7 @@ import io.intino.ness.master.persistence.MasterTripletWriter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -83,7 +84,7 @@ public class UpdateMasterMessageHandler implements MasterMessageHandler<UpdateMa
 		serializedRecord = master.serializer().serialize(record);
 		master.masterMap().set(record.id(), serializedRecord); // TODO: save enabled triplet
 
-		new MasterTripletWriter(new File(master.datalakeRootPath(), "triplets")).publish(List.of(record.getTriplet("enabled")));
+		new MasterTripletWriter(new File(master.datalakeRootPath(), "triplets")).write(List.of(record.getTriplet("enabled")));
 
 		publishListenerMessage(message.clientName(), enabledNewValue ? Action.Enabled : Action.Disabled, message.id(), record.id(), serializedRecord);
 
@@ -113,16 +114,26 @@ public class UpdateMasterMessageHandler implements MasterMessageHandler<UpdateMa
 	private boolean publishNewOrModifiedTriplets(UpdateMasterMessage message) throws Exception {
 		List<Triplet> tripletsToPublish = getNewOrModifiedTriplets(master.serializer().deserialize(message.value()));
 		if(tripletsToPublish.isEmpty()) return false;
-		new MasterTripletWriter(new File(master.datalakeRootPath(), "triplets")).publish(tripletsToPublish);
+		setAuthorToTriplets(message.clientName(), tripletsToPublish);
+		new MasterTripletWriter(new File(master.datalakeRootPath(), "triplets")).write(tripletsToPublish);
 		return true;
 	}
 
-	// TODO: handle removal of attributes. Special care when dealing with primitive and non-nullable values
 	private List<Triplet> getNewOrModifiedTriplets(TripletRecord newRecord) {
 		List<Triplet> triplets = newRecord.triplets().collect(Collectors.toList());
 		if(!master.masterMap().containsKey(newRecord.id())) return triplets;
 		TripletRecord oldRecord = master.serializer().deserialize(master.masterMap().get(newRecord.id()));
 		triplets.removeIf(oldRecord::contains);
 		return triplets;
+	}
+
+	private void setAuthorToTriplets(String clientName, List<Triplet> triplets) {
+		if(clientName == null) return;
+		int size = triplets.size();
+		for(int i = 0; i < size; i++) {
+			Triplet t = triplets.get(i);
+			if(t.author() == null)
+				triplets.set(i, Triplet.withAuthor(t, clientName));
+		}
 	}
 }
