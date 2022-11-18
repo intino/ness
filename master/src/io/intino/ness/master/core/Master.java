@@ -90,6 +90,10 @@ public class Master {
 		Logger.info("Master initialized. Using " + getHazelcastMemoryUsedMB() + " MB");
 	}
 
+	public void stop() {
+		hazelcast.shutdown();
+	}
+
 	private void initHazelcast() {
 		Logger.trace("Initializing hazelcast instance...");
 		hazelcast = Hazelcast.newHazelcastInstance(getHazelcastConfig());
@@ -138,7 +142,7 @@ public class Master {
 
 	protected void handleRequestMessage(Message<Object> hzMessage) {
 		try {
-			new UpdateMasterMessageHandler(this).handle(String.valueOf(hzMessage.getMessageObject()));
+			new UpdateMasterMessageHandler(this).handle(hzMessage.getMessageObject());
 		} catch (MasterMessageException e) {
 			Logger.error(e);
 			notifyError(e);
@@ -147,7 +151,7 @@ public class Master {
 
 	private void notifyError(MasterMessageException error) {
 		try {
-			MasterMessagePublisher.publishMessage(hazelcast, MASTER_ERROR_TOPIC, new ErrorMasterMessage(error, Instant.now()));
+			MasterMessagePublisher.publishMessage(hazelcast, MASTER_ERROR_TOPIC, new ErrorMasterMessage(error));
 		} catch (Throwable e) {
 			Logger.error(e);
 		}
@@ -200,7 +204,7 @@ public class Master {
 		public static final int DEFAULT_PORT = 5701;
 		public static final String DEFAULT_INSTANCE_NAME = "master";
 		public static final String DEFAULT_HOST = "localhost";
-		public static final String DEFAULT_LOG_API = "log4j";
+		public static final String DEFAULT_LOG_API = "none";
 
 		private File datalakeRootPath;
 		private String instanceName = DEFAULT_INSTANCE_NAME;

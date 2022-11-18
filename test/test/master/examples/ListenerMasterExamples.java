@@ -44,7 +44,6 @@ public class ListenerMasterExamples {
 	public void errorListeners() {
 		terminal.addErrorListener(error -> {
 
-			String author = error.author();
 			String requestId = error.messageId();
 			Instant ts = error.ts();
 			MasterMessageException cause = error.cause();
@@ -67,7 +66,6 @@ public class ListenerMasterExamples {
 
 		terminal.addEmployeeEntityListener(event -> {
 
-			String author = event.author();
 			Instant ts = event.ts();
 			Employee employee = event.entity();
 

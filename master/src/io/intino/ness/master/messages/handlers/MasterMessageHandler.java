@@ -6,7 +6,7 @@ import io.intino.ness.master.messages.MasterMessageSerializer;
 
 public interface MasterMessageHandler<T extends MasterMessage> {
 
-	default void handle(String serializedMessage) throws MasterMessageException {
+	default void handle(Object serializedMessage) throws MasterMessageException {
 		handle(MasterMessageSerializer.deserialize(serializedMessage, messageClass()));
 	}
 

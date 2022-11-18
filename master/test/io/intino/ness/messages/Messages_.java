@@ -1,18 +1,18 @@
 package io.intino.ness.messages;
 
 import io.intino.alexandria.Json;
-import io.intino.ness.master.messages.*;
-
-import java.time.Instant;
+import io.intino.ness.master.messages.ErrorMasterMessage;
+import io.intino.ness.master.messages.MasterMessageException;
+import io.intino.ness.master.messages.MasterMessageSerializer;
+import io.intino.ness.master.messages.UpdateMasterMessage;
 
 public class Messages_ {
 
 	public static void main(String[] args) {
 
 		ErrorMasterMessage m = new ErrorMasterMessage(new MasterMessageException("AAA")
-				.author("the author")
-				.originalMessage(new UpdateMasterMessage("abc", UpdateMasterMessage.Action.Enable, "r", Instant.now())),
-				Instant.now());
+				.clientName("the client")
+				.originalMessage(new UpdateMasterMessage("abc", UpdateMasterMessage.Action.Enable, "r")));
 
 		System.out.println(Json.toJsonPretty(m));
 

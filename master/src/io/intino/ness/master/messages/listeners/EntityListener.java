@@ -39,15 +39,23 @@ public interface EntityListener<T extends Entity> {
 	interface Event<T extends Entity> {
 
 		/**
+		 * Returns the server member who processed the request
+		 * */
+		String serverName();
+		/**
 		 * Returns the client name that sent the request
 		 * */
-		String author();
+		String clientName();
 		/**
 		 * Indicates which type of action was performed. This can differ from the original intention of the request.
 		 * */
 		Type type();
 		/**
-		 * The entity upon the operation was performed. Will be null if type is None
+		 * The entity upon the operation was performed.
+		 * */
+		Entity.Id entityId();
+		/**
+		 * The entity upon the operation was performed. It may be null.
 		 * */
 		T entity();
 		/**

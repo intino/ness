@@ -21,15 +21,15 @@ public interface ErrorListener {
 		MasterMessageException cause();
 
 		/**The client name that sent the request.*/
-		default String author() {
+		default String clientName() {
 			MasterMessageException error = cause();
-			return error == null ? null : error.author();
+			return error == null ? null : error.clientName();
 		}
 
 		/**The message id that triggered the error.*/
 		default String messageId() {
 			MasterMessageException error = cause();
-			return error == null ? null : error.originalMessage();
+			return error == null ? null : error.originalMessageId();
 		}
 	}
 }

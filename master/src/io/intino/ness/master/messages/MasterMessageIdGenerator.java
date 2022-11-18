@@ -4,7 +4,7 @@ import java.util.UUID;
 
 class MasterMessageIdGenerator {
 
-	static String generate(Class<? extends MasterMessage> messageClass) {
+	static String generateFor(Class<? extends MasterMessage> messageClass) {
 		return messageClass.getSimpleName().replace("MasterMessage", "") + "#" + UUID.randomUUID();
 	}
 }

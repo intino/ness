@@ -100,7 +100,7 @@ def type(master & interface)
     		private EntityFilter filter = EntityFilter.OnlyEnabled;
     		private boolean cacheDisabledView = true;
     		private final Map<String, String> properties = new HashMap<>() {{
-    			put("hazelcast.logging.type", "log4j");
+    			put("hazelcast.logging.type", "none");
     		}};
 
     		public Config() {}
@@ -342,7 +342,7 @@ def type(master & cached)
     	}
 
     	private UpdateMasterMessage createMessage(UpdateMasterMessage.Action action, String value) {
-    		return new UpdateMasterMessage(config.instanceName(), action, value, java.time.Instant.now());
+    		return new UpdateMasterMessage(config.instanceName(), action, value);
     	}
 
     	private boolean isFiltered(TripletRecord record) {
@@ -438,7 +438,7 @@ def type(master & cached)
 
 			@Override
 			public void onMessage(Message<Object> rawMessage) {
-				ErrorMasterMessage message = MasterMessageSerializer.deserialize(String.valueOf(rawMessage.getMessageObject()), ErrorMasterMessage.class);
+				ErrorMasterMessage message = MasterMessageSerializer.deserialize(rawMessage.getMessageObject(), ErrorMasterMessage.class);
             	notifyErrorListeners(new MasterError(message.ts(), message.error()));
 			}
 
@@ -478,8 +478,11 @@ def type(master & cached)
 			@Override
 			public void onMessage(Message<Object> rawMessage) {
 				ListenerMasterMessage message = MasterMessageSerializer.deserialize(String.valueOf(rawMessage.getMessageObject()), ListenerMasterMessage.class);
-				TripletRecord record = message.action() == ListenerMasterMessage.Action.None ? null : serializer().deserialize(message.record());
-				Event<?> event = new MasterEntityEvent<>(message.author(), asEventType(message.action()), asEntity(record), message.record(), message.ts(), message.id());
+				TripletRecord record = serializer().tryDeserialize(message.record()).orElse(null);
+				Event<?> event = new MasterEntityEvent<>(
+					message.serverName(), message.clientName(),	asEventType(message.action()),
+					message.recordId(), asEntity(record), message.record(),
+					message.ts(), message.updateMessageId());
 				process(event, record);
 				notifyEntityListeners(event);
 			}
@@ -515,7 +518,7 @@ def type(master & cached)
 				CompletableFuture<Response<?>> future = futures.remove(event.messageId());
 				if(future != null) future.complete(Response.ofSuccessful(event));
 
-				List<EntityListener> listeners = entityListeners.get(event.entity().id().type());
+				List<EntityListener> listeners = entityListeners.get(event.entityId().type());
 				if(listeners != null) listeners.forEach(listener -> listener.notify(event));
 			}
 		}
@@ -573,16 +576,20 @@ def type(master & cached)
 
 		public static class MasterEntityEvent<T extends Entity> implements Event<T> {
 
-			private final String author;
+			private final String serverName;
+			private final String clientName;
 			private final Type type;
+			private final Entity.Id entityId;
 			private final T entity;
 			private final String value;
 			private final Instant ts;
 			private final String messageId;
 
-			private MasterEntityEvent(String author, Type type, T entity, String value, Instant ts, String messageId) {
-				this.author = author;
+			private MasterEntityEvent(String serverName, String clientName, Type type, String entityId, T entity, String value, Instant ts, String messageId) {
+				this.serverName = serverName;
+				this.clientName = clientName;
 				this.type = type;
+				this.entityId = new Entity.Id(entityId);
 				this.entity = entity;
 				this.value = value;
 				this.ts = ts;
@@ -590,13 +597,23 @@ def type(master & cached)
 			}
 
 			@Override
-			public String author() {
-				return author;
+			public String serverName() {
+				return serverName;
+			}
+
+			@Override
+			public String clientName() {
+				return clientName;
 			}
 
 			@Override
 			public Type type() {
 				return type;
+			}
+
+			@Override
+			public Entity.Id entityId() {
+				return entityId;
 			}
 
 			@Override
@@ -771,7 +788,7 @@ def type(master & lazy)
     	}
 
     	private UpdateMasterMessage createMessage(UpdateMasterMessage.Action action, String value) {
-    		return new UpdateMasterMessage(config.instanceName(), action, value, java.time.Instant.now());
+    		return new UpdateMasterMessage(config.instanceName(), action, value);
     	}
 
     	$entity+getter...[$NL$NL]
@@ -880,8 +897,11 @@ def type(master & lazy)
 			@Override
 			public void onMessage(Message<Object> rawMessage) {
 				ListenerMasterMessage message = MasterMessageSerializer.deserialize(String.valueOf(rawMessage.getMessageObject()), ListenerMasterMessage.class);
-				TripletRecord record = message.action() == ListenerMasterMessage.Action.None ? null : serializer().deserialize(message.record());
-				Event<?> event = new MasterEntityEvent<>(message.author(), asEventType(message.action()), asEntity(record), message.record(), message.ts(), message.id());
+				TripletRecord record = serializer().tryDeserialize(message.record()).orElse(null);
+				Event<?> event = new MasterEntityEvent<>(
+					message.serverName(), message.clientName(),	asEventType(message.action()),
+					message.recordId(), asEntity(record), message.record(),
+					message.ts(), message.updateMessageId());
 				notifyEntityListeners(event);
 			}
 
@@ -902,7 +922,7 @@ def type(master & lazy)
 				CompletableFuture<Response<?>> future = futures.remove(event.messageId());
 				if(future != null) future.complete(Response.ofSuccessful(event));
 
-				List<EntityListener> listeners = entityListeners.get(event.entity().id().type());
+				List<EntityListener> listeners = entityListeners.get(event.entityId().type());
 				if(listeners != null) listeners.forEach(listener -> listener.notify(event));
 			}
 		}
@@ -940,16 +960,20 @@ def type(master & lazy)
 
 		public static class MasterEntityEvent<T extends Entity> implements Event<T> {
 
-			private final String author;
+			private final String serverName;
+			private final String clientName;
 			private final Type type;
+			private final Entity.Id entityId;
 			private final T entity;
 			private final String value;
 			private final Instant ts;
 			private final String messageId;
 
-			private MasterEntityEvent(String author, Type type, T entity, String value, Instant ts, String messageId) {
-				this.author = author;
+			private MasterEntityEvent(String serverName, String clientName, Type type, String entityId, T entity, String value, Instant ts, String messageId) {
+				this.serverName = serverName;
+				this.clientName = clientName;
 				this.type = type;
+				this.entityId = new Entity.Id(entityId);
 				this.entity = entity;
 				this.value = value;
 				this.ts = ts;
@@ -957,13 +981,23 @@ def type(master & lazy)
 			}
 
 			@Override
-			public String author() {
-				return author;
+			public String serverName() {
+				return serverName;
+			}
+
+			@Override
+			public String clientName() {
+				return clientName;
 			}
 
 			@Override
 			public Type type() {
 				return type;
+			}
+
+			@Override
+			public Entity.Id entityId() {
+				return entityId;
 			}
 
 			@Override

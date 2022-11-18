@@ -23,7 +23,7 @@ public class ModifyingMasterData {
 
 	/**
 	 * Create or update the specified entity. If the entity was already registered, it will update it contents.
-	 * If the entity does not change at all, nothing will be updated and the event type will be None, and the entity will be null.
+	 * If the entity does not change at all, nothing will be updated and the event type will be None
 	 *
 	 * The changes will be visible to all cluster members.
 	 *
@@ -51,7 +51,8 @@ public class ModifyingMasterData {
 		if(response.success()) {
 			// The entity was successfully created/updated
 			EntityListener.Event<Employee> event = response.event(); // Only non-null when response.success() is true
-			Employee entity = event.entity(); // Null if event.type() == None
+			Entity.Id entityId = event.entityId(); // Always non-null
+			Employee entity = event.entity(); // May be null, depending on the original request
 			// ...
 		} else {
 			// An error occurred in the server while processing this request

@@ -12,7 +12,6 @@ import io.intino.ness.master.persistence.MasterTripletWriter;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,30 +43,31 @@ public class UpdateMasterMessageHandler implements MasterMessageHandler<UpdateMa
 			}
 		} catch (Throwable e) {
 			throw new MasterMessageException("Error while processing the UpdateMasterMessage " + message.id(), e)
-					.author(message.author())
+					.serverName(master.instanceName())
+					.clientName(message.clientName())
 					.originalMessage(message);
 		}
 	}
 
 	private void handlePublish(UpdateMasterMessage message) throws Exception {
+		TripletRecord record = master.serializer().deserialize(message.value());
 		if(publishNewOrModifiedTriplets(message)) {
-			TripletRecord record = master.serializer().deserialize(message.value());
 			boolean wasAlreadyCreated = master.masterMap().containsKey(record.id());
 			master.masterMap().set(record.id(), message.value());
-			publishListenerMessage(message.author(), wasAlreadyCreated ? Action.Updated : Action.Created, message.id(), message.value());
+			publishListenerMessage(message.clientName(), wasAlreadyCreated ? Action.Updated : Action.Created, message.id(), record.id(), message.value());
 		} else {
-			publishListenerMessage(message.author(), Action.None, message.id(), message.value());
+			publishListenerMessage(message.clientName(), Action.None, message.id(), record.id(), message.value());
 		}
 	}
 
 	private void handleEnable(UpdateMasterMessage message) throws IOException {
 		if(!setEnableOrDisable(message, true))
-			publishListenerMessage(message.author(), Action.None, message.id(), message.value());
+			publishListenerMessage(message.clientName(), Action.None, message.id(), message.value(), null);
 	}
 
 	private void handleDisable(UpdateMasterMessage message) throws IOException {
 		if(!setEnableOrDisable(message, false))
-			publishListenerMessage(message.author(), Action.None, message.id(), message.value());
+			publishListenerMessage(message.clientName(), Action.None, message.id(), message.value(), null);
 	}
 
 	private boolean setEnableOrDisable(UpdateMasterMessage message, boolean enabledNewValue) throws IOException {
@@ -85,27 +85,29 @@ public class UpdateMasterMessageHandler implements MasterMessageHandler<UpdateMa
 
 		new MasterTripletWriter(new File(master.datalakeRootPath(), "triplets")).publish(List.of(record.getTriplet("enabled")));
 
-		publishListenerMessage(message.author(), enabledNewValue ? Action.Enabled : Action.Disabled, message.id(), serializedRecord);
+		publishListenerMessage(message.clientName(), enabledNewValue ? Action.Enabled : Action.Disabled, message.id(), record.id(), serializedRecord);
 
 		return true;
 	}
 
 	private void handleRemove(UpdateMasterMessage message) {
-		if(!master.masterMap().containsKey(message.value())) {
-			publishListenerMessage(message.author(), Action.None, message.id(), message.value());
+		String recordId = message.value();
+		if(!master.masterMap().containsKey(recordId)) {
+			publishListenerMessage(message.clientName(), Action.None, message.id(), recordId, null);
 			return;
 		}
-		String removedRecord = master.masterMap().remove(message.value());
-		publishListenerMessage(message.author(), Action.Removed, message.id(), removedRecord);
+		String removedRecord = master.masterMap().remove(recordId);
+		publishListenerMessage(message.clientName(), Action.Removed, message.id(), recordId, removedRecord);
 	}
 
-	private void publishListenerMessage(String author, Action action, String updateMessageId, String record) {
+	private void publishListenerMessage(String clientName, Action action, String updateMessageId, String recordId, String record) {
 		MasterMessagePublisher.publishMessage(master.hazelcast(), MASTER_LISTENER_TOPIC, new ListenerMasterMessage(
-				author,
+				master.instanceName(),
+				clientName,
 				action,
 				updateMessageId,
-				record,
-				Instant.now()));
+				recordId,
+				record));
 	}
 
 	private boolean publishNewOrModifiedTriplets(UpdateMasterMessage message) throws Exception {

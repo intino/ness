@@ -1,48 +1,40 @@
 package io.intino.ness;
 
-import com.hazelcast.client.HazelcastClient;
-import com.hazelcast.client.config.ClientConfig;
-import com.hazelcast.client.config.ClientNetworkConfig;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.topic.Message;
-import com.hazelcast.topic.MessageListener;
-import io.intino.ness.master.messages.MasterMessageSerializer;
-import io.intino.ness.master.messages.MasterTopics;
-import io.intino.ness.master.messages.UpdateMasterMessage;
-import io.intino.ness.master.model.Triplet;
-import io.intino.ness.master.model.TripletRecord;
-import io.intino.ness.master.serialization.MasterSerializers;
+import io.intino.alexandria.Json;
+import io.intino.ness.master.messages.Response;
+import org.example.test.model.MasterTerminal;
+import org.example.test.model.entities.Employee;
 
-import java.time.Instant;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class MasterClient_ {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ExecutionException, InterruptedException {
+		MasterTerminal.Config config = new MasterTerminal.Config()
+				.instanceName("the client")
+				.allowWriting(true)
+				.putProperty("hazelcast.logging.type", "none")
+				.addresses(List.of("localhost:62555"));
 
-		ClientConfig config = new ClientConfig();
-		config.setInstanceName("hz-client");
-		config.setNetworkConfig(new ClientNetworkConfig().addAddress("localhost:62555"));
+		MasterTerminal terminal = MasterTerminal.create(config);
+		terminal.start();
 
-		HazelcastInstance hz = HazelcastClient.newHazelcastClient(config);
+		Runtime.getRuntime().addShutdownHook(new Thread(terminal::stop));
 
-		hz.getMap("master").get("2520019:theater");
+		Employee employee = new Employee("123:employee", terminal).name("CR7");
 
-		hz.getTopic(MasterTopics.MASTER_LISTENER_TOPIC).addMessageListener(new MessageListener<Object>() {
-			@Override
-			public void onMessage(Message<Object> message) {
-				String m = String.valueOf(message.getMessageObject());
-				System.out.println(m);
-			}
-		});
+		Future<Response<Employee>> future = terminal.publish(employee);
+		Response<Employee> response = future.get();
 
-		hz.getTopic(MasterTopics.MASTER_UPDATE_TOPIC).publish(MasterMessageSerializer.serialize(new UpdateMasterMessage(
-				config.getInstanceName(),
-				UpdateMasterMessage.Action.Publish,
-				MasterSerializers.getDefault().serialize(new TripletRecord("2520019:theater")
-						.put(new Triplet("2520019:theater", "name", String.valueOf(System.nanoTime())))),
-				Instant.now()
-		)));
+		System.out.println(Json.toJsonPretty(response.event()));
+		System.out.println(Json.toJsonPretty(response.error()));
 
-		Runtime.getRuntime().addShutdownHook(new Thread(hz::shutdown));
+		Employee employee2 = response.event().entity();
+
+		System.out.println(employee2.equals(employee));
+
+		System.out.println("done");
 	}
 }
