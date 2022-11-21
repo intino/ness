@@ -30,6 +30,8 @@ public class PluginTest {
 	private static final String INTELLIJ_MAVEN_PLUGIN = "C:/Users/naits/AppData/Local/JetBrains/Toolbox/apps/IDEA-C/ch-0/222.3739.54/plugins/maven/lib/maven3";
 //	private static final String JAVA_HOME = "/Library/Java/JavaVirtualMachines/jdk-11.0.10.jdk/Contents/Home";
 	private static final String JAVA_HOME = "C:/Program Files/Java/jdk-11.0.2";
+//	private static final String CESAR_PROJECT_PATH = USER_HOME + "/workspace/cesar/datahub/";
+	private static final String CESAR_PROJECT_PATH = WORKSPACE_ROOT + "IntinoDev/cesar/datahub/";
 
 	@Test
 	public void should_build_test_terminals() {
@@ -54,15 +56,19 @@ public class PluginTest {
 	@Test
 	public void should_build_cesar_terminal() throws IOException {
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
+		launcher.deleteTempDirOnPublish(false);
 		launcher.
-				moduleStructure(new ModuleStructure(singletonList(new File(USER_HOME + "/workspace/cesar/datahub/src")), singletonList(new File(USER_HOME + "/workspace/cesar/datahub/res")), new File(USER_HOME + "/workspace/ness/out/test/")))
+				moduleStructure(new ModuleStructure(singletonList(
+						new File(CESAR_PROJECT_PATH + "src")),
+						singletonList(new File(CESAR_PROJECT_PATH + "res")),
+						new File(CESAR_PROJECT_PATH + "out/test/")))
 				.systemProperties(new SystemProperties(new File(INTELLIJ_MAVEN_PLUGIN),
 						new File(JAVA_HOME)))
 				.logger(System.out)
 				.notifier(notifier())
 				.invokedPhase(PluginLauncher.Phase.INSTALL)
 				.moduleConfiguration(cesarConfiguration());
-		File temp = new File(USER_HOME + "/workspace/ness/datahubterminalplugin/temp/cesar");
+		File temp = new File(NESS_DIR + "/datahubterminalplugin/temp/cesar");
 		temp.mkdirs();
 		launcher.run(temp);
 	}
