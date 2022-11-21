@@ -56,12 +56,21 @@ public class TripletRecord {
 		return t == null ? null : t.value();
 	}
 
-	public void put(Triplet triplet) {
+	public String getValueOrDefault(String predicate, String defaultValue) {
+		return contains(predicate) ? getValue(predicate) : defaultValue;
+	}
+
+	public TripletRecord put(Triplet triplet) {
 		triplets.put(triplet.predicate(), triplet);
+		return this;
 	}
 
 	public boolean contains(String predicate) {
 		return triplets.containsKey(predicate);
+	}
+
+	public boolean contains(String predicate, String value) {
+		return triplets.containsKey(predicate) && Objects.equals(triplets.get(predicate).value(), value);
 	}
 
 	public boolean contains(Triplet triplet) {

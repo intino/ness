@@ -28,6 +28,8 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private static final String MAX_INGESTION_VERSION = "5.0.0";
 	private static final String MAX_EVENT_VERSION = "4.0.0";
 
+	private boolean deleteTempDirOnPublish = true;
+
 	@Override
 	public void run() {
 		if (invokedPhase.ordinal() < 2) return;
@@ -63,7 +65,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			published.set(new OntologyPublisher(new File(tempDir, "ontology"), graph, configuration(), moduleStructure(), versions, systemProperties(), invokedPhase, logger(), notifier()).publish() & published.get());
 			if (published.get() && notifier() != null)
 				notifier().notify("Ontology " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), "ontology", configuration().artifact().version()));
-			if (published.get()) FileUtils.deleteDirectory(tempDir);
+			handleTempDir(tempDir, published);
 			return published.get();
 		} catch (Throwable e) {
 			logger().println(e.getMessage());
@@ -80,7 +82,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 				if (published.get() && notifier() != null)
 					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), terminalNameArtifact(terminal), configuration().artifact().version()));
 			});
-			if (published.get()) FileUtils.deleteDirectory(tempDir);
+			handleTempDir(tempDir, published);
 		} catch (Throwable e) {
 			logger().println(e.getMessage());
 			e.printStackTrace();
@@ -93,13 +95,17 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			published.set(new MasterPublisher(new File(tempDir, "master"), graph, configuration(), versions, systemProperties(), invokedPhase, logger(), notifier()).publish());
 			if (published.get() && notifier() != null)
 				notifier().notify("Master Terminal " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), "master-terminal", configuration().artifact().version()));
-			if (published.get()) FileUtils.deleteDirectory(tempDir);
+			handleTempDir(tempDir, published);
 			return published.get();
 		} catch (Throwable e) {
 			logger().println(e.getMessage());
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	private void handleTempDir(File tempDir, AtomicBoolean published) throws IOException {
+		if (published.get() && deleteTempDirOnPublish) FileUtils.deleteDirectory(tempDir);
 	}
 
 	private static Graph loadGraph(File resDirectory) {
@@ -216,5 +222,10 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		} catch (Throwable var2) {
 			return null;
 		}
+	}
+
+	public DataHubTerminalsPluginLauncher deleteTempDirOnPublish(boolean deleteTempDirOnPublish) {
+		this.deleteTempDirOnPublish = deleteTempDirOnPublish;
+		return this;
 	}
 }

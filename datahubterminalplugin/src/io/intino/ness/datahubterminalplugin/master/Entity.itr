@@ -33,7 +33,7 @@ def type(entity & class)
 
 		[$attribute+wordDeclaration...[$NL]]
 
-		protected final $package.MasterTerminal master;
+		protected transient final $package.MasterTerminal master;
 
 		[$attribute+field...[$NL]]
 
@@ -272,27 +272,27 @@ def type(entity) type(component) type(list) trigger(asTriplet)
 end
 
 def type(entity) type(component) trigger(asTriplet)
-	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", String.valueOf($name+firstLowerCase)));
+	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", $name+firstLowerCase == null ? null : Triplet.stringValueOf($name+firstLowerCase)));
 end
 
 def type(entity) type(list) trigger(asTriplet)
-	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", String.join(LIST_SEP, $name+firstLowerCase)));
+	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", $name+firstLowerCase == null ? null : String.join(LIST_SEP, $name+firstLowerCase)));
 end
 
 def type(entity) trigger(asTriplet)
-	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", String.valueOf($name+firstLowerCase~Reference)));
+	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", $name+firstLowerCase~Reference == null ? null : Triplet.stringValueOf($name+firstLowerCase~Reference)));
 end
 
 def type(date | datetime) trigger(asTriplet)
-	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", $name+firstLowerCase~.format(java.time.format.DateTimeFormatter.ofPattern("$format"))));
+	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", $name+firstLowerCase == null ? null : $name+firstLowerCase~.format(java.time.format.DateTimeFormatter.ofPattern("$format"))));
 end
 
 def type(instant) trigger(asTriplet)
-	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", String.valueOf($name+firstLowerCase~.toEpochMilli())));
+	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", $name+firstLowerCase == null ? null : Triplet.stringValueOf($name+firstLowerCase~.toEpochMilli())));
 end
 
 def trigger(asTriplet)
-	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", String.valueOf($name+firstLowerCase)));
+	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", Triplet.stringValueOf($name+firstLowerCase)));
 end
 
 def type(word) trigger(wordDeclaration)

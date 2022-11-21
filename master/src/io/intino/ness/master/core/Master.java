@@ -10,8 +10,10 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.ness.master.data.FileTripletLoader;
 import io.intino.ness.master.data.MasterTripletsDigester;
 import io.intino.ness.master.data.TripletLoader;
-import io.intino.ness.master.data.update.MasterMessageHandler;
-import io.intino.ness.master.data.update.MasterMessageHandler.MasterMessage;
+import io.intino.ness.master.messages.ErrorMasterMessage;
+import io.intino.ness.master.messages.MasterMessageException;
+import io.intino.ness.master.messages.MasterMessagePublisher;
+import io.intino.ness.master.messages.handlers.UpdateMasterMessageHandler;
 import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.model.TripletRecord;
 import io.intino.ness.master.serialization.MasterSerializer;
@@ -22,6 +24,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.intino.ness.master.messages.MasterTopics.MASTER_ERROR_TOPIC;
+import static io.intino.ness.master.messages.MasterTopics.MASTER_UPDATE_TOPIC;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 
@@ -29,9 +33,6 @@ public class Master {
 
 	public static final String METADATA_MAP_NAME = "metadata";
 	public static final String MASTER_MAP_NAME = "master";
-	public static final String REQUESTS_TOPIC = "requests";
-	public static final String ERRORS_TOPIC = "errors";
-	public static final String MESSAGE_SEPARATOR = "##";
 	public static final String NONE_TYPE = "";
 
 	private HazelcastInstance hazelcast;
@@ -89,6 +90,10 @@ public class Master {
 		Logger.info("Master initialized. Using " + getHazelcastMemoryUsedMB() + " MB");
 	}
 
+	public void stop() {
+		hazelcast.shutdown();
+	}
+
 	private void initHazelcast() {
 		Logger.trace("Initializing hazelcast instance...");
 		hazelcast = Hazelcast.newHazelcastInstance(getHazelcastConfig());
@@ -132,37 +137,24 @@ public class Master {
 	}
 
 	protected void setupListeners() {
-		hazelcast.getTopic(REQUESTS_TOPIC).addMessageListener(this::handleRequestMessage);
-		Logger.trace("Hazelcast initialized");
+		hazelcast.getTopic(MASTER_UPDATE_TOPIC).addMessageListener(this::handleRequestMessage);
 	}
 
 	protected void handleRequestMessage(Message<Object> hzMessage) {
-		MasterMessage message = asMasterMessage(hzMessage);
 		try {
-			new MasterMessageHandler(this).handle(message);
-		} catch (Exception e) {
-			hazelcast.getTopic(ERRORS_TOPIC).publish(errorMessage(message, e));
+			new UpdateMasterMessageHandler(this).handle(hzMessage.getMessageObject());
+		} catch (MasterMessageException e) {
+			Logger.error(e);
+			notifyError(e);
 		}
 	}
 
-	private static String errorMessage(MasterMessage message, Exception e) {
-		return message.publisherName
-				+ MESSAGE_SEPARATOR + message.serializedRecord
-				+ MESSAGE_SEPARATOR + message.ts
-				+ MESSAGE_SEPARATOR + e.getClass().getName()
-				+ MESSAGE_SEPARATOR + e.getMessage();
-	}
-
-	private MasterMessage asMasterMessage(Message<Object> hzMessage) {
-		String[] info = String.valueOf(hzMessage.getMessageObject().toString()).split(MESSAGE_SEPARATOR);
-		String publisherName = info[0];
-		String record = info[1];
-		return new MasterMessage(
-				serializer().deserialize(record),
-				record,
-				publisherName,
-				Instant.ofEpochMilli(hzMessage.getPublishTime())
-		);
+	private void notifyError(MasterMessageException error) {
+		try {
+			MasterMessagePublisher.publishMessage(hazelcast, MASTER_ERROR_TOPIC, new ErrorMasterMessage(error));
+		} catch (Throwable e) {
+			Logger.error(e);
+		}
 	}
 
 	public MasterSerializer serializer() {
@@ -171,7 +163,7 @@ public class Master {
 
 	protected com.hazelcast.config.Config getHazelcastConfig() {
 		com.hazelcast.config.Config hzConfig = new com.hazelcast.config.Config();
-		hzConfig.setProperty("hazelcast.logging.type", "log4j");
+		config.properties().forEach(hzConfig::setProperty);
 		hzConfig.setInstanceName(config.instanceName());
 		hzConfig.setNetworkConfig(new NetworkConfig().setPort(config.port()));
 		return hzConfig;
@@ -203,11 +195,16 @@ public class Master {
 				.map(e -> e.getKey() + ": " + e.getValue()).collect(Collectors.joining("\n  "));
 	}
 
+	public HazelcastInstance hazelcast() {
+		return hazelcast;
+	}
+
 	public static class Config {
 
 		public static final int DEFAULT_PORT = 5701;
 		public static final String DEFAULT_INSTANCE_NAME = "master";
 		public static final String DEFAULT_HOST = "localhost";
+		public static final String DEFAULT_LOG_API = "none";
 
 		private File datalakeRootPath;
 		private String instanceName = DEFAULT_INSTANCE_NAME;
@@ -216,6 +213,9 @@ public class Master {
 		private MasterSerializer serializer = MasterSerializers.getDefault();
 		private MasterTripletsDigester tripletsDigester = MasterTripletsDigester.createDefault();
 		private TripletLoader tripletLoader;
+		private final Map<String, String> properties = new HashMap<>() {{
+			put("hazelcast.logging.type", DEFAULT_LOG_API);
+		}};
 
 		public Config() {
 		}
@@ -300,6 +300,15 @@ public class Master {
 
 		public Config tripletsLoader(TripletLoader tripletLoader) {
 			this.tripletLoader = tripletLoader;
+			return this;
+		}
+
+		public Map<String, String> properties() {
+			return properties;
+		}
+
+		public Config putProperty(String key, String value) {
+			this.properties.put(key, value);
 			return this;
 		}
 	}

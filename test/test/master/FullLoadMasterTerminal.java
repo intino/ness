@@ -1,36 +1,46 @@
-//package master;
+//package org.example.test.model;
 //
 //import com.hazelcast.client.HazelcastClient;
 //import com.hazelcast.client.config.ClientConfig;
 //import com.hazelcast.client.config.ClientNetworkConfig;
-//import com.hazelcast.core.EntryAdapter;
-//import com.hazelcast.core.EntryEvent;
 //import com.hazelcast.core.HazelcastInstance;
 //import com.hazelcast.map.IMap;
+//import com.hazelcast.topic.Message;
+//import com.hazelcast.topic.MessageListener;
 //import io.intino.alexandria.logger.Logger;
 //import io.intino.ness.master.data.EntityListener;
-//import io.intino.ness.master.data.EntryListener;
+//import io.intino.ness.master.data.EntityListener.Event;
+//import io.intino.ness.master.messages.ListenerMasterMessage;
+//import io.intino.ness.master.messages.MasterMessagePublisher;
+//import io.intino.ness.master.messages.MasterMessageSerializer;
+//import io.intino.ness.master.messages.UpdateMasterMessage;
 //import io.intino.ness.master.model.Entity;
 //import io.intino.ness.master.model.Triplet;
 //import io.intino.ness.master.model.TripletRecord;
 //import io.intino.ness.master.serialization.MasterSerializer;
 //import io.intino.ness.master.serialization.MasterSerializers;
-//import org.example.test.model.MasterTerminal;
+//import org.example.test.model.entities.*;
 //
 //import java.time.Instant;
-//import java.util.*;
+//import java.util.ArrayList;
+//import java.util.HashMap;
+//import java.util.List;
+//import java.util.Map;
 //import java.util.concurrent.ConcurrentHashMap;
 //import java.util.concurrent.ExecutorService;
 //import java.util.concurrent.Executors;
 //import java.util.concurrent.TimeUnit;
+//import java.util.concurrent.atomic.AtomicBoolean;
 //import java.util.logging.ConsoleHandler;
 //import java.util.logging.Handler;
 //import java.util.logging.Level;
 //import java.util.logging.LogManager;
 //import java.util.stream.Stream;
 //
-//import static io.intino.ness.master.core.Master.*;
-//import static java.util.Collections.emptyList;
+//import static io.intino.ness.master.core.Master.MASTER_MAP_NAME;
+//import static io.intino.ness.master.core.Master.METADATA_MAP_NAME;
+//import static io.intino.ness.master.messages.MasterTopics.MASTER_LISTENER_TOPIC;
+//import static io.intino.ness.master.messages.MasterTopics.MASTER_UPDATE_TOPIC;
 //import static java.util.Objects.requireNonNull;
 //
 //public class FullLoadMasterTerminal implements MasterTerminal {
@@ -51,10 +61,11 @@
 //	private final Map<String, CheckField> checkFieldMap = new ConcurrentHashMap<>();
 //	private final Map<String, OrderType> orderTypeMap = new ConcurrentHashMap<>();
 //
+//	private final AtomicBoolean initialized = new AtomicBoolean(false);
 //	private final MasterTerminal.Config config;
-//	private HazelcastInstance hazelcast;
+//	protected HazelcastInstance hazelcast;
 //	@SuppressWarnings("rawtypes")
-//	private final Map<String, List<EntryListener>> entryListeners = new HashMap<>();
+//	private final Map<String, List<EntityListener>> entityListeners = new HashMap<>();
 //
 //	public FullLoadMasterTerminal(MasterTerminal.Config config) {
 //		this.config = requireNonNull(config);
@@ -62,6 +73,7 @@
 //
 //	@Override
 //	public void start() {
+//		if(!initialized.compareAndSet(false, true)) return;
 //		configureLogger();
 //		initHazelcastClient();
 //		loadData();
@@ -73,14 +85,11 @@
 //		hazelcast.shutdown();
 //	}
 //
-//	public <T extends Entity> void addEntryListener(String type, EntryListener<T> listener) {
+//	@Override
+//	public <T extends Entity> void addEntityListener(String type, EntityListener<T> listener) {
 //		if(type == null) throw new NullPointerException("Type cannot be null");
 //		if(listener == null) throw new NullPointerException("EntryListener cannot be null");
-//		entryListeners.computeIfAbsent(type, k -> new LinkedList<>()).add(listener);
-//	}
-//
-//	public void addEmployeeEntryListener(EntryListener<Employee> listener) {
-//		addEntryListener("employee", listener);
+//		entityListeners.computeIfAbsent(type, k -> new ArrayList<>()).add(listener);
 //	}
 //
 //	@Override
@@ -92,12 +101,6 @@
 //	@Override
 //	public MasterTerminal.Config config() {
 //		return new MasterTerminal.Config(config);
-//	}
-//
-//	@Override
-//	@Deprecated
-//	public void addEntryListener(com.hazelcast.core.EntryListener<String, String> listener) {
-//
 //	}
 //
 //	@Override
@@ -281,33 +284,50 @@
 //		return orderTypeMap.values().stream();
 //	}
 //
+//	@Override
+//	public void enable(String id) {
+//		if(!config.allowWriting()) throw new UnsupportedOperationException("This master client is configured as read only");
+//		if(id == null) throw new NullPointerException("Entity id cannot be null");
+//		MasterMessagePublisher.publishMessage(hazelcast, MASTER_UPDATE_TOPIC, createMessage(UpdateMasterMessage.Action.Enable, id));
+//	}
+//
+//	@Override
+//	public void disable(String id) {
+//		if(!config.allowWriting()) throw new UnsupportedOperationException("This master client is configured as read only");
+//		if(id == null) throw new NullPointerException("Entity id cannot be null");
+//		MasterMessagePublisher.publishMessage(hazelcast, MASTER_UPDATE_TOPIC, createMessage(UpdateMasterMessage.Action.Disable, id));
+//	}
+//
+//	@Override
 //	public void publish(Entity entity) {
-//		if(!config.allowWriting()) throw new UnsupportedOperationException("This master client cannot publish because it is configured as read only");
-//		String record = serializer().serialize(new TripletRecord(""));
-//		hazelcast.getTopic(REQUESTS_TOPIC).publish(config.instanceName() + MESSAGE_SEPARATOR + record);
+//		if(!config.allowWriting()) throw new UnsupportedOperationException("This master client is configured as read only");
+//		if(entity == null) throw new NullPointerException("Entity cannot be null");
+//		MasterMessagePublisher.publishMessage(hazelcast, MASTER_UPDATE_TOPIC, createMessage(UpdateMasterMessage.Action.Publish, serializer().serialize(entity.asTripletRecord())));
 //	}
 //
-//	private <T extends Entity> T asEntity(TripletRecord record) {
-//		switch(record.type()) {
-//			case "employee": return new Employee(record, this);
-//			case "country": return new Country(record, this);
-//			case "area": return new Area(record, this);
-//			case "region": return new Region(record, this);
-//			case "theater": return new Theater(record, this);
-//			case "screen": return new Screen(record, this);
-//			case "dock": return new Dock(record, this);
-//			case "screendock": return new ScreenDock(record, this);
-//			case "depot": return new Depot(record, this);
-//			case "office": return new Office(record, this);
-//			case "desk": return new Desk(record, this);
-//			case "asset": return new Asset(record, this);
-//			case "dualasset": return new DualAsset(record, this);
-//			case "checkfield": return new CheckField(record, this);
-//			case "ordertype": return new OrderType(record, this);
-//		}
+//	@Override
+//	public MasterView disabled() {
+//		return new DisabledView(this);
 //	}
 //
-//	private void add(TripletRecord record) {
+//	private UpdateMasterMessage createMessage(UpdateMasterMessage.Action action, String value) {
+//		return new UpdateMasterMessage(config.instanceName(), action, value, java.time.Instant.now());
+//	}
+//
+//	private boolean isFiltered(TripletRecord record) {
+//		if(config.filter() == MasterTerminal.EntityFilter.All) return false;
+//		final boolean enabled = isEnabled(record);
+//		return (enabled && config.filter() == MasterTerminal.EntityFilter.OnlyEnabled)
+//				|| (!enabled && config.filter() == MasterTerminal.EntityFilter.OnlyDisabled);
+//	}
+//
+//	private boolean isEnabled(TripletRecord record) {
+//		String enabledValue = record.getValue("enabled");
+//		return enabledValue == null || "true".equalsIgnoreCase(enabledValue);
+//	}
+//
+//	protected void add(TripletRecord record) {
+//		if(isFiltered(record)) return;
 //		switch(record.type()) {
 //			case "employee": addToEmployee(record); break;
 //			case "country": addToCountry(record); break;
@@ -327,7 +347,7 @@
 //		}
 //	}
 //
-//	private void remove(String id) {
+//	protected void remove(String id) {
 //		switch(Triplet.typeOf(id)) {
 //			case "employee": removeFromEmployee(id); break;
 //			case "country": removeFromCountry(id); break;
@@ -498,14 +518,18 @@
 //	}
 //
 //	private void initHazelcastClient() {
+//		if(hazelcast != null) return;
+//
 //		ClientConfig config = new ClientConfig();
 //		config.setInstanceName(this.config.instanceName());
 //		config.setNetworkConfig(new ClientNetworkConfig().setAddresses(this.config.addresses()));
+//		this.config.properties().forEach(config::setProperty);
+//
 //		hazelcast = HazelcastClient.newHazelcastClient(config);
 //	}
 //
-//	private void initListeners() {
-//		hazelcast.getMap(MASTER_MAP_NAME).addEntryListener(new BaseEntryListener(), true);
+//	protected void initListeners() {
+//		hazelcast.getTopic(MASTER_LISTENER_TOPIC).addMessageListener(new ListenerTopicMessageListener());
 //	}
 //
 //	private void loadData() {
@@ -552,74 +576,134 @@
 //		rootLogger.addHandler(handler);
 //	}
 //
-//	public class BaseEntryListener extends EntryAdapter<String, String> {
+//	private class ListenerTopicMessageListener implements MessageListener<Object> {
 //
 //		@Override
-//		public void entryAdded(EntryEvent<String, String> event) {
-//			addOrUpdateRecord(event.getKey(), event.getValue());
-//			notifyEntryListeners(event.getValue(), EntryListener.Event.Type.Create);
+//		public void onMessage(Message<Object> rawMessage) {
+//			ListenerMasterMessage message = MasterMessageSerializer.deserialize(String.valueOf(rawMessage.getMessageObject()), ListenerMasterMessage.class);
+//			TripletRecord record = serializer().deserialize(message.record());
+//			Event<?> event = new MasterEntityEvent<>(message.author(), asEventType(message.action()), asEntity(record), message.ts(), message.id());
+//			process(event, record);
+//			notifyEntityListeners(event);
 //		}
 //
-//		@Override
-//		public void entryUpdated(EntryEvent<String, String> event) {
-//			addOrUpdateRecord(event.getKey(), event.getValue());event.getSource()
-//			notifyEntryListeners(event.getValue(), EntryListener.Event.Type.Update);
+//		protected void process(Event<?> event, TripletRecord record) {
+//			switch(event.type()) {
+//				case Create:
+//				case Update:
+//				case Enable:
+//					add(record);
+//					break;
+//				case Disable:
+//				case Remove:
+//					remove(record.id());
+//					break;
+//			}
 //		}
 //
-//		@Override
-//		public void entryRemoved(EntryEvent<String, String> event) {
-//			remove(event.getKey());
-//			notifyEntryListeners(event.getValue(), EntryListener.Event.Type.Remove);
-//		}
-//
-//		@Override
-//		public void entryEvicted(EntryEvent<String, String> event) {
-//			remove(event.getKey());
-//		}
-//
-//		private void addOrUpdateRecord(String id, String serializedRecord) {
-//			MasterSerializer serializer = serializer();
-//			add(serializer.deserialize(serializedRecord));
+//		private Event.Type asEventType(ListenerMasterMessage.Action action) {
+//			switch(action) {
+//				case Created: return Event.Type.Create;
+//				case Updated: return Event.Type.Update;
+//				case Enabled: return Event.Type.Enable;
+//				case Disabled: return Event.Type.Disable;
+//				case Removed: return Event.Type.Remove;
+//				default: throw new IllegalArgumentException("Unknown listener action " + action);
+//			}
 //		}
 //
 //		@SuppressWarnings("all")
-//		private void notifyEntryListeners(String serializedRecord, EntityListener.Event.Type type) {
-//			TripletRecord record = serializer().deserialize(serializedRecord);
-//			Entity entity = asEntity(record);
-//			MasterEntryEvent<?> event = new MasterEntryEvent<>(type, entity, "", Instant.now());
-//			List<EntityListener> listeners = entryListeners.get(record.type());
+//		protected void notifyEntityListeners(Event<?> event) {
+//			List<EntityListener> listeners = entityListeners.get(event.entity().id().type());
 //			if(listeners != null) listeners.forEach(listener -> listener.notify(event));
 //		}
 //	}
 //
-//	public static class MasterEntryEvent<T extends Entity> implements EntityListener.Event<T> {
+//	private static class DisabledView extends FullLoadMasterTerminal {
 //
+//		public DisabledView(FullLoadMasterTerminal original) {
+//			super(new Config(original.config()).allowWriting(false).filter(EntityFilter.OnlyDisabled), original.hazelcast);
+//		}
+//
+//		@Override
+//		public <T extends Entity> void addEntityListener(String type, EntityListener<T> listener) {
+//			throw new UnsupportedOperationException();
+//		}
+//
+//		@Override
+//		public void stop() {
+//			throw new UnsupportedOperationException();
+//		}
+//
+//		@Override
+//		public MasterView disabled() {
+//			return this;
+//		}
+//
+//		@Override
+//		protected void initListeners() {
+//			hazelcast.getTopic(MASTER_LISTENER_TOPIC).addMessageListener(new DisabledListenerTopicMessageListener());
+//		}
+//
+//		private class DisabledListenerTopicMessageListener extends ListenerTopicMessageListener {
+//
+//			protected void process(Event<?> event, TripletRecord record) {
+//				switch(event.type()) {
+//					case Create:
+//					case Update:
+//					case Enable:
+//						remove(record.id());
+//						break;
+//					case Disable:
+//					case Remove:
+//						add(record);
+//						break;
+//				}
+//			}
+//
+//			protected void notifyEntityListeners(Event<?> event) {}
+//		}
+//	}
+//
+//	public static class MasterEntityEvent<T extends Entity> implements Event<T> {
+//
+//		private final String author;
 //		private final Type type;
 //		private final T entity;
-//		private final String author;
 //		private final Instant ts;
+//		private final String messageId;
 //
-//		MasterEntryEvent(Type type, T entity, String author, Instant ts) {
+//		private MasterEntityEvent(String author, Type type, T entity, Instant ts, String messageId) {
+//			this.author = author;
 //			this.type = type;
 //			this.entity = entity;
-//			this.author = author;
 //			this.ts = ts;
+//			this.messageId = messageId;
 //		}
 //
-//		public Type type() {
-//			return type;
-//		}
-//
-//		public T entity() {
-//			return entity;
-//		}
-//
+//		@Override
 //		public String author() {
 //			return author;
 //		}
 //
+//		@Override
+//		public Type type() {
+//			return type;
+//		}
+//
+//		@Override
+//		public T entity() {
+//			return entity;
+//		}
+//
+//		@Override
 //		public Instant ts() {
 //			return ts;
+//		}
+//
+//		@Override
+//		public String messageId() {
+//			return messageId;
 //		}
 //	}
 //}
