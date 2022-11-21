@@ -8,6 +8,7 @@
       <sourceFolder url="file://$MODULE_DIR$/temp/gc/crmTerminal/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/temp/gc/digestorTerminal/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/temp/test/master/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/temp/cesar/master/src" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

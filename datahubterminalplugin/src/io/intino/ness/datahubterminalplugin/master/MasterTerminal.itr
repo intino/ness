@@ -24,12 +24,13 @@ def type(master & interface)
 	import java.util.UUID;
 	import java.util.concurrent.Future;
 	import java.util.concurrent.CompletableFuture;
-	import org.example.test.model.entities.*;
 	import io.intino.ness.master.model.TripletRecord;
 	import io.intino.ness.master.messages.listeners.EntityListener;
 	import io.intino.ness.master.messages.listeners.ErrorListener;
 	import io.intino.ness.master.messages.Response;
 	import io.intino.ness.master.model.Entity;
+
+	import $package.entities.*;
 
 	public interface MasterTerminal extends MasterView {
 
