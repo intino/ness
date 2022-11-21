@@ -1,8 +1,6 @@
 package master.general;
 
-import io.intino.alexandria.Json;
 import io.intino.ness.master.messages.Response;
-import io.intino.ness.master.model.Entity;
 import org.example.test.model.MasterTerminal;
 import org.example.test.model.entities.Employee;
 
