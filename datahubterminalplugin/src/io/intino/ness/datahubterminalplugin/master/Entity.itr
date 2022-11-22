@@ -18,14 +18,13 @@ def type(entity & class)
 
 	import io.intino.ness.master.model.Triplet;
 	import io.intino.ness.master.model.TripletRecord;
+	import io.intino.ness.master.model.Entity;
 
 	import java.util.List;
 	import java.util.ArrayList;
-	import java.util.HashMap;
-    import java.util.Map;
-    import java.util.function.BiConsumer;
-	import java.util.Arrays;
+	import java.util.Map;
 	import java.util.stream.Collectors;
+	import java.util.Arrays;
 
 	public[ $isAbstract+firstLowerCase] class $abstract~$name+FirstUpperCase extends $parent {
 
@@ -73,6 +72,13 @@ def type(entity & class)
 		}]
 
 		[$attribute+addAndRemoveMethod...[$NL$NL]]
+
+		private static String normalizeId(String fullId) {
+			Entity.Id id = new Entity.Id(fullId);
+			if(id.type().isEmpty()) return id.value() + ":$name+firstLowerCase";
+			if(!id.type().equals("$name+firstLowerCase")) throw new IllegalArgumentException("Attempting to create an $name+firstUpperCase with an invalid id: " + fullId);
+			return fullId;
+		}
     }
 end
 
@@ -81,6 +87,10 @@ def attribute(this:io.intino.ness.master.model.Entity) trigger(super)
 end
 
 def trigger(super)
+	super(normalizeId(id), master);
+end
+
+def type(abstract) trigger(super)
 	super(id, master);
 end
 

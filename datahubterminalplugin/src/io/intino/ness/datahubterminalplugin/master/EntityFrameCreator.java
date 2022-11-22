@@ -2,6 +2,7 @@ package io.intino.ness.datahubterminalplugin.master;
 
 
 import io.intino.datahub.model.Entity;
+import io.intino.datahub.model.EntityData;
 import io.intino.datahub.model.NessGraph;
 import io.intino.datahub.model.Struct;
 import io.intino.itrules.Frame;
@@ -136,7 +137,7 @@ public class EntityFrameCreator {
 	}
 
 	private boolean isProperTypeName(String s) {
-		return !s.equals("List") && !s.equals("Optional") && !s.equals("Type");
+		return !s.equals("List") && !s.equals("Optional") && !s.equals("Type") && !s.equals("Required");
 	}
 
 	private Parameter parameter(Node c, String name) {

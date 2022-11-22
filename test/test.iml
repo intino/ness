@@ -146,10 +146,7 @@
     <orderEntry type="library" name="Intino: com.hazelcast:hazelcast:5.1.3" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:5.0.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:5.0.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.1.1" level="project" />
     <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.9.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.test.datahubtest:test-terminal:1.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:terminal-jms:4.5.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:1.7.36" level="project" />
@@ -157,6 +154,6 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:mapp:1.1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.test.datahubtest:ontology:1.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.test.datahubtest:master-terminal:1.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:json:1.1.2" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.1.2" level="project" />
   </component>
 </module>

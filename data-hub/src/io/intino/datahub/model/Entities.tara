@@ -12,6 +12,7 @@ Concept:Named Struct
 	Aspect ExtensionOf > var Struct struct
 
 Concept EntityData is abstract
+	Aspect Required
 	Aspect Optional
 	Aspect List
 	Aspect Type
