@@ -41,14 +41,14 @@ def type(validator & class)
 
 		@Override
 		public Stream<Issue> validate(TripletRecord record, TripletRecordStore store) {
-			return record.attributes().entrySet().stream()
-				.map(e -> validate(e, record, store))
+			return validatorsPerField.keySet().stream()
+				.map(attrib -> validate(attrib, record.get(attrib), record, store))
 				.filter(Objects::nonNull)
 				.reduce(Stream::concat).orElse(Stream.empty());
 		}
 
-		protected Stream<Issue> validate(Map.Entry<String, List<TripletRecord.Value>> attrib, TripletRecord record, TripletRecordStore store) {
-			return validatorsPerField.getOrDefault(attrib.getKey(), FieldValidator.none()).validate(attrib.getValue(), record, store);
+		protected Stream<Issue> validate(String attrib, List<TripletRecord.Value> values, TripletRecord record, TripletRecordStore store) {
+			return validatorsPerField.getOrDefault(attrib, FieldValidator.none()).validate(values, record, store);
 		}
 
 		[$attribute+validationMethod...[$NL$NL]]
