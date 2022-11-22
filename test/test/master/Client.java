@@ -20,6 +20,8 @@ public class Client {
 		MasterTerminal terminal = MasterTerminal.create();
 		terminal.start();
 
+		Employee e = new Employee("", terminal);
+
 		Theater theater = terminal.disabled().theater("123:theater");
 		Stream<Theater> theaters = terminal.disabled().theaters();
 		List<Theater> theaterList = terminal.disabled().theaterList();

@@ -42,7 +42,7 @@ def type(entity & class)
 		}
 
 		public $abstract~$name+FirstUpperCase(TripletRecord record, $package.MasterTerminal master) {
-			this(record.id(), master);
+			this(normalizeId(record.id()), master);
 			record.triplets().forEach(this::add);
 		}
 
@@ -73,25 +73,31 @@ def type(entity & class)
 
 		[$attribute+addAndRemoveMethod...[$NL$NL]]
 
-		private static String normalizeId(String fullId) {
-			Entity.Id id = new Entity.Id(fullId);
-			if(id.type().isEmpty()) return id.value() + ":$name+firstLowerCase";
-			if(!id.type().equals("$name+firstLowerCase")) throw new IllegalArgumentException("Attempting to create an $name+firstUpperCase with an invalid id: " + fullId);
-			return fullId;
-		}
+		$normalizeId+normalizeIdMethod
     }
 end
 
+def type(normalizeId & abstract) trigger(normalizeIdMethod)
+	private static String normalizeId(String fullId) {
+		return fullId;
+	}
+end
+
+def type(normalizeId) trigger(normalizeIdMethod)
+	private static String normalizeId(String fullId) {
+		Entity.Id id = new Entity.Id(fullId);
+		if(id.type().isEmpty()) return id.value() + ":$name+firstLowerCase";
+		if(!id.type().equals("$name+firstLowerCase")) throw new IllegalArgumentException("Attempting to create an $name+firstUpperCase with an invalid id: " + fullId);
+		return fullId;
+	}
+end
+
 def attribute(this:io.intino.ness.master.model.Entity) trigger(super)
-	super(id);
+	super(normalizeId(id));
 end
 
 def trigger(super)
 	super(normalizeId(id), master);
-end
-
-def type(abstract) trigger(super)
-	super(id, master);
 end
 
 def trigger(addSwitchCase)
