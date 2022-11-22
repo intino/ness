@@ -129,10 +129,14 @@ public class EntityFrameCreator {
 	}
 
 	private String type(Node node) {
-		String aspect = node.conceptList().stream().map(Concept::name).filter(a -> !a.equals("List")).findFirst().orElse("");
+		String aspect = node.conceptList().stream().map(Concept::name).filter(this::isProperTypeName).findFirst().orElse("");
 		boolean list = node.conceptList().stream().anyMatch(a -> a.name().equals("List"));
 		if (!list) return types.getOrDefault(aspect, firstUpperCase().format(node.name()).toString());
 		return listTypes.getOrDefault(aspect, "List<" + firstUpperCase().format(node.name()).toString() + ">");
+	}
+
+	private boolean isProperTypeName(String s) {
+		return !s.equals("List") && !s.equals("Optional") && !s.equals("Type");
 	}
 
 	private Parameter parameter(Node c, String name) {
