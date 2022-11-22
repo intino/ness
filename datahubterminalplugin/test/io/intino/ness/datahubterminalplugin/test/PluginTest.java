@@ -89,9 +89,12 @@ public class PluginTest {
 	}
 
 	@Test
-	public void should_build_cinepolis_terminals() throws IOException {
+	public void should_build_cinepolis_terminals() throws IOException, InterruptedException {
+//		Thread.sleep(20000);
+		long start = System.currentTimeMillis();
 		new File(WORKSPACE_ROOT, "IntinoDev/ness/out/datahub-cinepolis/").mkdirs();
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
+//		launcher.deleteTempDirOnPublish(false);
 		launcher.moduleStructure(new ModuleStructure(List.of(
 						new File(WORKSPACE_ROOT, "MonentiaDev/cinepolis/datahub/src"),
 						new File(WORKSPACE_ROOT, "MonentiaDev/cinepolis/datahub/shared")),
@@ -107,6 +110,9 @@ public class PluginTest {
 		FileUtils.deleteDirectory(temp);
 		temp.mkdirs();
 		launcher.run(temp);
+		long time = System.currentTimeMillis() - start;
+		System.out.println("Time: " + (time / 1000.0f) + " seconds");
+		FileUtils.deleteDirectory(temp);
 	}
 
 	private PluginLauncher.Notifier notifier() {
