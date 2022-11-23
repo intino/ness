@@ -4,7 +4,7 @@ Artifact("io.intino", "6.0.1-SNAPSHOT") data-hub as Product
 	Model("Proteo", "3.4.0", "4.2.0") > outLanguage = "Ness"
 	Box("Konos", "9.7.4")
 	Imports
-		Compile("io.intino.ness", "master", "1.0.0")
+		Compile("io.intino.ness", "master", "1.0.1")
 		Compile("io.intino.alexandria", "core-framework", "2.1.2")
 		Compile("io.intino.alexandria", "jmx", "1.0.3")
 		Compile("io.intino.alexandria", "ui-framework", "4.21.2")

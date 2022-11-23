@@ -17,19 +17,16 @@ end
 def type(master & interface)
 	package $package;
 
-	import java.util.Arrays;
-	import java.util.Map;
-	import java.util.HashMap;
-	import java.util.List;
-	import java.util.UUID;
-	import java.util.concurrent.Future;
-	import java.util.concurrent.CompletableFuture;
-	import io.intino.ness.master.model.TripletRecord;
+	import com.hazelcast.client.config.ClientConfig;
+	import com.hazelcast.client.config.ClientNetworkConfig;
+	import io.intino.ness.master.core.MasterLifecycleListener;
+	import io.intino.ness.master.messages.Response;
 	import io.intino.ness.master.messages.listeners.EntityListener;
 	import io.intino.ness.master.messages.listeners.ErrorListener;
-	import io.intino.ness.master.messages.Response;
 	import io.intino.ness.master.model.Entity;
-	import io.intino.ness.master.core.*;
+	import io.intino.ness.master.model.TripletRecord;
+	import java.util.*;
+	import java.util.concurrent.Future;
 
 	import $package.entities.*;
 
@@ -58,6 +55,7 @@ def type(master & interface)
 
 		io.intino.ness.master.serialization.MasterSerializer serializer();
 
+		/**Add a listener to this terminal lifecycle. Only valid after calling start.*/
 		void addLifecycleListener(MasterLifecycleListener listener);
 
 		void addErrorListener(ErrorListener listener);
@@ -81,7 +79,7 @@ def type(master & interface)
 			ClientConfig hzConfig = new ClientConfig();
 			hzConfig.setInstanceName(config.clientName());
 			hzConfig.setNetworkConfig(new ClientNetworkConfig().setAddresses(config.addresses()));
-			hzConfig.properties().forEach(hzConfig::setProperty);
+			config.properties().forEach(hzConfig::setProperty);
 
 			if(config.connectionConfig() != null) {
 				Config.ConnectionConfig connectionConfig = config.connectionConfig();
@@ -90,7 +88,7 @@ def type(master & interface)
                     .setMaxBackoffMillis(connectionConfig.maxBackoffMillis())
                 	.setClusterConnectTimeoutMillis(connectionConfig.clusterConnectTimeoutMillis())
                     .setMultiplier(connectionConfig.multiplier())
-                    .setJitter(connectionConfig.)jitter();
+                    .setJitter(connectionConfig.jitter());
 			}
 
 			return hzConfig;
@@ -293,6 +291,7 @@ def type(master & cached)
 	import com.hazelcast.client.config.ClientConfig;
 	import com.hazelcast.client.config.ClientNetworkConfig;
 	import com.hazelcast.core.HazelcastInstance;
+	import com.hazelcast.core.LifecycleEvent.LifecycleState;
 	import com.hazelcast.map.IMap;
 	import com.hazelcast.topic.Message;
 	import com.hazelcast.topic.MessageListener;
@@ -311,6 +310,7 @@ def type(master & cached)
 
 	import java.time.Instant;
 	import java.util.ArrayList;
+	import java.util.Arrays;
 	import java.util.Collections;
 	import java.util.List;
 	import java.util.Map;
@@ -369,9 +369,11 @@ def type(master & cached)
 
     	@Override
     	public void addLifecycleListener(MasterLifecycleListener listener) {
+    		if(hazelcast == null) return;
     		if(listener == null) throw new NullPointerException("MasterLifecycleListener cannot be null");
     		hazelcast.getLifecycleService().addLifecycleListener(e -> {
-    			listener.onChanged(new MasterLifecycleEvent(toLifecycleState(e.getState())));
+    			MasterLifecycleEvent.State state = toLifecycleState(e.getState());
+    			if(state != null) listener.onChanged(new MasterLifecycleEvent(state));
     		});
     	}
 
@@ -764,6 +766,7 @@ def type(master & lazy)
 	import com.hazelcast.client.config.ClientConfig;
 	import com.hazelcast.client.config.ClientNetworkConfig;
 	import com.hazelcast.core.HazelcastInstance;
+	import com.hazelcast.core.LifecycleEvent.LifecycleState;
 	import com.hazelcast.map.IMap;
 	import com.hazelcast.topic.Message;
 	import com.hazelcast.topic.MessageListener;
@@ -777,12 +780,14 @@ def type(master & lazy)
 	import io.intino.ness.master.model.TripletRecord;
 	import io.intino.ness.master.serialization.MasterSerializer;
 	import io.intino.ness.master.serialization.MasterSerializers;
+	import io.intino.ness.master.core.*;
 
 	import java.time.Instant;
 	import java.util.ArrayList;
 	import java.util.Collections;
 	import java.util.List;
 	import java.util.Map;
+	import java.util.Arrays;
 	import java.util.function.BiFunction;
 	import java.util.concurrent.*;
 	import java.util.concurrent.atomic.AtomicBoolean;
@@ -837,9 +842,11 @@ def type(master & lazy)
 
     	@Override
     	public void addLifecycleListener(MasterLifecycleListener listener) {
+    		if(hazelcast == null) return;
     		if(listener == null) throw new NullPointerException("MasterLifecycleListener cannot be null");
     		hazelcast.getLifecycleService().addLifecycleListener(e -> {
-    			listener.onChanged(new MasterLifecycleEvent(toLifecycleState(e.getState())));
+    			MasterLifecycleEvent.State state = toLifecycleState(e.getState());
+    			if(state != null) listener.onChanged(new MasterLifecycleEvent(state));
     		});
     	}
 
