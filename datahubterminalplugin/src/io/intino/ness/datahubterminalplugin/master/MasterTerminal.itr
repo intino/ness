@@ -29,6 +29,7 @@ def type(master & interface)
 	import io.intino.ness.master.messages.listeners.ErrorListener;
 	import io.intino.ness.master.messages.Response;
 	import io.intino.ness.master.model.Entity;
+	import io.intino.ness.master.core.*;
 
 	import $package.entities.*;
 
@@ -57,6 +58,8 @@ def type(master & interface)
 
 		io.intino.ness.master.serialization.MasterSerializer serializer();
 
+		void addLifecycleListener(MasterLifecycleListener listener);
+
 		void addErrorListener(ErrorListener listener);
 
 		<T extends Entity> void addEntityListener(String type, EntityListener<T> listener);
@@ -70,6 +73,27 @@ def type(master & interface)
 				$entity+asEntitySwitchCase...[$NL]
 				default: throw new IllegalArgumentException("Unknown entity type " + record.type());
 			}
+		}
+
+		default ClientConfig getHazelcastConfig() {
+			MasterTerminal.Config config = config();
+
+			ClientConfig hzConfig = new ClientConfig();
+			hzConfig.setInstanceName(config.clientName());
+			hzConfig.setNetworkConfig(new ClientNetworkConfig().setAddresses(config.addresses()));
+			hzConfig.properties().forEach(hzConfig::setProperty);
+
+			if(config.connectionConfig() != null) {
+				Config.ConnectionConfig connectionConfig = config.connectionConfig();
+				hzConfig.getConnectionStrategyConfig().getConnectionRetryConfig()
+                	.setInitialBackoffMillis(connectionConfig.initialBackoffMillis())
+                    .setMaxBackoffMillis(connectionConfig.maxBackoffMillis())
+                	.setClusterConnectTimeoutMillis(connectionConfig.clusterConnectTimeoutMillis())
+                    .setMultiplier(connectionConfig.multiplier())
+                    .setJitter(connectionConfig.)jitter();
+			}
+
+			return hzConfig;
 		}
 
 		enum Type {
@@ -100,6 +124,7 @@ def type(master & interface)
     		private boolean multithreadLoading = true;
     		private EntityFilter filter = EntityFilter.OnlyEnabled;
     		private boolean cacheDisabledView = true;
+    		private ConnectionConfig connectionConfig;
     		private final Map<String, String> properties = new HashMap<>() {{
     			put("hazelcast.logging.type", "none");
     			put("master.log.initialization_complete", "true");
@@ -181,6 +206,15 @@ def type(master & interface)
     			return this;
     		}
 
+			public ConnectionConfig connectionConfig() {
+				return connectionConfig;
+			}
+
+			public Config connectionConfig(ConnectionConfig connectionConfig) {
+				this.connectionConfig = connectionConfig;
+				return this;
+			}
+
     		public Map<String, String> properties() {
     			return properties;
     		}
@@ -195,6 +229,59 @@ def type(master & interface)
     			return this;
     		}
 
+			public static class ConnectionConfig {
+
+				private int initialBackoffMillis = 1000;
+				private int maxBackoffMillis = 30000;
+				private float multiplier = 1.05f;
+				private int clusterConnectTimeoutMillis = - 1;
+				private float jitter = 0;
+
+				public int initialBackoffMillis() {
+					return initialBackoffMillis;
+				}
+
+				public ConnectionConfig initialBackoffMillis(int initialBackoffMillis) {
+					this.initialBackoffMillis = initialBackoffMillis;
+					return this;
+				}
+
+				public int maxBackoffMillis() {
+					return maxBackoffMillis;
+				}
+
+				public ConnectionConfig maxBackoffMillis(int maxBackoffMillis) {
+					this.maxBackoffMillis = maxBackoffMillis;
+					return this;
+				}
+
+				public float multiplier() {
+					return multiplier;
+				}
+
+				public ConnectionConfig multiplier(float multiplier) {
+					this.multiplier = multiplier;
+					return this;
+				}
+
+				public int clusterConnectTimeoutMillis() {
+					return clusterConnectTimeoutMillis;
+				}
+
+				public ConnectionConfig clusterConnectTimeoutMillis(int clusterConnectTimeoutMillis) {
+					this.clusterConnectTimeoutMillis = clusterConnectTimeoutMillis;
+					return this;
+				}
+
+				public float jitter() {
+					return jitter;
+				}
+
+				public ConnectionConfig jitter(float jitter) {
+					this.jitter = jitter;
+					return this;
+				}
+			}
     	}
 	}
 end
@@ -210,6 +297,7 @@ def type(master & cached)
 	import com.hazelcast.topic.Message;
 	import com.hazelcast.topic.MessageListener;
 	import io.intino.alexandria.logger.Logger;
+	import io.intino.ness.master.core.*;
 	import io.intino.ness.master.messages.*;
 	import io.intino.ness.master.messages.listeners.EntityListener;
 	import io.intino.ness.master.messages.listeners.EntityListener.Event;
@@ -219,6 +307,7 @@ def type(master & cached)
 	import io.intino.ness.master.model.TripletRecord;
 	import io.intino.ness.master.serialization.MasterSerializer;
 	import io.intino.ness.master.serialization.MasterSerializers;
+	import io.intino.ness.master.core.*;
 
 	import java.time.Instant;
 	import java.util.ArrayList;
@@ -276,6 +365,18 @@ def type(master & cached)
 		@Override
     	public void stop() {
     		hazelcast.shutdown();
+    	}
+
+    	@Override
+    	public void addLifecycleListener(MasterLifecycleListener listener) {
+    		if(listener == null) throw new NullPointerException("MasterLifecycleListener cannot be null");
+    		hazelcast.getLifecycleService().addLifecycleListener(e -> {
+    			listener.onChanged(new MasterLifecycleEvent(toLifecycleState(e.getState())));
+    		});
+    	}
+
+    	private static MasterLifecycleEvent.State toLifecycleState(LifecycleState state) {
+    		return Arrays.stream(MasterLifecycleEvent.State.values()).filter(s -> s.name().equalsIgnoreCase(state.name())).findFirst().orElse(null);
     	}
 
 		@Override
@@ -732,6 +833,18 @@ def type(master & lazy)
 		@Override
     	public void stop() {
     		hazelcast.shutdown();
+    	}
+
+    	@Override
+    	public void addLifecycleListener(MasterLifecycleListener listener) {
+    		if(listener == null) throw new NullPointerException("MasterLifecycleListener cannot be null");
+    		hazelcast.getLifecycleService().addLifecycleListener(e -> {
+    			listener.onChanged(new MasterLifecycleEvent(toLifecycleState(e.getState())));
+    		});
+    	}
+
+    	private static MasterLifecycleEvent.State toLifecycleState(LifecycleState state) {
+    		return Arrays.stream(MasterLifecycleEvent.State.values()).filter(s -> s.name().equalsIgnoreCase(state.name())).findFirst().orElse(null);
     	}
 
 		@Override
