@@ -2,6 +2,7 @@ package io.intino.ness.datahubterminalplugin.master;
 
 
 import io.intino.datahub.model.Entity;
+import io.intino.datahub.model.EntityData;
 import io.intino.datahub.model.NessGraph;
 import io.intino.datahub.model.Struct;
 import io.intino.itrules.Frame;
@@ -58,6 +59,7 @@ public class EntityFrameCreator {
 				.add("attribute", entity.core$().componentList().stream().map(a -> attrFrameOf(a, entity.core$())).toArray());
 		final Parameter parent = parameter(entity.core$(), "entity");
 		builder.add("parent", parent != null ? ((Entity) parent.values().get(0)).name$() : "io.intino.ness.master.model.Entity");
+		builder.add("normalizeId", new FrameBuilder("normalizeId", (entity.isAbstract() || entity.isDecorable()) ? "abstract" : "").add("name", entity.name$()).toFrame());
 		if (entity.isDecorable() || entity.isAbstract()) builder.add("isAbstract", "abstract");
 		if (entity.isDecorable()) builder.add("abstract", "abstract");
 		return builder;
@@ -136,7 +138,7 @@ public class EntityFrameCreator {
 	}
 
 	private boolean isProperTypeName(String s) {
-		return !s.equals("List") && !s.equals("Optional") && !s.equals("Type");
+		return !s.equals("List") && !s.equals("Optional") && !s.equals("Type") && !s.equals("Required");
 	}
 
 	private Parameter parameter(Node c, String name) {

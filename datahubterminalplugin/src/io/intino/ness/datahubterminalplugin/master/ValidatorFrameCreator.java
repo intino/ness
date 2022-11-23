@@ -1,8 +1,8 @@
 package io.intino.ness.datahubterminalplugin.master;
 
 
+import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.model.Entity;
-import io.intino.datahub.model.EntityData;
 import io.intino.datahub.model.Struct;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
@@ -145,8 +145,16 @@ public class ValidatorFrameCreator {
 		builder.add("typeParameter", typeParameterOf(type));
 
 		boolean optional = node.conceptList().stream().anyMatch(a -> a.name().equals("Optional"));
+		boolean required = node.conceptList().stream().anyMatch(a -> a.name().equals("Required"));
+
+		if(required && optional) {
+			Logger.warn("Illegal combination of aspects: " + node.name() + " is declared both as Optional and Required. It will be set to Required.");
+			// Illegal combination of aspects. Let's set optional=false because it is more restrictive that way
+			optional = false;
+		}
+
 		if (optional)
-			builder.add("optional", new FrameBuilder("optional", "warning").add("name", node.name()).toFrame());
+			builder.add("check", new FrameBuilder("optional", "warning").add("name", node.name()).toFrame());
 
 		Parameter values = parameter(node, "values");
 		if (values != null) builder.add("value", values.values().stream().map(Object::toString).toArray());
@@ -156,7 +164,7 @@ public class ValidatorFrameCreator {
 			builder.add("defaultValue", defaultValue(node, type, defaultValue));
 			if (!optional) builder.add("optional", new FrameBuilder("optional").add("name", node.name()).toFrame());
 		} else if (!optional)
-			builder.add("required", new FrameBuilder("required").add("name", node.name()).toFrame());
+			builder.add("check", new FrameBuilder("required").add("name", node.name()).toFrame());
 
 		Parameter format = parameter(node, "format");
 		if (format != null) builder.add("format", format.values().get(0));
@@ -168,7 +176,21 @@ public class ValidatorFrameCreator {
 		Parameter struct = parameter(node, "struct");
 		if (struct != null) builder.add("struct", structFrame(((Struct) struct.values().get(0)).core$()));
 
+		addMissingAttributeCheckFrame(node, builder, required, optional);
+
 		return builder.toFrame();
+	}
+
+	private void addMissingAttributeCheckFrame(Node node, FrameBuilder builder, boolean required, boolean optional) {
+		FrameBuilder frame;
+		if(required) {
+			frame = new FrameBuilder("check", "required");
+		} else if(optional) {
+			frame = new FrameBuilder("check", "optional", "warning");
+		} else {
+			frame = new FrameBuilder("check");
+		}
+		builder.add("check", frame.add("name", node.name()).toFrame());
 	}
 
 	private String defaultFormat(String type) { // TODO: try get from master model

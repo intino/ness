@@ -76,8 +76,7 @@ end
 
 def type(attribute & list) trigger(validationMethod)
 	protected Stream<Issue> validate$name+FirstUpperCase~(List<TripletRecord.Value> values, TripletRecord record, TripletRecordStore store) {
-		[$required+attributeNotDefined]
-		[$optional+attributeNotDefined]
+		$check+attributeNotDefined
 		if(values.size() > 1) return Stream.of(Issue.error(DUPLICATED_ATTRIBUTE, "{"+record.id()+"} " + "$name is defined " + values.size() + " times.").source(values.get(0).source()));
 		return isListOf$typeParameter+FirstUpperCase~(values.get(0).get(), store)
 			? Stream.empty()
@@ -87,8 +86,7 @@ end
 
 def type(attribute & entity) trigger(validationMethod)
 	protected Stream<Issue> validate$name+FirstUpperCase~(List<TripletRecord.Value> values, TripletRecord record, TripletRecordStore store) {
-		[$required+attributeNotDefined]
-		[$optional+attributeNotDefined]
+		$check+attributeNotDefined
 		if(values.size() > 1) return Stream.of(Issue.error(DUPLICATED_ATTRIBUTE, "{"+record.id()+"} " + "$name is defined " + values.size() + " times.").source(values.get(0).source()));
         return store.get(values.get(0).get()) != null
         	? Stream.empty()
@@ -98,8 +96,7 @@ end
 
 def type(attribute) !type(string) trigger(validationMethod)
 	protected Stream<Issue> validate$name+FirstUpperCase~(List<TripletRecord.Value> values, TripletRecord record, TripletRecordStore store) {
-		[$required+attributeNotDefined]
-		[$optional+attributeNotDefined]
+		$check+attributeNotDefined
 		if(values.size() > 1) return Stream.of(Issue.error(DUPLICATED_ATTRIBUTE, "{"+record.id()+"} " + "$name is defined " + values.size() + " times.").source(values.get(0).source()));
 		return is$typename+FirstUpperCase~(values.get(0).get(), store)
 			? Stream.empty()
@@ -109,22 +106,21 @@ end
 
 def type(attribute) type(string) trigger(validationMethod)
 	protected Stream<Issue> validate$name+FirstUpperCase~(List<TripletRecord.Value> values, TripletRecord record, TripletRecordStore store) {
-		[$required+attributeNotDefined]
-		[$optional+attributeNotDefined]
+		$check+attributeNotDefined
 		if(values.size() > 1) return Stream.of(Issue.error(DUPLICATED_ATTRIBUTE, "{"+record.id()+"} " + "$name is defined " + values.size() + " times.").source(values.get(0).source()));
 		return Stream.empty();
 	}
 end
 
-def type(required) trigger(attributeNotDefined)
+def type(check & required) trigger(attributeNotDefined)
 	if(values.isEmpty() || values.get(0).isEmpty()) return Stream.of(Issue.error(MISSING_ATTRIBUTE, "{"+record.id()+"} " + "$name is not defined.").source(record.source()));
 end
 
-def type(optional & warning) trigger(attributeNotDefined)
+def type(check & optional & warning) trigger(attributeNotDefined)
 	if(values.isEmpty() || values.get(0).isEmpty()) return Stream.of(Issue.warning(MISSING_ATTRIBUTE, "{"+record.id()+"} " + "$name is not defined.").source(record.source()));
 end
 
-def type(optional) trigger(attributeNotDefined)
+def type(check) trigger(attributeNotDefined)
 	if(values.isEmpty() || values.get(0).isEmpty()) return Stream.empty();
 end
 

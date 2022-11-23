@@ -2,8 +2,8 @@ dsl Ness
 
 Entity Employee
 	Attribute base as String
-	Attribute foreman as String
-	Attribute name as String
+	Attribute foreman as String Optional
+	Attribute name as String Required
 	Attribute phone as String
 	Attribute photo as String
 	Attribute role as String

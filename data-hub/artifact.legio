@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino", "6.0.0") data-hub as Product
+Artifact("io.intino", "6.0.1-SNAPSHOT") data-hub as Product
 	Model("Proteo", "3.4.0", "4.2.0") > outLanguage = "Ness"
 	Box("Konos", "9.7.4")
 	Imports
@@ -26,7 +26,7 @@ Artifact("io.intino", "6.0.0") data-hub as Product
 		Compile("org.apache.activemq", "activemq-jaas", "5.17.2")
 		Compile("org.apache.activemq", "activemq-runtime-config", "5.17.2")
 		Test("junit", "junit", "4.13.2")
-		Web("io.intino", "datalake-inspector", "6.0.0")
+		Web("io.intino", "datalake-inspector", "6.0.1-SNAPSHOT")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
 	Distribution > Artifactory("intino-maven")
