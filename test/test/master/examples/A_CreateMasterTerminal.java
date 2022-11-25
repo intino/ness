@@ -1,5 +1,6 @@
 package master.examples;
 
+import io.intino.ness.master.core.MasterInitializationException;
 import org.example.test.model.MasterTerminal;
 
 import java.util.List;
@@ -21,15 +22,16 @@ public class A_CreateMasterTerminal {
 	 * See MasterTerminal.Config class to see the default values
 	 * A custom config instance is recommended
 	 **/
-	public MasterTerminal createDefault() {
-		return MasterTerminal.create();
+	public void createDefault() {
+		MasterTerminal terminal = MasterTerminal.create();
+		terminal.start();
 	}
 
 	/**
 	 * This will create a MasterTerminal with your custom configuration
 	 * This is the recommended way of creating a MasterTerminal instance
 	 **/
-	public MasterTerminal createWithCustomConfig() {
+	public void createWithCustomConfig() {
 		MasterTerminal.Config config = new MasterTerminal.Config()
 				.clientName("my client") // App or module name is recommended here
 				.allowWriting(true) // Allows this instance to update the master data. Default is false
@@ -40,6 +42,66 @@ public class A_CreateMasterTerminal {
 				.cacheDisabledView(true) // Tells whether the terminal should cache the disabled view instance. Recommended when using FullLoad implementation. The default value is true
 				.putProperty("some other property", "value"); // Specify other properties (especially useful for timeouts, see https://docs.hazelcast.com/hazelcast/5.1/fault-tolerance/timeouts)
 
-		return MasterTerminal.create(config);
+		// Connection retry config. If not set, it will try to connect infinitely.
+		MasterTerminal.Config.ConnectionConfig connectionConfig = new MasterTerminal.Config.ConnectionConfig()
+				.clusterConnectTimeoutMillis(60 * 1000)
+				.initialBackoffMillis(10000)
+				.maxBackoffMillis(60 * 1000)
+				.multiplier(1.05f)
+				.jitter(0);
+
+		config.connectionConfig(connectionConfig);
+
+		MasterTerminal terminal = MasterTerminal.create(config);
+		terminal.start();
+	}
+
+	/**
+	 * start() will block until the terminal can connect to a master server. If it cannot connect to any server, and if
+	 * clusterConnectTimeoutMillis was set to a value > 0, it will throw a MasterInitializationException after the specified timeout.
+	 * */
+	public void handleErrorsOnStart() {
+		MasterTerminal terminal = MasterTerminal.create();
+		try {
+			terminal.start();
+		} catch (MasterInitializationException e) {
+			// TODO
+		}
+	}
+
+	/**
+	 * You can listen to changes to the MasterTerminal backend. This is specially useful if you want to be notified when
+	 * the terminal loses connection or reconnects to a server.
+	 *
+	 * The listener must be added AFTER calling start.
+	 * */
+	public void handleLifecycleEvents() {
+		MasterTerminal terminal = MasterTerminal.create();
+		terminal.start();
+
+		terminal.addLifecycleListener(event -> {
+			switch(event.state()) {
+				case STARTING:
+					break;
+				case STARTED:
+					break;
+				case SHUTTING_DOWN:
+					break;
+				case SHUTDOWN:
+					break;
+				case MERGING:
+					break;
+				case MERGED:
+					break;
+				case MERGE_FAILED:
+					break;
+				case CLIENT_CONNECTED:
+					break;
+				case CLIENT_DISCONNECTED:
+					break;
+				case CLIENT_CHANGED_CLUSTER:
+					break;
+			}
+		});
 	}
 }
