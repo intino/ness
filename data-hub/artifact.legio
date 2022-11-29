@@ -26,7 +26,7 @@ Artifact("io.intino", "6.0.1") data-hub as Product
 		Compile("org.apache.activemq", "activemq-jaas", "5.17.2")
 		Compile("org.apache.activemq", "activemq-runtime-config", "5.17.2")
 		Test("junit", "junit", "4.13.2")
-		Web("io.intino", "datalake-inspector", "6.0.1-SNAPSHOT")
+		Web("io.intino", "datalake-inspector", "6.0.1")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
 	Distribution > Artifactory("intino-maven")
