@@ -64,6 +64,15 @@ def type(validator & class)
     		}
 		}
 
+		protected boolean isSetOfString(String value, TripletRecordStore store) {
+			try {
+    			java.util.Arrays.stream(value.split(LIST_SEPARATOR)).collect(java.util.stream.Collectors.toSet());
+    			return true;
+    		} catch(Exception e) {
+    		 	return false;
+    		}
+		}
+
 		protected boolean isEntity(String id, TripletRecordStore store) {
 			return store.get(id) != null;
 		}
@@ -79,6 +88,16 @@ def type(attribute & list) trigger(validationMethod)
 		$check+attributeNotDefined
 		if(values.size() > 1) return Stream.of(Issue.error(DUPLICATED_ATTRIBUTE, "{"+record.id()+"} " + "$name is defined " + values.size() + " times.").source(values.get(0).source()));
 		return isListOf$typeParameter+FirstUpperCase~(values.get(0).get(), store)
+			? Stream.empty()
+			: Stream.of(Issue.error(INVALID_VALUE, "{"+record.id()+"} " + "$name is an invalid $type: " + values.get(0).get()).source(values.get(0).source()));
+	}
+end
+
+def type(attribute & set) trigger(validationMethod)
+	protected Stream<Issue> validate$name+FirstUpperCase~(List<TripletRecord.Value> values, TripletRecord record, TripletRecordStore store) {
+		$check+attributeNotDefined
+		if(values.size() > 1) return Stream.of(Issue.error(DUPLICATED_ATTRIBUTE, "{"+record.id()+"} " + "$name is defined " + values.size() + " times.").source(values.get(0).source()));
+		return isSetOf$typeParameter+FirstUpperCase~(values.get(0).get(), store)
 			? Stream.empty()
 			: Stream.of(Issue.error(INVALID_VALUE, "{"+record.id()+"} " + "$name is an invalid $type: " + values.get(0).get()).source(values.get(0).source()));
 	}
@@ -179,7 +198,7 @@ def type(type) type(instant) trigger(checkType)
 	}
 end
 
-def type(type) type(list) trigger(checkType)
+def type(type) type(list | set) trigger(checkType)
 	protected boolean is$typename+FirstUpperCase~Of$typeParameter+FirstUpperCase(String value, TripletRecordStore store) {
 		try {
 			List<String> list = java.util.Arrays.stream(value.split(LIST_SEPARATOR)).collect(java.util.stream.Collectors.toList());
@@ -206,7 +225,7 @@ def type(type) type(map) trigger(checkType)
 	}
 end
 
-def type(struct) trigger(checkType)
+def type(type) type(struct) trigger(checkType)
 	protected boolean is$name+FirstUpperCase~(String value, TripletRecordStore store) {
 		try {
         	List<String> values = java.util.Arrays.stream(value.split(STRUCT_FIELD_SEPARATOR, -1)).map(v -> v.trim()).collect(java.util.stream.Collectors.toList());
@@ -218,7 +237,7 @@ def type(struct) trigger(checkType)
 	}
 end
 
-def type(word) trigger(checkType)
+def type(type) type(word) trigger(checkType)
 	protected boolean is$name+FirstUpperCase~(String value, TripletRecordStore store) {
 		try {
         	$package.$name+FirstUpperCase~.valueOf(value);

@@ -17,33 +17,47 @@ import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
 
 public class ValidatorFrameCreator {
 	private static final String DOT = ".";
-	private static final Map<String, String> types = Map.of(
-			"String", "String",
-			"Double", "double",
-			"Integer", "integer",
-			"Boolean", "boolean",
-			"Entity", "io.intino.ness.master.model.Entity",
-			"Long", "long",
-			"Date", "LocalDate",
-			"DateTime", "LocalDateTime",
-			"Instant", "Instant",
-			"Map", "Map"
-	);
 
-	private static final Map<String, String> listTypes = Map.of(
-			"String", "List<String>",
-			"Double", "List<Double>",
-			"Integer", "List<Integer>",
-			"Boolean", "List<Boolean",
-			"Entity", "List<io.intino.ness.master.model.Entity>",
-			"Long", "List<Long>",
-			"Date", "List<LocalDate>",
-			"DateTime", "List<LocalDateTime>",
-			"Instant", "List<Instant>",
-			"Map", "List<Map>"
-	);
+	private static final Map<String, String> TheTypes = new HashMap<>() {{
+		put("String", "String");
+		put("Double", "double");
+		put("Integer", "integer");
+		put("Boolean", "boolean");
+		put("Entity", "io.intino.ness.master.model.Entity");
+		put("Long", "long");
+		put("Date", "LocalDate");
+		put("DateTime", "LocalDateTime");
+		put("Instant", "Instant");
+		put("Map", "Map");
+	}};
+
+	private static final Map<String, String> ListTypes = new HashMap<>() {{
+		put("String", "List<String>");
+		put("Double", "List<Double>");
+		put("Integer", "List<Integer>");
+		put("Boolean", "List<Boolean");
+		put("Entity", "List<io.intino.ness.master.model.Entity>");
+		put("Long", "List<Long>");
+		put("Date", "List<LocalDate>");
+		put("DateTime", "List<LocalDateTime>");
+		put("Instant", "List<Instant>");
+		put("Map", "List<Map>");
+	}};
+
+	private static final Map<String, String> SetTypes = new HashMap<>() {{
+		put("String", "Set<String>");
+		put("Double", "Set<Double>");
+		put("Integer", "Set<Integer>");
+		put("Boolean", "Set<Boolean");
+		put("Entity", "Set<io.intino.ness.master.model.Entity>");
+		put("Long", "Set<Long>");
+		put("Date", "Set<LocalDate>");
+		put("DateTime", "Set<LocalDateTime>");
+		put("Instant", "Set<Instant>");
+		put("Map", "Set<Map>");
+	}};
+
 	private final String workingPackage;
-
 	private final Set<String> processedTypes = new HashSet<>();
 
 	public ValidatorFrameCreator(String workingPackage) {
@@ -78,14 +92,15 @@ public class ValidatorFrameCreator {
 
 	private Stream<Frame> typeFramesOf(Node node, Node parent) {
 		String type = type(node);
-		String typename = typename(type);
-		String typeParameter = typeParameterOf(type);
+		String typename = typename(type, node);
+		String typeParameter = typeParameterOf(type, node);
 		return typeFramesOf(node, parent, type, typename, typeParameter);
 	}
 
 	private Stream<Frame> typeFramesOf(Node node, Node parent, String type, String typename, String typeParameter) {
 		if(!processedTypes.add(type.toLowerCase())) return Stream.empty();
 		if(type.startsWith("List<") && typeParameter.equals("String")) return Stream.empty();
+		if(type.startsWith("Set<") && typeParameter.equals("String")) return Stream.empty();
 
 		List<Frame> frames = new LinkedList<>();
 
@@ -104,27 +119,27 @@ public class ValidatorFrameCreator {
 
 	private void processTypeExtraInfo(Node node, Node parent, String typeParameter, List<Frame> frames, FrameBuilder builder) {
 		if(!typeParameter.isEmpty() && !typeParameter.equals("Entity") && !typeParameter.equals("String")) {
-			typeFramesOf(null, null,
+			typeFramesOf(node, parent,
 					typeParameter,
 					typeParameter,
 					"")
 					.forEach(frames::add);
+		} else {
+			if (node.conceptList().stream().anyMatch(a -> a.name().equals("Word")))
+				builder.add("word").add("package", workingPackage + ".entities." + parent.name());
+
+			Parameter struct = parameter(node, "struct");
+			if (struct != null)
+				builder.add("struct").add("struct", structFrame(((Struct) struct.values().get(0)).core$()));
 		}
-
-		if (node.conceptList().stream().anyMatch(a -> a.name().equals("Word")))
-			builder.add("word").add("package", workingPackage + ".entities." + parent.name());
-
-		Parameter struct = parameter(node, "struct");
-		if (struct != null)
-			builder.add("struct").add("struct").add("struct", structFrame(((Struct) struct.values().get(0)).core$()));
 	}
 
-	private String typeParameterOf(String type) {
-		if(!type.contains("List<")) return "";
+	private String typeParameterOf(String type, Node node) {
+		if(!type.contains("List<") && !type.contains("Set<")) return "";
 		return type.substring(type.indexOf("<") + 1).replace("io.intino.ness.master.model.", "").replace(">", "");
 	}
 
-	private String typename(String type) {
+	private String typename(String type, Node node) {
 		if (!type.contains("<")) return type;
 		return type.substring(0, type.indexOf('<'));
 	}
@@ -141,8 +156,8 @@ public class ValidatorFrameCreator {
 		builder.add("name", node.name()).add("owner", node.owner().name()).add("type", type).add("package", workingPackage);
 		builder.add("index", node.owner().componentList().indexOf(node));
 
-		builder.add("typename", typename(type));
-		builder.add("typeParameter", typeParameterOf(type));
+		builder.add("typename", typename(type, node));
+		builder.add("typeParameter", typeParameterOf(type, node));
 
 		boolean optional = node.conceptList().stream().anyMatch(a -> a.name().equals("Optional"));
 		boolean required = node.conceptList().stream().anyMatch(a -> a.name().equals("Required"));
@@ -214,10 +229,19 @@ public class ValidatorFrameCreator {
 	}
 
 	private String type(Node node) {
-		String aspect = node.conceptList().stream().map(Concept::name).filter(a -> !a.equals("List")).findFirst().orElse("");
+		String aspect = node.conceptList().stream().map(Concept::name).filter(this::isProperTypeName).findFirst().orElse("");
+
 		boolean list = node.conceptList().stream().anyMatch(a -> a.name().equals("List"));
-		if (!list) return types.getOrDefault(aspect, firstUpperCase().format(node.name()).toString());
-		return listTypes.getOrDefault(aspect, "List<" + firstUpperCase().format(node.name()).toString() + ">");
+		if (list) return ListTypes.getOrDefault(aspect, "List<" + firstUpperCase().format(node.name()).toString() + ">");
+
+		boolean set = node.conceptList().stream().anyMatch(a -> a.name().equals("Set"));
+		if (set) return SetTypes.getOrDefault(aspect, "Set<" + firstUpperCase().format(node.name()).toString() + ">");
+
+		return TheTypes.getOrDefault(aspect, firstUpperCase().format(node.name()).toString());
+	}
+
+	private boolean isProperTypeName(String s) {
+		return !s.equals("Set") && !s.equals("List") && !s.equals("Optional") && !s.equals("Type") && !s.equals("Required");
 	}
 
 	private Parameter parameter(Node c, String name) {

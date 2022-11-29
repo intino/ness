@@ -73,6 +73,11 @@ def type(master & interface)
 			}
 		}
 
+		/**expectedType must include the : prefix*/
+		default String normalizeId(String id, String expectedType) {
+			return id.endsWith(expectedType) ? id : id + expectedType;
+		}
+
 		default ClientConfig getHazelcastConfig() {
 			MasterTerminal.Config config = config();
 
@@ -1197,7 +1202,7 @@ end
 
 def !type(abstract) trigger(remove)
 	private void removeFrom$name+FirstUpperCase(String id) {
-		$name+firstLowerCase~Map.remove(id);
+		$name+firstLowerCase~Map.remove(normalizeId(id, ":$name+firstLowerCase"));
 	}
 end
 
@@ -1229,7 +1234,7 @@ end
 def !type(abstract) type(cached) trigger(getter)
 	@Override
 	public $name+FirstUpperCase $name+firstLowerCase(String id) {
-		return $name+firstLowerCase~Map.get(id);
+		return $name+firstLowerCase~Map.get(normalizeId(id, ":$name+firstLowerCase"));
 	}
 
 	@Override
@@ -1241,6 +1246,7 @@ end
 def !type(abstract) type(lazy) trigger(getter)
 	@Override
 	public $name+FirstUpperCase $name+firstLowerCase(String id) {
+		id = normalizeId(id, ":$name+firstLowerCase");
 		TripletRecord record = getRecord(id);
     	return record != null ? entity($name+FirstUpperCase::new, id, record) : null;
 	}

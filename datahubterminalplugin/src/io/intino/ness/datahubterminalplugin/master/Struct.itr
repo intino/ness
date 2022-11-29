@@ -28,10 +28,10 @@ def type(struct)
 
 		@Override
 		public String toString() {
-			StringBuilder sb = new StringBuilder("$name+FirstUpperCase {");
+			StringBuilder sb = new StringBuilder();
 			$attribute+toString...[$NL]
-			sb.delete(sb.length() - ", ".length(), sb.length());
-			return sb.append("}").toString();
+			sb.delete(sb.length() - 1, sb.length());
+			return sb.toString();
 		}
 	}
 end
@@ -59,7 +59,7 @@ def trigger(equals)
 end
 
 def trigger(toString)
-	sb.append("$name+firstLowerCase=").append(this.$name+firstLowerCase).append(", ");
+	sb.append(this.$name+firstLowerCase).append(',');
 end
 
 def type(attribute)

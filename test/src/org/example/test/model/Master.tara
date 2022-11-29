@@ -1,16 +1,49 @@
 dsl Ness
 
+Entity Configuration as Abstract
+	Attribute configId as String
+
+Entity Installation as ExtensionOf(Configuration)
+	Attribute name as String
+	Attribute type as Word("Videometry" "WeatherStation")
+	Attribute place as Struct(GeoPoint)
+	Attribute placeList as Struct(GeoPoint) List
+	Attribute en as Word("A" "B")
+	Attribute enList as Word("A" "B" "C") List
+	Attribute url as String
+
+Entity Zone as ExtensionOf(Configuration)
+	Attribute name as String
+	//TODO
+	//Attribute place as Struct(GeoPoint) List
+	Attribute place as Struct(GeoPoint) List
+	Attribute ownerZone as Entity(Zone)
+	Attribute childZones as Entity(Zone) List
+	Attribute sensorIds as Entity(Installation) List
+	//TODO
+	Attribute associatedKpis as Word("A" "B" "C") Set
+
+Entity AlertConfiguration as ExtensionOf(Configuration)
+	Attribute entityId as String
+	Attribute type as Word("BeachSandOccupancy" "DrySandArea" "WetSandArea" "Tide" "LostConnection")
+	Attribute timeScale as Word("Minute" "Hour" "Day" "Week" "Month" "Year")
+	Attribute enabledMin as Boolean
+	Attribute min as Double
+	Attribute enabledMax as Boolean
+	Attribute max as Double
+	Attribute recipients as String List
+
+
 Entity Employee
 	Attribute base as String
-	Attribute foreman as String Optional
+	Attribute foreman as String
 	Attribute name as String Required
 	Attribute phone as String
 	Attribute photo as String
-	Attribute role as String
+	Attribute role as String Required
 	Attribute area as Entity(Area) // Area es el id del area, pero a la hora de obtenerlo se devuelve el objeto
-	Attribute email as String
+	Attribute email as String Required
 	Attribute language as String
-	Attribute enabled as Boolean(true) // Valor por defecto
 	Attribute date as Date
 	Attribute datetime as DateTime("dd/MM/yyyy HH:mm:ss")
 	Attribute ins as Instant
@@ -38,10 +71,14 @@ Entity Region as ExtensionOf(Place)
 	Attribute country as Entity(Country)
 	Attribute timeOffset as Double
 	Attribute hasDst as Boolean
+//	Attribute timeOffsetHours as Function -> Integer
+//	Attribute timeOffsetMinutes as Function -> Integer
+//	Attribute timeOffsetOn as Function(date as Date) -> Double
 
 Struct GeoPoint
 	Attribute latitude as Double
 	Attribute longitude as Double
+//	Attribute distanceTo as Function(point as GeoPoint) -> Integer
 
 Entity Theater as ExtensionOf(Place)
 	Attribute address as String
@@ -56,14 +93,15 @@ Entity Theater as ExtensionOf(Place)
     Attribute region as Entity(Region)
     Attribute screens as String
     Attribute ipOrder as String
-    Attribute ipSegment as String
+    Attribute ipSegment as String Optional
     Attribute ipTms as String
     Attribute shared as String
-    Attribute telephone as String // Optional
+    Attribute telephone as String
     Attribute territory as String
     Attribute type as String
     Attribute area as Entity(Area)
     Attribute enabled as Boolean(defaultValue= true)
+//    Attribute screenList as Function -> Entity(Screen) List
 
 Entity Screen as ExtensionOf(Place)
 	Attribute theater as Entity(Theater)
@@ -74,7 +112,7 @@ Entity Screen as ExtensionOf(Place)
 	Attribute tech3D as Word("IMAX" "IMAXbarco" "IMAXchristie" "REALD")
 	Attribute tech4D as Word("_4DX")
 	Attribute setup as Word("STANDARD" "JUNIOR" "PREMIUM", defaultValue = "STANDARD")
-	Attribute screenDocks as Entity(ScreenDock)
+	Attribute screenDocks as Entity(ScreenDock) List
 	Attribute twin as String
 
 Entity Dock as ExtensionOf(Place)
@@ -92,6 +130,8 @@ Entity Office as ExtensionOf(Place)
 	Attribute name as String
 
 Entity Desk as ExtensionOf(Place)
+//	Attribute office as Function -> Entity(Office)
+//	Attribute theater as Function -> Entity(Theater)
 
 Entity Asset
 	Attribute sn as String
@@ -100,8 +140,17 @@ Entity Asset
 	Attribute warranty as String
 	Attribute place as Entity(Place)
 	Attribute status as Word("Delivering" "Delivered" "Installed")
+//	Attribute isGhost as Function -> Bool
 
 Entity DualAsset as ExtensionOf(Asset)
+//	Attribute assets as Function
+//		===
+//			public List<Asset> assets() {
+//				return null;
+//			}
+//		===
+//	Attribute missingAssets as String List
+//	Attribute attribute as Function(key as String) -> String
 
 Entity CheckField as Component
 	Attribute name as String
