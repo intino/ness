@@ -20,7 +20,7 @@ Entity Employee
 
 Entity Place as Abstract
 
-Entity Country as ExtensionOf(Place) Decorable
+Entity Country as ExtensionOf(Place)
 	Attribute name as String
 	Attribute language as String
 	Attribute dst as Struct(Dst)
@@ -38,16 +38,12 @@ Entity Region as ExtensionOf(Place)
 	Attribute country as Entity(Country)
 	Attribute timeOffset as Double
 	Attribute hasDst as Boolean
-//	Attribute timeOffsetHours as Function -> Integer
-//	Attribute timeOffsetMinutes as Function -> Integer
-//	Attribute timeOffsetOn as Function(date as Date) -> Double
 
 Struct GeoPoint
 	Attribute latitude as Double
 	Attribute longitude as Double
-//	Attribute distanceTo as Function(point as GeoPoint) -> Integer
 
-Entity Theater as ExtensionOf(Place) Decorable
+Entity Theater as ExtensionOf(Place)
 	Attribute address as String
     Attribute city as String
     Attribute coordinates as Struct(GeoPoint)
@@ -68,7 +64,6 @@ Entity Theater as ExtensionOf(Place) Decorable
     Attribute type as String
     Attribute area as Entity(Area)
     Attribute enabled as Boolean(defaultValue= true)
-//    Attribute screenList as Function -> Entity(Screen) List
 
 Entity Screen as ExtensionOf(Place)
 	Attribute theater as Entity(Theater)
@@ -97,8 +92,6 @@ Entity Office as ExtensionOf(Place)
 	Attribute name as String
 
 Entity Desk as ExtensionOf(Place)
-//	Attribute office as Function -> Entity(Office)
-//	Attribute theater as Function -> Entity(Theater)
 
 Entity Asset
 	Attribute sn as String
@@ -107,26 +100,17 @@ Entity Asset
 	Attribute warranty as String
 	Attribute place as Entity(Place)
 	Attribute status as Word("Delivering" "Delivered" "Installed")
-//	Attribute isGhost as Function -> Bool
 
 Entity DualAsset as ExtensionOf(Asset)
-//	Attribute assets as Function
-//		===
-//			public List<Asset> assets() {
-//				return null;
-//			}
-//		===
-//	Attribute missingAssets as String List
-//	Attribute attribute as Function(key as String) -> String
 
-Entity CheckField as Decorable Component
+Entity CheckField as Component
 	Attribute name as String
 	Attribute type as Word("String" "Number" "Date" "Option" "MultiOption" "Image" "Entity" "Package" "Note" "Marker" "Section" "Validation" "Signature")
 	Attribute code as String
 	Attribute optional as Boolean
 	Attribute conditional as String
 
-Entity OrderType as Decorable
+Entity OrderType
 	Attribute code as String
     Attribute labelEn as String
     Attribute labelEs as String
