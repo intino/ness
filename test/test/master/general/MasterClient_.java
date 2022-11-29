@@ -2,9 +2,13 @@ package master.general;
 
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
+import com.hazelcast.client.config.ClientConnectionStrategyConfig;
+import com.hazelcast.client.config.SocketOptions;
+import com.hazelcast.config.ListenerConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.LifecycleEvent;
 import com.hazelcast.core.LifecycleListener;
+import io.intino.ness.master.core.MasterLifecycleEvent;
 import io.intino.ness.master.messages.Response;
 import org.example.test.model.MasterTerminal;
 import org.example.test.model.entities.Employee;
@@ -13,16 +17,19 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import static io.intino.ness.master.core.MasterLifecycleEvent.State.CLIENT_DISCONNECTED;
+
 public class MasterClient_ {
 
 	public static void main(String[] args) throws ExecutionException, InterruptedException {
 
 		ClientConfig config = new ClientConfig();
 		config.getNetworkConfig().addAddress("localhost:62555");
-		config.getConnectionStrategyConfig().getConnectionRetryConfig()
-				.setClusterConnectTimeoutMillis(1000);
+		ClientConnectionStrategyConfig connectionStrategyConfig = config.getConnectionStrategyConfig();
+		connectionStrategyConfig.setReconnectMode(ClientConnectionStrategyConfig.ReconnectMode.ON);
+		connectionStrategyConfig.getConnectionRetryConfig().setClusterConnectTimeoutMillis(1000);
 
-		HazelcastInstance hz = HazelcastClient.newHazelcastClient(config);
+		HazelcastInstance hz = HazelcastClient.get(config);
 
 		hz.getLifecycleService().addLifecycleListener(new LifecycleListener() {
 			@Override
@@ -37,14 +44,22 @@ public class MasterClient_ {
 //				.clientName("the client")
 //				.allowWriting(true)
 //				.addresses(List.of("localhost:62555"))
-//				.putProperty("hazelcast.logging.type", "none")
-//				.putProperty("hazelcast.socket.connect.timeout.seconds", "1");
+//				.putProperty("hazelcast.logging.type", "none");
+//
+//		config.connectionConfig(new MasterTerminal.Config.ConnectionConfig().clusterConnectTimeoutMillis(5000));
 //
 //		MasterTerminal terminal = MasterTerminal.create(config);
+//
 //		terminal.start();
 //
+//		terminal.addLifecycleListener(event -> {
+//			if(event.state() == CLIENT_DISCONNECTED) {
+//				// ...
+//			}
+//		});
+//
 //		Runtime.getRuntime().addShutdownHook(new Thread(terminal::stop));
-
+//
 //		terminal.publish(new Employee("1:employee", terminal).name("Pedri"));
 //		terminal.publish(new Employee("2:employee", terminal).name("Gavi"));
 //		terminal.publish(new Employee("3:employee", terminal).name("Asensio"));
