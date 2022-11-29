@@ -1,21 +1,11 @@
 package master.general;
 
-import com.hazelcast.client.HazelcastClient;
-import com.hazelcast.client.config.ClientConfig;
-import com.hazelcast.client.config.ClientConnectionStrategyConfig;
-import com.hazelcast.client.config.SocketOptions;
-import com.hazelcast.config.ListenerConfig;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.LifecycleEvent;
-import com.hazelcast.core.LifecycleListener;
-import io.intino.ness.master.core.MasterLifecycleEvent;
-import io.intino.ness.master.messages.Response;
 import org.example.test.model.MasterTerminal;
-import org.example.test.model.entities.Employee;
+import org.example.test.model.entities.Zone;
+import org.example.test.model.structs.GeoPoint;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import static io.intino.ness.master.core.MasterLifecycleEvent.State.CLIENT_DISCONNECTED;
 
@@ -23,61 +13,36 @@ public class MasterClient_ {
 
 	public static void main(String[] args) throws ExecutionException, InterruptedException {
 
-		ClientConfig config = new ClientConfig();
-		config.getNetworkConfig().addAddress("localhost:62555");
-		ClientConnectionStrategyConfig connectionStrategyConfig = config.getConnectionStrategyConfig();
-		connectionStrategyConfig.setReconnectMode(ClientConnectionStrategyConfig.ReconnectMode.ON);
-		connectionStrategyConfig.getConnectionRetryConfig().setClusterConnectTimeoutMillis(1000);
+//		ClientConfig config = new ClientConfig();
+//		config.getNetworkConfig().addAddress("localhost:62555");
+//		ClientConnectionStrategyConfig connectionStrategyConfig = config.getConnectionStrategyConfig();
+//		connectionStrategyConfig.setReconnectMode(ClientConnectionStrategyConfig.ReconnectMode.ON);
+//		connectionStrategyConfig.getConnectionRetryConfig().setClusterConnectTimeoutMillis(1000);
 
-		HazelcastInstance hz = HazelcastClient.get(config);
+		MasterTerminal.Config config = new MasterTerminal.Config()
+				.clientName("the client")
+				.allowWriting(true)
+				.addresses(List.of("localhost:62555"))
+				.putProperty("hazelcast.logging.type", "none");
 
-		hz.getLifecycleService().addLifecycleListener(new LifecycleListener() {
-			@Override
-			public void stateChanged(LifecycleEvent event) {
-				System.out.println(event);
+		config.connectionConfig(new MasterTerminal.Config.ConnectionConfig().clusterConnectTimeoutMillis(5000));
+
+		MasterTerminal terminal = MasterTerminal.create(config);
+
+		terminal.start();
+
+		terminal.addLifecycleListener(event -> {
+			if(event.state() == CLIENT_DISCONNECTED) {
+				// ...
 			}
 		});
 
-		Runtime.getRuntime().addShutdownHook(new Thread(hz::shutdown));
+		Runtime.getRuntime().addShutdownHook(new Thread(terminal::stop));
 
-//		MasterTerminal.Config config = new MasterTerminal.Config()
-//				.clientName("the client")
-//				.allowWriting(true)
-//				.addresses(List.of("localhost:62555"))
-//				.putProperty("hazelcast.logging.type", "none");
-//
-//		config.connectionConfig(new MasterTerminal.Config.ConnectionConfig().clusterConnectTimeoutMillis(5000));
-//
-//		MasterTerminal terminal = MasterTerminal.create(config);
-//
-//		terminal.start();
-//
-//		terminal.addLifecycleListener(event -> {
-//			if(event.state() == CLIENT_DISCONNECTED) {
-//				// ...
-//			}
-//		});
-//
-//		Runtime.getRuntime().addShutdownHook(new Thread(terminal::stop));
-//
-//		terminal.publish(new Employee("1:employee", terminal).name("Pedri"));
-//		terminal.publish(new Employee("2:employee", terminal).name("Gavi"));
-//		terminal.publish(new Employee("3:employee", terminal).name("Asensio"));
-//		terminal.publish(new Employee("4:employee", terminal).name("Ansu Fati"));
-//		terminal.publish(new Employee("5:employee", terminal).name("Nico Williams"));
-//
-//		Future<Response<Employee>> future = terminal.disable("1:employee");
-//
-//		future.get();
-//
-//		System.out.println("1 => " + terminal.employee("1:employee"));
-//
-//		System.out.println("2 => " + terminal.disabled().employee("1:employee"));
-//
-//		terminal.publish(new Employee("6:employee", terminal).name("Unai Simon"));
-//		terminal.publish(new Employee("7:employee", terminal).name("Morata"));
-//
-//		System.out.println("done");
+		Zone zone = terminal.zone("");
+		List<GeoPoint> place = zone.place();
+
+		System.out.println("done");
 	}
 
 	public static class ConnectionConfig {

@@ -2,7 +2,6 @@ package io.intino.ness.datahubterminalplugin.master;
 
 
 import io.intino.datahub.model.Entity;
-import io.intino.datahub.model.EntityData;
 import io.intino.datahub.model.NessGraph;
 import io.intino.datahub.model.Struct;
 import io.intino.itrules.Frame;
@@ -19,7 +18,7 @@ import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
 
 public class EntityFrameCreator {
 	private static final String DOT = ".";
-	private static final Map<String, String> types = Map.of(
+	private static final Map<String, String> TheTypes = Map.of(
 			"String", "String",
 			"Double", "double",
 			"Integer", "int",
@@ -28,7 +27,7 @@ public class EntityFrameCreator {
 			"Long", "long"
 	);
 
-	private static final Map<String, String> listTypes = Map.of(
+	private static final Map<String, String> ListTypes = Map.of(
 			"String", "List<String>",
 			"Double", "List<Double>",
 			"Integer", "List<Integer>",
@@ -36,6 +35,16 @@ public class EntityFrameCreator {
 			"Entity", "List<io.intino.ness.master.model.Entity>",
 			"Long", "List<Long>"
 	);
+
+	private static final Map<String, String> SetTypes = Map.of(
+			"String", "Set<String>",
+			"Double", "Set<Double>",
+			"Integer", "Set<Integer>",
+			"Boolean", "Set<Boolean>",
+			"Entity", "Set<io.intino.ness.master.model.Entity>",
+			"Long", "Set<Long>"
+	);
+
 	private final String workingPackage;
 	private final NessGraph model;
 
@@ -69,13 +78,28 @@ public class EntityFrameCreator {
 		FrameBuilder builder = new FrameBuilder().add("attribute");
 		node.conceptList().forEach(aspect -> builder.add(aspect.name()));
 		String type = type(node);
-		builder.add("name", node.name()).add("owner", node.owner().name()).add("type", type).add("package", workingPackage);
-		builder.add("index", node.owner().componentList().indexOf(node));
-		builder.add("entityOwner", owner.name());
+
+		builder.add("name", node.name())
+				.add("owner", node.owner().name())
+				.add("type", type)
+				.add("package", workingPackage)
+				.add("index", node.owner().componentList().indexOf(node))
+				.add("entityOwner", owner.name());
+
 		if(owner.is(Entity.Abstract.class) || owner.is(Entity.Decorable.class))
 			builder.add("castToSubclass", "(" + owner.name() + ")");
+
+		if(type.contains("List<") || type.contains("Set<")) {
+			builder.add("typeParameter", typeParameterOf(type));
+		} // TODO: for maps
+
 		processParameters(node, builder, type);
+
 		return builder.toFrame();
+	}
+
+	private String typeParameterOf(String type) {
+		return type.substring(type.indexOf("<") + 1, type.lastIndexOf(">"));
 	}
 
 	private void processParameters(Node node, FrameBuilder builder, String type) {
@@ -100,7 +124,11 @@ public class EntityFrameCreator {
 		}
 
 		Parameter struct = parameter(node, "struct");
-		if (struct != null) builder.add("struct", structFrame(((Struct) struct.values().get(0)).core$()));
+		if (struct != null) {
+			Node structNode = ((Struct) struct.values().get(0)).core$();
+			builder.add("struct", structFrame(structNode)).add("structLength", String.valueOf(structNode.componentList().size()));
+		}
+
 		builder.add("attribute", builder.toFrame());
 	}
 
@@ -126,19 +154,25 @@ public class EntityFrameCreator {
 
 	private static String defaultValueOf(String type, Parameter defaultValue) {
 		if(type.contains("List<")) return "new java.util.ArrayList<>()";
-		if(type.contains("Map<")) return "new java.util.HashMap<>()";
+		if(type.contains("Set<")) return "new java.util.LinkedHashSet<>()";
+		if(type.contains("Map<")) return "new java.util.LinkedHashMap<>()";
 		return defaultValue.values().get(0).toString();
 	}
 
 	private String type(Node node) {
 		String aspect = node.conceptList().stream().map(Concept::name).filter(this::isProperTypeName).findFirst().orElse("");
+
 		boolean list = node.conceptList().stream().anyMatch(a -> a.name().equals("List"));
-		if (!list) return types.getOrDefault(aspect, firstUpperCase().format(node.name()).toString());
-		return listTypes.getOrDefault(aspect, "List<" + firstUpperCase().format(node.name()).toString() + ">");
+		if (list) return ListTypes.getOrDefault(aspect, "List<" + firstUpperCase().format(node.name()).toString() + ">");
+
+		boolean set = node.conceptList().stream().anyMatch(a -> a.name().equals("Set"));
+		if (set) return SetTypes.getOrDefault(aspect, "Set<" + firstUpperCase().format(node.name()).toString() + ">");
+
+		return TheTypes.getOrDefault(aspect, firstUpperCase().format(node.name()).toString());
 	}
 
 	private boolean isProperTypeName(String s) {
-		return !s.equals("List") && !s.equals("Optional") && !s.equals("Type") && !s.equals("Required");
+		return !s.equals("Set") && !s.equals("List") && !s.equals("Optional") && !s.equals("Type") && !s.equals("Required");
 	}
 
 	private Parameter parameter(Node c, String name) {

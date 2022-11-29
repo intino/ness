@@ -8,13 +8,14 @@ Concept:Named Entity
 	Aspect Component
 
 Concept:Named Struct
-	Concept:Named:RequiresAspect Attribute extends EntityData
+	Concept:Named:RequiresAspect Attribute extends StructData
 	Aspect ExtensionOf > var Struct struct
 
 Concept EntityData is abstract
 	Aspect Required
 	Aspect Optional
 	Aspect List
+	Aspect Set
 	Aspect Type
 		var string type is reactive private
 		sub Double
@@ -44,3 +45,31 @@ Concept EntityData is abstract
 			var string type = "java.util.Map" is reactive private
 			Concept:{1..1}:RequiresAspect Key extends EntityData
 			Concept:{1..1}:RequiresAspect Value extends EntityData
+
+
+Concept StructData is abstract
+	Aspect Required
+	Aspect Optional
+	Aspect Type
+		var string type is reactive private
+		sub Double
+			var double defaultValue = empty
+		sub Integer
+			var integer defaultValue = empty
+		sub Long
+			var long defaultValue = empty
+		sub Boolean
+			var boolean defaultValue = empty
+		sub String
+			var string defaultValue = empty
+		sub Date
+			var string format = "dd/MM/yyyy"
+		sub DateTime
+			var string format = "dd/MM/yyyy HH:mm:ss"
+		sub Instant
+			var instant defaultValue = empty
+		sub Word
+			var string[] values
+			var string defaultValue= empty
+		sub Entity
+			var Entities.Entity entity
