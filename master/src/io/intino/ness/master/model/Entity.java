@@ -51,7 +51,7 @@ public abstract class Entity {
 	}
 
 	public List<Triplet> triplets() {
-		return new ArrayList<>(0);
+		return new ArrayList<>(extraTriplets.values());
 	}
 
 	public TripletRecord asTripletRecord() {

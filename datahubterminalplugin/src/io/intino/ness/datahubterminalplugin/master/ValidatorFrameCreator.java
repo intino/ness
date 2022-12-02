@@ -3,10 +3,12 @@ package io.intino.ness.datahubterminalplugin.master;
 
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.model.Entity;
+import io.intino.datahub.model.EntityData;
 import io.intino.datahub.model.Struct;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.magritte.framework.Concept;
+import io.intino.magritte.framework.Layer;
 import io.intino.magritte.framework.Node;
 
 import java.util.*;
@@ -78,8 +80,10 @@ public class ValidatorFrameCreator {
 		FrameBuilder builder = new FrameBuilder("validator", "class")
 				.add("package", workingPackage + DOT + "validators")
 				.add("name", entity.core$().name())
-				.add("attribute", entity.core$().componentList().stream().map(this::attrFrameOf).toArray())
-				.add("type", entity.core$().componentList().stream().flatMap(c -> typeFramesOf(c, entity.core$())).filter(Objects::nonNull).toArray());
+				.add("attribute", entity.core$().componentList().stream().filter(c -> c.is(EntityData.class)).map(this::attrFrameOf).toArray())
+				.add("type", entity.core$().componentList().stream()
+						.filter(c -> c.is(EntityData.class))
+						.flatMap(c -> typeFramesOf(c, entity.core$())).filter(Objects::nonNull).toArray());
 
 		final Parameter parent = parameter(entity.core$(), "entity");
 		builder.add("parent", parent != null ? ((Entity) parent.values().get(0)).name$() : "io.intino.ness.master.model.Entity");
@@ -93,7 +97,7 @@ public class ValidatorFrameCreator {
 	private Stream<Frame> typeFramesOf(Node node, Node parent) {
 		String type = type(node);
 		String typename = typename(type, node);
-		String typeParameter = typeParameterOf(type, node);
+		String typeParameter = typeParameterOf(type);
 		return typeFramesOf(node, parent, type, typename, typeParameter);
 	}
 
@@ -130,11 +134,11 @@ public class ValidatorFrameCreator {
 
 			Parameter struct = parameter(node, "struct");
 			if (struct != null)
-				builder.add("struct").add("struct", structFrame(((Struct) struct.values().get(0)).core$()));
+				builder.add("struct").add("struct", structFrame(((Struct) struct.values().get(0))));
 		}
 	}
 
-	private String typeParameterOf(String type, Node node) {
+	private String typeParameterOf(String type) {
 		if(!type.contains("List<") && !type.contains("Set<")) return "";
 		return type.substring(type.indexOf("<") + 1).replace("io.intino.ness.master.model.", "").replace(">", "");
 	}
@@ -157,7 +161,7 @@ public class ValidatorFrameCreator {
 		builder.add("index", node.owner().componentList().indexOf(node));
 
 		builder.add("typename", typename(type, node));
-		builder.add("typeParameter", typeParameterOf(type, node));
+		builder.add("typeParameter", typeParameterOf(type));
 
 		boolean optional = node.conceptList().stream().anyMatch(a -> a.name().equals("Optional"));
 		boolean required = node.conceptList().stream().anyMatch(a -> a.name().equals("Required"));
@@ -189,7 +193,7 @@ public class ValidatorFrameCreator {
 		if (entity != null) builder.add("entity", ((Entity) entity.values().get(0)).name$()); // TODO: check
 
 		Parameter struct = parameter(node, "struct");
-		if (struct != null) builder.add("struct", structFrame(((Struct) struct.values().get(0)).core$()));
+		if (struct != null) builder.add("struct", structFrame(((Struct) struct.values().get(0))));
 
 		addMissingAttributeCheckFrame(node, builder, required, optional);
 
@@ -212,11 +216,11 @@ public class ValidatorFrameCreator {
 		return type.endsWith("LocalDateTime") ? "dd/MM/yyyy HH:mm:ss" : "dd/MM/yyyy";
 	}
 
-	private Frame structFrame(Node node) {
+	private Frame structFrame(Struct node) {
 		return new FrameBuilder("struct")
-				.add("name", node.name())
+				.add("name", node.core$().name())
 				.add("package", workingPackage)
-				.add("attribute", node.componentList().stream().map(this::attrFrameOf).toArray())
+				.add("attribute", node.attributeList().stream().map(Layer::core$).map(this::attrFrameOf).toArray())
 				.toFrame();
 	}
 

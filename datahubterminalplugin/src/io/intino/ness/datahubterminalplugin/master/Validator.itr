@@ -260,6 +260,10 @@ def type(integer) trigger(parse)
 	Integer.parseInt(values.get($index))
 end
 
+def type(long) trigger(parse)
+	Long.parseLong(values.get($index))
+end
+
 def type(double) trigger(parse)
 	Double.parseDouble(values.get($index))
 end

@@ -1,9 +1,7 @@
 package io.intino.ness.datahubterminalplugin.master;
 
 
-import io.intino.datahub.model.Entity;
-import io.intino.datahub.model.NessGraph;
-import io.intino.datahub.model.Struct;
+import io.intino.datahub.model.*;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.magritte.framework.Concept;
@@ -18,31 +16,40 @@ import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
 
 public class EntityFrameCreator {
 	private static final String DOT = ".";
-	private static final Map<String, String> TheTypes = Map.of(
+	static final Map<String, String> TheTypes = Map.of(
 			"String", "String",
 			"Double", "double",
 			"Integer", "int",
+			"Long", "long",
 			"Boolean", "boolean",
 			"Entity", "io.intino.ness.master.model.Entity",
-			"Long", "long"
+			"Date", "LocalDate",
+			"DateTime", "LocalDateTime",
+			"Instant", "Instant"
 	);
 
-	private static final Map<String, String> ListTypes = Map.of(
+	static final Map<String, String> ListTypes = Map.of(
 			"String", "List<String>",
 			"Double", "List<Double>",
 			"Integer", "List<Integer>",
 			"Boolean", "List<Boolean>",
 			"Entity", "List<io.intino.ness.master.model.Entity>",
-			"Long", "List<Long>"
+			"Long", "List<Long>",
+			"Date", "List<LocalDate>",
+			"DateTime", "List<LocalDateTime>",
+			"Instant", "List<Instant>"
 	);
 
-	private static final Map<String, String> SetTypes = Map.of(
+	static final Map<String, String> SetTypes = Map.of(
 			"String", "Set<String>",
 			"Double", "Set<Double>",
 			"Integer", "Set<Integer>",
 			"Boolean", "Set<Boolean>",
 			"Entity", "Set<io.intino.ness.master.model.Entity>",
-			"Long", "Set<Long>"
+			"Long", "Set<Long>",
+			"Date", "Set<LocalDate>",
+			"DateTime", "Set<LocalDateTime>",
+			"Instant", "Set<Instant>"
 	);
 
 	private final String workingPackage;
@@ -65,7 +72,9 @@ public class EntityFrameCreator {
 		FrameBuilder builder = new FrameBuilder("entity", "class")
 				.add("package", workingPackage)
 				.add("name", entity.core$().name())
-				.add("attribute", entity.core$().componentList().stream().map(a -> attrFrameOf(a, entity.core$())).toArray());
+				.add("attribute", entity.core$().componentList().stream().filter(a -> a.is(EntityData.class)).map(a -> attrFrameOf(a, entity.core$())).toArray())
+				.add("expression", entity.core$().componentList().stream().filter(a -> a.is(Expression.class)).map(ExpressionHelper::exprFrameOf).toArray());
+
 		final Parameter parent = parameter(entity.core$(), "entity");
 		builder.add("parent", parent != null ? ((Entity) parent.values().get(0)).name$() : "io.intino.ness.master.model.Entity");
 		builder.add("normalizeId", new FrameBuilder("normalizeId", (entity.isAbstract() || entity.isDecorable()) ? "abstract" : "").add("name", entity.name$()).toFrame());
@@ -125,8 +134,8 @@ public class EntityFrameCreator {
 
 		Parameter struct = parameter(node, "struct");
 		if (struct != null) {
-			Node structNode = ((Struct) struct.values().get(0)).core$();
-			builder.add("struct", structFrame(structNode)).add("structLength", String.valueOf(structNode.componentList().size()));
+			Struct structNode = ((Struct) struct.values().get(0));
+			builder.add("struct", structFrame(structNode)).add("structLength", String.valueOf(structNode.attributeList().size()));
 		}
 
 		builder.add("attribute", builder.toFrame());
@@ -136,11 +145,11 @@ public class EntityFrameCreator {
 		return type.equals("Date") ? "dd/MM/yyyy" : "dd/MM/yyyy HH:mm:ss";
 	}
 
-	private Frame structFrame(Node node) {
+	private Frame structFrame(Struct node) {
 		return new FrameBuilder("struct")
-				.add("name", node.name())
+				.add("name", node.core$().name())
 				.add("package", workingPackage)
-				.add("attribute", node.componentList().stream().map(node1 -> attrFrameOf(node1, node)).toArray())
+				.add("attribute", node.attributeList().stream().map(node1 -> attrFrameOf(node1.core$(), node.core$())).toArray())
 				.toFrame();
 	}
 

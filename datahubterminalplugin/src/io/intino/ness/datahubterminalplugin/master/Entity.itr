@@ -20,13 +20,9 @@ def type(entity & class)
 	import io.intino.ness.master.model.TripletRecord;
 	import io.intino.ness.master.model.Entity;
 
-	import java.util.List;
-	import java.util.Set;
-	import java.util.ArrayList;
-	import java.util.LinkedHashSet;
-	import java.util.Map;
-	import java.util.stream.Collectors;
-	import java.util.Arrays;
+	import java.time.*;
+	import java.util.*;
+	import java.util.stream.*;
 
 	public[ $isAbstract+firstLowerCase] class $abstract~$name+FirstUpperCase extends $parent {
 
@@ -50,6 +46,8 @@ def type(entity & class)
 
 		[$attribute+getterAndSetter...[$NL$NL]]
 
+		[$expression+expressionDeclaration...[$NL$NL]]
+
 		public $name+FirstUpperCase add(Triplet triplet) {
 			switch(triplet.predicate()) {
 				[$attribute+addSwitchCase...[$NL]]
@@ -69,7 +67,7 @@ def type(entity & class)
 		[public List<Triplet> triplets() {
 			final java.util.ArrayList<Triplet> triplets = new java.util.ArrayList<>();
 			$attribute+astriplet...[$NL]
-			triplets.addAll(super.extraTriplets().values());
+			triplets.addAll(super.triplets());
 			return triplets;
 		}]
 
@@ -442,7 +440,7 @@ def type(word) type(list | set) trigger(asTriplet)
 end
 
 def type(word) trigger(asTriplet)
-	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", $name+firstLowerCase.name()));
+	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", $name+firstLowerCase == null ? null : $name+firstLowerCase.name()));
 end
 
 def type(struct) type(list | set) trigger(asTriplet)
@@ -732,6 +730,10 @@ def type(int) trigger(parse)
 	Integer.parseInt(values.get($index))
 end
 
+def type(long) trigger(parse)
+	Long.parseLong(values.get($index))
+end
+
 def type(double) trigger(parse)
 	Double.parseDouble(values.get($index))
 end
@@ -750,4 +752,14 @@ end
 
 def trigger(parse)
 	values.get($index)
+end
+
+def trigger(expressionDeclaration)
+	$modifier $returnType $name([$parameter+parameterDeclaration...[, ]]) {
+		$expression
+	}
+end
+
+def trigger(parameterDeclaration)
+	$type $name
 end

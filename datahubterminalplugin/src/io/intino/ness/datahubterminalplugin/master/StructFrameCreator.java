@@ -1,10 +1,12 @@
 package io.intino.ness.datahubterminalplugin.master;
 
 
+import io.intino.datahub.model.EntityData;
 import io.intino.datahub.model.Struct;
 import io.intino.datahub.model.Struct.Attribute;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
+import io.intino.magritte.framework.Layer;
 import io.intino.magritte.framework.Predicate;
 
 import java.util.*;
@@ -39,7 +41,8 @@ public class StructFrameCreator {
 		return new FrameBuilder("struct", "class")
 				.add("package", workingPackage)
 				.add("name", struct.name$())
-				.add("attribute", struct.attributeList().stream().map(this::attrFrameOf).toArray());
+				.add("attribute", struct.attributeList().stream().map(this::attrFrameOf).toArray())
+				.add("expression", struct.methodList().stream().map(Layer::core$).map(ExpressionHelper::exprFrameOf).toArray());
 	}
 
 	private Frame attrFrameOf(Attribute attr) {
