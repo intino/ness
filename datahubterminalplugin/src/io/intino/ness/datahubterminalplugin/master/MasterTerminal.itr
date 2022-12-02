@@ -62,6 +62,9 @@ def type(master & interface)
 
 		<T extends Entity> void addEntityListener(String type, EntityListener<T> listener);
 
+		$entity+enable...[$NL$NL]
+		$entity+disable...[$NL$NL]
+
 		$entity+entityListener...[$NL$NL]
 
 		@SuppressWarnings("unchecked")
@@ -1274,4 +1277,18 @@ end
 
 def type(entity) !type(abstract) trigger(asEntitySwitchCase)
 	case "$name+firstLowerCase": return (T) new $name+FirstUpperCase(record, this);
+end
+
+def type(entity) !type(abstract) trigger(enable)
+	default Future<Response<$name+FirstUpperCase>> enable$name+FirstUpperCase(String id) {
+		if(id == null) throw new NullPointerException("Id cannot be null");
+		return enable(normalizeId(id, "$name+firstLowerCase"));
+	}
+end
+
+def type(entity) !type(abstract) trigger(disable)
+	default Future<Response<$name+FirstUpperCase>> disable$name+FirstUpperCase(String id) {
+		if(id == null) throw new NullPointerException("Id cannot be null");
+		return disable(normalizeId(id, "$name+firstLowerCase"));
+	}
 end

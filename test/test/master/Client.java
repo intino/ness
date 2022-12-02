@@ -13,7 +13,5 @@ public class Client {
 
 		MasterTerminal terminal = MasterTerminal.create(config);
 		terminal.start();
-
-
 	}
 }

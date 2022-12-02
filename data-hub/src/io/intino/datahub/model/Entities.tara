@@ -2,6 +2,7 @@ dsl Proteo
 
 Concept:Named Entity
 	Concept:Named:RequiresAspect Attribute extends EntityData
+	Concept:Named:RequiresAspect Method extends Expression
 	Aspect ExtensionOf > var Entity entity
 	Aspect Abstract
 	Aspect Decorable
@@ -9,7 +10,28 @@ Concept:Named Entity
 
 Concept:Named Struct
 	Concept:Named:RequiresAspect Attribute extends StructData
+	Concept:Named:RequiresAspect Method extends Expression
 	Aspect ExtensionOf > var Struct struct
+
+Concept Expression is abstract
+	Aspect Private
+	Aspect Getter
+		var string expression
+		sub DoubleGetter
+		sub IntegerGetter
+		sub LongGetter
+		sub BooleanGetter
+		sub StringGetter
+		sub DateGetter
+		sub DateTimeGetter
+		sub InstantGetter
+	Aspect Function
+		var string expression
+		Concept:{1..1}:RequiresAspect ReturnType extends EntityData
+   		Concept:Named:RequiresAspect Parameter extends EntityData
+	Aspect Routine
+		var string expression
+   		Concept:Named:RequiresAspect Parameter extends EntityData
 
 Concept EntityData is abstract
 	Aspect Required
