@@ -1,11 +1,14 @@
 package master.general;
 
+import io.intino.ness.master.messages.Response;
+import io.intino.ness.master.model.Entity;
 import org.example.test.model.MasterTerminal;
-import org.example.test.model.entities.Zone;
-import org.example.test.model.structs.GeoPoint;
+//import org.example.test.model.entities.Installation;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import static io.intino.ness.master.core.MasterLifecycleEvent.State.CLIENT_DISCONNECTED;
 
@@ -39,10 +42,19 @@ public class MasterClient_ {
 
 		Runtime.getRuntime().addShutdownHook(new Thread(terminal::stop));
 
-		Zone zone = terminal.zone("");
-		List<GeoPoint> place = zone.place();
-
-		System.out.println("done");
+//		Installation entity = new Installation(UUID.randomUUID() + ":installation", terminal);
+//		entity.name("Hola");
+//		entity.type(Installation.Type.Videometry);
+//		entity.url("");
+//
+//		terminal.disable("123:zone");
+//		terminal.enableZone("123");
+//
+//		Future<Response<Entity>> future = terminal.publish(entity);
+//
+//		Response<Entity> response = future.get();
+//
+//		System.out.println("done");
 	}
 
 	public static class ConnectionConfig {
