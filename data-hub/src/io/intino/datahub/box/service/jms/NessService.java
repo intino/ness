@@ -20,17 +20,21 @@ public class NessService {
 		manager.registerQueueConsumer("service.ness.seal", m -> response(manager, m, new SealRequest(box).accept(MessageReader.textFrom(m))));
 		manager.registerQueueConsumer("service.ness.seal.last", m -> response(manager, m, new LastSealRequest(box).accept(MessageReader.textFrom(m))));
 		manager.registerQueueConsumer("service.ness.backup", m -> response(manager, m, new BackupRequest(box).accept(MessageReader.textFrom(m))));
+		manager.registerQueueConsumer("service.ness.datalake", m -> response(manager, m, new DatalakeRequest(box).accept(m)));
 	}
 
 	private void response(BrokerManager manager, Message requestMessage, String response) {
+		response(manager, requestMessage, MessageTranslator.toJmsMessage(response));
+	}
+
+	private void response(BrokerManager manager, Message request, Message response) {
 		new Thread(() -> {
 			try {
-				Destination reply = requestMessage.getJMSReplyTo();
+				Destination reply = request.getJMSReplyTo();
 				QueueProducer queueProducer = manager.queueProducerOf(reply instanceof ActiveMQTempQueue ? ((ActiveMQTempQueue) reply).getQueueName() : reply.toString());
-				Message message = MessageTranslator.toJmsMessage(response);
-				if (message == null) return;
-				message.setJMSCorrelationID(requestMessage.getJMSCorrelationID());
-				queueProducer.produce(message);
+				if (response == null) return;
+				response.setJMSCorrelationID(request.getJMSCorrelationID());
+				queueProducer.produce(response);
 			} catch (JMSException e) {
 				Logger.error(e);
 			}
