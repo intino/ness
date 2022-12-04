@@ -148,5 +148,6 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.1.2" level="project" />
     <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.9.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.ness:master:1.0.2" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
   </component>
 </module>

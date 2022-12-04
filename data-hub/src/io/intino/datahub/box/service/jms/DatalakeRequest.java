@@ -8,16 +8,22 @@ import io.intino.alexandria.jms.MessageReader;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.broker.BrokerManager;
-import io.intino.datahub.broker.jms.MessageTranslator;
-import org.apache.activemq.ActiveMQSession;
+import org.apache.activemq.command.ActiveMQBytesMessage;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import static io.intino.datahub.broker.jms.MessageTranslator.toJmsMessage;
 import static java.util.stream.Collectors.toList;
 
 public class DatalakeRequest {
@@ -29,11 +35,12 @@ public class DatalakeRequest {
 		manager = box.brokerService().manager();
 	}
 
-	public Message accept(Message request) {
+	public Stream<Message> accept(Message request) {
 		String content = MessageReader.textFrom(request);
+		if (content.equals("datalake")) return Stream.of(toJmsMessage(box.datalake().root().getAbsolutePath()));
 		if (content.equals("eventStore/tanks"))
-			return MessageTranslator.toJmsMessage(Json.toString(box.datalake().eventStore().tanks()
-					.map(DatalakeRequest::tankOf).collect(toList())));
+			return Stream.of(toJmsMessage(Json.toString(box.datalake().eventStore().tanks()
+					.map(DatalakeRequest::tankOf).collect(toList()))));
 		if (content.startsWith("{")) {
 			JsonObject jsonObject = Json.fromString(content, JsonObject.class);
 			if ("reflow".equals(jsonObject.get("operation").getAsString())) return reflow(jsonObject);
@@ -41,23 +48,39 @@ public class DatalakeRequest {
 		return null;
 	}
 
-	private Message reflow(JsonObject request) {
+	private Stream<Message> reflow(JsonObject request) {
+		String tank = request.get("tank").getAsString();
+		List<String> tubs = new ArrayList<>();
+		request.get("tubs").getAsJsonArray().forEach(v -> tubs.add(v.getAsString()));
+		List<File> files = filesOf(tank, tubs).collect(toList());
+		return IntStream.range(0, files.size())
+				.mapToObj(i -> toMessage(read(files.get(i)), i < files.size() - 1))
+				.filter(Objects::nonNull);
+	}
+
+	private static Message toMessage(byte[] content, boolean hasNext) {
 		try {
-			String tank = request.get("tank").getAsString();
-			List<String> tubs = new ArrayList<>();
-			request.get("tubs").getAsJsonArray().forEach(v -> tubs.add(v.getAsString()));
-			return ((ActiveMQSession) manager.session()).createBlobMessage(getStream(tank, tubs));
+			ActiveMQBytesMessage message = new ActiveMQBytesMessage();
+			message.setBooleanProperty("hasNext", hasNext);
+			message.writeBytes(content);
+			return message;
 		} catch (JMSException e) {
 			Logger.error(e);
 			return null;
 		}
 	}
 
+	private static byte[] read(File f) {
+		try {
+			return Files.readAllBytes(f.toPath());
+		} catch (IOException e) {
+			Logger.error(e);
+			return new byte[0];
+		}
+	}
 
-	private InputStream getStream(String tank, List<String> tubs) {
-		if (tubs == null) return InputStream.nullInputStream();
-		List<File> files = box.datalake().eventStore().tank(tank).tubs().filter(t -> tubs.contains(t.timetag().value())).map(t -> ((FileEventTub) t).file()).collect(toList());
-		return new SequenceInputStream(new InputStreamEnumeration(files));
+	private Stream<File> filesOf(String tank, List<String> tubs) {
+		return box.datalake().eventStore().tank(tank).tubs().filter(t -> tubs.contains(t.timetag().value())).map(t -> ((FileEventTub) t).file());
 	}
 
 	private static Tank tankOf(Datalake.EventStore.Tank t) {

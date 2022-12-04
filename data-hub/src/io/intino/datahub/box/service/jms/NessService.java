@@ -12,6 +12,7 @@ import org.apache.activemq.command.ActiveMQTempQueue;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import java.util.stream.Stream;
 
 public class NessService {
 
@@ -30,8 +31,7 @@ public class NessService {
 	private void response(BrokerManager manager, Message request, Message response) {
 		new Thread(() -> {
 			try {
-				Destination reply = request.getJMSReplyTo();
-				QueueProducer queueProducer = manager.queueProducerOf(reply instanceof ActiveMQTempQueue ? ((ActiveMQTempQueue) reply).getQueueName() : reply.toString());
+				QueueProducer queueProducer = producer(manager, request);
 				if (response == null) return;
 				response.setJMSCorrelationID(request.getJMSCorrelationID());
 				queueProducer.produce(response);
@@ -39,5 +39,28 @@ public class NessService {
 				Logger.error(e);
 			}
 		}).start();
+	}
+
+	private void response(BrokerManager manager, Message request, Stream<Message> response) {
+		QueueProducer producer = producer(manager, request);
+		if (producer == null) return;
+		new Thread(() -> response.forEach(m -> {
+			try {
+				m.setJMSCorrelationID(request.getJMSCorrelationID());
+				producer.produce(m);
+			} catch (JMSException e) {
+				Logger.error(e);
+			}
+		})).start();
+	}
+
+	private static QueueProducer producer(BrokerManager manager, Message request) {
+		try {
+			Destination reply = request.getJMSReplyTo();
+			return manager.queueProducerOf(reply instanceof ActiveMQTempQueue ? ((ActiveMQTempQueue) reply).getQueueName() : reply.toString());
+		} catch (JMSException e) {
+			Logger.error(e);
+			return null;
+		}
 	}
 }
