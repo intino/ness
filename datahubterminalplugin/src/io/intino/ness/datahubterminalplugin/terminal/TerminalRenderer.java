@@ -10,7 +10,6 @@ import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
 import io.intino.ness.datahubterminalplugin.Commons;
-import io.intino.ness.datahubterminalplugin.DatalakeTemplate;
 import io.intino.ness.datahubterminalplugin.Formatters;
 
 import java.io.File;
@@ -38,7 +37,6 @@ class TerminalRenderer {
 	void render() {
 		final File packageFolder = new File(srcDir, rootPackage.replace(".", File.separator));
 		Commons.writeFrame(packageFolder, snakeCaseToCamelCase().format(terminal.name$()).toString(), template().render(createTerminalFrame()));
-		Commons.writeFrame(packageFolder, "Datalake", new DatalakeTemplate().render(createDatalakeFrame()));
 	}
 
 	private Frame createTerminalFrame() {

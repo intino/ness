@@ -30,7 +30,7 @@ def type(terminal)
 			$publish+if...[$NL]
 		}
 
-		public Datalake datalake() {
+		public io.intino.alexandria.datalake.Datalake datalake() {
 			final AtomicReference<String> path = new AtomicReference<>(null);
 			synchronized(monitor) {
 				connector.requestResponse("service.ness.datalake", new Event(new io.intino.alexandria.message.Message("Seal")).ts(java.time.Instant.now()).toString(), r -> {
@@ -46,8 +46,8 @@ def type(terminal)
 				}
 			}
 			if (path.get() == null) return null;
-			if (new File(path.get()).exists()) return new FileDatalake(path.get());
-			return new io.intino.alexandria.terminal.remotedatalake.RemoteDatalake((JmsConnector) connector);
+			if (new File(path.get()).exists()) return new io.intino.alexandria.datalake.file.FileDatalake(new File(path.get()));
+			return new io.intino.alexandria.terminal.remotedatalake.RemoteDatalake((io.intino.alexandria.terminal.JmsConnector) connector);
 		}
 
 		public BatchSession batch(java.io.File temporalStageDirectory) {
