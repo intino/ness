@@ -30,9 +30,24 @@ def type(terminal)
 			$publish+if...[$NL]
 		}
 
-		[$datalake
-		public Datalake datalake(java.io.File directory) {
-			return new Datalake(directory);
+		public Datalake datalake() {
+			final AtomicReference<String> path = new AtomicReference<>(null);
+			synchronized(monitor) {
+				connector.requestResponse("service.ness.datalake", new Event(new io.intino.alexandria.message.Message("Seal")).ts(java.time.Instant.now()).toString(), r -> {
+					synchronized(monitor) {
+						path.set(r);
+						monitor.notify();
+					}
+				});
+				try {
+					monitor.wait(5000);
+				} catch (InterruptedException e) {
+					io.intino.alexandria.logger.Logger.error(e);
+				}
+			}
+			if (path.get() == null) return null;
+			if (new File(path.get()).exists()) return new FileDatalake(path.get());
+			return new io.intino.alexandria.terminal.remotedatalake.RemoteDatalake((JmsConnector) connector);
 		}
 
 		public BatchSession batch(java.io.File temporalStageDirectory) {
@@ -42,7 +57,7 @@ def type(terminal)
 		public BatchSession batch(java.io.File temporalStageDirectory, Config config) {
 			return new BatchSession(temporalStageDirectory, config);
 		}
-		]
+
 
 		public void publish(io.intino.alexandria.event.SessionEvent session) {
 			connector.sendEvent(io.intino.alexandria.event.SessionEvent.PATH, session);

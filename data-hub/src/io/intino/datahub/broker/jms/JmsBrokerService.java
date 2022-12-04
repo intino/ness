@@ -239,6 +239,73 @@ public class JmsBrokerService implements BrokerService {
 			}
 		}
 
+		public Session session() {
+			return session;
+		}
+
+		public TopicConsumer registerTopicConsumer(String topic, Consumer<Message> consumer) {
+			List<JmsConsumer> list = new ArrayList<>();
+			if (!this.consumers.containsKey(topic)) this.consumers.putIfAbsent(topic, list);
+			else list = this.consumers.get(topic);
+			try {
+				TopicConsumer topicConsumer = new TopicConsumer(nessSession(), topic);
+				topicConsumer.listen(consumer);
+				list.add(topicConsumer);
+				return topicConsumer;
+			} catch (JMSException e) {
+				Logger.error(e);
+			}
+			return null;
+		}
+
+		public QueueConsumer registerQueueConsumer(String topic, Consumer<Message> consumer) {
+			List<JmsConsumer> list = new ArrayList<>();
+			if (!this.consumers.containsKey(topic)) this.consumers.putIfAbsent(topic, list);
+			else list = this.consumers.get(topic);
+			try {
+				QueueConsumer queueConsumer = new QueueConsumer(nessSession(), topic);
+				queueConsumer.listen(consumer);
+				list.add(queueConsumer);
+				return queueConsumer;
+			} catch (JMSException e) {
+				Logger.error(e);
+			}
+			return null;
+		}
+
+		public void unregisterConsumer(TopicConsumer consumer) {
+			consumer.close();
+			consumers.values().forEach(list -> list.remove(consumer));
+		}
+
+		public QueueProducer queueProducerOf(String queue) {
+			try {
+				if (!this.producers.containsKey(queue))
+					this.producers.put(queue, new QueueProducer(nessSession(), queue));
+				return (QueueProducer) this.producers.get(queue);
+			} catch (JMSException e) {
+				Logger.error(e.getMessage(), e);
+				return null;
+			}
+		}
+
+		public TopicProducer topicProducerOf(String topic) {
+			try {
+				if (!this.producers.containsKey(topic))
+					this.producers.put(topic, new TopicProducer(nessSession(), topic));
+				return (TopicProducer) this.producers.get(topic);
+			} catch (JMSException e) {
+				Logger.error(e.getMessage(), e);
+				return null;
+			}
+		}
+
+		void stopConsumersOf(String topic) {
+			if (!this.consumers.containsKey(topic)) return;
+			this.consumers.get(topic).forEach(JmsConsumer::close);
+			this.consumers.get(topic).clear();
+		}
+
 		private void startNessSession() {
 			try {
 				connection = new ActiveMQConnectionFactory("vm://" + "ness").createConnection("ness", "ness");
@@ -300,70 +367,6 @@ public class JmsBrokerService implements BrokerService {
 		private Session nessSession() {
 			if (this.session == null || closedSession()) startNessSession();
 			return session;
-		}
-
-		public TopicConsumer registerTopicConsumer(String topic, Consumer<Message> consumer) {
-			List<JmsConsumer> list = new ArrayList<>();
-			if (!this.consumers.containsKey(topic)) this.consumers.putIfAbsent(topic, list);
-			else list = this.consumers.get(topic);
-			try {
-				TopicConsumer topicConsumer = new TopicConsumer(nessSession(), topic);
-				topicConsumer.listen(consumer);
-				list.add(topicConsumer);
-				return topicConsumer;
-			} catch (JMSException e) {
-				Logger.error(e);
-			}
-			return null;
-		}
-
-		public QueueConsumer registerQueueConsumer(String topic, Consumer<Message> consumer) {
-			List<JmsConsumer> list = new ArrayList<>();
-			if (!this.consumers.containsKey(topic)) this.consumers.putIfAbsent(topic, list);
-			else list = this.consumers.get(topic);
-			try {
-				QueueConsumer queueConsumer = new QueueConsumer(nessSession(), topic);
-				queueConsumer.listen(consumer);
-				list.add(queueConsumer);
-				return queueConsumer;
-			} catch (JMSException e) {
-				Logger.error(e);
-			}
-			return null;
-		}
-
-		public void unregisterConsumer(TopicConsumer consumer) {
-			consumer.close();
-			consumers.values().forEach(list -> list.remove(consumer));
-		}
-
-		@Override
-		public QueueProducer queueProducerOf(String queue) {
-			try {
-				if (!this.producers.containsKey(queue))
-					this.producers.put(queue, new QueueProducer(nessSession(), queue));
-				return (QueueProducer) this.producers.get(queue);
-			} catch (JMSException e) {
-				Logger.error(e.getMessage(), e);
-				return null;
-			}
-		}
-
-		public TopicProducer topicProducerOf(String topic) {
-			try {
-				if (!this.producers.containsKey(topic))
-					this.producers.put(topic, new TopicProducer(nessSession(), topic));
-				return (TopicProducer) this.producers.get(topic);
-			} catch (JMSException e) {
-				Logger.error(e.getMessage(), e);
-				return null;
-			}
-		}
-
-		void stopConsumersOf(String topic) {
-			if (!this.consumers.containsKey(topic)) return;
-			this.consumers.get(topic).forEach(JmsConsumer::close);
-			this.consumers.get(topic).clear();
 		}
 
 		private boolean closedSession() {

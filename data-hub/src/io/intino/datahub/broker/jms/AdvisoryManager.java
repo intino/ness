@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 class AdvisoryManager {
 	private final Broker broker;
-	private HashMap<String, Info> info = new HashMap<>();
+	private final HashMap<String, Info> info = new HashMap<>();
 
 	AdvisoryManager(Broker broker) {
 		this.broker = broker;

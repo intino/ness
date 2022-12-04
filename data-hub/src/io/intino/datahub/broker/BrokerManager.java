@@ -6,6 +6,7 @@ import io.intino.alexandria.jms.TopicConsumer;
 import io.intino.alexandria.jms.TopicProducer;
 
 import javax.jms.Message;
+import javax.jms.Session;
 import java.util.function.Consumer;
 
 public interface BrokerManager {
@@ -19,4 +20,6 @@ public interface BrokerManager {
 	TopicProducer topicProducerOf(String topic);
 
 	QueueProducer queueProducerOf(String queue);
+
+	Session session();
 }
