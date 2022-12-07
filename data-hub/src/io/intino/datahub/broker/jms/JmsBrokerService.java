@@ -40,7 +40,7 @@ import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 
 public class JmsBrokerService implements BrokerService {
 	private static final String NESS = "ness";
-	private static final String masterTopic = "master";
+	private static final String entitiesTopic = "entities";
 	private final File root;
 	private final NessGraph graph;
 	private final File brokerStage;
@@ -347,7 +347,7 @@ public class JmsBrokerService implements BrokerService {
 		}
 
 		private void initEntityConsumers() {
-			brokerManager.registerTopicConsumer(masterTopic, new EntitySerializer(datalake, master).create());
+			brokerManager.registerTopicConsumer(entitiesTopic, new EntitySerializer(datalake, master).create());
 			Logger.info("Master ignited!");
 		}
 

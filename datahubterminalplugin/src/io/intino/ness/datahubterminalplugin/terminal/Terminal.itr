@@ -22,9 +22,8 @@ def type(terminal)
 		$bpm+splits
 		public static String$[] subscriptionChannels = new String$[]{$subscribe+channel};
 
-		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector) {
+		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector, String clientId) {
 			this.connector = connector;
-
 		}
 
 		public void publish(Object event, String split) {
@@ -32,7 +31,7 @@ def type(terminal)
 		}
 
 		public Entities entities() {
-
+			connector.subscribe("entities", connector.clientId() + "-entities", c->{});
 		}
 
 		public io.intino.alexandria.datalake.Datalake datalake() {
