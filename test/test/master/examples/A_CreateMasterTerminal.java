@@ -24,6 +24,9 @@ public class A_CreateMasterTerminal {
 	 **/
 	public void createDefault() {
 		MasterTerminal terminal = MasterTerminal.create();
+
+		Runtime.getRuntime().addShutdownHook(new Thread(terminal::stop));
+
 		terminal.start();
 	}
 

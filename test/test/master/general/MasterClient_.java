@@ -1,27 +1,42 @@
 package master.general;
 
-import io.intino.ness.master.messages.Response;
-import io.intino.ness.master.model.Entity;
+import com.hazelcast.client.HazelcastClient;
+import com.hazelcast.client.config.ClientConfig;
+import com.hazelcast.core.HazelcastInstance;
 import org.example.test.model.MasterTerminal;
-//import org.example.test.model.entities.Installation;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import static io.intino.ness.master.core.MasterLifecycleEvent.State.CLIENT_DISCONNECTED;
 
 public class MasterClient_ {
 
 	public static void main(String[] args) throws ExecutionException, InterruptedException {
+//		initMasterTerminal();
+		initHazelcastClientRaw();
+	}
 
-//		ClientConfig config = new ClientConfig();
-//		config.getNetworkConfig().addAddress("localhost:62555");
+	private static void initHazelcastClientRaw() {
+		ClientConfig config = new ClientConfig();
+		config.setClusterName("cluster");
+		config.setInstanceName("the client 1");
+		config.getNetworkConfig().addAddress("localhost:62555");
 //		ClientConnectionStrategyConfig connectionStrategyConfig = config.getConnectionStrategyConfig();
 //		connectionStrategyConfig.setReconnectMode(ClientConnectionStrategyConfig.ReconnectMode.ON);
 //		connectionStrategyConfig.getConnectionRetryConfig().setClusterConnectTimeoutMillis(1000);
 
+//		config.getSecurityConfig().setUsernamePasswordIdentityConfig("client1", "client1_password");
+//		config.setCredentials(new UsernamePasswordCredentials("client1", "client1_password"));
+
+		HazelcastInstance hz = HazelcastClient.getOrCreateHazelcastClient(config);
+
+		Runtime.getRuntime().addShutdownHook(new Thread(hz::shutdown));
+
+		System.out.println("done");
+	}
+
+	private static void initMasterTerminal() {
 		MasterTerminal.Config config = new MasterTerminal.Config()
 				.clientName("the client")
 				.allowWriting(true)

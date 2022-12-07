@@ -1,5 +1,13 @@
 package master.general;
 
+import com.hazelcast.client.Client;
+import com.hazelcast.client.ClientListener;
+import com.hazelcast.config.*;
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.instance.BuildInfo;
+import com.hazelcast.instance.BuildInfoProvider;
+import com.hazelcast.security.SecurityContext;
 import io.intino.ness.master.core.Master;
 import io.intino.ness.master.data.FileTripletLoader;
 import io.intino.ness.master.data.validation.*;
@@ -18,7 +26,13 @@ import static io.intino.ness.master.data.validation.Issue.Type.MISSING_ATTRIBUTE
 
 public class MasterServer_ {
 
+
 	public static void main(String[] args) {
+//		initMaster();
+		initHazelcastRaw();
+	}
+
+	private static void initMaster() {
 		Master.Config config = new Master.Config();
 		config.datalakeRootPath(new File("temp/cinepolis-data/datasets"));
 		config.instanceName("the server");
@@ -31,6 +45,47 @@ public class MasterServer_ {
 		master.start();
 
 		Runtime.getRuntime().addShutdownHook(new Thread(master::stop));
+	}
+
+	private static void initHazelcastRaw() {
+
+		BuildInfo buildInfo = BuildInfoProvider.getBuildInfo();
+
+//		try {
+//			Field modifiersField = Field.class.getDeclaredField("modifiers");
+//			modifiersField.setAccessible(true);
+//
+//			Field f = buildInfo.getClass().getDeclaredField("enterprise");
+//			f.setAccessible(true);
+//			modifiersField.setInt(f, f.getModifiers() & ~Modifier.FINAL);
+//
+//			f.set(buildInfo, true);
+//
+//			System.out.println(buildInfo.isEnterprise());
+//
+//		} catch (Exception e) {
+//			throw new RuntimeException(e);
+//		}
+//
+//		SecurityConfig sc = new SecurityConfig();
+//		sc.setClientRealmConfig("realm", new RealmConfig().setUsernamePasswordIdentityConfig("client1", "client1_password"));
+//		sc.setClientRealm("realm");
+//		sc.setMemberRealm("realm");
+//		sc.setEnabled(true);
+//
+//		SocketInterceptorConfig socketInterceptorConfig = new SocketInterceptorConfig()
+//				.setEnabled(true)
+//				.setClassName(MySocketInterceptor.class.getName());
+
+		Config config = new Config();
+		config.setClusterName("cluster");
+		config.setInstanceName("cluster");
+		config.setNetworkConfig(new NetworkConfig().setPort(62555));
+//		config.setSecurityConfig(sc);
+
+		HazelcastInstance hz = Hazelcast.newHazelcastInstance(config);
+
+		Runtime.getRuntime().addShutdownHook(new Thread(hz::shutdown));
 	}
 
 	public static void main1(String[] args) {
@@ -152,4 +207,5 @@ public class MasterServer_ {
 			return false;
 		}
 	}
+
 }
