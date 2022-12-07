@@ -1184,11 +1184,11 @@ end
 
 
 def !type(abstract) trigger(remover)
-	case "$name+lowerCase": removeFrom$name+FirstUpperCase(id); break;
+	case "$name+firstLowerCase": removeFrom$name+FirstUpperCase(id); break;
 end
 
 def !type(abstract) trigger(adder)
-	case "$name+lowerCase": addTo$name+FirstUpperCase(record); break;
+	case "$name+firstLowerCase": addTo$name+FirstUpperCase(record); break;
 end
 
 def !type(abstract) trigger(map)
@@ -1220,6 +1220,7 @@ end
 def type(abstract) trigger(getter)
 	@Override
 	public $name+FirstUpperCase $name+firstLowerCase(String id) {
+		if(id == null) return null;
     	switch(Triplet.typeOf(id)) {
     		$subclass+getById...[$NL]
     	}
@@ -1237,6 +1238,7 @@ end
 def !type(abstract) type(cached) trigger(getter)
 	@Override
 	public $name+FirstUpperCase $name+firstLowerCase(String id) {
+		if(id == null) return null;
 		return $name+firstLowerCase~Map.get(normalizeId(id, ":$name+firstLowerCase"));
 	}
 
@@ -1249,6 +1251,7 @@ end
 def !type(abstract) type(lazy) trigger(getter)
 	@Override
 	public $name+FirstUpperCase $name+firstLowerCase(String id) {
+		if(id == null) return null;
 		id = normalizeId(id, ":$name+firstLowerCase");
 		TripletRecord record = getRecord(id);
     	return record != null ? entity($name+FirstUpperCase::new, id, record) : null;
