@@ -31,14 +31,14 @@ def type(terminal)
 			$publish+if...[$NL]
 		}
 
-		public Entities entities(){
+		public Entities entities() {
 
 		}
 
 		public io.intino.alexandria.datalake.Datalake datalake() {
 			final AtomicReference<String> path = new AtomicReference<>(null);
 			synchronized(monitor) {
-				connector.requestResponse("service.ness.datalake", new Event(new io.intino.alexandria.message.Message("Seal")).ts(java.time.Instant.now()).toString(), r -> {
+				connector.requestResponse("service.ness.datalake.eventstore", new Event(new io.intino.alexandria.message.Message("Datalake")).ts(java.time.Instant.now()).toString(), r -> {
 					synchronized(monitor) {
 						path.set(r);
 						monitor.notify();
