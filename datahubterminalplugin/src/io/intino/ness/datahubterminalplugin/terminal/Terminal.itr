@@ -24,10 +24,15 @@ def type(terminal)
 
 		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector) {
 			this.connector = connector;
+
 		}
 
 		public void publish(Object event, String split) {
 			$publish+if...[$NL]
+		}
+
+		public Entities entities(){
+
 		}
 
 		public io.intino.alexandria.datalake.Datalake datalake() {
