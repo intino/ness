@@ -26,21 +26,21 @@ import java.util.stream.Stream;
 import static io.intino.datahub.broker.jms.MessageTranslator.toJmsMessage;
 import static java.util.stream.Collectors.toList;
 
-public class DatalakeRequest {
+public class EventStoreRequest {
 	private final DataHubBox box;
 	private final BrokerManager manager;
 
-	public DatalakeRequest(DataHubBox box) {
+	public EventStoreRequest(DataHubBox box) {
 		this.box = box;
 		manager = box.brokerService().manager();
 	}
 
 	public Stream<Message> accept(Message request) {
 		String content = MessageReader.textFrom(request);
-		if (content.equals("datalake")) return Stream.of(toJmsMessage(box.datalake().root().getAbsolutePath()));
+		if (content.equals("datalake")) return Stream.of(toJmsMessage((box.datalake()).root().getAbsolutePath()));
 		if (content.equals("eventStore/tanks"))
 			return Stream.of(toJmsMessage(Json.toString(box.datalake().eventStore().tanks()
-					.map(DatalakeRequest::tankOf).collect(toList()))));
+					.map(EventStoreRequest::tankOf).collect(toList()))));
 		if (content.startsWith("{")) {
 			JsonObject jsonObject = Json.fromString(content, JsonObject.class);
 			if ("reflow".equals(jsonObject.get("operation").getAsString())) return reflow(jsonObject);
