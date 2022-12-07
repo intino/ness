@@ -1,5 +1,7 @@
 dsl Proteo
 
+use Entities
+
 Concept:{0..1} Broker
 	var string path = empty
 	var integer port = empty
@@ -45,7 +47,7 @@ Concept:{0..1} Datalake
 	Concept:{1..*}:AspectRequired Tank
 		var word:Scale scale = empty
 		Aspect TankType
-			sub Entity > var Entities.Entity event
+			sub Entity > var Entities.Entity entity
 			sub Event
 				var Model.Event event
 				var boolean sortingRequired = true
@@ -57,9 +59,11 @@ Concept:Named Terminal
 		var string processStatusClass = "io.intino.alexandria.bpm.ProcessStatus" is private
 		var Datalake.Split split
 	Concept:{0..1} Publish
-		var Datalake.Tank.Event[] tanks
+		var Datalake.Tank.Event[] eventTanks
+		var Datalake.Tank.Entity[] entityTanks
 	Concept:{0..1} Subscribe
-		var Datalake.Tank.Event[] tanks
+		var Datalake.Tank.Event[] eventTanks
+		var Datalake.Tank.Entity[] entityTanks
 
 Concept Namespace
 	var string qn = @qn is private reactive
