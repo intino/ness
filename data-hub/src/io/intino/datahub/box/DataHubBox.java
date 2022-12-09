@@ -113,6 +113,10 @@ public class DataHubBox extends AbstractBox {
 		return new FileSessionSealer(datalake, stageDirectory);
 	}
 
+	public Master master() {
+		return master;
+	}
+
 	public void beforeStart() {
 		stageDirectory().mkdirs();
 		initMaster();
@@ -133,9 +137,6 @@ public class DataHubBox extends AbstractBox {
 	private Master.Config getMasterConfig() {
 		Master.Config config = new Master.Config();
 		config.datalakeRootPath(datalakeDirectory());
-		config.instanceName(configuration.masterInstanceName());
-		config.host(configuration.masterHost());
-		config.port(Integer.parseInt(configuration.masterPort()));
 		config.serializer(MasterSerializers.getOrDefault(configuration.masterSerializer()));
 		config.tripletsDigester(new DatahubTripletDigesterFactory().create());
 		config.tripletsLoader(new DatahubTripletLoader(datalake.tripletsStore()));

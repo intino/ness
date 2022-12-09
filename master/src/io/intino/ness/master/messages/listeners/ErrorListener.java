@@ -1,7 +1,5 @@
 package io.intino.ness.master.messages.listeners;
 
-import io.intino.ness.master.messages.MasterMessageException;
-
 import java.time.Instant;
 
 @FunctionalInterface
@@ -18,18 +16,12 @@ public interface ErrorListener {
 		Instant ts();
 
 		/**The exception thrown. **/
-		MasterMessageException cause();
+		Throwable cause();
 
 		/**The client name that sent the request.*/
-		default String clientName() {
-			MasterMessageException error = cause();
-			return error == null ? null : error.clientName();
-		}
+		String clientName();
 
 		/**The message id that triggered the error.*/
-		default String messageId() {
-			MasterMessageException error = cause();
-			return error == null ? null : error.originalMessageId();
-		}
+		String messageId();
 	}
 }

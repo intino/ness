@@ -1,30 +1,32 @@
 package io.intino.ness.master.messages;
 
+import io.intino.alexandria.message.Message;
+
 public class UpdateMasterMessage extends MasterMessage {
 
-	private final String clientName;
-	private final Action action;
-	private final String value;
+	public UpdateMasterMessage(String clientName, Intent intent, String value) {
+		message.set("clientName", clientName);
+		message.set("intent", intent.name());
+		message.set("value", value);
+	}
 
-	public UpdateMasterMessage(String clientName, Action action, String value) {
-		this.clientName = clientName;
-		this.action = action;
-		this.value = value;
+	public UpdateMasterMessage(Message message) {
+		super(message);
 	}
 
 	public String clientName() {
-		return clientName;
+		return message.get("clientName").asString();
 	}
 
-	public Action action() {
-		return action;
+	public Intent intent() {
+		return Intent.valueOf(message.get("intent").asString());
 	}
 
 	public String value() {
-		return value;
+		return message.get("value").asString();
 	}
 
-	public enum Action {
-		Publish, Enable, Disable, Remove
+	public enum Intent {
+		Publish, Enable, Disable
 	}
 }
