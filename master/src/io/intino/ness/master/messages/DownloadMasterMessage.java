@@ -8,6 +8,10 @@ import java.util.stream.Collectors;
 
 public class DownloadMasterMessage extends MasterMessage {
 
+	public static final String PROPERTY_ENTITY_SERIALIZER = "entity_serializer";
+	public static final String PROPERTY_MAP_SERIALIZER = "map_serializer";
+	public static final String PROPERTY_ERROR = "error";
+
 	public DownloadMasterMessage(Set<String> tanks, EntityFilter filter) {
 		message.set("tanks", String.join(",", tanks));
 		message.set("filter", filter.name());
