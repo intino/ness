@@ -3,12 +3,12 @@ def type(entity & decorable)
 
 	public class $name+FirstUpperCase extends Abstract$name+FirstUpperCase {
 
-		public $name+FirstUpperCase(String id, $package.MasterTerminal master) {
-			super(id, master);
+		public $name+FirstUpperCase(String id) {
+			super(id);
 		}
 
-		public $name+FirstUpperCase(io.intino.ness.master.model.TripletRecord record, $package.MasterTerminal master) {
-			super(record, master);
+		public $name+FirstUpperCase(io.intino.ness.master.model.TripletRecord record) {
+			super(record);
 		}
 	}
 end
@@ -30,17 +30,17 @@ def type(entity & class)
 
 		[$attribute+wordDeclaration...[$NL]]
 
-		protected transient final $package.MasterTerminal master;
+		protected transient final $package.Entities master;
 
 		[$attribute+field...[$NL]]
 
-		public $abstract~$name+FirstUpperCase(String id, $package.MasterTerminal master) {
+		public $abstract~$name+FirstUpperCase(String id) {
 			$parent+super
-			this.master = java.util.Objects.requireNonNull(master);
+			this.master = $package.Entities.get();
 		}
 
-		public $abstract~$name+FirstUpperCase(TripletRecord record, $package.MasterTerminal master) {
-			this(normalizeId(record.id()), master);
+		public $abstract~$name+FirstUpperCase(TripletRecord record) {
+			this(normalizeId(record.id()));
 			record.triplets().forEach(this::add);
 		}
 
@@ -97,7 +97,7 @@ def attribute(this:io.intino.ness.master.model.Entity) trigger(super)
 end
 
 def trigger(super)
-	super(normalizeId(id), master);
+	super(normalizeId(id));
 end
 
 def trigger(addSwitchCase)
@@ -291,19 +291,19 @@ end
 
 
 def type(boolean) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Boolean.parseBoolean(triplet.value());
+	this.$name+firstLowerCase = triplet.value() == false ? null : Boolean.parseBoolean(triplet.value());
 end
 
 def type(integer) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Integer.parseInt(triplet.value());
+	this.$name+firstLowerCase = triplet.value() == 0 ? null : Integer.parseInt(triplet.value());
 end
 
 def type(double) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Double.parseDouble(triplet.value());
+	this.$name+firstLowerCase = triplet.value() == 0.0 ? null : Double.parseDouble(triplet.value());
 end
 
 def type(long) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Long.parseLong(triplet.value());
+	this.$name+firstLowerCase = triplet.value() == 0L ? null : Long.parseLong(triplet.value());
 end
 
 def type(word) type(list) trigger(add)

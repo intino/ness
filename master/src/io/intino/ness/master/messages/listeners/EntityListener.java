@@ -25,10 +25,6 @@ public interface EntityListener<T extends Entity> {
 		return event -> { if(event.type() == Event.Type.Disable) listener.notify(event); };
 	}
 
-	static <E extends Entity> EntityListener<E> onRemove(EntityListener<E> listener) {
-		return event -> { if(event.type() == Event.Type.Remove) listener.notify(event); };
-	}
-
 	static <E extends Entity> EntityListener<E> onNone(EntityListener<E> listener) {
 		return event -> { if(event.type() == Event.Type.None) listener.notify(event); };
 	}
@@ -38,10 +34,6 @@ public interface EntityListener<T extends Entity> {
 	 * */
 	interface Event<T extends Entity> {
 
-		/**
-		 * Returns the server member who processed the request
-		 * */
-		String serverName();
 		/**
 		 * Returns the client name that sent the request
 		 * */
@@ -80,8 +72,6 @@ public interface EntityListener<T extends Entity> {
 			Enable,
 			/**The entity was disabled*/
 			Disable,
-			/**The entity was removed from master*/
-			Remove,
 			/**No operation was performed*/
 			None
 		}

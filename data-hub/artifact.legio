@@ -1,10 +1,10 @@
 dsl Legio
 
-Artifact("io.intino", "6.1.1") data-hub as Product
+Artifact("io.intino", "6.2.0") data-hub as Product
 	Model("Proteo", "3.4.0", "4.2.0") > outLanguage = "Ness"
 	Box("Konos", "9.7.4")
 	Imports
-		Compile("io.intino.ness", "master", "1.0.2")
+		Compile("io.intino.ness", "master", "1.1.0")
 		Compile("io.intino.alexandria", "core-framework", "2.1.2")
 		Compile("io.intino.alexandria", "jmx", "1.0.3")
 		Compile("io.intino.alexandria", "ui-framework", "4.21.2")
@@ -26,7 +26,7 @@ Artifact("io.intino", "6.1.1") data-hub as Product
 		Compile("org.apache.activemq", "activemq-jaas", "5.17.2")
 		Compile("org.apache.activemq", "activemq-runtime-config", "5.17.2")
 		Test("junit", "junit", "4.13.2")
-		Web("io.intino", "datalake-inspector", "6.1.0")
+		Web("io.intino", "datalake-inspector", "6.2.0")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
 	Distribution > Artifactory("intino-maven")

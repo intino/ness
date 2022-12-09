@@ -21,10 +21,10 @@ public class MasterTripletWriter {
 
 	private static final String TRIPLETS_EXTENSION = ".triplets";
 
-	private final File datalakeTripletsPath;
+	private final File datalakeEntitiesPath;
 
-	public MasterTripletWriter(File datalakeTripletsPath) {
-		this.datalakeTripletsPath = requireNonNull(datalakeTripletsPath);
+	public MasterTripletWriter(File datalakeEntitiesPath) {
+		this.datalakeEntitiesPath = requireNonNull(datalakeEntitiesPath);
 	}
 
 	public void write(List<Triplet> triplets) throws IOException {
@@ -36,7 +36,7 @@ public class MasterTripletWriter {
 	}
 
 	private void write(String tank, List<Triplet> triplets) throws IOException {
-		File tankDir = new File(datalakeTripletsPath, capitalize(tank));
+		File tankDir = new File(datalakeEntitiesPath, capitalize(tank));
 		tankDir.mkdirs();
 
 		File file = new File(tankDir, todaysTimetag() + TRIPLETS_EXTENSION);

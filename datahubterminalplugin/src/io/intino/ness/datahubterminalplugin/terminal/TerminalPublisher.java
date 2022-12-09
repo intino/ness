@@ -79,7 +79,7 @@ public class TerminalPublisher {
 		srcDirectory.mkdirs();
 		Map<Event, Datalake.Split> eventSplitMap = collectEvents(tanks);
 		if (duplicatedEvents()) return false;
-		new TerminalRenderer(terminal, eventSplitMap, srcDirectory, basePackage).render();
+		new TerminalRenderer(terminal, eventSplitMap, srcDirectory, basePackage, conf.artifact().code().generationPackage()).render();
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
 		writeManifest(resDirectory);
@@ -87,8 +87,8 @@ public class TerminalPublisher {
 	}
 
 	private boolean duplicatedEvents() {
-		final Set<String> duplicatedPublish = terminal.publish() != null ? findDuplicates(terminal.publish().tanks().stream().map(Tank.Event::qn).collect(Collectors.toList())) : Collections.emptySet();
-		final Set<String> duplicatedSubscribe = terminal.subscribe() != null ? findDuplicates(terminal.subscribe().tanks().stream().map(Tank.Event::qn).collect(Collectors.toList())) : Collections.emptySet();
+		final Set<String> duplicatedPublish = terminal.publish() != null ? findDuplicates(terminal.publish().eventTanks().stream().map(Tank.Event::qn).collect(Collectors.toList())) : Collections.emptySet();
+		final Set<String> duplicatedSubscribe = terminal.subscribe() != null ? findDuplicates(terminal.subscribe().eventTanks().stream().map(Tank.Event::qn).collect(Collectors.toList())) : Collections.emptySet();
 		if (!duplicatedPublish.isEmpty()) {
 			logger.println("Duplicated publishing event in terminal " + terminal.name$() + ": " + String.join(", ", duplicatedPublish));
 			notifier.notifyError("Duplicated publishing event in terminal " + terminal.name$() + ": " + String.join(", ", duplicatedPublish));
@@ -108,8 +108,8 @@ public class TerminalPublisher {
 	}
 
 	private void writeManifest(File srcDirectory) {
-		List<String> publish = terminal.publish() != null ? terminal.publish().tanks().stream().map(this::eventQn).collect(Collectors.toList()) : Collections.emptyList();
-		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().tanks().stream().map(this::eventQn).collect(Collectors.toList()) : Collections.emptyList();
+		List<String> publish = terminal.publish() != null ? terminal.publish().eventTanks().stream().map(this::eventQn).collect(Collectors.toList()) : Collections.emptyList();
+		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().eventTanks().stream().map(this::eventQn).collect(Collectors.toList()) : Collections.emptyList();
 		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses(), eventSplits());
 		try {
 			Files.write(new File(srcDirectory, "terminal.mf").toPath(), new Gson().toJson(manifest).getBytes());
@@ -127,9 +127,9 @@ public class TerminalPublisher {
 	}
 
 	private Map<String, Set<String>> eventSplits() {
-		Map<String, Set<String>> eventSplits = terminal.publish() == null ? new HashMap<>() : eventSplitOf(terminal.publish().tanks());
+		Map<String, Set<String>> eventSplits = terminal.publish() == null ? new HashMap<>() : eventSplitOf(terminal.publish().eventTanks());
 		if (terminal.subscribe() == null) return eventSplits;
-		Map<String, Set<String>> subscribeEventSplits = eventSplitOf(terminal.subscribe().tanks());
+		Map<String, Set<String>> subscribeEventSplits = eventSplitOf(terminal.subscribe().eventTanks());
 		for (String eventType : subscribeEventSplits.keySet()) {
 			if (!eventSplits.containsKey(eventType)) eventSplits.put(eventType, new HashSet<>());
 			eventSplits.get(eventType).addAll(subscribeEventSplits.get(eventType));
@@ -146,9 +146,9 @@ public class TerminalPublisher {
 	private Map<String, String> tankClasses() {
 		Map<String, String> tankClasses = new HashMap<>();
 		if (terminal.publish() != null)
-			terminal.publish().tanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + namespace(t.event()).toLowerCase() + t.event().name$()));
+			terminal.publish().eventTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + namespace(t.event()).toLowerCase() + t.event().name$()));
 		if (terminal.subscribe() != null)
-			terminal.subscribe().tanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + namespace(t.event()).toLowerCase() + t.event().name$()));
+			terminal.subscribe().eventTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + namespace(t.event()).toLowerCase() + t.event().name$()));
 		if (terminal.bpm() != null) {
 			Split split = terminal.bpm().split();
 			String statusQn = terminal.bpm().processStatusClass();

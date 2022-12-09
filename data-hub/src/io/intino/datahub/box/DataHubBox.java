@@ -113,15 +113,19 @@ public class DataHubBox extends AbstractBox {
 		return new FileSessionSealer(datalake, stageDirectory);
 	}
 
+	public Master master() {
+		return master;
+	}
+
 	public void beforeStart() {
 		stageDirectory().mkdirs();
-		load();
+		initMaster();
+		loadBrokerService();
 		if (graph.datalake() != null) this.datalake = new FileDatalake(datalakeDirectory());
 		if (graph.broker() != null) {
 			configureBroker();
 			nessService = new NessService(this);
 		}
-		initMaster();
 		sentinels = new Sentinels(this);
 	}
 
@@ -133,9 +137,6 @@ public class DataHubBox extends AbstractBox {
 	private Master.Config getMasterConfig() {
 		Master.Config config = new Master.Config();
 		config.datalakeRootPath(datalakeDirectory());
-		config.instanceName(configuration.masterInstanceName());
-		config.host(configuration.masterHost());
-		config.port(Integer.parseInt(configuration.masterPort()));
 		config.serializer(MasterSerializers.getOrDefault(configuration.masterSerializer()));
 		config.tripletsDigester(new DatahubTripletDigesterFactory().create());
 		config.tripletsLoader(new DatahubTripletLoader(datalake.tripletsStore()));
@@ -163,9 +164,9 @@ public class DataHubBox extends AbstractBox {
 		return null;
 	}
 
-	private void load() {
+	private void loadBrokerService() {
 		if (this.graph.broker() != null && graph.broker().implementation() == null)
-			graph.broker().implementation(() -> new JmsBrokerService(graph, brokerStage()));
+			graph.broker().implementation(() -> new JmsBrokerService(graph, brokerStage(),datalake(), master));
 	}
 
 	private void configureBroker() {

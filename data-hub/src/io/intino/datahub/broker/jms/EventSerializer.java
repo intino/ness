@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.function.Consumer;
@@ -20,12 +19,12 @@ import static java.nio.file.StandardOpenOption.CREATE;
 import static java.time.LocalDateTime.ofInstant;
 import static java.time.ZoneOffset.UTC;
 
-class TopicSaver {
+class EventSerializer {
 	private final File stage;
 	private final String tank;
 	private final Scale scale;
 
-	TopicSaver(File stage, String tank, Scale scale) {
+	EventSerializer(File stage, String tank, Scale scale) {
 		this.stage = stage;
 		this.tank = tank;
 		this.scale = scale;

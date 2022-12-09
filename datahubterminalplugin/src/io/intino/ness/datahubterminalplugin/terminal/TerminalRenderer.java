@@ -26,12 +26,14 @@ class TerminalRenderer {
 	private final Map<Event, Split> eventWithSplit;
 	private final File srcDir;
 	private final String rootPackage;
+	private final String entitiesPackage;
 
-	TerminalRenderer(Terminal terminal, Map<Event, Split> eventWithSplit, File srcDir, String rootPackage) {
+	TerminalRenderer(Terminal terminal, Map<Event, Split> eventWithSplit, File srcDir, String rootPackage, String entitiesPackage) {
 		this.terminal = terminal;
 		this.eventWithSplit = eventWithSplit;
 		this.srcDir = srcDir;
 		this.rootPackage = rootPackage;
+		this.entitiesPackage = entitiesPackage;
 	}
 
 	void render() {
@@ -41,7 +43,7 @@ class TerminalRenderer {
 
 	private Frame createTerminalFrame() {
 		Datalake datalake = terminal.graph().datalake();
-		FrameBuilder builder = new FrameBuilder("terminal").add("package", rootPackage).add("name", terminal.name$());
+		FrameBuilder builder = new FrameBuilder("terminal").add("package", rootPackage).add("entitiesPackage", entitiesPackage).add("name", terminal.name$());
 		if (datalake != null) builder.add("datalake", "").add("scale", datalake.scale().name());
 		builder.add("event", eventWithSplit.keySet().stream().map(e -> new FrameBuilder("event").
 				add("namespace", eventNamespace(e)).
@@ -49,9 +51,9 @@ class TerminalRenderer {
 				add("name", e.name$()).
 				add("type", eventPackage(e) + "." + firstUpperCase(e.name$())).toFrame()).toArray(Frame[]::new));
 		if (terminal.publish() != null)
-			terminal.publish().tanks().forEach(tank -> builder.add("publish", frameOf(tank)));
+			terminal.publish().eventTanks().forEach(tank -> builder.add("publish", frameOf(tank)));
 		if (terminal.subscribe() != null)
-			terminal.subscribe().tanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
+			terminal.subscribe().eventTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
 		if (terminal.bpm() != null) addBpm(builder);
 		return builder.toFrame();
 	}
