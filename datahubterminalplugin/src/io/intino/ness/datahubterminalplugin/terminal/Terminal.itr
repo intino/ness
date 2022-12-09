@@ -5,6 +5,7 @@ def type(terminal)
 	import io.intino.alexandria.Scale;
 	import io.intino.alexandria.event.Event;
 	import io.intino.alexandria.logger.Logger;
+	import $entitiesPackage.Entities;
 
 	import java.util.concurrent.atomic.AtomicReference;
 
@@ -17,13 +18,17 @@ def type(terminal)
 	import java.io.File;
 
 	public class $name+snakeCaseToCamelCase+firstUpperCase {
+		public static String$[] subscriptionChannels = new String$[]{$subscribe+channel};
+
 		private final io.intino.alexandria.terminal.Connector connector;
 		private final java.util.Map<java.util.function.BiConsumer<?, String>, List<java.util.function.Consumer<io.intino.alexandria.event.Event>>> consumers = new java.util.HashMap<>();
 		$bpm+splits
-		public static String$[] subscriptionChannels = new String$[]{$subscribe+channel};
+		private final Entities entities;
 
 		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector, String clientId) {
 			this.connector = connector;
+			this.entities = Entities.get();
+			this.entities.init(connector);
 		}
 
 		public void publish(Object event, String split) {
@@ -31,9 +36,7 @@ def type(terminal)
 		}
 
 		public Entities entities() {
-			connector.requestResponse("service.ness.datalake.entitystore")//reflow
-			connector.sendMessge("entities")
-			connector.subscribe("entities", connector.clientId() + "-entities", c->{});
+			return entities;
 		}
 
 		public io.intino.alexandria.datalake.Datalake datalake() {

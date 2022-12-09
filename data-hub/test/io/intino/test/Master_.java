@@ -17,8 +17,6 @@ public class Master_ {
 		FileDatalake datalake = new FileDatalake(new File("temp/datalake"));
 
 		Master.Config config = new Master.Config();
-		config.instanceName("master");
-		config.port(5701);
 		config.datalakeRootPath(datalake.root());
 		config.tripletsLoader(new DatahubTripletLoader(datalake.tripletsStore()));
 

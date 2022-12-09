@@ -211,8 +211,8 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 
 	private List<Tank.Event> tanks(Terminal terminal) {
 		List<Tank.Event> tanks = new ArrayList<>();
-		if (terminal.publish() != null) tanks.addAll(terminal.publish().tanks());
-		if (terminal.subscribe() != null) tanks.addAll(terminal.subscribe().tanks());
+		if (terminal.publish() != null) tanks.addAll(terminal.publish().eventTanks());
+		if (terminal.subscribe() != null) tanks.addAll(terminal.subscribe().eventTanks());
 		return tanks;
 	}
 

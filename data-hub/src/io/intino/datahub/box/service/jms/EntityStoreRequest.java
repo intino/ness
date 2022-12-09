@@ -34,7 +34,7 @@ public class EntityStoreRequest {
 		Iterator<io.intino.alexandria.message.Message> it = MessageTranslator.toInlMessages(message);
 		while(it.hasNext()) {
 			io.intino.alexandria.message.Message m = it.next();
-			if(m.is(MasterMessage.INL_TYPE) && DownloadMasterMessage.class.getSimpleName().equals(m.get("messageClass").asString())) {
+			if(m.is(MasterMessage.INL_TYPE) && DownloadMasterMessage.class.getName().equals(m.get("messageClass").asString())) {
 				return downloadEntities(new DownloadMasterMessage(m));
 			}
 		}
@@ -50,6 +50,7 @@ public class EntityStoreRequest {
 			message.setStringProperty(PROPERTY_ENTITY_SERIALIZER, master.serializer().name());
 			message.setStringProperty(PROPERTY_MAP_SERIALIZER, mapSerializer.name());
 			message.setBooleanProperty(PROPERTY_ERROR, false);
+			message.setIntProperty(PROPERTY_BODY_SIZE, bytes.length);
 			message.writeBytes(bytes);
 
 			return Stream.of(message);

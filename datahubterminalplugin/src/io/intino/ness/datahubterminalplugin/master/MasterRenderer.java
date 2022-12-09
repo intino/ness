@@ -96,16 +96,14 @@ public class MasterRenderer {
 	}
 
 	private Map<String, String> masterClass() {
-		String masterView = workingPackage + DOT + firstUpperCase().format(javaValidName().format("MasterView").toString());
-		String fullLoad = workingPackage + DOT + firstUpperCase().format(javaValidName().format("FullLoadMasterTerminal").toString());
-		String lazyLoad = workingPackage + DOT + firstUpperCase().format(javaValidName().format("LazyLoadMasterTerminal").toString());
-		String masterTerminal = workingPackage + DOT + firstUpperCase().format(javaValidName().format("MasterTerminal").toString());
+		String masterView = workingPackage + DOT + firstUpperCase().format(javaValidName().format("EntitiesView").toString());
+		String fullLoad = workingPackage + DOT + firstUpperCase().format(javaValidName().format("CachedEntities").toString());
+		String masterTerminal = workingPackage + DOT + firstUpperCase().format(javaValidName().format("Entities").toString());
 
 		return Map.of(
-				destination(masterView), customize(new MasterTerminalTemplate()).render(masterFrameBuilder("view").toFrame()),
-				destination(fullLoad), customize(new MasterTerminalTemplate()).render(masterFrameBuilder("cached").toFrame()),
-				destination(lazyLoad), customize(new MasterTerminalTemplate()).render(masterFrameBuilder("lazy").toFrame()),
-				destination(masterTerminal), customize(new MasterTerminalTemplate()).render(masterFrameBuilder("interface").toFrame())
+				destination(masterView), customize(new EntitiesTemplate()).render(masterFrameBuilder("view").toFrame()),
+				destination(fullLoad), customize(new EntitiesTemplate()).render(masterFrameBuilder("cached").toFrame()),
+				destination(masterTerminal), customize(new EntitiesTemplate()).render(masterFrameBuilder("interface").toFrame())
 		);
 	}
 

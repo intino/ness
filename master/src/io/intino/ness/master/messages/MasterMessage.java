@@ -56,4 +56,10 @@ public abstract class MasterMessage implements Serializable {
 		message.set("id", MasterMessageIdGenerator.generateFor(getClass()));
 		message.set("ts", Instant.now());
 	}
+
+	public static class Unknown extends MasterMessage {
+		public Unknown(Message message) {
+			super(message);
+		}
+	}
 }

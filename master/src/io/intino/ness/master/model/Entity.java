@@ -82,6 +82,12 @@ public abstract class Entity {
 		return Objects.equals(id, entity.id);
 	}
 
+	public boolean deepEquals(Entity other) {
+		if(this == other) return true;
+		if(!id.equals(other.id)) return false;
+		return triplets().equals(other.triplets());
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(id);
