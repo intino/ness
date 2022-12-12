@@ -6,7 +6,6 @@ import io.intino.datahub.model.NessGraph;
 import io.intino.datahub.model.Terminal;
 import io.intino.magritte.framework.Graph;
 import io.intino.magritte.framework.stores.FileSystemStore;
-import io.intino.ness.datahubterminalplugin.master.MasterPublisher;
 import io.intino.ness.datahubterminalplugin.ontology.OntologyPublisher;
 import io.intino.ness.datahubterminalplugin.terminal.TerminalPublisher;
 import io.intino.plugin.PluginLauncher;
@@ -45,9 +44,8 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		Graph graph = loadGraph(resDirectory);
 		if (hasErrors(graph)) return;
 		Map<String, String> versions = versions();
-		boolean publishedMaster = publishMasterTerminal(graph.as(NessGraph.class), versions, tempDir);
 		if (!publishOntology(graph.as(NessGraph.class), versions, tempDir)) return;
-		publishTerminals(graph.as(NessGraph.class), versions, tempDir, publishedMaster);
+		publishTerminals(graph.as(NessGraph.class), versions, tempDir);
 		logger().println("Finished generation of terminals!");
 	}
 
@@ -74,11 +72,11 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		}
 	}
 
-	private void publishTerminals(NessGraph nessGraph, Map<String, String> versions, File tempDir, boolean includeMaster) {
+	private void publishTerminals(NessGraph nessGraph, Map<String, String> versions, File tempDir) {
 		try {
 			AtomicBoolean published = new AtomicBoolean(true);
 			nessGraph.terminalList().parallelStream().forEach(terminal -> {
-				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), versions, systemProperties(), invokedPhase, logger(), notifier(), includeMaster).publish() & published.get());
+				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), versions, systemProperties(), invokedPhase, logger(), notifier()).publish() & published.get());
 				if (published.get() && notifier() != null)
 					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), terminalNameArtifact(terminal), configuration().artifact().version()));
 			});
@@ -86,21 +84,6 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		} catch (Throwable e) {
 			logger().println(e.getMessage());
 			e.printStackTrace();
-		}
-	}
-
-	private boolean publishMasterTerminal(NessGraph graph, Map<String, String> versions, File tempDir) {
-		try {
-			AtomicBoolean published = new AtomicBoolean(true);
-			published.set(new MasterPublisher(new File(tempDir, "master"), graph, configuration(), versions, systemProperties(), invokedPhase, logger(), notifier()).publish());
-			if (published.get() && notifier() != null)
-				notifier().notify("Master Terminal " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), "master-terminal", configuration().artifact().version()));
-			handleTempDir(tempDir, published);
-			return published.get();
-		} catch (Throwable e) {
-			logger().println(e.getMessage());
-			e.printStackTrace();
-			return false;
 		}
 	}
 

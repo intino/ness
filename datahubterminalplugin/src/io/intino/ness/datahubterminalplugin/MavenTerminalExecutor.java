@@ -1,7 +1,6 @@
 package io.intino.ness.datahubterminalplugin;
 
 import io.intino.Configuration;
-import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.plugin.PluginLauncher.SystemProperties;
 import org.apache.maven.shared.invoker.*;
@@ -24,7 +23,7 @@ public class MavenTerminalExecutor {
 	private final SystemProperties systemProperties;
 	private final PrintStream logger;
 
-	public enum Target {EventsAndMaster, Events, Bpm, Master}
+	public enum Target {EventsAndEntities, Events, Bpm, Master}
 
 	public MavenTerminalExecutor(File root, String basePackage, Target target, String terminalName, Map<String, String> versions, Configuration conf, SystemProperties systemProperties, PrintStream logger) {
 		this.root = root;
@@ -78,24 +77,14 @@ public class MavenTerminalExecutor {
 			if (isSnapshotVersion()) buildDistroFrame(builder, conf.artifact().distribution().snapshot());
 			else buildDistroFrame(builder, conf.artifact().distribution().release());
 		}
-		if (target.equals(Target.Events) || target.equals(Target.EventsAndMaster))
+		if (target.equals(Target.Events) || target.equals(Target.EventsAndEntities))
 			builder.add("terminal", terminalDependenciesFrame(group, version));
 		if (target.equals(Target.Bpm)) builder.add("bpm", versions.get("bpm"));
-		if (target.equals(Target.Master)) builder.add("master", masterFrame());
-		if (target.equals(Target.EventsAndMaster))
-			builder.add("masterTerminal", masterTerminalFrame(group, version));
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new PomTemplate().render(builder.toFrame()));
 		return pomFile;
 	}
 
-	private Frame masterFrame() {
-		return new FrameBuilder("master").add("masterVersion", versions.get("master")).add("terminalVersion", versions.get("terminal-jms")).toFrame();
-	}
-
-	private static FrameBuilder masterTerminalFrame(String group, String version) {
-		return new FrameBuilder().add("group", group).add("version", version);
-	}
 
 	private boolean isSnapshotVersion() {
 		return conf.artifact().version().contains("SNAPSHOT");
@@ -107,6 +96,7 @@ public class MavenTerminalExecutor {
 				add("artifact", "ontology").
 				add("terminalVersion", versions.get("terminal-jms")).
 				add("ingestionVersion", versions.get("ingestion")).
+				add("masterVersion", versions.get("master")).
 				add("version", version);
 	}
 

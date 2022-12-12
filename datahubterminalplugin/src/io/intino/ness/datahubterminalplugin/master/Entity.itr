@@ -158,7 +158,7 @@ def type(entity) type(list) type(component) trigger(add)
 
 	for(String serializedItem : items) {
 		TripletRecord item = serializer.deserialize(serializedItem.trim());
-		$entity+FirstUpperCase entity = new $entity+FirstUpperCase(item.id(), master);
+		$entity+FirstUpperCase entity = new $entity+FirstUpperCase(item.id());
 		this.$name+firstLowerCase.add(entity);
 	}
 end
@@ -268,7 +268,7 @@ def type(entity) type(set) type(component) trigger(add)
 
 	for(String serializedItem : items) {
 		TripletRecord item = serializer.deserialize(serializedItem.trim());
-		$entity+FirstUpperCase entity = new $entity+FirstUpperCase(item.id(), master);
+		$entity+FirstUpperCase entity = new $entity+FirstUpperCase(item.id());
 		this.$name+firstLowerCase.add(entity);
 	}
 end
@@ -359,7 +359,7 @@ def type(entity) type(component) trigger(add)
 	}
 
 	TripletRecord r = master.serializer().deserialize(triplet.value().trim());
-	this.$name+firstLowerCase = new $entity+FirstUpperCase(r.id(), master);
+	this.$name+firstLowerCase = new $entity+FirstUpperCase(r.id());
 end
 
 def type(entity) trigger(add)
