@@ -18,7 +18,7 @@ def type(terminal)
 	import java.util.concurrent.TimeUnit;
 	import java.util.stream.Collectors;
 
-	import $entitiesPackage.Entities;
+	import $package+validPackage~.master.Entities;
 
 	public class $name+snakeCaseToCamelCase+firstUpperCase {
 		public static String$[] subscriptionChannels = new String$[]{$subscribe+channel};
@@ -37,7 +37,7 @@ def type(terminal)
 		}
 
 		public Entities entities() {
-			return entities != null ? entities : entities = Entities.get().init(connector);
+			return entities != null ? entities : (entities = Entities.get().init(connector));
 		}
 
 		public io.intino.alexandria.datalake.Datalake datalake() {

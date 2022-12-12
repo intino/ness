@@ -78,8 +78,17 @@ def type(pom)
 		[$event]
 		[$terminal]
 		[$bpm]
+		[$master]
 	</dependencies>
 </project>
+end
+
+def trigger(master)
+	<dependency>
+      	<groupId>io.intino.ness</groupId>
+      	<artifactId>master</artifactId>
+      	<version>$masterVersion</version>
+    </dependency>
 end
 
 def trigger(event)
@@ -106,11 +115,6 @@ def trigger(terminal)
 		<groupId>io.intino.alexandria</groupId>
 		<artifactId>datalake</artifactId>
 		<version>4.0.5</version>
-	</dependency>
-	<dependency>
-		<groupId>io.intino.ness</groupId>
-		<artifactId>master</artifactId>
-		<version>$masterVersion</version>
 	</dependency>
 	<dependency>
 		<groupId>$group+lowercase</groupId>
