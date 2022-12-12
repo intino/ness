@@ -56,7 +56,7 @@ public class OntologyPublisher {
 				notifier.notifyError("The Version " + conf.artifact().version() + " is Already Distributed.");
 				return false;
 			}
-			if (!new OntologyRenderer(graph, conf, root, sourceDirectory(), resDirectories, basePackage).render())
+			if (!new OntologyRenderer(graph, conf, root, sourceDirectory(), resDirectories, basePackage, logger, notifier).render())
 				return false;
 			logger.println("Publishing ontology...");
 			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");

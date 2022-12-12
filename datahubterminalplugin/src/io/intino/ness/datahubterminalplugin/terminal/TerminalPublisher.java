@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.intino.ness.datahubterminalplugin.Formatters.snakeCaseToCamelCase;
 import static io.intino.plugin.PluginLauncher.Phase.*;
 
 public class TerminalPublisher {
@@ -78,7 +79,7 @@ public class TerminalPublisher {
 		srcDirectory.mkdirs();
 		Map<Event, Datalake.Split> eventSplitMap = collectEvents(tanks);
 		if (duplicatedEvents()) return false;
-		new MasterRenderer(root, terminal.graph(), conf, logger, notifier).render();
+//		new MasterRenderer(root, snakeCaseToCamelCase().format(terminal.name$()).toString(), terminal.graph(), conf, logger, notifier, basePackage).render();
 		new TerminalRenderer(terminal, eventSplitMap, srcDirectory, basePackage, conf.artifact().code().generationPackage()).render();
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
