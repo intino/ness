@@ -119,9 +119,11 @@ public class DataHubBox extends AbstractBox {
 
 	public void beforeStart() {
 		stageDirectory().mkdirs();
-		initMaster();
 		loadBrokerService();
-		if (graph.datalake() != null) this.datalake = new FileDatalake(datalakeDirectory());
+		if (graph.datalake() != null) {
+			this.datalake = new FileDatalake(datalakeDirectory());
+			initMaster();
+		}
 		if (graph.broker() != null) {
 			configureBroker();
 			nessService = new NessService(this);
