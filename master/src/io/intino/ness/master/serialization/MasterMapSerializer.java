@@ -1,5 +1,7 @@
 package io.intino.ness.master.serialization;
 
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import io.intino.alexandria.Json;
 
 import java.util.Map;
@@ -10,8 +12,8 @@ public class MasterMapSerializer {
 		return Json.toJson(map);
 	}
 
-	@SuppressWarnings("unchecked")
 	public static Map<String, String> deserialize(String str) {
-		return Json.fromJson(str, Map.class);
+		return new GsonBuilder().setPrettyPrinting().create().fromJson(str, new TypeToken<Map<String, String>>() {
+		}.getType());
 	}
 }

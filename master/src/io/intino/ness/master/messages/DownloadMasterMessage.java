@@ -21,9 +21,7 @@ public class DownloadMasterMessage extends MasterMessage {
 	}
 
 	public Set<String> tanks() {
-		Message.Value tanks = message.get("tanks");
-		if(tanks == null || tanks.asString() == null) return null;
-		return Arrays.stream(tanks.asString().split(",")).collect(Collectors.toSet());
+		return message.contains("tanks")?Arrays.stream(message.get("tanks").asString().split(",")).collect(Collectors.toSet()): null;
 	}
 
 	public EntityFilter filter() {
