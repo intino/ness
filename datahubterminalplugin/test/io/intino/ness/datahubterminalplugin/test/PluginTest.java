@@ -13,26 +13,19 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import static io.intino.ness.datahubterminalplugin.test.OSValidator.isWindows;
 import static java.util.Collections.singletonList;
 
 @Ignore
 public class PluginTest {
-
-	private static final String NESS_DIR = "C:\\Users\\naits\\Desktop\\IntinoDev\\ness\\";
-//	private static final String NESS_DIR = "/Users/oroncal/workspace/ness/";
-	private static final String MODULE_DIR = "datahubterminalplugin";
-	private static final File ModuleFile = new File(MODULE_DIR);
 	private static final String USER_HOME = System.getProperty("user.home");
-	private static final String WORKSPACE_ROOT = "C:/Users/naits/Desktop/";
-//	private static final String TEST_MODULE_PATH = USER_HOME + "/workspace/ness/datahubterminalplugin/temp/test";
-	private static final String TEST_MODULE_PATH = "C:/Users/naits/Desktop/IntinoDev/ness/test";
-//	private static final String WORKSPACE_ROOT = USER_HOME + "/workspace";
-//	public static final String INTELLIJ_MAVEN_PLUGIN = "/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3/";
-	private static final String INTELLIJ_MAVEN_PLUGIN = "C:/Users/naits/AppData/Local/JetBrains/Toolbox/apps/IDEA-C/ch-0/222.3739.54/plugins/maven/lib/maven3";
-//	private static final String JAVA_HOME = "/Library/Java/JavaVirtualMachines/jdk-11.0.10.jdk/Contents/Home";
-	private static final String JAVA_HOME = "C:/Program Files/Java/jdk-11.0.2";
-//	private static final String CESAR_PROJECT_PATH = USER_HOME + "/workspace/cesar/datahub/";
-	private static final String CESAR_PROJECT_PATH = WORKSPACE_ROOT + "IntinoDev/cesar/datahub/";
+	private static final String NESS_DIR = isWindows() ? "C:\\Users\\naits\\Desktop\\IntinoDev\\ness\\" : "/Users/oroncal/workspace/ness/";
+	private static final String WORKSPACE_ROOT = isWindows() ? "C:/Users/naits/Desktop/" : USER_HOME + "/workspace";
+	private static final String TEST_MODULE_PATH = isWindows() ? "C:/Users/naits/Desktop/IntinoDev/ness/test" : USER_HOME + "/workspace/ness/datahubterminalplugin/temp/test";
+	private static final String INTELLIJ_MAVEN_PLUGIN = isWindows() ? "C:/Users/naits/AppData/Local/JetBrains/Toolbox/apps/IDEA-C/ch-0/222.3739.54/plugins/maven/lib/maven3" : "/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3/";
+	private static final String JAVA_HOME = isWindows() ? "C:/Program Files/Java/jdk-11.0.2" : "/Library/Java/JavaVirtualMachines/jdk-11.0.10.jdk/Contents/Home";
+	private static final String CESAR_PROJECT_PATH = USER_HOME + "/workspace/cesar/datahub/";
+//	private static final String CESAR_PROJECT_PATH = WORKSPACE_ROOT + "IntinoDev/cesar/datahub/";
 
 	@Test
 	public void should_build_cesar_terminal() throws IOException {
@@ -100,7 +93,7 @@ public class PluginTest {
 						new File(WORKSPACE_ROOT, "MonentiaDev/cinepolis/datahub/src"),
 						new File(WORKSPACE_ROOT, "MonentiaDev/cinepolis/datahub/shared")),
 						singletonList(new File(WORKSPACE_ROOT, "MonentiaDev/cinepolis/datahub/res")),
-						new File(WORKSPACE_ROOT,"MonentiaDev/cinepolis/out")))
+						new File(WORKSPACE_ROOT, "MonentiaDev/cinepolis/out")))
 				.systemProperties(new SystemProperties(
 						new File(INTELLIJ_MAVEN_PLUGIN),
 						new File(JAVA_HOME)))
@@ -134,10 +127,10 @@ public class PluginTest {
 	private Configuration cesarConfiguration() {
 		return new ConfigurationBuilder()
 				.artifactBegin()
-					.groupId("io.intino.cesar")
-					.name("datahub")
-					.version("1.0.0")
-					.codeGenerationPackage("io.intino.cesar.datahub")
+				.groupId("io.intino.cesar")
+				.name("datahub")
+				.version("1.0.0")
+				.codeGenerationPackage("io.intino.cesar.datahub")
 				.artifactEnd()
 				.build();
 	}
@@ -145,9 +138,9 @@ public class PluginTest {
 	private Configuration gcConfiguration() {
 		return new ConfigurationBuilder()
 				.artifactBegin()
-					.groupId("io.provista")
-					.name("datahub")
-					.version("3.1.0")
+				.groupId("io.provista")
+				.name("datahub")
+				.version("3.1.0")
 				.artifactEnd()
 				.build();
 	}
@@ -155,10 +148,10 @@ public class PluginTest {
 	private Configuration cinepolisConfiguration() {
 		return new ConfigurationBuilder()
 				.artifactBegin()
-					.groupId("com.cinepolis")
-					.name("datahub")
-					.version("2.0.0")
-					.codeGenerationPackage("com.cinepolis.datahub")
+				.groupId("com.cinepolis")
+				.name("datahub")
+				.version("2.0.0")
+				.codeGenerationPackage("com.cinepolis.datahub")
 				.artifactEnd()
 				.build();
 	}
@@ -166,10 +159,10 @@ public class PluginTest {
 	private Configuration testConfiguration() {
 		return new ConfigurationBuilder()
 				.artifactBegin()
-					.groupId("io.intino.test")
-					.name("datahub-test")
-					.version("1.0.0-SNAPSHOT")
-					.codeGenerationPackage("org.example.test.model")
+				.groupId("io.intino.test")
+				.name("datahub-test")
+				.version("1.0.0-SNAPSHOT")
+				.codeGenerationPackage("org.example.test.model")
 				.artifactEnd()
 				.build();
 	}

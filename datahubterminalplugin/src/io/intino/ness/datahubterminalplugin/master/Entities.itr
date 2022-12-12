@@ -483,12 +483,12 @@ def !type(abstract) trigger(addEntityInternal)
 	private Event.Type addTo$name+FirstUpperCase~Internal(TripletRecord record) {
 		$name+FirstUpperCase entity = new $name+FirstUpperCase(record.id());
     	record.triplets().forEach(entity::add);
-    	if(!entity.enabled()) {
+    	if (!entity.enabled()) {
         	disabledView.$name+firstLowerCase~Map.put(record.id(), entity);
         	return Event.Type.None;
         }
     	$name+FirstUpperCase old = $name+firstLowerCase~Map.get(record.id());
-    	if(!entity.deepEquals(old)) return Event.Type.None;
+    	if (entity.deepEquals(old)) return Event.Type.None;
     	$name+firstLowerCase~Map.put(record.id(), entity);
     	return old == null ? Event.Type.Create : Event.Type.Update;
     }
@@ -497,13 +497,10 @@ end
 def !type(abstract) trigger(enableEntityInternal)
 	private Event.Type enable$name+FirstUpperCase~Internal(String id) {
 		if($name+firstLowerCase~Map.containsKey(id)) return Event.Type.None;
-
 		$name+FirstUpperCase entity = disabledView.$name+firstLowerCase~Map.remove(id);
-		if(entity == null) return Event.Type.None;
-
+		if (entity == null) return Event.Type.None;
 		entity.add(new Triplet(id, "enabled", "true"));
     	$name+firstLowerCase~Map.put(id, entity);
-
     	return Event.Type.Enable;
     }
 end
