@@ -28,7 +28,7 @@ def type(terminal)
 		$bpm+splits
 		private final Entities entities;
 
-		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector, String clientId) {
+		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector) {
 			this.connector = connector;
 			this.entities = Entities.get();
 			this.entities.init(connector);
