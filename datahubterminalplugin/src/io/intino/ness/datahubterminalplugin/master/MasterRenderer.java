@@ -1,6 +1,7 @@
 package io.intino.ness.datahubterminalplugin.master;
 
 import io.intino.Configuration;
+import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.NessGraph;
 import io.intino.datahub.model.Struct;
@@ -26,6 +27,7 @@ public class MasterRenderer {
 	private static final String JAVA = ".java";
 
 	private final File srcFolder;
+	private String terminalName;
 	private final NessGraph model;
 	private final Configuration conf;
 	private final PrintStream logger;
@@ -33,10 +35,12 @@ public class MasterRenderer {
 	private final Template entityTemplate;
 	private final Template validatorTemplate;
 	private final Template structTemplate;
-	private final String workingPackage;
+	private final String basePackage;
+	private final String modelPackage;
 
-	public MasterRenderer(File root, NessGraph model, Configuration conf, PrintStream logger, PluginLauncher.Notifier notifier) {
-		this.srcFolder = new File(root, "src");
+	public MasterRenderer(File srcDir, String terminalName, NessGraph model, Configuration conf, PrintStream logger, PluginLauncher.Notifier notifier, String basePackage) {
+		this.srcFolder = srcDir;
+		this.terminalName = terminalName;
 		this.model = model;
 		this.conf = conf;
 		this.logger = logger;
@@ -45,20 +49,34 @@ public class MasterRenderer {
 		this.validatorTemplate = customize(new ValidatorTemplate());
 		this.structTemplate = customize(new StructTemplate());
 		srcFolder.mkdirs();
-		workingPackage = this.conf.artifact().code().generationPackage();
+		this.basePackage = basePackage;
+		this.modelPackage = basePackage + ".master";
 	}
 
 	public boolean render() {
+		return renderMaster() && renderOntologyClasses();
+	}
+
+	public boolean renderMaster() {
 		try {
 			if (model.entityList().isEmpty()) return false;
-			logger.println("Generating Entities...");
-			write(entityClasses());
-			write(structClasses());
 			write(masterClass());
 			write(validationLayerClass());
 			return true;
 		} catch (Throwable e) {
 			notifier.notifyError("Error during java className generation: " + ErrorUtils.getMessage(e));
+			return false;
+		}
+	}
+
+	public boolean renderOntologyClasses() {
+		try {
+			logger.println("Generating Entities...");
+			write(structClasses());
+			write(entityClasses());
+			return true;
+		} catch (Exception e) {
+			Logger.error(e);
 			return false;
 		}
 	}
@@ -83,32 +101,32 @@ public class MasterRenderer {
 	}
 
 	private Map<String, String> validationLayerClass() {
-		String module = javaValidName().format(conf.artifact().name()).toString();
-		String qn = workingPackage + DOT + "validators" + DOT + firstUpperCase().format(module) + "RecordValidationLayer";
+		String module = "General"; //javaValidName().format(firstUpperCase().format(terminalName)).toString();
+		String qn = basePackage + DOT + "validators" + DOT + module + "RecordValidationLayer";
 		return Map.of(
 				destination(qn), customize(new ValidatorTemplate()).render(
 						new FrameBuilder("validationLayer", "class")
 								.add("module", module)
 								.add("entity", entities(""))
-								.add("package", workingPackage + ".validators")
+								.add("package", basePackage + ".validators")
 								.toFrame())
 		);
 	}
 
 	private Map<String, String> masterClass() {
-		String masterView = workingPackage + DOT + firstUpperCase().format(javaValidName().format("EntitiesView").toString());
-		String fullLoad = workingPackage + DOT + firstUpperCase().format(javaValidName().format("CachedEntities").toString());
-		String masterTerminal = workingPackage + DOT + firstUpperCase().format(javaValidName().format("Entities").toString());
+		String masterView = basePackage + DOT + firstUpperCase().format(javaValidName().format("EntitiesView").toString());
+		String fullLoad = basePackage + DOT + firstUpperCase().format(javaValidName().format("CachedEntities").toString());
+		String masterTerminal = basePackage + DOT + firstUpperCase().format(javaValidName().format("Entities").toString());
 
 		return Map.of(
-				destination(masterView), customize(new EntitiesTemplate()).render(masterFrameBuilder("view").toFrame()),
-				destination(fullLoad), customize(new EntitiesTemplate()).render(masterFrameBuilder("cached").toFrame()),
-				destination(masterTerminal), customize(new EntitiesTemplate()).render(masterFrameBuilder("interface").toFrame())
+				destination(srcFolder + "/" + masterView), customize(new EntitiesTemplate()).render(masterFrameBuilder("view").toFrame()),
+				destination(srcFolder + "/" + fullLoad), customize(new EntitiesTemplate()).render(masterFrameBuilder("cached").toFrame()),
+				destination(srcFolder + "/" + masterTerminal), customize(new EntitiesTemplate()).render(masterFrameBuilder("interface").toFrame())
 		);
 	}
 
 	private FrameBuilder masterFrameBuilder(String type) {
-		FrameBuilder builder = new FrameBuilder("master").add("package", workingPackage);
+		FrameBuilder builder = new FrameBuilder("master").add("package", basePackage);
 		builder.add("entity", entities(type));
 		builder.add(type);
 		return builder;
@@ -140,7 +158,7 @@ public class MasterRenderer {
 	}
 
 	private Map<String, String> renderEntityNode(Entity entity) {
-		return new EntityFrameCreator(workingPackage, model).create(entity).entrySet().stream()
+		return new EntityFrameCreator(modelPackage, model).create(entity).entrySet().stream()
 				.collect(toMap(
 						e -> entityDestination(e.getKey(), e.getValue()),
 						e -> entityTemplate.render(e.getValue()))
@@ -148,7 +166,7 @@ public class MasterRenderer {
 	}
 
 	private Map<String, String> renderValidator(Entity entity) {
-		return new ValidatorFrameCreator(workingPackage).create(entity).entrySet().stream()
+		return new ValidatorFrameCreator(modelPackage).create(entity).entrySet().stream()
 				.collect(toMap(
 						e -> validatorDestination(e.getKey(), e.getValue()),
 						e -> validatorTemplate.render(e.getValue()))
@@ -156,7 +174,7 @@ public class MasterRenderer {
 	}
 
 	private Map<String, String> renderStructNode(Struct struct) {
-		return new StructFrameCreator(workingPackage).create(struct).entrySet().stream()
+		return new StructFrameCreator(modelPackage).create(struct).entrySet().stream()
 				.collect(toMap(
 						e -> destination(e.getKey()),
 						e -> structTemplate.render(e.getValue()))

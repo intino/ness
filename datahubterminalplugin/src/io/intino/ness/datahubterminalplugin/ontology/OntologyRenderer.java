@@ -2,36 +2,48 @@ package io.intino.ness.datahubterminalplugin.ontology;
 
 import io.intino.Configuration;
 import io.intino.alexandria.logger.Logger;
-import io.intino.datahub.model.Datalake;
-import io.intino.datahub.model.Event;
-import io.intino.datahub.model.NessGraph;
-import io.intino.datahub.model.Wordbag;
+import io.intino.datahub.model.*;
 import io.intino.ness.datahubterminalplugin.event.EventRenderer;
 import io.intino.ness.datahubterminalplugin.event.WordbagRenderer;
+import io.intino.ness.datahubterminalplugin.master.MasterRenderer;
+import io.intino.plugin.PluginLauncher;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class OntologyRenderer {
+
 	private final List<Datalake.Tank.Event> eventTanks;
 	private final List<Event> events;
+	private final List<Entity> entities;
+	private final List<Struct> structs;
 	private final List<Wordbag> wordbags;
+	private NessGraph graph;
 	private final Configuration conf;
 	private final File root;
+	private PrintStream logger;
+	private PluginLauncher.Notifier notifier;
 	private final Map<Event, Datalake.Split> eventSplitMap;
 	private final File srcDir;
 	private final List<File> resDirectories;
 	private final String basePackage;
 
-	OntologyRenderer(NessGraph graph, Configuration conf, File root, File srcDir, List<File> resDirectories, String basePackage) {
+	OntologyRenderer(NessGraph graph, Configuration conf, File root, File srcDir, List<File> resDirectories, String basePackage,
+					 PrintStream logger, PluginLauncher.Notifier notifier) {
 		this.eventTanks = eventTanks(graph);
 		this.events = graph.eventList();
+		this.entities = graph.entityList();
+		this.structs = graph.structList();
 		this.wordbags = graph.wordbagList();
+		this.graph = graph;
 		this.conf = conf;
 		this.root = root;
+		this.logger = logger;
+		this.notifier = notifier;
 		this.eventSplitMap = splitEvents();
 		this.srcDir = srcDir;
 		this.resDirectories = resDirectories;
@@ -40,6 +52,17 @@ public class OntologyRenderer {
 	}
 
 	public boolean render() {
+		renderEvents();
+		renderEntities();
+		return true;
+	}
+
+	private void renderEntities() {
+		new MasterRenderer(srcDir, null, graph, conf, logger, notifier, basePackage)
+				.render();
+	}
+
+	private void renderEvents() {
 		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDir, basePackage).render());
 		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDir, basePackage).render());
 		wordbags.stream().parallel().forEach(w -> new WordbagRenderer(w, conf, srcDir, resDirectories, basePackage).render());
@@ -56,7 +79,6 @@ public class OntologyRenderer {
 						Logger.error(e);
 					}
 				});
-		return true;
 	}
 
 

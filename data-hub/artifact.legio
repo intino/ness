@@ -37,9 +37,6 @@ Artifact("io.intino", "6.2.0") data-hub as Product
 	Parameter("broker_port")
 	Parameter("broker_secondary_port")
 	Parameter("ui_port")
-	Parameter("master_instance_name")
-	Parameter("master_port")
-	Parameter("master_host")
 	Parameter("master_serializer")
 
 Repository("intino-maven")
