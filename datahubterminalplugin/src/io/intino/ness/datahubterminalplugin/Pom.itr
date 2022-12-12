@@ -79,7 +79,6 @@ def type(pom)
 		[$terminal]
 		[$bpm]
 		[$master]
-		[$masterTerminal]
 	</dependencies>
 </project>
 end
@@ -147,14 +146,6 @@ def trigger(master)
     	<artifactId>terminal-jms</artifactId>
     	<version>$terminalVersion</version>
     </dependency>
-end
-
-def trigger(masterTerminal)
-	<dependency>
-		<groupId>$group+lowercase</groupId>
-		<artifactId>master-terminal</artifactId>
-		<version>$version</version>
-	</dependency>
 end
 
 def type(repository) !type(distribution) trigger(release)
