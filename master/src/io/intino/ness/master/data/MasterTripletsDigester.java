@@ -14,13 +14,15 @@ public interface MasterTripletsDigester {
 		return new DefaultTripletsDigester();
 	}
 
-	Result load(TripletLoader tripletLoader, MasterSerializer serializer) throws Exception;
+	Result load(EntityLoader entityLoader, MasterSerializer serializer) throws Exception;
 
 	interface Result {
 		static WritableResult create() {
 			return new WritableResult();
 		}
+
 		Stats stats();
+
 		Map<String, TripletRecord> records();
 
 		class Stats {
@@ -35,7 +37,7 @@ public interface MasterTripletsDigester {
 			}
 
 			public void increment(String key) {
-				statsMap.compute(key, (k, v) -> v == null ? 1 : (int)v + 1);
+				statsMap.compute(key, (k, v) -> v == null ? 1 : (int) v + 1);
 			}
 
 			@SuppressWarnings("unchecked")

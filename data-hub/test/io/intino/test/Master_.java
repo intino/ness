@@ -3,8 +3,8 @@ package io.intino.test;
 import io.intino.alexandria.datalake.Datalake;
 import io.intino.alexandria.datalake.file.FileDatalake;
 import io.intino.ness.master.core.Master;
+import io.intino.ness.master.data.EntityLoader;
 import io.intino.ness.master.data.MasterTripletsDigester;
-import io.intino.ness.master.data.TripletLoader;
 import io.intino.ness.master.model.Triplet;
 
 import java.io.File;
@@ -18,7 +18,7 @@ public class Master_ {
 
 		Master.Config config = new Master.Config();
 		config.datalakeRootPath(datalake.root());
-		config.tripletsLoader(new DatahubTripletLoader(datalake.tripletsStore()));
+		config.tripletsLoader(new DatahubEntityLoader(datalake.entityStore()));
 
 		Master master = new Master(config);
 		Runtime.getRuntime().addShutdownHook(new Thread(master::stop));
@@ -26,11 +26,11 @@ public class Master_ {
 		master.start();
 	}
 
-	private static class DatahubTripletLoader implements TripletLoader {
+	private static class DatahubEntityLoader implements EntityLoader {
 
-		private final Datalake.TripletStore store;
+		private final Datalake.EntityStore store;
 
-		public DatahubTripletLoader(Datalake.TripletStore store) {
+		public DatahubEntityLoader(Datalake.EntityStore store) {
 			this.store = store;
 		}
 
@@ -38,11 +38,11 @@ public class Master_ {
 		public Stream<Triplet> loadTriplets(MasterTripletsDigester.Result.Stats stats) {
 			return store.tanks()
 					.peek(t -> stats.increment("Tanks read"))
-					.flatMap(Datalake.TripletStore.Tank::tubs)
+					.flatMap(Datalake.EntityStore.Tank::tubs)
 					.flatMap(tub -> readTripletsFrom(tub, stats));
 		}
 
-		private Stream<Triplet> readTripletsFrom(Datalake.TripletStore.Tub tub, MasterTripletsDigester.Result.Stats stats) {
+		private Stream<Triplet> readTripletsFrom(Datalake.EntityStore.Tub tub, MasterTripletsDigester.Result.Stats stats) {
 			stats.increment(MasterTripletsDigester.Result.Stats.FILES_READ);
 			return tub.triplets()
 					.map(t -> new Triplet(t.subject(), t.verb(), t.object()))

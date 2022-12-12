@@ -18,7 +18,7 @@ public class TripletValidationLayer {
 	}
 
 	public TripletValidationLayer addValidator(TripletValidator validator) {
-		if(validator == null) return this;
+		if (validator == null) return this;
 		validators.add(validator);
 		return this;
 	}

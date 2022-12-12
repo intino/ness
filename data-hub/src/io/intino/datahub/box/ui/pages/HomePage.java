@@ -1,11 +1,6 @@
 package io.intino.datahub.box.ui.pages;
 
-import io.intino.alexandria.exceptions.*;
-
-import java.time.*;
-import java.util.*;
-
-import io.intino.datahub.box.ui.displays.templates.*;
+import io.intino.datahub.box.ui.displays.templates.HomeTemplate;
 
 public class HomePage extends AbstractHomePage {
 

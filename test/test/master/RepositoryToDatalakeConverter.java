@@ -1,6 +1,6 @@
 package master;
 
-import io.intino.ness.master.data.FileTripletLoader;
+import io.intino.ness.master.data.FileEntityLoader;
 import io.intino.ness.master.data.MasterTripletsDigester;
 import io.intino.ness.master.model.TripletRecord;
 import io.intino.ness.master.serialization.MasterSerializers;
@@ -25,7 +25,7 @@ public class RepositoryToDatalakeConverter {
 
 		MasterTripletsDigester digester = MasterTripletsDigester.createDefault();
 
-		MasterTripletsDigester.Result digestion = digester.load(new FileTripletLoader(repository), MasterSerializers.getDefault());
+		MasterTripletsDigester.Result digestion = digester.load(new FileEntityLoader(repository), MasterSerializers.getDefault());
 
 		System.out.println(digestion.stats());
 

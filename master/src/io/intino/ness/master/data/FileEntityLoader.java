@@ -15,16 +15,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class FileTripletLoader implements TripletLoader {
+public class FileEntityLoader implements EntityLoader {
 
 	private final File root;
 	private final Set<String> extensions; // Without .
 
-	public FileTripletLoader(File root) {
+	public FileEntityLoader(File root) {
 		this(root, Set.of("triples", "triplets"));
 	}
 
-	public FileTripletLoader(File root, Set<String> extensions) {
+	public FileEntityLoader(File root, Set<String> extensions) {
 		this.root = root;
 		this.extensions = extensions;
 	}
@@ -39,9 +39,9 @@ public class FileTripletLoader implements TripletLoader {
 
 		List<Triplet> triplets = new ArrayList<>();
 
-		try(BufferedReader reader = new BufferedReader(new FileReader(file))) {
+		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			String line;
-			while((line = reader.readLine()) != null) {
+			while ((line = reader.readLine()) != null) {
 				process(line, triplets, stats);
 			}
 		} catch (IOException e) {
@@ -53,7 +53,7 @@ public class FileTripletLoader implements TripletLoader {
 
 	protected void process(String line, List<Triplet> triplets, Stats stats) {
 		stats.increment(Stats.LINES_READ);
-		if(line.isEmpty()) return;
+		if (line.isEmpty()) return;
 		triplets.add(new Triplet(line));
 		stats.increment(Stats.TRIPLETS_READ);
 	}
@@ -65,7 +65,7 @@ public class FileTripletLoader implements TripletLoader {
 	}
 
 	private Stream<File> findTripletsFilesIn(File root) throws IOException {
-		try(Stream<Path> files = Files.walk(root.toPath())) {
+		try (Stream<Path> files = Files.walk(root.toPath())) {
 			return files.map(Path::toFile)
 					.filter(f -> f.isFile() && extensions.contains(extensionOf(f)))
 					.collect(Collectors.toList()).stream();

@@ -11,7 +11,9 @@ public interface RecordValidator {
 	String MAP_KEY_VALUE_SEPARATOR = "=";
 	String STRUCT_FIELD_SEPARATOR = ",";
 
-	static RecordValidator none() { return (r, s) -> Stream.empty(); }
+	static RecordValidator none() {
+		return (r, s) -> Stream.empty();
+	}
 
 	Stream<Issue> validate(TripletRecord record, TripletRecordStore store);
 

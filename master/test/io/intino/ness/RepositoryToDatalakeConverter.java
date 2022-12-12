@@ -1,6 +1,6 @@
 package io.intino.ness;
 
-import io.intino.ness.master.data.FileTripletLoader;
+import io.intino.ness.master.data.FileEntityLoader;
 import io.intino.ness.master.data.MasterTripletsDigester;
 import io.intino.ness.master.model.TripletRecord;
 import io.intino.ness.master.serialization.MasterSerializers;
@@ -25,7 +25,7 @@ public class RepositoryToDatalakeConverter {
 
 		MasterTripletsDigester digester = MasterTripletsDigester.createDefault();
 
-		MasterTripletsDigester.Result digestion = digester.load(new FileTripletLoader(repository), MasterSerializers.getDefault());
+		MasterTripletsDigester.Result digestion = digester.load(new FileEntityLoader(repository), MasterSerializers.getDefault());
 
 		System.out.println(digestion.stats());
 
@@ -38,9 +38,9 @@ public class RepositoryToDatalakeConverter {
 		File root = new File(datalake, "triplets");
 		root.mkdirs();
 
-		for(var entry : digestion.records().values().stream().collect(Collectors.groupingBy(TripletRecord::type)).entrySet()) {
+		for (var entry : digestion.records().values().stream().collect(Collectors.groupingBy(TripletRecord::type)).entrySet()) {
 			String type = entry.getKey();
-			if(type.isBlank()) type = "Unknown";
+			if (type.isBlank()) type = "Unknown";
 			File tank = new File(root, StringUtils.capitalize(type));
 			tank.mkdirs();
 			File tub = new File(tank, "00000000.triplets");

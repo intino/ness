@@ -76,7 +76,8 @@ public class HomeTemplate extends AbstractHomeTemplate<DataHubBox> {
 			List<File> review = new Regenerator(box.datalake(), box.graph().datalake().backup() == null ? null : new File(box.graph().datalake().backup().path(), "sessions"), new File(box.configuration().home(), "reviews")).review(mapper);
 			mapperLoader.delete(mapperCode);
 			return review.get(0);
-		} catch (IOException | InstantiationException | InvocationTargetException | IllegalAccessException | ClassNotFoundException ex) {
+		} catch (IOException | InstantiationException | InvocationTargetException | IllegalAccessException |
+				 ClassNotFoundException ex) {
 			Logger.error(ex);
 			return null;
 		}

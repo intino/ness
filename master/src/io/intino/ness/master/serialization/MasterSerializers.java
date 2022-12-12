@@ -17,6 +17,7 @@ public final class MasterSerializers {
 	}
 
 	private static final Map<String, Supplier<MasterSerializer>> Serializers = new ConcurrentHashMap<>();
+
 	static {
 		Serializers.put(Standard.TSV, SeparatorMasterSerializer.Tsv::new);
 		Serializers.put(Standard.CSV, SeparatorMasterSerializer.Csv::new);
@@ -28,19 +29,19 @@ public final class MasterSerializers {
 	}
 
 	public static MasterSerializer getOrDefault(String name) {
-		if(name == null) return null;
+		if (name == null) return null;
 		MasterSerializer serializer = get(name);
 		return serializer != null ? serializer : getDefault();
 	}
 
 	public static MasterSerializer get(String name) {
-		if(name == null) return null;
+		if (name == null) return null;
 		return Serializers.getOrDefault(name.toLowerCase(), MasterSerializers::getNull).get();
 	}
 
 	public static void setSerializer(String name, Supplier<MasterSerializer> serializerSupplier) {
-		if(serializerSupplier == null) throw new NullPointerException("Serializer supplier cannot be null");
-		if(name.equalsIgnoreCase("default")) throw new IllegalArgumentException("Cannot set the default serializer");
+		if (serializerSupplier == null) throw new NullPointerException("Serializer supplier cannot be null");
+		if (name.equalsIgnoreCase("default")) throw new IllegalArgumentException("Cannot set the default serializer");
 		Serializers.put(name, serializerSupplier);
 	}
 

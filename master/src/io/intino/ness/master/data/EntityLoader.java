@@ -4,7 +4,7 @@ import io.intino.ness.master.model.Triplet;
 
 import java.util.stream.Stream;
 
-public interface TripletLoader {
+public interface EntityLoader {
 
 	Stream<Triplet> loadTriplets(MasterTripletsDigester.Result.Stats stats) throws Exception;
 }

@@ -9,19 +9,27 @@ public interface ErrorListener {
 
 	/**
 	 * Represents an error occurred on server side while processing an update request.
-	 * */
+	 */
 	interface Error {
 
-		/**The instant at which the error occurred.**/
+		/**
+		 * The instant at which the error occurred.
+		 **/
 		Instant ts();
 
-		/**The exception thrown. **/
+		/**
+		 * The exception thrown.
+		 **/
 		Throwable cause();
 
-		/**The client name that sent the request.*/
+		/**
+		 * The client name that sent the request.
+		 */
 		String clientName();
 
-		/**The message id that triggered the error.*/
+		/**
+		 * The message id that triggered the error.
+		 */
 		String messageId();
 	}
 }

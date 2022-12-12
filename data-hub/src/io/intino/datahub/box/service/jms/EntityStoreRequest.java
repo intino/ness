@@ -31,9 +31,9 @@ public class EntityStoreRequest {
 
 	public Message accept(Message message) {
 		Iterator<io.intino.alexandria.message.Message> it = MessageTranslator.toInlMessages(message);
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			io.intino.alexandria.message.Message m = it.next();
-			if(m.is(MasterMessage.INL_TYPE) && DownloadMasterMessage.class.getName().equals(m.get("messageClass").asString())) {
+			if (m.is(MasterMessage.INL_TYPE) && DownloadMasterMessage.class.getName().equals(m.get("messageClass").asString())) {
 				return downloadEntities(new DownloadMasterMessage(m));
 			}
 		}
@@ -64,8 +64,8 @@ public class EntityStoreRequest {
 		String key = entry.getKey();
 		String value = entry.getValue();
 
-		if(m.tanks() != null && !m.tanks().contains(tankOf(key))) return false;
-		if(m.filter() == AllEntities) return true;
+		if (m.tanks() != null && !m.tanks().contains(tankOf(key))) return false;
+		if (m.filter() == AllEntities) return true;
 
 		TripletRecord record = master.serializer().deserialize(value);
 		boolean enabled = "true".equals(record.getValue("enabled"));

@@ -2,7 +2,7 @@ package io.intino.ness.master.data.validation;
 
 /**
  * Indicates the source of a triple. It can refer to a file or a publisher (from other application).
- * */
+ */
 public interface TripletSource {
 
 	static TripletSource ofFile(String path, int line) {

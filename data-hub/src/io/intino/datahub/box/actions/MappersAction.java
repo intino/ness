@@ -3,7 +3,6 @@ package io.intino.datahub.box.actions;
 import io.intino.datahub.box.DataHubBox;
 
 import java.io.File;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 

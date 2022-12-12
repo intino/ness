@@ -5,7 +5,9 @@ import java.util.stream.Stream;
 
 public interface FieldValidator {
 
-	static FieldValidator none() {return (v, r, s) -> Stream.empty();}
+	static FieldValidator none() {
+		return (v, r, s) -> Stream.empty();
+	}
 
 	Stream<Issue> validate(List<RecordValidator.TripletRecord.Value> values, RecordValidator.TripletRecord record, TripletRecordStore store);
 }

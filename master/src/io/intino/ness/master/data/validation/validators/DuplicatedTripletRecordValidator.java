@@ -37,9 +37,9 @@ public class DuplicatedTripletRecordValidator implements RecordValidator {
 	private Issue getIssue(TripletRecord record, Map.Entry<String, List<TripletRecord.Value>> e) {
 		TripletSource source0 = e.getValue().get(0).source();
 
-		if(e.getValue().stream().allMatch(v -> Objects.equals(source0, v.source())))
+		if (e.getValue().stream().allMatch(v -> Objects.equals(source0, v.source())))
 			return Issue.create(level, DUPLICATED_ATTRIBUTE, "Record (" + record.id() + ") defines " + e.getKey() + " " + e.getValue().size() + " times.")
-				.source(e.getValue().get(e.getValue().size() - 1).source());
+					.source(e.getValue().get(e.getValue().size() - 1).source());
 
 		return Issue.create(level, DUPLICATED_ATTRIBUTE, "Record (" + record.id() + ") defines " + e.getKey() + " " + e.getValue().size() + " times in different files.")
 				.source(new CombinedTripletSource(e.getValue().stream().map(TripletRecord.Value::source).map(TripletSource::get).collect(Collectors.toList())));

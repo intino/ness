@@ -7,7 +7,7 @@ public class OnlyNumeric implements NodeRule {
 
 
 	public boolean accept(Node node) {
-		return node.appliedAspects().stream().noneMatch(a -> a.type().contains("Text") || a.type().contains("Table")|| a.type().equals("Word"));
+		return node.appliedAspects().stream().noneMatch(a -> a.type().contains("Text") || a.type().contains("Table") || a.type().equals("Word"));
 	}
 
 	@Override

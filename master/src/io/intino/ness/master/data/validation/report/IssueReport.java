@@ -28,7 +28,7 @@ public class IssueReport {
 	private void put(Issue issue) {
 		if (issue == null) return;
 		String key = issue.source() == null ? OTHER : issue.source().name();
-		if(key == null) key = OTHER;
+		if (key == null) key = OTHER;
 		List<Issue> issuesOfThatFile = issues.computeIfAbsent(key, k -> new ArrayList<>());
 		issuesOfThatFile.add(issue);
 	}
@@ -59,13 +59,14 @@ public class IssueReport {
 
 	public Map<String, IssuesCount> issueTypes() {
 		Map<String, IssuesCount> types = new HashMap<>();
-		for(var issueList : issues.values()) issueList
-				.forEach(i -> types.compute(i.type(), (k, v) -> {
-					IssuesCount count = v == null ? new IssuesCount() : v;
-					if(i.level() == Issue.Level.Error) count.errors++;
-					else count.warnings++;
-					return count;
-				}));
+		for (var issueList : issues.values())
+			issueList
+					.forEach(i -> types.compute(i.type(), (k, v) -> {
+						IssuesCount count = v == null ? new IssuesCount() : v;
+						if (i.level() == Issue.Level.Error) count.errors++;
+						else count.warnings++;
+						return count;
+					}));
 		return types.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(
 				Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new
 		));

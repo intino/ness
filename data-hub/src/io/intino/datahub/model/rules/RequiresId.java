@@ -3,8 +3,6 @@ package io.intino.datahub.model.rules;
 import io.intino.magritte.lang.model.Node;
 import io.intino.magritte.lang.model.rules.NodeRule;
 
-import java.util.List;
-
 public class RequiresId implements NodeRule {
 
 

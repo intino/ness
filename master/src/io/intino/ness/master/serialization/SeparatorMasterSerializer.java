@@ -15,7 +15,8 @@ public abstract class SeparatorMasterSerializer implements MasterSerializer {
 	private final String separator;
 
 	public SeparatorMasterSerializer(String separator) {
-		if(separator == null || separator.isEmpty()) throw new IllegalArgumentException("Separator cannot be null nor empty");
+		if (separator == null || separator.isEmpty())
+			throw new IllegalArgumentException("Separator cannot be null nor empty");
 		this.separator = separator;
 	}
 

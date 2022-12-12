@@ -24,19 +24,19 @@ public abstract class Entity {
 
 	private void setEnabled(boolean enabled) {
 		final boolean oldValue = this.enabled();
-		if(oldValue == enabled) return;
-
-		if(enabled)
-			onEnable();
-		else
-			onDisable();
+		if (oldValue == enabled) return;
+		if (enabled) onEnable();
+		else onDisable();
 	}
 
-	protected void onEnable() {}
-	protected void onDisable() {}
+	protected void onEnable() {
+	}
+
+	protected void onDisable() {
+	}
 
 	public Entity add(Triplet t) {
-		if(t.predicate().equals("enabled")) setEnabled(parseBoolean(t.value()));
+		if (t.predicate().equals("enabled")) setEnabled(parseBoolean(t.value()));
 		extraTriplets.put(t.predicate(), t);
 		return this;
 	}
@@ -83,8 +83,9 @@ public abstract class Entity {
 	}
 
 	public boolean deepEquals(Entity other) {
-		if(this == other) return true;
-		if(!id.equals(other.id)) return false;
+		if (other == null) return false;
+		if (this == other) return true;
+		if (!id.equals(other.id)) return false;
 		return triplets().equals(other.triplets());
 	}
 

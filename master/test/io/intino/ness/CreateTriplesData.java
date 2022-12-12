@@ -25,29 +25,29 @@ public class CreateTriplesData {
 //		generate(1_000_000,1,"temp/cinepolis-data/mock-1M-1/mock-1M-1.triples");
 //		generate(100_000,1,"temp/cinepolis-data/mock-100K-1/mock-100K-1.triples");
 //		generate(10_000,1, "temp/cinepolis-data/mock-10K-1/mock-10K-1.triples");
-		generate(1_000,1,"temp/cinepolis-data/mock-1K-1/mock-1K-1.triples");
+		generate(1_000, 1, "temp/cinepolis-data/mock-1K-1/mock-1K-1.triples");
 
-		generate(100, 1000,"temp/cinepolis-data/mock-100-1K/mock-100-1K.triples");
+		generate(100, 1000, "temp/cinepolis-data/mock-100-1K/mock-100-1K.triples");
 	}
 
 	private static void generate(int numRecords, int numFields, String file) throws IOException {
 		new File(file).getParentFile().mkdirs();
-		try(BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
 
 			long id = START_ID;
-			for(int j = 0; j < numRecords; j++) {
+			for (int j = 0; j < numRecords; j++) {
 				addAttrib(writer, id, "name", "n" + id);
-				if(numFields >= 2) addAttrib(writer, id, "age", randomAge());
-				if(numFields >= 3) addAttrib(writer, id, "postalCode", randomPostalCode());
-				if(numFields >= 4) addAttrib(writer, id, "phone", randomPhone());
-				if(numFields >= 5) addAttrib(writer, id, "company", randomCompany());
-				if(numFields >= 6) addAttrib(writer, id, "department", randomDepartment());
-				if(numFields >= 7) addAttrib(writer, id, "country", randomCountry());
-				if(numFields >= 8) addAttrib(writer, id, "address", randomAddress());
-				if(numFields >= 9) addAttrib(writer, id, "area", randomArea());
-				if(numFields >= 10) addAttrib(writer, id, "foreman", randomForeman());
-				if(numFields >= 11) {
-					for(int i = 11;i < numFields;i++) {
+				if (numFields >= 2) addAttrib(writer, id, "age", randomAge());
+				if (numFields >= 3) addAttrib(writer, id, "postalCode", randomPostalCode());
+				if (numFields >= 4) addAttrib(writer, id, "phone", randomPhone());
+				if (numFields >= 5) addAttrib(writer, id, "company", randomCompany());
+				if (numFields >= 6) addAttrib(writer, id, "department", randomDepartment());
+				if (numFields >= 7) addAttrib(writer, id, "country", randomCountry());
+				if (numFields >= 8) addAttrib(writer, id, "address", randomAddress());
+				if (numFields >= 9) addAttrib(writer, id, "area", randomArea());
+				if (numFields >= 10) addAttrib(writer, id, "foreman", randomForeman());
+				if (numFields >= 11) {
+					for (int i = 11; i < numFields; i++) {
 						addAttrib(writer, id, "attrib-" + i, "v-" + Rand.nextInt());
 					}
 				}
@@ -77,6 +77,7 @@ public class CreateTriplesData {
 	}
 
 	private static final String[] Countries = {"Spain", "Mexico", "USA", "Germany", "England", "France", "Japan", "China"};
+
 	private static Object randomCountry() {
 		return Countries[Rand.nextInt(Countries.length)];
 	}

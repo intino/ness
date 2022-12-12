@@ -12,7 +12,7 @@ public class DownloadMasterMessage extends MasterMessage {
 	public static final String PROPERTY_ERROR = "error";
 
 	public DownloadMasterMessage(Set<String> tanks, EntityFilter filter) {
-		if(tanks != null) message.set("tanks", String.join(",", tanks));
+		if (tanks != null) message.set("tanks", String.join(",", tanks));
 		message.set("filter", filter.name());
 	}
 
@@ -21,7 +21,7 @@ public class DownloadMasterMessage extends MasterMessage {
 	}
 
 	public Set<String> tanks() {
-		return message.contains("tanks")?Arrays.stream(message.get("tanks").asString().split(",")).collect(Collectors.toSet()): null;
+		return message.contains("tanks") ? Arrays.stream(message.get("tanks").asString().split(",")).collect(Collectors.toSet()) : null;
 	}
 
 	public EntityFilter filter() {
