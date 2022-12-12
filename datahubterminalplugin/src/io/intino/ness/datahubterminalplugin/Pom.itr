@@ -140,8 +140,13 @@ def trigger(master)
 	<dependency>
 		<groupId>io.intino.ness</groupId>
 		<artifactId>master</artifactId>
-		<version>$this</version>
+		<version>$masterVersion</version>
 	</dependency>
+	<dependency>
+    	<groupId>io.intino.alexandria</groupId>
+    	<artifactId>terminal-jms</artifactId>
+    	<version>$terminalVersion</version>
+    </dependency>
 end
 
 def trigger(masterTerminal)

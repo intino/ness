@@ -1,6 +1,7 @@
 package io.intino.ness.datahubterminalplugin;
 
 import io.intino.Configuration;
+import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.plugin.PluginLauncher.SystemProperties;
 import org.apache.maven.shared.invoker.*;
@@ -80,12 +81,16 @@ public class MavenTerminalExecutor {
 		if (target.equals(Target.Events) || target.equals(Target.EventsAndMaster))
 			builder.add("terminal", terminalDependenciesFrame(group, version));
 		if (target.equals(Target.Bpm)) builder.add("bpm", versions.get("bpm"));
-		if (target.equals(Target.Master)) builder.add("master", versions.get("master"));
+		if (target.equals(Target.Master)) builder.add("master", masterFrame());
 		if (target.equals(Target.EventsAndMaster))
 			builder.add("masterTerminal", masterTerminalFrame(group, version));
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new PomTemplate().render(builder.toFrame()));
 		return pomFile;
+	}
+
+	private Frame masterFrame() {
+		return new FrameBuilder("master").add("masterVersion", versions.get("master")).add("terminalVersion", versions.get("terminal-jms")).toFrame();
 	}
 
 	private static FrameBuilder masterTerminalFrame(String group, String version) {
