@@ -26,12 +26,10 @@ def type(terminal)
 		private final io.intino.alexandria.terminal.Connector connector;
 		private final java.util.Map<java.util.function.BiConsumer<?, String>, List<java.util.function.Consumer<io.intino.alexandria.event.Event>>> consumers = new java.util.HashMap<>();
 		$bpm+splits
-		private final Entities entities;
+		private Entities entities;
 
 		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector) {
 			this.connector = connector;
-			this.entities = Entities.get();
-			this.entities.init(connector);
 		}
 
 		public void publish(Object event, String split) {
@@ -39,7 +37,7 @@ def type(terminal)
 		}
 
 		public Entities entities() {
-			return entities;
+		return this.entities != null ? this.entities : (this.entities = Entities.get().init(connector));
 		}
 
 		public io.intino.alexandria.datalake.Datalake datalake() {
