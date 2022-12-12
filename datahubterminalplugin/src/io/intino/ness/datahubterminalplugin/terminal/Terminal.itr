@@ -6,7 +6,6 @@ def type(terminal)
 	import io.intino.alexandria.event.Event;
 	import io.intino.alexandria.logger.Logger;
 	import org.apache.activemq.command.ActiveMQTextMessage;
-	import org.example.test.model.Entities;
 
 	import javax.jms.JMSException;
 	import javax.jms.Message;

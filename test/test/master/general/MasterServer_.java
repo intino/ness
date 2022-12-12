@@ -18,6 +18,7 @@ import io.intino.ness.master.model.Entity;
 import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.serialization.MasterSerializers;
 import io.intino.test.datahubtest.TestTerminal;
+import org.example.test.model.Entities;
 import org.example.test.model.entities.Zone;
 
 import java.io.File;
@@ -38,22 +39,26 @@ public class MasterServer_ {
 	}
 
 	private static void initMaster() {
-		TestTerminal t;
+		TestTerminal t = new TestTerminal();
 
-		Future<Response<Entity>> future = t.entities().publish(new Zone());
+		Entities entities = t.entities();
 
-		Master.Config config = new Master.Config();
-		config.datalakeRootPath(new File("temp/cinepolis-data/datasets"));
-		config.instanceName("the server");
-		config.serializer(MasterSerializers.getDefault());
-		config.tripletsLoader(new FileTripletLoader(new File("temp/cinepolis-data/datasets")));
-		config.port(62555);
-		config.putProperty("hazelcast.logging.type", "none");
+		List<Zone> zones = entities.zoneList();
 
-		Master master = new Master(config);
-		master.start();
-
-		Runtime.getRuntime().addShutdownHook(new Thread(master::stop));
+//		Future<Response<Entity>> future = t.entities().publish(new Zone());
+//
+//		Master.Config config = new Master.Config();
+//		config.datalakeRootPath(new File("temp/cinepolis-data/datasets"));
+//		config.instanceName("the server");
+//		config.serializer(MasterSerializers.getDefault());
+//		config.tripletsLoader(new FileTripletLoader(new File("temp/cinepolis-data/datasets")));
+//		config.port(62555);
+//		config.putProperty("hazelcast.logging.type", "none");
+//
+//		Master master = new Master(config);
+//		master.start();
+//
+//		Runtime.getRuntime().addShutdownHook(new Thread(master::stop));
 	}
 
 	private static void initHazelcastRaw() {
