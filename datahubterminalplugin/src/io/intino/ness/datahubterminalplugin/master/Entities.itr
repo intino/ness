@@ -38,7 +38,7 @@ def type(master & interface)
 			return Singleton.Instance;
 		}
 
-		void init(Connector connector);
+		Entities init(Connector connector);
 
 		<T extends Entity> Future<Response<T>> enable(String entityId);
 		<T extends Entity> Future<Response<T>> disable(String entityId);
@@ -130,13 +130,14 @@ def type(master & cached)
     	CachedEntities() {}
 
 		@Override
-		public synchronized void init(Connector connector) {
+		public synchronized Entities init(Connector connector) {
 			try {
-				if(!initialized.compareAndSet(false, true)) return;
+				if(!initialized.compareAndSet(false, true)) return null;
 				this.connector = requireNonNull(connector);
 				loadData();
 				initListeners();
 				Logger.info("Entities terminal " + connector.clientId() + " initialized successfully. (" + getClass().getSimpleName() + ")");
+				return this;
 			} catch(Exception e) {
 				throw new MasterInitializationException("Entities failed to start: " + e.getMessage(), e);
 			}
