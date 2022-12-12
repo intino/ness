@@ -48,7 +48,7 @@ public class MasterRenderer {
 		workingPackage = this.conf.artifact().code().generationPackage();
 	}
 
-	boolean render() {
+	public boolean render() {
 		try {
 			if (model.entityList().isEmpty()) return false;
 			logger.println("Generating Entities...");

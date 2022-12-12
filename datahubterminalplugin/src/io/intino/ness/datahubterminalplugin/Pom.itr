@@ -78,7 +78,6 @@ def type(pom)
 		[$event]
 		[$terminal]
 		[$bpm]
-		[$master]
 	</dependencies>
 </project>
 end
@@ -109,6 +108,11 @@ def trigger(terminal)
 		<version>4.0.5</version>
 	</dependency>
 	<dependency>
+		<groupId>io.intino.ness</groupId>
+		<artifactId>master</artifactId>
+		<version>$masterVersion</version>
+	</dependency>
+	<dependency>
 		<groupId>$group+lowercase</groupId>
 		<artifactId>$artifact+lowercase</artifactId>
 		<version>$version</version>
@@ -135,18 +139,6 @@ def trigger(bpm)
 	</dependency>
 end
 
-def trigger(master)
-	<dependency>
-		<groupId>io.intino.ness</groupId>
-		<artifactId>master</artifactId>
-		<version>$masterVersion</version>
-	</dependency>
-	<dependency>
-    	<groupId>io.intino.alexandria</groupId>
-    	<artifactId>terminal-jms</artifactId>
-    	<version>$terminalVersion</version>
-    </dependency>
-end
 
 def type(repository) !type(distribution) trigger(release)
 	<repository>
