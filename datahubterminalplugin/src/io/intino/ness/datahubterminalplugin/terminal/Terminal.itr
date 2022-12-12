@@ -1,21 +1,25 @@
 def type(terminal)
 	package $package+validPackage;
 
-	import io.intino.alexandria.Timetag;
 	import io.intino.alexandria.Scale;
+	import io.intino.alexandria.Timetag;
 	import io.intino.alexandria.event.Event;
 	import io.intino.alexandria.logger.Logger;
-	import $entitiesPackage.Entities;
+	import org.apache.activemq.command.ActiveMQTextMessage;
+	import org.example.test.model.Entities;
 
-	import java.util.concurrent.atomic.AtomicReference;
-
-	import java.time.Instant;
-
-	import java.util.function.Consumer;
-	import java.util.List;
-	import java.util.stream.Collectors;
-	import java.util.stream.Stream;
+	import javax.jms.JMSException;
+	import javax.jms.Message;
+	import javax.jms.TextMessage;
 	import java.io.File;
+	import java.time.Instant;
+	import java.util.List;
+	import java.util.Map;
+    import java.util.Collections;
+	import java.util.concurrent.TimeUnit;
+	import java.util.stream.Collectors;
+
+	import $entitiesPackage.Entities;
 
 	public class $name+snakeCaseToCamelCase+firstUpperCase {
 		public static String$[] subscriptionChannels = new String$[]{$subscribe+channel};
@@ -40,23 +44,21 @@ def type(terminal)
 		}
 
 		public io.intino.alexandria.datalake.Datalake datalake() {
-			final AtomicReference<String> path = new AtomicReference<>(null);
-			synchronized(monitor) {
-				connector.requestResponse("service.ness.datalake.eventstore", new Event(new io.intino.alexandria.message.Message("Datalake")).ts(java.time.Instant.now()).toString(), r -> {
-					synchronized(monitor) {
-						path.set(r);
-						monitor.notify();
-					}
-				});
-				try {
-					monitor.wait(5000);
-				} catch (InterruptedException e) {
-					io.intino.alexandria.logger.Logger.error(e);
-				}
+			try {
+				Message message = connector.requestResponse("service.ness.datalake.eventstore", request("Datalake"), 5, TimeUnit.SECONDS);
+				if(message == null) return null;
+
+				String path = ((TextMessage)message).getText();
+				if(path == null) return null;
+
+				return new File(path).exists()
+						? new io.intino.alexandria.datalake.file.FileDatalake(new File(path))
+						: new io.intino.alexandria.terminal.remotedatalake.RemoteDatalake((io.intino.alexandria.terminal.JmsConnector) connector);
+
+			} catch (JMSException e) {
+				Logger.error(e);
+				return null;
 			}
-			if (path.get() == null) return null;
-			if (new File(path.get()).exists()) return new io.intino.alexandria.datalake.file.FileDatalake(new File(path.get()));
-			return new io.intino.alexandria.terminal.remotedatalake.RemoteDatalake((io.intino.alexandria.terminal.JmsConnector) connector);
 		}
 
 		public BatchSession batch(java.io.File temporalStageDirectory) {
@@ -66,7 +68,6 @@ def type(terminal)
 		public BatchSession batch(java.io.File temporalStageDirectory, Config config) {
 			return new BatchSession(temporalStageDirectory, config);
 		}
-
 
 		public void publish(io.intino.alexandria.event.SessionEvent session) {
 			connector.sendEvent(io.intino.alexandria.event.SessionEvent.PATH, session);
@@ -81,37 +82,35 @@ def type(terminal)
 
 		$subscribe...[$NL$NL]
 
-		private static final Object monitor = new Object();
-
 		public synchronized void requestSeal() {
-			synchronized(monitor) {
-				connector.requestResponse("service.ness.seal", new Event(new io.intino.alexandria.message.Message("Seal")).ts(java.time.Instant.now()).toString(), s -> {
-					synchronized(monitor) {monitor.notify();}
-				});
-				try {
-					monitor.wait(1000 * 60 * 30);
-				} catch (InterruptedException e) {
-					io.intino.alexandria.logger.Logger.error(e);
-				}
-			}
+			connector.requestResponse("service.ness.seal", request("Seal"), 30, TimeUnit.MINUTES);
 		}
 
 		public synchronized Instant requestLastSeal() {
-			final AtomicReference<Instant> timestamp = new AtomicReference<>(Instant.now());
-			synchronized(monitor) {
-				connector.requestResponse("service.ness.seal.last", new Event(new io.intino.alexandria.message.Message("LastSeal")).ts(java.time.Instant.now()).toString(), s -> {
-					synchronized(monitor) {
-						if (s != null) timestamp.set(Instant.parse(s));
-						monitor.notify();
-					}
-				});
-				try {
-					monitor.wait(1000 * 10);
-				} catch (InterruptedException e) {
-					io.intino.alexandria.logger.Logger.error(e);
-				}
+			Message message = connector.requestResponse("service.ness.seal.last", request("LastSeal"), 10, TimeUnit.MINUTES);
+			if(message == null) return Instant.now();
+			try {
+				return Instant.parse(((TextMessage)message).getText());
+			} catch (Exception e) {
+				Logger.error(e);
+				return Instant.now();
 			}
-			return timestamp.get();
+		}
+
+		private javax.jms.Message request(String type) {
+			return request(type, Collections.emptyMap());
+		}
+
+		private javax.jms.Message request(String type, Map<String, String> attributes) {
+			try {
+				ActiveMQTextMessage m = new ActiveMQTextMessage();
+				io.intino.alexandria.message.Message message = new io.intino.alexandria.message.Message(type);
+				attributes.forEach(message::set);
+				m.setText(new Event(message).ts(java.time.Instant.now()).toString());
+				return m;
+			} catch(Exception e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 		public class BatchSession {
@@ -166,20 +165,8 @@ def type(terminal)
 			}
 
 			public synchronized void seal() {
-				synchronized(monitor) {
-					connector.requestResponse("service.ness.seal", new Event(new io.intino.alexandria.message.Message("Seal").set("stage", temporalStage.getName())).ts(java.time.Instant.now()).toString(), s -> {
-							synchronized(monitor) {
-								monitor.notify();
-							}
-						}
-					);
-					try {
-						monitor.wait();
-					} catch (InterruptedException e) {
-						io.intino.alexandria.logger.Logger.error(e);
-					}
-				}
-            }
+				connector.requestResponse("service.ness.seal", request("Seal", Map.of("stage", temporalStage.getName())));
+        	}
 
             private void upload(List<File> sessions, String host, String user, String dataHubStageAbsolutePath) {
 				try {

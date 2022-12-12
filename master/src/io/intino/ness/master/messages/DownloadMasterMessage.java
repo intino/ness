@@ -12,7 +12,7 @@ public class DownloadMasterMessage extends MasterMessage {
 	public static final String PROPERTY_ERROR = "error";
 
 	public DownloadMasterMessage(Set<String> tanks, EntityFilter filter) {
-		message.set("tanks", String.join(",", tanks));
+		if(tanks != null) message.set("tanks", String.join(",", tanks));
 		message.set("filter", filter.name());
 	}
 
