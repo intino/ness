@@ -457,10 +457,6 @@ def type(master & cached)
 
 			$entity+map...[$NL]
 
-			private void init() {
-
-			}
-
     		$entity+getter...[$NL$NL]
 		}
     }
