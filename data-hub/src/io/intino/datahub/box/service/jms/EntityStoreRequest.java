@@ -30,7 +30,7 @@ public class EntityStoreRequest {
 		this.master = box.master();
 	}
 
-	public Stream<Message> accept(Message message) {
+	public Message accept(Message message) {
 		Iterator<io.intino.alexandria.message.Message> it = MessageTranslator.toInlMessages(message);
 		while(it.hasNext()) {
 			io.intino.alexandria.message.Message m = it.next();
@@ -38,26 +38,22 @@ public class EntityStoreRequest {
 				return downloadEntities(new DownloadMasterMessage(m));
 			}
 		}
-		return Stream.empty();
+		return null;
 	}
 
-	private Stream<Message> downloadEntities(DownloadMasterMessage m) {
+	private Message downloadEntities(DownloadMasterMessage m) {
 		try {
-			MasterMapSerializer mapSerializer = MasterMapSerializer.getDefault();
-			byte[] bytes = mapSerializer.serialize(getMasterMap(m));
-
-			ActiveMQBytesMessage message = new ActiveMQBytesMessage();
+			ActiveMQTextMessage message = new ActiveMQTextMessage();
 			message.setStringProperty(PROPERTY_ENTITY_SERIALIZER, master.serializer().name());
-			message.setStringProperty(PROPERTY_MAP_SERIALIZER, mapSerializer.name());
 			message.setBooleanProperty(PROPERTY_ERROR, false);
-			message.setIntProperty(PROPERTY_BODY_SIZE, bytes.length);
-			message.writeBytes(bytes);
+			message.setText(MasterMapSerializer.serialize(getMasterMap(m)));
+			message.compress();
 
-			return Stream.of(message);
+			return message;
 
 		} catch (Exception e) {
 			Logger.error(e);
-			return Stream.of(errorMessage(e));
+			return errorMessage(e);
 		}
 	}
 
@@ -89,6 +85,7 @@ public class EntityStoreRequest {
 			ActiveMQTextMessage m = new ActiveMQTextMessage();
 			m.setBooleanProperty(PROPERTY_ERROR, true);
 			m.setText(e.getClass().getSimpleName() + ": " + e.getMessage());
+			m.compress();
 			return m;
 		} catch (Exception ex) {
 			Logger.error(ex);

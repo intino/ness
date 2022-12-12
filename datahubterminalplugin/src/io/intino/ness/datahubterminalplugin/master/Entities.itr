@@ -297,11 +297,10 @@ def type(master & cached)
 			}
 
 			this.serializer = MasterSerializers.get(message.getStringProperty(PROPERTY_ENTITY_SERIALIZER));
-			MasterMapSerializer mapSerializer = MasterMapSerializer.get(message.getStringProperty(PROPERTY_MAP_SERIALIZER));
 
-			byte$[$] bytes = ((ActiveMQBytesMessage) message).getContent().getData();
+			String serializedMap = ((ActiveMQTextMessage) message).getText();
 
-			Map<String, String> entities = mapSerializer.deserialize(bytes);
+			Map<String, String> entities = MapSerializer.deserialize(serializedMap);
 
 			initializeEntityMaps(entities);
 		}

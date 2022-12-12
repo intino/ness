@@ -291,19 +291,19 @@ end
 
 
 def type(boolean) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == false ? null : Boolean.parseBoolean(triplet.value());
+	this.$name+firstLowerCase = triplet.value() == null ? false : Boolean.parseBoolean(triplet.value());
 end
 
 def type(integer) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == 0 ? null : Integer.parseInt(triplet.value());
+	this.$name+firstLowerCase = triplet.value() == null ? 0 : Integer.parseInt(triplet.value());
 end
 
 def type(double) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == 0.0 ? null : Double.parseDouble(triplet.value());
+	this.$name+firstLowerCase = triplet.value() == null ? 0.0 : Double.parseDouble(triplet.value());
 end
 
 def type(long) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == 0L ? null : Long.parseLong(triplet.value());
+	this.$name+firstLowerCase = triplet.value() == null ? 0L : Long.parseLong(triplet.value());
 end
 
 def type(word) type(list) trigger(add)
