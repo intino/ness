@@ -13,12 +13,17 @@ import io.intino.ness.master.data.FileTripletLoader;
 import io.intino.ness.master.data.validation.*;
 import io.intino.ness.master.data.validation.validators.DuplicatedTripletRecordValidator;
 import io.intino.ness.master.data.validation.validators.SyntaxTripletValidator;
+import io.intino.ness.master.messages.Response;
+import io.intino.ness.master.model.Entity;
 import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.serialization.MasterSerializers;
+import io.intino.test.datahubtest.TestTerminal;
+import org.example.test.model.entities.Zone;
 
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 import static io.intino.ness.master.data.validation.Issue.Type.INVALID_VALUE;
@@ -33,6 +38,10 @@ public class MasterServer_ {
 	}
 
 	private static void initMaster() {
+		TestTerminal t;
+
+		Future<Response<Entity>> future = t.entities().publish(new Zone());
+
 		Master.Config config = new Master.Config();
 		config.datalakeRootPath(new File("temp/cinepolis-data/datasets"));
 		config.instanceName("the server");
