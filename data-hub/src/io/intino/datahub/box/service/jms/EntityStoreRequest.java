@@ -9,7 +9,6 @@ import io.intino.ness.master.messages.MasterMessage;
 import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.model.TripletRecord;
 import io.intino.ness.master.serialization.MasterMapSerializer;
-import org.apache.activemq.command.ActiveMQBytesMessage;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.commons.lang3.StringUtils;
 
@@ -17,10 +16,10 @@ import javax.jms.Message;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static io.intino.ness.master.messages.DownloadMasterMessage.EntityFilter.*;
-import static io.intino.ness.master.messages.DownloadMasterMessage.*;
+import static io.intino.ness.master.messages.DownloadMasterMessage.PROPERTY_ENTITY_SERIALIZER;
+import static io.intino.ness.master.messages.DownloadMasterMessage.PROPERTY_ERROR;
 
 public class EntityStoreRequest {
 
@@ -30,7 +29,7 @@ public class EntityStoreRequest {
 		this.master = box.master();
 	}
 
-	public Stream<Message> accept(Message message) {
+	public Message accept(Message message) {
 		Iterator<io.intino.alexandria.message.Message> it = MessageTranslator.toInlMessages(message);
 		while(it.hasNext()) {
 			io.intino.alexandria.message.Message m = it.next();
@@ -38,26 +37,20 @@ public class EntityStoreRequest {
 				return downloadEntities(new DownloadMasterMessage(m));
 			}
 		}
-		return Stream.empty();
+		return null;
 	}
 
-	private Stream<Message> downloadEntities(DownloadMasterMessage m) {
+	private Message downloadEntities(DownloadMasterMessage m) {
 		try {
-			MasterMapSerializer mapSerializer = MasterMapSerializer.getDefault();
-			byte[] bytes = mapSerializer.serialize(getMasterMap(m));
-
-			ActiveMQBytesMessage message = new ActiveMQBytesMessage();
+			ActiveMQTextMessage message = new ActiveMQTextMessage();
 			message.setStringProperty(PROPERTY_ENTITY_SERIALIZER, master.serializer().name());
-			message.setStringProperty(PROPERTY_MAP_SERIALIZER, mapSerializer.name());
 			message.setBooleanProperty(PROPERTY_ERROR, false);
-			message.setIntProperty(PROPERTY_BODY_SIZE, bytes.length);
-			message.writeBytes(bytes);
-
-			return Stream.of(message);
-
+			message.setText(MasterMapSerializer.serialize(getMasterMap(m)));
+			message.compress();
+			return message;
 		} catch (Exception e) {
 			Logger.error(e);
-			return Stream.of(errorMessage(e));
+			return errorMessage(e);
 		}
 	}
 
@@ -71,7 +64,7 @@ public class EntityStoreRequest {
 		String key = entry.getKey();
 		String value = entry.getValue();
 
-		if(!m.tanks().contains(tankOf(key))) return false;
+		if(m.tanks() != null && !m.tanks().contains(tankOf(key))) return false;
 		if(m.filter() == AllEntities) return true;
 
 		TripletRecord record = master.serializer().deserialize(value);
@@ -89,6 +82,7 @@ public class EntityStoreRequest {
 			ActiveMQTextMessage m = new ActiveMQTextMessage();
 			m.setBooleanProperty(PROPERTY_ERROR, true);
 			m.setText(e.getClass().getSimpleName() + ": " + e.getMessage());
+			m.compress();
 			return m;
 		} catch (Exception ex) {
 			Logger.error(ex);

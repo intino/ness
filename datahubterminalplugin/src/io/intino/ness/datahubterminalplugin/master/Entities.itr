@@ -79,6 +79,7 @@ def type(master & cached)
 	import io.intino.alexandria.logger.Logger;
 	import io.intino.alexandria.terminal.Connector;
 	import io.intino.ness.master.core.MasterInitializationException;
+	import io.intino.ness.master.messages.DownloadMasterMessage;
 	import io.intino.ness.master.messages.MasterMessageSerializer;
 	import io.intino.ness.master.messages.Response;
 	import io.intino.ness.master.messages.UpdateMasterMessage;
@@ -91,9 +92,9 @@ def type(master & cached)
 	import io.intino.ness.master.serialization.MasterMapSerializer;
 	import io.intino.ness.master.serialization.MasterSerializer;
 	import io.intino.ness.master.serialization.MasterSerializers;
-	import org.apache.activemq.command.ActiveMQBytesMessage;
 	import org.apache.activemq.command.ActiveMQTextMessage;
 
+	import javax.jms.Message;
 	import java.time.Instant;
 	import java.util.ArrayList;
 	import java.util.Collections;
@@ -101,10 +102,10 @@ def type(master & cached)
 	import java.util.Map;
 	import java.util.concurrent.*;
 	import java.util.concurrent.atomic.AtomicBoolean;
-	import java.util.concurrent.atomic.AtomicReference;
 	import java.util.stream.Stream;
 
-	import static io.intino.ness.master.messages.DownloadMasterMessage.*;
+	import static io.intino.ness.master.messages.DownloadMasterMessage.PROPERTY_ENTITY_SERIALIZER;
+	import static io.intino.ness.master.messages.DownloadMasterMessage.PROPERTY_ERROR;
 	import static java.util.Objects.requireNonNull;
 
 	import $package.entities.*;
@@ -228,6 +229,10 @@ def type(master & cached)
             return enabledValue == null || "true".equalsIgnoreCase(enabledValue);
     	}
 
+    	private boolean isDisabled(TripletRecord record) {
+    		return !isEnabled(record);
+    	}
+
     	protected Event.Type addEntityInternal(TripletRecord record) {
     		switch(record.type()) {
     			$entity+addEntitySwitchCase...[$NL]
@@ -260,50 +265,41 @@ def type(master & cached)
 		}
 
 		private void loadData() {
-			final Object monitor = new Object();
-			AtomicReference<Throwable> error = new AtomicReference<>();
-
-			connector.requestResponse(ENTITY_STORE_SERVICE_PATH, connector.clientId(), response -> {
-				try {
-					handleResponse(response);
-				} catch (Throwable e) {
-					error.set(e);
-				} finally {
-					monitor.notify();
-				}
-			});
-
-			try {
-				monitor.wait(60 * 60 * 1000);
-			} catch (InterruptedException e) {
-				Logger.error(e);
-				error.compareAndSet(null, e);
-			}
-
-			if(error.get() != null) throw new MasterInitializationException("Could not load data from master: " + error.get().getMessage());
-
-			Logger.debug("Loading data from master (serializer=" + serializer.name() + ")");
-			long start = System.currentTimeMillis();
-
+			Logger.debug("Loading data from master...");
+    		long start = System.currentTimeMillis();
+			initializeEntityMaps(downloadMasterData(DownloadMasterMessage.EntityFilter.AllEntities));
 			long time = System.currentTimeMillis() - start;
 			Logger.debug("Data from master loaded in " + time + " ms");
 		}
 
-		private void handleResponse(String response) throws Exception {
-			javax.jms.Message message = null; // TODO from response string
+		private Map<String, String> downloadMasterData(DownloadMasterMessage.EntityFilter filter) {
+			try {
+				Message message = connector.requestResponse(ENTITY_STORE_SERVICE_PATH, downloadMessage(filter));
+				return handleResponse(message);
+			} catch (Exception e) {
+				throw new MasterInitializationException("Could not load data from master: " + e.getMessage(), e);
+			}
+		}
 
+		private Message downloadMessage(DownloadMasterMessage.EntityFilter filter) {
+			try {
+				DownloadMasterMessage m = new DownloadMasterMessage(null, filter);
+				ActiveMQTextMessage message = new ActiveMQTextMessage();
+				message.setText(MasterMessageSerializer.serialize(m));
+				message.compress();
+				return message;
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		private Map<String, String> handleResponse(javax.jms.Message message) throws Exception {
 			if(message.getBooleanProperty(PROPERTY_ERROR)) {
 				throw new RuntimeException(((ActiveMQTextMessage) message).getText());
 			}
-
 			this.serializer = MasterSerializers.get(message.getStringProperty(PROPERTY_ENTITY_SERIALIZER));
-			MasterMapSerializer mapSerializer = MasterMapSerializer.get(message.getStringProperty(PROPERTY_MAP_SERIALIZER));
-
-			byte$[$] bytes = ((ActiveMQBytesMessage) message).getContent().getData();
-
-			Map<String, String> entities = mapSerializer.deserialize(bytes);
-
-			initializeEntityMaps(entities);
+			String serializedMap = ((ActiveMQTextMessage) message).getText();
+			return MasterMapSerializer.deserialize(serializedMap);
 		}
 
 		private void initializeEntityMaps(Map<String, String> entities) {
@@ -461,6 +457,10 @@ def type(master & cached)
 
 			$entity+map...[$NL]
 
+			private void init() {
+
+			}
+
     		$entity+getter...[$NL$NL]
 		}
     }
@@ -486,6 +486,10 @@ def !type(abstract) trigger(addEntityInternal)
 	private Event.Type addTo$name+FirstUpperCase~Internal(TripletRecord record) {
 		$name+FirstUpperCase entity = new $name+FirstUpperCase(record.id());
     	record.triplets().forEach(entity::add);
+    	if(!entity.enabled()) {
+        	disabledView.$name+firstLowerCase~Map.put(record.id(), entity);
+        	return Event.Type.None;
+        }
     	$name+FirstUpperCase old = $name+firstLowerCase~Map.get(record.id());
     	if(!entity.deepEquals(old)) return Event.Type.None;
     	$name+firstLowerCase~Map.put(record.id(), entity);
