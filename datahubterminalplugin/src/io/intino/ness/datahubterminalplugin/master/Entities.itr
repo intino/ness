@@ -9,7 +9,6 @@ def type(master & view)
     import $package.entities.*;
 
 	public interface EntitiesView {
-
 		$entity+getterSignature...[$NL$NL]
 	}
 end
@@ -38,9 +37,9 @@ def type(master & interface)
 			return entities;
 		}
 
-		<T extends Entity> Future<Response<T>> enable(String entityId);
-		<T extends Entity> Future<Response<T>> disable(String entityId);
-		<T extends Entity> Future<Response<T>> publish(Entity entity);
+		void enable(String entityId);
+		void disable(String entityId);
+		void publish(Entity entity);
 
 		EntitiesView disabled();
 
@@ -141,6 +140,7 @@ def type(master & cached)
 		private MasterSerializer serializer;
 		private final DisabledEntitiesView disabledView = new DisabledEntitiesView();
 		private volatile boolean synchronous = true;
+		EntitiesMessageConsumer entityConsumer;
 
     	CachedEntities(Connector connector) {
     		this.connector = requireNonNull(connector);
@@ -187,39 +187,30 @@ def type(master & cached)
     	$entity+getter...[$NL$NL]
 
     	@Override
-    	public <T extends Entity> Future<Response<T>> enable(String id) {
+    	public void enable(String id) {
             if(id == null || id.isBlank()) throw new NullPointerException("Entity id cannot be null nor blank");
             if(publishIsDisabledFor(Triplet.typeOf(id))) throw new UnsupportedOperationException("This terminal is not subscribed to " + capitalize(Triplet.typeOf(id)));
             UpdateMasterMessage message = createMessage(UpdateMasterMessage.Intent.Enable, id);
-            CompletableFuture<Response<T>> future = new CompletableFuture<>();
-            futures.put(message.id(), future);
+			this.entityConsumer.accept(message);
             publishMessage(message);
-            if(synchronous) waitFor(future);
-            return future;
     	}
 
       	@Override
-      	public <T extends Entity> Future<Response<T>> disable(String id) {
+      	public void disable(String id) {
             if(id == null || id.isBlank()) throw new NullPointerException("Entity id cannot be null nor blank");
             if(publishIsDisabledFor(Triplet.typeOf(id))) throw new UnsupportedOperationException("This terminal is not subscribed to " + capitalize(Triplet.typeOf(id)));
             UpdateMasterMessage message = createMessage(UpdateMasterMessage.Intent.Disable, id);
-            CompletableFuture<Response<T>> future = new CompletableFuture<>();
-            futures.put(message.id(), future);
+            this.entityConsumer.accept(message);
             publishMessage(message);
-            if(synchronous) waitFor(future);
-            return future;
       	}
 
 		@Override
-    	public <T extends Entity> Future<Response<T>> publish(Entity entity) {
+    	public void publish(Entity entity) {
 			if(entity == null) throw new NullPointerException("Entity cannot be null");
 			if(publishIsDisabledFor(entity.id().type())) throw new UnsupportedOperationException("This terminal is not subscribed to " + capitalize(entity.id().type()));
 			UpdateMasterMessage message = createMessage(UpdateMasterMessage.Intent.Publish, serializer().serialize(entity.asTripletRecord()));
-            CompletableFuture<Response<T>> future = new CompletableFuture<>();
-            futures.put(message.id(), future);
+			this.entityConsumer.accept(message);
 			publishMessage(message);
-			if(synchronous) waitFor(future);
-			return future;
     	}
 
     	private static boolean publishIsDisabledFor(String type) {
@@ -288,7 +279,8 @@ def type(master & cached)
     	$entity+disableEntityInternal...[$NL$NL]
 
 		protected void initListeners() {
-			connector.attachListener(ENTITIES_TOPIC, connector.clientId() + "-" + ENTITIES_TOPIC, new EntitiesMessageConsumer());
+			this.entityConsumer = new EntitiesMessageConsumer();
+			connector.attachListener(ENTITIES_TOPIC, connector.clientId() + "-" + ENTITIES_TOPIC, entityConsumer);
 		}
 
 		private void loadData() {
@@ -343,9 +335,7 @@ def type(master & cached)
 		private void loadDataMultiThread(Map<String, String> entities, MasterSerializer serializer) {
 			try {
 				ExecutorService threadPool = Executors.newFixedThreadPool(availableThreads());
-
 				entities.forEach((id, serializedRecord) -> threadPool.submit(() -> addEntityInternal(serializer.deserialize(serializedRecord))));
-
 				threadPool.shutdown();
 				threadPool.awaitTermination(1, TimeUnit.HOURS);
 			} catch (Exception e) {
@@ -361,12 +351,13 @@ def type(master & cached)
 
 			@Override
 			public void accept(String rawMessage, String callback) {
-				UpdateMasterMessage message = (UpdateMasterMessage) MasterMessageSerializer.deserialize(rawMessage);
+				accept((UpdateMasterMessage) MasterMessageSerializer.deserialize(rawMessage));
+			}
+
+			public void accept(UpdateMasterMessage message) {
 				try {
 					TripletRecord record = serializer().tryDeserialize(message.value()).orElse(null);
-
 					Event.Type type = process(message, record, message.value());
-
 					MasterEntityEvent<?> event = new MasterEntityEvent<>();
 					event.type = type;
 					event.ts = message.ts();
@@ -375,9 +366,7 @@ def type(master & cached)
 					event.entity = asEntity(record);
 					event.entityId = new Entity.Id(record != null ? record.id() : message.value());
 					event.value = message.value();
-
 					notifyEntityListeners(event);
-
 				} catch (Throwable e) {
 					handleError(message, e);
 				}
@@ -621,15 +610,15 @@ def type(entity) !type(abstract) trigger(asEntitySwitchCase)
 end
 
 def type(entity) !type(abstract) trigger(enable)
-	default Future<Response<$name+FirstUpperCase>> enable$name+FirstUpperCase(String id) {
+	default void enable$name+FirstUpperCase(String id) {
 		if(id == null) throw new NullPointerException("Id cannot be null");
-		return enable(normalizeId(id, "$name+firstLowerCase"));
+		enable(normalizeId(id, "$name+firstLowerCase"));
 	}
 end
 
 def type(entity) !type(abstract) trigger(disable)
-	default Future<Response<$name+FirstUpperCase>> disable$name+FirstUpperCase(String id) {
+	default void disable$name+FirstUpperCase(String id) {
 		if(id == null) throw new NullPointerException("Id cannot be null");
-		return disable(normalizeId(id, "$name+firstLowerCase"));
+		disable(normalizeId(id, "$name+firstLowerCase"));
 	}
 end

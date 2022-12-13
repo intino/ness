@@ -152,33 +152,35 @@ public class MasterRenderer {
 
 	private Frame[] entities(String type, Terminal terminal) {
 		Set<String> subscribeEntities = getSubscribeEntities(terminal);
-		Set<String> publishEntities = terminal.publish().entityTanks().stream().map(e -> e.name$().toLowerCase()).collect(Collectors.toSet());
-		return model.entityList().stream()
-				.map(c -> {
-					FrameBuilder b = new FrameBuilder("entity").add("name", c.name$());
-					if (c.isAbstract()) {
-						b.add("abstract");
-						Frame[] subclasses = subclassesOf(c);
-						if (subclasses.length > 0) b.add("subclass", subclasses);
-					}
-					b.add(type);
-					if(subscribeEntities.contains(c.name$().toLowerCase())) b.add("subscribe");
-					if(publishEntities.contains(c.name$().toLowerCase())) b.add("publish");
-					return b.toFrame();
-				}).toArray(Frame[]::new);
+		Set<String> publishEntities = terminal.publish() == null ? Set.of() : terminal.publish().entityTanks().stream().map(e -> e.name$().toLowerCase()).collect(Collectors.toSet());
+		return model.entityList().stream().map(c -> {
+			FrameBuilder b = new FrameBuilder("entity").add("name", c.name$());
+			if (c.isAbstract()) {
+				b.add("abstract");
+				Frame[] subclasses = subclassesOf(c);
+				if (subclasses.length > 0) b.add("subclass", subclasses);
+			}
+			b.add(type);
+			if (subscribeEntities.contains(c.name$().toLowerCase())) b.add("subscribe");
+			if (publishEntities.contains(c.name$().toLowerCase())) b.add("publish");
+			return b.toFrame();
+		}).toArray(Frame[]::new);
 	}
 
 	private Set<String> getSubscribeEntities(Terminal terminal) {
-		Set<String> subscribeEntities = terminal.subscribe().entityTanks().stream().map(Layer::name$).map(String::toLowerCase).collect(Collectors.toSet());
-		if(model.entityList().stream().map(e -> e.name$().toLowerCase()).allMatch(subscribeEntities::contains)) return subscribeEntities;
+		Terminal.Subscribe subscribe = terminal.subscribe();
+		if (subscribe == null) return Set.of();
+		Set<String> subscribeEntities = subscribe.entityTanks().stream().map(Layer::name$).map(String::toLowerCase).collect(Collectors.toSet());
+		if (model.entityList().stream().map(e -> e.name$().toLowerCase()).allMatch(subscribeEntities::contains))
+			return subscribeEntities;
 		resolveInterDependencies(subscribeEntities);
 		return subscribeEntities;
 	}
 
 	private void resolveInterDependencies(Set<String> entities) {
-		for(String name : entities.toArray(String[]::new)) {
+		for (String name : entities.toArray(String[]::new)) {
 			Entity entity = findEntity(name);
-			if(entity == null) {
+			if (entity == null) {
 				Logger.warn("Entity " + name + " not found in model");
 				continue;
 			}
@@ -187,16 +189,16 @@ public class MasterRenderer {
 	}
 
 	private void getEntityReferencesOf(Entity entity, Set<String> entities) {
-		for(Entity.Attribute attribute : entity.attributeList()) {
-			for(Entity ref : entityReferencesOf(attribute)) {
-				if(entities.add(ref.name$().toLowerCase())) {
+		for (Entity.Attribute attribute : entity.attributeList()) {
+			for (Entity ref : entityReferencesOf(attribute)) {
+				if (entities.add(ref.name$().toLowerCase())) {
 					getEntityReferencesOf(ref, entities);
 				}
 			}
 		}
-		for(Entity.Method method : entity.methodList()) {
-			for(Entity ref : entityReferencesOf(method)) {
-				if(entities.add(ref.name$().toLowerCase())) {
+		for (Entity.Method method : entity.methodList()) {
+			for (Entity ref : entityReferencesOf(method)) {
+				if (entities.add(ref.name$().toLowerCase())) {
 					getEntityReferencesOf(ref, entities);
 				}
 			}
@@ -204,8 +206,8 @@ public class MasterRenderer {
 	}
 
 	private Iterable<? extends Entity> entityReferencesOf(Entity.Method method) {
-		if(method.isGetter()) return emptyList();
-		if(method.isFunction()) {
+		if (method.isGetter()) return emptyList();
+		if (method.isFunction()) {
 			return entityReferencesOf(
 					method.asFunction().returnType().asEntity(),
 					method.asFunction().parameterList().stream()
@@ -213,7 +215,7 @@ public class MasterRenderer {
 							.map(EntityData::asEntity)
 							.collect(Collectors.toList()));
 		}
-		if(method.isRoutine()) {
+		if (method.isRoutine()) {
 			return entityReferencesOf(
 					null,
 					method.asRoutine().parameterList().stream()
@@ -226,14 +228,14 @@ public class MasterRenderer {
 
 	private Iterable<? extends Entity> entityReferencesOf(EntityData.Entity returnType, List<EntityData.Entity> params) {
 		List<Entity> entities = new ArrayList<>(1 + params.size());
-		if(returnType != null && returnType.entity() != null) entities.add(returnType.entity());
+		if (returnType != null && returnType.entity() != null) entities.add(returnType.entity());
 		params.stream().filter(Objects::nonNull).map(EntityData.Entity::entity).filter(Objects::nonNull).forEach(entities::add);
 		return entities;
 	}
 
 	private Iterable<? extends Entity> entityReferencesOf(Entity.Attribute attribute) {
 		EntityData.Entity e = attribute.asEntity();
-		if(e != null && e.entity() != null) return List.of(e.entity());
+		if (e != null && e.entity() != null) return List.of(e.entity());
 		return emptyList();
 	}
 
