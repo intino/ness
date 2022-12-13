@@ -10,8 +10,21 @@ Entity Installation as ExtensionOf(MapEntity)
 Entity Zone as ExtensionOf(MapEntity)
 	Attribute place as Struct(GeoPoint) List
 	Attribute ownerZone as Entity(Zone)
-	Attribute childZones as Entity(Zone) Set
+	Attribute childZones as Entity(Zone) List
 	Attribute sensorIds as Entity(Installation) Set
+	Attribute counter as Integer
+
+	Method incrementCounter as Routine("counter++")
+
+	Method hasChildren as BooleanGetter("!childZones().isEmpty()")
+
+	Method firstChild as Function("hasChildren() ? childZones().get(0) : null")
+		ReturnType as Entity(Zone)
+
+	Method isChild as Function("childZones().contains(zone)")
+		ReturnType as Boolean
+		Parameter zone as Entity(Zone)
+
 
 Entity AlertConfiguration
 	Attribute entityId as String
@@ -26,3 +39,4 @@ Entity AlertConfiguration
 Struct GeoPoint
 	Attribute latitude as Double
 	Attribute longitude as Double
+	Method sqrtLength as DoubleGetter("latitude*latitude + longitude*longitude")

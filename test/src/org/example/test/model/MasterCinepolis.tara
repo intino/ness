@@ -61,7 +61,7 @@ Entity Region as ExtensionOf(Place)
 	Attribute timeOffset as Double
 	Attribute hasDst as Boolean
 
-	Method timeOffsetHours as IntegerGetter("(int) timeOffset;")
+	Method timeOffsetHours as IntegerGetter("(int) timeOffset")
 	Method timeOffsetMinutes as IntegerGetter("Math.abs(timeOffset) - Math.abs((int)timeOffset) == 0.5 ? (timeOffset >= 0 ? 30 : -30) : 0")
 
 	Method localDateTimeAt as Function
