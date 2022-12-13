@@ -19,14 +19,12 @@ public class OntologyRenderer {
 
 	private final List<Datalake.Tank.Event> eventTanks;
 	private final List<Event> events;
-	private final List<Entity> entities;
-	private final List<Struct> structs;
 	private final List<Wordbag> wordbags;
-	private NessGraph graph;
+	private final NessGraph graph;
 	private final Configuration conf;
 	private final File root;
-	private PrintStream logger;
-	private PluginLauncher.Notifier notifier;
+	private final PrintStream logger;
+	private final PluginLauncher.Notifier notifier;
 	private final Map<Event, Datalake.Split> eventSplitMap;
 	private final File srcDir;
 	private final List<File> resDirectories;
@@ -36,8 +34,6 @@ public class OntologyRenderer {
 					 PrintStream logger, PluginLauncher.Notifier notifier) {
 		this.eventTanks = eventTanks(graph);
 		this.events = graph.eventList();
-		this.entities = graph.entityList();
-		this.structs = graph.structList();
 		this.wordbags = graph.wordbagList();
 		this.graph = graph;
 		this.conf = conf;
@@ -58,8 +54,8 @@ public class OntologyRenderer {
 	}
 
 	private void renderEntities() {
-		new MasterRenderer(srcDir, null, graph, conf, logger, notifier, basePackage)
-				.render();
+		if(graph.entityList().isEmpty()) return;
+		new MasterRenderer(srcDir, graph, conf, logger, notifier, basePackage).renderOntology();
 	}
 
 	private void renderEvents() {

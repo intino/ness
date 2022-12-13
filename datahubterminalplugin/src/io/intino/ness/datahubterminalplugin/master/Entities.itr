@@ -17,28 +17,26 @@ end
 def type(master & interface)
 	package $package;
 
-	import io.intino.alexandria.terminal.Connector;
 	import io.intino.ness.master.messages.Response;
 	import io.intino.ness.master.messages.listeners.EntityListener;
 	import io.intino.ness.master.messages.listeners.ErrorListener;
 	import io.intino.ness.master.model.Entity;
 	import io.intino.ness.master.model.TripletRecord;
-	import java.util.*;
+
 	import java.util.concurrent.Future;
+	import java.util.concurrent.atomic.AtomicReference;
 
 	import $package.entities.*;
 
 	public interface Entities extends EntitiesView {
 
-		final class Singleton {
-			private static final Entities Instance = new CachedEntities();
-		}
+		Singleton Instance = new Singleton();
 
 		static Entities get() {
-			return Singleton.Instance;
+			Entities entities = Instance.get();
+			if(entities == null) throw new IllegalStateException("Entities is not initialized!");
+			return entities;
 		}
-
-		Entities init(Connector connector);
 
 		<T extends Entity> Future<Response<T>> enable(String entityId);
 		<T extends Entity> Future<Response<T>> disable(String entityId);
@@ -69,6 +67,17 @@ def type(master & interface)
 		/**expectedType must include the : prefix*/
 		default String normalizeId(String id, String expectedType) {
 			return id.endsWith(expectedType) ? id : id + expectedType;
+		}
+
+		final class Singleton {
+			private final AtomicReference<Entities> instance = new AtomicReference<>();
+			private Singleton() {}
+			private Entities get() {
+				return instance.get();
+			}
+			private void set(Entities entities) {
+				instance.compareAndSet(null, java.util.Objects.requireNonNull(entities));
+			}
 		}
 	}
 end
@@ -108,7 +117,9 @@ def type(master & cached)
 	import static io.intino.ness.master.messages.DownloadMasterMessage.PROPERTY_ERROR;
 	import static java.util.Objects.requireNonNull;
 
-	import $package.entities.*;
+	import $package+validPackage~.master.Entities;
+	import $package+validPackage~.master.EntitiesView;
+	import $package.master.entities.*;
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public class CachedEntities implements Entities {
@@ -118,7 +129,7 @@ def type(master & cached)
 
     	$entity+map...[$NL]
 
-		protected Connector connector;
+		private final Connector connector;
 		private final AtomicBoolean initialized = new AtomicBoolean(false);
 		private final Map<String, List<EntityListener>> entityListeners = new ConcurrentHashMap<>();
 		private final List<ErrorListener> errorListeners = Collections.synchronizedList(new ArrayList<>());
@@ -127,13 +138,13 @@ def type(master & cached)
 		private final DisabledEntitiesView disabledView = new DisabledEntitiesView();
 		private volatile boolean synchronous = true;
 
-    	CachedEntities() {}
+    	CachedEntities(Connector connector) {
+    		this.connector = requireNonNull(connector);
+    	}
 
-		@Override
-		public synchronized Entities init(Connector connector) {
+		synchronized Entities init() {
 			try {
 				if(!initialized.compareAndSet(false, true)) return null;
-				this.connector = requireNonNull(connector);
 				loadData();
 				initListeners();
 				Logger.info("Entities terminal " + connector.clientId() + " initialized successfully. (" + getClass().getSimpleName() + ")");

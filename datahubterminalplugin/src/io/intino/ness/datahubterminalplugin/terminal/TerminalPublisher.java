@@ -79,7 +79,8 @@ public class TerminalPublisher {
 		srcDirectory.mkdirs();
 		Map<Event, Datalake.Split> eventSplitMap = collectEvents(tanks);
 		if (duplicatedEvents()) return false;
-//		new MasterRenderer(root, snakeCaseToCamelCase().format(terminal.name$()).toString(), terminal.graph(), conf, logger, notifier, basePackage).render();
+		if(!terminal.graph().entityList().isEmpty())
+			new MasterRenderer(srcDirectory, terminal.graph(), conf, logger, notifier, basePackage).renderTerminal(terminal);
 		new TerminalRenderer(terminal, eventSplitMap, srcDirectory, basePackage, conf.artifact().code().generationPackage()).render();
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();

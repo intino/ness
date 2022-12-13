@@ -150,6 +150,7 @@
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-spring:5.17.3" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-pool:5.17.3" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-jms-pool:5.17.3" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:4.0.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zet:1.0.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:tris:1.0.0" level="project" />
