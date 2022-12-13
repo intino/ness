@@ -1,0 +1,37 @@
+dsl Ness
+
+Event Sensorization
+	Attribute installation as Text
+	Attribute value as Real
+	Attribute unit as Text
+	Attribute place as Text
+
+Event SensPhotovoltaicPanelPower as ExtensionOf(Sensorization)
+
+Event SensPhotovoltaicPanelEnergy as ExtensionOf(Sensorization)
+
+Event SensGridPower as ExtensionOf(Sensorization)
+
+Event SensGridEnergy as ExtensionOf(Sensorization)
+
+Event SensConsumedPower as ExtensionOf(Sensorization)
+
+Event SensConsumedEnergy as ExtensionOf(Sensorization)
+
+Event SensPhi as ExtensionOf(Sensorization)
+
+Event SensGlobalIrradiance as ExtensionOf(Sensorization)
+
+//Event SensEfVerticalIrradiance as ExtensionOf(Sensorization)
+//
+//Event SensEfAngledIrradiance as ExtensionOf(Sensorization)
+
+Event SensTemperature as ExtensionOf(Sensorization)
+
+Event SensRelativeHumidity as ExtensionOf(Sensorization)
+
+Event SensResistanceTemperature as ExtensionOf(Sensorization)
+
+Event SensWindVelocity as ExtensionOf(Sensorization)
+
+Event SensWindDirection as ExtensionOf(Sensorization)

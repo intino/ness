@@ -28,6 +28,26 @@ public class PluginTest {
 //	private static final String CESAR_PROJECT_PATH = WORKSPACE_ROOT + "IntinoDev/cesar/datahub/";
 
 	@Test
+	public void should_build_datagran_terminal() {
+		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
+		launcher.deleteTempDirOnPublish(false);
+		launcher.moduleStructure(new ModuleStructure(List.of(
+						new File("test-res/datagran/src")),
+						List.of(new File("test-res/datagran/res")),
+						new File(NESS_DIR + "/out")))
+				.systemProperties(new SystemProperties(new File(INTELLIJ_MAVEN_PLUGIN),
+						new File(JAVA_HOME)))
+				.logger(System.out)
+				.invokedPhase(PluginLauncher.Phase.INSTALL)
+				.notifier(notifier())
+				.moduleConfiguration(testConfiguration());
+		File temp = new File(NESS_DIR + "/datahubterminalplugin/temp/datagran");
+//		FileUtils.deleteDirectory(temp);
+		temp.mkdirs();
+		launcher.run(temp);
+	}
+
+	@Test
 	public void should_build_cesar_terminal() throws IOException {
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
 		launcher.deleteTempDirOnPublish(false);
