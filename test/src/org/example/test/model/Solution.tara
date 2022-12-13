@@ -1,6 +1,7 @@
 dsl Ness
 
 use Master
+use References
 
 Datalake(Month, path = "") dl
 	Split("") Divisiones
@@ -11,6 +12,11 @@ Datalake(Month, path = "") dl
 	Tank zone as Entity(entity = Zone)
 	Tank installation as Entity(entity = Installation)
 	Tank alertConfiguration as Entity(entity = AlertConfiguration)
+
+	Tank a as Entity(entity = A)
+	Tank attributeReference as Entity(entity = AttributeReference)
+	Tank attributeListReference as Entity(entity = AttributeListReference)
+	Tank deepReference as Entity(entity = DeepReference)
 
 	ProcessStatus(split = Divisiones)
 	Backup
@@ -51,5 +57,5 @@ Event Example
 	Attribute names as Text List
 
 Terminal testTerminal
-	Publish(eventTanks = dl.example, entityTanks = dl.zone)
-	Subscribe (eventTanks = dl.example, entityTanks = dl.zone dl.installation)
+	Publish(eventTanks = dl.example, entityTanks = dl.zone dl.attributeListReference)
+	Subscribe (eventTanks = dl.example, entityTanks = dl.zone dl.installation dl.deepReference)

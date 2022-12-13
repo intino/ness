@@ -1,4 +1,5 @@
 dsl Ness
+
 Entity MapEntity as Abstract
 	Attribute name as String
 

@@ -234,22 +234,7 @@ public class MasterRenderer {
 	private Iterable<? extends Entity> entityReferencesOf(Entity.Attribute attribute) {
 		EntityData.Entity e = attribute.asEntity();
 		if(e != null && e.entity() != null) return List.of(e.entity());
-
-		if(!attribute.isMap()) return emptyList();
-
-		List<Entity> refs = new ArrayList<>(2);
-
-		EntityData.Map map = attribute.asMap();
-
-		EntityData.Map.Key key = map.key();
-		EntityData.Entity ke = key.asEntity();
-		if(ke != null && ke.entity() != null) refs.add(ke.entity());
-
-		EntityData.Map.Value value = map.value();
-		EntityData.Entity ve = value.asEntity();
-		if(ve != null && ve.entity() != null) refs.add(ve.entity());
-
-		return refs;
+		return emptyList();
 	}
 
 	private Entity findEntity(String name) {
