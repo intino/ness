@@ -53,10 +53,8 @@ class EntitySerializer {
 	public class MasterMessageHandler {
 
 		public void handle(Message rawMessage) throws Exception {
-			if (!UpdateMasterMessage.class.getSimpleName().equals(rawMessage.get("messageClass").asString())) return;
-
+			if (!UpdateMasterMessage.class.getName().equals(rawMessage.get("messageClass").asString())) return;
 			UpdateMasterMessage message = new UpdateMasterMessage(rawMessage);
-
 			synchronized (MasterMessageHandler.class) {
 				switch (message.intent()) {
 					case Publish:

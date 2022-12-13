@@ -48,7 +48,7 @@ public class PluginTest {
 	}
 
 	@Test
-	public void should_build_cesar_terminal() throws IOException {
+	public void should_build_cesar_terminal() {
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
 		launcher.deleteTempDirOnPublish(false);
 		launcher.
