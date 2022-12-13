@@ -30,18 +30,19 @@ def type(entity & class)
 
 		[$attribute+wordDeclaration...[$NL]]
 
-		protected transient final $package.Entities master;
-
 		[$attribute+field...[$NL]]
 
 		public $abstract~$name+FirstUpperCase(String id) {
 			$parent+super
-			this.master = $package.Entities.get();
 		}
 
 		public $abstract~$name+FirstUpperCase(TripletRecord record) {
 			this(normalizeId(record.id()));
 			record.triplets().forEach(this::add);
+		}
+
+		public $package.Entities entities() {
+			return $package.Entities.get();
 		}
 
 		[$attribute+getterAndSetter...[$NL$NL]]
@@ -152,7 +153,7 @@ def type(entity) type(list) type(component) trigger(add)
 		return;
 	}
 
-	io.intino.ness.master.serialization.MasterSerializer serializer = master.serializer();
+	io.intino.ness.master.serialization.MasterSerializer serializer = entities().serializer();
 	String$[$] items = triplet.value().split(LIST_SEP);
 	this.$name+firstLowerCase = new ArrayList<>(items.length);
 
@@ -262,7 +263,7 @@ def type(entity) type(set) type(component) trigger(add)
 		return;
 	}
 
-	io.intino.ness.master.serialization.MasterSerializer serializer = master.serializer();
+	io.intino.ness.master.serialization.MasterSerializer serializer = entities().serializer();
 	String$[$] items = triplet.value().split(LIST_SEP);
 	this.$name+firstLowerCase = new ArrayList<>(items.length);
 
@@ -358,7 +359,7 @@ def type(entity) type(component) trigger(add)
 		return;
 	}
 
-	TripletRecord r = master.serializer().deserialize(triplet.value().trim());
+	TripletRecord r = entities().serializer().deserialize(triplet.value().trim());
 	this.$name+firstLowerCase = new $entity+FirstUpperCase(r.id());
 end
 
@@ -452,15 +453,15 @@ def type(struct) trigger(asTriplet)
 end
 
 def type(entity) type(component) type(list) trigger(asTriplet)
-	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", master.serializer().serialize(new TripletRecord($name+firstLowerCase.stream().flatMap(e -> e.triplets().stream()).collect(Collectors.toMap(Triplet::subject, t->t))))));
+	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", entities().serializer().serialize(new TripletRecord($name+firstLowerCase.stream().flatMap(e -> e.triplets().stream()).collect(Collectors.toMap(Triplet::subject, t->t))))));
 end
 
 def type(entity) type(component) type(set) trigger(asTriplet)
-	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", master.serializer().serialize(new TripletRecord($name+firstLowerCase.stream().flatMap(e -> e.triplets().stream()).collect(Collectors.toMap(Triplet::subject, t->t))))));
+	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", entities().serializer().serialize(new TripletRecord($name+firstLowerCase.stream().flatMap(e -> e.triplets().stream()).collect(Collectors.toMap(Triplet::subject, t->t))))));
 end
 
 def type(entity) type(component) type(set) trigger(asTriplet)
-	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", master.serializer().serialize(new TripletRecord($name+firstLowerCase.stream().flatMap(e -> e.triplets().stream()).collect(Collectors.toMap(Triplet::subject, t->t))))));
+	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", entities().serializer().serialize(new TripletRecord($name+firstLowerCase.stream().flatMap(e -> e.triplets().stream()).collect(Collectors.toMap(Triplet::subject, t->t))))));
 end
 
 def type(entity) type(component) trigger(asTriplet)
@@ -627,7 +628,7 @@ def type(entity) type(list) trigger(getterAndSetter)
 	}
 
 	public List<$entity+firstUpperCase> $name+firstLowerCase() {
-		return $name+firstLowerCase.stream().map(master::$entity+firstLowerCase).collect(Collectors.toList());
+		return $name+firstLowerCase.stream().map(entities()::$entity+firstLowerCase).collect(Collectors.toList());
 	}
 
 	public $entityOwner+firstUpperCase $name+firstLowerCase(List<String> $name+firstLowerCase) {
@@ -642,7 +643,7 @@ def type(entity) type(set) trigger(getterAndSetter)
 	}
 
 	public Set<$entity+firstUpperCase> $name+firstLowerCase() {
-		return $name+firstLowerCase.stream().map(master::$entity+firstLowerCase).collect(Collectors.toCollection(LinkedHashSet::new));
+		return $name+firstLowerCase.stream().map(entities()::$entity+firstLowerCase).collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
 	public $entityOwner+firstUpperCase $name+firstLowerCase(Set<String> $name+firstLowerCase) {
@@ -657,7 +658,7 @@ def type(entity) trigger(getterAndSetter)
 	}
 
 	public $entity+firstUpperCase $name+firstLowerCase() {
-		return master.$entity+firstLowerCase($name+firstLowerCase~Reference);
+		return entities().$entity+firstLowerCase($name+firstLowerCase~Reference);
 	}
 
 	public $entityOwner+firstUpperCase $name+firstLowerCase(String $name+firstLowerCase~Id) {
