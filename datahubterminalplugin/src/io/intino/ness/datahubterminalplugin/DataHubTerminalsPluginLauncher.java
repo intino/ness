@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private static final String MINIMUM_BPM_VERSION = "1.2.5";
-	private static final String MINIMUM_TERMINAL_JMS_VERSION = "4.4.0";
+	private static final String MINIMUM_TERMINAL_JMS_VERSION = "4.9.0";
 	private static final String MINIMUM_EVENT_VERSION = "3.0.0";
 	private static final String MINIMUM_INGESTION_VERSION = "4.0.5";
 	private static final String MINIMUM_MASTER_VERSION = "1.0.0";
