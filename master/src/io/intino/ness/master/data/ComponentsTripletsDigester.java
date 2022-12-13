@@ -26,13 +26,13 @@ public class ComponentsTripletsDigester extends DefaultTripletsDigester {
 	}
 
 	@Override
-	public Result load(TripletLoader tripletLoader, MasterSerializer serializer) throws Exception {
+	public Result load(EntityLoader entityLoader, MasterSerializer serializer) throws Exception {
 		WritableResult result = Result.create();
 
 		Map<String, TripletRecord> entities = result.records();
 		Map<String, TripletRecord> components = new HashMap<>();
 
-		tripletLoader.loadTriplets(result.stats()).forEach(t -> register(entities, components, t));
+		entityLoader.loadTriplets(result.stats()).forEach(t -> register(entities, components, t));
 
 		handleComponents(entities, components, serializer);
 
@@ -45,30 +45,30 @@ public class ComponentsTripletsDigester extends DefaultTripletsDigester {
 	}
 
 	private void handleComponents(Map<String, TripletRecord> entities, Map<String, TripletRecord> components, MasterSerializer serializer) {
-		for(TripletRecord entity : entities.values()) {
-			if(hasComponents(entity)) setEntityComponents(entity, components, serializer);
+		for (TripletRecord entity : entities.values()) {
+			if (hasComponents(entity)) setEntityComponents(entity, components, serializer);
 		}
 	}
 
 	private void setEntityComponents(TripletRecord entity, Map<String, TripletRecord> components, MasterSerializer serializer) {
 		String entityId = entity.id().substring(0, entity.id().indexOf(':'));
-		for(TripletRecord component : components.values()) {
-			if(isComponentOfEntity(component, entityId)) {
+		for (TripletRecord component : components.values()) {
+			if (isComponentOfEntity(component, entityId)) {
 				addComponentToEntity(component, entity, serializer);
 			}
 		}
 	}
 
 	private void addComponentToEntity(TripletRecord component, TripletRecord entity, MasterSerializer serializer) {
-		if(!componentsByEntityType.containsKey(entity.type())) return;
+		if (!componentsByEntityType.containsKey(entity.type())) return;
 		String componentType = component.type();
-		for(ComponentAttributeDefinition def : componentsByEntityType.get(entity.type())) {
-			if(def.component().equals(componentType)) {
-				if(def.type() == ComponentAttributeDefinition.Type.Reference)
+		for (ComponentAttributeDefinition def : componentsByEntityType.get(entity.type())) {
+			if (def.component().equals(componentType)) {
+				if (def.type() == ComponentAttributeDefinition.Type.Reference)
 					setEntityComponent(def.name(), component, entity, serializer);
-				else if(def.type() == ComponentAttributeDefinition.Type.List)
+				else if (def.type() == ComponentAttributeDefinition.Type.List)
 					updateEntityComponentList(def.name(), component, entity, serializer);
-				else if(def.type() == ComponentAttributeDefinition.Type.Map)
+				else if (def.type() == ComponentAttributeDefinition.Type.Map)
 					updateEntityComponentMap(def.name(), component, entity, serializer);
 			}
 		}
@@ -78,7 +78,7 @@ public class ComponentsTripletsDigester extends DefaultTripletsDigester {
 		String attrib = entity.getValue(name);
 
 		Map<String, String> map;
-		if(attrib == null) map = new HashMap<>(1);
+		if (attrib == null) map = new HashMap<>(1);
 		else map = Arrays.stream(attrib.split(MAP_ENTRY_SEPARATOR))
 				.map(s -> s.split("="))
 				.collect(Collectors.toMap(s -> s[0], s -> s[1]));
@@ -92,7 +92,7 @@ public class ComponentsTripletsDigester extends DefaultTripletsDigester {
 		String attrib = entity.getValue(name);
 
 		List<String> list;
-		if(attrib == null) list = new ArrayList<>();
+		if (attrib == null) list = new ArrayList<>();
 		else list = Arrays.asList(attrib.split(LIST_ENTRY_SEPARATOR));
 
 		list.add(serializer.serialize(component));
@@ -112,7 +112,7 @@ public class ComponentsTripletsDigester extends DefaultTripletsDigester {
 		return typesWithComponents.contains(entity.type());
 	}
 
-//	private static final Set<String> ComponentTypes = Set.of("check");
+	//	private static final Set<String> ComponentTypes = Set.of("check");
 	private boolean isComponent(String id) {
 		return componentTypes.contains(Triplet.typeOf(id));
 	}

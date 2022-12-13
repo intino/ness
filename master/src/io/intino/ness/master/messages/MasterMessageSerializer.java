@@ -12,7 +12,7 @@ public class MasterMessageSerializer {
 	public static MasterMessage deserialize(String str) {
 		Message message = new Message(str);
 		String messageClass = message.get("messageClass").asString();
-		if(messageClass == null) return new MasterMessage.Unknown(message);
+		if (messageClass == null) return new MasterMessage.Unknown(message);
 		return instantiate(messageClass, message);
 	}
 

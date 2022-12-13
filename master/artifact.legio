@@ -4,11 +4,11 @@ Artifact("io.intino.ness", "1.1.0") master
 	Imports
 		Compile("io.intino.alexandria", "logger", "2.1.0")
 		Compile("io.intino.alexandria", "logger4j", "1.0.1")
-		Compile("io.intino.alexandria", "json", "1.1.2")
+		Compile("io.intino.alexandria", "json", "1.2.0")
 		Compile("io.intino.alexandria", "primitives", "1.0.5")
 		Compile("io.intino.alexandria", "message", "3.0.5")
 		Compile("org.xerial.snappy", "snappy-java", "1.1.8.4")
-		Test("junit", "junit", "4.13")
+		Test("junit", "junit", "4.13.2")
 		Test("org.apache.commons", "commons-text", "1.10.0")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, attachSources =true)
 	Distribution > Artifactory("intino-maven")

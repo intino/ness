@@ -53,7 +53,7 @@ class EntitySerializer {
 	public class MasterMessageHandler {
 
 		public void handle(Message rawMessage) throws Exception {
-			if(!UpdateMasterMessage.class.getSimpleName().equals(rawMessage.get("messageClass").asString())) return;
+			if (!UpdateMasterMessage.class.getSimpleName().equals(rawMessage.get("messageClass").asString())) return;
 
 			UpdateMasterMessage message = new UpdateMasterMessage(rawMessage);
 
@@ -74,7 +74,7 @@ class EntitySerializer {
 
 		private void handlePublish(UpdateMasterMessage message) throws Exception {
 			TripletRecord record = master.serializer().deserialize(message.value());
-			if(publishNewOrModifiedTriplets(message)) {
+			if (publishNewOrModifiedTriplets(message)) {
 				master.masterMap().put(record.id(), message.value());
 			}
 		}
@@ -89,12 +89,12 @@ class EntitySerializer {
 
 		private void setEnableOrDisable(UpdateMasterMessage message, boolean enabledNewValue) throws IOException {
 			String serializedRecord = master.masterMap().get(message.value());
-			if(serializedRecord == null) return;
+			if (serializedRecord == null) return;
 
 			TripletRecord record = master.serializer().deserialize(serializedRecord);
 
 			boolean wasEnabled = "true".equals(record.getValueOrDefault("enabled", "true"));
-			if(wasEnabled == enabledNewValue) return;
+			if (wasEnabled == enabledNewValue) return;
 
 			record.put(new Triplet(record.id(), "enabled", String.valueOf(enabledNewValue)));
 			serializedRecord = master.serializer().serialize(record);
@@ -105,7 +105,7 @@ class EntitySerializer {
 
 		private boolean publishNewOrModifiedTriplets(UpdateMasterMessage message) throws Exception {
 			List<Triplet> tripletsToPublish = getNewOrModifiedTriplets(master.serializer().deserialize(message.value()));
-			if(tripletsToPublish.isEmpty()) return false;
+			if (tripletsToPublish.isEmpty()) return false;
 			setAuthorToTriplets(message.clientName(), tripletsToPublish);
 			new MasterTripletWriter(new File(master.datalakeRootPath(), DATALAKE_ENTITIES_SUBDIR)).write(tripletsToPublish);
 			return true;
@@ -113,18 +113,18 @@ class EntitySerializer {
 
 		private List<Triplet> getNewOrModifiedTriplets(TripletRecord newRecord) {
 			List<Triplet> triplets = newRecord.triplets().collect(Collectors.toList());
-			if(!master.masterMap().containsKey(newRecord.id())) return triplets;
+			if (!master.masterMap().containsKey(newRecord.id())) return triplets;
 			TripletRecord oldRecord = master.serializer().deserialize(master.masterMap().get(newRecord.id()));
 			triplets.removeIf(oldRecord::contains);
 			return triplets;
 		}
 
 		private void setAuthorToTriplets(String clientName, List<Triplet> triplets) {
-			if(clientName == null) return;
+			if (clientName == null) return;
 			int size = triplets.size();
-			for(int i = 0; i < size; i++) {
+			for (int i = 0; i < size; i++) {
 				Triplet t = triplets.get(i);
-				if(t.author() == null)
+				if (t.author() == null)
 					triplets.set(i, Triplet.withAuthor(t, clientName));
 			}
 		}

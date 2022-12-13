@@ -2,9 +2,9 @@ package io.intino.ness.master.core;
 
 import io.intino.alexandria.Json;
 import io.intino.alexandria.logger.Logger;
-import io.intino.ness.master.data.FileTripletLoader;
+import io.intino.ness.master.data.FileEntityLoader;
 import io.intino.ness.master.data.MasterTripletsDigester;
-import io.intino.ness.master.data.TripletLoader;
+import io.intino.ness.master.data.EntityLoader;
 import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.model.TripletRecord;
 import io.intino.ness.master.serialization.MasterSerializer;
@@ -42,7 +42,7 @@ public class Master {
 		return config.tripletsDigester();
 	}
 
-	public TripletLoader tripletLoader() {
+	public EntityLoader tripletLoader() {
 		return config.tripletLoader();
 	}
 
@@ -94,11 +94,13 @@ public class Master {
 	}
 
 	private void checkConfigValues() {
-		if(config.datalakeRootPath() == null) throw new MasterInitializationException("Data directory cannot be null");
-		if(config.serializer() == null) throw new MasterInitializationException("Serializer cannot be null");
-		if(config.serializer().name() == null) throw new MasterInitializationException("Serializer name cannot be null");
-		if(config.tripletsDigester() == null) throw new MasterInitializationException("Triplet digester cannot be null");
-		if(config.tripletLoader() == null) throw new MasterInitializationException("Triplet loader cannot be null");
+		if (config.datalakeRootPath() == null) throw new MasterInitializationException("Data directory cannot be null");
+		if (config.serializer() == null) throw new MasterInitializationException("Serializer cannot be null");
+		if (config.serializer().name() == null)
+			throw new MasterInitializationException("Serializer name cannot be null");
+		if (config.tripletsDigester() == null)
+			throw new MasterInitializationException("Triplet digester cannot be null");
+		if (config.tripletLoader() == null) throw new MasterInitializationException("Triplet loader cannot be null");
 	}
 
 	private float getMemoryUsedMB() {
@@ -122,7 +124,7 @@ public class Master {
 		private File datalakeRootPath;
 		private MasterSerializer serializer = MasterSerializers.getDefault();
 		private MasterTripletsDigester tripletsDigester = MasterTripletsDigester.createDefault();
-		private TripletLoader tripletLoader;
+		private EntityLoader entityLoader;
 
 		public Config() {
 		}
@@ -130,7 +132,7 @@ public class Master {
 		public Config(Map<String, String> arguments) {
 			this.datalakeRootPath = new File(arguments.get("datalake_path"));
 			this.serializer = MasterSerializers.get(arguments.getOrDefault("serializer", MasterSerializers.Standard.getDefault()));
-			this.tripletLoader = new FileTripletLoader(datalakeRootPath);
+			this.entityLoader = new FileEntityLoader(datalakeRootPath);
 		}
 
 		public Config(String[] args) {
@@ -171,12 +173,12 @@ public class Master {
 			return this;
 		}
 
-		public TripletLoader tripletLoader() {
-			return tripletLoader;
+		public EntityLoader tripletLoader() {
+			return entityLoader;
 		}
 
-		public Config tripletsLoader(TripletLoader tripletLoader) {
-			this.tripletLoader = tripletLoader;
+		public Config tripletsLoader(EntityLoader entityLoader) {
+			this.entityLoader = entityLoader;
 			return this;
 		}
 	}

@@ -18,7 +18,10 @@ def type(terminal)
 	import java.util.concurrent.TimeUnit;
 	import java.util.stream.Collectors;
 
-	import $entitiesPackage.Entities;
+	import java.lang.reflect.Field;
+    import java.lang.reflect.Method;
+
+	import $package+validPackage~.master.Entities;
 
 	public class $name+snakeCaseToCamelCase+firstUpperCase {
 		public static String$[] subscriptionChannels = new String$[]{$subscribe+channel};
@@ -37,7 +40,33 @@ def type(terminal)
 		}
 
 		public Entities entities() {
-			return entities != null ? entities : entities = Entities.get().init(connector);
+			return entities != null ? entities : initEntities();
+		}
+
+		private synchronized Entities initEntities() {
+			if(entities != null) return entities;
+			CachedEntities entities = new CachedEntities(connector);
+			entities.init();
+			setSingletonInstance(entities);
+			this.entities = entities;
+			return entities;
+		}
+
+		private void setSingletonInstance(Entities entities) {
+			try {
+				Entities.Singleton singleton = getEntitiesSingleton();
+    	    	Method method = Entities.Singleton.class.getDeclaredMethod("set", Entities.class);
+    	    	method.setAccessible(true);
+    	    	method.invoke(singleton, entities);
+    	    	method.setAccessible(false);
+			} catch(Exception e) {
+				throw new RuntimeException("Failed to initialize Entities singleton: " + e.getMessage(), e);
+			}
+		}
+
+		private Entities.Singleton getEntitiesSingleton() throws Exception {
+			Field field = Entities.class.getField("Instance");
+			return (Entities.Singleton) field.get(null);
 		}
 
 		public io.intino.alexandria.datalake.Datalake datalake() {

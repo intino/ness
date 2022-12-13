@@ -1,8 +1,5 @@
 package io.intino.ness.messages;
 
-import io.intino.alexandria.Json;
-import io.intino.ness.master.messages.UpdateMasterMessage;
-
 public class Messages_ {
 
 	public static void main(String[] args) {

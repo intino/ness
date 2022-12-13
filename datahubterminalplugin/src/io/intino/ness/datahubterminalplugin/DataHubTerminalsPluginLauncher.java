@@ -44,8 +44,8 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		Graph graph = loadGraph(resDirectory);
 		if (hasErrors(graph)) return;
 		Map<String, String> versions = versions();
-		if (!publishOntology(graph.as(NessGraph.class), versions, tempDir)) return;
 		publishTerminals(graph.as(NessGraph.class), versions, tempDir);
+		if (!publishOntology(graph.as(NessGraph.class), versions, tempDir)) return;
 		logger().println("Finished generation of terminals!");
 	}
 

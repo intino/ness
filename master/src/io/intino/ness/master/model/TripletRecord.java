@@ -26,7 +26,8 @@ public class TripletRecord {
 	}
 
 	public TripletRecord(Map<String, Triplet> triplets) {
-		if(triplets.isEmpty()) throw new IllegalArgumentException("triplets cannot be null. Consider using TripletRecord(String id) constructor instead.");
+		if (triplets.isEmpty())
+			throw new IllegalArgumentException("triplets cannot be null. Consider using TripletRecord(String id) constructor instead.");
 		this.id = triplets.entrySet().stream().findFirst().get().getValue().subject();
 		this.triplets = triplets;
 	}

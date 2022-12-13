@@ -22,8 +22,7 @@ import static io.intino.ness.master.core.Master.NONE_TYPE;
  *
  * <p>The subject is divided into 2 sections: id and type, separated by colon (:).</p>
  * <p>Example: i9-10900K:cpu => (id = i9-10900K, type = cpu)</p>
- *
- * */
+ */
 public class Triplet implements Serializable {
 
 	public static final String TRIPLET_SEPARATOR = "\t";
@@ -49,7 +48,7 @@ public class Triplet implements Serializable {
 	}
 
 	public static Triplet withAuthor(Triplet triplet, String author) {
-		if(Objects.equals(triplet.author(), author)) return triplet;
+		if (Objects.equals(triplet.author(), author)) return triplet;
 		String[] attributes = Arrays.copyOf(triplet.attributes, triplet.attributes.length + 1);
 		attributes[3] = toNormalized(author);
 		return new Triplet(attributes);
@@ -63,18 +62,18 @@ public class Triplet implements Serializable {
 
 	public Triplet(String[] record) {
 		this.attributes = record;
-		for(int i = 2;i < attributes.length;i++)
+		for (int i = 2; i < attributes.length; i++)
 			attributes[i] = toNormalized(attributes[i]);
 		validate();
 	}
 
 	public Triplet(String subject, String predicate, String value) {
-		this.attributes = new String[] {subject, predicate, toNormalized(value)};
+		this.attributes = new String[]{subject, predicate, toNormalized(value)};
 		validate();
 	}
 
 	public Triplet(String subject, String predicate, String value, String author) {
-		this.attributes = new String[] {subject, predicate, toNormalized(value), toNormalized(author)};
+		this.attributes = new String[]{subject, predicate, toNormalized(value), toNormalized(author)};
 		validate();
 	}
 
@@ -116,6 +115,7 @@ public class Triplet implements Serializable {
 			public String get(int index) {
 				return attributes[index];
 			}
+
 			@Override
 			public int size() {
 				return attributes.length;
@@ -142,12 +142,12 @@ public class Triplet implements Serializable {
 	}
 
 	private void validate() {
-		if(attributes.length < TRIPLET_MIN_SIZE) throw new MalformedException("Triplets must have at least 3 fields " +
+		if (attributes.length < TRIPLET_MIN_SIZE) throw new MalformedException("Triplets must have at least 3 fields " +
 				"(subject, predicate and value), but it has " + attributes.length + ": " + Arrays.toString(attributes));
 		checkIfAnyAttributeContainIllegalCharacters(attributes);
-		if(isNullOrBlank(attributes[0])) throw new NullPointerException("Subject cannot be null nor blank");
-		if(isNullOrBlank(id())) throw new NullPointerException("Id cannot be null nor blank");
-		if(isNullOrBlank(attributes[1])) throw new NullPointerException("Predicate cannot be null nor blank");
+		if (isNullOrBlank(attributes[0])) throw new NullPointerException("Subject cannot be null nor blank");
+		if (isNullOrBlank(id())) throw new NullPointerException("Id cannot be null nor blank");
+		if (isNullOrBlank(attributes[1])) throw new NullPointerException("Predicate cannot be null nor blank");
 	}
 
 	private void checkIfAnyAttributeContainIllegalCharacters(String[] attributes) {

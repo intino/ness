@@ -18,9 +18,9 @@ import io.intino.magritte.framework.Graph;
 import io.intino.ness.master.core.Master;
 import io.intino.ness.master.data.ComponentAttributeDefinition;
 import io.intino.ness.master.data.ComponentsTripletsDigester;
+import io.intino.ness.master.data.EntityLoader;
 import io.intino.ness.master.data.MasterTripletsDigester;
 import io.intino.ness.master.data.MasterTripletsDigester.Result.Stats;
-import io.intino.ness.master.data.TripletLoader;
 import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.serialization.MasterSerializers;
 
@@ -141,7 +141,7 @@ public class DataHubBox extends AbstractBox {
 		config.datalakeRootPath(datalakeDirectory());
 		config.serializer(MasterSerializers.getOrDefault(configuration.masterSerializer()));
 		config.tripletsDigester(new DatahubTripletDigesterFactory().create());
-		config.tripletsLoader(new DatahubTripletLoader(datalake.tripletsStore()));
+		config.tripletsLoader(new DatahubEntityLoader(datalake.entityStore()));
 		return config;
 	}
 
@@ -168,7 +168,7 @@ public class DataHubBox extends AbstractBox {
 
 	private void loadBrokerService() {
 		if (this.graph.broker() != null && graph.broker().implementation() == null)
-			graph.broker().implementation(() -> new JmsBrokerService(graph, brokerStage(),datalake(), master));
+			graph.broker().implementation(() -> new JmsBrokerService(graph, brokerStage(), datalake(), master));
 	}
 
 	private void configureBroker() {
@@ -197,11 +197,11 @@ public class DataHubBox extends AbstractBox {
 		return lastSeal;
 	}
 
-	private static class DatahubTripletLoader implements TripletLoader {
+	private static class DatahubEntityLoader implements EntityLoader {
 
-		private final Datalake.TripletStore store;
+		private final Datalake.EntityStore store;
 
-		public DatahubTripletLoader(Datalake.TripletStore store) {
+		public DatahubEntityLoader(Datalake.EntityStore store) {
 			this.store = store;
 		}
 
@@ -209,11 +209,11 @@ public class DataHubBox extends AbstractBox {
 		public Stream<Triplet> loadTriplets(Stats stats) {
 			return store.tanks()
 					.peek(t -> stats.increment("Tanks read"))
-					.flatMap(Datalake.TripletStore.Tank::tubs)
+					.flatMap(Datalake.EntityStore.Tank::tubs)
 					.flatMap(tub -> readTripletsFrom(tub, stats));
 		}
 
-		private Stream<Triplet> readTripletsFrom(Datalake.TripletStore.Tub tub, Stats stats) {
+		private Stream<Triplet> readTripletsFrom(Datalake.EntityStore.Tub tub, Stats stats) {
 			stats.increment(Stats.FILES_READ);
 			return tub.triplets()
 					.map(t -> new Triplet(t.subject(), t.verb(), t.object()))
@@ -225,7 +225,7 @@ public class DataHubBox extends AbstractBox {
 
 		private MasterTripletsDigester create() {
 			List<Entity> typesWithComponents = typesWithComponents();
-			if(typesWithComponents.isEmpty()) return MasterTripletsDigester.createDefault();
+			if (typesWithComponents.isEmpty()) return MasterTripletsDigester.createDefault();
 			return new ComponentsTripletsDigester(
 					componentsByEntityType(typesWithComponents),
 					typesWithComponents.stream().map(this::subjectType).collect(Collectors.toSet()),
@@ -239,7 +239,7 @@ public class DataHubBox extends AbstractBox {
 
 		private Map<String, List<ComponentAttributeDefinition>> componentsByEntityType(List<Entity> typesWithComponents) {
 			Map<String, List<ComponentAttributeDefinition>> componentsByEntityType = new HashMap<>();
-			for(Entity entity : typesWithComponents) {
+			for (Entity entity : typesWithComponents) {
 				List<ComponentAttributeDefinition> definitions = getComponentsOf(entity)
 						.map(c -> new ComponentAttributeDefinition(
 								c.name$(),
@@ -253,8 +253,8 @@ public class DataHubBox extends AbstractBox {
 		}
 
 		private ComponentAttributeDefinition.Type type(String type) {
-			if(type.contains("List")) return ComponentAttributeDefinition.Type.List;
-			if(type.contains("Map")) return ComponentAttributeDefinition.Type.Map;
+			if (type.contains("List")) return ComponentAttributeDefinition.Type.List;
+			if (type.contains("Map")) return ComponentAttributeDefinition.Type.Map;
 			return ComponentAttributeDefinition.Type.Reference;
 		}
 

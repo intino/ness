@@ -6,9 +6,9 @@ import io.intino.ness.master.serialization.MasterSerializer;
 public class DefaultTripletsDigester implements MasterTripletsDigester {
 
 	@Override
-	public Result load(TripletLoader tripletLoader, MasterSerializer serializer) throws Exception {
+	public Result load(EntityLoader entityLoader, MasterSerializer serializer) throws Exception {
 		WritableResult result = Result.create();
-		tripletLoader.loadTriplets(result.stats()).forEach(t -> result.records().computeIfAbsent(t.subject(), TripletRecord::new).put(t));
+		entityLoader.loadTriplets(result.stats()).forEach(t -> result.records().computeIfAbsent(t.subject(), TripletRecord::new).put(t));
 		return result;
 	}
 }

@@ -5,6 +5,7 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.NessGraph;
 import io.intino.datahub.model.Struct;
+import io.intino.datahub.model.Terminal;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
@@ -27,7 +28,6 @@ public class MasterRenderer {
 	private static final String JAVA = ".java";
 
 	private final File srcFolder;
-	private String terminalName;
 	private final NessGraph model;
 	private final Configuration conf;
 	private final PrintStream logger;
@@ -35,12 +35,10 @@ public class MasterRenderer {
 	private final Template entityTemplate;
 	private final Template validatorTemplate;
 	private final Template structTemplate;
-	private final String basePackage;
-	private final String modelPackage;
+	private String modelPackage;
 
-	public MasterRenderer(File srcDir, String terminalName, NessGraph model, Configuration conf, PrintStream logger, PluginLauncher.Notifier notifier, String basePackage) {
+	public MasterRenderer(File srcDir, NessGraph model, Configuration conf, PrintStream logger, PluginLauncher.Notifier notifier, String basePackage) {
 		this.srcFolder = srcDir;
-		this.terminalName = terminalName;
 		this.model = model;
 		this.conf = conf;
 		this.logger = logger;
@@ -49,18 +47,28 @@ public class MasterRenderer {
 		this.validatorTemplate = customize(new ValidatorTemplate());
 		this.structTemplate = customize(new StructTemplate());
 		srcFolder.mkdirs();
-		this.basePackage = basePackage;
-		this.modelPackage = basePackage + ".master";
+		this.modelPackage = basePackage;
 	}
 
-	public boolean render() {
+	public boolean renderOntology() {
+		this.modelPackage += ".master";
 		return renderMaster() && renderOntologyClasses();
+	}
+
+	public boolean renderTerminal(Terminal terminal) {
+		try {
+			write(entitiesImpl());
+			return true;
+		} catch (Exception e) {
+			Logger.error(e);
+			return false;
+		}
 	}
 
 	public boolean renderMaster() {
 		try {
 			if (model.entityList().isEmpty()) return false;
-			write(masterClass());
+			write(entitiesInterfaces());
 			write(validationLayerClass());
 			return true;
 		} catch (Throwable e) {
@@ -102,31 +110,37 @@ public class MasterRenderer {
 
 	private Map<String, String> validationLayerClass() {
 		String module = "General"; //javaValidName().format(firstUpperCase().format(terminalName)).toString();
-		String qn = basePackage + DOT + "validators" + DOT + module + "RecordValidationLayer";
+		String qn = modelPackage + DOT + "validators" + DOT + module + "RecordValidationLayer";
 		return Map.of(
 				destination(qn), customize(new ValidatorTemplate()).render(
 						new FrameBuilder("validationLayer", "class")
 								.add("module", module)
 								.add("entity", entities(""))
-								.add("package", basePackage + ".validators")
+								.add("package", modelPackage + ".validators")
 								.toFrame())
 		);
 	}
 
-	private Map<String, String> masterClass() {
-		String masterView = basePackage + DOT + firstUpperCase().format(javaValidName().format("EntitiesView").toString());
-		String fullLoad = basePackage + DOT + firstUpperCase().format(javaValidName().format("CachedEntities").toString());
-		String masterTerminal = basePackage + DOT + firstUpperCase().format(javaValidName().format("Entities").toString());
+	private Map<String, String> entitiesInterfaces() {
+		String masterView = modelPackage + DOT + firstUpperCase().format(javaValidName().format("EntitiesView").toString());
+		String masterTerminal = modelPackage + DOT + firstUpperCase().format(javaValidName().format("Entities").toString());
 
 		return Map.of(
-				destination(srcFolder + "/" + masterView), customize(new EntitiesTemplate()).render(masterFrameBuilder("view").toFrame()),
-				destination(srcFolder + "/" + fullLoad), customize(new EntitiesTemplate()).render(masterFrameBuilder("cached").toFrame()),
-				destination(srcFolder + "/" + masterTerminal), customize(new EntitiesTemplate()).render(masterFrameBuilder("interface").toFrame())
+				destination(masterView), customize(new EntitiesTemplate()).render(masterFrameBuilder("view").toFrame()),
+				destination(masterTerminal), customize(new EntitiesTemplate()).render(masterFrameBuilder("interface").toFrame())
+		);
+	}
+
+	private Map<String, String> entitiesImpl() {
+		String cachedEntities = modelPackage + DOT + firstUpperCase().format(javaValidName().format("CachedEntities").toString());
+
+		return Map.of(
+				destination(cachedEntities), customize(new EntitiesTemplate()).render(masterFrameBuilder("cached").toFrame())
 		);
 	}
 
 	private FrameBuilder masterFrameBuilder(String type) {
-		FrameBuilder builder = new FrameBuilder("master").add("package", basePackage);
+		FrameBuilder builder = new FrameBuilder("master").add("package", modelPackage);
 		builder.add("entity", entities(type));
 		builder.add(type);
 		return builder;

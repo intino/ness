@@ -25,13 +25,13 @@ public class RecordValidationLayer {
 	}
 
 	public RecordValidationLayer addValidator(RecordValidator validator) {
-		if(validator == null) return this;
+		if (validator == null) return this;
 		generalValidators.add(validator);
 		return this;
 	}
 
 	public RecordValidationLayer setValidator(String type, RecordValidator validator) {
-		if(validator == null) return this;
+		if (validator == null) return this;
 		validatorsPerType.put(type, validator);
 		return this;
 	}

@@ -30,7 +30,7 @@ public interface ValidationTripletRecordReader {
 		@Override
 		public Stream<RecordValidator.TripletRecord> records() throws IOException {
 			Map<String, RecordValidator.TripletRecord> records = new HashMap<>();
-			try(Stream<String> lines = Files.lines(file.toPath())) {
+			try (Stream<String> lines = Files.lines(file.toPath())) {
 				readTripletRecordsFromLines(records, lines);
 			}
 			return records.values().stream();

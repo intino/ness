@@ -54,7 +54,7 @@ public class HtmlIssueReportDocumentBuilder {
 
 	private String renderContent1() {
 		StringBuilder sb = new StringBuilder();
-		for(var entry : sortByNumErrors(new HashSet<>(issueReport.getAll().entrySet()))) {
+		for (var entry : sortByNumErrors(new HashSet<>(issueReport.getAll().entrySet()))) {
 			sb.append("<h4 id=\"").append(entry.getKey().hashCode()).append("\">").append(entry.getKey()).append(" (").append(entry.getValue().size()).append("):</h4>");
 			sb.append("<ul class=\"list-group\">");
 			entry.getValue().stream().filter(e -> e.level() == Issue.Level.Error).sorted(sortByLine()).map(this::render).forEach(sb::append);
@@ -71,7 +71,7 @@ public class HtmlIssueReportDocumentBuilder {
 
 		int index = 0;
 
-		for(var entry : sortByNumErrors(new HashSet<>(issueReport.getAll().entrySet()))) {
+		for (var entry : sortByNumErrors(new HashSet<>(issueReport.getAll().entrySet()))) {
 			renderCard(sb, entry, index++);
 		}
 
@@ -116,7 +116,8 @@ public class HtmlIssueReportDocumentBuilder {
 	}
 
 	private String render(Issue issue) {
-		if(issue.source() instanceof DuplicatedTripletRecordValidator.CombinedTripletSource) return renderIssueCombinedSource(issue);
+		if (issue.source() instanceof DuplicatedTripletRecordValidator.CombinedTripletSource)
+			return renderIssueCombinedSource(issue);
 		String level = issue.level() == Issue.Level.Error ? "danger" : "warning";
 		return "<div class=\"list-group-item list-group-item-" + level + " mb-1\">"
 				+ "<div><i class=\"fa-solid fa-skating fa-fw\" style=\"background:DodgerBlue\"></i>" + issue.levelMsg() + "</div>"
@@ -130,7 +131,7 @@ public class HtmlIssueReportDocumentBuilder {
 		StringBuilder sb = new StringBuilder("<div class=\"list-group-item list-group-item-" + level + " mb-1\">");
 		sb.append("<p><b>[").append(issue.level().name()).append("]</b> ").append(issue.message()).append("</p>");
 
-		for(String name : ((DuplicatedTripletRecordValidator.CombinedTripletSource)issue.source()).names()) {
+		for (String name : ((DuplicatedTripletRecordValidator.CombinedTripletSource) issue.source()).names()) {
 			sb.append("<p><small>At ").append(name).append("</small></p>");
 		}
 
@@ -140,7 +141,7 @@ public class HtmlIssueReportDocumentBuilder {
 	private String renderIssues() {
 		StringBuilder sb = new StringBuilder();
 		float total = issueReport.count();
-		for(Map.Entry<String, IssuesCount> entry : issueReport.issueTypes().entrySet()) {
+		for (Map.Entry<String, IssuesCount> entry : issueReport.issueTypes().entrySet()) {
 			IssuesCount count = entry.getValue();
 			String percentage = String.format("%.02f", count.total() / total * 100);
 			sb.append(listItemBadge(entry.getKey() + " <b>(" + percentage + "%)</b>", count.warnings(), count.errors()));
@@ -169,8 +170,8 @@ public class HtmlIssueReportDocumentBuilder {
 		StringBuilder sb = new StringBuilder();
 		float total = issueReport.count();
 		boolean first = true;
-		for(Map.Entry<String, IssuesCount> entry : issueReport.issueTypes().entrySet()) {
-			if(!first) sb.append(", ");
+		for (Map.Entry<String, IssuesCount> entry : issueReport.issueTypes().entrySet()) {
+			if (!first) sb.append(", ");
 			first = false;
 			IssuesCount count = entry.getValue();
 			String percentage = String.format("%.02f", count.total() / total * 100).replace(",", ".");
@@ -238,7 +239,7 @@ public class HtmlIssueReportDocumentBuilder {
 	public static class HtmlTemplate {
 
 		public static HtmlTemplate get(String name) {
-			try(BufferedReader reader = new BufferedReader(new InputStreamReader(HtmlTemplate.class.getResourceAsStream("/" + name)))) {
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(HtmlTemplate.class.getResourceAsStream("/" + name)))) {
 				return new HtmlTemplate(reader.lines().collect(Collectors.joining("\n")));
 			} catch (Exception e) {
 				throw new IllegalArgumentException("Failed to open " + name, e);
@@ -254,7 +255,7 @@ public class HtmlIssueReportDocumentBuilder {
 		public HtmlTemplate set(String variable, String value) {
 			variable = String.format("'$%s'", variable);
 			int index;
-			while((index = html.indexOf(variable)) >= 0) {
+			while ((index = html.indexOf(variable)) >= 0) {
 				html.replace(index, index + variable.length(), value);
 			}
 			return this;

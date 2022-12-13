@@ -65,16 +65,16 @@ public class Issue implements Comparable<Issue> {
 
 	@Override
 	public int compareTo(Issue o) {
-		if(o == null) return -1;
+		if (o == null) return -1;
 		return level == o.level ? compareSources(o.source) : level.compareTo(o.level);
 	}
 
 	private int compareSources(TripletSource otherSource) {
-		if(source == null) return 1;
-		if(otherSource == null) return -1;
-		if(source instanceof TripletSource.PublisherTripletSource) return 1;
-		if(otherSource instanceof TripletSource.PublisherTripletSource) return 1;
-		if(source instanceof TripletSource.FileTripletSource && otherSource instanceof TripletSource.FileTripletSource)
+		if (source == null) return 1;
+		if (otherSource == null) return -1;
+		if (source instanceof TripletSource.PublisherTripletSource) return 1;
+		if (otherSource instanceof TripletSource.PublisherTripletSource) return 1;
+		if (source instanceof TripletSource.FileTripletSource && otherSource instanceof TripletSource.FileTripletSource)
 			return Integer.compare(((TripletSource.FileTripletSource) source).line(), ((TripletSource.FileTripletSource) otherSource).line());
 		return 0;
 	}
