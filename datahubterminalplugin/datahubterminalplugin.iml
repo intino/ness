@@ -27,7 +27,6 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:logger:2.1.0" level="project" />
     <orderEntry type="library" name="Intino: org.apache.commons:commons-lang3:3.12.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.ness:master:1.1.0" level="project" />
-    <orderEntry type="module" module-name="master" />
     <orderEntry type="library" name="Intino: io.intino:plugin-interface:2.2.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino:configuration:1.2.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.itrules:engine:1.0.0" level="project" />
@@ -45,14 +44,23 @@
     <orderEntry type="library" scope="TEST" name="Intino: org.antlr:antlr4-runtime:4.8" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.4.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:primitives:1.0.4" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:terminal-jms:4.9.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:4.0.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.2.0" level="project" />
     <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.10" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.3.4" level="project" />
     <orderEntry type="library" name="Intino: commons-io:commons-io:2.5" level="project" />
     <orderEntry type="library" name="Intino: commons-codec:commons-codec:1.15" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:1.7.36" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:session:1.1.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:event:3.0.5" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:zim:4.0.3" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:message:3.0.5" level="project" />
+    <orderEntry type="library" name="Intino: org.antlr:antlr4-runtime:4.10.1" level="project" />
+    <orderEntry type="library" name="Intino: org.xerial.snappy:snappy-java:1.1.8.4" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:zet:1.0.7" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:tris:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:4.0.7" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.0.4" level="project" />
+    <orderEntry type="module" module-name="master" />
   </component>
 </module>
