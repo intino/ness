@@ -224,7 +224,7 @@ def type(master & cached)
     	}
 
     	private void publishMessage(UpdateMasterMessage message) {
-    		connector.sendMessage(ENTITIES_TOPIC, MasterMessageSerializer.serialize(message));
+    		connector.sendTopicMessage(ENTITIES_TOPIC, MasterMessageSerializer.serialize(message));
     	}
 
     	@Override
