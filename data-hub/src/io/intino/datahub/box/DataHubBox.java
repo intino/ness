@@ -244,7 +244,7 @@ public class DataHubBox extends AbstractBox {
 						.map(c -> new ComponentAttributeDefinition(
 								c.name$(),
 								c.asEntity().name$(),
-								type(c.asEntity().type())
+								type(c.core$().layerList())
 						)).collect(Collectors.toList());
 
 				componentsByEntityType.put(entity.name$(), definitions);
@@ -252,9 +252,9 @@ public class DataHubBox extends AbstractBox {
 			return componentsByEntityType;
 		}
 
-		private ComponentAttributeDefinition.Type type(String type) {
-			if (type.contains("List")) return ComponentAttributeDefinition.Type.List;
-			if (type.contains("Map")) return ComponentAttributeDefinition.Type.Map;
+		private ComponentAttributeDefinition.Type type(List<String> types) {
+			if (types.stream().anyMatch(t -> t.endsWith("$List"))) return ComponentAttributeDefinition.Type.List;
+			if (types.stream().anyMatch(t -> t.endsWith("$Map"))) return ComponentAttributeDefinition.Type.Map;
 			return ComponentAttributeDefinition.Type.Reference;
 		}
 

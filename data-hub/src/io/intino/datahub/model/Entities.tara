@@ -73,7 +73,6 @@ Concept StructData is abstract
 	Aspect Required
 	Aspect Optional
 	Aspect Type
-		var string type is reactive private
 		sub Double
 			var double defaultValue = empty
 		sub Integer
