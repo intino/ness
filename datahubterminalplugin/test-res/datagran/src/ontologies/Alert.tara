@@ -1,0 +1,9 @@
+dsl Ness
+
+Event Alert
+	Attribute alertConfiguration as Text
+	Attribute installation as Text
+	Attribute type as Text
+	Attribute timeScale as Word("Minute" "Hour" "Day" "Week" "Month" "Year")
+	Attribute reason as Text
+	Attribute notifiedUsers as List Text

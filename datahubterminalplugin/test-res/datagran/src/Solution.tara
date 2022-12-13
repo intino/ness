@@ -1,0 +1,62 @@
+dsl Ness
+
+use Alert
+use Sensorization
+use Kpi
+use CreatedConfiguration
+use DeletedConfiguration
+
+Broker(path = empty, port = empty, secondaryPort = empty)
+    User("piloto", "piloto")
+    User("control", "control")
+
+Datalake(scale = Day, path = empty) dl
+
+	Seal > Cron(pattern = "0 0 4 1/1 * ? *", timeZone = "Atlantic/Canary")
+
+	Tank alert as Event(Alert)
+	Tank alertConfiguration as Event(AlertConfiguration)
+    Tank consumedEnergy as Event(ConsumedEnergy)
+    Tank consumedPower as Event(ConsumedPower)
+    Tank deletedAlertConfiguration as Event(DeletedAlertConfiguration)
+    Tank deletedInstallation as Event(DeletedInstallation)
+    Tank gridEnergy as Event(GridEnergy)
+    Tank gridPower as Event(GridPower)
+    Tank negativeGridEnergy as Event(NegativeGridEnergy)
+	Tank phi as Event(Phi)
+	Tank photovoltaicPanelEnergy as Event(PhotovoltaicPanelEnergy)
+	Tank photovoltaicPanelPower as Event(PhotovoltaicPanelPower)
+	Tank globalIrradiance as Event(GlobalIrradiance)
+//	Tank efVerticalIrradiance as Event(EfVerticalIrradiance)
+//	Tank efAngledIrradiance as Event(EfAngledIrradiance)
+	Tank temperature as Event(Temperature)
+	Tank relativeHumidity as Event(RelativeHumidity)
+	Tank resistanceTemperature as Event(ResistanceTemperature)
+	Tank windVelocity as Event(WindVelocity)
+	Tank windDirection as Event(WindDirection)
+	Tank installation as Event(Installation)
+	Tank sensConsumedEnergy as Event(SensConsumedEnergy)
+	Tank sensConsumedPower as Event(SensConsumedPower)
+	Tank sensGridEnergy as Event(SensGridEnergy)
+	Tank sensGridPower as Event(SensGridPower)
+	Tank sensPhi as Event(SensPhi)
+	Tank sensPhotovoltaicPanelEnergy as Event(SensPhotovoltaicPanelEnergy)
+	Tank sensPhotovoltaicPanelPower as Event(SensPhotovoltaicPanelPower)
+	Tank sensGlobalIrradiance as Event(SensGlobalIrradiance)
+//    Tank sensEfVerticalIrradiance as Event(SensEfVerticalIrradiance)
+//    Tank sensEfAngledIrradiance as Event(SensEfAngledIrradiance)
+    Tank sensTemperature as Event(SensTemperature)
+    Tank sensRelativeHumidity as Event(SensRelativeHumidity)
+    Tank sensResistanceTemperature as Event(SensResistanceTemperature)
+    Tank sensWindVelocity as Event(SensWindVelocity)
+    Tank sensWindDirection as Event(SensWindDirection)
+
+Terminal testTerminal
+
+//Terminal controlTerminal
+//    Subscribe(dl.alertConfiguration dl.deletedAlertConfiguration dl.deletedInstallation dl.sensConsumedEnergy dl.sensConsumedPower dl.sensGridEnergy dl.sensGridPower dl.sensPhi dl.sensPhotovoltaicPanelEnergy dl.sensPhotovoltaicPanelPower dl.sensGlobalIrradiance dl.sensEfVerticalIrradiance dl.sensEfAngledIrradiance dl.sensTemperature dl.sensRelativeHumidity dl.sensResistanceTemperature dl.sensWindVelocity dl.sensWindDirection dl.consumedEnergy dl.consumedPower dl.gridEnergy dl.gridPower dl.negativeGridEnergy dl.phi dl.photovoltaicPanelEnergy dl.photovoltaicPanelPower dl.globalIrradiance dl.efVerticalIrradiance dl.efAngledIrradiance dl.temperature dl.relativeHumidity dl.resistanceTemperature dl.windVelocity dl.windDirection dl.installation)
+//	Publish(dl.alert dl.sensConsumedEnergy dl.sensConsumedPower dl.sensGridEnergy dl.sensGridPower dl.sensPhi dl.sensPhotovoltaicPanelEnergy dl.sensPhotovoltaicPanelPower dl.sensGlobalIrradiance dl.sensEfVerticalIrradiance dl.sensEfAngledIrradiance dl.sensTemperature dl.sensRelativeHumidity dl.sensResistanceTemperature dl.sensWindVelocity dl.sensWindDirection dl.consumedEnergy dl.consumedPower dl.gridEnergy dl.gridPower dl.negativeGridEnergy dl.phi dl.photovoltaicPanelEnergy dl.photovoltaicPanelPower dl.globalIrradiance dl.efVerticalIrradiance dl.efAngledIrradiance dl.temperature dl.relativeHumidity dl.resistanceTemperature dl.windVelocity dl.windDirection)
+//
+//Terminal pilotoTerminal
+//    Subscribe(dl.alert dl.alertConfiguration dl.deletedAlertConfiguration dl.deletedInstallation dl.consumedEnergy dl.consumedPower dl.gridEnergy dl.gridPower dl.negativeGridEnergy dl.phi dl.photovoltaicPanelEnergy dl.photovoltaicPanelPower dl.globalIrradiance dl.efVerticalIrradiance dl.efAngledIrradiance dl.temperature dl.relativeHumidity dl.resistanceTemperature dl.windVelocity dl.windDirection dl.installation)
+//    Publish(dl.alertConfiguration dl.deletedAlertConfiguration dl.deletedInstallation dl.installation)

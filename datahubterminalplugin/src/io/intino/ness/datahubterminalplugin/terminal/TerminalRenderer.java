@@ -43,7 +43,7 @@ class TerminalRenderer {
 
 	private Frame createTerminalFrame() {
 		Datalake datalake = terminal.graph().datalake();
-		FrameBuilder builder = new FrameBuilder("terminal").add("package", rootPackage).add("entitiesPackage", entitiesPackage).add("name", terminal.name$());
+		FrameBuilder builder = new FrameBuilder("terminal").add("package", rootPackage).add("name", terminal.name$());
 		if (datalake != null) builder.add("datalake", "").add("scale", datalake.scale().name());
 		builder.add("event", eventWithSplit.keySet().stream().map(e -> new FrameBuilder("event").
 				add("namespace", eventNamespace(e)).
@@ -55,6 +55,7 @@ class TerminalRenderer {
 		if (terminal.subscribe() != null)
 			terminal.subscribe().eventTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
 		if (terminal.bpm() != null) addBpm(builder);
+		if(!terminal.graph().entityList().isEmpty()) builder.add("entities", new FrameBuilder("entities").add("package", rootPackage));
 		return builder.toFrame();
 	}
 
