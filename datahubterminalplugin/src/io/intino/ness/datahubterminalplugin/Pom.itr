@@ -63,11 +63,6 @@ def type(pom)
 
 	<repositories>
 		$repository+release...[$NL]
-		<repository>
-			<id>intino-maven</id>
-			<name>intino-maven-releases</name>
-			<url>https://artifactory.intino.io/artifactory/releases</url>
-		</repository>
 	</repositories>
 
 	<distributionManagement>
@@ -148,6 +143,7 @@ def type(repository) !type(distribution) trigger(release)
 	<repository>
 		<id>$name-~$random</id>
 		<url>$url</url>
+		[<snapshots><enabled>$snapshot</enabled></snapshots>]
 	</repository>
 end
 

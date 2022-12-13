@@ -108,10 +108,11 @@ public class MavenTerminalExecutor {
 		builder.add("repository", createRepositoryFrame(r).add("distribution").toFrame());
 	}
 
-	private FrameBuilder createRepositoryFrame(Configuration.Repository repository) {
-		return new FrameBuilder("repository", repository.getClass().getSimpleName()).
-				add("name", repository.identifier()).
+	private FrameBuilder createRepositoryFrame(Configuration.Repository repo) {
+		return new FrameBuilder("repository", repo.getClass().getSimpleName()).
+				add("name", repo.identifier()).
 				add("random", UUID.randomUUID().toString()).
-				add("url", repository.url());
+				add("url", repo.url()).
+				add("snapshot", repo instanceof Configuration.Repository.Snapshot);
 	}
 }

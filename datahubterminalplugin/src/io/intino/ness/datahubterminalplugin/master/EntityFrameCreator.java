@@ -86,7 +86,7 @@ public class EntityFrameCreator {
 	private Frame attrFrameOf(Node node, Node owner) {
 		FrameBuilder builder = new FrameBuilder().add("attribute");
 		node.conceptList().forEach(aspect -> builder.add(aspect.name()));
-		String type = type(node);
+		String type = typeOf(node);
 
 		builder.add("name", node.name())
 				.add("owner", node.owner().name())
@@ -105,10 +105,6 @@ public class EntityFrameCreator {
 		processParameters(node, builder, type);
 
 		return builder.toFrame();
-	}
-
-	private String typeParameterOf(String type) {
-		return type.substring(type.indexOf("<") + 1, type.lastIndexOf(">"));
 	}
 
 	private void processParameters(Node node, FrameBuilder builder, String type) {
@@ -168,8 +164,12 @@ public class EntityFrameCreator {
 		return defaultValue.values().get(0).toString();
 	}
 
-	private String type(Node node) {
-		String aspect = node.conceptList().stream().map(Concept::name).filter(this::isProperTypeName).findFirst().orElse("");
+	public static String typeParameterOf(String type) {
+		return type.substring(type.indexOf("<") + 1, type.lastIndexOf(">"));
+	}
+
+	public static String typeOf(Node node) {
+		String aspect = node.conceptList().stream().map(Concept::name).filter(EntityFrameCreator::isProperTypeName).findFirst().orElse("");
 
 		boolean list = node.conceptList().stream().anyMatch(a -> a.name().equals("List"));
 		if (list) return ListTypes.getOrDefault(aspect, "List<" + firstUpperCase().format(node.name()).toString() + ">");
@@ -180,7 +180,7 @@ public class EntityFrameCreator {
 		return TheTypes.getOrDefault(aspect, firstUpperCase().format(node.name()).toString());
 	}
 
-	private boolean isProperTypeName(String s) {
+	public static boolean isProperTypeName(String s) {
 		return !s.equals("Set") && !s.equals("List") && !s.equals("Optional") && !s.equals("Type") && !s.equals("Required");
 	}
 

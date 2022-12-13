@@ -38,17 +38,17 @@ public class ExpressionHelper {
 	}
 
 	private static String expressionOf(Expression expr) {
-		return decorateExpr(rawExpressionOf(expr));
+		return decorateExpr(expr, rawExpressionOf(expr));
 	}
 
-	private static String decorateExpr(String expr) {
-		expr = expr.trim();
-		if(StringUtils.countMatches(expr, "\n") == 0) {
-			if(!expr.startsWith("return")) expr = "return " + expr;
-			if(!expr.endsWith(";")) expr += ";";
-			return expr;
+	private static String decorateExpr(Expression expr, String exprStr) {
+		exprStr = exprStr.trim();
+		if(StringUtils.countMatches(exprStr, "\n") == 0) {
+			if(!expr.isRoutine() && !exprStr.startsWith("return")) exprStr = "return " + exprStr;
+			if(!exprStr.endsWith(";")) exprStr += ";";
+			return exprStr;
 		}
-		String[] lines = expr.split("\n", -1);
+		String[] lines = exprStr.split("\n", -1);
 		return Arrays.stream(lines).map(ExpressionHelper::removeDefaultItrIndentation).collect(Collectors.joining("\n"));
 	}
 

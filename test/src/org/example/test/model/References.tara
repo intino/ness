@@ -1,0 +1,38 @@
+dsl Ness
+
+Entity A
+	Attribute x as Integer
+
+Entity AttributeReference
+	Attribute a as Entity(A)
+
+Entity AttributeListReference
+	Attribute a as Entity(A) List
+
+Entity AttributeSetReference
+	Attribute a as Entity(A) Set
+
+//Entity AttributeMapValueReference
+//	Attribute a as Map
+//		Key as String
+//		Value as Entity(A)
+//
+//Entity AttributeMapKeyReference
+//	Attribute a as Map
+//		Key as Entity(A)
+//		Value as Integer
+
+Entity MethodReturnTypeReference
+	Method a as Function("null")
+		ReturnType as Entity(A)
+
+Entity MethodParameterReference
+	Method a as Function("null")
+		ReturnType as String
+		Parameter x as Entity(A)
+
+Entity DeepReference
+	Attribute x as Entity(MethodReturnTypeReference)
+
+
+

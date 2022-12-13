@@ -1,10 +1,23 @@
 dsl Ness
 
+use Master
+use References
+
 Datalake(Month, path = "") dl
 	Split("") Divisiones
 		Split DA;Split DB;Split DC;Split DD;Split DF;Split DG;Split DJ;Split DK;Split DL;Split DM;Split DN;Split DP;Split DU;Split DV;Split DW;Split DX;
 	Split asemed
 	Tank example as Event(event = Example)
+
+	Tank zone as Entity(entity = Zone)
+	Tank installation as Entity(entity = Installation)
+	Tank alertConfiguration as Entity(entity = AlertConfiguration)
+
+	Tank a as Entity(entity = A)
+	Tank attributeReference as Entity(entity = AttributeReference)
+	Tank attributeListReference as Entity(entity = AttributeListReference)
+	Tank deepReference as Entity(entity = DeepReference)
+
 	ProcessStatus(split = Divisiones)
 	Backup
 		Cron(pattern = "0 0 12 1/1 * ? *", timeZone = "Atlantic/Canary")
@@ -23,7 +36,6 @@ Event ajuste
 Event cierreAjuste
 Event usuarioConectado
 Event usuarioDesconectado
-
 
 Wordbag Gestiones as Inline
 	Word(1) Rezago
@@ -45,5 +57,5 @@ Event Example
 	Attribute names as Text List
 
 Terminal testTerminal
-	Publish(tanks = dl.example)
-	Subscribe (tanks = dl.example)
+	Publish(eventTanks = dl.example, entityTanks = dl.zone dl.attributeListReference)
+	Subscribe (eventTanks = dl.example, entityTanks = dl.zone dl.installation dl.deepReference)

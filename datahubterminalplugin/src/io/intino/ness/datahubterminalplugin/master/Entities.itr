@@ -108,6 +108,7 @@ def type(master & cached)
 	import java.util.ArrayList;
 	import java.util.Collections;
 	import java.util.List;
+	import java.util.Set;
 	import java.util.Map;
 	import java.util.concurrent.*;
 	import java.util.concurrent.atomic.AtomicBoolean;
@@ -126,6 +127,9 @@ def type(master & cached)
 
 		private static final String ENTITIES_TOPIC = "entities";
 		private static final String ENTITY_STORE_SERVICE_PATH = "service.ness.datalake.entitystore";
+
+		private static final Set<String> PublishEntities = Set.of([$entity+publishItem...[, ]]);
+		private static final Set<String> SubscribeEntities = Set.of([$entity+subscribeItem...[, ]]);
 
     	$entity+map...[$NL]
 
@@ -172,7 +176,7 @@ def type(master & cached)
     	public <T extends Entity> void addEntityListener(String type, EntityListener<T> listener) {
     		if(type == null) throw new NullPointerException("Type cannot be null");
     		if(listener == null) throw new NullPointerException("EntryListener cannot be null");
-    		entityListeners.computeIfAbsent(type, k -> new ArrayList<>()).add(listener);
+    		entityListeners.computeIfAbsent(type, k -> new ArrayList<>(1)).add(listener);
     	}
 
 		@Override
@@ -184,7 +188,8 @@ def type(master & cached)
 
     	@Override
     	public <T extends Entity> Future<Response<T>> enable(String id) {
-            if(id == null) throw new NullPointerException("Entity id cannot be null");
+            if(id == null || id.isBlank()) throw new NullPointerException("Entity id cannot be null nor blank");
+            if(publishIsDisabledFor(Triplet.typeOf(id))) throw new UnsupportedOperationException("This terminal is not subscribed to " + capitalize(Triplet.typeOf(id)));
             UpdateMasterMessage message = createMessage(UpdateMasterMessage.Intent.Enable, id);
             CompletableFuture<Response<T>> future = new CompletableFuture<>();
             futures.put(message.id(), future);
@@ -195,7 +200,8 @@ def type(master & cached)
 
       	@Override
       	public <T extends Entity> Future<Response<T>> disable(String id) {
-            if(id == null) throw new NullPointerException("Entity id cannot be null");
+            if(id == null || id.isBlank()) throw new NullPointerException("Entity id cannot be null nor blank");
+            if(publishIsDisabledFor(Triplet.typeOf(id))) throw new UnsupportedOperationException("This terminal is not subscribed to " + capitalize(Triplet.typeOf(id)));
             UpdateMasterMessage message = createMessage(UpdateMasterMessage.Intent.Disable, id);
             CompletableFuture<Response<T>> future = new CompletableFuture<>();
             futures.put(message.id(), future);
@@ -207,12 +213,21 @@ def type(master & cached)
 		@Override
     	public <T extends Entity> Future<Response<T>> publish(Entity entity) {
 			if(entity == null) throw new NullPointerException("Entity cannot be null");
+			if(publishIsDisabledFor(entity.id().type())) throw new UnsupportedOperationException("This terminal is not subscribed to " + capitalize(entity.id().type()));
 			UpdateMasterMessage message = createMessage(UpdateMasterMessage.Intent.Publish, serializer().serialize(entity.asTripletRecord()));
             CompletableFuture<Response<T>> future = new CompletableFuture<>();
             futures.put(message.id(), future);
 			publishMessage(message);
 			if(synchronous) waitFor(future);
 			return future;
+    	}
+
+    	private static boolean publishIsDisabledFor(String type) {
+    		return !PublishEntities.contains(capitalize(type));
+    	}
+
+    	private static String capitalize(String s) {
+    		return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     	}
 
     	private void waitFor(Future<?> future) {
@@ -224,7 +239,7 @@ def type(master & cached)
     	}
 
     	private void publishMessage(UpdateMasterMessage message) {
-    		connector.sendMessage(ENTITIES_TOPIC, MasterMessageSerializer.serialize(message));
+    		connector.sendTopicMessage(ENTITIES_TOPIC, MasterMessageSerializer.serialize(message));
     	}
 
     	@Override
@@ -295,7 +310,7 @@ def type(master & cached)
 
 		private Message downloadMessage(DownloadMasterMessage.EntityFilter filter) {
 			try {
-				DownloadMasterMessage m = new DownloadMasterMessage(null, filter);
+				DownloadMasterMessage m = new DownloadMasterMessage(SubscribeEntities, filter);
 				ActiveMQTextMessage message = new ActiveMQTextMessage();
 				message.setText(MasterMessageSerializer.serialize(m));
 				message.compress();
@@ -474,23 +489,31 @@ def type(master & cached)
     }
 end
 
-def !type(abstract) trigger(addEntitySwitchCase)
+def type(publish) trigger(publishItem)
+	"$name+FirstUpperCase"
+end
+
+def type(subscribe) trigger(subscribeItem)
+	"$name+FirstUpperCase"
+end
+
+def !type(abstract) type(subscribe) trigger(addEntitySwitchCase)
 	case "$name+firstLowerCase": return addTo$name+FirstUpperCase~Internal(record);
 end
 
-def !type(abstract) trigger(enableEntitySwitchCase)
+def !type(abstract) type(subscribe) trigger(enableEntitySwitchCase)
 	case "$name+firstLowerCase": return enable$name+FirstUpperCase~Internal(id);
 end
 
-def !type(abstract) trigger(disableEntitySwitchCase)
+def !type(abstract) type(subscribe) trigger(disableEntitySwitchCase)
 	case "$name+firstLowerCase": return disable$name+FirstUpperCase~Internal(id);
 end
 
-def !type(abstract) trigger(map)
+def !type(abstract) type(subscribe) trigger(map)
 	private final Map<String, $name+FirstUpperCase> $name+FirstLowerCase~Map = new ConcurrentHashMap<>();
 end
 
-def !type(abstract) trigger(addEntityInternal)
+def !type(abstract) type(subscribe) trigger(addEntityInternal)
 	private Event.Type addTo$name+FirstUpperCase~Internal(TripletRecord record) {
 		$name+FirstUpperCase entity = new $name+FirstUpperCase(record.id());
     	record.triplets().forEach(entity::add);
@@ -505,7 +528,7 @@ def !type(abstract) trigger(addEntityInternal)
     }
 end
 
-def !type(abstract) trigger(enableEntityInternal)
+def !type(abstract) type(subscribe) trigger(enableEntityInternal)
 	private Event.Type enable$name+FirstUpperCase~Internal(String id) {
 		if($name+firstLowerCase~Map.containsKey(id)) return Event.Type.None;
 		$name+FirstUpperCase entity = disabledView.$name+firstLowerCase~Map.remove(id);
@@ -516,7 +539,7 @@ def !type(abstract) trigger(enableEntityInternal)
     }
 end
 
-def !type(abstract) trigger(disableEntityInternal)
+def !type(abstract) type(subscribe) trigger(disableEntityInternal)
 	private Event.Type disable$name+FirstUpperCase~Internal(String id) {
 		if(!$name+firstLowerCase~Map.containsKey(id)) return Event.Type.None;
 
@@ -556,7 +579,7 @@ def type(abstract) trigger(getter)
 	}
 end
 
-def !type(abstract) type(cached) trigger(getter)
+def !type(abstract) type(subscribe) trigger(getter)
 	@Override
 	public $name+FirstUpperCase $name+firstLowerCase(String id) {
 		if(id == null) return null;
@@ -569,21 +592,15 @@ def !type(abstract) type(cached) trigger(getter)
 	}
 end
 
-def !type(abstract) type(lazy) trigger(getter)
+def !type(abstract) trigger(getter)
 	@Override
 	public $name+FirstUpperCase $name+firstLowerCase(String id) {
-		if(id == null) return null;
-		id = normalizeId(id, ":$name+firstLowerCase");
-		TripletRecord record = getRecord(id);
-    	return record != null ? entity($name+FirstUpperCase::new, id, record) : null;
+		throw new UnsupportedOperationException("This terminal is not subscribed to $name+FirstUpperCase");
 	}
 
 	@Override
 	public Stream<$name+FirstUpperCase> $name+Plural+firstLowerCase() {
-		return masterMap.entrySet().stream()
-				.filter(e -> e.getKey().endsWith(":$name+firstLowerCase"))
-				.filter(e -> accepts(e.getValue()))
-				.map(e -> entity($name+FirstUpperCase::new, e.getKey(), serializer.deserialize(e.getValue())));
+		throw new UnsupportedOperationException("This terminal is not subscribed to $name+FirstUpperCase");
 	}
 end
 

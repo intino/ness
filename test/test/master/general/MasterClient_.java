@@ -18,12 +18,14 @@ public class MasterClient_ {
 	}
 
 	private static TestTerminal createTerminal() {
-		return new TestTerminal(new JmsConnector(
+		JmsConnector connector = new JmsConnector(
 				"localhost:62123",
 				"test",
 				"test",
 				"test",
 				new File("temp/cache")
-		));
+		);
+		connector.start();
+		return new TestTerminal(connector);
 	}
 }

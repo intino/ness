@@ -230,10 +230,9 @@ def type(entities) trigger(getter)
 	}
 
 	private synchronized Entities initEntities() {
-		if(entities != null) return entities;
 		CachedEntities entities = new CachedEntities(connector);
-		entities.init();
 		setSingletonInstance(entities);
+		entities.init();
 		this.entities = entities;
 		return entities;
 	}
