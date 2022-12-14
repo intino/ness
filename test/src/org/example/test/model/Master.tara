@@ -7,34 +7,17 @@ Entity Installation as ExtensionOf(MapEntity)
 	Attribute type as Word("Videometry" "WeatherStation")
 	Attribute place as Struct(GeoPoint)
 	Attribute url as String
+	Method getPlaceWkt as Function("\"POINT(\" + place.latitude() + \" \" + place.longitude() + \")\"")
+		ReturnType as String
+	Method setPlaceWkt as Routine("place(new GeoPoint(latitude, longitude))")
+		Parameter latitude as Double
+		Parameter longitude as Double
 
 Entity Zone as ExtensionOf(MapEntity)
 	Attribute place as Struct(GeoPoint) List
 	Attribute ownerZone as Entity(Zone)
-	Attribute childZones as Entity(Zone) List
-	Attribute sensorIds as Entity(Installation) Set
-	Attribute counter as Integer
-
-	Method placeWkt as StringGetter("\"POINT(\" + place().get(0).latitude() + \" \" + place().get(0).longitude() + \")\"")
-
-	Method incrementCounter as Routine("counter++")
-
-	Method hasChildren as BooleanGetter("!childZones().isEmpty()")
-
-	Method firstChild as Function("hasChildren() ? childZones().get(0) : null")
-		ReturnType as Entity(Zone)
-
-	Method isChild as Function("childZones().contains(zone)")
-		ReturnType as Boolean
-		Parameter zone as Entity(Zone)
-
-	Method getSomeCustomObject as Function("new MyObject(id().value(), counter)")
-		ReturnType as Struct(MyObject)
-
-
-Struct MyObject
-	Attribute name as String
-	Attribute x as Integer
+	Attribute children as Entity(MapEntity) Set
+	Method placeWkt as StringGetter("\"POLYGON(\" + place.stream().map(p -> p.latitude() + \" \" + p.longitude()).collect(Collectors.joining(\", \")) + \")\"")
 
 Entity AlertConfiguration
 	Attribute entityId as String
@@ -45,6 +28,13 @@ Entity AlertConfiguration
 	Attribute enabledMax as Boolean
 	Attribute max as Double
 	Attribute recipients as String Set
+
+Entity Employee
+	Attribute name as String
+	Attribute theater as Entity(Theater)
+
+Entity Theater
+	Attribute name as String
 
 Struct GeoPoint
 	Attribute latitude as Double

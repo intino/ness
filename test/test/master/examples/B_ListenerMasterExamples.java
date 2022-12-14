@@ -1,9 +1,8 @@
 package master.examples;
 
-import io.intino.ness.master.messages.MasterMessageException;
 import io.intino.ness.master.messages.listeners.EntityListener;
-import org.example.test.model.MasterTerminal;
-import org.example.test.model.entities.Employee;
+import io.intino.test.datahubtest.TestTerminal;
+import io.intino.test.datahubtest.master.entities.Employee;
 
 import java.time.Instant;
 
@@ -16,9 +15,9 @@ import java.time.Instant;
  * See ModifyingMasterExamples for details.
  *
  * */
-public class C_ListenerMasterExamples {
+public class B_ListenerMasterExamples {
 
-	private MasterTerminal terminal;
+	private TestTerminal terminal;
 
 	/**
 	 * You can add an entity listener for each entity defined in the model.
@@ -29,12 +28,11 @@ public class C_ListenerMasterExamples {
 	 * This example is using listeners for specific event types. The listener will only be called when the event.type() is the expected one.
 	 * */
 	public void entityListenersPerEventType() {
-		terminal.addEmployeeEntityListener(EntityListener.onCreate(event -> {})); // event.type() == Create
-		terminal.addEmployeeEntityListener(EntityListener.onUpdate(event -> {})); // event.type() == Update
-		terminal.addEmployeeEntityListener(EntityListener.onEnable(event -> {})); // event.type() == Enable
-		terminal.addEmployeeEntityListener(EntityListener.onDisable(event -> {})); // event.type() == Disable
-		terminal.addEmployeeEntityListener(EntityListener.onRemove(event -> {})); // event.type() == Remove
-		terminal.addEmployeeEntityListener(EntityListener.onNone(event -> {})); // event.type() == None
+		terminal.entities().addEmployeeEntityListener(EntityListener.onCreate(event -> {})); // event.type() == Create
+		terminal.entities().addEmployeeEntityListener(EntityListener.onUpdate(event -> {})); // event.type() == Update
+		terminal.entities().addEmployeeEntityListener(EntityListener.onEnable(event -> {})); // event.type() == Enable
+		terminal.entities().addEmployeeEntityListener(EntityListener.onDisable(event -> {})); // event.type() == Disable
+		terminal.entities().addEmployeeEntityListener(EntityListener.onNone(event -> {})); // event.type() == None
 	}
 
 	/**
@@ -42,12 +40,10 @@ public class C_ListenerMasterExamples {
 	 *
 	 * */
 	public void errorListeners() {
-		terminal.addErrorListener(error -> {
-
+		terminal.entities().addErrorListener(error -> {
 			String requestId = error.messageId();
 			Instant ts = error.ts();
-			MasterMessageException cause = error.cause();
-
+			Throwable cause = error.cause();
 			// ...
 		});
 	}
@@ -63,7 +59,7 @@ public class C_ListenerMasterExamples {
 	 * */
 	public void entityListenersGeneric() {
 
-		terminal.addEmployeeEntityListener(event -> {
+		terminal.entities().addEmployeeEntityListener(event -> {
 
 			Instant ts = event.ts();
 			Employee employee = event.entity();
@@ -79,9 +75,6 @@ public class C_ListenerMasterExamples {
 					// ...
 					break;
 				case Disable:
-					// ...
-					break;
-				case Remove:
 					// ...
 					break;
 				case None:
