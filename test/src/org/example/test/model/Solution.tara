@@ -58,4 +58,4 @@ Event Example
 
 Terminal testTerminal
 	Publish(eventTanks = dl.example, entityTanks = dl.zone dl.attributeListReference)
-	Subscribe (eventTanks = dl.example, entityTanks = dl.zone dl.installation dl.deepReference)
+	Subscribe(eventTanks = dl.example, entityTanks = dl.zone dl.installation dl.deepReference)

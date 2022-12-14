@@ -139,14 +139,13 @@ def type(master & cached)
 		private final Map<String, CompletableFuture> futures = new ConcurrentHashMap<>();
 		private MasterSerializer serializer;
 		private final DisabledEntitiesView disabledView = new DisabledEntitiesView();
-		private volatile boolean synchronous = true;
-		EntitiesMessageConsumer entityConsumer;
+		private EntitiesMessageConsumer entityConsumer;
 
     	CachedEntities(Connector connector) {
     		this.connector = requireNonNull(connector);
     	}
 
-		synchronized Entities init() {
+		synchronized void init() {
 			try {
 				if(!initialized.compareAndSet(false, true)) return null;
 				loadData();
@@ -156,14 +155,6 @@ def type(master & cached)
 			} catch(Exception e) {
 				throw new MasterInitializationException("Entities failed to start: " + e.getMessage(), e);
 			}
-		}
-
-		public boolean isSynchronous() {
-			return synchronous;
-		}
-
-		public void setSynchronous(boolean synchronous) {
-			this.synchronous = synchronous;
 		}
 
 		@Override
