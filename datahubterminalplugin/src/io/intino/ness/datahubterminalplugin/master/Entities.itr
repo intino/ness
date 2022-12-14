@@ -147,11 +147,10 @@ def type(master & cached)
 
 		synchronized void init() {
 			try {
-				if(!initialized.compareAndSet(false, true)) return null;
+				if(!initialized.compareAndSet(false, true)) return;
 				loadData();
 				initListeners();
 				Logger.info("Entities terminal " + connector.clientId() + " initialized successfully. (" + getClass().getSimpleName() + ")");
-				return this;
 			} catch(Exception e) {
 				throw new MasterInitializationException("Entities failed to start: " + e.getMessage(), e);
 			}

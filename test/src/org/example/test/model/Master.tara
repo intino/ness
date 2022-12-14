@@ -15,6 +15,8 @@ Entity Zone as ExtensionOf(MapEntity)
 	Attribute sensorIds as Entity(Installation) Set
 	Attribute counter as Integer
 
+	Method placeWkt as StringGetter("\"POINT(\" + place().get(0).latitude() + \" \" + place().get(0).longitude() + \")\"")
+
 	Method incrementCounter as Routine("counter++")
 
 	Method hasChildren as BooleanGetter("!childZones().isEmpty()")
@@ -26,6 +28,13 @@ Entity Zone as ExtensionOf(MapEntity)
 		ReturnType as Boolean
 		Parameter zone as Entity(Zone)
 
+	Method getSomeCustomObject as Function("new MyObject(id().value(), counter)")
+		ReturnType as Struct(MyObject)
+
+
+Struct MyObject
+	Attribute name as String
+	Attribute x as Integer
 
 Entity AlertConfiguration
 	Attribute entityId as String
