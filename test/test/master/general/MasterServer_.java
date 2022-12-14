@@ -1,15 +1,12 @@
 package master.general;
 
 import io.intino.alexandria.core.Box;
-import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.box.DataHubConfiguration;
 import io.intino.datahub.model.NessGraph;
 import io.intino.magritte.framework.Graph;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 
 public class MasterServer_ {
 
@@ -24,15 +21,7 @@ public class MasterServer_ {
 	}
 
 	private static void loadUsers(File workspace, NessGraph nessGraph) {
-		try {
-			File file = new File(workspace, "datahub/users.bin");
-			if (!file.exists()) return;
-			nessGraph.broker().clear().user(u -> true);
-			String[] users = new String(Files.readAllBytes(file.toPath())).split("\n");
-			for (String user : users) nessGraph.broker().create().user(user.split("::")[0], user.split("::")[1]);
-		} catch (IOException e) {
-			Logger.error(e);
-		}
+		nessGraph.broker().create().user("test", "test");
 	}
 
 	private static String[] args() {

@@ -20,6 +20,8 @@ def type(entity & class)
 	import io.intino.ness.master.model.TripletRecord;
 	import io.intino.ness.master.model.Entity;
 
+	import $package.structs.*;
+
 	import java.time.*;
 	import java.util.*;
 	import java.util.stream.*;
