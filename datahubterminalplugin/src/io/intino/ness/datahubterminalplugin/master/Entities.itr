@@ -489,12 +489,12 @@ def !type(abstract) type(subscribe) trigger(disableEntitySwitchCase)
 end
 
 def !type(abstract) type(subscribe) trigger(map)
-	private final Map<String, $name+FirstUpperCase> $name+FirstLowerCase~Map = new ConcurrentHashMap<>();
+	private final Map<String, $package.entities.$name+FirstUpperCase> $name+FirstLowerCase~Map = new ConcurrentHashMap<>();
 end
 
 def !type(abstract) type(subscribe) trigger(addEntityInternal)
 	private Event.Type addTo$name+FirstUpperCase~Internal(TripletRecord record) {
-		$name+FirstUpperCase entity = new $name+FirstUpperCase(record.id());
+		$package.entities.$name+FirstUpperCase entity = new $package.entities.$name+FirstUpperCase(record.id());
     	record.triplets().forEach(entity::add);
     	if (!entity.enabled()) {
         	disabledView.$name+firstLowerCase~Map.put(record.id(), entity);
@@ -510,7 +510,7 @@ end
 def !type(abstract) type(subscribe) trigger(enableEntityInternal)
 	private Event.Type enable$name+FirstUpperCase~Internal(String id) {
 		if($name+firstLowerCase~Map.containsKey(id)) return Event.Type.None;
-		$name+FirstUpperCase entity = disabledView.$name+firstLowerCase~Map.remove(id);
+		$package.entities.$name+FirstUpperCase entity = disabledView.$name+firstLowerCase~Map.remove(id);
 		if (entity == null) return Event.Type.None;
 		entity.add(new Triplet(id, "enabled", "true"));
     	$name+firstLowerCase~Map.put(id, entity);
@@ -522,7 +522,7 @@ def !type(abstract) type(subscribe) trigger(disableEntityInternal)
 	private Event.Type disable$name+FirstUpperCase~Internal(String id) {
 		if(!$name+firstLowerCase~Map.containsKey(id)) return Event.Type.None;
 
-    	$name+FirstUpperCase entity = $name+firstLowerCase~Map.remove(id);
+    	$package.entities.$name+FirstUpperCase entity = $name+firstLowerCase~Map.remove(id);
     	if(entity == null) return Event.Type.None;
 
     	entity.add(new Triplet(id, "enabled", "false"));
@@ -542,7 +542,7 @@ end
 
 def type(abstract) trigger(getter)
 	@Override
-	public $name+FirstUpperCase $name+firstLowerCase(String id) {
+	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
 		if(id == null) return null;
     	switch(Triplet.typeOf(id)) {
     		$subclass+getById...[$NL]
@@ -551,7 +551,7 @@ def type(abstract) trigger(getter)
 	}
 
 	@Override
-	public Stream<$name+FirstUpperCase> $name+Plural+firstLowerCase() {
+	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
 		return Stream.of(
 			$subclass+getAllStream...[,$NL]
 		).flatMap(java.util.function.Function.identity());
@@ -560,43 +560,43 @@ end
 
 def !type(abstract) type(subscribe) trigger(getter)
 	@Override
-	public $name+FirstUpperCase $name+firstLowerCase(String id) {
+	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
 		if(id == null) return null;
 		return $name+firstLowerCase~Map.get(normalizeId(id, ":$name+firstLowerCase"));
 	}
 
 	@Override
-	public Stream<$name+FirstUpperCase> $name+Plural+firstLowerCase() {
+	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
 		return $name+firstLowerCase~Map.values().stream();
 	}
 end
 
 def !type(abstract) trigger(getter)
 	@Override
-	public $name+FirstUpperCase $name+firstLowerCase(String id) {
+	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
 		throw new UnsupportedOperationException("This terminal is not subscribed to $name+FirstUpperCase");
 	}
 
 	@Override
-	public Stream<$name+FirstUpperCase> $name+Plural+firstLowerCase() {
+	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
 		throw new UnsupportedOperationException("This terminal is not subscribed to $name+FirstUpperCase");
 	}
 end
 
 def trigger(getterSignature)
-	$name+FirstUpperCase $name+firstLowerCase(String id);
-	Stream<$name+FirstUpperCase> $name+Plural+firstLowerCase();
-	default List<$name+FirstUpperCase> $name+firstLowerCase~List() {return $name+Plural+firstLowerCase().collect(Collectors.toList());}
+	$package.entities.$name+FirstUpperCase $name+firstLowerCase(String id);
+	Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase();
+	default List<$package.entities.$name+FirstUpperCase> $name+firstLowerCase~List() {return $name+Plural+firstLowerCase().collect(Collectors.toList());}
 end
 
 def trigger(entityListener)
-	default void add$name+FirstUpperCase~EntityListener(EntityListener<$name+FirstUpperCase> listener) {
+	default void add$name+FirstUpperCase~EntityListener(EntityListener<$package.entities.$name+FirstUpperCase> listener) {
 		addEntityListener("$name+firstLowerCase", listener);
 	}
 end
 
 def type(entity) !type(abstract) trigger(asEntitySwitchCase)
-	case "$name+firstLowerCase": return (T) new $name+FirstUpperCase(record);
+	case "$name+firstLowerCase": return (T) new $package.entities.$name+FirstUpperCase(record);
 end
 
 def type(entity) !type(abstract) trigger(enable)

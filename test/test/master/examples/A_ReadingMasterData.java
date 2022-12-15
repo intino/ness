@@ -1,19 +1,20 @@
 package master.examples;
 
-import org.example.test.model.MasterTerminal;
-import org.example.test.model.MasterView;
-import org.example.test.model.entities.Employee;
-import org.example.test.model.entities.Theater;
+import io.intino.test.datahubtest.TestTerminal;
+import io.intino.test.datahubtest.master.Entities;
+import io.intino.test.datahubtest.master.EntitiesView;
+import io.intino.test.datahubtest.master.entities.Employee;
+import io.intino.test.datahubtest.master.entities.Theater;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-public class B_ReadingMasterData {
+public class A_ReadingMasterData {
 
-	private MasterTerminal terminal;
+	private TestTerminal terminal;
 
 	/**
-	 * MasterTerminal will expose 3 methods for each type of entity.
+	 * Entities will expose 3 methods for each type of entity.
 	 * The EntityFilter specified in the configuration will be applied here.
 	 *
 	 * Notes:
@@ -23,24 +24,22 @@ public class B_ReadingMasterData {
 	 * The entities returned are meant to be read-only. This means that, if you change an entity by calling a setter, you will only be
 	 * changing the object in local memory. The original object in the master server will not be modified.
 	 *
+	 * You can only get the entities that your terminal subscribed to. If you try to access an entity not specified in the Subscribe
+	 * section in the terminal declaration, an UnsupportedOperationException will be thrown.
+	 *
 	 * To modify the entities, see the ModifyingMasterData examples
 	 *
 	 * */
 	public void getEntities() {
-		Employee employee = terminal.employee("123:employee"); // Get by id. Returns null if not found
-		Stream<Employee> employees = terminal.employees(); // Get stream of entities. Empty stream if no entities were found
-		List<Employee> employeeList = terminal.employeeList(); // Get list of entities. Empty list if no entities were found
+		Entities entities = terminal.entities();
 
-		// If you want to use the terminal as a read-only accessor to master, cast it to a MasterView interface
-		MasterView masterView = terminal;
-
-		masterView.employee("123:employee");
-		masterView.employees();
-		masterView.employeeList();
+		Employee employee = entities.employee("123:employee");
+		Stream<Employee> employees = entities.employees();
+		List<Employee> employeeList = entities.employeeList();
 	}
 
 	/**
-	 * You can access disabled entities (entity.enabled() == false) if you call the MasterTerminal.disabled() method
+	 * You can access disabled entities (entity.enabled() == false) if you call the Entities.disabled() method
 	 *
 	 * This only has an effect if the EntityFilter specified on MasterTerminal creation was NOT OnlyDisabled.
 	 * If the filter already was OnlyDisabled, it will return itself.
@@ -51,7 +50,7 @@ public class B_ReadingMasterData {
 	 *
 	 * */
 	public void getDisabledEntities() {
-		MasterView disabledView = terminal.disabled();
+		EntitiesView disabledView = terminal.entities().disabled();
 
 		Theater theater = disabledView.theater("123:theater");
 		Stream<Theater> theaters = disabledView.theaters();
