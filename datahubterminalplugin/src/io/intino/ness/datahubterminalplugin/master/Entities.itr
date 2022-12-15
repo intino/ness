@@ -500,7 +500,7 @@ def !type(abstract) type(subscribe) trigger(addEntityInternal)
         	disabledView.$name+firstLowerCase~Map.put(record.id(), entity);
         	return Event.Type.None;
         }
-    	$name+FirstUpperCase old = $name+firstLowerCase~Map.get(record.id());
+    	$package.entities.$name+FirstUpperCase old = $name+firstLowerCase~Map.get(record.id());
     	if (entity.deepEquals(old)) return Event.Type.None;
     	$name+firstLowerCase~Map.put(record.id(), entity);
     	return old == null ? Event.Type.Create : Event.Type.Update;

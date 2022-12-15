@@ -74,7 +74,7 @@ public class EntityFrameCreator {
 				.add("name", entity.core$().name())
 				.add("attribute", entity.core$().componentList().stream().filter(a -> a.is(EntityData.class)).map(a -> attrFrameOf(a, entity.core$())).toArray())
 				.add("expression", entity.core$().componentList().stream().filter(a -> a.is(Expression.class)).map(ExpressionHelper::exprFrameOf).toArray());
-
+		if (!model.structList().isEmpty()) builder.add("hasStructs", new FrameBuilder().add("package", workingPackage));
 		final Parameter parent = parameter(entity.core$(), "entity");
 		builder.add("parent", parent != null ? ((Entity) parent.values().get(0)).name$() : "io.intino.ness.master.model.Entity");
 		builder.add("normalizeId", new FrameBuilder("normalizeId", (entity.isAbstract() || entity.isDecorable()) ? "abstract" : "").add("package", workingPackage).add("name", entity.name$()).toFrame());
