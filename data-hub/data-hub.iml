@@ -151,7 +151,7 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:zet:1.0.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:tris:1.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.ness:master:1.1.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.1.2" level="project" />
-    <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.9.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.2.0" level="project" />
+    <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.10" level="project" />
   </component>
 </module>
