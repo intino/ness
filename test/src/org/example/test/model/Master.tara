@@ -3,6 +3,9 @@ dsl Ness
 Entity MapEntity as Abstract
 	Attribute name as String
 
+Entity Module
+	Attribute name as String
+
 Entity Installation as ExtensionOf(MapEntity)
 	Attribute type as Word("Videometry" "WeatherStation")
 	Attribute place as Struct(GeoPoint)

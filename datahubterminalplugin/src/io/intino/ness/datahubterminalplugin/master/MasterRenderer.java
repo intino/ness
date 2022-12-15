@@ -113,7 +113,7 @@ public class MasterRenderer {
 				destination(qn), customize(new ValidatorTemplate()).render(
 						new FrameBuilder("validationLayer", "class")
 								.add("module", module)
-								.add("entity", entities(""))
+								.add("entity", entitiesForInterfaces(""))
 								.add("package", modelPackage + ".validators")
 								.toFrame())
 		);
@@ -145,7 +145,7 @@ public class MasterRenderer {
 
 	private FrameBuilder entitiesInterfaceFrameBuilder(String type) {
 		FrameBuilder builder = new FrameBuilder("master").add("package", modelPackage);
-		builder.add("entity", entities(type));
+		builder.add("entity", entitiesForInterfaces(type));
 		builder.add(type);
 		return builder;
 	}
@@ -154,7 +154,7 @@ public class MasterRenderer {
 		Set<String> subscribeEntities = getSubscribeEntities(terminal);
 		Set<String> publishEntities = terminal.publish() == null ? Set.of() : terminal.publish().entityTanks().stream().map(e -> e.name$().toLowerCase()).collect(Collectors.toSet());
 		return model.entityList().stream().map(c -> {
-			FrameBuilder b = new FrameBuilder("entity").add("name", c.name$());
+			FrameBuilder b = new FrameBuilder("entity").add("package", modelPackage + ".master").add("name", c.name$());
 			if (c.isAbstract()) {
 				b.add("abstract");
 				Frame[] subclasses = subclassesOf(c);
@@ -243,10 +243,10 @@ public class MasterRenderer {
 		return model.entityList(e -> name.equalsIgnoreCase(e.name$())).findFirst().orElse(null);
 	}
 
-	private Frame[] entities(String type) {
+	private Frame[] entitiesForInterfaces(String type) {
 		return model.entityList().stream()
 				.map(c -> {
-					final FrameBuilder b = new FrameBuilder("entity").add("name", c.name$());
+					final FrameBuilder b = new FrameBuilder("entity").add("package", modelPackage).add("name", c.name$());
 					if (c.isAbstract()) {
 						b.add("abstract");
 						Frame[] subclasses = subclassesOf(c);
@@ -260,7 +260,7 @@ public class MasterRenderer {
 	private Frame[] subclassesOf(Entity parent) {
 		return model.entityList().stream()
 				.filter(e -> isSubclassOf(e, parent))
-				.map(c -> new FrameBuilder("subclass").add("name", c.name$()).toFrame())
+				.map(c -> new FrameBuilder("subclass").add("package", modelPackage + ".master").add("name", c.name$()).toFrame())
 				.toArray(Frame[]::new);
 	}
 

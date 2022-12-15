@@ -161,7 +161,7 @@ def type(entity) type(list) type(component) trigger(add)
 
 	for(String serializedItem : items) {
 		TripletRecord item = serializer.deserialize(serializedItem.trim());
-		$entity+FirstUpperCase entity = new $entity+FirstUpperCase(item.id());
+		$package.entities.$entity+FirstUpperCase entity = new $package.entities.$entity+FirstUpperCase(item.id());
 		this.$name+firstLowerCase.add(entity);
 	}
 end
@@ -362,7 +362,7 @@ def type(entity) type(component) trigger(add)
 	}
 
 	TripletRecord r = entities().serializer().deserialize(triplet.value().trim());
-	this.$name+firstLowerCase = new $entity+FirstUpperCase(r.id());
+	this.$name+firstLowerCase = new $package.entities.$entity+FirstUpperCase(r.id());
 end
 
 def type(entity) trigger(add)
@@ -511,15 +511,15 @@ def type(struct) trigger(field)
 end
 
 def type(entity) type(component) type(list) trigger(field)
-	protected List<$entity+firstUpperCase> $name+firstLowerCase;
+	protected List<$package.entities.$entity+firstUpperCase> $name+firstLowerCase;
 end
 
 def type(entity) type(component) type(set) trigger(field)
-	protected Set<$entity+firstUpperCase> $name+firstLowerCase;
+	protected Set<$package.entities.$entity+firstUpperCase> $name+firstLowerCase;
 end
 
 def type(entity) type(component) trigger(field)
-	protected $entity+firstUpperCase $name+firstLowerCase;
+	protected $package.entities.$entity+firstUpperCase $name+firstLowerCase;
 end
 
 def type(entity) type(list) trigger(field)
@@ -592,33 +592,33 @@ def type(struct) trigger(getterAndSetter)
 end
 
 def type(entity) type(component) type(list) trigger(getterAndSetter)
-	public List<$entity+firstUpperCase> $name+firstLowerCase() {
+	public List<$package.entities.$entity+firstUpperCase> $name+firstLowerCase() {
 		return $name+firstLowerCase;
 	}
 
-	public $entityOwner+firstUpperCase $name+firstLowerCase(List<$entity+firstUpperCase> $name+firstLowerCase) {
+	public $entityOwner+firstUpperCase $name+firstLowerCase(List<$package.entities.$entity+firstUpperCase> $name+firstLowerCase) {
 		this.$name+firstLowerCase = $name+firstLowerCase;
 		return $castToSubclass~this;
 	}
 end
 
 def type(entity) type(component) type(set) trigger(getterAndSetter)
-	public Set<$entity+firstUpperCase> $name+firstLowerCase() {
+	public Set<$package.entities.$entity+firstUpperCase> $name+firstLowerCase() {
 		return $name+firstLowerCase;
 	}
 
-	public $entityOwner+firstUpperCase $name+firstLowerCase(Set<$entity+firstUpperCase> $name+firstLowerCase) {
+	public $entityOwner+firstUpperCase $name+firstLowerCase(Set<$package.entities.$entity+firstUpperCase> $name+firstLowerCase) {
 		this.$name+firstLowerCase = $name+firstLowerCase;
 		return $castToSubclass~this;
 	}
 end
 
 def type(entity) type(component) trigger(getterAndSetter)
-	public $entity+firstUpperCase $name+firstLowerCase() {
+	public $package.entities.$entity+firstUpperCase $name+firstLowerCase() {
 		return $name+firstLowerCase;
 	}
 
-	public $entityOwner+firstUpperCase $name+firstLowerCase($entity+firstUpperCase $name+firstLowerCase) {
+	public $entityOwner+firstUpperCase $name+firstLowerCase($package.entities.$entity+firstUpperCase $name+firstLowerCase) {
 		this.$name+firstLowerCase = $name+firstLowerCase;
 		return $castToSubclass~this;
 	}
@@ -629,7 +629,7 @@ def type(entity) type(list) trigger(getterAndSetter)
 		return $name+firstLowerCase;
 	}
 
-	public List<$entity+firstUpperCase> $name+firstLowerCase() {
+	public List<$package.entities.$entity+firstUpperCase> $name+firstLowerCase() {
 		return $name+firstLowerCase.stream().map(entities()::$entity+firstLowerCase).collect(Collectors.toList());
 	}
 
@@ -644,7 +644,7 @@ def type(entity) type(set) trigger(getterAndSetter)
 		return $name+firstLowerCase;
 	}
 
-	public Set<$entity+firstUpperCase> $name+firstLowerCase() {
+	public Set<$package.entities.$entity+firstUpperCase> $name+firstLowerCase() {
 		return $name+firstLowerCase.stream().map(entities()::$entity+firstLowerCase).collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
@@ -659,7 +659,7 @@ def type(entity) trigger(getterAndSetter)
 		return $name+firstLowerCase~Reference;
 	}
 
-	public $entity+firstUpperCase $name+firstLowerCase() {
+	public $package.entities.$entity+firstUpperCase $name+firstLowerCase() {
 		return entities().$entity+firstLowerCase($name+firstLowerCase~Reference);
 	}
 
