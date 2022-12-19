@@ -16,19 +16,19 @@ import java.util.UUID;
 public class MavenTerminalExecutor {
 	private final File root;
 	private final String basePackage;
-	private final Target target;
 	private final String terminalName;
 	private final Map<String, String> versions;
 	private final Configuration conf;
 	private final SystemProperties systemProperties;
 	private final PrintStream logger;
+	private final List<Target> targets;
 
-	public enum Target {EventsAndEntities, Events, Bpm, Master}
+	public enum Target {Entities, Events, Bpm}
 
-	public MavenTerminalExecutor(File root, String basePackage, Target target, String terminalName, Map<String, String> versions, Configuration conf, SystemProperties systemProperties, PrintStream logger) {
+	public MavenTerminalExecutor(File root, String basePackage, List<Target> targets, String terminalName, Map<String, String> versions, Configuration conf, SystemProperties systemProperties, PrintStream logger) {
 		this.root = root;
 		this.basePackage = basePackage;
-		this.target = target;
+		this.targets = targets;
 		this.terminalName = terminalName;
 		this.versions = versions;
 		this.conf = conf;
@@ -77,9 +77,9 @@ public class MavenTerminalExecutor {
 			if (isSnapshotVersion()) buildDistroFrame(builder, conf.artifact().distribution().snapshot());
 			else buildDistroFrame(builder, conf.artifact().distribution().release());
 		}
-		if (target.equals(Target.Events) || target.equals(Target.EventsAndEntities))
+		if (targets.contains(Target.Events))
 			builder.add("terminal", terminalDependenciesFrame(group, version));
-		if (target.equals(Target.Bpm)) builder.add("bpm", versions.get("bpm"));
+		if (targets.contains(Target.Bpm)) builder.add("bpm", versions.get("bpm"));
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new PomTemplate().render(builder.toFrame()));
 		return pomFile;
@@ -97,7 +97,6 @@ public class MavenTerminalExecutor {
 				add("terminalVersion", versions.get("terminal-jms")).
 				add("ingestionVersion", versions.get("ingestion")).
 				add("datalakeVersion", versions.get("datalake")).
-				add("masterVersion", versions.get("master")).
 				add("version", version);
 	}
 
