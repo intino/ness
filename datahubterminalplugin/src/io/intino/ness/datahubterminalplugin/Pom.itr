@@ -109,7 +109,7 @@ def trigger(terminal)
 	<dependency>
 		<groupId>io.intino.alexandria</groupId>
 		<artifactId>datalake</artifactId>
-		<version>4.0.5</version>
+		<version>$datalakeVersion</version>
 	</dependency>
 	<dependency>
 		<groupId>$group+lowercase</groupId>

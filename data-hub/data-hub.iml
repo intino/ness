@@ -149,8 +149,6 @@
     <orderEntry type="library" name="Intino: io.intino.ness:master:1.1.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.2.0" level="project" />
     <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.10" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:4.0.7" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:zet:1.0.7" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:tris:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
   </component>
 </module>
