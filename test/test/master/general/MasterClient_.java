@@ -23,6 +23,7 @@ public class MasterClient_ {
 				.place(place())
 				.name("A B C")
 		);
+		entities.disableZone("a9d7d8a8-ef30-46a5-888d-45843a68dea3");
 	}
 
 	private static List<GeoPoint> place() {

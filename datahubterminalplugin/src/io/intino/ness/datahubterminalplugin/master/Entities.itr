@@ -602,13 +602,13 @@ end
 def type(entity) !type(abstract) trigger(enable)
 	default void enable$name+FirstUpperCase(String id) {
 		if(id == null) throw new NullPointerException("Id cannot be null");
-		enable(normalizeId(id, "$name+firstLowerCase"));
+		enable(normalizeId(id, ":$name+firstLowerCase"));
 	}
 end
 
 def type(entity) !type(abstract) trigger(disable)
 	default void disable$name+FirstUpperCase(String id) {
 		if(id == null) throw new NullPointerException("Id cannot be null");
-		disable(normalizeId(id, "$name+firstLowerCase"));
+		disable(normalizeId(id, ":$name+firstLowerCase"));
 	}
 end
