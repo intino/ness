@@ -390,7 +390,7 @@ def type(master & cached)
 				switch(message.intent()) {
 					case Publish: return addEntityInternal(record);
 					case Enable: return enableEntityInternal(value);
-					case Disable: return disableEntityInternal(record.id());
+					case Disable: return disableEntityInternal(value);
 				}
 				throw new IllegalArgumentException("Unknown intent " + message.intent());
 			}
