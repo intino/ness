@@ -21,7 +21,8 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.intino.ness.datahubterminalplugin.Formatters.snakeCaseToCamelCase;
+import static io.intino.ness.datahubterminalplugin.MavenTerminalExecutor.Target.Bpm;
+import static io.intino.ness.datahubterminalplugin.MavenTerminalExecutor.Target.Events;
 import static io.intino.plugin.PluginLauncher.Phase.*;
 
 public class TerminalPublisher {
@@ -53,7 +54,7 @@ public class TerminalPublisher {
 		try {
 			if (!createSources()) return false;
 			logger.println("Publishing " + terminal.name$() + "...");
-			new MavenTerminalExecutor(root, basePackage, Target.EventsAndEntities, terminalNameArtifact(), versions, conf, systemProperties, logger).mvn(invokedPhase == INSTALL ? "install" : "deploy");
+			new MavenTerminalExecutor(root, basePackage, targets(), terminalNameArtifact(), versions, conf, systemProperties, logger).mvn(invokedPhase == INSTALL ? "install" : "deploy");
 			logger.println("Terminal " + terminal.name$() + " published!");
 			return true;
 		} catch (Throwable e) {
@@ -61,6 +62,13 @@ public class TerminalPublisher {
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	private ArrayList<Target> targets() {
+		ArrayList<Target> targets = new ArrayList<>();
+		targets.add(Events);
+		if (terminal.bpm() != null) targets.add(Bpm);
+		return targets;
 	}
 
 	private boolean checkPublish() {
@@ -79,7 +87,7 @@ public class TerminalPublisher {
 		srcDirectory.mkdirs();
 		Map<Event, Datalake.Split> eventSplitMap = collectEvents(tanks);
 		if (duplicatedEvents()) return false;
-		if(!terminal.graph().entityList().isEmpty())
+		if (!terminal.graph().entityList().isEmpty())
 			new MasterRenderer(srcDirectory, terminal.graph(), conf, logger, notifier, basePackage).renderTerminal(terminal);
 		new TerminalRenderer(terminal, eventSplitMap, srcDirectory, basePackage, conf.artifact().code().generationPackage()).render();
 		File resDirectory = new File(root, "res");
