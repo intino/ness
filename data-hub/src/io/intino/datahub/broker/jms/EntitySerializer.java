@@ -3,6 +3,7 @@ package io.intino.datahub.broker.jms;
 import io.intino.alexandria.datalake.file.FileDatalake;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
+import io.intino.datahub.model.NessGraph;
 import io.intino.ness.master.core.Master;
 import io.intino.ness.master.messages.UpdateMasterMessage;
 import io.intino.ness.master.model.Triplet;
@@ -21,10 +22,12 @@ class EntitySerializer {
 	private static final String DATALAKE_ENTITIES_SUBDIR = "entities";
 
 	private final FileDatalake datalake;
+	private final NessGraph graph;
 	private final Master master;
 
-	public EntitySerializer(FileDatalake datalake, Master master) {
+	public EntitySerializer(FileDatalake datalake, NessGraph graph, Master master) {
 		this.datalake = datalake;
+		this.graph = graph;
 		this.master = master;
 	}
 

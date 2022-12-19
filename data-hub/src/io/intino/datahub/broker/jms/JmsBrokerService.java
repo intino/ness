@@ -347,7 +347,7 @@ public class JmsBrokerService implements BrokerService {
 		}
 
 		private void initEntityConsumers() {
-			brokerManager.registerTopicConsumer(entitiesTopic, new EntitySerializer(datalake, master).create());
+			brokerManager.registerTopicConsumer(entitiesTopic, new EntitySerializer(datalake, graph, master).create());
 			Logger.info("Master ignited!");
 		}
 
