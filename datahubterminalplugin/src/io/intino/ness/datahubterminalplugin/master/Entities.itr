@@ -547,7 +547,7 @@ def type(abstract) trigger(getter)
     	switch(Triplet.typeOf(id)) {
     		$subclass+getById...[$NL]
     	}
-    	return null;
+    	return $name+Plural+firstLowerCase().filter(e -> id.equals(e.id().value())).findFirst().orElse(null);
 	}
 
 	@Override

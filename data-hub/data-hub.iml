@@ -147,11 +147,11 @@
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-spring:5.17.3" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-pool:5.17.3" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-jms-pool:5.17.3" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.ness:master:1.1.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.2.0" level="project" />
+    <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.10" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:4.0.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zet:1.0.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:tris:1.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.ness:master:1.1.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.2.0" level="project" />
-    <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.10" level="project" />
   </component>
 </module>

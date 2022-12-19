@@ -27,28 +27,22 @@ public class MasterTripletWriter {
 		this.datalakeEntitiesPath = requireNonNull(datalakeEntitiesPath);
 	}
 
-	public void write(List<Triplet> triplets) throws IOException {
-		synchronized (MasterTripletWriter.class) {
-			for (Map.Entry<String, List<Triplet>> entry : groupByType(triplets)) {
-				write(entry.getKey(), entry.getValue());
+	public void write(String tank, List<Triplet> triplets) throws IOException {
+		synchronized(MasterTripletWriter.class) {
+			File tankDir = new File(datalakeEntitiesPath, capitalize(tank));
+			tankDir.mkdirs();
+
+			File file = new File(tankDir, todaysTimetag() + TRIPLETS_EXTENSION);
+			File tmp = new File(file.getAbsolutePath() + "_" + System.nanoTime() + ".tmp");
+			tmp.deleteOnExit();
+
+			try {
+				if (file.exists()) Files.copy(file.toPath(), tmp.toPath(), REPLACE_EXISTING);
+				Files.write(tmp.toPath(), serialize(triplets), CREATE, WRITE, APPEND);
+				Files.move(tmp.toPath(), file.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
+			} finally {
+				tmp.delete();
 			}
-		}
-	}
-
-	private void write(String tank, List<Triplet> triplets) throws IOException {
-		File tankDir = new File(datalakeEntitiesPath, capitalize(tank));
-		tankDir.mkdirs();
-
-		File file = new File(tankDir, todaysTimetag() + TRIPLETS_EXTENSION);
-		File tmp = new File(file.getAbsolutePath() + "_" + System.nanoTime() + ".tmp");
-		tmp.deleteOnExit();
-
-		try {
-			if (file.exists()) Files.copy(file.toPath(), tmp.toPath(), REPLACE_EXISTING);
-			Files.write(tmp.toPath(), serialize(triplets), CREATE, WRITE, APPEND);
-			Files.move(tmp.toPath(), file.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
-		} finally {
-			tmp.delete();
 		}
 	}
 

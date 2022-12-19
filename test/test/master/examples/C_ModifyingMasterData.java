@@ -36,7 +36,7 @@ public class C_ModifyingMasterData {
 
 		Zone zone = new Zone("my_zone_id")
 				.ownerZone("other:zone")
-				.children(Set.of("A", "B", "C"))
+				.children(List.of("A", "B", "C"))
 				.place(List.of(new GeoPoint(0, 0), new GeoPoint(1, 1)));
 
 		entities.publish(zone);

@@ -161,10 +161,23 @@ public class MasterRenderer {
 				if (subclasses.length > 0) b.add("subclass", subclasses);
 			}
 			b.add(type);
-			if (subscribeEntities.contains(c.name$().toLowerCase())) b.add("subscribe");
-			if (publishEntities.contains(c.name$().toLowerCase())) b.add("publish");
+			if (findRecursivelyIn(c, subscribeEntities)) b.add("subscribe");
+			if (findRecursivelyIn(c, publishEntities)) b.add("publish");
 			return b.toFrame();
 		}).toArray(Frame[]::new);
+	}
+
+	private boolean findRecursivelyIn(Entity entity, Set<String> entities) {
+		if(entities.contains(entity.name$().toLowerCase())) return true;
+		return anyOfItsParentsIsPresent(entity, entities);
+	}
+
+	private boolean anyOfItsParentsIsPresent(Entity entity, Set<String> entities) {
+		if(!entity.isExtensionOf()) return false;
+		Entity parent = entity.asExtensionOf().entity();
+		if(parent == null) return false;
+		if(entities.contains(parent.name$().toLowerCase())) return true;
+		return anyOfItsParentsIsPresent(parent, entities);
 	}
 
 	private Set<String> getSubscribeEntities(Terminal terminal) {

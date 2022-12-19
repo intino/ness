@@ -7,6 +7,7 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.model.Broker;
 import io.intino.datahub.model.Datalake;
+import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.NessGraph;
 import io.intino.ness.master.core.Master;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -347,7 +348,7 @@ public class JmsBrokerService implements BrokerService {
 		}
 
 		private void initEntityConsumers() {
-			brokerManager.registerTopicConsumer(entitiesTopic, new EntitySerializer(datalake, master).create());
+			brokerManager.registerTopicConsumer(entitiesTopic, new EntitySerializer(datalake, graph, master).create());
 			Logger.info("Master ignited!");
 		}
 
