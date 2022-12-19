@@ -7,6 +7,7 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.model.Broker;
 import io.intino.datahub.model.Datalake;
+import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.NessGraph;
 import io.intino.ness.master.core.Master;
 import org.apache.activemq.ActiveMQConnectionFactory;

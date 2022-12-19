@@ -3,15 +3,17 @@ dsl Ness
 Entity MapEntity as Abstract
 	Attribute name as String
 
-Entity Module
+Entity Module as Abstract
 	Attribute name as String
+
+Entity LogModule as ExtensionOf(Module)
+	Attribute logPath as String
 
 Entity Installation as ExtensionOf(MapEntity)
 	Attribute type as Word("Videometry" "WeatherStation")
 	Attribute place as Struct(GeoPoint)
 	Attribute url as String
-	Method getPlaceWkt as Function("\"POINT(\" + place.latitude() + \" \" + place.longitude() + \")\"")
-		ReturnType as String
+	Method getPlaceWkt as StringGetter("\"POINT(\" + place.latitude() + \" \" + place.longitude() + \")\"")
 	Method setPlaceWkt as Routine("place(new GeoPoint(latitude, longitude))")
 		Parameter latitude as Double
 		Parameter longitude as Double
@@ -19,8 +21,18 @@ Entity Installation as ExtensionOf(MapEntity)
 Entity Zone as ExtensionOf(MapEntity)
 	Attribute place as Struct(GeoPoint) List
 	Attribute ownerZone as Entity(Zone)
-	Attribute children as Entity(MapEntity) Set
+	Attribute children as Entity(MapEntity) List
+
+	Method hasChildren as BooleanGetter("!children().isEmpty()")
+
+	Method firstChild as Function("hasChildren() ? children().get(0) : null")
+		ReturnType as Entity(MapEntity)
+
 	Method placeWkt as StringGetter("\"POLYGON(\" + place.stream().map(p -> p.latitude() + \" \" + p.longitude()).collect(Collectors.joining(\", \")) + \")\"")
+
+	Method addPlace as Routine("place.add(point)")
+		Parameter point as Struct(GeoPoint)
+
 
 Entity AlertConfiguration
 	Attribute entityId as String

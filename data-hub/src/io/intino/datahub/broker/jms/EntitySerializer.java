@@ -3,19 +3,27 @@ package io.intino.datahub.broker.jms;
 import io.intino.alexandria.datalake.file.FileDatalake;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
+import io.intino.datahub.model.Datalake;
+import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.NessGraph;
+import io.intino.magritte.framework.Layer;
 import io.intino.ness.master.core.Master;
 import io.intino.ness.master.messages.UpdateMasterMessage;
 import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.model.TripletRecord;
 import io.intino.ness.master.persistence.MasterTripletWriter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyList;
 
 class EntitySerializer {
 
@@ -55,6 +63,8 @@ class EntitySerializer {
 
 	public class MasterMessageHandler {
 
+		private String entityId;
+
 		public void handle(Message rawMessage) throws Exception {
 			if (!UpdateMasterMessage.class.getName().equals(rawMessage.get("messageClass").asString())) return;
 			UpdateMasterMessage message = new UpdateMasterMessage(rawMessage);
@@ -75,6 +85,7 @@ class EntitySerializer {
 
 		private void handlePublish(UpdateMasterMessage message) throws Exception {
 			TripletRecord record = master.serializer().deserialize(message.value());
+			entityId = record.id();
 			if (publishNewOrModifiedTriplets(message)) {
 				master.masterMap().put(record.id(), message.value());
 			}
@@ -89,6 +100,7 @@ class EntitySerializer {
 		}
 
 		private void setEnableOrDisable(UpdateMasterMessage message, boolean enabledNewValue) throws IOException {
+			entityId = message.value();
 			String serializedRecord = master.masterMap().get(message.value());
 			if (serializedRecord == null) return;
 
@@ -101,15 +113,51 @@ class EntitySerializer {
 			serializedRecord = master.serializer().serialize(record);
 			master.masterMap().put(record.id(), serializedRecord);
 
-			new MasterTripletWriter(new File(datalake.root(), DATALAKE_ENTITIES_SUBDIR)).write(List.of(record.getTriplet("enabled")));
+			saveToDatalake(List.of(record.getTriplet("enabled")));
 		}
 
 		private boolean publishNewOrModifiedTriplets(UpdateMasterMessage message) throws Exception {
 			List<Triplet> tripletsToPublish = getNewOrModifiedTriplets(master.serializer().deserialize(message.value()));
 			if (tripletsToPublish.isEmpty()) return false;
 			setAuthorToTriplets(message.clientName(), tripletsToPublish);
-			new MasterTripletWriter(new File(master.datalakeRootPath(), DATALAKE_ENTITIES_SUBDIR)).write(tripletsToPublish);
+			saveToDatalake(tripletsToPublish);
 			return true;
+		}
+
+		private void saveToDatalake(List<Triplet> triplets) throws IOException {
+			for(String tank : tanksOf()) {
+				new MasterTripletWriter(new File(master.datalakeRootPath(), DATALAKE_ENTITIES_SUBDIR)).write(tank, triplets);
+			}
+		}
+
+		private Iterable<String> tanksOf() {
+			String type = Triplet.typeOf(entityId);
+			List<String> targets = new ArrayList<>();
+
+			Entity entity = graph.entityList().stream().filter(e -> e.name$().equals(StringUtils.capitalize(type))).findFirst().orElse(null);
+			if(entity == null) return emptyList();
+			if(entity.isExtensionOf()) addParentEntities(entity.asExtensionOf().entity(), targets);
+			targets.add(entity.name$());
+
+			Set<String> tanks = definedTanks();
+			targets.removeIf(t -> !tanks.contains(t));
+
+			return targets;
+		}
+
+		private Set<String> definedTanks() {
+			return graph.datalake().tankList().stream()
+					.filter(Datalake.Tank::isEntity)
+					.map(Datalake.Tank::asEntity)
+					.map(Datalake.Tank.Entity::entity)
+					.map(Layer::name$)
+					.collect(Collectors.toSet());
+		}
+
+		private void addParentEntities(Entity entity, List<String> targets) {
+			if(entity == null) return;
+			targets.add(entity.name$());
+			if(entity.isExtensionOf()) addParentEntities(entity.asExtensionOf().entity(), targets);
 		}
 
 		private List<Triplet> getNewOrModifiedTriplets(TripletRecord newRecord) {
