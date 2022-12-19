@@ -96,6 +96,7 @@ public class MavenTerminalExecutor {
 				add("artifact", "ontology").
 				add("terminalVersion", versions.get("terminal-jms")).
 				add("ingestionVersion", versions.get("ingestion")).
+				add("datalakeVersion", versions.get("datalake")).
 				add("masterVersion", versions.get("master")).
 				add("version", version);
 	}

@@ -64,6 +64,15 @@ public class ArtifactoryConnector {
 		}
 	}
 
+	public static List<String> datalakeVersions() {
+		try {
+			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/datalake/maven-metadata.xml");
+			return extractVersions(read(connect(url)).toString());
+		} catch (Throwable e) {
+			return Collections.emptyList();
+		}
+	}
+
 	public static List<String> bpmVersions() {
 		try {
 			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/bpm-framework/maven-metadata.xml");

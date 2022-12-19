@@ -23,6 +23,8 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private static final String MINIMUM_EVENT_VERSION = "3.0.0";
 	private static final String MINIMUM_INGESTION_VERSION = "4.0.5";
 	private static final String MINIMUM_MASTER_VERSION = "1.0.0";
+	private static final String MINIMUM_DATALAKE_VERSION = "5.0.3";
+	private static final String MAX_DATALAKE_VERSION = "6.0.0";
 	private static final String MAX_TERMINAL_JMS_VERSION = "5.0.0";
 	private static final String MAX_INGESTION_VERSION = "5.0.0";
 	private static final String MAX_EVENT_VERSION = "4.0.0";
@@ -54,7 +56,8 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 				"ingestion", ingestionVersion(),
 				"bpm", bpmVersion(),
 				"master", masterVersion(),
-				"event", eventVersion());
+				"event", eventVersion(),
+				"datalake", datalakeVersion());
 	}
 
 	private boolean publishOntology(NessGraph graph, Map<String, String> versions, File tempDir) {
@@ -149,6 +152,12 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	}
 
 
+	private String datalakeVersion() {
+		List<String> versions = ArtifactoryConnector.datalakeVersions();
+		Collections.reverse(versions);
+		return versions.isEmpty() ? MINIMUM_DATALAKE_VERSION : suitableDatalakeVersion(versions);
+	}
+
 	private String suitableTerminalVersion(List<String> versions) {
 		return versions.stream().filter(version -> version.compareTo(MAX_TERMINAL_JMS_VERSION) < 0).findFirst().orElse(MINIMUM_TERMINAL_JMS_VERSION);
 	}
@@ -159,6 +168,10 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 
 	private String suitableEventVersion(List<String> versions) {
 		return versions.stream().filter(v -> v.compareTo(MAX_EVENT_VERSION) < 0).findFirst().orElse(MINIMUM_EVENT_VERSION);
+	}
+
+	private String suitableDatalakeVersion(List<String> versions) {
+		return versions.stream().filter(v -> v.compareTo(MAX_DATALAKE_VERSION) < 0).findFirst().orElse(MINIMUM_EVENT_VERSION);
 	}
 
 	private boolean isSnapshotVersion() {
