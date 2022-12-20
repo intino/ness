@@ -285,8 +285,10 @@ def type(master & cached)
 			try {
 				Message message = connector.requestResponse(ENTITY_STORE_SERVICE_PATH, downloadMessage(filter));
 				return handleResponse(message);
+			} catch (NullPointerException e) {
+				throw new MasterInitializationException("Could not load data from master: no response from datahub.");
 			} catch (Exception e) {
-				throw new MasterInitializationException("Could not load data from master: " + e.getMessage(), e);
+				throw new MasterInitializationException("Could not load data from master: " + e.getMessage());
 			}
 		}
 
