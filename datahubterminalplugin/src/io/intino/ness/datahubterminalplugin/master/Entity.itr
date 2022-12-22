@@ -29,6 +29,8 @@ def type(entity & class)
 	public[ $isAbstract+firstLowerCase] class $abstract~$name+FirstUpperCase extends $parent {
 
 		protected static final String LIST_SEP = ",";
+		protected static final String MAP_ENTRY_SEP = ";";
+		protected static final String MAP_KEY_VALUE_CONNECTOR = "=";
 
 		[$attribute+wordDeclaration...[$NL]]
 
@@ -77,6 +79,18 @@ def type(entity & class)
 		[$attribute+addAndRemoveMethod...[$NL$NL]]
 
 		$normalizeId+normalizeIdMethod
+
+		private static boolean isNullOrEmpty(String s) {
+			return s == null || s.isEmpty();
+		}
+
+		private static <T> List<T> nullOrEmptyList(String s) {
+			return s == null ? null : new ArrayList<>(0);
+		}
+
+		private static <T> Set<T> nullOrEmptySet(String s) {
+			return s == null ? null : new LinkedHashSet<>(0);
+		}
     }
 end
 
@@ -126,35 +140,35 @@ def trigger(addAndRemoveMethod)
 end
 
 def type(boolean) type(list) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Boolean::parseBoolean).collect(Collectors.toList());
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptyList(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Boolean::parseBoolean).collect(Collectors.toList());
 end
 
 def type(integer) type(list) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Integer::parseInt).collect(Collectors.toList());
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptyList(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Integer::parseInt).collect(Collectors.toList());
 end
 
 def type(double) type(list) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Double::parseDouble).collect(Collectors.toList());
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptyList(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Double::parseDouble).collect(Collectors.toList());
 end
 
 def type(long) type(list) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Long::parseLong).collect(Collectors.toList());
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptyList(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Long::parseLong).collect(Collectors.toList());
 end
 
 def type(word) type(list) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map($typeParameter+firstUpperCase::valueOf).collect(Collectors.toList());
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptyList(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map($typeParameter+firstUpperCase::valueOf).collect(Collectors.toList());
 end
 
 def type(word) type(set) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map($typeParameter+firstUpperCase::valueOf).collect(Collectors.toCollection(LinkedHashSet::new));
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptySet(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map($typeParameter+firstUpperCase::valueOf).collect(Collectors.toCollection(LinkedHashSet::new));
 end
 
 def type(string) type(list) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).collect(Collectors.toList());
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptyList(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).collect(Collectors.toList());
 end
 
 def type(entity) type(list) type(component) trigger(add)
-	if(triplet.value() == null) {
+	if(isNullOrEmpty(triplet.value())) {
 		this.$name+firstLowerCase = null;
 		return;
 	}
@@ -171,17 +185,12 @@ def type(entity) type(list) type(component) trigger(add)
 end
 
 def type(entity) type(list) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).collect(Collectors.toList());
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptyList(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).collect(Collectors.toList());
 end
 
 def type(struct) type(list) trigger(add)
-	if(triplet.value() == null) {
+	if(isNullOrEmpty(triplet.value())) {
     	$name+firstLowerCase = null;
-    	return;
-    }
-
-    if(triplet.value().isEmpty()) {
-    	$name+firstLowerCase = new ArrayList<>(0);
     	return;
     }
 
@@ -199,13 +208,8 @@ def type(struct) type(list) trigger(add)
 end
 
 def type(struct) type(set) trigger(add)
-	if(triplet.value() == null) {
+	if(isNullOrEmpty(triplet.value())) {
     	$name+firstLowerCase = null;
-    	return;
-    }
-
-    if(triplet.value().isEmpty()) {
-    	$name+firstLowerCase = new LinkedHashSet<>(0);
     	return;
     }
 
@@ -223,44 +227,44 @@ def type(struct) type(set) trigger(add)
 end
 
 def type(date) type(list) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.LocalDate.parse(s, java.time.format.DateTimeFormatter.ofPattern("$format"))).collect(Collectors.toList()));
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptyList(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.LocalDate.parse(s, java.time.format.DateTimeFormatter.ofPattern("$format"))).collect(Collectors.toList());
 end
 
 def type(datetime) type(list) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.LocalDateTime.parse(s, java.time.format.DateTimeFormatter.ofPattern("$format"))).collect(Collectors.toList()));
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptyList(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.LocalDateTime.parse(s, java.time.format.DateTimeFormatter.ofPattern("$format"))).collect(Collectors.toList());
 end
 
 def type(instant) type(list) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.Instant.ofEpochMilli(Long.parseLong(s))).collect(Collectors.toList()));
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptyList(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.Instant.ofEpochMilli(Long.parseLong(s))).collect(Collectors.toList());
 end
 
 
 def type(boolean) type(set) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Boolean::parseBoolean).collect(Collectors.toCollection(LinkedHashSet::new));
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptySet(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Boolean::parseBoolean).collect(Collectors.toCollection(LinkedHashSet::new));
 end
 
 def type(integer) type(set) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Integer::parseInt).collect(Collectors.toCollection(LinkedHashSet::new));
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptySet(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Integer::parseInt).collect(Collectors.toCollection(LinkedHashSet::new));
 end
 
 def type(double) type(set) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Double::parseDouble).collect(Collectors.toCollection(LinkedHashSet::new));
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptySet(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Double::parseDouble).collect(Collectors.toCollection(LinkedHashSet::new));
 end
 
 def type(long) type(set) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Long::parseLong).collect(Collectors.toCollection(LinkedHashSet::new));
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptySet(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(Long::parseLong).collect(Collectors.toCollection(LinkedHashSet::new));
 end
 
 def type(word) type(list) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map($type+firstUpperCase::valueOf).collect(Collectors.toList());
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptyList(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map($type+firstUpperCase::valueOf).collect(Collectors.toList());
 end
 
 def type(word) type(set) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map($type+firstUpperCase::valueOf).collect(Collectors.toCollection(LinkedHashSet::new));
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptySet(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map($type+firstUpperCase::valueOf).collect(Collectors.toCollection(LinkedHashSet::new));
 end
 
 def type(string) type(set) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).collect(Collectors.toCollection(LinkedHashSet::new));
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptySet(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).collect(Collectors.toCollection(LinkedHashSet::new));
 end
 
 def type(entity) type(set) type(component) trigger(add)
@@ -268,6 +272,11 @@ def type(entity) type(set) type(component) trigger(add)
 		this.$name+firstLowerCase = null;
 		return;
 	}
+
+	if(triplet.value().isEmpty()) {
+		this.$name+firstLowerCase = new LinkedHashSet<>(0);
+    	return;
+    }
 
 	io.intino.ness.master.serialization.MasterSerializer serializer = entities().serializer();
 	String$[$] items = triplet.value().split(LIST_SEP);
@@ -281,19 +290,19 @@ def type(entity) type(set) type(component) trigger(add)
 end
 
 def type(entity) type(set) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).collect(Collectors.toCollection(LinkedHashSet::new));
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptySet(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).collect(Collectors.toCollection(LinkedHashSet::new));
 end
 
 def type(date) type(set) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.LocalDate.parse(s, java.time.format.DateTimeFormatter.ofPattern("$format"))).collect(Collectors.toCollection(LinkedHashSet::new)));
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptySet(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.LocalDate.parse(s, java.time.format.DateTimeFormatter.ofPattern("$format"))).collect(Collectors.toCollection(LinkedHashSet::new));
 end
 
 def type(datetime) type(set) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.LocalDateTime.parse(s, java.time.format.DateTimeFormatter.ofPattern("$format"))).collect(Collectors.toCollection(LinkedHashSet::new)));
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptySet(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.LocalDateTime.parse(s, java.time.format.DateTimeFormatter.ofPattern("$format"))).collect(Collectors.toCollection(LinkedHashSet::new));
 end
 
 def type(instant) type(set) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null ? null : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.Instant.ofEpochMilli(Long.parseLong(s))).collect(Collectors.toCollection(LinkedHashSet::new)));
+	this.$name+firstLowerCase = isNullOrEmpty(triplet.value()) ? nullOrEmptySet(triplet.value()) : Arrays.stream(triplet.value().split(LIST_SEP)).map(String::trim).map(s -> java.time.Instant.ofEpochMilli(Long.parseLong(s))).collect(Collectors.toCollection(LinkedHashSet::new));
 end
 
 
@@ -386,11 +395,22 @@ def type(instant) trigger(add)
 end
 
 def type(map) trigger(add)
-	this.$name+firstLowerCase = triplet.value() == null
-		? null
-		: java.util.Arrays.stream(triplet.value().split(";"))
-			.map(e -> e.split("="))
-			.collect(java.util.stream.Collectors.toMap(e -> e$[0].trim(), e -> e$[1].trim()));
+	if(triplet.value() == null) {
+		this.$name+firstLowerCase = null;
+		return;
+	}
+
+	if(triplet.value().isEmpty()) {
+		this.$name+firstLowerCase = new LinkedHashMap<>(0);
+        return;
+	}
+
+	String$[$] split = triplet.value().split(MAP_ENTRY_SEP);
+	Map<String, String> map = new LinkedHashMap<>(split.length);
+	java.util.Arrays.stream(split)
+			.map(e -> e.split(MAP_KEY_VALUE_CONNECTOR))
+			.forEach(e -> map.put(e$[0].trim(), e$[1].trim()));
+	this.$name+firstLowerCase = map;
 end
 
 def type(struct) trigger(add)
@@ -443,7 +463,7 @@ def type(struct) trigger(remove)
 end
 
 def type(word) type(list | set) trigger(asTriplet)
-	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", $name+firstLowerCase~.stream().map(e -> e.name()).collect(Collectors.joining(LIST_SEP))));
+	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", $name+firstLowerCase == null ? null : $name+firstLowerCase~.stream().map(e -> e.name()).collect(Collectors.joining(LIST_SEP))));
 end
 
 def type(word) trigger(asTriplet)
@@ -486,12 +506,28 @@ def type(entity) trigger(asTriplet)
 	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", $name+firstLowerCase~Reference == null ? null : Triplet.stringValueOf($name+firstLowerCase~Reference)));
 end
 
+def type(date | datetime) type(list | set) trigger(asTriplet)
+	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", $name+firstLowerCase == null ? null : $name+firstLowerCase~.stream().map(d -> d == null ? Triplet.NULL : d.format(java.time.format.DateTimeFormatter.ofPattern("$format"))).collect(Collectors.joining(LIST_SEP))));
+end
+
+def type(instant) type(list | set) trigger(asTriplet)
+	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", $name+firstLowerCase == null ? null : $name+firstLowerCase~.stream().map(i -> i == null ? Triplet.NULL : Triplet.stringValueOf(i.toEpochMilli())).collect(Collectors.joining(LIST_SEP))));
+end
+
 def type(date | datetime) trigger(asTriplet)
 	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", $name+firstLowerCase == null ? null : $name+firstLowerCase~.format(java.time.format.DateTimeFormatter.ofPattern("$format"))));
 end
 
 def type(instant) trigger(asTriplet)
 	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", $name+firstLowerCase == null ? null : Triplet.stringValueOf($name+firstLowerCase~.toEpochMilli())));
+end
+
+def type(list | set) trigger(asTriplet)
+	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", $name+firstLowerCase == null ? null : $name+firstLowerCase.stream().map(String::valueOf).collect(Collectors.joining(LIST_SEP))));
+end
+
+def type(map) trigger(asTriplet)
+	triplets.add(new Triplet(id().get(), "$name+firstLowerCase", $name+firstLowerCase == null ? null : $name+firstLowerCase.entrySet().stream().map(e -> Triplet.stringValueOf(e.getKey()) + MAP_KEY_VALUE_CONNECTOR + Triplet.stringValueOf(e.getValue())).collect(Collectors.joining(MAP_ENTRY_SEP))));
 end
 
 def trigger(asTriplet)
@@ -536,6 +572,30 @@ end
 
 def type(entity) trigger(field)
 	protected String $name+firstLowerCase~Reference;
+end
+
+def type(date) type(list) trigger(field)
+	protected List<java.time.LocalDate> $name+firstLowerCase;
+end
+
+def type(datetime) type(list) trigger(field)
+	protected List<java.time.LocalDateTime> $name+firstLowerCase;
+end
+
+def type(instant) type(list) trigger(field)
+	protected List<java.time.Instant> $name+firstLowerCase;
+end
+
+def type(date) type(set) trigger(field)
+	protected Set<java.time.LocalDate> $name+firstLowerCase;
+end
+
+def type(datetime) type(set) trigger(field)
+	protected Set<java.time.LocalDateTime> $name+firstLowerCase;
+end
+
+def type(instant) type(set) trigger(field)
+	protected Set<java.time.Instant> $name+firstLowerCase;
 end
 
 def type(date) trigger(field)
@@ -669,6 +729,72 @@ def type(entity) trigger(getterAndSetter)
 
 	public $entityOwner+firstUpperCase $name+firstLowerCase(String $name+firstLowerCase~Id) {
 		$name+firstLowerCase~Reference = $name+firstLowerCase~Id;
+		return $castToSubclass~this;
+	}
+end
+
+def type(date) type(list) trigger(getterAndSetter)
+	public List<java.time.LocalDate> $name+firstLowerCase() {
+		return this.$name+firstLowerCase;
+	}
+
+	public $entityOwner+firstUpperCase $name+firstLowerCase(List<java.time.LocalDate> $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
+		return $castToSubclass~this;
+	}
+end
+
+def type(datetime) type(list) trigger(getterAndSetter)
+	public List<java.time.LocalDateTime> $name+firstLowerCase() {
+		return this.$name+firstLowerCase;
+	}
+
+	public $entityOwner+firstUpperCase $name+firstLowerCase(List<java.time.LocalDateTime> $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
+		return $castToSubclass~this;
+	}
+end
+
+def type(instant) type(list) trigger(getterAndSetter)
+	public List<java.time.Instant> $name+firstLowerCase() {
+		return this.$name+firstLowerCase;
+	}
+
+	public $entityOwner+firstUpperCase $name+firstLowerCase(List<java.time.Instant> $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
+		return $castToSubclass~this;
+	}
+end
+
+def type(date) type(set) trigger(getterAndSetter)
+	public Set<java.time.LocalDate> $name+firstLowerCase() {
+		return this.$name+firstLowerCase;
+	}
+
+	public $entityOwner+firstUpperCase $name+firstLowerCase(Set<java.time.LocalDate> $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
+		return $castToSubclass~this;
+	}
+end
+
+def type(datetime) type(set) trigger(getterAndSetter)
+	public Set<java.time.LocalDateTime> $name+firstLowerCase() {
+		return this.$name+firstLowerCase;
+	}
+
+	public $entityOwner+firstUpperCase $name+firstLowerCase(Set<java.time.LocalDateTime> $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
+		return $castToSubclass~this;
+	}
+end
+
+def type(instant) type(set) trigger(getterAndSetter)
+	public Set<java.time.Instant> $name+firstLowerCase() {
+		return this.$name+firstLowerCase;
+	}
+
+	public $entityOwner+firstUpperCase $name+firstLowerCase(Set<java.time.Instant> $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
 		return $castToSubclass~this;
 	}
 end
