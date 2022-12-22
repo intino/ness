@@ -3,11 +3,11 @@ dsl Ness
 Entity MapEntity as Abstract
 	Attribute name as String
 
-Entity Module as Abstract
-	Attribute name as String
-
-Entity LogModule as ExtensionOf(Module)
-	Attribute logPath as String
+//Entity Module as Abstract
+//	Attribute name as String
+//
+//Entity LogModule as ExtensionOf(Module)
+//	Attribute logPath as String
 
 Entity Installation as ExtensionOf(MapEntity)
 	Attribute type as Word("Videometry" "WeatherStation")
@@ -19,9 +19,14 @@ Entity Installation as ExtensionOf(MapEntity)
 		Parameter longitude as Double
 
 Entity Zone as ExtensionOf(MapEntity)
+	Attribute strings as String List
+	Attribute ints as Integer List
+	Attribute stringsSet as String Set
+	Attribute intsSet as Integer Set
 	Attribute place as Struct(GeoPoint) List
 	Attribute ownerZone as Entity(Zone)
 	Attribute children as Entity(MapEntity) List
+	Attribute myMap as Map
 
 	Method hasChildren as BooleanGetter("!children().isEmpty()")
 

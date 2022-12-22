@@ -159,9 +159,9 @@ public class EntityFrameCreator {
 	}
 
 	private static String defaultValueOf(String type, Parameter defaultValue) {
-		if(type.contains("List<")) return "new java.util.ArrayList<>()";
-		if(type.contains("Set<")) return "new java.util.LinkedHashSet<>()";
-		if(type.contains("Map<")) return "new java.util.LinkedHashMap<>()";
+		if(type.contains("List<")) return "null";
+		if(type.contains("Set<")) return "null";
+		if(type.contains("Map<")) return "null";
 		return defaultValue.values().get(0).toString();
 	}
 
@@ -177,6 +177,9 @@ public class EntityFrameCreator {
 
 		boolean set = node.conceptList().stream().anyMatch(a -> a.name().equals("Set"));
 		if (set) return SetTypes.getOrDefault(aspect, "Set<" + firstUpperCase().format(node.name()).toString() + ">");
+
+		boolean map = node.conceptList().stream().anyMatch(a -> a.name().equals("Map"));
+		if (map) return "Map<String, String>";
 
 		return TheTypes.getOrDefault(aspect, firstUpperCase().format(node.name()).toString());
 	}
