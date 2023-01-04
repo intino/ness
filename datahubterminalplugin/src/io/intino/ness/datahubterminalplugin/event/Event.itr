@@ -33,6 +33,10 @@ def trigger(event)
 			return this;
 		}
 
+		public static $name+firstUpperCase fromString(String event) {
+			return new $name+firstUpperCase(new io.intino.alexandria.message.MessageReader(event).next());
+		}
+
 		[$attribute+getter...[$NL$NL]]
 
 		[$component+getter...[$NL$NL]]
