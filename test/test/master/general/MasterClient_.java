@@ -3,7 +3,6 @@ package master.general;
 import io.intino.alexandria.terminal.JmsConnector;
 import io.intino.test.datahubtest.TestTerminal;
 import io.intino.test.datahubtest.master.Entities;
-import io.intino.test.datahubtest.master.entities.LogModule;
 import io.intino.test.datahubtest.master.entities.Zone;
 import io.intino.test.datahubtest.master.structs.GeoPoint;
 
@@ -24,6 +23,10 @@ public class MasterClient_ {
 				.name("A B C")
 		);
 		entities.disableZone("a9d7d8a8-ef30-46a5-888d-45843a68dea3");
+
+		entities.addApplicationModuleEntityListener(event -> {
+			System.out.println(event.type() + " => " + event.entityId());
+		});
 	}
 
 	private static List<GeoPoint> place() {
