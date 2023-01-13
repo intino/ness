@@ -18,8 +18,6 @@ Datalake(Month, path = "") dl
 	Tank attributeListReference as Entity(entity = AttributeListReference)
 	Tank deepReference as Entity(entity = DeepReference)
 
-	Tank module as Entity(Module)
-
 	ProcessStatus(split = Divisiones)
 	Backup
 		Cron(pattern = "0 0 12 1/1 * ? *", timeZone = "Atlantic/Canary")
@@ -59,5 +57,5 @@ Event Example
 	Attribute names as Text List
 
 Terminal testTerminal
-	Publish(eventTanks = dl.example, entityTanks = dl.zone dl.attributeListReference dl.module)
-	Subscribe(eventTanks = dl.example, entityTanks = dl.zone dl.installation dl.deepReference dl.module)
+	Publish(eventTanks = dl.example, entityTanks = dl.zone dl.attributeListReference)
+	Subscribe(eventTanks = dl.example, entityTanks = dl.zone dl.installation dl.deepReference)
