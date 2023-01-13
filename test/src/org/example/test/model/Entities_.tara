@@ -1,0 +1,53 @@
+dsl Ness
+//
+//
+//Entity User
+//	Attribute name as String
+//	Attribute displayName as String
+//	Attribute email as String
+//
+//Entity Team
+//	Attribute displayName as String
+//	Attribute channels as Entity(Channel) List
+//
+//Entity Channel as Component
+//	Attribute displayName as String
+//
+//Entity Module as Abstract
+//	Attribute place as String
+//	Attribute service as String
+//
+//Entity LogModule as ExtensionOf(Module)
+//	Attribute logPath as String
+//
+//Entity RdbmsModule as ExtensionOf(Module)
+//	Attribute url as String
+//
+//Entity ApplicationModule as ExtensionOf(Module)
+//	Attribute applications as String List
+//	Attribute applications2 as Integer List
+//	Attribute applications3 as Double List
+//	Attribute applications6 as Long List
+//	Attribute applications4 as Date List
+//	Attribute applications5 as DateTime List
+//	Attribute applications55 as Instant List
+//	Attribute applications7 as Struct(Hola) List
+//	Attribute applications8 as Entity(LogModule) List
+//	Attribute applications9 as Word("A" "B" "G") List
+//
+//	Attribute setapplications as String Set
+//    Attribute setapplications2 as Integer Set
+//    Attribute setapplications3 as Double Set
+//    Attribute setapplications6 as Long Set
+//    Attribute setapplications4 as Date Set
+//    Attribute setapplications5 as DateTime Set
+//    Attribute setapplications55 as Instant Set
+//    Attribute setapplications7 as Struct(Hola) Set
+//    Attribute setapplications8 as Entity(LogModule) Set
+//    Attribute setapplications9 as Word("A" "B" "G") Set
+//
+//	Attribute myMap as Map
+//
+//
+//Struct Hola
+//	Attribute name as String
