@@ -273,12 +273,15 @@ public class MasterRenderer {
 	private Frame[] subclassesOf(Entity parent) {
 		return model.entityList().stream()
 				.filter(e -> isSubclassOf(e, parent))
-				.map(c -> new FrameBuilder("subclass").add("package", modelPackage + ".master").add("name", c.name$()).toFrame())
+				.map(c -> new FrameBuilder("subclass").add("package", modelPackage + ".master")
+						.add("name", c.name$()).toFrame())
 				.toArray(Frame[]::new);
 	}
 
-	private static boolean isSubclassOf(Entity node, Entity parent) {
-		return node.isExtensionOf() && node.asExtensionOf().entity().equals(parent);//TODO ojo con las jerarquias. Aquí no se comprueba nada mas que la ascendencia directa
+	private static boolean isSubclassOf(Entity node, Entity expectedParent) {
+		if(!node.isExtensionOf()) return false;
+		Entity parent = node.asExtensionOf().entity();
+		return parent.equals(expectedParent) || isSubclassOf(parent, expectedParent);
 	}
 
 	private Map<String, String> renderEntityNode(Entity entity) {

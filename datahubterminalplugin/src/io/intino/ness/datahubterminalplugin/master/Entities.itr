@@ -535,7 +535,7 @@ def !type(abstract) type(subscribe) trigger(disableEntityInternal)
 end
 
 def type(subclass) trigger(getById)
-	case "$name+lowerCase": return $name+firstLowerCase(id);
+	case "$name+firstLowerCase": return $name+firstLowerCase(id);
 end
 
 def type(subclass) trigger(getAllStream)

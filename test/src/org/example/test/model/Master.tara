@@ -1,62 +1,42 @@
 dsl Ness
 
+Entity UserInfo
+	Attribute username as String
+	Attribute password as String
+	Attribute role as Word("User" "Admin" "Developer")
+
 Entity MapEntity as Abstract
 	Attribute name as String
+	Attribute sensId as String
 
-//Entity Module as Abstract
-//	Attribute name as String
-//
-//Entity LogModule as ExtensionOf(Module)
-//	Attribute logPath as String
-
-Entity Installation as ExtensionOf(MapEntity)
-	Attribute type as Word("Videometry" "WeatherStation")
+Entity Installation as Abstract ExtensionOf(MapEntity)
 	Attribute place as Struct(GeoPoint)
-	Attribute url as String
 	Method getPlaceWkt as StringGetter("\"POINT(\" + place.latitude() + \" \" + place.longitude() + \")\"")
 	Method setPlaceWkt as Routine("place(new GeoPoint(latitude, longitude))")
 		Parameter latitude as Double
 		Parameter longitude as Double
 
+Entity Videometry as ExtensionOf(Installation)
+	Attribute zones as String Set
+
+Entity WeatherStation as ExtensionOf(Installation)
+	Attribute url as String
+
 Entity Zone as ExtensionOf(MapEntity)
-	Attribute strings as String List
-	Attribute ints as Integer List
-	Attribute stringsSet as String Set
-	Attribute intsSet as Integer Set
+	Attribute parent as String
+	Attribute children as String Set
 	Attribute place as Struct(GeoPoint) List
-	Attribute ownerZone as Entity(Zone)
-	Attribute children as Entity(MapEntity) List
-	Attribute myMap as Map
-
-	Method hasChildren as BooleanGetter("!children().isEmpty()")
-
-	Method firstChild as Function("hasChildren() ? children().get(0) : null")
-		ReturnType as Entity(MapEntity)
-
-	Method placeWkt as StringGetter("\"POLYGON(\" + place.stream().map(p -> p.latitude() + \" \" + p.longitude()).collect(Collectors.joining(\", \")) + \")\"")
-
-	Method addPlace as Routine("place.add(point)")
-		Parameter point as Struct(GeoPoint)
-
+	Method getPlaceWkt as StringGetter("\"POLYGON(\" + place.stream().map(p -> p.latitude() + \" \" + p.longitude()).collect(Collectors.joining(\", \")) + \")\"")
 
 Entity AlertConfiguration
 	Attribute entityId as String
 	Attribute type as Word("BeachSandOccupancy" "DrySandArea" "WetSandArea" "Tide" "LostConnection")
-	Attribute timeScale as Word("Minute" "Hour" "Day" "Week" "Month" "Year")
+	Attribute timeScale as Word("Hour" "Day" "Week" "Month" "Year")
 	Attribute enabledMin as Boolean
 	Attribute min as Double
 	Attribute enabledMax as Boolean
 	Attribute max as Double
-	Attribute recipients as String Set
-
-Entity Employee
-	Attribute name as String
-	Attribute theater as Entity(Theater)
-
-Entity Theater
-	Attribute name as String
 
 Struct GeoPoint
 	Attribute latitude as Double
 	Attribute longitude as Double
-	Method sqrtLength as DoubleGetter("latitude*latitude + longitude*longitude")
