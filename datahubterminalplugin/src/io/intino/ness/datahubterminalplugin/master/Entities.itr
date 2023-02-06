@@ -556,7 +556,7 @@ def type(abstract) trigger(getter)
 	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
 		return Stream.of(
 			$subclass+getAllStream...[,$NL]
-		).flatMap(java.util.function.Function.identity()).distinct();
+		).<$package.entities.$name+FirstUpperCase>flatMap(java.util.function.Function.identity()).distinct();
 	}
 end
 
