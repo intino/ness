@@ -1,0 +1,99 @@
+dsl Ness
+
+Namespace monitoring
+	Event AnomalyBundle
+		Attribute place as Text
+		Component Anomaly
+			Attribute code as Text
+			Attribute triggerValue as Text
+	Event Notification
+		Attribute destination as Text
+		Attribute content as Text
+		Attribute type as Word("text" "file" "image" "question")
+
+Namespace it
+	Event Mode
+		Attribute asset as Text
+		Attribute value as Word("Off" "On")
+	Event Status
+		Attribute asset as Text
+		Attribute memory as LongInteger
+		Attribute hdd as LongInteger
+		Attribute cpu as Real
+		Attribute kernelTemperature as Real
+		Attribute temperature as Real
+		Attribute mBytesReadFromNetwork as Integer
+		Attribute mBytesSentToNetwork as Integer
+		Attribute openFiles as Integer
+		Attribute threads as Integer
+		Attribute processCount as Integer
+		Component(multiple = true) RDBMS
+			Attribute module as Text
+			Component(multiple = true) Statement
+				Attribute sql as Text
+				Attribute totalCpuTime as Real
+				Attribute totalElapsedTime as Real
+				Attribute executionCount as Integer
+				Attribute callsPerSecond as Integer
+				Attribute maxLogicalReads as Integer
+				Attribute maxLogicalWrites as Integer
+		Component(multiple = true) Process
+			Attribute name as Text
+			Attribute user as Text
+			Attribute startingTime as DateTime
+			Attribute pid as Integer
+			Attribute commandLine as Text
+			Component(multiple = false) ProcessStatus
+				Attribute state as Word("NEW" "RUNNING" "SLEEPING" "WAITING" "ZOMBIE" "STOPPED" "OTHER" "INVALID" "SUSPENDED")
+				Attribute memory as LongInteger
+				Attribute cpu as Real
+				Attribute threads as Integer
+				Attribute openFiles as LongInteger
+				Attribute mBytesRead as LongInteger
+				Attribute mBytesWritten as LongInteger
+		Component(multiple = true) JavaProcess as ExtensionOf(Process)
+        	Attribute classpathPrefix as Text
+        	Attribute mainArtifact as Text
+        	Attribute debugPort as Integer
+        	Attribute jmxPort as Integer
+        	Attribute minMemory as Integer(defaultValue = 0)
+        	Attribute maxMemory as Integer(defaultValue = 0)
+        	Attribute classpath as Text List
+        	Attribute inputArguments as Text List
+        	Attribute jvmParameter as Text List
+        	Attribute jvmVersion as Text
+        	Component Operation
+        		Attribute name as Text
+        		Attribute returnType as Text
+        		Attribute description as Text
+        		Component Parameter
+					Attribute type as Text
+					Attribute name as Text
+
+	Event Info
+		Attribute server as Text
+		Attribute architecture as Text
+		Attribute os as Text
+		Attribute cores as Integer
+		Attribute diskSize as LongInteger  //MB
+		Attribute memorySize as LongInteger //MB
+		Attribute processes as Integer
+		Attribute maxOpenFiles as LongInteger
+		Attribute jvm as Text
+		Attribute consulVersion as Text
+
+Event Log
+	Attribute server as Text
+	Attribute module as Text
+	Attribute file as Text
+	Attribute value as Text
+
+Event Operation
+	Attribute user as Text
+	Attribute server as Text
+	Attribute process as Text
+	Attribute operation as Text
+	Attribute result as Text
+	Component Parameter
+		Attribute type as Text
+		Attribute name as Text

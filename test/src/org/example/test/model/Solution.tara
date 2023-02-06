@@ -1,61 +1,47 @@
 dsl Ness
 
-use Master
-use References
+use Entities
+use Events
 
-Datalake(Month, path = "") dl
-	Split("") Divisiones
-		Split DA;Split DB;Split DC;Split DD;Split DF;Split DG;Split DJ;Split DK;Split DL;Split DM;Split DN;Split DP;Split DU;Split DV;Split DW;Split DX;
-	Split asemed
-	Tank example as Event(event = Example)
+Broker(path = empty, port = 63000, secondaryPort = 1884)
+	User("trooper", "trooper")
+	User("consul", "consul")
+	User("connector", "connector")
 
-	Tank zone as Entity(entity = Zone)
-	Tank installation as Entity(entity = Installation)
-	Tank alertConfiguration as Entity(entity = AlertConfiguration)
+Datalake(scale = Day, path = "{datalake}") dl
+	Seal > Cron(pattern = "0 0 4 1/1 * ? *", timeZone = empty)
+	Tank mode as Event(it.Mode)
+	Tank assetStatus as Event(it.Status)
+	Tank assetInfo as Event(it.Info)
+	Tank anomaly as Event(monitoring.AnomalyBundle)
+	Tank notification as Event(monitoring.Notification)
 
-	Tank a as Entity(entity = A)
-	Tank attributeReference as Entity(entity = AttributeReference)
-	Tank attributeListReference as Entity(entity = AttributeListReference)
-	Tank deepReference as Entity(entity = DeepReference)
+	Tank user as Entity(User)
+	Tank team as Entity(Team)
+	Tank channel as Entity(Channel)
+	Tank type as Entity (Type)
+	Tank area as Entity (Area)
+	Tank host as Entity (Host)
+	Tank asset as Entity (Asset)
+	Tank assetType as Entity (AssetType)
+	Tank service as Entity(Service)
+	Tank serviceType as Entity (ServiceType)
+	Tank businessType as Entity (BusinessType)
+	Tank anomalyRule as Entity(AnomalyType)
+	Tank anomalyType as Entity(AnomalyRule)
 
-	ProcessStatus(split = Divisiones)
-	Backup
-		Cron(pattern = "0 0 12 1/1 * ? *", timeZone = "Atlantic/Canary")
+Terminal trooper-terminal
+	Subscribe(dl.anomaly dl.assetInfo dl.assetStatus dl.mode, dl.user dl.asset dl.service dl.team dl.channel dl.type dl.assetType dl.serviceType dl.area dl.host)
+	Publish(dl.notification, dl.service)
 
-Broker(port = 63000, secondaryPort = 1884, path = "./broker")
-	User(name = "user1", password = "1234")
+Terminal monitor-terminal
+	Publish(dl.assetInfo dl.assetStatus dl.mode)
+	Subscribe(empty, dl.service)
 
-Event criterio
-	Attribute value as Text
-	Attribute id as Integer
-Event criterioBorrado
-Event criterioModificado
-Event criterioSentencia
-Event ajuste
+Terminal wizard-terminal
+	Publish(dl.anomaly)
+	Subscribe(dl.mode dl.assetInfo dl.assetStatus,dl.asset dl.service dl.anomalyType dl.anomalyRule)
 
-Event cierreAjuste
-Event usuarioConectado
-Event usuarioDesconectado
-
-Wordbag Gestiones as Inline
-	Word(1) Rezago
-	Word(2) Convenio
-	Word(3) Incobrable
-	Word(4) Normal
-
-Lookup(namespace = "cfe") Contratos
-	Column index as Id
-	Column(isRequired = true) name as Text
-	Column extra1 as Real
-	Column extra2 as Integer
-	Column extra3 as LongInteger
-	Column extra4 as Bool
-	Column gestion as WordFromBag(wordbag  = Gestiones)
-
-Event Example
-	Attribute name as Text
-	Attribute names as Text List
-
-Terminal testTerminal
-	Publish(eventTanks = dl.example, entityTanks = dl.zone dl.attributeListReference)
-	Subscribe(eventTanks = dl.example, entityTanks = dl.zone dl.installation dl.deepReference)
+Terminal connector-terminal
+	Publish(empty, dl.user dl.team dl.channel)
+	Subscribe(dl.notification, dl.user dl.team dl.channel)
