@@ -2,7 +2,7 @@ dsl Ness
 
 Entity Area
 
-Entity Type
+Entity Type as Abstract
 	Attribute labelEs as String
 	Attribute labelEn as String
 	Attribute labelPt as String

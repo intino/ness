@@ -30,7 +30,7 @@ Datalake(scale = Day, path = "{datalake}") dl
 	Tank anomalyRule as Entity(AnomalyType)
 	Tank anomalyType as Entity(AnomalyRule)
 
-Terminal trooper-terminal
+Terminal test-terminal
 	Subscribe(dl.anomaly dl.assetInfo dl.assetStatus dl.mode, dl.user dl.asset dl.service dl.team dl.channel dl.type dl.assetType dl.serviceType dl.area dl.host)
 	Publish(dl.notification, dl.service)
 

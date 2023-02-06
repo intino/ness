@@ -111,6 +111,7 @@ def type(master & cached)
 	import java.util.Map;
 	import java.util.concurrent.*;
 	import java.util.concurrent.atomic.AtomicBoolean;
+	import java.util.concurrent.atomic.AtomicReference;
 	import java.util.stream.Stream;
 
 	import static io.intino.ness.master.messages.DownloadMasterMessage.PROPERTY_ENTITY_SERIALIZER;
@@ -314,7 +315,7 @@ def type(master & cached)
 		}
 
 		private void initializeEntityMaps(Map<String, String> entities) {
-			if(availableThreads() >= 4)
+			if(availableThreads() >= 4 && entities.size() > 100)
 				loadDataMultiThread(entities, serializer);
 			else
 				loadDataSingleThread(entities, serializer);
@@ -326,10 +327,21 @@ def type(master & cached)
 
 		private void loadDataMultiThread(Map<String, String> entities, MasterSerializer serializer) {
 			try {
+				AtomicReference<Throwable> error = new AtomicReference<>();
 				ExecutorService threadPool = Executors.newFixedThreadPool(availableThreads());
-				entities.forEach((id, serializedRecord) -> threadPool.submit(() -> addEntityInternal(serializer.deserialize(serializedRecord))));
+
+				entities.forEach((id, serializedRecord) -> threadPool.execute(() -> {
+					try {
+						addEntityInternal(serializer.deserialize(serializedRecord));
+					} catch(Throwable e) {
+						error.set(e);
+					}
+				}));
+
 				threadPool.shutdown();
 				threadPool.awaitTermination(1, TimeUnit.HOURS);
+
+				if(error.get() != null) throw new RuntimeException(error.get());
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
