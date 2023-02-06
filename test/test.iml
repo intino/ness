@@ -120,7 +120,6 @@
     <orderEntry type="module" module-name="datalake-inspector" />
     <orderEntry type="library" scope="TEST" name="Intino: junit:junit:4.13" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.hamcrest:hamcrest-core:1.3" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.test.datahubtest:test-terminal:1.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:5.0.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:5.0.3" level="project" />
