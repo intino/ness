@@ -17,7 +17,7 @@ public class MasterClient_ {
 		Entities entities = terminal.entities();
 		Team team = new Team("team1:team");
 		team.displayName("team_name");
-		team.channels(List.of(new Channel("the_name")));
+		team.channels(List.of(new Channel("ch1", 1), new Channel("ch2", 2), new Channel("ch3", 3)));
 		entities.publish(team);
 		entities.publish(new AnomalyType("anomalyType1").group("Group1").issueEN("Anomaly 1").issueES("Anomalía 1").issuePT("Anomalia 1"));
 		System.out.println();
