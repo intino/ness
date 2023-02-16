@@ -14,6 +14,7 @@
       <sourceFolder url="file://$MODULE_DIR$/temp/cesar/monitoring-terminal/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/temp/test/ontology/src" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/temp/cesar/ontology/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/temp/test/test-terminal/src" isTestSource="true" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
