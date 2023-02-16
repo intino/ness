@@ -16,10 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -150,6 +147,7 @@ class EntitySerializer {
 					.filter(Datalake.Tank::isEntity)
 					.map(Datalake.Tank::asEntity)
 					.map(Datalake.Tank.Entity::entity)
+					.filter(Objects::nonNull)
 					.map(Layer::name$)
 					.collect(Collectors.toSet());
 		}

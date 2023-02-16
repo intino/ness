@@ -20,9 +20,9 @@ Entity User
 
 Entity Team
 	Attribute displayName as String
-	Attribute channels as Entity(Channel) List
+	Attribute channels as Struct(Channel) List
 
-Entity Channel as Component
+Struct Channel
 	Attribute displayName as String
 
 Entity Asset
