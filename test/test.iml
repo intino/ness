@@ -85,15 +85,12 @@
     <orderEntry type="library" name="Intino: org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1" level="project" />
     <orderEntry type="library" name="Intino: org.fusesource.hawtbuf:hawtbuf:1.11" level="project" />
     <orderEntry type="library" name="Intino: org.apache.geronimo.specs:geronimo-j2ee-management_1.1_spec:1.0.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:4.0.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:session:1.1.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:event:3.0.5" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zim:4.0.3" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:message:3.0.5" level="project" />
     <orderEntry type="library" name="Intino: org.antlr:antlr4-runtime:4.10.1" level="project" />
     <orderEntry type="library" name="Intino: org.xerial.snappy:snappy-java:1.1.8.4" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:zet:1.0.7" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:tris:1.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:scheduler-framework:1.1.1" level="project" />
     <orderEntry type="library" name="Intino: org.quartz-scheduler:quartz:2.3.2" level="project" />
     <orderEntry type="library" name="Intino: com.mchange:c3p0:0.9.5.4" level="project" />
@@ -117,10 +114,6 @@
     <orderEntry type="library" name="Intino: javax.xml.bind:jaxb-api:2.3.1" level="project" />
     <orderEntry type="library" name="Intino: javax.activation:javax.activation-api:1.2.0" level="project" />
     <orderEntry type="library" name="Intino: org.jvnet.jaxb2_commons:jaxb2-basics-runtime:0.12.0" level="project" />
-    <orderEntry type="module" module-name="datalake-inspector" />
-    <orderEntry type="library" scope="TEST" name="Intino: junit:junit:4.13" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: org.hamcrest:hamcrest-core:1.3" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.test.datahubtest:test-terminal:1.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:5.0.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:5.0.3" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:jmx:1.0.5" level="project" />
@@ -153,10 +146,14 @@
     <orderEntry type="library" name="Intino: io.intino.ness:master:1.1.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.2.0" level="project" />
     <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.10" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:4.0.7" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:zet:1.0.7" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:tris:1.0.0" level="project" />
+    <orderEntry type="module" module-name="datalake-inspector" />
+    <orderEntry type="library" scope="TEST" name="Intino: junit:junit:4.13" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.hamcrest:hamcrest-core:1.3" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.test.datahubtest:test-terminal:1.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:terminal-jms:4.9.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:mapp:1.1.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.test.datahubtest:ontology:1.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
   </component>
 </module>

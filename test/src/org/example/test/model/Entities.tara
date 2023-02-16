@@ -24,6 +24,7 @@ Entity Team
 
 Struct Channel
 	Attribute displayName as String
+	Attribute priority as Integer
 
 Entity Asset
 	Attribute ip as String

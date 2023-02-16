@@ -132,6 +132,7 @@ public class EntityTemplate extends Template {
 			rule().condition((trigger("call"))).output(literal("new ")).output(mark("package")).output(literal(".structs.")).output(mark("name", "firstUpperCase")).output(literal("(")).output(mark("attribute", "parse").multiple(", ")).output(literal(")")),
 			rule().condition((type("boolean")), (trigger("parse"))).output(literal("Boolean.parseBoolean(values.get(")).output(mark("index")).output(literal("))")),
 			rule().condition((type("int")), (trigger("parse"))).output(literal("Integer.parseInt(values.get(")).output(mark("index")).output(literal("))")),
+			rule().condition((type("integer")), (trigger("parse"))).output(literal("Integer.parseInt(values.get(")).output(mark("index")).output(literal("))")),
 			rule().condition((type("long")), (trigger("parse"))).output(literal("Long.parseLong(values.get(")).output(mark("index")).output(literal("))")),
 			rule().condition((type("double")), (trigger("parse"))).output(literal("Double.parseDouble(values.get(")).output(mark("index")).output(literal("))")),
 			rule().condition((type("date")), (trigger("parse"))).output(literal("java.time.LocalDate.parse(values.get(")).output(mark("index")).output(literal("));")),
