@@ -276,9 +276,9 @@ def type(master & cached)
 
 		private void loadData() {
 			Logger.debug("Loading data from master...");
-    		long start = System.currentTimeMillis();
+    		long start = java.lang.System.currentTimeMillis();
 			initializeEntityMaps(downloadMasterData(DownloadMasterMessage.EntityFilter.AllEntities));
-			long time = System.currentTimeMillis() - start;
+			long time = java.lang.System.currentTimeMillis() - start;
 			Logger.debug("Data from master loaded in " + time + " ms");
 		}
 
