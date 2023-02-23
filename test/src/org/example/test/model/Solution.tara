@@ -18,11 +18,11 @@ Datalake(scale = Day, path = "{datalake}") dl
 
 	Tank user as Entity(User)
 	Tank team as Entity(Team)
-	Tank channel as Entity(Channel)
 	Tank type as Entity (Type)
 	Tank area as Entity (Area)
 	Tank host as Entity (Host)
 	Tank asset as Entity (Asset)
+	Tank system as Entity (System)
 	Tank assetType as Entity (AssetType)
 	Tank service as Entity(Service)
 	Tank serviceType as Entity (ServiceType)
@@ -31,8 +31,8 @@ Datalake(scale = Day, path = "{datalake}") dl
 	Tank anomalyType as Entity(AnomalyRule)
 
 Terminal test-terminal
-	Subscribe(dl.anomaly dl.assetInfo dl.assetStatus dl.mode, dl.user dl.asset dl.service dl.team dl.channel dl.type dl.assetType dl.serviceType dl.area dl.host dl.anomalyType)
-	Publish(dl.notification, dl.service dl.team dl.anomalyType)
+	Subscribe(dl.anomaly dl.assetInfo dl.assetStatus dl.mode, dl.user dl.asset dl.service dl.team dl.type dl.assetType dl.serviceType dl.area dl.host dl.anomalyType dl.system)
+	Publish(dl.notification, dl.service dl.team dl.anomalyType dl.system)
 
 Terminal monitor-terminal
 	Publish(dl.assetInfo dl.assetStatus dl.mode)
@@ -43,5 +43,5 @@ Terminal wizard-terminal
 	Subscribe(dl.mode dl.assetInfo dl.assetStatus,dl.asset dl.service dl.anomalyType dl.anomalyRule)
 
 Terminal connector-terminal
-	Publish(empty, dl.user dl.team dl.channel)
-	Subscribe(dl.notification, dl.user dl.team dl.channel)
+	Publish(empty, dl.user dl.team)
+	Subscribe(dl.notification, dl.user dl.team)

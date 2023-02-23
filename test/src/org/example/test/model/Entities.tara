@@ -26,12 +26,22 @@ Struct Channel
 	Attribute displayName as String
 	Attribute priority as Integer
 
+Entity System
+	Attribute ip as String
+	Attribute publicIp as String
+	Attribute type as Entity(AssetType)
+	Attribute area as Entity(Area)
+	Attribute host as Entity(Host)
+
 Entity Asset
 	Attribute ip as String
 	Attribute publicIp as String
 	Attribute type as Entity(AssetType)
 	Attribute area as Entity(Area)
 	Attribute host as Entity(Host)
+	Attribute system as Entity(System)
+	Attribute systemList as Entity(System) List
+	Attribute systemSet as Entity(System) Set
 
 Entity AnomalyType
 	Attribute group as String
