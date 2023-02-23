@@ -1,9 +1,9 @@
 package io.intino.datahub.datalake;
 
 import io.intino.alexandria.Timetag;
-import io.intino.alexandria.event.Event;
-import io.intino.alexandria.ingestion.EventSession;
-import io.intino.alexandria.ingestion.SessionHandler;
+import io.intino.alexandria.event.message.MessageEvent;
+import io.intino.alexandria.ingestion.MessageEventSession;
+import io.intino.alexandria.ingestion.MessageSessionHandler;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.alexandria.message.MessageReader;
@@ -34,7 +34,7 @@ public class BrokerSessions {
 
 	private void pushTemporalSessions() {
 		try {
-			SessionHandler handler = new SessionHandler(stageDirectory);
+			MessageSessionHandler handler = new MessageSessionHandler(stageDirectory);
 			File tmp = new File(stageDirectory, "tmp");
 			tmp.mkdirs();
 			for (File file : requireNonNull(brokerStageDirectory.listFiles(f -> f.getName().endsWith(".inl"))))
@@ -43,15 +43,15 @@ public class BrokerSessions {
 			for (File file : tmpFiles) {
 				String name = file.getName().replace(".inl", "");
 				String[] split = name.split("#");
-				EventSession eventSession = handler.createEventSession();
+				MessageEventSession eventSession = handler.createEventSession();
 				MessageReader messages = new MessageReader(new FileInputStream(file));
 				for (Message message : messages)
-					eventSession.put(split[0], new Timetag(split[1]), new Event(message));
+					eventSession.put(split[0],split[1], new Timetag(split[2]), new MessageEvent(message));
 				messages.close();
 				eventSession.close();
 				file.delete();
 			}
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			Logger.error(e);
 		}
 	}

@@ -3,12 +3,11 @@ package io.intino.datahub.datalake.regenerator;
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.datalake.Datalake;
 import io.intino.alexandria.datalake.file.FileDatalake;
-import io.intino.alexandria.datalake.file.FileEventTub;
-import io.intino.alexandria.datalake.file.eventsourcing.EventPump;
-import io.intino.alexandria.datalake.file.eventsourcing.FileEventPump;
 import io.intino.alexandria.event.Event;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.MessageWriter;
+import io.intino.datahub.datalake.pump.EventPump;
+import io.intino.datahub.datalake.pump.FileEventPump;
 import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.File;
@@ -31,7 +30,7 @@ public class DatalakeRegenerator {
 	public File review(Mapper mapper) {
 		File reportFile = new File(reviewsDirectory, mapperPrefixName(mapper) + ".html");
 		RegeneratorReporter reporter = new RegeneratorReporter(reportFile);
-		EventPump.Reflow reflow = new FileEventPump(datalake.eventStore()).reflow(mapper.filter());
+		EventPump.Reflow reflow = new FileEventPump(datalake.messageStore()).reflow(mapper.filter());
 		while (reflow.hasNext()) reflow.next(1, event -> review(mapper, reporter, event));
 		reporter.commit();
 		return reportFile;
@@ -40,26 +39,31 @@ public class DatalakeRegenerator {
 	public File revise(Mapper mapper) {
 		File reportFile = new File(datalake.root(), mapperPrefixName(mapper) + ".html");
 		RegeneratorReporter reporter = new RegeneratorReporter(reportFile);
-		datalake.eventStore().tanks().sorted(Comparator.comparing(Datalake.EventStore.Tank::name)).filter(tank -> mapper.filter().allow(tank)).forEach(tank -> timetags(tank).forEach(timetag -> {
-			if (mapper.filter().allow(tank, timetag)) {
-				FileEventTub tub = (FileEventTub) tank.on(timetag);
-				if (!tub.file().exists()) return;
-				MessageWriter writer = new MessageWriter(this.zipStream(temp(tub)));
-				tub.events().forEachRemaining(e -> {
-					String before = e.toMessage().toString();
-					Event after = e;
-					if (mapper.filter().allow(e)) {
-						after = mapper.apply(e);
-						reporter.addItem(before, after == null ? null : after.toString());
-					}
-					if (after != null) write(writer, after);
-				});
-				close(writer);
-				backupSourceTub(mapper, tub);
-				if (temp(tub).length() > 20) move(temp(tub), tub.file());
-				else temp(tub).delete();
-			}
-		}));
+		datalake.messageStore().tanks()
+				.sorted(Comparator.comparing(Datalake.Store.Tank::name))
+				.filter(tank -> mapper.filter().allow(tank))
+				.forEach(tank -> {
+							timetags(tank).forEach(timetag -> {
+								if (!mapper.filter().allow(tank, timetag)) return;
+								FileEventTub tub = (FileEventTub) tank.on(timetag);
+								if (!tub.file().exists()) return;
+								MessageWriter writer = new MessageWriter(this.zipStream(temp(tub)));
+								tub.events().forEachRemaining(e -> {
+									String before = e.toMessage().toString();
+									Event after = e;
+									if (mapper.filter().allow(e)) {
+										after = mapper.apply(e);
+										reporter.addItem(before, after == null ? null : after.toString());
+									}
+									if (after != null) write(writer, after);
+								});
+								close(writer);
+								backupSourceTub(mapper, tub);
+								if (temp(tub).length() > 20) move(temp(tub), tub.file());
+								else temp(tub).delete();
+							});
+						}
+				);
 		reporter.commit();
 		return reportFile;
 	}
@@ -103,8 +107,8 @@ public class DatalakeRegenerator {
 	}
 
 
-	private Iterable<Timetag> timetags(Datalake.EventStore.Tank tank) {
-		return tank.first().timetag().iterateTo(tank.last().timetag());
+	private Iterable<Timetag> timetags(Datalake.Store.Source<Event> tank) {
+		return tank.
 	}
 
 	private void move(File source, File dest) {

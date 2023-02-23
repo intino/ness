@@ -2,6 +2,7 @@ package io.intino.datahub.box;
 
 import io.intino.alexandria.datalake.Datalake;
 import io.intino.alexandria.datalake.file.FileDatalake;
+import io.intino.alexandria.event.tuple.TupleEvent;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.sealing.FileSessionSealer;
 import io.intino.alexandria.sealing.SessionSealer;
@@ -79,7 +80,7 @@ public class DataHubBox extends AbstractBox {
 	}
 
 	public SessionSealer sessionSealer() {
-		return new FileSessionSealer(datalake, stageDirectory());
+		return new FileSessionSealer(datalake, stageDirectory(), treatedDirectory());
 	}
 
 	private void injectJmsConfiguration() {
@@ -103,6 +104,10 @@ public class DataHubBox extends AbstractBox {
 		return new File(configuration.home(), "datahub/stage");
 	}
 
+	public File treatedDirectory() {
+		return new File(configuration.home(), "datahub/treated");
+	}
+
 	public File mappersDirectory() {
 		File mappers = new File(configuration.home(), "datahub/mappers");
 		mappers.mkdirs();
@@ -110,7 +115,7 @@ public class DataHubBox extends AbstractBox {
 	}
 
 	public SessionSealer sessionSealer(File stageDirectory) {
-		return new FileSessionSealer(datalake, stageDirectory);
+		return new FileSessionSealer(datalake, stageDirectory, treatedDirectory());
 	}
 
 	public Master master() {
@@ -141,7 +146,7 @@ public class DataHubBox extends AbstractBox {
 		config.datalakeRootPath(datalakeDirectory());
 		config.serializer(MasterSerializers.getOrDefault(configuration.masterSerializer()));
 		config.tripletsDigester(new DatahubTripletDigesterFactory().create());
-		config.tripletsLoader(new DatahubEntityLoader(datalake.entityStore()));
+		config.tripletsLoader(new DatahubEntityLoader(datalake.tupleStore()));
 		return config;
 	}
 
@@ -199,9 +204,9 @@ public class DataHubBox extends AbstractBox {
 
 	private static class DatahubEntityLoader implements EntityLoader {
 
-		private final Datalake.EntityStore store;
+		private final Datalake.Store<TupleEvent> store;
 
-		public DatahubEntityLoader(Datalake.EntityStore store) {
+		public DatahubEntityLoader(Datalake.Store<TupleEvent> store) {
 			this.store = store;
 		}
 
@@ -209,14 +214,14 @@ public class DataHubBox extends AbstractBox {
 		public Stream<Triplet> loadTriplets(Stats stats) {
 			return store.tanks()
 					.peek(t -> stats.increment("Tanks read"))
-					.flatMap(Datalake.EntityStore.Tank::tubs)
+					.flatMap(Datalake.Store.Tank<TupleEvent>::tubs)
 					.flatMap(tub -> readTripletsFrom(tub, stats));
 		}
 
-		private Stream<Triplet> readTripletsFrom(Datalake.EntityStore.Tub tub, Stats stats) {
+		private Stream<Triplet> readTripletsFrom(Datalake.Store.Tub<TupleEvent> tub, Stats stats) {
 			stats.increment(Stats.FILES_READ);
-			return tub.triplets()
-					.map(t -> new Triplet(t.subject(), t.verb(), t.object()))
+			return tub.events()
+					.map(t -> new Triplet(t.subject(), t.predicate(), t.value()))
 					.peek(t -> stats.increment(Stats.TRIPLETS_READ));
 		}
 	}

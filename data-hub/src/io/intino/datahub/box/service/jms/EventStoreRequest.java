@@ -3,7 +3,6 @@ package io.intino.datahub.box.service.jms;
 import com.google.gson.JsonObject;
 import io.intino.alexandria.Json;
 import io.intino.alexandria.datalake.Datalake;
-import io.intino.alexandria.datalake.file.FileEventTub;
 import io.intino.alexandria.jms.MessageReader;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
@@ -39,7 +38,7 @@ public class EventStoreRequest {
 		String content = MessageReader.textFrom(request);
 		if (content.equals("datalake")) return Stream.of(toJmsMessage((box.datalake()).root().getAbsolutePath()));
 		if (content.equals("eventStore/tanks"))
-			return Stream.of(toJmsMessage(Json.toString(box.datalake().eventStore().tanks()
+			return Stream.of(toJmsMessage(Json.toString(box.datalake().messageStore().tanks()
 					.map(EventStoreRequest::tankOf).collect(toList()))));
 		if (content.startsWith("{")) {
 			JsonObject jsonObject = Json.fromString(content, JsonObject.class);
