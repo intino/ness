@@ -7,7 +7,6 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.model.Broker;
 import io.intino.datahub.model.Datalake;
-import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.NessGraph;
 import io.intino.ness.master.core.Master;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -333,7 +332,7 @@ public class JmsBrokerService implements BrokerService {
 				graph.datalake().tankList().stream().filter(Datalake.Tank::isEvent).map(Datalake.Tank::asEvent).
 						forEach(t -> {
 							if (!t.asTank().isSplitted() || t.asTank().asSplitted().split().isLeaf())
-								brokerManager.registerTopicConsumer(t.qn(), new EventSerializer(brokerStage, t.qn(), scale(t)).create());
+								brokerManager.registerTopicConsumer(t.qn(), new MessageSerializer(brokerStage, t.qn(), scale(t)).create());
 							else {
 								Datalake.Split context = t.asTank().asSplitted().split();
 								register(t, scale(t), context);
@@ -342,7 +341,7 @@ public class JmsBrokerService implements BrokerService {
 						});
 				Datalake.ProcessStatus processStatus = graph.datalake().processStatus();
 				if (processStatus != null) registerProcessStatus(datalakeScale(), processStatus);
-				brokerManager.registerTopicConsumer("Session", new EventSerializer(brokerStage, "Session", datalakeScale()).create());
+				brokerManager.registerTopicConsumer("Session", new MessageSerializer(brokerStage, "Session", datalakeScale()).create());
 				Logger.info("Tanks ignited!");
 			}
 		}
@@ -363,15 +362,15 @@ public class JmsBrokerService implements BrokerService {
 		private void registerProcessStatus(Scale scale, Datalake.ProcessStatus ps) {
 			if (ps.split() == null) {
 				String topic = processStatusQn(ps, ps.split());
-				brokerManager.registerTopicConsumer(topic, new EventSerializer(brokerStage, topic, scale).create());
+				brokerManager.registerTopicConsumer(topic, new MessageSerializer(brokerStage, topic, scale).create());
 			} else ps.split().leafs().forEach(c -> {
 				String topic = processStatusQn(ps, c);
-				brokerManager.registerTopicConsumer(topic, new EventSerializer(brokerStage, topic, scale).create());
+				brokerManager.registerTopicConsumer(topic, new MessageSerializer(brokerStage, topic, scale).create());
 			});
 		}
 
 		private void register(Datalake.Tank.Event t, Scale scale, Datalake.Split c) {
-			brokerManager.registerTopicConsumer(tankQn(t, c), new EventSerializer(brokerStage, tankQn(t, c), scale).create());
+			brokerManager.registerTopicConsumer(tankQn(t, c), new MessageSerializer(brokerStage, tankQn(t, c), scale).create());
 		}
 
 		private String processStatusQn(Datalake.ProcessStatus ps, Datalake.Split c) {

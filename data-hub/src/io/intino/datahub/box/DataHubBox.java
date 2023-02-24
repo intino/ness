@@ -215,10 +215,10 @@ public class DataHubBox extends AbstractBox {
 			return store.tanks()
 					.peek(t -> stats.increment("Tanks read"))
 					.flatMap(Datalake.Store.Tank<TupleEvent>::tubs)
-					.flatMap(tub -> readTripletsFrom(tub, stats));
+					.flatMap(tub -> readTuplesFrom(tub, stats));
 		}
 
-		private Stream<Triplet> readTripletsFrom(Datalake.Store.Tub<TupleEvent> tub, Stats stats) {
+		private Stream<Triplet> readTuplesFrom(Datalake.Store.Tub<TupleEvent> tub, Stats stats) {
 			stats.increment(Stats.FILES_READ);
 			return tub.events()
 					.map(t -> new Triplet(t.subject(), t.predicate(), t.value()))

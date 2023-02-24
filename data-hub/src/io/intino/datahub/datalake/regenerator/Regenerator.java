@@ -25,7 +25,7 @@ public class Regenerator {
 		File datalakeReport = new DatalakeRegenerator(datalake, reviewsDirectory, ts).review(mapper);
 		Logger.info("Finished review on datalake");
 		if (sessionsBackupDirectory != null) {
-			File sessionsReport = new SessionRegenerator(datalake, sessionsBackupDirectory, reviewsDirectory, ts).review(mapper);
+			File sessionsReport = new SessionRegenerator(datalake, sessionsBackupDirectory, reviewsDirectory).review(mapper);
 			Logger.info("Finished Regeneration review");
 			return Arrays.asList(datalakeReport, sessionsReport);
 		}
@@ -39,7 +39,7 @@ public class Regenerator {
 		File datalakeReport = new DatalakeRegenerator(datalake, reviewsDirectory, ts).revise(mapper);
 		Logger.info("Finished revise on datalake");
 		if (sessionsBackupDirectory != null) {
-			File sessionsReport = new SessionRegenerator(datalake, sessionsBackupDirectory, reviewsDirectory, ts).revise(mapper);
+			File sessionsReport = new SessionRegenerator(datalake, sessionsBackupDirectory, reviewsDirectory).revise(mapper);
 			Logger.info("Finished Regeneration revise");
 			return Arrays.asList(datalakeReport, sessionsReport);
 		}

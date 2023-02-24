@@ -29,7 +29,7 @@ public class FileEventPump implements EventPump {
 			}
 
 			Stream<Event> tankInputStream(Datalake.Store.Tank<? extends Event> tank) {
-				return (Stream<Event>) tank.content((ss, tt) -> filter.allow(tank, ss.toString(), tt));
+				return (Stream<Event>) tank.content((ss, tt) -> filter.allow(tank, ss, tt));
 			}
 
 			public boolean hasNext() {

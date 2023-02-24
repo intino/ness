@@ -1,8 +1,8 @@
 package io.intino.datahub.datalake.regenerator;
 
 import io.intino.alexandria.datalake.Datalake;
+import io.intino.alexandria.datalake.FileTub;
 import io.intino.alexandria.datalake.file.FileDatalake;
-import io.intino.alexandria.datalake.file.message.MessageEventTub;
 import io.intino.alexandria.event.Event;
 import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.logger.Logger;
@@ -32,7 +32,7 @@ public class DatalakeRegenerator {
 		File reportFile = new File(reviewsDirectory, mapperPrefixName(mapper) + ".html");
 		RegeneratorReporter reporter = new RegeneratorReporter(reportFile);
 		EventPump.Reflow reflow = new FileEventPump(datalake.messageStore()).reflow(mapper.filter());
-		while (reflow.hasNext()) reflow.next(1, event -> review(mapper, reporter, event));
+		while (reflow.hasNext()) reflow.next(1, event -> review(mapper, reporter, (MessageEvent) event));
 		reporter.commit();
 		return reportFile;
 	}
@@ -43,30 +43,27 @@ public class DatalakeRegenerator {
 		datalake.messageStore().tanks()
 				.sorted(Comparator.comparing(Datalake.Store.Tank::name))
 				.filter(tank -> mapper.filter().allow(tank))
-				.forEach(tank -> {
-					tank.content((s, t) -> mapper.filter().allow(tank, s, t)).forEach(e -> {
-
-					});
+				.flatMap(Datalake.Store.Tank::sources)
+				.flatMap(Datalake.Store.Source::tubs)
+				.forEach(tub -> {
 					MessageWriter writer = new MessageWriter(this.zipStream(temp(tub)));
-					tub.events().forEachRemaining(e -> {
+					tub.events().forEach(e -> {
 						String before = e.toMessage().toString();
-						Event after = e;
+						MessageEvent after = e;
 						if (mapper.filter().allow(e)) {
-							after = mapper.apply(e);
+							after = (MessageEvent) mapper.apply(e);
 							reporter.addItem(before, after == null ? null : after.toString());
 						}
 						if (after != null) write(writer, after);
 					});
 					close(writer);
 					backupSourceTub(mapper, tub);
-					if (temp(tub).length() > 20) move(temp(tub), tub.file());
+					if (temp(tub).length() > 20) move(temp(tub), ((FileTub) tub).file());
 					else temp(tub).delete();
 				});
-	}
-				);
 		reporter.commit();
 		return reportFile;
-}
+	}
 
 	private void close(MessageWriter writer) {
 		try {
@@ -92,12 +89,12 @@ public class DatalakeRegenerator {
 		}
 	}
 
-	private File temp(MessageEventTub tub) {
-		return new File(tub.file().getAbsolutePath() + ".tmp");
+	private File temp(Datalake.Store.Tub<MessageEvent> tub) {
+		return new File(((FileTub) tub).file().getAbsolutePath() + ".tmp");
 	}
 
-	private void backupSourceTub(Mapper mapper, MessageEventTub tub) {
-		File source = tub.file();
+	private void backupSourceTub(Mapper mapper, Datalake.Store.Tub<MessageEvent> tub) {
+		File source = ((FileTub) tub).file();
 		File dest = new File(source.getParentFile(), mapperPrefixName(mapper) + "_" + source.getName() + ".bak");
 		move(source, dest);
 	}
