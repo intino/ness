@@ -1,21 +1,21 @@
 dsl Ness
 
 Namespace monitoring
-	Event AnomalyBundle
+	Message AnomalyBundle
 		Attribute place as Text
 		Component Anomaly
 			Attribute code as Text
 			Attribute triggerValue as Text
-	Event Notification
+	Message Notification
 		Attribute destination as Text
 		Attribute content as Text
 		Attribute type as Word("text" "file" "image" "question")
 
 Namespace it
-	Event Mode
+	Message Mode
 		Attribute asset as Text
 		Attribute value as Word("Off" "On")
-	Event Status
+	Message Status
 		Attribute asset as Text
 		Attribute memory as LongInteger
 		Attribute hdd as LongInteger
@@ -70,7 +70,7 @@ Namespace it
 					Attribute type as Text
 					Attribute name as Text
 
-	Event Info
+	Message Info
 		Attribute server as Text
 		Attribute architecture as Text
 		Attribute os as Text
@@ -82,13 +82,13 @@ Namespace it
 		Attribute jvm as Text
 		Attribute consulVersion as Text
 
-Event Log
+Message Log
 	Attribute server as Text
 	Attribute module as Text
 	Attribute file as Text
 	Attribute value as Text
 
-Event Operation
+Message Operation
 	Attribute user as Text
 	Attribute server as Text
 	Attribute process as Text

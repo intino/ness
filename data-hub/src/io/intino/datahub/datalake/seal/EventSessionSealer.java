@@ -62,8 +62,8 @@ public class EventSessionSealer {
 
 	private Format formatOf(String tankName) {
 		io.intino.datahub.model.Datalake.Tank tank = graphDl.tankList(t -> !t.isTuple()).stream().filter(t -> {
-			if (t.isMessage() && t.asMessage().message().name$().equals(tankName)) return true;
-			return t.isMeasurement() && t.asMeasurement().measurement().name$().equals(tankName);
+			if (t.isMessage() && t.asMessage().qn().equals(tankName)) return true;
+			return t.isMeasurement() && t.asMeasurement().qn().equals(tankName);
 		}).findFirst().orElse(null);
 		if (tank == null) return Unknown;
 		if (tank.isMessage()) return Message;
