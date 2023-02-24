@@ -155,5 +155,7 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:6.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:6.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:cli-framework:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
   </component>
 </module>
