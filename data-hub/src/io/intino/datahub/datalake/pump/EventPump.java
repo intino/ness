@@ -1,7 +1,7 @@
 package io.intino.datahub.datalake.pump;
 
 import io.intino.alexandria.Timetag;
-import io.intino.alexandria.datalake.Datalake;
+import io.intino.alexandria.datalake.Datalake.Store.Source;
 import io.intino.alexandria.datalake.Datalake.Store.Tank;
 import io.intino.alexandria.event.Event;
 
@@ -17,7 +17,7 @@ public interface EventPump {
 		interface Filter {
 			boolean allow(Tank<? extends Event> tank);
 
-			boolean allow(Tank<? extends Event> tank, String source, Timetag timetag);
+			boolean allow(Tank<? extends Event> tank, Source<? extends Event> source, Timetag timetag);
 		}
 	}
 

@@ -44,30 +44,29 @@ public class DatalakeRegenerator {
 				.sorted(Comparator.comparing(Datalake.Store.Tank::name))
 				.filter(tank -> mapper.filter().allow(tank))
 				.forEach(tank -> {
-							timetags(tank).forEach(timetag -> {
-								if (!mapper.filter().allow(tank, timetag)) return;
-								FileEventTub tub = (FileEventTub) tank.on(timetag);
-								if (!tub.file().exists()) return;
-								MessageWriter writer = new MessageWriter(this.zipStream(temp(tub)));
-								tub.events().forEachRemaining(e -> {
-									String before = e.toMessage().toString();
-									Event after = e;
-									if (mapper.filter().allow(e)) {
-										after = mapper.apply(e);
-										reporter.addItem(before, after == null ? null : after.toString());
-									}
-									if (after != null) write(writer, after);
-								});
-								close(writer);
-								backupSourceTub(mapper, tub);
-								if (temp(tub).length() > 20) move(temp(tub), tub.file());
-								else temp(tub).delete();
-							});
+					tank.content((s, t) -> mapper.filter().allow(tank, s, t)).forEach(e -> {
+
+					});
+					MessageWriter writer = new MessageWriter(this.zipStream(temp(tub)));
+					tub.events().forEachRemaining(e -> {
+						String before = e.toMessage().toString();
+						Event after = e;
+						if (mapper.filter().allow(e)) {
+							after = mapper.apply(e);
+							reporter.addItem(before, after == null ? null : after.toString());
 						}
+						if (after != null) write(writer, after);
+					});
+					close(writer);
+					backupSourceTub(mapper, tub);
+					if (temp(tub).length() > 20) move(temp(tub), tub.file());
+					else temp(tub).delete();
+				});
+	}
 				);
 		reporter.commit();
 		return reportFile;
-	}
+}
 
 	private void close(MessageWriter writer) {
 		try {
