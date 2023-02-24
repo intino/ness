@@ -1,9 +1,10 @@
 package io.intino.datahub.datalake.regenerator;
 
-import io.intino.alexandria.Timetag;
 import io.intino.alexandria.datalake.Datalake;
 import io.intino.alexandria.datalake.file.FileDatalake;
+import io.intino.alexandria.datalake.file.message.MessageEventTub;
 import io.intino.alexandria.event.Event;
+import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.MessageWriter;
 import io.intino.datahub.datalake.pump.EventPump;
@@ -76,7 +77,7 @@ public class DatalakeRegenerator {
 		}
 	}
 
-	private void write(MessageWriter writer, Event after) {
+	private void write(MessageWriter writer, MessageEvent after) {
 		try {
 			writer.write(after.toMessage());
 		} catch (IOException e) {
@@ -84,7 +85,7 @@ public class DatalakeRegenerator {
 		}
 	}
 
-	private void review(Mapper mapper, RegeneratorReporter reporter, Event event) {
+	private void review(Mapper mapper, RegeneratorReporter reporter, MessageEvent event) {
 		if (mapper.filter().allow(event)) {
 			String before = event.toMessage().toString();
 			Event after = mapper.apply(event);
@@ -92,11 +93,11 @@ public class DatalakeRegenerator {
 		}
 	}
 
-	private File temp(FileEventTub tub) {
+	private File temp(MessageEventTub tub) {
 		return new File(tub.file().getAbsolutePath() + ".tmp");
 	}
 
-	private void backupSourceTub(Mapper mapper, FileEventTub tub) {
+	private void backupSourceTub(Mapper mapper, MessageEventTub tub) {
 		File source = tub.file();
 		File dest = new File(source.getParentFile(), mapperPrefixName(mapper) + "_" + source.getName() + ".bak");
 		move(source, dest);
@@ -104,11 +105,6 @@ public class DatalakeRegenerator {
 
 	private String mapperPrefixName(Mapper mapper) {
 		return "datalake_" + mapper.getClass().getSimpleName() + "_" + ts;
-	}
-
-
-	private Iterable<Timetag> timetags(Datalake.Store.Source<Event> tank) {
-		return tank.
 	}
 
 	private void move(File source, File dest) {

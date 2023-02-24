@@ -21,11 +21,11 @@ import static io.intino.ness.master.messages.DownloadMasterMessage.EntityFilter.
 import static io.intino.ness.master.messages.DownloadMasterMessage.PROPERTY_ENTITY_SERIALIZER;
 import static io.intino.ness.master.messages.DownloadMasterMessage.PROPERTY_ERROR;
 
-public class EntityStoreRequest {
+public class TupleStoreRequest {
 
 	private final Master master;
 
-	public EntityStoreRequest(DataHubBox box) {
+	public TupleStoreRequest(DataHubBox box) {
 		this.master = box.master();
 	}
 

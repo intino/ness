@@ -4,7 +4,6 @@ import io.intino.alexandria.Fingerprint;
 import io.intino.alexandria.Session;
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.datalake.Datalake;
-import io.intino.alexandria.datalake.Datalake.EventStore.Tank;
 import io.intino.alexandria.event.Event;
 import io.intino.alexandria.event.EventReader;
 import io.intino.alexandria.logger.Logger;

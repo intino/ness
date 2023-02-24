@@ -21,8 +21,8 @@ public class NessService {
 		manager.registerQueueConsumer("service.ness.seal", m -> response(manager, m, new SealRequest(box).accept(MessageReader.textFrom(m))));
 		manager.registerQueueConsumer("service.ness.seal.last", m -> response(manager, m, new LastSealRequest(box).accept(MessageReader.textFrom(m))));
 		manager.registerQueueConsumer("service.ness.backup", m -> response(manager, m, new BackupRequest(box).accept(MessageReader.textFrom(m))));
-		manager.registerQueueConsumer("service.ness.datalake.eventstore", m -> response(manager, m, new EventStoreRequest(box).accept(m)));
-		manager.registerQueueConsumer("service.ness.datalake.entitystore", m -> response(manager, m, new EntityStoreRequest(box).accept(m)));
+		manager.registerQueueConsumer("service.ness.datalake.messagestore", m -> response(manager, m, new MessageStoreRequest(box).accept(m)));
+		manager.registerQueueConsumer("service.ness.datalake.tuplestore", m -> response(manager, m, new TupleStoreRequest(box).accept(m)));
 	}
 
 	private void response(BrokerManager manager, Message requestMessage, String response) {

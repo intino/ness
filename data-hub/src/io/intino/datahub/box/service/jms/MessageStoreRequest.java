@@ -3,35 +3,32 @@ package io.intino.datahub.box.service.jms;
 import com.google.gson.JsonObject;
 import io.intino.alexandria.Json;
 import io.intino.alexandria.datalake.Datalake;
+import io.intino.alexandria.datalake.file.message.MessageEventTub;
+import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.jms.MessageReader;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
-import io.intino.datahub.broker.BrokerManager;
 import org.apache.activemq.command.ActiveMQBytesMessage;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.intino.datahub.broker.jms.MessageTranslator.toJmsMessage;
 import static java.util.stream.Collectors.toList;
 
-public class EventStoreRequest {
+public class MessageStoreRequest {
 	private final DataHubBox box;
-	private final BrokerManager manager;
 
-	public EventStoreRequest(DataHubBox box) {
+	public MessageStoreRequest(DataHubBox box) {
 		this.box = box;
-		manager = box.brokerService().manager();
 	}
 
 	public Stream<Message> accept(Message request) {
@@ -39,7 +36,7 @@ public class EventStoreRequest {
 		if (content.equals("datalake")) return Stream.of(toJmsMessage((box.datalake()).root().getAbsolutePath()));
 		if (content.equals("eventStore/tanks"))
 			return Stream.of(toJmsMessage(Json.toString(box.datalake().messageStore().tanks()
-					.map(EventStoreRequest::tankOf).collect(toList()))));
+					.map(MessageStoreRequest::tankOf).collect(toList()))));
 		if (content.startsWith("{")) {
 			JsonObject jsonObject = Json.fromString(content, JsonObject.class);
 			if ("reflow".equals(jsonObject.get("operation").getAsString())) return reflow(jsonObject);
@@ -79,63 +76,22 @@ public class EventStoreRequest {
 	}
 
 	private Stream<File> filesOf(String tank, List<String> tubs) {
-		return box.datalake().eventStore().tank(tank).tubs().filter(t -> tubs.contains(t.timetag().value())).map(t -> ((FileEventTub) t).file());
+		return box.datalake().messageStore().tank(tank).sources().flatMap(Datalake.Store.Source::tubs).filter(t -> tubs.contains(t.timetag().value())).map(t -> ((MessageEventTub) t).file());
 	}
 
-	private static Tank tankOf(Datalake.EventStore.Tank t) {
-		return new Tank(t.name(), t.scale().name(), t.tubs().map(tb -> tb.timetag().value()).collect(toList()));
+	private static Tank tankOf(Datalake.Store.Tank<MessageEvent> t) {
+		return new Tank(t.name(), t.scale().name(), t.sources().map(Datalake.Store.Source::name).collect(toList()));
 	}
 
 	private static class Tank {
 		String name;
 		String scale;
-		List<String> tubs;
+		List<String> sources;
 
-		public Tank(String name, String scale, List<String> tubs) {
+		public Tank(String name, String scale, List<String> sources) {
 			this.name = name;
 			this.scale = scale;
-			this.tubs = tubs;
-		}
-	}
-
-	private static class InputStreamEnumeration implements Enumeration<InputStream> {
-		private final Enumeration<File> files;
-		private InputStream nextElement;
-
-		InputStreamEnumeration(Collection<File> files) {
-			this.files = Collections.enumeration(files);
-		}
-
-		public InputStream nextElement() {
-			if (hasMore()) {
-				InputStream res = nextElement;
-				nextElement = null;
-				return res;
-			} else throw new NoSuchElementException();
-		}
-
-		public boolean hasMore() {
-			if (nextElement != null) return true;
-			nextElement = getNextElement();
-			return (nextElement != null);
-		}
-
-		public boolean hasMoreElements() {
-			return hasMore();
-		}
-
-		private InputStream getNextElement() {
-			PrivilegedAction<InputStream> act = () -> {
-				while (files.hasMoreElements()) try {
-					return new FileInputStream(files.nextElement());
-				} catch (IOException ignored) {
-				}
-				return null;
-			};
-			return AccessController.doPrivileged(act);
-		}
-
-		public void close() {
+			this.sources = sources;
 		}
 	}
 }
