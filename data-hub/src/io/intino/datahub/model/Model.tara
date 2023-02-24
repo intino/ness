@@ -47,10 +47,13 @@ Concept:{0..1} Datalake
 	Concept:{1..*}:AspectRequired Tank
 		var word:Scale scale = empty
 		Aspect TankType
-			sub Entity > var Entities.Entity entity
-			sub Event
-				var Model.Event event
+			sub Tuple > var Entities.Entity entity
+			sub Message
+				var Model.Message message
 				var boolean sortingRequired = true
+				var string qn = @qn is private reactive
+			sub Measurement
+				var Model.Measurement measurement
 				var string qn = @qn is private reactive
 		Aspect Splitted > var Split split
 
@@ -59,24 +62,29 @@ Concept:Named Terminal
 		var string processStatusClass = "io.intino.alexandria.bpm.ProcessStatus" is private
 		var Datalake.Split split
 	Concept:{0..1} Publish
-		var Datalake.Tank.Event[] eventTanks
-		var Datalake.Tank.Entity[] entityTanks = empty
+		var Datalake.Tank.Message[] messageTanks
+		var Datalake.Tank.Tuple[] tupleTanks = empty
+		var Datalake.Tank.Measurement[] measurementTanks = empty
 	Concept:{0..1} Subscribe
-		var Datalake.Tank.Event[] eventTanks
-		var Datalake.Tank.Entity[] entityTanks = empty
+		var Datalake.Tank.Message[] messageTanks
+		var Datalake.Tank.Tuple[] tupleTanks = empty
+		var Datalake.Tank.Measurement[] measurementTanks = empty
 
 Concept Namespace
 	var string qn = @qn is private reactive
 	has Namespace
-	has Event
+	has Message
 
-Concept Event
+Concept Measurement
+	has:Named:RequiresAspect Attribute
+
+Concept Message
 	has:Named:RequiresAspect Attribute
 	has Component
 	Concept Has
 		var Component element
 		var boolean multiple = true
-	Aspect ExtensionOf > var Event parent
+	Aspect ExtensionOf > var Message parent
 
 Concept Component
 	var boolean multiple = true
@@ -139,26 +147,3 @@ Concept Data is abstract
 			var string type = "java.lang.Enum" is reactive private
 			var string[] values;
 			var integer:{bits} size = 16 bits
-		sub WordFromBag
-			var string type = "java.lang.Enum" is reactive private
-			var Model.Wordbag wordbag;
-			var integer:{bits} size = 8 bits
-
-Concept:Named:RequiresAspect Wordbag
-	Aspect Inline
-		Concept:Named Word
-			var integer:{1..*} value
-			var string label = 'self.name$()'
-	Aspect InResource
-		var resource:{tsv} tsv
-		Concept:{2..*}:Named:RequiresAspect Attribute extends Data
-
-
-Concept:Named Lookup
-	var string namespace
-	Concept:Named:RequiresAspect Column extends Data
-		var boolean isRequired = false
-	Concept:Named Index
-		var Column[] columns
-		var boolean createOnClose = false
-	Aspect Volatile

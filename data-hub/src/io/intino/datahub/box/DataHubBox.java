@@ -12,6 +12,7 @@ import io.intino.datahub.box.service.scheduling.Sentinels;
 import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.broker.jms.JmsBrokerService;
 import io.intino.datahub.datalake.BrokerSessions;
+import io.intino.datahub.datalake.seal.DatahubSessionSealer;
 import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.EntityData;
 import io.intino.datahub.model.NessGraph;
@@ -80,7 +81,7 @@ public class DataHubBox extends AbstractBox {
 	}
 
 	public SessionSealer sessionSealer() {
-		return new FileSessionSealer(datalake, stageDirectory(), treatedDirectory());
+		return new DatahubSessionSealer(datalake,graph.datalake(), stageDirectory(), treatedDirectory());
 	}
 
 	private void injectJmsConfiguration() {

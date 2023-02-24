@@ -144,9 +144,9 @@ class EntitySerializer {
 
 		private Set<String> definedTanks() {
 			return graph.datalake().tankList().stream()
-					.filter(Datalake.Tank::isEntity)
-					.map(Datalake.Tank::asEntity)
-					.map(Datalake.Tank.Entity::entity)
+					.filter(Datalake.Tank::isTuple)
+					.map(Datalake.Tank::asTuple)
+					.map(Datalake.Tank.Tuple::entity)
 					.filter(Objects::nonNull)
 					.map(Layer::name$)
 					.collect(Collectors.toSet());
