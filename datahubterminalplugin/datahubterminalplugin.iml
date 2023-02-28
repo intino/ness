@@ -43,7 +43,6 @@
     <orderEntry type="library" scope="TEST" name="Intino: org.antlr:antlr4-runtime:4.8" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:terminal-jms:4.9.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.4.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:session:1.1.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:event:3.0.5" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zim:4.0.3" level="project" />
@@ -152,7 +151,5 @@
     <orderEntry type="library" name="Intino: javax.activation:javax.activation-api:1.2.0" level="project" />
     <orderEntry type="library" name="Intino: org.jvnet.jaxb2_commons:jaxb2-basics-runtime:0.12.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino:data-hub:6.2.5" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:primitives:1.0.4" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:4.0.7" level="project" />
   </component>
 </module>
