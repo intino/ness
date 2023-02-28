@@ -1,6 +1,6 @@
 package io.intino.ness.master.messages.listeners;
 
-import io.intino.ness.master.model.Entity;
+import io.intino.ness.master.Entity;
 
 import java.time.Instant;
 
@@ -57,7 +57,12 @@ public interface EntityListener<T extends Entity> {
 		/**
 		 * The entity upon the operation was performed.
 		 */
-		Entity.Id entityId();
+		String entityId();
+
+		/**
+		 * The entity simple class name
+		 * */
+		String entityClassName();
 
 		/**
 		 * The entity upon the operation was performed. It may be null.

@@ -15,46 +15,44 @@ Entity Host
 
 Entity User
 	Attribute name as String
+	Attribute language as String
 	Attribute displayName as String
 	Attribute email as String
 
 Entity Team
 	Attribute displayName as String
-	Attribute channels as Struct(Channel) List
+	Attribute users as Entity(User) List
+	Attribute channels as Entity(Channel) List
 
-Struct Channel
+Entity Channel
 	Attribute displayName as String
-	Attribute priority as Integer
 
 Entity System
-	Attribute ip as String
-	Attribute publicIp as String
-	Attribute type as Entity(AssetType)
-	Attribute area as Entity(Area)
-	Attribute host as Entity(Host)
 
-Entity Asset
+Entity Asset as ExtensionOf(System)
 	Attribute ip as String
 	Attribute publicIp as String
 	Attribute type as Entity(AssetType)
 	Attribute area as Entity(Area)
 	Attribute host as Entity(Host)
-	Attribute system as Entity(System)
-	Attribute systemList as Entity(System) List
-	Attribute systemSet as Entity(System) Set
+	Attribute team as Entity(Team)
 
 Entity AnomalyType
 	Attribute group as String
-	Attribute issueEN as String
-	Attribute issueES as String
-	Attribute issuePT as String
+	Attribute issueEn as String
+	Attribute issueEs as String
+	Attribute issuePt as String
 
 Entity AnomalyRule
 	Attribute detector as String
+	Attribute services as Entity(Service) List
 
-Entity Service as Abstract
-	Attribute asset as String
-	Attribute type as Entity(ServiceType)
+Entity Service as Abstract ExtensionOf(System)
+	Attribute asset as Entity(Asset)
+	Attribute team as Entity(Team)
 
 Entity RdbmsService as ExtensionOf(Service) > Attribute url as String
 Entity ApplicationService as ExtensionOf(Service) > Attribute applications as String List
+
+
+

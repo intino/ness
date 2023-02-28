@@ -41,6 +41,7 @@ Terminal monitor-terminal
 Terminal wizard-terminal
 	Publish(dl.anomaly)
 	Subscribe(dl.mode dl.assetInfo dl.assetStatus,dl.asset dl.service dl.anomalyType dl.anomalyRule)
+	Datamarts(d1 d2 d3...)
 
 Terminal connector-terminal
 	Publish(empty, dl.user dl.team)

@@ -21,9 +21,16 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.0.5" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:message:3.0.5" level="project" />
     <orderEntry type="library" name="Intino: org.antlr:antlr4-runtime:4.10.1" level="project" />
-    <orderEntry type="library" name="Intino: org.xerial.snappy:snappy-java:1.1.8.4" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.2.0" level="project" />
     <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.10" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: junit:junit:4.13.2" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:6.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:event:4.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:iterator-stream:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:resource-cleaner:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:zim:5.0.0" level="project" />
+    <orderEntry type="library" name="Intino: com.github.luben:zstd-jni:1.5.4-1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:zit:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ztp:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.2.1" level="project" />
   </component>
 </module>

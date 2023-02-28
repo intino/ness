@@ -2,7 +2,7 @@ package io.intino.ness.master.messages;
 
 import io.intino.ness.master.messages.listeners.EntityListener;
 import io.intino.ness.master.messages.listeners.ErrorListener;
-import io.intino.ness.master.model.Entity;
+import io.intino.ness.master.Entity;
 
 /**
  * Represents the result of an update request to master.
