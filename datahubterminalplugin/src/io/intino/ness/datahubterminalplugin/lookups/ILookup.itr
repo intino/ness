@@ -1,9 +1,0 @@
-def type(interface)
-	package $package;
-
-	public interface DynamicLookup {
-		void open();
-		void commit();
-		void close();
-	}
-end

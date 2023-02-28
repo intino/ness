@@ -91,7 +91,7 @@ class AdvisoryManager {
 		}
 	}
 
-	private class Info {
+	private static class Info {
 		int consumers = 0;
 		int producers = 0;
 		int enqueued = 0;

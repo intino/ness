@@ -47,7 +47,6 @@ Concept:{0..1} Datalake
 	Concept:{1..*}:AspectRequired Tank
 		var word:Scale scale = empty
 		Aspect TankType
-			sub Tuple > var Entities.Entity entity
 			sub Message
 				var Model.Message message
 				var boolean sortingRequired = true
@@ -67,11 +66,9 @@ Concept:Named Terminal
 		var Datalake.Split split
 	Concept:{0..1} Publish
 		var Datalake.Tank.Message[] messageTanks
-		var Datalake.Tank.Tuple[] tupleTanks = empty
 		var Datalake.Tank.Measurement[] measurementTanks = empty
 	Concept:{0..1} Subscribe
 		var Datalake.Tank.Message[] messageTanks
-		var Datalake.Tank.Tuple[] tupleTanks = empty
 		var Datalake.Tank.Measurement[] measurementTanks = empty
 
 Concept Namespace
@@ -79,8 +76,7 @@ Concept Namespace
 	has Namespace
 	has Message
 
-Concept Measurement
-	has:Named:RequiresAspect Attribute
+Concept Measurement > Concept:{1..*} Value
 
 Concept Message
 	has:Named:RequiresAspect Attribute

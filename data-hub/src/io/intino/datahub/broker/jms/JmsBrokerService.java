@@ -25,6 +25,7 @@ import org.apache.activemq.plugin.java.JavaRuntimeConfigurationPlugin;
 import org.apache.activemq.security.AuthenticationUser;
 import org.apache.activemq.security.SimpleAuthenticationPlugin;
 import org.apache.activemq.store.kahadb.KahaDBPersistenceAdapter;
+import org.apache.http.impl.entity.EntitySerializer;
 
 import javax.jms.*;
 import java.io.File;
@@ -40,24 +41,19 @@ import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 
 public class JmsBrokerService implements BrokerService {
 	private static final String NESS = "ness";
-	private static final String entitiesTopic = "entities";
 	private final File root;
 	private final NessGraph graph;
 	private final File brokerStage;
-	private final FileDatalake datalake;
-	private final Master master;
 	private final BrokerManager brokerManager;
 	private final PipeManager pipeManager;
 	private final Map<String, VirtualDestinationInterceptor> pipes = new HashMap<>();
 
 	private org.apache.activemq.broker.BrokerService service;
 
-	public JmsBrokerService(NessGraph graph, File brokerStage, FileDatalake datalake, Master master) {
+	public JmsBrokerService(NessGraph graph, File brokerStage) {
 		this.root = new File(graph.broker().path());
 		this.graph = graph;
 		this.brokerStage = brokerStage;
-		this.datalake = datalake;
-		this.master = master;
 		configure();
 		this.brokerManager = new BrokerManager(graph, new AdvisoryManager(jmsBroker()));
 		this.pipeManager = new PipeManager(brokerManager, graph.broker().pipeList());
@@ -226,7 +222,6 @@ public class JmsBrokerService implements BrokerService {
 		void start() {
 			startNessSession();
 			initMessageTankConsumers();
-			initEntityConsumers();
 		}
 
 		void stop() {
@@ -330,9 +325,8 @@ public class JmsBrokerService implements BrokerService {
 			if (graph.datalake() == null) return;
 			brokerStage.mkdirs();
 			graph.datalake().tankList().stream()
-					.filter(tank -> !tank.isTuple())
-					.map(Datalake.Tank::asMessage).
-					forEach(t -> {
+					.map(Datalake.Tank::asMessage)
+					.forEach(t -> {
 						if (!t.asTank().isSplitted() || t.asTank().asSplitted().split().isLeaf())
 							brokerManager.registerTopicConsumer(t.qn(), new MessageSerializer(brokerStage, t.qn(), scale(t)).create());
 						else {
@@ -347,10 +341,6 @@ public class JmsBrokerService implements BrokerService {
 			Logger.info("Tanks ignited!");
 		}
 
-		private void initEntityConsumers() {
-			brokerManager.registerTopicConsumer(entitiesTopic, new EntitySerializer(datalake, graph, master).create());
-			Logger.info("Master ignited!");
-		}
 
 		private Scale scale(Datalake.Tank.Message t) {
 			return t.scale() != null ? Scale.valueOf(t.scale().name()) : datalakeScale();
