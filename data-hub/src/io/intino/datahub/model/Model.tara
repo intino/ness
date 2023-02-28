@@ -57,6 +57,10 @@ Concept:{0..1} Datalake
 				var string qn = @qn is private reactive
 		Aspect Splitted > var Split split
 
+Concept:Named Datamart
+	var word:SnapshotScale scale
+	has Entity
+
 Concept:Named Terminal
 	Concept:{0..1} Bpm
 		var string processStatusClass = "io.intino.alexandria.bpm.ProcessStatus" is private
