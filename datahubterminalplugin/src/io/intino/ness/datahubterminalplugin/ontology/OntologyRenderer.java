@@ -3,8 +3,7 @@ package io.intino.ness.datahubterminalplugin.ontology;
 import io.intino.Configuration;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.model.*;
-import io.intino.ness.datahubterminalplugin.event.EventRenderer;
-import io.intino.ness.datahubterminalplugin.event.WordbagRenderer;
+import io.intino.ness.datahubterminalplugin.message.MessageRenderer;
 import io.intino.ness.datahubterminalplugin.master.MasterRenderer;
 import io.intino.plugin.PluginLauncher;
 
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
 public class OntologyRenderer {
 
 	private final List<Datalake.Tank.Event> eventTanks;
-	private final List<Event> events;
+	private final List<Event> messages;
 	private final List<Wordbag> wordbags;
 	private final NessGraph graph;
 	private final Configuration conf;
@@ -33,7 +32,7 @@ public class OntologyRenderer {
 	OntologyRenderer(NessGraph graph, Configuration conf, File root, File srcDir, List<File> resDirectories, String basePackage,
 					 PrintStream logger, PluginLauncher.Notifier notifier) {
 		this.eventTanks = eventTanks(graph);
-		this.events = graph.eventList();
+		this.messages = graph.eventList();
 		this.wordbags = graph.wordbagList();
 		this.graph = graph;
 		this.conf = conf;
@@ -59,9 +58,8 @@ public class OntologyRenderer {
 	}
 
 	private void renderEvents() {
-		eventSplitMap.forEach((k, v) -> new EventRenderer(k, v, srcDir, basePackage).render());
-		events.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new EventRenderer(event, null, srcDir, basePackage).render());
-		wordbags.stream().parallel().forEach(w -> new WordbagRenderer(w, conf, srcDir, resDirectories, basePackage).render());
+		eventSplitMap.forEach((k, v) -> new MessageRenderer(k, v, srcDir, basePackage).render());
+		messages.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new MessageRenderer(event, null, srcDir, basePackage).render());
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
 		wordbags.stream().filter(Wordbag::isInResource).map(Wordbag::asInResource).

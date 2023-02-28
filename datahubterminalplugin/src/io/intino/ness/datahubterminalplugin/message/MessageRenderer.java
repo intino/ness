@@ -1,4 +1,4 @@
-package io.intino.ness.datahubterminalplugin.event;
+package io.intino.ness.datahubterminalplugin.message;
 
 import io.intino.datahub.model.*;
 import io.intino.datahub.model.Datalake.Split;
@@ -17,14 +17,14 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
 
-public class EventRenderer {
-	private static final String EVENT = "io.intino.alexandria.event.Event";
+public class MessageRenderer {
+	private static final String EVENT = "io.intino.alexandria.event.MessageEvent";
 	private final Event event;
 	private final Split split;
 	private final File destination;
 	private final String rootPackage;
 
-	public EventRenderer(Event event, Split split, File destination, String rootPackage) {
+	public MessageRenderer(Event event, Split split, File destination, String rootPackage) {
 		this.event = event;
 		this.split = split;
 		this.destination = destination;
@@ -207,7 +207,7 @@ public class EventRenderer {
 	}
 
 	private Template template() {
-		return Formatters.customize(new EventTemplate()).add("typeFormat", (value) -> {
+		return Formatters.customize(new MessageTemplate()).add("typeFormat", (value) -> {
 			if (value.toString().contains(".")) return Formatters.firstLowerCase(value.toString());
 			else return value;
 		});

@@ -1,0 +1,380 @@
+def type(root)
+	package $package+ValidPackage;
+
+	$event
+end
+
+def trigger(event)
+	public class $name+firstUpperCase [extends $parent] implements java.io.Serializable {
+		$split
+
+		[$attribute+declaration...[$NL]]
+		[$component+declaration...[$NL]]
+
+		public $name+firstUpperCase(String ss) {
+			[super(new io.intino.alexandria.event.MessageEvent("$parentSuper", ss))?super("$name", ss)];
+		}
+
+		public $name+firstUpperCase(io.intino.alexandria.event.MessageEvent event) {
+			this(event.toMessage());
+		}
+
+		public $name+firstUpperCase(io.intino.alexandria.message.Message message) {
+			super(message);
+		}
+
+		public $name+firstUpperCase ts(java.time.Instant ts) {
+			super.ts(ts);
+			return this;
+		}
+
+		public $name+firstUpperCase ss(String ss) {
+			super.ss(ss);
+			return this;
+		}
+
+		public static $name+firstUpperCase fromString(String event) {
+			return new $name+firstUpperCase(new io.intino.alexandria.message.MessageReader(event).next());
+		}
+
+		[$attribute+getter...[$NL$NL]]
+
+		[$component+getter...[$NL$NL]]
+
+		[$attribute+setter...[$NL$NL]]
+
+		[$component+setter...[$NL$NL]]
+
+		[$component...[$NL$NL]]
+
+		@Override
+		public io.intino.alexandria.message.Message toMessage() {
+			$attribute+serializeTable...[$NL]
+			return super.toMessage();
+		}
+	}
+end
+
+def trigger(component)
+	public static class $name+firstUpperCase [extends $parent] implements java.io.Serializable {
+		[$attribute+declaration...[$NL]]
+		[$component+declaration...[$NL]]
+		[$parent+delegate?protected io.intino.alexandria.message.Message message;]
+
+		public $name+firstUpperCase() {
+			[this(new io.intino.alexandria.message.Message("$parentSuper")?this.message = new io.intino.alexandria.message.Message("$name");]
+		}
+
+		public $name+firstUpperCase(io.intino.alexandria.message.Message message) {
+			[super(message)$parent+delegate?this.message = message;]
+		}
+
+		$attribute+getter...[$NL$NL]
+
+		$component+getter...[$NL$NL]
+
+		$attribute+setter...[$NL$NL]
+
+		$component+setter...[$NL$NL]
+
+		[$component...[$NL$NL]]
+
+		public io.intino.alexandria.message.Message toMessage() {
+			return this.message;
+		}
+	}
+end
+
+def type(default) trigger(super)
+	super(")
+end
+
+def trigger(split)
+	public enum Split {
+		$enum+asEnum...[, ];
+
+		public abstract String qn();
+
+		public static Split splitByQn(String qn) {
+			return java.util.Arrays.stream(values()).filter(c -> c.qn().equals(qn)).findFirst().orElse(null);
+		}
+	}
+end
+
+def trigger(asEnum)
+	$value+snakeCaseToCamelCase {
+		public String qn() {
+			return "$qn";
+		}
+	}
+end
+
+def trigger(delegate)
+	;
+
+end
+
+def type(word & single) trigger(declaration)
+	public enum $name+FirstUpperCase {
+		$words...[, ]
+	}
+
+end
+
+def type(word & multiple) trigger(declaration)
+	public enum $name+FirstUpperCase {
+		$words...[, ]
+	}
+
+end
+
+def type(table) trigger(declaration)
+	private $package.$table+FirstUpperCase $name+firstLowerCase = null;
+end
+
+def type(component) trigger(declaration)
+	private java.util.List<$type+FirstUpperCase> $name+firstLowerCase~List = null;
+end
+
+def type(word & single) trigger(getter)
+	public $name+FirstUpperCase $name+FirstLowerCase() {
+		return !message.contains("$name+FirstLowerCase") ? null : $name+FirstUpperCase.valueOf(message.get("$name+FirstLowerCase").asString());
+	}
+end
+
+def type(word & multiple) trigger(getter)
+	public java.util.List<$type+FirstUpperCase> $name+FirstLowerCase() {
+		if (!message.contains("$name+FirstLowerCase")) return java.util.Collections.emptyList();
+		return java.util.Arrays.stream(message.get("$name+FirstLowerCase").as(String$[].class)).map($name+FirstUpperCase::valueOf).collect(java.util.stream.Collectors.toUnmodifiableList());
+	}
+end
+
+def type(table) trigger(getter)
+	public $package.$table+FirstUpperCase $name+firstLowerCase() {
+		return this.$name+FirstLowerCase == null ? this.$name+FirstLowerCase =  new $package.$table+FirstUpperCase(message.get("$name").asTable()) : this.$name+FirstLowerCase;
+	}
+end
+
+def type(primitive & single & date) !attribute(defaultValue:null) trigger(getter)
+	public $type $name+firstLowerCase() {
+		return $type.ofInstant(message.get("$name+FirstLowerCase").asInstant(), java.time.ZoneId.systemDefault());
+	}
+end
+
+def type(primitive & single) !attribute(defaultValue:null) trigger(getter)
+	public $type $name+firstLowerCase() {
+		return message.get("$name+FirstLowerCase").as$simpleType();
+	}
+end
+
+def type(primitive & single) trigger(getter)
+	public $type $name+firstLowerCase() {
+		return !message.contains("$name+FirstLowerCase") ? $defaultValue : message.get("$name+FirstLowerCase").as$simpleType();
+	}
+end
+
+def type(primitive & multiple) trigger(getter)
+	public java.util.List<$type+FirstUpperCase> $name+firstLowerCase() {
+		return new java.util.ArrayList<$type+FirstUpperCase>(message.contains("$name+FirstLowerCase") ? java.util.Arrays.asList(message.get("$name+FirstLowerCase").as($type$[].class)) : java.util.Collections.emptyList()) {
+			@Override
+			public boolean add($type+FirstUpperCase value) {
+				super.add(value);
+				message.append("$name+FirstLowerCase", value);
+				return true;
+			}
+
+			@Override
+			public void add(int index, $type+FirstUpperCase element) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public boolean remove(Object value) {
+				if (!(value instanceof $type)) return false;
+				super.remove(value);
+				message.remove("$name+FirstLowerCase", value);
+				return true;
+			}
+
+			@Override
+			public $type remove(int index) {
+				$type type = get(index);
+				remove(type);
+				return type;
+			}
+
+			@Override
+			public boolean removeIf(java.util.function.Predicate<? super $type+FirstUpperCase> filter) {
+				return removeAll(java.util.stream.IntStream.range(0, this.size()).filter(i -> filter.test(get(i))).mapToObj(this::get).collect(java.util.stream.Collectors.toList()));
+			}
+
+			@Override
+			public boolean removeAll(java.util.Collection<?> c) {
+				c.forEach(this::remove);
+				return true;
+			}
+
+			@Override
+			public boolean addAll(java.util.Collection<? extends $type+FirstUpperCase> c) {
+				c.forEach(this::add);
+				return true;
+			}
+
+			@Override
+			public boolean addAll(int index, java.util.Collection<? extends $type+FirstUpperCase> c) {
+				throw new UnsupportedOperationException();
+			}
+
+			public void clear() {
+				super.clear();
+				message.remove("$name+FirstLowerCase");
+			}
+		};
+	}
+end
+
+def type(word & single) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase($type+FirstUpperCase $name+firstLowerCase) {
+		if ($name+firstLowerCase == null) this.message.remove("$name+firstLowerCase");
+		else this.message.set("$name+firstLowerCase", $name+firstLowerCase.name());
+		return this;
+	}
+end
+
+def type(word & multiple) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase(java.util.List<$type+FirstUpperCase> $name+firstLowerCase) {
+		this.message.remove("$name+firstLowerCase");
+		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v.name()));
+		return this;
+	}
+end
+
+def type(primitive & single) type(integer | double) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
+		this.message.set("$name+firstLowerCase", $name+firstLowerCase);
+		return this;
+	}
+end
+
+def type(primitive & single & date) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
+		if ($name+firstLowerCase == null) this.message.remove("$name+firstLowerCase");
+		else this.message.set("$name+firstLowerCase", $name+firstLowerCase.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant());
+		return this;
+	}
+end
+
+def type(primitive & single) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase($type $name+firstLowerCase) {
+		if ($name+firstLowerCase == null) this.message.remove("$name+firstLowerCase");
+		else this.message.set("$name+firstLowerCase", $name+firstLowerCase);
+		return this;
+	}
+end
+
+def type(table) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase($package.$table+FirstUpperCase $name+firstLowerCase) {
+		this.$name+firstLowerCase = $name+firstLowerCase;
+		return this;
+	}
+end
+
+def type(primitive & multiple) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase(java.util.List<$type> $name+firstLowerCase) {
+		this.message.remove("$name+firstLowerCase");
+		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v));
+		return this;
+	}
+end
+
+def type(primitive & multiple) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase(java.util.List<$type> $name+firstLowerCase) {
+		this.message.remove("$name+firstLowerCase");
+		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v));
+		return this;
+	}
+end
+
+def type(component) !type(single) trigger(getter)
+	public java.util.List<$type> $name+firstLowerCase~List() {
+		if (this.$name+firstLowerCase~List != null) return this.$name+firstLowerCase~List;
+		return this.$name+firstLowerCase~List = new java.util.ArrayList<$type>(message.components("$type").stream().map(c -> new $type(c)).collect(java.util.stream.Collectors.toList())) {
+			@Override
+			public boolean add($type element) {
+				super.add(element);
+				message.add(element.toMessage());
+				return true;
+			}
+
+			@Override
+			public void add(int index, $type element) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public boolean remove(Object o) {
+				if (!(o instanceof $type)) return false;
+				super.remove(o);
+				message.remove((($type) o).toMessage());
+				return true;
+			}
+
+			@Override
+			public $type remove(int index) {
+				$type type = get(index);
+				remove(type);
+				return type;
+			}
+
+			@Override
+			public boolean removeIf(java.util.function.Predicate<? super $type> filter) {
+				return removeAll(java.util.stream.IntStream.range(0, this.size()).filter(i -> filter.test(get(i))).mapToObj(this::get).collect(java.util.stream.Collectors.toList()));
+			}
+
+			@Override
+			public boolean removeAll(java.util.Collection<?> c) {
+				c.forEach(this::remove);
+				return true;
+			}
+
+			@Override
+			public boolean addAll(java.util.Collection<? extends $type> c) {
+				c.forEach(this::add);
+				return true;
+			}
+
+			@Override
+			public boolean addAll(int index, java.util.Collection<? extends $type> c) {
+				throw new UnsupportedOperationException();
+			}
+		};
+	}
+end
+
+def type(component) type(single) trigger(getter)
+	public $type $name+firstLowerCase() {
+		java.util.List<io.intino.alexandria.message.Message> components = message.components("$type");
+		return components.isEmpty() ? null : new $type(components.get(0));
+	}
+end
+
+def type(component) type(single) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase($type+firstUpperCase $name+firstLowerCase) {
+		this.message.components("$type").forEach(v -> this.message.remove(v));
+		if ($name+firstLowerCase != null) this.message.add($name+firstLowerCase.toMessage());
+		return this;
+	}
+end
+
+def type(multiple & component) trigger(setter)
+	public $owner+firstUpperCase $name+firstLowerCase~List(java.util.List<$type+firstUpperCase> $name+firstLowerCase) {
+		new java.util.ArrayList(this.$name+firstLowerCase~List()).forEach(v -> this.$name+firstLowerCase~List.remove(v));
+		this.$name+firstLowerCase~List.addAll($name+firstLowerCase);
+		return this;
+	}
+end
+
+def type(table) trigger(serialize)
+	if (this.$name+firstLowerCase == null) this.message.remove("$name+firstLowerCase");
+	else this.message.set("$name+firstLowerCase", this.$name+firstLowerCase.serialize());
+end
