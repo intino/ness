@@ -4,10 +4,11 @@ import io.intino.alexandria.Fingerprint;
 import io.intino.alexandria.Scale;
 import io.intino.alexandria.Session;
 import io.intino.alexandria.Timetag;
-import io.intino.alexandria.event.Event;
+import io.intino.alexandria.event.Event.Format;
 import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
+import io.intino.datahub.model.Datalake;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.util.Iterator;
 import java.util.function.Consumer;
 
 import static io.intino.alexandria.Timetag.of;
+import static io.intino.alexandria.event.Event.Format.Measurement;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.time.LocalDateTime.ofInstant;
@@ -24,10 +26,10 @@ import static java.time.ZoneOffset.UTC;
 
 class MessageSerializer {
 	private final File stage;
-	private final String tank;
+	private final Datalake.Tank tank;
 	private final Scale scale;
 
-	MessageSerializer(File stage, String tank, Scale scale) {
+	MessageSerializer(File stage, Datalake.Tank tank, Scale scale) {
 		this.stage = stage;
 		this.tank = tank;
 		this.scale = scale;
@@ -38,7 +40,13 @@ class MessageSerializer {
 	}
 
 	private void save(Iterator<Message> messages) {
-		messages.forEachRemaining(m -> write(destination(tank, m).toPath(), m));
+		messages.forEachRemaining(m -> write(destination(m).toPath(), m));
+	}
+
+	private File destination(Message message) {
+		MessageEvent event = new MessageEvent(message);
+		String fingerprint = Fingerprint.of(tank.qn(), event.ss(), timetag(event), tank.isMessage() ? Format.Message : Measurement).name();
+		return new File(stage, fingerprint + Session.SessionExtension);
 	}
 
 	private void write(Path path, Message message) {
@@ -47,12 +55,6 @@ class MessageSerializer {
 		} catch (IOException e) {
 			Logger.error(e);
 		}
-	}
-
-	private File destination(String tank, Message message) {
-		MessageEvent event = new MessageEvent(message);
-		String fingerprint = Fingerprint.of(tank, event.ss(), timetag(event), Event.Format.Message).name();
-		return new File(stage, fingerprint + Session.SessionExtension);
 	}
 
 	private Timetag timetag(MessageEvent event) {

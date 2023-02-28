@@ -46,14 +46,12 @@ Concept:{0..1} Datalake
 		has:Named Split
 	Concept:{1..*}:AspectRequired Tank
 		var word:Scale scale = empty
+		var string qn = @qn is private reactive
 		Aspect TankType
 			sub Message
 				var Model.Message message
 				var boolean sortingRequired = true
-				var string qn = @qn is private reactive
-			sub Measurement
-				var Model.Measurement measurement
-				var string qn = @qn is private reactive
+			sub Measurement > var Model.Measurement measurement
 		Aspect Splitted > var Split split
 
 Concept:Named Datamart
@@ -97,7 +95,7 @@ Concept Component
 
 Concept:Named:RequiresAspect Attribute extends Data is component
 
-Concept Data is abstract
+Concept Data is abstract component
 	Aspect List
 	Aspect Type
 		var string type is reactive private

@@ -11,6 +11,7 @@ import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.broker.jms.JmsBrokerService;
 import io.intino.datahub.datalake.BrokerSessions;
 import io.intino.datahub.datalake.seal.DatahubSessionSealer;
+import io.intino.datahub.model.Message;
 import io.intino.datahub.model.NessGraph;
 import io.intino.magritte.framework.Graph;
 import io.intino.ness.master.core.Master;
@@ -65,7 +66,7 @@ public class DataHubBox extends AbstractBox {
 	}
 
 	public SessionSealer sessionSealer() {
-		return new DatahubSessionSealer(datalake,graph.datalake(), stageDirectory(), treatedDirectory());
+		return new DatahubSessionSealer(datalake, graph.datalake(), stageDirectory(), treatedDirectory());
 	}
 
 	private void injectJmsConfiguration() {
@@ -78,6 +79,10 @@ public class DataHubBox extends AbstractBox {
 			graph.broker().path(brokerDirectory().getAbsolutePath());
 			graph.broker().port(Integer.parseInt(configuration.brokerPort()));
 			graph.broker().secondaryPort(Integer.parseInt(configuration.brokerSecondaryPort()));
+		}
+		if (graph.datalake().tank(t -> t.name$().equals("Session")) == null) {
+			Message session = graph.create("Session").message();
+			graph.datalake().create("Session").tank().asMessage(session);
 		}
 	}
 

@@ -61,13 +61,12 @@ public class EventSessionSealer {
 	}
 
 	private Format formatOf(String tankName) {
-		io.intino.datahub.model.Datalake.Tank tank = graphDl.tankList(t -> !t.isTuple()).stream().filter(t -> {
+		io.intino.datahub.model.Datalake.Tank tank = graphDl.tankList().stream().filter(t -> {
 			if (t.isMessage() && t.asMessage().qn().equals(tankName)) return true;
 			return t.isMeasurement() && t.asMeasurement().qn().equals(tankName);
 		}).findFirst().orElse(null);
 		if (tank == null) return Unknown;
-		if (tank.isMessage()) return Message;
-		return Measurement;
+		return tank.isMessage() ? Message : Measurement;
 	}
 
 	private void moveTreated(Map.Entry<Fingerprint, List<File>> e) {

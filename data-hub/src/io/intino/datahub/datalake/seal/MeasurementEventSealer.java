@@ -29,7 +29,7 @@ class MeasurementEventSealer {
 	}
 
 	private void seal(File datalakeFile, List<File> sessions) throws IOException {
-		try(MeasurementEventWriter writer = new MeasurementEventWriter(datalakeFile)) {
+		try (MeasurementEventWriter writer = new MeasurementEventWriter(datalakeFile)) {
 			writer.write(streamOf(sessions).map(e -> {
 				Message message = e.toMessage();
 				double[] values = values(message);
@@ -41,7 +41,11 @@ class MeasurementEventSealer {
 	}
 
 	private static double[] values(Message message) {
-		return message.attributes().stream().filter(a -> !a.equals("ts") && !a.equals("ss") && !a.equals("measurements")).mapToDouble(a -> message.get(a).asDouble()).toArray();
+		return message.attributes().stream()
+				.filter(a -> !a.equals("ts"))
+				.filter(a -> !a.equals("sensor"))
+				.filter(a -> !a.equals("measurements"))
+				.mapToDouble(a -> message.get(a).asDouble()).toArray();
 	}
 
 	private Stream<MessageEvent> streamOf(List<File> files) throws IOException {
