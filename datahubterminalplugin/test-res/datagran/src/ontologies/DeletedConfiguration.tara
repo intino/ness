@@ -1,8 +1,0 @@
-dsl Ness
-
-Event DeletedConfiguration
-	Attribute configId as Text
-
-Event DeletedAlertConfiguration as ExtensionOf(DeletedConfiguration)
-
-Event DeletedInstallation as ExtensionOf(DeletedConfiguration)

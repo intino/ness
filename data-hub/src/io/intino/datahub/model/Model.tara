@@ -36,14 +36,6 @@ Concept:{0..1} Datalake
 			var string timeZone
 	Concept:{0..1} ProcessStatus
 		var string name = "ProcessStatus" is private final
-		var Split split
-	Concept:Named Split
-		var string label = 'self.name$()'
-		var string qn = @qn is private reactive
-		var boolean isLeaf = @isLeaf is private reactive
-		var boolean isRoot = @isRoot is private reactive
-		var Split[] leafs = @leafs is private reactive
-		has:Named Split
 	Concept:{1..*}:AspectRequired Tank
 		var word:Scale scale = empty
 		var string qn = @qn is private reactive
@@ -52,7 +44,6 @@ Concept:{0..1} Datalake
 				var Model.Message message
 				var boolean sortingRequired = true
 			sub Measurement > var Model.Measurement measurement
-		Aspect Splitted > var Split split
 
 Concept:Named Datamart
 	var word:SnapshotScale scale
@@ -61,7 +52,6 @@ Concept:Named Datamart
 Concept:Named Terminal
 	Concept:{0..1} Bpm
 		var string processStatusClass = "io.intino.alexandria.bpm.ProcessStatus" is private
-		var Datalake.Split split
 	Concept:{0..1} Publish
 		var Datalake.Tank.Message[] messageTanks
 		var Datalake.Tank.Measurement[] measurementTanks = empty

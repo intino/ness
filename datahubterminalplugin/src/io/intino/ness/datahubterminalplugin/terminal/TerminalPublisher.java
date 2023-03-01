@@ -3,15 +3,12 @@ package io.intino.ness.datahubterminalplugin.terminal;
 import com.google.gson.Gson;
 import io.intino.Configuration;
 import io.intino.alexandria.logger.Logger;
-import io.intino.datahub.model.Datalake;
-import io.intino.datahub.model.Datalake.Split;
 import io.intino.datahub.model.Datalake.Tank;
-import io.intino.datahub.model.Event;
+import io.intino.datahub.model.Message;
 import io.intino.datahub.model.Namespace;
 import io.intino.datahub.model.Terminal;
 import io.intino.ness.datahubterminalplugin.*;
 import io.intino.ness.datahubterminalplugin.MavenTerminalExecutor.Target;
-import io.intino.ness.datahubterminalplugin.master.MasterRenderer;
 import io.intino.plugin.PluginLauncher;
 
 import java.io.File;
@@ -28,6 +25,7 @@ import static io.intino.plugin.PluginLauncher.Phase.*;
 public class TerminalPublisher {
 	private final File root;
 	private final Terminal terminal;
+	private List<Tank.Measurement> measurementTanks;
 	private final Configuration conf;
 	private final Map<String, String> versions;
 	private final PluginLauncher.SystemProperties systemProperties;
@@ -35,12 +33,13 @@ public class TerminalPublisher {
 	private final PluginLauncher.Phase invokedPhase;
 	private final PrintStream logger;
 	private final PluginLauncher.Notifier notifier;
-	private final List<Tank.Event> tanks;
+	private final List<Tank.Message> messageTanks;
 
-	public TerminalPublisher(File root, Terminal terminal, List<Tank.Event> tanks, Configuration configuration, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger, PluginLauncher.Notifier notifier) {
+	public TerminalPublisher(File root, Terminal terminal, List<Tank.Message> messageTanks, List<Tank.Measurement> measurementTanks, Configuration configuration, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger, PluginLauncher.Notifier notifier) {
 		this.root = root;
 		this.terminal = terminal;
-		this.tanks = tanks;
+		this.messageTanks = messageTanks;
+		this.measurementTanks = measurementTanks;
 		this.conf = configuration;
 		this.versions = versions;
 		this.systemProperties = systemProperties;
@@ -85,11 +84,11 @@ public class TerminalPublisher {
 	private boolean createSources() {
 		File srcDirectory = new File(root, "src");
 		srcDirectory.mkdirs();
-		Map<Event, Datalake.Split> eventSplitMap = collectEvents(tanks);
+		List<Message> messages = messageTanks.stream().map(Tank.Message::message).collect(Collectors.toList());
 		if (duplicatedEvents()) return false;
-		if (!terminal.graph().entityList().isEmpty())
-			new MasterRenderer(srcDirectory, terminal.graph(), conf, logger, notifier, basePackage).renderTerminal(terminal);
-		new TerminalRenderer(terminal, eventSplitMap, srcDirectory, basePackage, conf.artifact().code().generationPackage()).render();
+//		if (!terminal.graph().entityList().isEmpty())
+//			new MasterRenderer(srcDirectory, terminal.graph(), conf, logger, notifier, basePackage).renderTerminal(terminal);
+		new TerminalRenderer(terminal, messages, srcDirectory, basePackage, conf.artifact().code().generationPackage()).render();
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
 		writeManifest(resDirectory);
@@ -97,8 +96,8 @@ public class TerminalPublisher {
 	}
 
 	private boolean duplicatedEvents() {
-		final Set<String> duplicatedPublish = terminal.publish() != null ? findDuplicates(terminal.publish().eventTanks().stream().map(Tank.Event::qn).collect(Collectors.toList())) : Collections.emptySet();
-		final Set<String> duplicatedSubscribe = terminal.subscribe() != null ? findDuplicates(terminal.subscribe().eventTanks().stream().map(Tank.Event::qn).collect(Collectors.toList())) : Collections.emptySet();
+		final Set<String> duplicatedPublish = terminal.publish() != null ? findDuplicates(terminal.publish().messageTanks().stream().map(Tank.Message::qn).collect(Collectors.toList())) : Collections.emptySet();
+		final Set<String> duplicatedSubscribe = terminal.subscribe() != null ? findDuplicates(terminal.subscribe().messageTanks().stream().map(Tank.Message::qn).collect(Collectors.toList())) : Collections.emptySet();
 		if (!duplicatedPublish.isEmpty()) {
 			logger.println("Duplicated publishing event in terminal " + terminal.name$() + ": " + String.join(", ", duplicatedPublish));
 			notifier.notifyError("Duplicated publishing event in terminal " + terminal.name$() + ": " + String.join(", ", duplicatedPublish));
@@ -118,9 +117,9 @@ public class TerminalPublisher {
 	}
 
 	private void writeManifest(File srcDirectory) {
-		List<String> publish = terminal.publish() != null ? terminal.publish().eventTanks().stream().map(this::eventQn).collect(Collectors.toList()) : Collections.emptyList();
-		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().eventTanks().stream().map(this::eventQn).collect(Collectors.toList()) : Collections.emptyList();
-		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses(), eventSplits());
+		List<String> publish = terminal.publish() != null ? terminal.publish().messageTanks().stream().map(this::eventQn).collect(Collectors.toList()) : Collections.emptyList();
+		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().messageTanks().stream().map(this::eventQn).collect(Collectors.toList()) : Collections.emptyList();
+		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses());
 		try {
 			Files.write(new File(srcDirectory, "terminal.mf").toPath(), new Gson().toJson(manifest).getBytes());
 		} catch (IOException e) {
@@ -128,66 +127,28 @@ public class TerminalPublisher {
 		}
 	}
 
-	private String namespace(Event event) {
-		return event.core$().owner().is(Namespace.class) ? event.core$().ownerAs(Namespace.class).qn() + "." : "";
-	}
-
 	private String terminalNameArtifact() {
 		return Formatters.firstLowerCase(Formatters.camelCaseToSnakeCase().format(terminal.name$()).toString());
-	}
-
-	private Map<String, Set<String>> eventSplits() {
-		Map<String, Set<String>> eventSplits = terminal.publish() == null ? new HashMap<>() : eventSplitOf(terminal.publish().eventTanks());
-		if (terminal.subscribe() == null) return eventSplits;
-		Map<String, Set<String>> subscribeEventSplits = eventSplitOf(terminal.subscribe().eventTanks());
-		for (String eventType : subscribeEventSplits.keySet()) {
-			if (!eventSplits.containsKey(eventType)) eventSplits.put(eventType, new HashSet<>());
-			eventSplits.get(eventType).addAll(subscribeEventSplits.get(eventType));
-		}
-		return eventSplits;
-	}
-
-	private Map<String, Set<String>> eventSplitOf(List<Tank.Event> tanks) {
-		return tanks.stream().
-				collect(Collectors.toMap(this::eventQn,
-						tank -> tank.asTank().isSplitted() ? tank.asTank().asSplitted().split().leafs().stream().map(Split::qn).collect(Collectors.toSet()) : Collections.emptySet(), (a, b) -> b));
 	}
 
 	private Map<String, String> tankClasses() {
 		Map<String, String> tankClasses = new HashMap<>();
 		if (terminal.publish() != null)
-			terminal.publish().eventTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + namespace(t.event()).toLowerCase() + t.event().name$()));
+			terminal.publish().messageTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + namespace(t.message()).toLowerCase() + t.message().name$()));
 		if (terminal.subscribe() != null)
-			terminal.subscribe().eventTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + namespace(t.event()).toLowerCase() + t.event().name$()));
-		if (terminal.bpm() != null) {
-			Split split = terminal.bpm().split();
-			String statusQn = terminal.bpm().processStatusClass();
-			String statusClassName = statusQn.substring(statusQn.lastIndexOf(".") + 1);
-			tankClasses.put((split != null ? split.qn() + "." : "") + statusClassName, statusQn);
-		}
+			terminal.subscribe().messageTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + namespace(t.message()).toLowerCase() + t.message().name$()));
+		if (terminal.bpm() != null)
+			tankClasses.put(terminal.bpm().processStatusClass().substring(terminal.bpm().processStatusClass().lastIndexOf(".") + 1), terminal.bpm().processStatusClass());
 		return tankClasses;
 	}
 
-	private String eventQn(Tank.Event t) {
-		return namespace(t.event()) + t.event().name$();
+	private String eventQn(Tank.Message tank) {
+		return namespace(tank.message()) + tank.message().name$();
 	}
 
-	private Map<Event, Split> collectEvents(List<Tank.Event> tanks) {
-		Map<Event, Split> events = new HashMap<>();
-		for (Tank.Event tank : tanks) {
-			List<Event> hierarchy = hierarchy(tank.event());
-			Split split = tank.asTank().isSplitted() ? tank.asTank().asSplitted().split() : null;
-			events.put(hierarchy.get(0), split);
-			hierarchy.remove(0);
-			hierarchy.forEach(e -> events.put(e, null));
-		}
-		return events;
+	private String namespace(Message message) {
+		return message.core$().owner().is(Namespace.class) ? message.core$().ownerAs(Namespace.class).qn() + "." : "";
 	}
 
-	private List<Event> hierarchy(Event event) {
-		Set<Event> events = new LinkedHashSet<>();
-		events.add(event);
-		if (event.isExtensionOf()) events.addAll(hierarchy(event.asExtensionOf().parent()));
-		return new ArrayList<>(events);
-	}
+
 }

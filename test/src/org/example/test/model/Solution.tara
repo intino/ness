@@ -16,33 +16,15 @@ Datalake(scale = Day, path = "{datalake}") dl
 	Tank anomaly as Message(monitoring.AnomalyBundle)
 	Tank notification as Message(monitoring.Notification)
 
-	Tank user as Tuple(User)
-	Tank team as Tuple(Team)
-	Tank type as Tuple (Type)
-	Tank area as Tuple (Area)
-	Tank host as Tuple (Host)
-	Tank asset as Tuple (Asset)
-	Tank system as Tuple (System)
-	Tank assetType as Tuple (AssetType)
-	Tank service as Tuple(Service)
-	Tank serviceType as Tuple (ServiceType)
-	Tank businessType as Tuple (BusinessType)
-	Tank anomalyRule as Tuple(AnomalyType)
-	Tank anomalyType as Tuple(AnomalyRule)
-
 Terminal test-terminal
-	Subscribe(dl.anomaly dl.assetInfo dl.assetStatus dl.mode, dl.user dl.asset dl.service dl.team dl.type dl.assetType dl.serviceType dl.area dl.host dl.anomalyType dl.system)
-	Publish(dl.notification, dl.service dl.team dl.anomalyType dl.system)
+	Subscribe(dl.anomaly dl.assetInfo dl.assetStatus dl.mode)
+	Publish(dl.notification)
 
 Terminal monitor-terminal
 	Publish(dl.assetInfo dl.assetStatus dl.mode)
-	Subscribe(empty, dl.service)
+	Subscribe(dl.anomaly)
 
 Terminal wizard-terminal
 	Publish(dl.anomaly)
-	Subscribe(dl.mode dl.assetInfo dl.assetStatus,dl.asset dl.service dl.anomalyType dl.anomalyRule)
-	Datamarts(d1 d2 d3...)
-
-Terminal connector-terminal
-	Publish(empty, dl.user dl.team)
-	Subscribe(dl.notification, dl.user dl.team)
+	Subscribe(dl.mode dl.assetInfo dl.assetStatus)
+//	Datamarts(d1 d2 d3...)
