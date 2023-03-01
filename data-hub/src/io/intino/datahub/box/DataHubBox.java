@@ -11,11 +11,15 @@ import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.broker.jms.JmsBrokerService;
 import io.intino.datahub.datalake.BrokerSessions;
 import io.intino.datahub.datalake.seal.DatahubSessionSealer;
+import io.intino.datahub.master.datamarts.messages.MessageMasterDatamartFactory;
+import io.intino.datahub.master.MasterDatamartRepository;
+import io.intino.datahub.master.datamarts.messages.MapMessageMasterDatamart;
+import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.NessGraph;
 import io.intino.magritte.framework.Graph;
-import io.intino.ness.master.core.Master;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.time.Instant;
 
@@ -28,7 +32,7 @@ public class DataHubBox extends AbstractBox {
 	private Sentinels sentinels;
 	private NessGraph graph;
 	private Instant lastSeal;
-	private Master master;
+	private MasterDatamartRepository masterDatamarts;
 
 	public DataHubBox(String[] args) {
 		super(args);
@@ -103,8 +107,8 @@ public class DataHubBox extends AbstractBox {
 		return new FileSessionSealer(datalake, stageDirectory, treatedDirectory());
 	}
 
-	public Master master() {
-		return master;
+	public MasterDatamartRepository masterDatamarts() {
+		return masterDatamarts;
 	}
 
 	public void beforeStart() {
@@ -112,11 +116,13 @@ public class DataHubBox extends AbstractBox {
 		loadBrokerService();
 		if (graph.datalake() != null) {
 			this.datalake = new FileDatalake(datalakeDirectory());
-//			initMaster();
 		}
 		if (graph.broker() != null) {
 			configureBroker();
 			nessService = new NessService(this);
+		}
+		if(graph.datamartList() != null && !graph.datamartList().isEmpty()) {
+			initMasterDatamarts();
 		}
 		sentinels = new Sentinels(this);
 	}
@@ -173,18 +179,24 @@ public class DataHubBox extends AbstractBox {
 		return lastSeal;
 	}
 
+	private void initMasterDatamarts() {
+		File datamartsRoot = new File(configuration.home(), "datamarts");
+		masterDatamarts = new MasterDatamartRepository(datamartsRoot);
+		MessageMasterDatamartFactory datamartFactory = new MessageMasterDatamartFactory(datamartsRoot, datalake);
+		for(Datamart datamart : graph.datamartList()) {
+			initDatamart(datamartFactory, datamart);
+		}
+		Logger.info("MasterDatamarts initialized (" + masterDatamarts.size() + ")");
+	}
 
-//	private void initMaster() {
-//		master = new Master(getMasterConfig());
-//		master.start();
-//	}
-//
-//	private Master.Config getMasterConfig() {
-//		Master.Config config = new Master.Config();
-////		config.datalakeRootPath(datalakeDirectory());
-////		config.serializer(MasterSerializers.getOrDefault(configuration.masterSerializer()));
-////		config.tripletsDigester(new DatahubTripletDigesterFactory().create());
-//		return config;
-//	}
-
+	private void initDatamart(MessageMasterDatamartFactory datamartFactory, Datamart datamart) {
+		try {
+			Logger.debug("Initializing MasterDatamart " + datamart.name$() + "...");
+			masterDatamarts.put(datamart.name$(), datamartFactory.create(datamart));
+			Logger.debug("MasterDatamart " + datamart.name$() + " initialized!");
+		} catch (IOException e) {
+			Logger.error("Could not initialize datamart " + datamart.name$() + ": " + e.getMessage(), e);
+			masterDatamarts.put(datamart.name$(), new MapMessageMasterDatamart(datamart.name$())); // TODO
+		}
+	}
 }

@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -20,6 +21,7 @@ import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.groupingBy;
 
 public class EventSessionSealer {
+
 	private final Datalake datalake;
 	private final io.intino.datahub.model.Datalake graphDl;
 	private final File stageDir;
@@ -61,13 +63,15 @@ public class EventSessionSealer {
 	}
 
 	private Format formatOf(String tankName) {
-		io.intino.datahub.model.Datalake.Tank tank = graphDl.tankList(t -> !t.isTuple()).stream().filter(t -> {
-			if (t.isMessage() && t.asMessage().qn().equals(tankName)) return true;
-			return t.isMeasurement() && t.asMeasurement().qn().equals(tankName);
-		}).findFirst().orElse(null);
-		if (tank == null) return Unknown;
-		if (tank.isMessage()) return Message;
-		return Measurement;
+		return graphDl.tankList().stream()
+				.filter(tank -> matches(tankName, tank))
+				.findFirst()
+				.map(tank -> (tank.isMessage() ? Message : Measurement)).orElse(Unknown);
+	}
+
+	private static boolean matches(String tankName, io.intino.datahub.model.Datalake.Tank tank) {
+		if (tank.isMessage() && tank.asMessage().qn().equals(tankName)) return true;
+		return tank.isMeasurement() && tank.asMeasurement().qn().equals(tankName);
 	}
 
 	private void moveTreated(Map.Entry<Fingerprint, List<File>> e) {

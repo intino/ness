@@ -10,7 +10,6 @@ public abstract class Entity implements Serializable {
 
 	private final String id;
 	private boolean enabled = true;
-	private transient MasterDatamart datamart;
 
 	public Entity(String id) {
 		if(id == null) throw new NullPointerException("Entity id cannot be null!!");
@@ -27,15 +26,6 @@ public abstract class Entity implements Serializable {
 
 	public Entity enabled(boolean enabled) {
 		this.enabled = enabled;
-		return this;
-	}
-
-	public MasterDatamart datamart() {
-		return datamart;
-	}
-
-	Entity datamart(MasterDatamart datamart) {
-		this.datamart = requireNonNull(datamart);
 		return this;
 	}
 

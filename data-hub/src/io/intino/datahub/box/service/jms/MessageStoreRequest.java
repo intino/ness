@@ -8,12 +8,17 @@ import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.jms.MessageReader;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
+import io.intino.datahub.master.MasterDatamart;
+import io.intino.datahub.master.serialization.MasterDatamartSerializer;
 import org.apache.activemq.command.ActiveMQBytesMessage;
+import org.apache.activemq.command.ActiveMQTextMessage;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +30,7 @@ import static io.intino.datahub.broker.jms.MessageTranslator.toJmsMessage;
 import static java.util.stream.Collectors.toList;
 
 public class MessageStoreRequest {
+
 	private final DataHubBox box;
 
 	public MessageStoreRequest(DataHubBox box) {
@@ -33,15 +39,46 @@ public class MessageStoreRequest {
 
 	public Stream<Message> accept(Message request) {
 		String content = MessageReader.textFrom(request);
-		if (content.equals("datalake")) return Stream.of(toJmsMessage((box.datalake()).root().getAbsolutePath()));
-		if (content.equals("eventStore/tanks"))
+		return content.startsWith("datamart") ? handleDatamartDownload(content) : handleDatalakeDownload(content);
+	}
+
+	private Stream<Message> handleDatamartDownload(String request) {
+		int datamartNameBegin = request.indexOf(':');
+		if(datamartNameBegin < 0) return null;
+		String datamartName = request.substring(datamartNameBegin).trim();
+		MasterDatamart<?> datamart = box.masterDatamarts().get(datamartName);
+		if(datamart == null) {
+			Logger.warn("No datamart with name '" + datamartName + "'");
+			return null;
+		}
+		return download(datamart);
+	}
+
+	private Stream<Message> handleDatalakeDownload(String request) {
+		if (request.equals("datalake")) return Stream.of(toJmsMessage((box.datalake()).root().getAbsolutePath()));
+		if (request.equals("eventStore/tanks"))
 			return Stream.of(toJmsMessage(Json.toString(box.datalake().messageStore().tanks()
 					.map(MessageStoreRequest::tankOf).collect(toList()))));
-		if (content.startsWith("{")) {
-			JsonObject jsonObject = Json.fromString(content, JsonObject.class);
+		if (request.startsWith("{")) {
+			JsonObject jsonObject = Json.fromString(request, JsonObject.class);
 			if ("reflow".equals(jsonObject.get("operation").getAsString())) return reflow(jsonObject);
 		}
 		return null;
+	}
+
+	private Stream<Message> download(MasterDatamart<?> datamart) {
+		try {
+			ActiveMQTextMessage message = new ActiveMQTextMessage();
+			try(Writer writer = new StringWriter(4096)) {
+				MasterDatamartSerializer.serialize(datamart, writer);
+				message.setText(writer.toString());
+			}
+			message.compress();
+			return Stream.of(message);
+		} catch (Exception e) {
+			Logger.error(e);
+			return null;
+		}
 	}
 
 	private Stream<Message> reflow(JsonObject request) {

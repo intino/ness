@@ -1,14 +1,12 @@
 package io.intino.datahub.broker.jms;
 
 import io.intino.alexandria.Scale;
-import io.intino.alexandria.datalake.file.FileDatalake;
 import io.intino.alexandria.jms.*;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.model.Broker;
 import io.intino.datahub.model.Datalake;
 import io.intino.datahub.model.NessGraph;
-import io.intino.ness.master.core.Master;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQSession;
 import org.apache.activemq.broker.BrokerPlugin;
@@ -25,7 +23,6 @@ import org.apache.activemq.plugin.java.JavaRuntimeConfigurationPlugin;
 import org.apache.activemq.security.AuthenticationUser;
 import org.apache.activemq.security.SimpleAuthenticationPlugin;
 import org.apache.activemq.store.kahadb.KahaDBPersistenceAdapter;
-import org.apache.http.impl.entity.EntitySerializer;
 
 import javax.jms.*;
 import java.io.File;

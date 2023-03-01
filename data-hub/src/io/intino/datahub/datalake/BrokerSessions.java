@@ -40,16 +40,17 @@ public class BrokerSessions {
 			tmp.mkdirs();
 			moveToTmp(tmp);
 			for (File file : requireNonNull(tmp.listFiles(f -> f.getName().endsWith(Session.SessionExtension)))) {
-				MessageReader messages = new MessageReader(new FileInputStream(file));
 				EventSession eventSession = handler.createEventSession();
-				Fingerprint fingerprint = Fingerprint.of(file);
-				for (Message message : messages)
-					eventSession.put(fingerprint.tank(), fingerprint.source(), fingerprint.timetag(), Event.Format.Message, new MessageEvent(message));
-				messages.close();
-				eventSession.close();
+				try(MessageReader messages = new MessageReader(new FileInputStream(file))) {
+					Fingerprint fingerprint = Fingerprint.of(file);
+					for (Message message : messages)
+						eventSession.put(fingerprint.tank(), fingerprint.source(), fingerprint.timetag(), Event.Format.Message, new MessageEvent(message));
+				} finally {
+					eventSession.close();
+				}
 				file.delete();
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			Logger.error(e);
 		}
 	}

@@ -7,13 +7,11 @@ import io.intino.alexandria.event.Event;
 import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.MessageWriter;
+import io.intino.alexandria.zim.Zim;
 import io.intino.datahub.datalake.pump.EventPump;
 import io.intino.datahub.datalake.pump.FileEventPump;
-import org.xerial.snappy.SnappyOutputStream;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.Comparator;
 
@@ -46,7 +44,7 @@ public class DatalakeRegenerator {
 				.flatMap(Datalake.Store.Tank::sources)
 				.flatMap(Datalake.Store.Source::tubs)
 				.forEach(tub -> {
-					MessageWriter writer = new MessageWriter(this.zipStream(temp(tub)));
+					MessageWriter writer = new MessageWriter(zim(temp(tub))); // TODO: OR which compression? Zim?
 					tub.events().forEach(e -> {
 						String before = e.toMessage().toString();
 						MessageEvent after = e;
@@ -111,9 +109,9 @@ public class DatalakeRegenerator {
 		}
 	}
 
-	private SnappyOutputStream zipStream(File file) {
+	private OutputStream zim(File file) {
 		try {
-			return new SnappyOutputStream(new FileOutputStream(file));
+			return Zim.compressing(new BufferedOutputStream(new FileOutputStream(file)));
 		} catch (IOException e) {
 			Logger.error(e);
 			return null;

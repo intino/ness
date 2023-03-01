@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "2.0.0") master
+Artifact("io.intino.ness", "2.0.0-SNAPSHOT") master
 	Imports
 		Compile("io.intino.alexandria", "logger", "2.1.0")
 		Compile("io.intino.alexandria", "logger4j", "1.0.1")

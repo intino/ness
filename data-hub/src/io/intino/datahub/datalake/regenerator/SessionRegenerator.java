@@ -11,11 +11,9 @@ import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.event.message.MessageEventReader;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.MessageWriter;
-import org.xerial.snappy.SnappyOutputStream;
+import io.intino.alexandria.zim.Zim;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.util.Collection;
@@ -40,11 +38,11 @@ public class SessionRegenerator {
 		File reportFile = new File(reviewDirectory, mapperPrefixName(mapper) + ".html");
 		RegeneratorReporter reporter = new RegeneratorReporter(reportFile);
 		for (File session : sessions()) {
-			if (!suitable(session, mapper.filter())) continue;
+			if (notSuitable(session, mapper.filter())) continue;
 			try (MessageEventReader reader = new MessageEventReader(session)) {
 				reader.forEachRemaining(e -> {
 					String before = e.toString();
-					map(mapper, reporter, session, e, before);
+					map(mapper, reporter, e, before);
 				});
 			} catch (Exception e) {
 				Logger.error(e);
@@ -58,12 +56,12 @@ public class SessionRegenerator {
 		File reportFile = new File(backupDirectory, mapperPrefixName(mapper) + ".html");
 		RegeneratorReporter reporter = new RegeneratorReporter(reportFile);
 		for (File session : sessions()) {
-			if (!suitable(session, mapper.filter())) continue;
-			MessageWriter writer = new MessageWriter(this.zipStream(temp(session)));
+			if (notSuitable(session, mapper.filter())) continue;
+			MessageWriter writer = new MessageWriter(zim(temp(session))); // TODO: OR which compression? Zim?
 			try (MessageEventReader reader = new MessageEventReader(session)) {
 				reader.forEachRemaining(e -> {
 					String before = e.toString();
-					MessageEvent after = map(mapper, reporter, session, e, before);
+					MessageEvent after = map(mapper, reporter, e, before);
 					if (after != null) write(writer, after);
 				});
 			} catch (Exception e) {
@@ -78,13 +76,13 @@ public class SessionRegenerator {
 		return reportFile;
 	}
 
-	private boolean suitable(File session, Mapper.Filter filter) {
+	private boolean notSuitable(File session, Mapper.Filter filter) {
 		Tank<MessageEvent> tank = tankOf(session);
 		Source<MessageEvent> source = sourceOf(tank, session);
-		return filter.allow(tank) && filter.allow(tank, source, timetagOf(session));
+		return !filter.allow(tank) || !filter.allow(tank, source, timetagOf(session));
 	}
 
-	private MessageEvent map(Mapper mapper, RegeneratorReporter reporter, File session, MessageEvent e, String before) {
+	private MessageEvent map(Mapper mapper, RegeneratorReporter reporter, MessageEvent e, String before) {
 		MessageEvent after = e;
 		Mapper.Filter filter = mapper.filter();
 		if (filter.allow(e)) {
@@ -126,7 +124,7 @@ public class SessionRegenerator {
 	}
 
 	private String ts() {
-		return Instant.now().toString().replaceAll("-|:", "").replace("T", "").substring(0, 14);
+		return Instant.now().toString().replaceAll("[-:]", "").replace("T", "").substring(0, 14);
 	}
 
 	private void move(File source, File dest) {
@@ -153,9 +151,9 @@ public class SessionRegenerator {
 		}
 	}
 
-	private SnappyOutputStream zipStream(File file) {
+	private OutputStream zim(File file) {
 		try {
-			return new SnappyOutputStream(new FileOutputStream(file));
+			return Zim.compressing(new BufferedOutputStream(new FileOutputStream(file)));
 		} catch (IOException e) {
 			Logger.error(e);
 			return null;
