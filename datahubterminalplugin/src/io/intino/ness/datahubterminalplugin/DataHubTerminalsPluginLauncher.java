@@ -79,7 +79,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		try {
 			AtomicBoolean published = new AtomicBoolean(true);
 			nessGraph.terminalList().parallelStream().forEach(terminal -> {
-				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, tanks(terminal), configuration(), versions, systemProperties(), invokedPhase, logger(), notifier()).publish() & published.get());
+				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, messageTanks(terminal), measurementTanks(terminal), configuration(), versions, systemProperties(), invokedPhase, logger(), notifier()).publish() & published.get());
 				if (published.get() && notifier() != null)
 					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), terminalNameArtifact(terminal), configuration().artifact().version()));
 			});
@@ -205,10 +205,17 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		}
 	}
 
-	private List<Tank.Event> tanks(Terminal terminal) {
-		List<Tank.Event> tanks = new ArrayList<>();
-		if (terminal.publish() != null) tanks.addAll(terminal.publish().eventTanks());
-		if (terminal.subscribe() != null) tanks.addAll(terminal.subscribe().eventTanks());
+	private List<Tank.Message> messageTanks(Terminal terminal) {
+		List<Tank.Message> tanks = new ArrayList<>();
+		if (terminal.publish() != null) tanks.addAll(terminal.publish().messageTanks());
+		if (terminal.subscribe() != null) tanks.addAll(terminal.subscribe().messageTanks());
+		return tanks;
+	}
+
+	private List<Tank.Measurement> measurementTanks(Terminal terminal) {
+		List<Tank.Measurement> tanks = new ArrayList<>();
+		if (terminal.publish() != null) tanks.addAll(terminal.publish().measurementTanks());
+		if (terminal.subscribe() != null) tanks.addAll(terminal.subscribe().measurementTanks());
 		return tanks;
 	}
 
@@ -220,8 +227,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		}
 	}
 
-	public DataHubTerminalsPluginLauncher deleteTempDirOnPublish(boolean deleteTempDirOnPublish) {
+	public void deleteTempDirOnPublish(boolean deleteTempDirOnPublish) {
 		this.deleteTempDirOnPublish = deleteTempDirOnPublish;
-		return this;
 	}
 }

@@ -1,58 +1,58 @@
 dsl Ness
-
-Entity Area
-
-Entity Type as Abstract
-	Attribute labelEs as String
-	Attribute labelEn as String
-	Attribute labelPt as String
-
-Entity AssetType as ExtensionOf(Type)
-Entity ServiceType as ExtensionOf(Type)
-Entity BusinessType as ExtensionOf(Type)
-
-Entity Host
-
-Entity User
-	Attribute name as String
-	Attribute language as String
-	Attribute displayName as String
-	Attribute email as String
-
-Entity Team
-	Attribute displayName as String
-	Attribute users as Entity(User) List
-	Attribute channels as Entity(Channel) List
-
-Entity Channel
-	Attribute displayName as String
-
-Entity System
-
-Entity Asset as ExtensionOf(System)
-	Attribute ip as String
-	Attribute publicIp as String
-	Attribute type as Entity(AssetType)
-	Attribute area as Entity(Area)
-	Attribute host as Entity(Host)
-	Attribute team as Entity(Team)
-
-Entity AnomalyType
-	Attribute group as String
-	Attribute issueEn as String
-	Attribute issueEs as String
-	Attribute issuePt as String
-
-Entity AnomalyRule
-	Attribute detector as String
-	Attribute services as Entity(Service) List
-
-Entity Service as Abstract ExtensionOf(System)
-	Attribute asset as Entity(Asset)
-	Attribute team as Entity(Team)
-
-Entity RdbmsService as ExtensionOf(Service) > Attribute url as String
-Entity ApplicationService as ExtensionOf(Service) > Attribute applications as String List
+//
+//Entity Area
+//
+//Entity Type as Abstract
+//	Attribute labelEs as String
+//	Attribute labelEn as String
+//	Attribute labelPt as String
+//
+//Entity AssetType as ExtensionOf(Type)
+//Entity ServiceType as ExtensionOf(Type)
+//Entity BusinessType as ExtensionOf(Type)
+//
+//Entity Host
+//
+//Entity User
+//	Attribute name as String
+//	Attribute language as String
+//	Attribute displayName as String
+//	Attribute email as String
+//
+//Entity Team
+//	Attribute displayName as String
+//	Attribute users as Entity(User) List
+//	Attribute channels as Entity(Channel) List
+//
+//Entity Channel
+//	Attribute displayName as String
+//
+//Entity System
+//
+//Entity Asset as ExtensionOf(System)
+//	Attribute ip as String
+//	Attribute publicIp as String
+//	Attribute type as Entity(AssetType)
+//	Attribute area as Entity(Area)
+//	Attribute host as Entity(Host)
+//	Attribute team as Entity(Team)
+//
+//Entity AnomalyType
+//	Attribute group as String
+//	Attribute issueEn as String
+//	Attribute issueEs as String
+//	Attribute issuePt as String
+//
+//Entity AnomalyRule
+//	Attribute detector as String
+//	Attribute services as Entity(Service) List
+//
+//Entity Service as Abstract ExtensionOf(System)
+//	Attribute asset as Entity(Asset)
+//	Attribute team as Entity(Team)
+//
+//Entity RdbmsService as ExtensionOf(Service) > Attribute url as String
+//Entity ApplicationService as ExtensionOf(Service) > Attribute applications as String List
 
 
 

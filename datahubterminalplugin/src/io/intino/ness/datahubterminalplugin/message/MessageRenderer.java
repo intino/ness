@@ -1,7 +1,6 @@
 package io.intino.ness.datahubterminalplugin.message;
 
 import io.intino.datahub.model.*;
-import io.intino.datahub.model.Datalake.Split;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
@@ -9,8 +8,6 @@ import io.intino.ness.datahubterminalplugin.Commons;
 import io.intino.ness.datahubterminalplugin.Formatters;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,13 +17,11 @@ import static java.util.Arrays.stream;
 public class MessageRenderer {
 	private static final String EVENT = "io.intino.alexandria.event.MessageEvent";
 	private final Message message;
-	private final Split split;
 	private final File destination;
 	private final String rootPackage;
 
-	public MessageRenderer(Message message, Split split, File destination, String rootPackage) {
+	public MessageRenderer(Message message, File destination, String rootPackage) {
 		this.message = message;
-		this.split = split;
 		this.destination = destination;
 		this.rootPackage = rootPackage;
 	}
@@ -48,10 +43,6 @@ public class MessageRenderer {
 		eventFrame.add("attribute", processAttributes(event.attributeList(), event.name$()));
 		Map<Component, Boolean> components = collectComponents(event);
 		if (!components.isEmpty()) eventFrame.add("component", processComponents(components, event.name$()));
-		if (split != null) {
-			List<Split> leafs = split.isLeaf() ? Collections.singletonList(split) : split.leafs();
-			eventFrame.add("split", new FrameBuilder().add("split").add("enum", enums(split, leafs)));
-		}
 		return eventFrame.toFrame();
 	}
 
@@ -110,17 +101,6 @@ public class MessageRenderer {
 		else if (attribute.isLongInteger()) return process(attribute.asLongInteger());
 		else if (attribute.isWord()) return process(attribute.asWord());
 		return null;
-	}
-
-	private Frame[] enums(Split realSplit, List<Split> leafs) {
-		List<Frame> frames = new ArrayList<>();
-		if (!leafs.contains(realSplit) && !realSplit.label().isEmpty())
-			frames.add(new FrameBuilder("enum").add("value", realSplit.qn().replace(".", "-")).toFrame());
-		for (Split leaf : leafs) {
-			FrameBuilder builder = new FrameBuilder("enum").add("value", leaf.qn().replace(".", "-")).add("qn", leaf.qn());
-			frames.add(builder.toFrame());
-		}
-		return frames.toArray(new Frame[0]);
 	}
 
 	private FrameBuilder process(Data.Real attribute) {

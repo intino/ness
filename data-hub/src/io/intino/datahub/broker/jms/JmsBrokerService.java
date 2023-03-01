@@ -199,10 +199,6 @@ public class JmsBrokerService implements BrokerService {
 		return textMessage;
 	}
 
-	private String tankQn(Datalake.Tank t, Datalake.Split split) {
-		return t.qn() + (!split.qn().isEmpty() ? "." + split.qn() : "");
-	}
-
 	final class BrokerManager implements io.intino.datahub.broker.BrokerManager {
 		private final Map<String, JmsProducer> producers = new HashMap<>();
 		private final Map<String, List<JmsConsumer>> consumers = new HashMap<>();
@@ -323,26 +319,12 @@ public class JmsBrokerService implements BrokerService {
 		private void initMessageTankConsumers() {
 			if (graph.datalake() == null) return;
 			brokerStage.mkdirs();
-			graph.datalake().tankList().forEach(t -> {
-				if (!t.isSplitted() || t.asSplitted().split().isLeaf())
-					brokerManager.registerTopicConsumer(t.qn(), new MessageSerializer(brokerStage, t, scale(t)).create());
-				else {
-					Datalake.Split context = t.asSplitted().split();
-					register(t, scale(t), context);
-					context.leafs().forEach(c -> register(t, scale(t), c));
-				}
-			});
+			graph.datalake().tankList().forEach(t -> brokerManager.registerTopicConsumer(t.qn(), new MessageSerializer(brokerStage, t, scale(t)).create()));
 			Logger.info("Tanks ignited!");
 		}
 
 		private void registerProcessStatus(Scale scale, Datalake.ProcessStatus ps) {
-			if (ps.split() == null) {
-				String topic = processStatusQn(ps, ps.split());
-				brokerManager.registerTopicConsumer(topic, new ProcessStatusSerializer(brokerStage, topic, scale).create());
-			} else ps.split().leafs().forEach(c -> {
-				String topic = processStatusQn(ps, c);
-				brokerManager.registerTopicConsumer(topic, new ProcessStatusSerializer(brokerStage, topic, scale).create());
-			});
+			brokerManager.registerTopicConsumer(ps.name(), new ProcessStatusSerializer(brokerStage, ps.name(), scale).create());
 		}
 
 		private Scale scale(Datalake.Tank t) {
@@ -351,14 +333,6 @@ public class JmsBrokerService implements BrokerService {
 
 		private Scale datalakeScale() {
 			return Scale.valueOf(graph.datalake().scale().name());
-		}
-
-		private void register(Datalake.Tank t, Scale scale, Datalake.Split c) {
-			brokerManager.registerTopicConsumer(tankQn(t, c), new ProcessStatusSerializer(brokerStage, tankQn(t, c), scale).create());
-		}
-
-		private String processStatusQn(Datalake.ProcessStatus ps, Datalake.Split c) {
-			return ps.name() + (c == null ? "" : "." + c.qn());
 		}
 
 		private Session nessSession() {

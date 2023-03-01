@@ -1,65 +1,65 @@
 dsl Ness
 
-Event UserAssertion as Assertion
-	// id
-	// enabled
-	Attribute name as Text
-	Attribute language as Text
-	Attribute displayName as Text
-	Attribute email as Text
-
-Event TeamAssertion as Assertion
-	Attribute displayName as Text
-	Attribute users as Text List
-
-Event SystemAssertion as Assertion
-
-Event AssetAssertion as ExtensionOf(SystemAssertion)
-	Attribute ip as Text
-	Attribute teams as Text List
-
-
-[UserAssertion]
-ts
-ss
-id: user-id
-email: new-email@gmail.com
-
-
-////////// SOLUTION
-
-
-Datalake(...) dl
-	Tank userAssertion as Message(UserAssertion)
-	Tank teamAssertion as Message(TeamAssertion)
-	...
-
-
-Datamart(...) master
-
-	Entity User > from = dl.userAssertion
-
-    Entity System as Abstract
-
-    Entity Asset as ExtensionOf(System) > from = dl.assetAssertion
-    	Attribute teams as Entity(Team) List
-
-	Entity Team > from = dl.teamAssertion
-    	Attribute users as Entity(User) List
-    	Expression userCount as IntegerGetter("users().size()")
-
-//=====
-
-// TODO: DISABLED??
-
-List<User> users = terminal.master().users();
-User user = terminal.master().user("user-id");
-
-List<Team> teams = terminal.master().asset("my_asset").teams();
-
-assertion.put("", "") // TODO
-
-terminal.publish(new UserAssertion(...).id("").email(""))
+//Message UserAssertion as Assertion
+//	// id
+//	// enabled
+//	Attribute name as Text
+//	Attribute language as Text
+//	Attribute displayName as Text
+//	Attribute email as Text
+//
+//Message TeamAssertion as Assertion
+//	Attribute displayName as Text
+//	Attribute users as Text List
+//
+//Message SystemAssertion as Assertion
+//
+//Message AssetAssertion as ExtensionOf(SystemAssertion)
+//	Attribute ip as Text
+//	Attribute teams as Text List
+//
+//
+//[UserAssertion]
+//ts
+//ss
+//id: user-id
+//email: new-email@gmail.com
+//
+//
+//////////// SOLUTION
+//
+//
+//Datalake(...) dl
+//	Tank userAssertion as Message(UserAssertion)
+//	Tank teamAssertion as Message(TeamAssertion)
+//	...
+//
+//
+//Datamart(...) master
+//
+//	Entity User > from = dl.userAssertion
+//
+//    Entity System as Abstract
+//
+//    Entity Asset as ExtensionOf(System) > from = dl.assetAssertion
+//    	Attribute teams as Entity(Team) List
+//
+//	Entity Team > from = dl.teamAssertion
+//    	Attribute users as Entity(User) List
+//    	Expression userCount as IntegerGetter("users().size()")
+//
+////=====
+//
+//// TODO: DISABLED??
+//
+//List<User> users = terminal.master().users();
+//User user = terminal.master().user("user-id");
+//
+//List<Team> teams = terminal.master().asset("my_asset").teams();
+//
+//assertion.put("", "") // TODO
+//
+//terminal.publish(new UserAssertion(...).id("").email(""))
 
 
 Namespace monitoring

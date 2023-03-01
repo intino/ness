@@ -32,8 +32,10 @@ public class MeasurementRenderer {
 	}
 
 	private Frame createMeasurementFrame(Measurement event, String packageName) {
-		FrameBuilder eventFrame = new FrameBuilder("event").
-				add("name", event.name$()).add("package", packageName);
+		FrameBuilder eventFrame = new FrameBuilder("event")
+				.add("parent", EVENT)
+				.add("name", event.name$())
+				.add("package", packageName);
 		Frame[] values = event.valueList().stream().map(m -> new FrameBuilder("value").add("name", m).add("owner", event.name$())).map(FrameBuilder::toFrame).toArray(Frame[]::new);
 		eventFrame.add("value", values);
 		return eventFrame.toFrame();
