@@ -1,85 +1,66 @@
 package io.intino.ness.datahubterminalplugin.ontology;
 
 import io.intino.Configuration;
-import io.intino.alexandria.logger.Logger;
-import io.intino.datahub.model.*;
-import io.intino.ness.datahubterminalplugin.message.MessageRenderer;
+import io.intino.datahub.model.Datalake;
+import io.intino.datahub.model.Message;
+import io.intino.datahub.model.NessGraph;
 import io.intino.ness.datahubterminalplugin.master.MasterRenderer;
+import io.intino.ness.datahubterminalplugin.measurement.MeasurementRenderer;
+import io.intino.ness.datahubterminalplugin.message.MessageRenderer;
 import io.intino.plugin.PluginLauncher;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class OntologyRenderer {
-
-	private final List<Datalake.Tank.Event> eventTanks;
-	private final List<Event> messages;
-	private final List<Wordbag> wordbags;
+	private final List<Message> messages;
 	private final NessGraph graph;
 	private final Configuration conf;
-	private final File root;
 	private final PrintStream logger;
 	private final PluginLauncher.Notifier notifier;
-	private final Map<Event, Datalake.Split> eventSplitMap;
+	private final Map<Message, Datalake.Split> messagesSplitMap;
 	private final File srcDir;
-	private final List<File> resDirectories;
 	private final String basePackage;
 
-	OntologyRenderer(NessGraph graph, Configuration conf, File root, File srcDir, List<File> resDirectories, String basePackage,
-					 PrintStream logger, PluginLauncher.Notifier notifier) {
-		this.eventTanks = eventTanks(graph);
-		this.messages = graph.eventList();
-		this.wordbags = graph.wordbagList();
+	OntologyRenderer(NessGraph graph, Configuration conf, File srcDir, String basePackage, PrintStream logger, PluginLauncher.Notifier notifier) {
+		this.messages = graph.messageList();
 		this.graph = graph;
 		this.conf = conf;
-		this.root = root;
 		this.logger = logger;
 		this.notifier = notifier;
-		this.eventSplitMap = splitEvents();
+		this.messagesSplitMap = splitMessages();
 		this.srcDir = srcDir;
-		this.resDirectories = resDirectories;
 		this.basePackage = basePackage;
 		srcDir.mkdirs();
 	}
 
 	public boolean render() {
-		renderEvents();
+		renderMessages();
+		renderMeasurements();
 		renderEntities();
 		return true;
 	}
 
+	private void renderMeasurements() {
+		measurementTanks().forEach(k -> new MeasurementRenderer(k.measurement(), srcDir, basePackage).render());
+	}
+
 	private void renderEntities() {
-		if(graph.entityList().isEmpty()) return;
 		new MasterRenderer(srcDir, graph, conf, logger, notifier, basePackage).renderOntology();
 	}
 
-	private void renderEvents() {
-		eventSplitMap.forEach((k, v) -> new MessageRenderer(k, v, srcDir, basePackage).render());
-		messages.stream().filter(event -> !eventSplitMap.containsKey(event)).parallel().forEach(event -> new MessageRenderer(event, null, srcDir, basePackage).render());
-		File resDirectory = new File(root, "res");
-		resDirectory.mkdirs();
-		wordbags.stream().filter(Wordbag::isInResource).map(Wordbag::asInResource).
-				forEach(w -> {
-					File source = new File(w.tsv().getPath());
-					File destination = new File(resDirectory, relativeResource(source));
-					destination.getParentFile().mkdirs();
-					try {
-						if (!destination.exists()) Files.copy(w.tsv().openStream(), destination.toPath());
-					} catch (IOException e) {
-						Logger.error(e);
-					}
-				});
+	private void renderMessages() {
+		messagesSplitMap.forEach((k, v) -> new MessageRenderer(k, v, srcDir, basePackage).render());
+		messages.stream().filter(event -> !messagesSplitMap.containsKey(event)).parallel().forEach(event -> new MessageRenderer(event, null, srcDir, basePackage).render());
 	}
 
 
-	private Map<Event, Datalake.Split> splitEvents() {
-		Map<Event, Datalake.Split> events = new HashMap<>();
-		for (Datalake.Tank.Event tank : eventTanks) {
-			List<Event> hierarchy = hierarchy(tank.event());
+	private Map<Message, Datalake.Split> splitMessages() {
+		Map<Message, Datalake.Split> events = new HashMap<>();
+		for (Datalake.Tank.Message tank : messageTanks()) {
+			List<Message> hierarchy = hierarchy(tank.message());
 			Datalake.Split split = tank.asTank().isSplitted() ? tank.asTank().asSplitted().split() : null;
 			events.put(hierarchy.get(0), split);
 			hierarchy.remove(0);
@@ -88,20 +69,23 @@ public class OntologyRenderer {
 		return events;
 	}
 
-	private String relativeResource(File resourceFile) {
-		String file = resourceFile.getAbsolutePath();
-		for (File resDirectory : resDirectories) file = file.replace(resDirectory.getAbsolutePath(), "");
-		return file;
-	}
-
-	private List<Datalake.Tank.Event> eventTanks(NessGraph nessGraph) {
-		if (nessGraph.datalake() == null) return Collections.emptyList();
-		return nessGraph.datalake().tankList().stream().filter(Datalake.Tank::isEvent).map(Datalake.Tank::asEvent).collect(Collectors.toList());
+	private List<Datalake.Tank.Message> messageTanks() {
+		return graph.datalake() == null ? Collections.emptyList() : graph.datalake().tankList().stream()
+				.filter(Datalake.Tank::isMessage)
+				.map(Datalake.Tank::asMessage)
+				.collect(Collectors.toList());
 	}
 
 
-	private List<Event> hierarchy(Event event) {
-		Set<Event> events = new LinkedHashSet<>();
+	private List<Datalake.Tank.Measurement> measurementTanks() {
+		return graph.datalake() == null ? Collections.emptyList() : graph.datalake().tankList().stream()
+				.filter(Datalake.Tank::isMeasurement)
+				.map(Datalake.Tank::asMeasurement)
+				.collect(Collectors.toList());
+	}
+
+	private List<Message> hierarchy(Message event) {
+		Set<Message> events = new LinkedHashSet<>();
 		events.add(event);
 		if (event.isExtensionOf()) events.addAll(hierarchy(event.asExtensionOf().parent()));
 		return new ArrayList<>(events);
