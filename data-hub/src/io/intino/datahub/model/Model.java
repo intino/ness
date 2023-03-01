@@ -17,29 +17,23 @@ public class Model {
 		return prefix + self.name$();
 	}
 
-	public static String qn(Datalake.Tank.Message self) {
-		String namespace = eventNamespace(self.message);
-		return qn(self, namespace.isEmpty() ? "" : namespace + ".", self.asTank());
+	public static String qn(Datalake.Tank self) {
+		String namespace = namespace(self);
+		String eventName = self.isMeasurement() ? self.asMeasurement().measurement.name$() : self.asMessage().message.name$();
+		return qn(eventName, namespace.isEmpty() ? "" : namespace + ".", self);
 	}
 
-	public static String qn(Datalake.Tank.Measurement self) {
-		String namespace = eventNamespace(self.measurement);
-		return qn(self, namespace.isEmpty() ? "" : namespace + ".", self.asTank());
+	private static String namespace(Datalake.Tank self) {
+		return self.isMeasurement() ? eventNamespace(self.asMeasurement().measurement) : eventNamespace(self.asMessage().message);
 	}
 
-	private static String qn(Datalake.Tank.Message self, String prefix, Datalake.Tank tank) {
+	private static String qn(String eventName, String prefix, Datalake.Tank tank) {
 		if (tank.isSplitted()) {
-			String split = self.asTank().asSplitted().split().qn();
-			return (split.isEmpty() ? "" : split + ".") + prefix + self.message().name$();
-		} else return prefix + self.message().name$();
+			String split = tank.asSplitted().split().qn();
+			return (split.isEmpty() ? "" : split + ".") + prefix + eventName;
+		} else return prefix + eventName;
 	}
 
-	private static String qn(Datalake.Tank.Measurement self, String prefix, Datalake.Tank tank) {
-		if (tank.isSplitted()) {
-			String split = self.asTank().asSplitted().split().qn();
-			return (split.isEmpty() ? "" : split + ".") + prefix + self.measurement().name$();
-		} else return prefix + self.measurement().name$();
-	}
 
 	private static String eventNamespace(Message message) {
 		return message.core$().owner().is(Namespace.class) ? message.core$().ownerAs(Namespace.class).qn() : "";

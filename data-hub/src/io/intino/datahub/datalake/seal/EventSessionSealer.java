@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -21,7 +20,6 @@ import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.groupingBy;
 
 public class EventSessionSealer {
-
 	private final Datalake datalake;
 	private final io.intino.datahub.model.Datalake graphDl;
 	private final File stageDir;

@@ -1,4 +1,4 @@
-package io.intino.ness.datahubterminalplugin.event;
+package io.intino.ness.datahubterminalplugin.message;
 
 import io.intino.datahub.model.*;
 import io.intino.datahub.model.Datalake.Split;
@@ -17,15 +17,15 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
 
-public class EventRenderer {
-	private static final String EVENT = "io.intino.alexandria.event.Event";
-	private final Event event;
+public class MessageRenderer {
+	private static final String EVENT = "io.intino.alexandria.event.MessageEvent";
+	private final Message message;
 	private final Split split;
 	private final File destination;
 	private final String rootPackage;
 
-	public EventRenderer(Event event, Split split, File destination, String rootPackage) {
-		this.event = event;
+	public MessageRenderer(Message message, Split split, File destination, String rootPackage) {
+		this.message = message;
 		this.split = split;
 		this.destination = destination;
 		this.rootPackage = rootPackage;
@@ -33,14 +33,14 @@ public class EventRenderer {
 
 	public void render() {
 		String rootPackage = eventsPackage();
-		if (event.core$().owner().is(Namespace.class))
-			rootPackage = rootPackage + "." + event.core$().ownerAs(Namespace.class).qn();
+		if (message.core$().owner().is(Namespace.class))
+			rootPackage = rootPackage + "." + message.core$().ownerAs(Namespace.class).qn();
 		final File packageFolder = new File(destination, rootPackage.replace(".", File.separator));
-		final Frame frame = createEventFrame(event, rootPackage);
-		Commons.writeFrame(packageFolder, event.name$(), template().render(new FrameBuilder("root").add("root", rootPackage).add("package", rootPackage).add("event", frame)));
+		final Frame frame = createEventFrame(message, rootPackage);
+		Commons.writeFrame(packageFolder, message.name$(), template().render(new FrameBuilder("root").add("root", rootPackage).add("package", rootPackage).add("event", frame)));
 	}
 
-	private Frame createEventFrame(Event event, String packageName) {
+	private Frame createEventFrame(Message event, String packageName) {
 		FrameBuilder eventFrame = new FrameBuilder("event").
 				add("name", event.name$()).add("package", packageName).
 				add("parent", parent(event));
@@ -55,9 +55,9 @@ public class EventRenderer {
 		return eventFrame.toFrame();
 	}
 
-	private String parent(Event event) {
-		if (event.isExtensionOf()) {
-			Event parent = event.asExtensionOf().parent();
+	private String parent(Message message) {
+		if (message.isExtensionOf()) {
+			Message parent = message.asExtensionOf().parent();
 			String eventPackage = eventsPackage();
 			if (parent.core$().owner().is(Namespace.class))
 				eventPackage = eventPackage + "." + parent.core$().ownerAs(Namespace.class).qn();
@@ -88,9 +88,9 @@ public class EventRenderer {
 		return builder;
 	}
 
-	private Map<Component, Boolean> collectComponents(Event event) {
-		Map<Component, Boolean> components = event.componentList().stream().collect(Collectors.toMap(c -> c, Component::multiple));
-		components.putAll(event.hasList().stream().collect(Collectors.toMap(Event.Has::element, Event.Has::multiple)));
+	private Map<Component, Boolean> collectComponents(Message message) {
+		Map<Component, Boolean> components = message.componentList().stream().collect(Collectors.toMap(c -> c, Component::multiple));
+		components.putAll(message.hasList().stream().collect(Collectors.toMap(Message.Has::element, Message.Has::multiple)));
 		return components;
 	}
 
@@ -109,7 +109,6 @@ public class EventRenderer {
 		else if (attribute.isDate()) return process(attribute.asDate());
 		else if (attribute.isLongInteger()) return process(attribute.asLongInteger());
 		else if (attribute.isWord()) return process(attribute.asWord());
-		else if (attribute.isWordFromBag()) return process(attribute.asWordFromBag());
 		return null;
 	}
 
@@ -190,14 +189,6 @@ public class EventRenderer {
 				.add("type", a.name$());
 	}
 
-	private FrameBuilder process(Data.WordFromBag attribute) {
-		return new FrameBuilder("wordbag")
-				.add("name", attribute.name$())
-				.add("wordbag", attribute.wordbag().name$())
-				.add("package", eventsPackage())
-				.add("type", "wordbag");
-	}
-
 	private String eventsPackage() {
 		return rootPackage + ".events";
 	}
@@ -207,7 +198,7 @@ public class EventRenderer {
 	}
 
 	private Template template() {
-		return Formatters.customize(new EventTemplate()).add("typeFormat", (value) -> {
+		return Formatters.customize(new MessageTemplate()).add("typeFormat", (value) -> {
 			if (value.toString().contains(".")) return Formatters.firstLowerCase(value.toString());
 			else return value;
 		});

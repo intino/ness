@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JavaKeywords {
-
-	private static List<String> javaKeywords = new ArrayList<>();
+	private static final List<String> javaKeywords = new ArrayList<>();
 
 	static {
 		javaKeywords.add("abstract");
