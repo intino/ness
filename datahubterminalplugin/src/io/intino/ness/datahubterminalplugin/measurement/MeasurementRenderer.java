@@ -11,29 +11,25 @@ import io.intino.ness.datahubterminalplugin.Formatters;
 import java.io.File;
 
 public class MeasurementRenderer {
-	private static final String EVENT = "io.intino.alexandria.event.MeasurementEvent";
-	private final Measurement event;
+	private final Measurement measurement;
 	private final File destination;
 	private final String rootPackage;
 
 	public MeasurementRenderer(Measurement measurement, File destination, String rootPackage) {
-		this.event = measurement;
+		this.measurement = measurement;
 		this.destination = destination;
 		this.rootPackage = rootPackage;
 	}
 
 	public void render() {
-		String rootPackage = eventsPackage();
-		if (event.core$().owner().is(Namespace.class))
-			rootPackage = rootPackage + "." + event.core$().ownerAs(Namespace.class).qn();
+		String rootPackage = rootPackage();
 		final File packageFolder = new File(destination, rootPackage.replace(".", File.separator));
-		final Frame frame = createMeasurementFrame(event, rootPackage);
-		Commons.writeFrame(packageFolder, event.name$(), template().render(new FrameBuilder("root").add("root", rootPackage).add("package", rootPackage).add("event", frame)));
+		final Frame frame = createMeasurementFrame(measurement, rootPackage);
+		Commons.writeFrame(packageFolder, measurement.name$(), template().render(frame));
 	}
 
 	private Frame createMeasurementFrame(Measurement event, String packageName) {
-		FrameBuilder eventFrame = new FrameBuilder("event")
-				.add("parent", EVENT)
+		FrameBuilder eventFrame = new FrameBuilder("measurement")
 				.add("name", event.name$())
 				.add("package", packageName);
 		Frame[] values = event.valueList().stream().map(m -> new FrameBuilder("value").add("name", m).add("owner", event.name$())).map(FrameBuilder::toFrame).toArray(Frame[]::new);
@@ -41,8 +37,15 @@ public class MeasurementRenderer {
 		return eventFrame.toFrame();
 	}
 
-	private String eventsPackage() {
-		return rootPackage + ".events";
+	private String rootPackage() {
+		String rootPackage = measurementsPackage();
+		if (measurement.core$().owner().is(Namespace.class))
+			rootPackage = rootPackage + "." + measurement.core$().ownerAs(Namespace.class).qn();
+		return rootPackage;
+	}
+
+	private String measurementsPackage() {
+		return rootPackage + ".measurements";
 	}
 
 	private Template template() {
