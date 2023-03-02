@@ -88,6 +88,7 @@ class TerminalRenderer {
 		String namespace = messageNamespace(messageTank.message());
 		return new FrameBuilder("default").
 				add("type", messagesPackage + "." + firstUpperCase(messageTank.message().name$())).
+				add("message", messageTank.message().name$()).
 				add("typeName", messageTank.name$()).
 				add("namespace", namespace).
 				add("namespaceQn", namespace.replace(".", "")).
