@@ -6,6 +6,7 @@ import io.intino.datahub.model.rules.SnapshotScale;
 
 import java.time.DayOfWeek;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public interface MasterDatamart<T> {
 
@@ -31,7 +32,11 @@ public interface MasterDatamart<T> {
 
 	void clear();
 
+	Stream<T> elements();
+
 	Map<String, T> toMap();
+
+	Class<T> elementType();
 
 	class Snapshot<T> {
 

@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class MapMessageMasterDatamart implements MasterDatamart<Message> {
 
@@ -83,8 +84,18 @@ public class MapMessageMasterDatamart implements MasterDatamart<Message> {
 	}
 
 	@Override
+	public Stream<Message> elements() {
+		return messages.values().stream();
+	}
+
+	@Override
 	public Map<String, Message> toMap() {
 		return Collections.unmodifiableMap(messages);
+	}
+
+	@Override
+	public Class<Message> elementType() {
+		return Message.class;
 	}
 
 	private void fail(MasterDatamart<Message> other, Map.Entry<String, Message> entry, String id) {

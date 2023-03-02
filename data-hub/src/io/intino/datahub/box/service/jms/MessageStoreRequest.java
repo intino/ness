@@ -15,13 +15,12 @@ import io.intino.datahub.master.serialization.MasterDatamartSerializer;
 import io.intino.datahub.master.serialization.MasterDatamartSnapshots;
 import org.apache.activemq.command.ActiveMQBytesMessage;
 import org.apache.activemq.command.ActiveMQTextMessage;
+import org.apache.activemq.util.ByteSequence;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -33,6 +32,7 @@ import java.util.stream.Stream;
 
 import static io.intino.datahub.broker.jms.MessageTranslator.toJmsMessage;
 import static io.intino.datahub.master.serialization.MasterDatamartSnapshots.loadMostRecentSnapshotTo;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 
 public class MessageStoreRequest {
@@ -83,7 +83,6 @@ public class MessageStoreRequest {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
 			message.setIntProperty("size", snapshots.size());
 			message.setText(snapshots.stream().map(Timetag::value).collect(Collectors.joining(",")));
-			message.compress();
 			return Stream.of(message);
 		} catch (Exception e) {
 			Logger.error(e);
@@ -93,13 +92,11 @@ public class MessageStoreRequest {
 
 	private Stream<Message> downloadDatamart(MasterDatamart<?> datamart) {
 		try {
-			ActiveMQTextMessage message = new ActiveMQTextMessage();
+			ActiveMQBytesMessage message = new ActiveMQBytesMessage();
 			message.setIntProperty("size", datamart.size());
-			try(Writer writer = new StringWriter(4096)) {
-				MasterDatamartSerializer.serialize(datamart, writer);
-				message.setText(writer.toString());
-			}
-			message.compress();
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream(8192);
+			MasterDatamartSerializer.serialize(datamart, outputStream);
+			message.writeBytes(outputStream.toByteArray());
 			return Stream.of(message);
 		} catch (Exception e) {
 			Logger.error(e);

@@ -21,9 +21,7 @@ public class MasterDatamartSnapshots {
 	public static void save(File datamartsRoot, Timetag timetag, MasterDatamart<?> datamart) throws IOException {
 		File file = snapshotDirOf(datamartsRoot, datamart.name() + "/" + timetag.value() + ".datamart.snapshot");
 		file.getParentFile().mkdirs();
-		try(BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-			MasterDatamartSerializer.serialize(datamart, writer);
-		}
+		MasterDatamartSerializer.serialize(datamart, new FileOutputStream(file));
 	}
 
 	public static List<Timetag> listAvailableSnapshotsOf(File datamartsRoot, String datamartName) {
