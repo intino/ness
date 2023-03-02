@@ -2,6 +2,7 @@ package io.intino.datahub.box.service.jms;
 
 import com.google.gson.JsonObject;
 import io.intino.alexandria.Json;
+import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.datalake.Datalake;
 import io.intino.alexandria.datalake.file.message.MessageEventTub;
@@ -11,6 +12,7 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.master.MasterDatamart;
 import io.intino.datahub.master.serialization.MasterDatamartSerializer;
+import io.intino.datahub.master.serialization.MasterDatamartSnapshots;
 import org.apache.activemq.command.ActiveMQBytesMessage;
 import org.apache.activemq.command.ActiveMQTextMessage;
 
@@ -21,9 +23,11 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.file.Files;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -51,15 +55,56 @@ public class MessageStoreRequest {
 
 	private Stream<Message> handleDatamartDownload(String request) {
 		String[] command = request.split(":", 3);
-		if(command.length < 3) return fail("Datamart requests must be like this: datamart:<name>:[timetag], but it was " + request);
+		if(command.length < 3) return fail("Datamart requests must be like this: datamart:<name>:[snapshots | timetag], but it was " + request);
 
 		String datamartName = command[1].trim();
-		Timetag snapshotTimetag = Timetag.of(command[2].trim());
+		String operation = command[2].trim();
 
-		return loadMostRecentSnapshotTo(box.masterDatamarts().root(), datamartName, snapshotTimetag)
+		return operation.equals("snapshots")
+				? listAvailableSnapshotsOf(datamartName)
+				: downloadDatamart(datamartName, operation);
+	}
+
+	private Stream<Message> downloadDatamart(String datamartName, String timetag) {
+		return loadMostRecentSnapshotTo(box.datamarts().root(), datamartName, asTimetag(timetag))
 				.map(MasterDatamart.Snapshot::datamart)
 				.map(this::downloadDatamart)
 				.orElse(null);
+	}
+
+	private Timetag asTimetag(String timetag) {
+		return timetag.isEmpty() ? Timetag.of(LocalDate.now(), Scale.Day) : Timetag.of(timetag);
+	}
+
+	private Stream<Message> listAvailableSnapshotsOf(String datamart) {
+		List<Timetag> snapshots = MasterDatamartSnapshots.listAvailableSnapshotsOf(box.datamarts().root(), datamart);
+		if(snapshots.isEmpty()) return Stream.empty();
+		try {
+			ActiveMQTextMessage message = new ActiveMQTextMessage();
+			message.setIntProperty("size", snapshots.size());
+			message.setText(snapshots.stream().map(Timetag::value).collect(Collectors.joining(",")));
+			message.compress();
+			return Stream.of(message);
+		} catch (Exception e) {
+			Logger.error(e);
+			return Stream.empty();
+		}
+	}
+
+	private Stream<Message> downloadDatamart(MasterDatamart<?> datamart) {
+		try {
+			ActiveMQTextMessage message = new ActiveMQTextMessage();
+			message.setIntProperty("size", datamart.size());
+			try(Writer writer = new StringWriter(4096)) {
+				MasterDatamartSerializer.serialize(datamart, writer);
+				message.setText(writer.toString());
+			}
+			message.compress();
+			return Stream.of(message);
+		} catch (Exception e) {
+			Logger.error(e);
+			return null;
+		}
 	}
 
 	private Stream<Message> handleDatalakeDownload(String request) {
@@ -72,21 +117,6 @@ public class MessageStoreRequest {
 			if ("reflow".equals(jsonObject.get("operation").getAsString())) return reflow(jsonObject);
 		}
 		return null;
-	}
-
-	private Stream<Message> downloadDatamart(MasterDatamart<?> datamart) {
-		try {
-			ActiveMQTextMessage message = new ActiveMQTextMessage();
-			try(Writer writer = new StringWriter(4096)) {
-				MasterDatamartSerializer.serialize(datamart, writer);
-				message.setText(writer.toString());
-			}
-			message.compress();
-			return Stream.of(message);
-		} catch (Exception e) {
-			Logger.error(e);
-			return null;
-		}
 	}
 
 	private Stream<Message> reflow(JsonObject request) {

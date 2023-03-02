@@ -112,7 +112,7 @@ public class DataHubBox extends AbstractBox {
 		return new FileSessionSealer(datalake, stageDirectory, treatedDirectory());
 	}
 
-	public MasterDatamartRepository masterDatamarts() {
+	public MasterDatamartRepository datamarts() {
 		return masterDatamarts;
 	}
 

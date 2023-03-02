@@ -15,7 +15,9 @@ import java.util.Iterator;
 import java.util.Optional;
 
 import static io.intino.datahub.master.MasterDatamart.Snapshot.shouldCreateSnapshot;
+import static io.intino.datahub.master.serialization.MasterDatamartSnapshots.loadMostRecentSnapshot;
 
+// TODO: reflow all entities, only load enabled entities or maintain 2 different versions of each datamart (enabled/disabled)?
 public class MessageMasterDatamartFactory {
 
 	private final File datamartsRoot;
@@ -27,7 +29,7 @@ public class MessageMasterDatamartFactory {
 	}
 
 	public MasterDatamart<Message> create(Datamart definition) throws IOException {
-		Optional<MasterDatamart.Snapshot<Message>> snapshot = MasterDatamartSnapshots.loadMostRecentSnapshot(datamartsRoot, definition.name$());
+		Optional<MasterDatamart.Snapshot<Message>> snapshot = loadMostRecentSnapshot(datamartsRoot, definition.name$());
 
 		MasterDatamart<Message> datamart;
 		Timetag fromTimetag;

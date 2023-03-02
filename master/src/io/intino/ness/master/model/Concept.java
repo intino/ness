@@ -15,6 +15,8 @@ public interface Concept {
 
 	Datamart datamart();
 
+	void addChangeListener(ChangeListener listener);
+
 	ConceptDefinition getDefinition();
 
 	default boolean instanceOf(ConceptDefinition definition) {
@@ -23,10 +25,15 @@ public interface Concept {
 	}
 
 	interface Attribute {
+
 		default String name() {return getDefinition().name();}
+
 		default Class<?> type() {return getDefinition().type();}
+
 		Value value();
-		Attribute addChangeListener(ChangeListener listener);
+
+		void addChangeListener(ChangeListener listener);
+
 		AttributeDefinition getDefinition();
 
 		class Value {
@@ -76,5 +83,10 @@ public interface Concept {
 		interface ChangeListener {
 			void onValueChange(Value oldValue, Value newValue);
 		}
+	}
+
+	@FunctionalInterface
+	interface ChangeListener {
+		void onChange(Concept concept, Attribute attribute, Attribute.Value oldValue);
 	}
 }

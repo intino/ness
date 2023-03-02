@@ -25,14 +25,14 @@ public class DatamartsSnapshotAction {
 	public void execute() {
 		synchronized (DatamartsSnapshotAction.class) {
 			Timetag today = Timetag.of(LocalDate.now(), Scale.Day);
-			box.masterDatamarts().datamarts().parallelStream().forEach(datamart -> createSnapshotIfNecessary(today, datamart));
+			box.datamarts().datamarts().parallelStream().forEach(datamart -> createSnapshotIfNecessary(today, datamart));
 		}
 	}
 
 	private void createSnapshotIfNecessary(Timetag today, MasterDatamart<?> datamart) {
 		try {
 			if(shouldCreateSnapshot(today, scaleOf(datamart)))
-				MasterDatamartSnapshots.save(box.masterDatamarts().root(), today, datamart);
+				MasterDatamartSnapshots.save(box.datamarts().root(), today, datamart);
 		} catch (Throwable e) {
 			Logger.error("Failed to handle snapshot of " + datamart.name() + ": " + e.getMessage(), e);
 		}

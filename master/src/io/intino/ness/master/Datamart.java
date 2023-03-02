@@ -1,5 +1,6 @@
 package io.intino.ness.master;
 
+import io.intino.ness.master.model.Concept;
 import io.intino.ness.master.model.Entity;
 import io.intino.ness.master.reflection.DatamartDefinition;
 
@@ -22,5 +23,12 @@ public interface Datamart {
 		return entities().collect(Collectors.toMap(Entity::id, Function.identity()));
 	}
 
+	void addEntityListener(EntityListener listener);
+
 	DatamartDefinition getDefinition();
+
+	interface EntityListener {
+		void onAddEntity(Entity entity);
+		void onUpdateEntity(Entity entity, Concept.Attribute attribute, Concept.Attribute.Value oldValue);
+	}
 }
