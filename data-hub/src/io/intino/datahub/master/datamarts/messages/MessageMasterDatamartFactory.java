@@ -6,7 +6,7 @@ import io.intino.alexandria.datalake.Datalake;
 import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.message.Message;
 import io.intino.datahub.master.MasterDatamart;
-import io.intino.datahub.master.serialization.SnapshotSerializer;
+import io.intino.datahub.master.serialization.MasterDatamartSnapshots;
 import io.intino.datahub.model.Datamart;
 
 import java.io.File;
@@ -27,7 +27,7 @@ public class MessageMasterDatamartFactory {
 	}
 
 	public MasterDatamart<Message> create(Datamart definition) throws IOException {
-		Optional<MasterDatamart.Snapshot<Message>> snapshot = SnapshotSerializer.load(datamartsRoot, definition.name$());
+		Optional<MasterDatamart.Snapshot<Message>> snapshot = MasterDatamartSnapshots.loadMostRecentSnapshot(datamartsRoot, definition.name$());
 
 		MasterDatamart<Message> datamart;
 		Timetag fromTimetag;
@@ -51,7 +51,7 @@ public class MessageMasterDatamartFactory {
 			MessageEvent event = iterator.next();
 			Timetag timetag = Timetag.of(event.ts(), Scale.Day);
 			if (shouldCreateSnapshot(timetag, definition.scale()))
-				SnapshotSerializer.save(datamartsRoot, timetag, datamart);
+				MasterDatamartSnapshots.save(datamartsRoot, timetag, datamart);
 			mount(event, datamart);
 		}
 	}

@@ -4,6 +4,7 @@ use Model
 
 Concept:Named Entity is component
 	var Datalake.Tank.Message from // TODO: OR add rule mustBeAssertion
+	var string[] exclude = empty
 	Concept:Named:RequiresAspect Attribute extends EntityData
 	Concept:Named:RequiresAspect Method extends Expression
 	Aspect ExtensionOf > var Entity entity

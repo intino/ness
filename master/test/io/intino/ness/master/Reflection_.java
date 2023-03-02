@@ -1,5 +1,7 @@
 package io.intino.ness.master;
 
+import io.intino.ness.master.model.Concept;
+import io.intino.ness.master.model.Concept.Attribute;
 import io.intino.ness.master.model.Entity;
 import io.intino.ness.master.reflection.AttributeDefinition;
 import io.intino.ness.master.reflection.DatamartDefinition;
@@ -19,6 +21,11 @@ public class Reflection_ {
 
 		EntityDefinition entityDef = entity.getDefinition();
 		Optional<AttributeDefinition> attribute = entityDef.attribute("name");
+		if(attribute.isPresent()) {
+			Optional<Attribute.Value> value = attribute.get().value(entity);
+			String theName = value.map(Attribute.Value::asString).orElse(null);
+			List<String> stringList = value.get().<List<String>>as();
+		}
 
 		DatamartDefinition definition = datamart.getDefinition();
 

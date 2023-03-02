@@ -2,6 +2,7 @@ package io.intino.datahub.box.service.jms;
 
 import com.google.gson.JsonObject;
 import io.intino.alexandria.Json;
+import io.intino.alexandria.Timetag;
 import io.intino.alexandria.datalake.Datalake;
 import io.intino.alexandria.datalake.file.message.MessageEventTub;
 import io.intino.alexandria.event.message.MessageEvent;
@@ -27,6 +28,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.intino.datahub.broker.jms.MessageTranslator.toJmsMessage;
+import static io.intino.datahub.master.serialization.MasterDatamartSnapshots.loadMostRecentSnapshotTo;
 import static java.util.stream.Collectors.toList;
 
 public class MessageStoreRequest {
@@ -38,20 +40,26 @@ public class MessageStoreRequest {
 	}
 
 	public Stream<Message> accept(Message request) {
-		String content = MessageReader.textFrom(request);
-		return content.startsWith("datamart") ? handleDatamartDownload(content) : handleDatalakeDownload(content);
+		try {
+			String content = MessageReader.textFrom(request);
+			return content.startsWith("datamart") ? handleDatamartDownload(content) : handleDatalakeDownload(content);
+		} catch (Throwable e) {
+			Logger.error(e);
+			return null;
+		}
 	}
 
 	private Stream<Message> handleDatamartDownload(String request) {
-		int datamartNameBegin = request.indexOf(':');
-		if(datamartNameBegin < 0) return null;
-		String datamartName = request.substring(datamartNameBegin).trim();
-		MasterDatamart<?> datamart = box.masterDatamarts().get(datamartName);
-		if(datamart == null) {
-			Logger.warn("No datamart with name '" + datamartName + "'");
-			return null;
-		}
-		return download(datamart);
+		String[] command = request.split(":", 3);
+		if(command.length < 3) return fail("Datamart requests must be like this: datamart:<name>:[timetag], but it was " + request);
+
+		String datamartName = command[1].trim();
+		Timetag snapshotTimetag = Timetag.of(command[2].trim());
+
+		return loadMostRecentSnapshotTo(box.masterDatamarts().root(), datamartName, snapshotTimetag)
+				.map(MasterDatamart.Snapshot::datamart)
+				.map(this::downloadDatamart)
+				.orElse(null);
 	}
 
 	private Stream<Message> handleDatalakeDownload(String request) {
@@ -66,7 +74,7 @@ public class MessageStoreRequest {
 		return null;
 	}
 
-	private Stream<Message> download(MasterDatamart<?> datamart) {
+	private Stream<Message> downloadDatamart(MasterDatamart<?> datamart) {
 		try {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
 			try(Writer writer = new StringWriter(4096)) {
@@ -118,6 +126,11 @@ public class MessageStoreRequest {
 
 	private static Tank tankOf(Datalake.Store.Tank<MessageEvent> t) {
 		return new Tank(t.name(), t.scale().name(), t.sources().map(Datalake.Store.Source::name).collect(toList()));
+	}
+
+	private static <T> T fail(String msg) {
+		Logger.error(msg);
+		return null;
 	}
 
 	private static class Tank {
