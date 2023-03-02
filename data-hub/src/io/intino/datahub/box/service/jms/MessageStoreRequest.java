@@ -96,7 +96,9 @@ public class MessageStoreRequest {
 			message.setIntProperty("size", datamart.size());
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream(8192);
 			MasterDatamartSerializer.serialize(datamart, outputStream);
-			message.writeBytes(outputStream.toByteArray());
+			byte[] bytes = outputStream.toByteArray();
+			message.writeBytes(bytes);
+			message.setIntProperty("content-size", bytes.length);
 			return Stream.of(message);
 		} catch (Exception e) {
 			Logger.error(e);
