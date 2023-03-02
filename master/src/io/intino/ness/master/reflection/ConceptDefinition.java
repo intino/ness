@@ -17,7 +17,11 @@ public interface ConceptDefinition {
 		return nameBegin < 0 ? fullName : fullName.substring(nameBegin);
 	}
 
-	List<AttributeDefinition> attributes();
+	default List<AttributeDefinition> attributes() {
+		List<AttributeDefinition> attributes = parent().map(ConceptDefinition::attributes).orElse(new ArrayList<>());
+		attributes.addAll(declaredAttributes());
+		return attributes;
+	}
 
 	List<AttributeDefinition> declaredAttributes();
 

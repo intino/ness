@@ -1,0 +1,292 @@
+def type(datamart & interface)
+	package $package;
+
+	import java.util.Arrays;
+    import java.util.List;
+    import java.util.UUID;
+    import java.util.stream.Stream;
+    import java.util.stream.Collectors;
+    import $package.entities.*;
+
+	public interface $name+FirstUpperCase~Datamart implements Datamart {
+		$entity+getterSignature...[$NL$NL]
+	}
+
+	interface Node<T extends $name+FirstUpperCase~Entity> {
+
+		int size();
+
+		T get(String id);
+
+		void put(String id, T entity);
+
+		void remove(String id);
+
+		Stream<T> stream();
+	}
+end
+
+def type(datamart & message & impl)
+	package $package;
+
+	import io.intino.alexandria.logger.Logger;
+	import io.intino.alexandria.terminal.Connector;
+	import org.apache.activemq.command.ActiveMQTextMessage;
+
+	import javax.jms.Message;
+	import java.time.Instant;
+	import java.util.ArrayList;
+	import java.util.Collections;
+	import java.util.List;
+	import java.util.Set;
+	import java.util.Map;
+	import java.util.concurrent.*;
+	import java.util.concurrent.atomic.AtomicBoolean;
+	import java.util.concurrent.atomic.AtomicReference;
+	import java.util.stream.Stream;
+
+	import static io.intino.ness.master.messages.DownloadMasterMessage.PROPERTY_ENTITY_SERIALIZER;
+	import static io.intino.ness.master.messages.DownloadMasterMessage.PROPERTY_ERROR;
+	import static java.util.Objects.requireNonNull;
+
+	import $package+validPackage~.master.Entities;
+	import $package+validPackage~.master.EntitiesView;
+	import $package.master.entities.*;
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	class $name+FirstUpperCase~DatamartImpl implements $name+FirstUpperCase~Datamart {
+
+		private static final String DATAHUB_MESSAGE_TOPIC = "service.ness.datalake.messagestore";
+
+		private static final DatamartDefinition $name~Definition = initDatamartDefinition();
+
+    	$entity+node...[$NL]
+
+		private final Connector connector;
+		private final AtomicBoolean initialized = new AtomicBoolean(false);
+		private final List<EntityListener> entityListeners = new ArrayList<>();
+
+    	public $name+FirstUpperCase~DatamartImpl(Connector connector) {
+    		this.connector = requireNonNull(connector);
+    	}
+
+		public synchronized void init() {
+			try {
+				if(!initialized.compareAndSet(false, true)) return;
+				downloadDatamartFromDatahub();
+				initDatahubMessageListener();
+				Logger.info("$name~Datamart (" + connector.clientId() + ") initialized successfully.");
+			} catch(Exception e) {
+				throw new MasterInitializationException("Entities failed to start: " + e.getMessage(), e);
+			}
+		}
+
+		@Override
+    	public void addEntityListener(EntityListener listener) {
+    		if(listener == null) throw new NullPointerException("EntityListener cannot be null");
+    		entityListeners.add(listener);
+    	}
+
+    	$entity+getter...[$NL$NL]
+
+    	private void publishMessage(Message message) {
+    		connector.sendTopicMessage(ENTITIES_TOPIC, message);
+    	}
+
+		protected void initDatahubMessageListener() {
+			this.entityConsumer = new EntityMessageConsumer();
+			connector.attachListener(DATAHUB_MESSAGE_TOPIC, connector.clientId() + "-" + DATAHUB_MESSAGE_TOPIC, entityConsumer);
+		}
+
+		private void downloadDatamartFromDatahub() {
+			Logger.debug("Downloading datamart from datahub...");
+    		long start = java.lang.System.currentTimeMillis();
+			loadEntitiesFromEvents(downloadEvents());
+			long time = java.lang.System.currentTimeMillis() - start;
+			Logger.debug("Datamart downloaded from datahub after " + time + " ms");
+		}
+
+		private Stream<Event> downloadEvents() {
+			try {
+				Message message = connector.requestResponse(DATAHUB_MESSAGE_TOPIC, downloadRequest());
+				return handleDownloadResponse(message);
+			} catch (NullPointerException e) {
+				throw new RuntimeException("Could not download datamart: no response from datahub.");
+			} catch (Exception e) {
+				throw new RuntimeException("Could not download datamart: " + e.getMessage());
+			}
+		}
+
+		private Message downloadRequest() throws Exception {
+			ActiveMQTextMessage message = new ActiveMQTextMessage();
+			message.setText("datamart:" + name() + ":" + snapshotTimetag());
+			message.compress();
+			return message;
+		}
+
+		protected String snapshotTimetag() {
+			return "";
+		}
+
+		private Stream<Event> handleDownloadResponse(javax.jms.Message message) throws Exception {
+			BytesMessage m = (BytesMessage) message;
+			int size = m.getIntProperty("content-size");
+			byte$[$] bytes = new byte$[size$];
+			m.readBytes(bytes, size);
+			return io.intino.alexandria.zim.ZimStream.of(new ByteArrayInputStream(bytes)).map(io.intino.alexandria.events.message.MessageEvent::new);
+		}
+
+		private void loadEntitiesFromEvents(Stream<Event> events) {
+			if(availableThreads() >= 4)
+				events.forEach(this::mount);
+			else
+				events.parallel().forEach(this::mount);
+		}
+
+		public void mount(Event event) {
+			switch(event.type()) {
+				[$entity+mountSwitchCase...[$NL]]
+			}
+		}
+
+		private Message readMessage(String str) {
+			return new MessageReader(str).next();
+		}
+
+		private static int availableThreads() {
+			return Runtime.getRuntime().availableProcessors();
+		}
+
+		private static DatamartDefinition initDatamartDefinition() {
+			return new DatamartDefinition() {
+
+				private final List<io.intino.ness.master.reflection.EntityDefinition> entities = initEntityDefinitions();
+				private final List<io.intino.ness.master.reflection.StructDefinition> structs = initStructDefinitions();
+
+				@Override
+				public String name() {
+					return "$name";
+				}
+
+				@Override
+				public Scale scale() {
+					return Scale.$scale;
+				}
+
+				@Override
+				public Query<io.intino.ness.master.reflection.EntityDefinition> entities() {
+					return new Query<>(entities);
+				}
+
+				@Override
+				public Query<io.intino.ness.master.reflection.StructDefinition> structs() {
+					return new Query<>(structs);
+				}
+
+				private List<io.intino.ness.master.reflection.EntityDefinition> initEntityDefinitions() {
+					List<io.intino.ness.master.reflection.EntityDefinition> list = new ArrayList<>($numEntities);
+					[$entity+addDefinition...[$NL]]
+					return list;
+				}
+
+				private List<io.intino.ness.master.reflection.StructDefinition> initStructDefinitions() {
+					List<io.intino.ness.master.reflection.StructDefinition> list = new ArrayList<>($numStructs);
+					[$struct+addDefinition...[$NL]]
+					return list;
+				}
+			};
+		}
+    }
+end
+
+def type(entity) trigger(addDefinition)
+	list.add(new EntityDefinition() {
+
+		@Override
+		public String fullName() {
+			return "$fullName";
+		}
+
+		@Override
+		public String name() {
+			return "$name";
+		}
+
+		@Override
+		public List<AttributeDefinition> declaredAttributes() {
+			return null;
+		}
+
+		@Override
+		public Optional<ConceptDefinition> parent() {
+			return Optional.empty();
+		}
+
+		@Override
+		public List<ConceptDefinition> descendants() {
+			return null;
+		}
+
+		@Override
+		public Class<?> javaClass() {
+			return null;
+		}
+	});
+end
+
+def type(entity) trigger(node)
+	private final Node<$name+FirstUpperCase> $name+firstLowerCase~Node = new $nodeImpl<>();
+end
+
+def type(entity) trigger(mountSwitchCase)
+	case "$name+FirstUpperCase":
+		synchronized($name+firstLowerCase~Node) {
+	 		new $package.mounters.$name+FirstUpperCase($name+firstLowerCase~Node).mount(event);
+		}
+		break;
+end
+
+def type(subclass) trigger(getById)
+	case "$name+firstLowerCase": return $name+firstLowerCase(id);
+end
+
+def type(subclass) trigger(getAllStream)
+	$name+Plural+firstLowerCase()
+end
+
+def type(abstract) trigger(getter)
+	@Override
+	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
+		if(id == null) return null;
+    	switch(Triplet.typeOf(id)) {
+    		$subclass+getById...[$NL]
+    	}
+    	return $name+Plural+firstLowerCase().filter(e -> id.equals(e.id().value())).findFirst().orElse(null);
+	}
+
+	@Override
+	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
+		return Stream.of(
+			$subclass+getAllStream...[,$NL]
+		).<$package.entities.$name+FirstUpperCase>flatMap(java.util.function.Function.identity());//.distinct();
+	}
+end
+
+def !type(abstract) trigger(getter)
+	@Override
+	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
+		if(id == null) return null;
+		return $name+firstLowerCase~Node.get(id);
+	}
+
+	@Override
+	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
+		return $name+firstLowerCase~Node.stream();
+	}
+end
+
+def trigger(getterSignature)
+	$package.entities.$name+FirstUpperCase $name+firstLowerCase(String id);
+	Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase();
+	default List<$package.entities.$name+FirstUpperCase> $name+firstLowerCase~List() {return $name+Plural+firstLowerCase().collect(Collectors.toList());}
+end

@@ -6,6 +6,7 @@ import io.intino.alexandria.zim.ZimWriter;
 import io.intino.datahub.master.MasterDatamart;
 import io.intino.datahub.master.datamarts.messages.MapMessageMasterDatamart;
 
+import javax.jms.BytesMessage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Reader;
