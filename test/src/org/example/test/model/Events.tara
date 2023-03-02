@@ -71,7 +71,7 @@ Namespace monitoring
 	Message Notification
 		Attribute destination as Text
 		Attribute content as Text
-		Attribute type as Word("text" "file" "image" "question")
+		Attribute notificationType as Word("text" "file" "image" "question")
 
 Namespace it
 	Message Mode

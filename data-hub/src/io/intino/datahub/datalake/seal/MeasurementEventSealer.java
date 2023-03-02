@@ -34,7 +34,7 @@ class MeasurementEventSealer {
 				Message message = e.toMessage();
 				double[] values = values(message);
 				String[] measurements = message.get("measurements").as(String[].class);
-				return new MeasurementEvent(e.ts(), e.ss(), measurements, values);
+				return new MeasurementEvent(e.type(), e.ss(), e.ts(), measurements, values);
 			}));
 		}
 
