@@ -9,7 +9,9 @@ import io.intino.datahub.model.Namespace;
 import io.intino.datahub.model.Terminal;
 import io.intino.ness.datahubterminalplugin.*;
 import io.intino.ness.datahubterminalplugin.MavenTerminalExecutor.Target;
-import io.intino.plugin.PluginLauncher;
+import io.intino.plugin.PluginLauncher.Notifier;
+import io.intino.plugin.PluginLauncher.Phase;
+import io.intino.plugin.PluginLauncher.SystemProperties;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,21 +27,17 @@ import static io.intino.plugin.PluginLauncher.Phase.*;
 public class TerminalPublisher {
 	private final File root;
 	private final Terminal terminal;
-	private List<Tank.Measurement> measurementTanks;
 	private final Configuration conf;
 	private final Map<String, String> versions;
-	private final PluginLauncher.SystemProperties systemProperties;
+	private final SystemProperties systemProperties;
 	private final String basePackage;
-	private final PluginLauncher.Phase invokedPhase;
+	private final Phase invokedPhase;
 	private final PrintStream logger;
-	private final PluginLauncher.Notifier notifier;
-	private final List<Tank.Message> messageTanks;
+	private final Notifier notifier;
 
-	public TerminalPublisher(File root, Terminal terminal, List<Tank.Message> messageTanks, List<Tank.Measurement> measurementTanks, Configuration configuration, Map<String, String> versions, PluginLauncher.SystemProperties systemProperties, PluginLauncher.Phase invokedPhase, PrintStream logger, PluginLauncher.Notifier notifier) {
+	public TerminalPublisher(File root, Terminal terminal, Configuration configuration, Map<String, String> versions, SystemProperties systemProperties, Phase invokedPhase, PrintStream logger, Notifier notifier) {
 		this.root = root;
 		this.terminal = terminal;
-		this.messageTanks = messageTanks;
-		this.measurementTanks = measurementTanks;
 		this.conf = configuration;
 		this.versions = versions;
 		this.systemProperties = systemProperties;
@@ -84,11 +82,10 @@ public class TerminalPublisher {
 	private boolean createSources() {
 		File srcDirectory = new File(root, "src");
 		srcDirectory.mkdirs();
-		List<Message> messages = messageTanks.stream().map(Tank.Message::message).collect(Collectors.toList());
 		if (duplicatedEvents()) return false;
 //		if (!terminal.graph().entityList().isEmpty())
 //			new MasterRenderer(srcDirectory, terminal.graph(), conf, logger, notifier, basePackage).renderTerminal(terminal);
-		new TerminalRenderer(terminal, messages, srcDirectory, basePackage, conf.artifact().code().generationPackage()).render();
+		new TerminalRenderer(terminal, srcDirectory, basePackage, conf.artifact().code().generationPackage()).render();
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
 		writeManifest(resDirectory);

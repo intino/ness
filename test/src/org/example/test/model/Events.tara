@@ -159,3 +159,7 @@ Message Operation
 	Component Parameter
 		Attribute type as Text
 		Attribute name as Text
+
+Measurement Btc
+	Value prize
+	Value volume

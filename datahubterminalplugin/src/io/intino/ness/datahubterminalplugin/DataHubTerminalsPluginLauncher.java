@@ -78,7 +78,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		try {
 			AtomicBoolean published = new AtomicBoolean(true);
 			nessGraph.terminalList().parallelStream().forEach(terminal -> {
-				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, messageTanks(terminal), measurementTanks(terminal), configuration(), versions, systemProperties(), invokedPhase, logger(), notifier()).publish() & published.get());
+				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, configuration(), versions, systemProperties(), invokedPhase, logger(), notifier()).publish() & published.get());
 				if (published.get() && notifier() != null)
 					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), terminalNameArtifact(terminal), configuration().artifact().version()));
 			});
@@ -205,20 +205,6 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 			Logger.error(e);
 			return new File("");
 		}
-	}
-
-	private List<Tank.Message> messageTanks(Terminal terminal) {
-		List<Tank.Message> tanks = new ArrayList<>();
-		if (terminal.publish() != null) tanks.addAll(terminal.publish().messageTanks());
-		if (terminal.subscribe() != null) tanks.addAll(terminal.subscribe().messageTanks());
-		return tanks;
-	}
-
-	private List<Tank.Measurement> measurementTanks(Terminal terminal) {
-		List<Tank.Measurement> tanks = new ArrayList<>();
-		if (terminal.publish() != null) tanks.addAll(terminal.publish().measurementTanks());
-		if (terminal.subscribe() != null) tanks.addAll(terminal.subscribe().measurementTanks());
-		return tanks;
 	}
 
 	public static <T> T safe(Safe.Wrapper<T> wrapper) {

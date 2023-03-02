@@ -9,6 +9,8 @@ import io.intino.ness.datahubterminalplugin.Commons;
 import io.intino.ness.datahubterminalplugin.Formatters;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MeasurementRenderer {
 	private final Measurement measurement;
@@ -28,13 +30,29 @@ public class MeasurementRenderer {
 		Commons.writeFrame(packageFolder, measurement.name$(), template().render(frame));
 	}
 
-	private Frame createMeasurementFrame(Measurement event, String packageName) {
+	private Frame createMeasurementFrame(Measurement measurement, String packageName) {
 		FrameBuilder eventFrame = new FrameBuilder("measurement")
-				.add("name", event.name$())
+				.add("name", measurement.name$())
+				.add("size", measurement.valueList().size())
 				.add("package", packageName);
-		Frame[] values = event.valueList().stream().map(m -> new FrameBuilder("value").add("name", m).add("owner", event.name$())).map(FrameBuilder::toFrame).toArray(Frame[]::new);
-		eventFrame.add("value", values);
+		List<Frame> list = new ArrayList<>();
+		List<Measurement.Value> valueList = measurement.valueList();
+		for (int i = 0, valueListSize = valueList.size(); i < valueListSize; i++) {
+			Measurement.Value m = valueList.get(i);
+			Frame frame = frame(measurement.name$(), m, i);
+			list.add(frame);
+		}
+		Frame[] object = list.toArray(new Frame[0]);
+		eventFrame.add("value", object);
 		return eventFrame.toFrame();
+	}
+
+	private static Frame frame(String measurement, Measurement.Value v, int i) {
+		return new FrameBuilder("value")
+				.add("index", i)
+				.add("name", v.name$())
+				.add("owner", measurement)
+				.toFrame();
 	}
 
 	private String rootPackage() {
