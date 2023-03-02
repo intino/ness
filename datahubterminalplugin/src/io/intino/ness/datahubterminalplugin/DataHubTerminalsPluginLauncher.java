@@ -18,17 +18,16 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DataHubTerminalsPluginLauncher extends PluginLauncher {
-	private static final String MINIMUM_BPM_VERSION = "1.2.5";
-	private static final String MINIMUM_TERMINAL_JMS_VERSION = "4.9.0";
-	private static final String MINIMUM_EVENT_VERSION = "3.0.0";
-	private static final String MINIMUM_INGESTION_VERSION = "4.0.5";
+	private static final String MINIMUM_BPM_VERSION = "3.0.0";
+	private static final String MINIMUM_TERMINAL_JMS_VERSION = "5.0.0";
+	private static final String MINIMUM_EVENT_VERSION = "4.0.0";
+	private static final String MINIMUM_INGESTION_VERSION = "5.0.0";
 	private static final String MINIMUM_MASTER_VERSION = "1.0.0";
-	private static final String MINIMUM_DATALAKE_VERSION = "5.0.3";
-	private static final String MAX_DATALAKE_VERSION = "6.0.0";
-	private static final String MAX_TERMINAL_JMS_VERSION = "5.0.0";
-	private static final String MAX_INGESTION_VERSION = "5.0.0";
-	private static final String MAX_EVENT_VERSION = "4.0.0";
-
+	private static final String MINIMUM_DATALAKE_VERSION = "6.0.0";
+	private static final String MAX_DATALAKE_VERSION = "7.0.0";
+	private static final String MAX_TERMINAL_JMS_VERSION = "6.0.0";
+	private static final String MAX_INGESTION_VERSION = "6.0.0";
+	private static final String MAX_EVENT_VERSION = "5.0.0";
 	private boolean deleteTempDirOnPublish = true;
 
 	@Override
@@ -43,11 +42,11 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		if (logger() != null) logger().println("Maven HOME: " + systemProperties.mavenHome.getAbsolutePath());
 		File resDirectory = resDirectory(moduleStructure().resDirectories);
 		if (resDirectory == null) return;
-		Graph graph = loadGraph(resDirectory);
+		NessGraph graph = loadGraph(resDirectory);
 		if (hasErrors(graph)) return;
 		Map<String, String> versions = versions();
-		if (!publishOntology(graph.as(NessGraph.class), versions, tempDir)) return;
-		publishTerminals(graph.as(NessGraph.class), versions, tempDir);
+		if (!publishOntology(graph, versions, tempDir)) return;
+		publishTerminals(graph, versions, tempDir);
 		logger().println("Finished generation of terminals!");
 	}
 
@@ -94,12 +93,15 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		if (published.get() && deleteTempDirOnPublish) FileUtils.deleteDirectory(tempDir);
 	}
 
-	private static Graph loadGraph(File resDirectory) {
+	private static NessGraph loadGraph(File resDirectory) {
 		String[] stashes = Arrays.stream(Objects.requireNonNull(resDirectory.listFiles(f -> f.getName().endsWith(".stash")))).map(f -> f.getName().replace(".stash", "")).toArray(String[]::new);
-		return new Graph(new FileSystemStore(resDirectory)).loadStashes(stashes);
+		final NessGraph graph = new Graph(new FileSystemStore(resDirectory)).loadStashes(stashes).as(NessGraph.class);
+		if (graph.messageList(t -> t.name$().equals("Session")).findAny().isEmpty())
+			graph.create("Session", "Session").message();
+		return graph;
 	}
 
-	private boolean hasErrors(Graph graph) {
+	private boolean hasErrors(NessGraph graph) {
 		if (graph == null) {
 			notifier().notifyError("Couldn't load graph. Please recompile module");
 			return true;

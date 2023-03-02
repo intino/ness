@@ -11,11 +11,11 @@ import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.broker.jms.JmsBrokerService;
 import io.intino.datahub.datalake.BrokerSessions;
 import io.intino.datahub.datalake.seal.DatahubSessionSealer;
-import io.intino.datahub.model.Message;
-import io.intino.datahub.master.datamarts.messages.MessageMasterDatamartFactory;
 import io.intino.datahub.master.MasterDatamartRepository;
 import io.intino.datahub.master.datamarts.messages.MapMessageMasterDatamart;
+import io.intino.datahub.master.datamarts.messages.MessageMasterDatamartFactory;
 import io.intino.datahub.model.Datamart;
+import io.intino.datahub.model.Message;
 import io.intino.datahub.model.NessGraph;
 import io.intino.magritte.framework.Graph;
 
@@ -85,7 +85,7 @@ public class DataHubBox extends AbstractBox {
 			graph.broker().secondaryPort(Integer.parseInt(configuration.brokerSecondaryPort()));
 		}
 		if (graph.datalake().tank(t -> t.name$().equals("Session")) == null) {
-			Message session = graph.create("Session").message();
+			Message session = graph.create("misc", "Session").message();
 			graph.datalake().create("Session").tank().asMessage(session);
 		}
 	}
@@ -126,7 +126,7 @@ public class DataHubBox extends AbstractBox {
 			configureBroker();
 			nessService = new NessService(this);
 		}
-		if(graph.datamartList() != null && !graph.datamartList().isEmpty()) {
+		if (graph.datamartList() != null && !graph.datamartList().isEmpty()) {
 			initMasterDatamarts();
 		}
 		sentinels = new Sentinels(this);
@@ -188,7 +188,7 @@ public class DataHubBox extends AbstractBox {
 		File datamartsRoot = new File(configuration.home(), "datamarts");
 		masterDatamarts = new MasterDatamartRepository(datamartsRoot);
 		MessageMasterDatamartFactory datamartFactory = new MessageMasterDatamartFactory(datamartsRoot, datalake);
-		for(Datamart datamart : graph.datamartList()) {
+		for (Datamart datamart : graph.datamartList()) {
 			initDatamart(datamartFactory, datamart);
 		}
 		Logger.info("MasterDatamarts initialized (" + masterDatamarts.size() + ")");

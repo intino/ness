@@ -54,10 +54,10 @@ class TerminalRenderer {
 	private Frame[] messageFrames() {
 		return messages.stream()
 				.map(e -> new FrameBuilder("message")
-						.add("namespace", eventNamespace(e))
-						.add("namespaceQn", eventNamespace(e).replace(".", ""))
+						.add("namespace", messageNamespace(e))
+						.add("namespaceQn", messageNamespace(e).replace(".", ""))
 						.add("name", e.name$())
-						.add("type", eventPackage(e) + "." + firstUpperCase(e.name$())).toFrame())
+						.add("type", messagePackage(e) + "." + firstUpperCase(e.name$())).toFrame())
 				.toArray(Frame[]::new);
 	}
 
@@ -84,10 +84,10 @@ class TerminalRenderer {
 	}
 
 	private Frame frameOf(Tank.Message messageTank) {
-		String eventPackage = eventPackage(messageTank.message());
-		String namespace = eventNamespace(messageTank.message());
+		String messagesPackage = messagePackage(messageTank.message());
+		String namespace = messageNamespace(messageTank.message());
 		return new FrameBuilder("default").
-				add("type", eventPackage + "." + firstUpperCase(messageTank.name$())).
+				add("type", messagesPackage + "." + firstUpperCase(messageTank.message().name$())).
 				add("typeName", messageTank.name$()).
 				add("namespace", namespace).
 				add("namespaceQn", namespace.replace(".", "")).
@@ -95,18 +95,18 @@ class TerminalRenderer {
 				add("channel", messageTank.qn()).toFrame();
 	}
 
-	private String eventPackage(Message event) {
-		String eventPackage = eventsPackage();
-		if (event.core$().owner().is(Namespace.class)) eventPackage = eventPackage + "." + eventNamespace(event);
-		return eventPackage;
+	private String messagePackage(Message event) {
+		String messagePackage = messagesPackage();
+		if (event.core$().owner().is(Namespace.class)) messagePackage = messagePackage + "." + messageNamespace(event);
+		return messagePackage;
 	}
 
-	private String eventNamespace(Message event) {
+	private String messageNamespace(Message event) {
 		return event.core$().owner().is(Namespace.class) ? event.core$().ownerAs(Namespace.class).qn().toLowerCase() : "";
 	}
 
-	private String eventsPackage() {
-		return rootPackage + ".events";
+	private String messagesPackage() {
+		return rootPackage + ".messages";
 	}
 
 

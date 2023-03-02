@@ -23,7 +23,7 @@ public class MavenTerminalExecutor {
 	private final PrintStream logger;
 	private final List<Target> targets;
 
-	public enum Target {Entities, Events, Bpm}
+	public enum Target {Events, Bpm}
 
 	public MavenTerminalExecutor(File root, String basePackage, List<Target> targets, String terminalName, Map<String, String> versions, Configuration conf, SystemProperties systemProperties, PrintStream logger) {
 		this.root = root;

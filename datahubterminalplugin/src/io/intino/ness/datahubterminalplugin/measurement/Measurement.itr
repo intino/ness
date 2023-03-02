@@ -24,13 +24,13 @@ def type(root)
 
 		[$value+setter...[$NL$NL]]
 
-		public io.intino.alexandria.event.MessageEvent toMessageEvent() {
+		public io.intino.alexandria.event.message.MessageEvent toMessageEvent() {
 			io.intino.alexandria.message.Message message = new io.intino.alexandria.message.Message(this.getClass().getSimpleName());
 			message.set("ts", this.ts);
 			message.set("ss", this.sensor);
 			message.set("measurements", this.measurements);
 			message.set("values", this.values);
-			return new io.intino.alexandria.event.MessageEvent(message);
+			return new io.intino.alexandria.event.message.MessageEvent(message);
 		}
 	}
 end

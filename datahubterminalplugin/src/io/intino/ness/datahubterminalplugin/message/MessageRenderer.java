@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.stream;
 
 public class MessageRenderer {
-	private static final String EVENT = "io.intino.alexandria.event.MessageEvent";
+	private static final String EVENT = "io.intino.alexandria.event.message.MessageEvent";
 	private final Message message;
 	private final File destination;
 	private final String rootPackage;
@@ -27,7 +27,7 @@ public class MessageRenderer {
 	}
 
 	public void render() {
-		String rootPackage = eventsPackage();
+		String rootPackage = messagesPackage();
 		if (message.core$().owner().is(Namespace.class))
 			rootPackage = rootPackage + "." + message.core$().ownerAs(Namespace.class).qn();
 		final File packageFolder = new File(destination, rootPackage.replace(".", File.separator));
@@ -49,7 +49,7 @@ public class MessageRenderer {
 	private String parent(Message message) {
 		if (message.isExtensionOf()) {
 			Message parent = message.asExtensionOf().parent();
-			String eventPackage = eventsPackage();
+			String eventPackage = messagesPackage();
 			if (parent.core$().owner().is(Namespace.class))
 				eventPackage = eventPackage + "." + parent.core$().ownerAs(Namespace.class).qn();
 			return eventPackage + "." + parent.name$();
@@ -169,8 +169,8 @@ public class MessageRenderer {
 				.add("type", a.name$());
 	}
 
-	private String eventsPackage() {
-		return rootPackage + ".events";
+	private String messagesPackage() {
+		return rootPackage + ".messages";
 	}
 
 	private boolean multiple(Data.Type attribute) {

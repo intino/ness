@@ -12,10 +12,10 @@ def trigger(event)
 		[$component+declaration...[$NL]]
 
 		public $name+firstUpperCase(String ss) {
-			[super(new io.intino.alexandria.event.MessageEvent("$parentSuper", ss))?super("$name", ss)];
+			[super(new io.intino.alexandria.event.message.MessageEvent("$parentSuper", ss))?super("$name", ss)];
 		}
 
-		public $name+firstUpperCase(io.intino.alexandria.event.MessageEvent event) {
+		public $name+firstUpperCase(io.intino.alexandria.event.message.MessageEvent event) {
 			this(event.toMessage());
 		}
 
@@ -49,7 +49,7 @@ def trigger(event)
 
 		@Override
 		public io.intino.alexandria.message.Message toMessage() {
-			$attribute+serializeTable...[$NL]
+			[$attribute+serializeTable...[$NL]]
 			return super.toMessage();
 		}
 	}

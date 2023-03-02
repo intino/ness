@@ -3,6 +3,7 @@ package io.intino.ness.datahubterminalplugin.ontology;
 import io.intino.Configuration;
 import io.intino.datahub.model.Datalake;
 import io.intino.datahub.model.Measurement;
+import io.intino.datahub.model.Message;
 import io.intino.datahub.model.NessGraph;
 import io.intino.ness.datahubterminalplugin.measurement.MeasurementRenderer;
 import io.intino.ness.datahubterminalplugin.message.MessageRenderer;
@@ -40,7 +41,7 @@ public class OntologyRenderer {
 	}
 
 	private void renderMessages() {
-		graph.messageList().forEach(event -> new MessageRenderer(event, srcDir, basePackage).render());
+		graph.core$().find(Message.class).forEach(event -> new MessageRenderer(event, srcDir, basePackage).render());
 	}
 
 	private void renderMeasurements() {
