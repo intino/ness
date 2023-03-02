@@ -66,7 +66,7 @@ Concept Namespace
 
 Concept Measurement > Concept:{1..*} Value
 
-Concept Message
+Concept:AvoidEventAttributes Message
 	has:Named:RequiresAspect Attribute
 	has Component
 	Concept Has

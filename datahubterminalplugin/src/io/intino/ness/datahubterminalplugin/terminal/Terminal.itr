@@ -4,6 +4,7 @@ def type(terminal)
 	import io.intino.alexandria.Scale;
 	import io.intino.alexandria.Timetag;
 	import io.intino.alexandria.event.Event;
+	import io.intino.alexandria.event.message.MessageEvent;
 	import io.intino.alexandria.logger.Logger;
 	import org.apache.activemq.command.ActiveMQTextMessage;
 
@@ -28,14 +29,13 @@ def type(terminal)
 
 		private final io.intino.alexandria.terminal.Connector connector;
 		private final java.util.Map<java.util.function.BiConsumer<?, String>, List<java.util.function.Consumer<io.intino.alexandria.event.Event>>> consumers = new java.util.HashMap<>();
-		$bpm+splits
 		[$entities+declaration]
 
 		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector) {
 			this.connector = connector;
 		}
 
-		public void publish(Object event, String split) {
+		public void publish(Object event) {
 			$publish+if...[$NL]
 		}
 
@@ -67,15 +67,6 @@ def type(terminal)
 			return new BatchSession(temporalStageDirectory, config);
 		}
 
-		public void publish(io.intino.alexandria.event.SessionEvent session) {
-			connector.sendEvent(io.intino.alexandria.event.SessionEvent.PATH, session);
-		}
-
-		public void subscribe(SessionEventConsumer onEventReceived) {
-			consumers.put(onEventReceived, List.of(event -> onEventReceived.accept(new io.intino.alexandria.event.SessionEvent(event.toMessage()), io.intino.alexandria.event.SessionEvent.PATH)));
-			connector.attachListener(io.intino.alexandria.event.SessionEvent.PATH, consumers.get(onEventReceived).get(0));
-		}
-
 		$publish...[$NL$NL]
 
 		$subscribe...[$NL$NL]
@@ -104,18 +95,18 @@ def type(terminal)
 				ActiveMQTextMessage m = new ActiveMQTextMessage();
 				io.intino.alexandria.message.Message message = new io.intino.alexandria.message.Message(type);
 				attributes.forEach(message::set);
-				m.setText(new Event(message).ts(java.time.Instant.now()).toString());
+				m.setText(new MessageEvent(message).ts(java.time.Instant.now()).toString());
 				return m;
 			} catch(Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
 
+
 		public class BatchSession {
 			private final java.io.File temporalStage;
 			private final io.intino.alexandria.ingestion.SessionHandler sessionHandler;
-			private final io.intino.alexandria.ingestion.EventSession eventSession;
-			private final io.intino.alexandria.ingestion.SetSession setSession;
+			private final io.intino.alexandria.ingestion.EventSession session;
 			private final Scale scale;
 
 			public BatchSession(java.io.File temporalStage) {
@@ -126,37 +117,29 @@ def type(terminal)
 				this.temporalStage = temporalStage;
 				this.scale = config.scale;
 				this.sessionHandler = new io.intino.alexandria.ingestion.SessionHandler(temporalStage);
-				this.eventSession = sessionHandler.createEventSession(config.eventsBufferSize);
-				this.setSession = sessionHandler.createSetSession(config.setsBufferSize);
+				this.session = sessionHandler.createEventSession(config.eventsBufferSize);
 			}
 
-			public void feed(Event event, String split) {
-                eventSession.put(tankOf(event, split), Timetag.of(event.ts(), this.scale), event);
+			public void feed(Event event) throws IOException {
+                session.put(tankOf(event), event.ss(), Timetag.of(event.ts(), this.scale), event.format(), event);
 			}
 
-			public void feed(Event event, String split, Scale scale) {
-				eventSession.put(tankOf(event, split), Timetag.of(event.ts(), scale), event);
-			}
-
-			public void feed(io.intino.alexandria.event.SessionEvent event) {
-				eventSession.put(io.intino.alexandria.event.SessionEvent.PATH, Timetag.of(event.ts(), Scale.Day), event);
+			public void feed(Event event, Scale scale) throws IOException {
+				session.put(tankOf(event), event.ss(), Timetag.of(event.ts(), scale), event.format(), event);
 			}
 
 			public void flush() {
-				eventSession.flush();
-				setSession.flush();
+				session.flush();
 			}
 
 			public void push(File dataHubStage) {
-				eventSession.close();
-				setSession.close();
+				session.close();
 				sessionHandler.pushTo(dataHubStage);
 				//connector.sendEvent("service.ness.push", new Event(new io.intino.alexandria.message.Message("Push").set("stage", temporalStage.getName())));
 			}
 
 			public void push(String host, String user, String dataHubStageAbsolutePath) {
-				eventSession.close();
-				setSession.close();
+				session.close();
 				List<File> files = io.intino.alexandria.ingestion.FS.allFilesIn(temporalStage, path -> path.getName().endsWith(io.intino.alexandria.Session.SessionExtension)).collect(Collectors.toList());
 				upload(files, host, user, dataHubStageAbsolutePath);
 				temporalStage.renameTo(new File(temporalStage.getParentFile(), temporalStage.getName() + ".treated"));
@@ -182,9 +165,9 @@ def type(terminal)
 
 			}
 
-            private String tankOf(Event event, String split) {
+            private String tankOf(Event event) {
             	$publish+tankOf...[$NL]
-            	return event.toMessage().type();
+            	return event.type();
             }
 		}
 
@@ -209,10 +192,7 @@ def type(terminal)
 			}
 		}
 
-		public interface SessionEventConsumer extends java.util.function.BiConsumer<io.intino.alexandria.event.SessionEvent, String> {
-		}
-
-		$event+interface...[$NL$NL]
+		$message+interface...[$NL$NL]
 	}
 end
 
@@ -255,64 +235,17 @@ def type(entities) trigger(getter)
 	}
 end
 
-def type(bpm) trigger(splits)
-	public enum BpmSplit {
-		$split+asEnum...[, ];
-
-		public abstract String qn();
-
-		public static BpmSplit splitByQn(String qn) {
-			return java.util.Arrays.stream(values()).filter(c -> c.qn().equals(qn)).findFirst().orElse(null);
-		}
-	}
-end
-
-def trigger(asEnum)
-	$value+snakeCaseToCamelCase {
-		public String qn() {
-			return "$qn";
-		}
-	}
-end
-
-def type(multisplit & bpm) trigger(if)
-	if (event instanceof $type) publish(($type) event, BpmSplit.splitByQn(split));
-end
-
-def type(multisplit) trigger(if)
-	if (event instanceof $type) publish(($type) event, $type.Split.splitByQn(split));
-end
-
 def trigger(if)
 	if (event instanceof $type) publish(($type) event);
-end
-
-def type(multisplit) !type(bpm) trigger(tankOf)
-	if (event instanceof $type) return "$typeWithNamespace." + $type.Split.splitByQn(split).qn();
 end
 
 def !type(bpm) trigger(tankOf)
 	if (event instanceof $type) return "$channel";
 end
 
-def type(bpm & multisplit) trigger(publish)
-	public void publish($type $typeName+firstLowerCase, BpmSplit split, BpmSplit... moreSplits) {
-		connector.sendEvent("$typeWithNamespace." + split.qn(), $typeName+firstLowerCase);
-		for (BpmSplit c : moreSplits) connector.sendEvent("$typeWithNamespace." + c.qn(), $typeName+firstLowerCase);
-	}
-end
-
 def type(bpm) trigger(publish)
 	public void publish($type $typeName+firstLowerCase) {
 		connector.sendEvent("$channel", $typeName+firstLowerCase);
-	}
-end
-
-def type(multisplit) !type(bpm) trigger(publish)
-	public void publish($type $typeName+firstLowerCase, $type.Split split, $type.Split... moreSplits) {
-		connector.sendEvent("$typeWithNamespace." + split.qn(), $typeName+firstLowerCase);
-		for ($type.Split c : moreSplits)
-			connector.sendEvent("$typeWithNamespace." + c.qn(), $typeName+firstLowerCase);
 	}
 end
 
@@ -322,100 +255,23 @@ def !type(bpm) trigger(publish)
 	}
 end
 
-def type(bpm & multiSplit) trigger(subscribe)
-	public void subscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, BpmSplit split, BpmSplit... moreSplits) {
-		consumers.putIfAbsent(onEventReceived, new java.util.ArrayList<>());
-		List<java.util.function.Consumer<io.intino.alexandria.event.Event>> eventConsumers = consumers.get(onEventReceived);
-		java.util.function.Consumer<io.intino.alexandria.event.Event> consumer = event -> onEventReceived.accept(new $type(event), "$typeName+FirstUpperCase." + split.qn());
-		connector.attachListener("$typeName+FirstUpperCase." + split.qn(), subscriberId + "_" + split.qn(), consumer);
-		eventConsumers.add(consumer);
-		for (BpmSplit c : moreSplits) {
-			consumer = event -> onEventReceived.accept(new $type(event), "$typeName+FirstUpperCase." + c.qn());
-			eventConsumers.add(consumer);
-			connector.attachListener("$typeName+FirstUpperCase." + c.qn(), subscriberId + "_" + c.qn(), consumer);
-		}
-	}
-
-	public void subscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, BpmSplit split, BpmSplit... moreSplits) {
-		consumers.put(onEventReceived, List.of(event -> onEventReceived.accept(new $type(event), "$typeName+FirstUpperCase." + split.qn())));
-		List<java.util.function.Consumer<io.intino.alexandria.event.Event>> eventConsumers = consumers.get(onEventReceived);
-		java.util.function.Consumer<io.intino.alexandria.event.Event> consumer = event -> onEventReceived.accept(new $type(event), "$typeName." + split.qn());
-		connector.attachListener("$typeName+FirstUpperCase." + split.qn(), consumer);
-		eventConsumers.add(consumer);
-		for (BpmSplit c : moreSplits) {
-			consumer = event -> onEventReceived.accept(new $type(event), "$typeName+FirstUpperCase." + c.qn());
-			eventConsumers.add(consumer);
-			connector.attachListener("$typeName+FirstUpperCase." + c.qn(), consumer);
-		}
-	}
-
-	public void unsubscribe(ProcessStatusConsumer onEventReceived) {
-		consumers.get(onEventReceived).forEach(c -> connector.detachListeners(c));
-	}
-end
-
-def type(multiSplit) !type(bpm) trigger(subscribe)
-	public void subscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, $type.Split split, $type.Split... moreSplits) {
-		consumers.putIfAbsent(onEventReceived, new java.util.ArrayList<>());
-		List<java.util.function.Consumer<io.intino.alexandria.event.Event>> eventConsumers = consumers.get(onEventReceived);
-		java.util.function.Consumer<io.intino.alexandria.event.Event> consumer = event -> { try { onEventReceived.accept(new $type(event), "$typeWithNamespace." + split.qn());} catch(Throwable e) { Logger.error(e); }};
-		connector.attachListener("$typeWithNamespace." + split.qn(), subscriberId + "_" + split.qn(), consumer);
-		eventConsumers.add(consumer);
-		for ($type.Split s : moreSplits) {
-			consumer = event -> { try { onEventReceived.accept(new $type(event), "$typeWithNamespace." + s.qn());} catch(Throwable e) { Logger.error(e); }};
-			connector.attachListener("$typeWithNamespace." + s.qn(), subscriberId + "_" + s.qn(), consumer);
-			eventConsumers.add(consumer);
-		}
-	}
-
-	public void subscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, java.util.function.Predicate<Instant> filter, $type.Split split, $type.Split... moreSplits) {
-		consumers.putIfAbsent(onEventReceived, new java.util.ArrayList<>());
-		List<java.util.function.Consumer<io.intino.alexandria.event.Event>> eventConsumers = consumers.get(onEventReceived);
-		java.util.function.Consumer<io.intino.alexandria.event.Event> consumer = event -> { try { onEventReceived.accept(new $type(event), "$typeWithNamespace." + split.qn());} catch(Throwable e) { Logger.error(e); }};
-		connector.attachListener("$typeWithNamespace." + split.qn(), subscriberId + "_" + split.qn(), consumer, filter);
-		eventConsumers.add(consumer);
-		for ($type.Split s : moreSplits) {
-			consumer = event -> { try { onEventReceived.accept(new $type(event), "$typeWithNamespace." + s.qn());} catch(Throwable e) { Logger.error(e); }};
-			connector.attachListener("$typeWithNamespace." + s.qn(), subscriberId + "_" + s.qn(), consumer, filter);
-			eventConsumers.add(consumer);
-		}
-	}
-
-	public void subscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, $type.Split split, $type.Split... moreSplits) {
-		consumers.putIfAbsent(onEventReceived, new java.util.ArrayList<>());
-		List<java.util.function.Consumer<io.intino.alexandria.event.Event>> eventConsumers = consumers.get(onEventReceived);
-		java.util.function.Consumer<io.intino.alexandria.event.Event> consumer = event -> onEventReceived.accept(new $type(event), "$typeWithNamespace." + split.qn());
-		connector.attachListener("$typeWithNamespace." + split.qn(), consumer);
-		eventConsumers.add(consumer);
-		for ($type.Split s : moreSplits) {
-			consumer = event -> { try { onEventReceived.accept(new $type(event), "$typeWithNamespace." + s.qn());} catch(Throwable e) { Logger.error(e); }};
-			connector.attachListener("$typeWithNamespace." + s.qn(), consumer);
-			eventConsumers.add(consumer);
-		}
-	}
-
-	public void unsubscribe($namespaceQn+firstUpperCase$typeName~Consumer onEventReceived) {
-		consumers.get(onEventReceived).forEach(c-> connector.detachListeners(c));
-	}
-end
-
 def trigger(subscribe)
-	public void subscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId) {
+	public void subscribe($namespaceQn+firstUpperCase$name+firstUpperCase~Consumer onEventReceived, String subscriberId) {
 		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type(event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
 		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0));
 	}
 
-	public void subscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived, String subscriberId, java.util.function.Predicate<Instant> filter) {
+	public void subscribe($namespaceQn+firstUpperCase$name+firstUpperCase~Consumer onEventReceived, String subscriberId, java.util.function.Predicate<Instant> filter) {
 		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type(event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
 		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), filter);
 	}
 
-	public void subscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived) {
+	public void subscribe($namespaceQn+firstUpperCase$name+firstUpperCase~Consumer onEventReceived) {
 		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type(event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
 		connector.attachListener("$channel", consumers.get(onEventReceived).get(0));
 	}
 
-	public void unsubscribe($namespaceQn+firstUpperCase$typeName+FirstUpperCase~Consumer onEventReceived) {
+	public void unsubscribe($namespaceQn+firstUpperCase$name+firstUpperCase~Consumer onEventReceived) {
 		consumers.get(onEventReceived).forEach(c -> connector.detachListeners(c));
 	}
 end
