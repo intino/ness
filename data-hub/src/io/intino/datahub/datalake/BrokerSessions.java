@@ -1,7 +1,9 @@
 package io.intino.datahub.datalake;
 
-import io.intino.alexandria.Timetag;
+import io.intino.alexandria.Fingerprint;
+import io.intino.alexandria.Session;
 import io.intino.alexandria.event.Event;
+import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.ingestion.EventSession;
 import io.intino.alexandria.ingestion.SessionHandler;
 import io.intino.alexandria.logger.Logger;
@@ -10,7 +12,6 @@ import io.intino.alexandria.message.MessageReader;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 
@@ -37,23 +38,26 @@ public class BrokerSessions {
 			SessionHandler handler = new SessionHandler(stageDirectory);
 			File tmp = new File(stageDirectory, "tmp");
 			tmp.mkdirs();
-			for (File file : requireNonNull(brokerStageDirectory.listFiles(f -> f.getName().endsWith(".inl"))))
-				moveToTmp(file, tmp);
-			File[] tmpFiles = requireNonNull(tmp.listFiles(f -> f.getName().endsWith(".inl")));
-			for (File file : tmpFiles) {
-				String name = file.getName().replace(".inl", "");
-				String[] split = name.split("#");
+			moveToTmp(tmp);
+			for (File file : requireNonNull(tmp.listFiles(f -> f.getName().endsWith(Session.SessionExtension)))) {
 				EventSession eventSession = handler.createEventSession();
-				MessageReader messages = new MessageReader(new FileInputStream(file));
-				for (Message message : messages)
-					eventSession.put(split[0], new Timetag(split[1]), new Event(message));
-				messages.close();
-				eventSession.close();
+				try(MessageReader messages = new MessageReader(new FileInputStream(file))) {
+					Fingerprint fingerprint = Fingerprint.of(file);
+					for (Message message : messages)
+						eventSession.put(fingerprint.tank(), fingerprint.source(), fingerprint.timetag(), Event.Format.Message, new MessageEvent(message));
+				} finally {
+					eventSession.close();
+				}
 				file.delete();
 			}
-		} catch (FileNotFoundException e) {
+		} catch (Exception e) {
 			Logger.error(e);
 		}
+	}
+
+	private void moveToTmp(File tmp) {
+		for (File file : requireNonNull(brokerStageDirectory.listFiles(f -> f.getName().endsWith(Session.SessionExtension))))
+			moveToTmp(file, tmp);
 	}
 
 	private void moveToTmp(File file, File tmp) {

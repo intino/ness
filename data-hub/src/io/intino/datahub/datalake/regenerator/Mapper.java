@@ -1,8 +1,8 @@
 package io.intino.datahub.datalake.regenerator;
 
 
-import io.intino.alexandria.datalake.file.eventsourcing.EventPump;
 import io.intino.alexandria.event.Event;
+import io.intino.datahub.datalake.pump.EventPump;
 
 import java.util.function.Function;
 

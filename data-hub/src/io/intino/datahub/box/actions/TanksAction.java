@@ -11,7 +11,7 @@ public class TanksAction {
 	public io.intino.alexandria.Context context = new io.intino.alexandria.Context();
 
 	public java.lang.String execute() {
-		String collect = box.datalake().eventStore().tanks().map(Datalake.EventStore.Tank::name).collect(joining("\n"));
+		String collect = box.datalake().messageStore().tanks().map(Datalake.Store.Tank::name).collect(joining("\n"));
 		return collect.isEmpty() ? "No tanks yet" : collect;
 	}
 }

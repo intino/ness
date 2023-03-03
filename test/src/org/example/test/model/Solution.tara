@@ -10,38 +10,22 @@ Broker(path = empty, port = 63000, secondaryPort = 1884)
 
 Datalake(scale = Day, path = "{datalake}") dl
 	Seal > Cron(pattern = "0 0 4 1/1 * ? *", timeZone = empty)
-	Tank mode as Event(it.Mode)
-	Tank assetStatus as Event(it.Status)
-	Tank assetInfo as Event(it.Info)
-	Tank anomaly as Event(monitoring.AnomalyBundle)
-	Tank notification as Event(monitoring.Notification)
+	Tank mode as Message(it.Mode)
+	Tank assetStatus as Message(it.Status)
+	Tank assetInfo as Message(it.Info)
+	Tank anomaly as Message(monitoring.AnomalyBundle)
+	Tank notification as Message(monitoring.Notification)
+	Tank btcTank as Measurement(Events.market.Btc)
 
-	Tank user as Entity(User)
-	Tank team as Entity(Team)
-	Tank type as Entity (Type)
-	Tank area as Entity (Area)
-	Tank host as Entity (Host)
-	Tank asset as Entity (Asset)
-	Tank system as Entity (System)
-	Tank assetType as Entity (AssetType)
-	Tank service as Entity(Service)
-	Tank serviceType as Entity (ServiceType)
-	Tank businessType as Entity (BusinessType)
-	Tank anomalyRule as Entity(AnomalyType)
-	Tank anomalyType as Entity(AnomalyRule)
-
-Terminal test-terminal
-	Subscribe(dl.anomaly dl.assetInfo dl.assetStatus dl.mode, dl.user dl.asset dl.service dl.team dl.type dl.assetType dl.serviceType dl.area dl.host dl.anomalyType dl.system)
-	Publish(dl.notification, dl.service dl.team dl.anomalyType dl.system)
-
-Terminal monitor-terminal
-	Publish(dl.assetInfo dl.assetStatus dl.mode)
-	Subscribe(empty, dl.service)
+//Terminal test-terminal
+//	Subscribe(dl.anomaly dl.assetInfo dl.assetStatus dl.mode)
+//	Publish(dl.notification)
+//
+//Terminal monitor-terminal
+//	Publish(dl.assetInfo dl.assetStatus dl.mode)
+//	Subscribe(dl.anomaly)
 
 Terminal wizard-terminal
-	Publish(dl.anomaly)
-	Subscribe(dl.mode dl.assetInfo dl.assetStatus,dl.asset dl.service dl.anomalyType dl.anomalyRule)
-
-Terminal connector-terminal
-	Publish(empty, dl.user dl.team)
-	Subscribe(dl.notification, dl.user dl.team)
+	Publish(dl.anomaly, dl.btcTank)
+	Subscribe(dl.mode dl.assetInfo dl.assetStatus, dl.btcTank)
+//	Datamarts(d1 d2 d3...)

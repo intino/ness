@@ -1,6 +1,10 @@
 dsl Proteo
 
-Concept:Named Entity
+use Model
+
+Concept:Named Entity is component
+	var Datalake.Tank.Message from // TODO: OR add rule mustBeAssertion
+	var string[] exclude = empty
 	Concept:Named:RequiresAspect Attribute extends EntityData
 	Concept:Named:RequiresAspect Method extends Expression
 	Aspect ExtensionOf > var Entity entity
@@ -8,7 +12,7 @@ Concept:Named Entity
 	Aspect Decorable
 	Aspect Component
 
-Concept:Named Struct
+Concept:Named Struct is component
 	Concept:Named:RequiresAspect Attribute extends StructData
 	Concept:Named:RequiresAspect Method extends Expression
 	Aspect ExtensionOf > var Struct struct

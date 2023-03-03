@@ -52,7 +52,6 @@ public class SealAction {
 		}
 	}
 
-
 	private void cleanStage() {
 		for (File file : Objects.requireNonNull(box.stageDirectory().listFiles()))
 			if (file.isDirectory() && Objects.requireNonNull(file.listFiles()).length == 0) try {

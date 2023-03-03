@@ -56,7 +56,7 @@ public class OntologyPublisher {
 				notifier.notifyError("The Version " + conf.artifact().version() + " is Already Distributed.");
 				return false;
 			}
-			if (!new OntologyRenderer(graph, conf, root, sourceDirectory(), resDirectories, basePackage, logger, notifier).render())
+			if (!new OntologyRenderer(graph, conf, sourceDirectory(), basePackage, logger, notifier).render())
 				return false;
 			logger.println("Publishing ontology...");
 			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
@@ -127,8 +127,6 @@ public class OntologyPublisher {
 			if (sourceDirectory.getName().equals("shared"))
 				builder.add("sourceDirectory", sourceDirectory.getAbsolutePath());
 		builder.add("event", new FrameBuilder().add("version", versions.get("event")));
-		builder.add("master", new FrameBuilder().add("masterVersion", versions.get("master")));
-		builder.add("led", new FrameBuilder().add("version", versions.get("led")));
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new PomTemplate().render(builder.toFrame()));
 		return pomFile;

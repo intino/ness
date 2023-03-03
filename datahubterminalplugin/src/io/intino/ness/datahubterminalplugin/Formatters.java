@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Formatters {
-
 	public static Formatter validName() {
 		return (value) -> snakeCaseToCamelCase(value.toString().replace(".", "-"));
 	}
@@ -135,5 +134,4 @@ public class Formatters {
 	public static String capitalize(String value) {
 		return value.isEmpty() ? "" : ((Formatter) StringFormatters.get(Locale.getDefault()).get("capitalize")).format(value).toString();
 	}
-
 }
