@@ -1,19 +1,34 @@
 package io.intino.ness.master.reflection;
 
+import io.intino.ness.master.Datamart;
+
 import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public interface DatamartDefinition {
 
 	String name();
 
-	Scale scale();
+	Datamart.Scale scale();
+
+	default List<ConceptDefinition<?>> concepts() {
+		List<ConceptDefinition<?>> concepts = new ArrayList<>(entities());
+		concepts.addAll(structs());
+		return concepts;
+	}
 
 	Query<EntityDefinition> entities();
 
 	Query<StructDefinition> structs();
+
+	default Optional<ConceptDefinition<?>> concept(String name) {
+		return concepts().stream().filter(e -> e.name().equals(name)).findFirst();
+	}
 
 	default Optional<EntityDefinition> entity(String name) {
 		return entities().stream().filter(e -> e.name().equals(name)).findFirst();
@@ -21,10 +36,6 @@ public interface DatamartDefinition {
 
 	default Optional<StructDefinition> struct(String name) {
 		return structs().stream().filter(e -> e.name().equals(name)).findFirst();
-	}
-
-	enum Scale {
-		Year, Month, Week, Day
 	}
 
 	class Query<T extends ConceptDefinition<T>> extends AbstractList<T> {

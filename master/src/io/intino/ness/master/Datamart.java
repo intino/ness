@@ -13,11 +13,13 @@ public interface Datamart {
 
 	default String name() {return getDefinition().name();}
 
+	default Scale scale() {return getDefinition().scale();}
+
 	int size();
 
 	<T extends Entity> T get(String id);
 
-	<T extends Entity> Stream<T> entities();
+	Stream<Entity> entities();
 
 	default Map<String, Entity> toMap() {
 		return entities().collect(Collectors.toMap(Entity::id, Function.identity()));
@@ -28,7 +30,34 @@ public interface Datamart {
 	DatamartDefinition getDefinition();
 
 	interface EntityListener {
-		void onAddEntity(Entity entity);
-		void onUpdateEntity(Entity entity, Concept.Attribute attribute, Concept.Attribute.Value oldValue);
+
+		void onCreate(Entity entity);
+		void onUpdate(Entity entity);
+		void onRemove(Entity entity);
+
+		interface OnCreate extends EntityListener {
+			@Override
+			default void onUpdate(Entity entity) {}
+			@Override
+			default void onRemove(Entity entity) {}
+		}
+
+		interface OnUpdate extends EntityListener {
+			@Override
+			default void onCreate(Entity entity) {}
+			@Override
+			default void onRemove(Entity entity) {}
+		}
+
+		interface OnRemove extends EntityListener {
+			@Override
+			default void onCreate(Entity entity) {}
+			@Override
+			default void onUpdate(Entity entity) {}
+		}
+	}
+
+	enum Scale {
+		Year, Month, Week, Day
 	}
 }

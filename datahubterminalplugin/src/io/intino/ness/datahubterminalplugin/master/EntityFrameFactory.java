@@ -6,12 +6,14 @@ import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.magritte.framework.Concept;
 import io.intino.magritte.framework.Node;
+import io.intino.ness.datahubterminalplugin.Formatters;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
+import static io.intino.ness.datahubterminalplugin.Formatters.firstUpperCase;
 import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
 
 public class EntityFrameFactory {
@@ -69,36 +71,55 @@ public class EntityFrameFactory {
 	private FrameBuilder frameOf(Entity entity) {
 		FrameBuilder builder = new FrameBuilder("entity", "class")
 				.add("package", workingPackage)
+				.add("datamart", datamart.name$())
 				.add("name", entity.core$().name())
 				.add("attribute", entity.core$().componentList().stream().filter(a -> a.is(EntityData.class)).map(a -> attrFrameOf(a, entity.core$())).toArray())
 				.add("expression", entity.core$().componentList().stream().filter(a -> a.is(Expression.class)).map(ExpressionHelper::exprFrameOf).toArray());
 		if (!datamart.structList().isEmpty()) builder.add("hasStructs", new FrameBuilder().add("package", workingPackage));
 		final Parameter parent = parameter(entity.core$(), "entity");
-		builder.add("parent", parent != null ? ((Entity) parent.values().get(0)).name$() : "io.intino.ness.master.model.Entity");
+		builder.add("parent", parent != null ? withFullPackage(((Entity) parent.values().get(0)).name$()) : baseEntityName());
 		builder.add("normalizeId", new FrameBuilder("normalizeId", (entity.isAbstract() || entity.isDecorable()) ? "abstract" : "").add("package", workingPackage).add("name", entity.name$()).toFrame());
 		if (entity.isDecorable() || entity.isAbstract()) builder.add("isAbstract", "abstract");
 		if (entity.isDecorable()) builder.add("abstract", "abstract");
 		return builder;
 	}
 
+	private String withFullPackage(String parent) {
+		return workingPackage + ".entities." + parent;
+	}
+
+	private String baseEntityName() {
+		return workingPackage + "." + firstUpperCase(datamart.name$()) + "Entity";
+	}
+
 	private Frame attrFrameOf(Node node, Node owner) {
 		FrameBuilder builder = new FrameBuilder().add("attribute");
 		node.conceptList().forEach(aspect -> builder.add(aspect.name()));
-		String type = typeOf(node);
 
-		builder.add("name", node.name())
-				.add("owner", node.owner().name())
-				.add("type", type)
-				.add("package", workingPackage)
-				.add("index", node.owner().componentList().indexOf(node))
-				.add("entityOwner", owner.name());
+		EntityData attr = node.as(EntityData.class);
+		String type = typeOf(attr);
 
 		if(owner.is(Entity.Abstract.class) || owner.is(Entity.Decorable.class))
 			builder.add("castToSubclass", "(" + owner.name() + ")");
 
-		if(type.contains("List<") || type.contains("Set<")) {
-			builder.add("typeParameter", typeParameterOf(type));
-		} // TODO: for maps
+		if(attr.isList() || attr.isSet()) {
+			String collectionType = attr.isList() ? "List" : "Set";
+			builder.add("type", collectionType + "<" + type + ">");
+			builder.add("typeParameter", type);
+			builder.add("collectionType", collectionType);
+		} else if(attr.isMap()) {
+			builder.add("type", "Map<String, String>");
+			builder.add("typeParameter", "java.lang.String");
+			builder.add("collectionType", "Map");
+		} else {
+			builder.add("type", type);
+		}
+
+		builder.add("name", node.name())
+				.add("owner", node.owner().name())
+				.add("package", workingPackage)
+				.add("index", node.owner().componentList().indexOf(node))
+				.add("entityOwner", owner.name());
 
 		processParameters(node, builder, type);
 
@@ -111,6 +132,7 @@ public class EntityFrameFactory {
 
 		Parameter defaultValue = DefaultValueHelper.getDefaultValue(node);
 		if (defaultValue != null) builder.add("defaultValue", defaultValue(node, type, defaultValue));
+		else builder.add("defaultValue", "null");
 
 		Parameter format = parameter(node, "format");
 		if (format != null) builder.add("format", format.values().get(0));
@@ -167,19 +189,26 @@ public class EntityFrameFactory {
 		return type.substring(type.indexOf("<") + 1, type.lastIndexOf(">"));
 	}
 
-	public static String typeOf(Node node) {
-		String aspect = node.conceptList().stream().map(Concept::name).filter(EntityFrameFactory::isProperTypeName).findFirst().orElse("");
+	private String typeOfWithCollections(EntityData node) {
+		if(node.isList()) return "List";
+		if(node.isSet()) return "Set";
+		if(node.isMap()) return "Map";
+		return typeOf(node);
+	}
 
-		boolean list = node.conceptList().stream().anyMatch(a -> a.name().equals("List"));
-		if (list) return ListTypes.getOrDefault(aspect, "List<" + firstUpperCase().format(node.name()).toString() + ">");
-
-		boolean set = node.conceptList().stream().anyMatch(a -> a.name().equals("Set"));
-		if (set) return SetTypes.getOrDefault(aspect, "Set<" + firstUpperCase().format(node.name()).toString() + ">");
-
-		boolean map = node.conceptList().stream().anyMatch(a -> a.name().equals("Map"));
-		if (map) return "Map<String, String>";
-
-		return TheTypes.getOrDefault(aspect, firstUpperCase().format(node.name()).toString());
+	private String typeOf(EntityData node) {
+		if(node.isDouble()) return "Double";
+		if(node.isInteger()) return "Integer";
+		if(node.isLong()) return "Long";
+		if(node.isBoolean()) return "Boolean";
+		if(node.isString()) return "String";
+		if(node.isDate()) return "LocalDate";
+		if(node.isDateTime()) return "LocalDateTime";
+		if(node.isInstant()) return "Instant";
+		if(node.isWord()) return node.asWord().name$();
+		if(node.isStruct()) return node.asStruct().struct().name$();
+		if(node.isEntity()) return node.asEntity().entity().name$();
+		throw new RuntimeException("Unknown type of " + node.name$());
 	}
 
 	public static boolean isProperTypeName(String s) {
@@ -191,8 +220,8 @@ public class EntityFrameFactory {
 		return values == null ? null : Parameter.of(values);
 	}
 
-	private String calculateEntityPath(Entity entity, String aPackage) {
-		return aPackage + DOT + "entities" + DOT
+	private String calculateEntityPath(Entity entity, String thePackage) {
+		return thePackage + DOT + "entities" + DOT
 				+ (entity.isDecorable() ? "Abstract" : "")
 				+ firstUpperCase().format(javaValidName().format(entity.core$().name()).toString());
 	}

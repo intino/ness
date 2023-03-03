@@ -7,14 +7,13 @@ import io.intino.itrules.FrameBuilder;
 import io.intino.magritte.framework.Concept;
 import io.intino.magritte.framework.Node;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
 import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
 
-// TODO
+// TODO: parse attributes from parent entities and implicit attributes from event T.T
 public class EntityMounterFrameFactory {
 	private static final String DOT = ".";
 
@@ -60,19 +59,17 @@ public class EntityMounterFrameFactory {
 	}
 
 	public Map<String, Frame> create(Entity entity) {
-		Map<String, Frame> map = new HashMap<>(4);
-		map.put(calculateEntityPath(entity, workingPackage), frameOf(entity).toFrame());
-		if (entity.isDecorable())
-			map.put(calculateDecorableEntityPath(entity.core$(), workingPackage), frameOf(entity).add("decorable").toFrame());
-		return map;
+		if(entity.isAbstract()) return new HashMap<>(0);
+		return Map.of(getMounterPath(entity, workingPackage), frameOf(entity).toFrame());
 	}
 
 	private FrameBuilder frameOf(Entity entity) {
-		FrameBuilder builder = new FrameBuilder("entity", "class")
+		FrameBuilder builder = new FrameBuilder("mounter")
+				.add("message")
 				.add("package", workingPackage)
+				.add("datamart", datamart.name$())
 				.add("name", entity.core$().name())
-				.add("attribute", entity.core$().componentList().stream().filter(a -> a.is(EntityData.class)).map(a -> attrFrameOf(a, entity.core$())).toArray())
-				.add("expression", entity.core$().componentList().stream().filter(a -> a.is(Expression.class)).map(ExpressionHelper::exprFrameOf).toArray());
+				.add("attribute", attributesOf(entity).toArray(Frame[]::new));
 		if (!datamart.structList().isEmpty()) builder.add("hasStructs", new FrameBuilder().add("package", workingPackage));
 		final Parameter parent = parameter(entity.core$(), "entity");
 		builder.add("parent", parent != null ? ((Entity) parent.values().get(0)).name$() : "io.intino.ness.master.model.Entity");
@@ -80,6 +77,73 @@ public class EntityMounterFrameFactory {
 		if (entity.isDecorable() || entity.isAbstract()) builder.add("isAbstract", "abstract");
 		if (entity.isDecorable()) builder.add("abstract", "abstract");
 		return builder;
+	}
+
+	private Collection<Frame> attributesOf(Entity entity) {
+		Map<String, FrameBuilder> attribs = new LinkedHashMap<>();
+		getAttributesFromEvent(entity, entity.from().message().attributeList(), attribs);
+		getAttributesFromParents(entity, attribs);
+		getAttributesFromEntity(entity.attributeList(), attribs);
+		return attribs.values().stream().map(FrameBuilder::toFrame).collect(Collectors.toList());
+	}
+
+	private void getAttributesFromEvent(Entity entity, List<Attribute> attributes, Map<String, FrameBuilder> map) {
+		for(Attribute attr : attributes) {
+			if(entity.exclude().contains(attr.name$())) continue;
+			FrameBuilder b = new FrameBuilder("attribute");
+			if(attr.isList()) b.add("list");
+			map.put(attr.name$(), b.add("name", attr.name$()).add("type", typeOf(attr)));
+		}
+	}
+
+	private void getAttributesFromParents(Entity entity, Map<String, FrameBuilder> map) {
+		if(!entity.isExtensionOf()) return;
+		List<Entity.Attribute> attributes = new ArrayList<>();
+		Entity parent = entity.asExtensionOf().entity();
+		while(parent != null) {
+			attributes.addAll(parent.attributeList());
+			parent = parent.isExtensionOf() ? parent.asExtensionOf().entity() : null;
+		}
+		Collections.reverse(attributes);
+		getAttributesFromEntity(attributes, map);
+	}
+
+	private void getAttributesFromEntity(List<Entity.Attribute> attributes, Map<String, FrameBuilder> map) {
+		for(Entity.Attribute attr : attributes) {
+			FrameBuilder b = new FrameBuilder("attribute");
+			if(attr.isList()) b.add("list");
+			if(attr.isSet()) b.add("set");
+			if(attr.isMap()) b.add("map");
+			if(attr.isEntity()) b.add("entity");
+			map.put(attr.name$(), b.add("name", attr.name$()).add("type", typeOf(attr)));
+		}
+	}
+
+	private String typeOf(EntityData node) {
+		if(node.isDouble()) return "Double";
+		if(node.isInteger()) return "Integer";
+		if(node.isLong()) return "Long";
+		if(node.isBoolean()) return "Boolean";
+		if(node.isString()) return "String";
+		if(node.isDate()) return "LocalDate";
+		if(node.isDateTime()) return "LocalDateTime";
+		if(node.isInstant()) return "Instant";
+		if(node.isWord()) return node.asWord().name$();
+		if(node.isStruct()) return node.asStruct().struct().name$();
+		if(node.isEntity()) return node.asEntity().entity().name$();
+		throw new RuntimeException("Unknown type of " + node.name$());
+	}
+
+	private String typeOf(Attribute node) {
+		if(node.isReal()) return "Double";
+		if(node.isInteger()) return "Integer";
+		if(node.isLongInteger()) return "Long";
+		if(node.isBool()) return "Boolean";
+		if(node.isText()) return "String";
+		if(node.isDate()) return "LocalDate";
+		if(node.isDateTime()) return "Instant";
+		if(node.isWord()) return node.asWord().name$();
+		throw new RuntimeException("Unknown type of " + node.name$());
 	}
 
 	private Frame attrFrameOf(Node node, Node owner) {
@@ -192,13 +256,7 @@ public class EntityMounterFrameFactory {
 		return values == null ? null : Parameter.of(values);
 	}
 
-	private String calculateEntityPath(Entity entity, String aPackage) {
-		return aPackage + DOT + "entities" + DOT
-				+ (entity.isDecorable() ? "Abstract" : "")
-				+ firstUpperCase().format(javaValidName().format(entity.core$().name()).toString());
-	}
-
-	private String calculateDecorableEntityPath(Node node, String aPackage) {
-		return aPackage + DOT + "entities" + DOT + firstUpperCase().format(javaValidName().format(node.name()).toString());
+	private String getMounterPath(Entity entity, String aPackage) {
+		return aPackage + DOT + "mounters" + DOT + firstUpperCase().format(javaValidName().format(entity.core$().name() + "Mounter").toString());
 	}
 }

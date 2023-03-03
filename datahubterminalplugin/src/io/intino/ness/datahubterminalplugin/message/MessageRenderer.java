@@ -8,9 +8,9 @@ import io.intino.ness.datahubterminalplugin.Commons;
 import io.intino.ness.datahubterminalplugin.Formatters;
 
 import java.io.File;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 
@@ -40,7 +40,7 @@ public class MessageRenderer {
 				add("name", event.name$()).add("package", packageName).
 				add("parent", parent(event));
 		if (event.isExtensionOf()) eventFrame.add("parentSuper", event.name$());
-		eventFrame.add("attribute", processAttributes(event.attributeList(), event.name$()));
+		eventFrame.add("attribute", processAttributesOf(attributesOf(event), event.name$()));
 		Map<Component, Boolean> components = collectComponents(event);
 		if (!components.isEmpty()) eventFrame.add("component", processComponents(components, event.name$()));
 		return eventFrame.toFrame();
@@ -57,10 +57,14 @@ public class MessageRenderer {
 		return EVENT;
 	}
 
-	private FrameBuilder[] processAttributes(List<Attribute> attributes, String owner) {
-		FrameBuilder[] frames = attributes.stream().map(this::process).toArray(FrameBuilder[]::new);
+	private FrameBuilder[] processAttributesOf(Stream<Attribute> attributes, String owner) {
+		FrameBuilder[] frames = attributes.map(this::process).toArray(FrameBuilder[]::new);
 		stream(frames).forEach(f -> f.add("owner", owner));
 		return frames;
+	}
+
+	private Stream<Attribute> attributesOf(Message message) {
+		return message.attributeList().stream(); // TODO: if message is an assertion, then add id and enable attributes (if not already defined)
 	}
 
 	private FrameBuilder[] processComponents(Map<Component, Boolean> components, String owner) {
@@ -72,7 +76,7 @@ public class MessageRenderer {
 				add("name", component.name$()).
 				add("type", component.name$()).
 				add("owner", owner).
-				add("attribute", processAttributes(component.attributeList(), component.name$()));
+				add("attribute", processAttributesOf(component.attributeList().stream(), component.name$()));
 		if (component.isExtensionOf()) builder.add("parent", component.asExtensionOf().parent().name$());
 		Map<Component, Boolean> components = collectComponents(component);
 		if (!components.isEmpty()) builder.add("component", processComponents(components, component.name$()));
