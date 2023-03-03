@@ -27,7 +27,7 @@ public interface AttributeDefinition {
 
 	interface ParameterDefinition {
 
-		Optional<ConceptDefinition> asConceptDefinition();
+		Optional<ConceptDefinition<?>> asConceptDefinition();
 
 		Class<?> javaClass();
 	}

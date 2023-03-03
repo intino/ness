@@ -27,7 +27,7 @@ public interface DatamartDefinition {
 		Year, Month, Week, Day
 	}
 
-	class Query<T extends ConceptDefinition> extends AbstractList<T> {
+	class Query<T extends ConceptDefinition<T>> extends AbstractList<T> {
 
 		private final List<T> source;
 

@@ -94,7 +94,10 @@ public abstract class $datamart+FirstUpperCase~Entity implements Entity {
 	}
 
 	protected Collection<Attribute> initDeclaredAttributes() {
-		return new ArrayList<>();
+		List<Attribute> attributes = new ArrayList<>();
+		attributes.add(attribute("id"));
+		attributes.add(attribute("enabled"));
+		return attributes;
 	}
 
 	private Map<String, Attribute> createAllAttributes() {

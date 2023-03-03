@@ -160,8 +160,8 @@ def type(datamart & message & impl)
 		private static DatamartDefinition initDatamartDefinition() {
 			return new DatamartDefinition() {
 
-				private final List<io.intino.ness.master.reflection.EntityDefinition> entities = initEntityDefinitions();
-				private final List<io.intino.ness.master.reflection.StructDefinition> structs = initStructDefinitions();
+				private final List<EntityDefinition> entities = initEntityDefinitions();
+				private final List<StructDefinition> structs = initStructDefinitions();
 
 				@Override
 				public String name() {
@@ -174,23 +174,23 @@ def type(datamart & message & impl)
 				}
 
 				@Override
-				public Query<io.intino.ness.master.reflection.EntityDefinition> entities() {
+				public Query<EntityDefinition> entities() {
 					return new Query<>(entities);
 				}
 
 				@Override
-				public Query<io.intino.ness.master.reflection.StructDefinition> structs() {
+				public Query<StructDefinition> structs() {
 					return new Query<>(structs);
 				}
 
-				private List<io.intino.ness.master.reflection.EntityDefinition> initEntityDefinitions() {
-					List<io.intino.ness.master.reflection.EntityDefinition> list = new ArrayList<>($numEntities);
+				private List<EntityDefinition> initEntityDefinitions() {
+					List<EntityDefinition> list = new ArrayList<>($numEntities);
 					[$entity+addDefinition...[$NL]]
 					return list;
 				}
 
-				private List<io.intino.ness.master.reflection.StructDefinition> initStructDefinitions() {
-					List<io.intino.ness.master.reflection.StructDefinition> list = new ArrayList<>($numStructs);
+				private List<StructDefinition> initStructDefinitions() {
+					List<StructDefinition> list = new ArrayList<>($numStructs);
 					[$struct+addDefinition...[$NL]]
 					return list;
 				}
@@ -201,6 +201,8 @@ end
 
 def type(entity) trigger(addDefinition)
 	list.add(new EntityDefinition() {
+
+		private final List<AttributeDefinition> declaredAttributes = initDeclaredAttributes();
 
 		@Override
 		public String fullName() {
@@ -214,22 +216,63 @@ def type(entity) trigger(addDefinition)
 
 		@Override
 		public List<AttributeDefinition> declaredAttributes() {
-			return null;
+			return declaredAttributes;
 		}
 
 		@Override
-		public Optional<ConceptDefinition> parent() {
-			return Optional.empty();
+		public Optional<EntityDefinition> parent() {
+			return $this+parentDef;
 		}
 
 		@Override
-		public List<ConceptDefinition> descendants() {
-			return null;
+		public List<EntityDefinition> descendants() {
+			return $this+descendants;
 		}
 
 		@Override
 		public Class<?> javaClass() {
-			return null;
+			return $name+FirstUpperCase.class;
+		}
+
+		private List<AttributeDefinition> initAttributeDefinitions() {
+			List<AttributeDefinition> list = new ArrayList<>($numAttributes);
+        	[$struct+addDefinition...[$NL]]
+        	return list;
+		}
+	});
+end
+
+def type(struct) trigger(addDefinition)
+	list.add(new StructDefinition() {
+
+		@Override
+		public String fullName() {
+			return "$fullName";
+		}
+
+		@Override
+		public String name() {
+			return "$name";
+		}
+
+		@Override
+		public List<AttributeDefinition> declaredAttributes() {
+			return declaredAttributes;
+		}
+
+		@Override
+		public Optional<StructDefinition> parent() {
+			return $struct+parentDef;
+		}
+
+		@Override
+		public List<StructDefinition> descendants() {
+			return $struct+descendants;
+		}
+
+		@Override
+		public Class<?> javaClass() {
+			return $name+FirstUpperCase.class;
 		}
 	});
 end

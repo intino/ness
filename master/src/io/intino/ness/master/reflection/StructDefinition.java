@@ -1,5 +1,5 @@
 package io.intino.ness.master.reflection;
 
-public interface StructDefinition extends ConceptDefinition {
+public interface StructDefinition extends ConceptDefinition<StructDefinition> {
 
 }

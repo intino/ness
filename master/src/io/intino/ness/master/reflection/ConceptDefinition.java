@@ -1,11 +1,11 @@
 package io.intino.ness.master.reflection;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public interface ConceptDefinition {
+public interface ConceptDefinition<T extends ConceptDefinition<T>> {
 
 	char NAME_SEPARATOR = '.';
 
@@ -18,9 +18,10 @@ public interface ConceptDefinition {
 	}
 
 	default List<AttributeDefinition> attributes() {
-		List<AttributeDefinition> attributes = parent().map(ConceptDefinition::attributes).orElse(new ArrayList<>());
-		attributes.addAll(declaredAttributes());
-		return attributes;
+		return Stream.of(
+				parent().map(ConceptDefinition::attributes).stream().flatMap(Collection::stream),
+				declaredAttributes().stream()
+		).flatMap(Function.identity()).collect(Collectors.toList());
 	}
 
 	List<AttributeDefinition> declaredAttributes();
@@ -33,11 +34,11 @@ public interface ConceptDefinition {
 		return declaredAttributes().stream().filter(attr -> attr.name().equals(name)).findFirst();
 	}
 
-	Optional<ConceptDefinition> parent();
+	Optional<T> parent();
 
-	default List<ConceptDefinition> ancestors() {
-		List<ConceptDefinition> ancestors = new ArrayList<>();
-		Optional<ConceptDefinition> parent = parent();
+	default List<T> ancestors() {
+		List<T> ancestors = new ArrayList<>();
+		Optional<T> parent = parent();
 		while(parent.isPresent()) {
 			ancestors.add(parent.get());
 			parent = parent.get().parent();
@@ -46,13 +47,13 @@ public interface ConceptDefinition {
 		return ancestors;
 	}
 
-	List<ConceptDefinition> descendants();
+	List<T> descendants();
 
-	default boolean isAncestorOf(ConceptDefinition other) {
+	default boolean isAncestorOf(T other) {
 		return ancestors().stream().anyMatch(a -> a.fullName().equals(other.fullName()));
 	}
 
-	default boolean isDescendantOf(ConceptDefinition other) {
+	default boolean isDescendantOf(T other) {
 		return descendants().stream().anyMatch(a -> a.fullName().equals(other.fullName()));
 	}
 
