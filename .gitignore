@@ -12,3 +12,4 @@ package-lock.json
 webpack.config.js
 gen
 *.stash
+.out/
