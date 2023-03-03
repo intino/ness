@@ -15,7 +15,7 @@ Datalake(scale = Day, path = "{datalake}") dl
 	Tank assetInfo as Message(it.Info)
 	Tank anomaly as Message(monitoring.AnomalyBundle)
 	Tank notification as Message(monitoring.Notification)
-	Tank btcTank as Measurement(Events.Btc)
+	Tank btcTank as Measurement(Events.market.Btc)
 
 //Terminal test-terminal
 //	Subscribe(dl.anomaly dl.assetInfo dl.assetStatus dl.mode)

@@ -160,6 +160,7 @@ Message Operation
 		Attribute type as Text
 		Attribute name as Text
 
-Measurement Btc
-	Value prize
-	Value volume
+Namespace market
+	Measurement Btc
+		Value prize
+		Value volume
