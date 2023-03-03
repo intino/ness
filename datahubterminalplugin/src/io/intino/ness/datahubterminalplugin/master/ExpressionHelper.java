@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
-import static io.intino.ness.datahubterminalplugin.master.EntityFrameCreator.*;
+import static io.intino.ness.datahubterminalplugin.master.EntityFrameFactory.*;
 
 public class ExpressionHelper {
 

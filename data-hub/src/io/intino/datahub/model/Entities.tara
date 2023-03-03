@@ -3,12 +3,13 @@ dsl Proteo
 use Model
 
 Concept:Named Entity is component
-	var Datalake.Tank.Message from // TODO: OR add rule mustBeAssertion
+	var Datalake.Tank.Message from = empty // TODO: OR add rule mustBeAssertion
 	var string[] exclude = empty
 	Concept:Named:RequiresAspect Attribute extends EntityData
 	Concept:Named:RequiresAspect Method extends Expression
 	Aspect ExtensionOf > var Entity entity
 	Aspect Abstract
+		var Datalake.Tank.Message from = empty is private final
 	Aspect Decorable
 	Aspect Component
 

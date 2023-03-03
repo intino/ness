@@ -37,7 +37,6 @@ class MeasurementEventSealer {
 				return new MeasurementEvent(e.type(), e.ss(), e.ts(), measurements, values);
 			}));
 		}
-
 	}
 
 	private static double[] values(Message message) {

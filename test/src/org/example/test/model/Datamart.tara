@@ -1,0 +1,34 @@
+dsl Ness
+
+use Datalake
+
+Datamart(scale = Day) master
+
+	Entity Area > from = dl.areaAssertion
+	Entity Host > from = dl.hostAssertion
+
+	Entity User > from = dl.userAssertion
+
+	Entity Team > from = dl.teamAssertion
+		Attribute users as Entity(User) List
+		Attribute channels as Entity(Channel) List
+
+	Entity Channel > from = dl.channelAssertion
+
+	Entity System as Abstract
+		Attribute container as Entity(System)
+		Attribute team as Entity(Team)
+		Attribute area as Entity(Area)
+		Attribute host as Entity(Host)
+
+	Entity Asset as ExtensionOf(System) > from = dl.assetAssertion
+		Attribute area as Entity(Area)
+		Attribute host as Entity(Host)
+
+	Entity AnomalyType > from = dl.anomalyTypeAssertion
+
+	Entity AnomalyRule > from = dl.anomalyRuleAssertion
+
+	Entity Service as Abstract ExtensionOf(System)
+	Entity RdbmsService as ExtensionOf(Service) > from = dl.rdbmsServiceAssertion
+	Entity ApplicationService as ExtensionOf(Service) > from = dl.applicationServiceAssertion

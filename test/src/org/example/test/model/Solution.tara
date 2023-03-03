@@ -1,31 +1,33 @@
 dsl Ness
 
-use Entities
-use Events
+use Datalake
 
 Broker(path = empty, port = 63000, secondaryPort = 1884)
 	User("trooper", "trooper")
 	User("consul", "consul")
 	User("connector", "connector")
+	User("master", "master")
 
-Datalake(scale = Day, path = "{datalake}") dl
-	Seal > Cron(pattern = "0 0 4 1/1 * ? *", timeZone = empty)
-	Tank mode as Message(it.Mode)
-	Tank assetStatus as Message(it.Status)
-	Tank assetInfo as Message(it.Info)
-	Tank anomaly as Message(monitoring.AnomalyBundle)
-	Tank notification as Message(monitoring.Notification)
-	Tank btcTank as Measurement(Events.Btc)
-
-//Terminal test-terminal
-//	Subscribe(dl.anomaly dl.assetInfo dl.assetStatus dl.mode)
-//	Publish(dl.notification)
+//Terminal trooper-terminal
+//	Subscribe(dl.anomaly dl.assetInfo dl.assetStatus dl.mode dl.userAssertion dl.assetAssertion dl.teamAssertion dl.channelAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion dl.areaAssertion dl.hostAssertion dl.anomalyTypeAssertion)
+//	Publish(dl.notification dl.assetAssertion)
 //
 //Terminal monitor-terminal
 //	Publish(dl.assetInfo dl.assetStatus dl.mode)
-//	Subscribe(dl.anomaly)
+//	Subscribe(empty)
+//
+//Terminal wizard-terminal
+//	Publish(dl.anomaly)
+//	Subscribe(dl.mode dl.assetInfo dl.assetStatus dl.assetAssertion dl.anomalyTypeAssertion dl.anomalyRuleAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion)
+//
+//Terminal connector-terminal
+//	Publish(dl.userAssertion dl.teamAssertion dl.channelAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion)
+//	Subscribe(dl.notification dl.userAssertion dl.teamAssertion dl.channelAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion)
+//
+//Terminal master-terminal
+//	Subscribe(dl.anomaly dl.assetInfo dl.assetStatus dl.mode dl.userAssertion dl.assetAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion dl.teamAssertion dl.channelAssertion dl.areaAssertion dl.hostAssertion dl.anomalyTypeAssertion)
+//	Publish(dl.anomaly dl.assetStatus dl.anomalyTypeAssertion dl.areaAssertion dl.assetAssertion dl.channelAssertion dl.hostAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion dl.teamAssertion dl.userAssertion)
 
-Terminal wizard-terminal
-	Publish(dl.anomaly, dl.btcTank)
-	Subscribe(dl.mode dl.assetInfo dl.assetStatus, dl.btcTank)
-//	Datamarts(d1 d2 d3...)
+Terminal test-terminal
+	Subscribe(dl.anomaly dl.assetInfo dl.assetStatus dl.mode dl.userAssertion dl.assetAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion dl.teamAssertion dl.channelAssertion dl.areaAssertion dl.hostAssertion dl.anomalyTypeAssertion)
+	Publish(dl.anomaly dl.assetStatus dl.anomalyTypeAssertion dl.areaAssertion dl.assetAssertion dl.channelAssertion dl.hostAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion dl.teamAssertion dl.userAssertion)

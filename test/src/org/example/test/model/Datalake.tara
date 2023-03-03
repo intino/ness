@@ -1,0 +1,23 @@
+dsl Ness
+
+use Events
+
+Datalake(scale = Day, path = "{datalake}") dl
+	Seal > Cron(pattern = "0 0 4 1/1 * ? *", timeZone = empty)
+
+	Tank mode as Message(it.Mode)
+	Tank assetStatus as Message(it.Status)
+	Tank assetInfo as Message(it.Info)
+	Tank anomaly as Message(monitoring.AnomalyBundle)
+	Tank notification as Message(monitoring.Notification)
+
+	Tank userAssertion as Message(assertions.UserAssertion)
+	Tank teamAssertion as Message(assertions.TeamAssertion)
+	Tank channelAssertion as Message(assertions.ChannelAssertion)
+	Tank areaAssertion as Message(assertions.AreaAssertion)
+	Tank hostAssertion as Message(assertions.HostAssertion)
+	Tank assetAssertion as Message(assertions.AssetAssertion)
+	Tank anomalyRuleAssertion as Message(assertions.AnomalyRuleAssertion)
+	Tank anomalyTypeAssertion as Message(assertions.AnomalyTypeAssertion)
+	Tank rdbmsServiceAssertion as Message(assertions.RdbmsServiceAssertion)
+	Tank applicationServiceAssertion as Message(assertions.ApplicationServiceAssertion)

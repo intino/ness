@@ -194,6 +194,10 @@ def type(datamart & message & impl)
 					[$struct+addDefinition...[$NL]]
 					return list;
 				}
+
+				private DatamartDefinition datamart() {
+					return this;
+				}
 			};
 		}
     }
@@ -236,7 +240,7 @@ def type(entity) trigger(addDefinition)
 
 		private List<AttributeDefinition> initAttributeDefinitions() {
 			List<AttributeDefinition> list = new ArrayList<>($numAttributes);
-        	[$struct+addDefinition...[$NL]]
+        	[$attribute+addDefinition...[$NL]]
         	return list;
 		}
 	});
@@ -244,6 +248,8 @@ end
 
 def type(struct) trigger(addDefinition)
 	list.add(new StructDefinition() {
+
+		private final List<AttributeDefinition> declaredAttributes = initDeclaredAttributes();
 
 		@Override
 		public String fullName() {
@@ -262,17 +268,65 @@ def type(struct) trigger(addDefinition)
 
 		@Override
 		public Optional<StructDefinition> parent() {
-			return $struct+parentDef;
+			return $this+parentDef;
 		}
 
 		@Override
 		public List<StructDefinition> descendants() {
-			return $struct+descendants;
+			return $this+descendants;
 		}
 
 		@Override
 		public Class<?> javaClass() {
 			return $name+FirstUpperCase.class;
+		}
+
+		private List<AttributeDefinition> initAttributeDefinitions() {
+			List<AttributeDefinition> list = new ArrayList<>($numAttributes);
+        	[$attribute+addDefinition...[$NL]]
+        	return list;
+		}
+	});
+end
+
+def type(attribute) type(collection) trigger(addDefinition)
+	list.add(new AttributeDefinition() {
+		@Override
+		public String name() {
+			return "$name";
+		}
+
+		@Override
+		public Class<?> type() {
+			return $type;
+		}
+
+		@Override
+		public List<ParameterDefinition> parameters() {
+			return List.of(new ParameterDefinition() {
+				@Override
+				public Optional<ConceptDefinition<?>> asConceptDefinition() {
+					return $parameterType instanceOf Concept ? datamart().concept("$parameterType") : Optional.empty();
+				}
+				@Override
+				public Class<?> javaClass() {
+					return $parameterType;
+				}
+			});
+		}
+	});
+end
+
+def type(attribute) trigger(addDefinition)
+	list.add(new AttributeDefinition() {
+		@Override
+		public String name() {
+			return "$name";
+		}
+
+		@Override
+		public Class<?> type() {
+			return $type;
 		}
 	});
 end

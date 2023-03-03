@@ -1,13 +1,9 @@
-def type(node & hashmap)
+def type(node & memorymap)
 	package $package.nodes;
 
-	import java.util.Arrays;
-    import java.util.List;
     import java.util.Map;
     import java.util.HashMap;
-    import java.util.UUID;
     import java.util.stream.Stream;
-    import java.util.stream.Collectors;
     import $package.entities.$entity;
 
     public class MemoryMapNode<T extends $datamart~Entity> implements DatamartNode<T> {

@@ -14,15 +14,16 @@ import java.util.Map;
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
 import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
 
-public class EntityFrameCreator {
+// TODO
+public class EntityMounterFrameFactory {
 	private static final String DOT = ".";
+
 	static final Map<String, String> TheTypes = Map.of(
 			"String", "String",
 			"Double", "double",
 			"Integer", "int",
 			"Long", "long",
 			"Boolean", "boolean",
-			"Entity", "io.intino.ness.master.model.Entity",
 			"Date", "LocalDate",
 			"DateTime", "LocalDateTime",
 			"Instant", "Instant"
@@ -33,7 +34,6 @@ public class EntityFrameCreator {
 			"Double", "List<Double>",
 			"Integer", "List<Integer>",
 			"Boolean", "List<Boolean>",
-			"Entity", "List<io.intino.ness.master.model.Entity>",
 			"Long", "List<Long>",
 			"Date", "List<LocalDate>",
 			"DateTime", "List<LocalDateTime>",
@@ -45,7 +45,6 @@ public class EntityFrameCreator {
 			"Double", "Set<Double>",
 			"Integer", "Set<Integer>",
 			"Boolean", "Set<Boolean>",
-			"Entity", "Set<io.intino.ness.master.model.Entity>",
 			"Long", "Set<Long>",
 			"Date", "Set<LocalDate>",
 			"DateTime", "Set<LocalDateTime>",
@@ -53,11 +52,11 @@ public class EntityFrameCreator {
 	);
 
 	private final String workingPackage;
-	private final NessGraph model;
+	private final Datamart datamart;
 
-	public EntityFrameCreator(String workingPackage, NessGraph model) {
+	public EntityMounterFrameFactory(String workingPackage, Datamart datamart) {
 		this.workingPackage = workingPackage;
-		this.model = model;
+		this.datamart = datamart;
 	}
 
 	public Map<String, Frame> create(Entity entity) {
@@ -74,7 +73,7 @@ public class EntityFrameCreator {
 				.add("name", entity.core$().name())
 				.add("attribute", entity.core$().componentList().stream().filter(a -> a.is(EntityData.class)).map(a -> attrFrameOf(a, entity.core$())).toArray())
 				.add("expression", entity.core$().componentList().stream().filter(a -> a.is(Expression.class)).map(ExpressionHelper::exprFrameOf).toArray());
-		if (!model.structList().isEmpty()) builder.add("hasStructs", new FrameBuilder().add("package", workingPackage));
+		if (!datamart.structList().isEmpty()) builder.add("hasStructs", new FrameBuilder().add("package", workingPackage));
 		final Parameter parent = parameter(entity.core$(), "entity");
 		builder.add("parent", parent != null ? ((Entity) parent.values().get(0)).name$() : "io.intino.ness.master.model.Entity");
 		builder.add("normalizeId", new FrameBuilder("normalizeId", (entity.isAbstract() || entity.isDecorable()) ? "abstract" : "").add("package", workingPackage).add("name", entity.name$()).toFrame());
@@ -122,7 +121,7 @@ public class EntityFrameCreator {
 		if (entity != null) {
 			String name = ((Entity) entity.values().get(0)).name$(); // TODO: check
 			builder.add("entity", name);
-			Entity reference = model.entityList().stream().filter(e -> e.name$().equals(name)).findFirst().orElse(null);
+			Entity reference = datamart.entityList().stream().filter(e -> e.name$().equals(name)).findFirst().orElse(null);
 			if (reference != null && reference.core$().conceptList().stream().anyMatch(c -> c.name().equals("Component"))) {
 				builder.add("component");
 			}
@@ -170,7 +169,7 @@ public class EntityFrameCreator {
 	}
 
 	public static String typeOf(Node node) {
-		String aspect = node.conceptList().stream().map(Concept::name).filter(EntityFrameCreator::isProperTypeName).findFirst().orElse("");
+		String aspect = node.conceptList().stream().map(Concept::name).filter(EntityMounterFrameFactory::isProperTypeName).findFirst().orElse("");
 
 		boolean list = node.conceptList().stream().anyMatch(a -> a.name().equals("List"));
 		if (list) return ListTypes.getOrDefault(aspect, "List<" + firstUpperCase().format(node.name()).toString() + ">");

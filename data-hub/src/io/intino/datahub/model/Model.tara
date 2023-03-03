@@ -48,6 +48,7 @@ Concept:{0..1} Datalake
 Concept:Named Datamart
 	var word:SnapshotScale scale
 	has Entity
+	has Struct
 
 Concept:Named Terminal
 	Concept:{0..1} Bpm
@@ -73,6 +74,7 @@ Concept:AvoidEventAttributes Message
 		var Component element
 		var boolean multiple = true
 	Aspect ExtensionOf > var Message parent
+	Aspect Assertion
 
 Concept Component
 	var boolean multiple = true

@@ -1,7 +1,6 @@
 package io.intino.ness.datahubterminalplugin.master;
 
 
-import io.intino.datahub.model.EntityData;
 import io.intino.datahub.model.Struct;
 import io.intino.datahub.model.Struct.Attribute;
 import io.intino.itrules.Frame;
@@ -9,25 +8,27 @@ import io.intino.itrules.FrameBuilder;
 import io.intino.magritte.framework.Layer;
 import io.intino.magritte.framework.Predicate;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
 import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
 
-public class StructFrameCreator {
+public class StructFrameFactory {
 	private static final String DOT = ".";
 	private static final Map<String, String> types = Map.of(
 			"String", "String",
 			"Double", "double",
 			"Integer", "int",
 			"Boolean", "boolean",
-			"Entity", "io.intino.ness.master.model.Entity",
 			"Long", "long"
 	);
 
 	private final String workingPackage;
 
-	public StructFrameCreator(String workingPackage) {
+	public StructFrameFactory(String workingPackage) {
 		this.workingPackage = workingPackage;
 	}
 
@@ -77,7 +78,7 @@ public class StructFrameCreator {
 	}
 
 	private static String getType(Attribute attribute) {
-		Optional<String> type = attribute.core$().layerList().stream().filter(StructFrameCreator::isStructData).findFirst();
+		Optional<String> type = attribute.core$().layerList().stream().filter(StructFrameFactory::isStructData).findFirst();
 		if(type.isEmpty()) throw new IllegalStateException("Cannot find type of attribute " + attribute + " in " + attribute.core$().owner().name());
 		return type.get().substring(type.get().indexOf("$") + 1);
 	}
@@ -86,7 +87,7 @@ public class StructFrameCreator {
 		return layer.startsWith("StructData$") && !layer.equals("StructData$Type");
 	}
 
-	private String calculateStructPath(Struct struct, String aPackage) {
-		return aPackage + DOT + "structs" + DOT + firstUpperCase().format(javaValidName().format(struct.name$()).toString());
+	private String calculateStructPath(Struct struct, String thePackage) {
+		return thePackage + DOT + "structs" + DOT + firstUpperCase().format(javaValidName().format(struct.name$()).toString());
 	}
 }
