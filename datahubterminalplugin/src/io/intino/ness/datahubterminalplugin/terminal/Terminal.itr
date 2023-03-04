@@ -95,7 +95,7 @@ def type(terminal)
 				ActiveMQTextMessage m = new ActiveMQTextMessage();
 				io.intino.alexandria.message.Message message = new io.intino.alexandria.message.Message(type);
 				attributes.forEach(message::set);
-				m.setText(new MessageEvent(message).ts(java.time.Instant.now()).toString());
+				m.setText(message.toString());
 				return m;
 			} catch(Exception e) {
 				throw new RuntimeException(e);
