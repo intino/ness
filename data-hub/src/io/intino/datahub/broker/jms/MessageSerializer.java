@@ -1,4 +1,4 @@
-package io.intino.datahub.broker.jms;
+	package io.intino.datahub.broker.jms;
 
 import io.intino.alexandria.Fingerprint;
 import io.intino.alexandria.Scale;
@@ -8,6 +8,9 @@ import io.intino.alexandria.event.Event.Format;
 import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
+import io.intino.datahub.datamart.MasterDatamart;
+import io.intino.datahub.datamart.MasterDatamartRepository;
+import io.intino.datahub.datamart.messages.MasterDatamartMessageMounter;
 import io.intino.datahub.model.Datalake;
 
 import java.io.File;
@@ -24,23 +27,40 @@ import static java.nio.file.StandardOpenOption.CREATE;
 import static java.time.LocalDateTime.ofInstant;
 import static java.time.ZoneOffset.UTC;
 
+@SuppressWarnings("unchecked")
 class MessageSerializer {
 	private final File stage;
 	private final Datalake.Tank tank;
 	private final Scale scale;
+	private final MasterDatamartMessageMounter[] mounters;
 
-	MessageSerializer(File stage, Datalake.Tank tank, Scale scale) {
+	MessageSerializer(File stage, Datalake.Tank tank, Scale scale, MasterDatamartRepository datamarts) {
 		this.stage = stage;
 		this.tank = tank;
 		this.scale = scale;
+		this.mounters = createMountersFor(tank, datamarts);
 	}
 
 	Consumer<javax.jms.Message> create() {
-		return message -> save(MessageTranslator.toInlMessages(message));
+		return message -> consume(MessageTranslator.toInlMessages(message));
 	}
 
-	private void save(Iterator<Message> messages) {
-		messages.forEachRemaining(m -> write(destination(m).toPath(), m));
+	private void consume(Iterator<Message> messages) {
+		while(messages.hasNext()) {
+			Message message = messages.next();
+			save(message);
+			mount(message);
+		}
+	}
+
+	private void mount(Message message) {
+		for(MasterDatamartMessageMounter mounter : mounters) {
+			mounter.mount(message);
+		}
+	}
+
+	private void save(Message message) {
+		write(destination(message).toPath(), message);
 	}
 
 	private File destination(Message message) {
@@ -59,5 +79,13 @@ class MessageSerializer {
 
 	private Timetag timetag(MessageEvent event) {
 		return of(ofInstant(event.ts(), UTC), scale);
+	}
+
+	private static MasterDatamartMessageMounter[] createMountersFor(Datalake.Tank tank, MasterDatamartRepository datamartsRepo) {
+		return datamartsRepo.datamarts().stream()
+				.filter(d -> d.elementType().equals(Message.class))
+				.filter(d -> d.subscribedEvents().contains(tank.asMessage().message().name$()))
+				.map(d -> new MasterDatamartMessageMounter((MasterDatamart<Message>) d))
+				.toArray(MasterDatamartMessageMounter[]::new);
 	}
 }

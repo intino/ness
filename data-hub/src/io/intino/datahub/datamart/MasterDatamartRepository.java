@@ -1,4 +1,4 @@
-package io.intino.datahub.master;
+package io.intino.datahub.datamart;
 
 import java.io.File;
 import java.util.Collection;

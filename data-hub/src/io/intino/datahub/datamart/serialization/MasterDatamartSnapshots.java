@@ -1,10 +1,11 @@
-package io.intino.datahub.master.serialization;
+package io.intino.datahub.datamart.serialization;
 
 import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.logger.Logger;
-import io.intino.datahub.master.MasterDatamart;
-import io.intino.datahub.master.MasterDatamart.Snapshot;
+import io.intino.datahub.datamart.MasterDatamart;
+import io.intino.datahub.datamart.MasterDatamart.Snapshot;
+import io.intino.datahub.model.NessGraph;
 
 import java.io.*;
 import java.time.LocalDate;
@@ -18,7 +19,7 @@ import static java.util.Collections.reverseOrder;
 
 public class MasterDatamartSnapshots {
 
-	public static void save(File datamartsRoot, Timetag timetag, MasterDatamart<?> datamart) throws IOException {
+	public static void saveSnapshot(File datamartsRoot, Timetag timetag, MasterDatamart<?> datamart) throws IOException {
 		File file = snapshotDirOf(datamartsRoot, datamart.name() + "/" + timetag.value() + ".datamart.snapshot");
 		file.getParentFile().mkdirs();
 		MasterDatamartSerializer.serialize(datamart, new FileOutputStream(file));
@@ -30,17 +31,17 @@ public class MasterDatamartSnapshots {
 				.collect(Collectors.toList());
 	}
 
-	public static <T> Optional<Snapshot<T>> loadMostRecentSnapshot(File datamartsRoot, String datamartName) {
-		return loadMostRecentSnapshotTo(datamartsRoot, datamartName, Timetag.of(LocalDate.now(), Scale.Day));
+	public static <T> Optional<Snapshot<T>> loadMostRecentSnapshot(File datamartsRoot, String datamartName, NessGraph graph) {
+		return loadMostRecentSnapshotTo(datamartsRoot, datamartName, Timetag.of(LocalDate.now(), Scale.Day), graph);
 	}
 
-	public static <T> Optional<Snapshot<T>> loadMostRecentSnapshotTo(File datamartsRoot, String datamartName, Timetag timetag) {
-		return findSnapshotFileOf(snapshotDirOf(datamartsRoot, datamartName), timetag).map(MasterDatamartSnapshots::deserialize);
+	public static <T> Optional<Snapshot<T>> loadMostRecentSnapshotTo(File datamartsRoot, String datamartName, Timetag timetag, NessGraph graph) {
+		return findSnapshotFileOf(snapshotDirOf(datamartsRoot, datamartName), timetag).map(f -> deserialize(f, graph));
 	}
 
-	private static <T> Snapshot<T> deserialize(File file) {
+	private static <T> Snapshot<T> deserialize(File file, NessGraph graph) {
 		try {
-			MasterDatamart<T> datamart = MasterDatamartSerializer.deserialize(new BufferedReader(new FileReader(file)));
+			MasterDatamart<T> datamart = MasterDatamartSerializer.deserialize(new BufferedReader(new FileReader(file)), graph);
 			return new Snapshot<>(timetagOf(file), datamart);
 		} catch (IOException e) {
 			Logger.error("Failed to deserialize datamart snapshot " + file.getName() + ": " + e.getMessage(), e);

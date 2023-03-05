@@ -1,20 +1,15 @@
-package io.intino.datahub.master;
+package io.intino.datahub.datamart;
 
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.model.rules.SnapshotScale;
 
 import java.time.DayOfWeek;
+import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
 public interface MasterDatamart<T> {
-
-	//TODO: el historico (en cliente) se hace como un stream de (instant, entity), en el que cada entrada
-	// representara un instante en el que se modifico esa entidad, y la entidad en ese momento
-	// Esto require un reflow completo
-	// Tambien se podria pedir un historico en un punto determinado del tiempo
-	// en este ultimo, se puede tirar de snapshot tambien
 
 	String name();
 
@@ -37,6 +32,8 @@ public interface MasterDatamart<T> {
 	Map<String, T> toMap();
 
 	Class<T> elementType();
+
+	Collection<String> subscribedEvents();
 
 	class Snapshot<T> {
 

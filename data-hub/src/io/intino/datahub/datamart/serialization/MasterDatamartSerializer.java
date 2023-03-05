@@ -1,12 +1,13 @@
-package io.intino.datahub.master.serialization;
+package io.intino.datahub.datamart.serialization;
 
 import io.intino.alexandria.Json;
 import io.intino.alexandria.message.Message;
 import io.intino.alexandria.zim.ZimWriter;
-import io.intino.datahub.master.MasterDatamart;
-import io.intino.datahub.master.datamarts.messages.MapMessageMasterDatamart;
+import io.intino.datahub.datamart.MasterDatamart;
+import io.intino.datahub.datamart.messages.MapMessageMasterDatamart;
+import io.intino.datahub.model.Datamart;
+import io.intino.datahub.model.NessGraph;
 
-import javax.jms.BytesMessage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Reader;
@@ -33,11 +34,17 @@ public class MasterDatamartSerializer {
 		}
 	}
 
-	public static <T> MasterDatamart<T> deserialize(Reader reader) throws IOException {
+	public static <T> MasterDatamart<T> deserialize(Reader reader, NessGraph graph) throws IOException {
 		try(reader) {
-			SerializedDatamart serializedDatamart = Json.fromJson(reader, SerializedDatamart.class);
-			return (MasterDatamart<T>) new MapMessageMasterDatamart(serializedDatamart.name, serializedDatamart.data);
+			SerializedDatamart sd = Json.fromJson(reader, SerializedDatamart.class);
+			return (MasterDatamart<T>) new MapMessageMasterDatamart(definitionOf(sd.name, graph), sd.data);
 		}
+	}
+
+	private static Datamart definitionOf(String name, NessGraph graph) {
+		return graph.datamartList().stream()
+				.filter(d -> d.name$().equals(name))
+				.findFirst().orElseThrow(() -> new IllegalArgumentException("No datamart named " + name + " defined"));
 	}
 
 	private static class SerializedDatamart implements Serializable {
