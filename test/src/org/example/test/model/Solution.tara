@@ -1,6 +1,7 @@
 dsl Ness
 
 use Datalake
+use Datamart
 
 Broker(path = empty, port = 63000, secondaryPort = 1884)
 	User("trooper", "trooper")
@@ -31,3 +32,4 @@ Broker(path = empty, port = 63000, secondaryPort = 1884)
 Terminal test-terminal
 	Subscribe(dl.anomaly dl.assetInfo dl.assetStatus dl.mode dl.userAssertion dl.assetAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion dl.teamAssertion dl.channelAssertion dl.areaAssertion dl.hostAssertion dl.anomalyTypeAssertion)
 	Publish(dl.anomaly dl.assetStatus dl.anomalyTypeAssertion dl.areaAssertion dl.assetAssertion dl.channelAssertion dl.hostAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion dl.teamAssertion dl.userAssertion)
+	Datamarts(master)

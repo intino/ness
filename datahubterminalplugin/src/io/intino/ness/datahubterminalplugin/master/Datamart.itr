@@ -15,7 +15,7 @@ def type(datamart & interface)
 
 	public interface $name+FirstUpperCase~Datamart extends Datamart {
 
-		$name+FirstUpperCase~DatamartImpl.$name+FirstUpperCase~DatamartDefinition definition = new $name+FirstUpperCase~DatamartImpl.$name+FirstUpperCase~DatamartDefinition();
+		DatamartDefinition definition = new $name+FirstUpperCase~DatamartImpl.$name+FirstUpperCase~DatamartDefinition();
 
 		List<Timetag> listSnapshots();
 
@@ -105,6 +105,7 @@ def type(datamart & message & impl)
 	public class $name+FirstUpperCase~DatamartImpl implements $name+FirstUpperCase~Datamart {
 
 		private static final String DATAHUB_MESSAGE_TOPIC = "service.ness.datalake.messagestore";
+		private static final $name+FirstUpperCase~DatamartImpl.$name+FirstUpperCase~DatamartDefinition definition = ($name+FirstUpperCase~DatamartImpl.$name+FirstUpperCase~DatamartDefinition) $name+FirstUpperCase~Datamart.definition;
 
 		private final Connector connector;
 		private final AtomicBoolean initialized = new AtomicBoolean(false);

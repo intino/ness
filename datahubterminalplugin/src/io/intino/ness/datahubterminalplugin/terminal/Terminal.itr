@@ -29,17 +29,18 @@ def type(terminal)
 
 		private final io.intino.alexandria.terminal.Connector connector;
 		private final java.util.Map<java.util.function.BiConsumer<?, String>, List<java.util.function.Consumer<io.intino.alexandria.event.Event>>> consumers = new java.util.HashMap<>();
-		[$entities+declaration]
+		[$datamart+declaration...[$NL]]
 
 		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector) {
 			this.connector = connector;
+			[$datamart+instantiate...[$NL]]
 		}
 
 		public void publish(Object event) {
 			$publish+if...[$NL]
 		}
 
-		[$entities+getter]
+		[$datamart+getter...[$NL]]
 
 		public io.intino.alexandria.datalake.Datalake datalake() {
 			try {
@@ -197,42 +198,17 @@ def type(terminal)
 	}
 end
 
-def type(entities) trigger(import)
-	import $package+validPackage~.master.Entities;
+def type(datamart) trigger(declaration)
+	private final $package.$name+FirstUpperCase~DatamartImpl $name+firstLowerCase~Datamart;
 end
 
-def type(entities) trigger(declaration)
-	private volatile Entities entities;
+def type(datamart) trigger(instantiate)
+	this.$name+firstLowerCase~Datamart = new $package.$name+FirstUpperCase~DatamartImpl(connector);
 end
 
-def type(entities) trigger(getter)
-	public Entities entities() {
-		return entities != null ? entities : initEntities();
-	}
-
-	private synchronized Entities initEntities() {
-		CachedEntities entities = new CachedEntities(connector);
-		setSingletonInstance(entities);
-		entities.init();
-		this.entities = entities;
-		return entities;
-	}
-
-	private void setSingletonInstance(Entities entities) {
-		try {
-			Entities.Singleton singleton = getEntitiesSingleton();
-        	Method method = Entities.Singleton.class.getDeclaredMethod("set", Entities.class);
-        	method.setAccessible(true);
-        	method.invoke(singleton, entities);
-        	method.setAccessible(false);
-		} catch(Exception e) {
-			throw new RuntimeException("Failed to initialize Entities singleton: " + e.getMessage(), e);
-		}
-	}
-
-	private Entities.Singleton getEntitiesSingleton() throws Exception {
-		Field field = Entities.class.getField("Instance");
-		return (Entities.Singleton) field.get(null);
+def type(datamart) trigger(getter)
+	public $package.$name+FirstUpperCase~Datamart $name+firstLowerCase~Datamart() {
+		return $name+firstLowerCase~Datamart.init();
 	}
 end
 

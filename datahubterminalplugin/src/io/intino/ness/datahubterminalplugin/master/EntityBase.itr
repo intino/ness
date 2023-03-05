@@ -89,16 +89,14 @@ def type(entity & base)
 
 		protected Collection<Attribute> initDeclaredAttributes() {
 			List<Attribute> attributes = new ArrayList<>();
-			attributes.add(attribute("id"));
-			attributes.add(attribute("enabled"));
+			attributes.add(new Attribute("id", id));
+			attributes.add(new Attribute("enabled", true));
 			return attributes;
 		}
 
 		private Map<String, Attribute> createAllAttributes() {
 			Collection<Attribute> declaredAttribs = initDeclaredAttributes();
 			Map<String, Attribute> attributes = new java.util.LinkedHashMap<>(2 + declaredAttribs.size());
-			attributes.put("id", new Attribute("id", id));
-	        attributes.put("enabled", new Attribute("enabled", true));
 	        declaredAttribs.forEach(attr -> attributes.put(attr.name(), attr));
 	        return attributes;
 		}

@@ -59,6 +59,8 @@ Concept:Named Terminal
 	Concept:{0..1} Subscribe
 		var Datalake.Tank.Message[] messageTanks
 		var Datalake.Tank.Measurement[] measurementTanks = empty
+	Concept:{0..1} Datamarts
+		var Datamart[] datamartNames
 
 Concept Namespace
 	var string qn = @qn is private reactive

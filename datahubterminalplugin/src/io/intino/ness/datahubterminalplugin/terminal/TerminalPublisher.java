@@ -83,9 +83,7 @@ public class TerminalPublisher {
 		File srcDirectory = new File(root, "src");
 		srcDirectory.mkdirs();
 		if (duplicatedEvents()) return false;
-//		if (!terminal.graph().entityList().isEmpty())
-//			new MasterRenderer(srcDirectory, terminal.graph(), conf, logger, notifier, basePackage).renderTerminal(terminal);
-		new TerminalRenderer(terminal, srcDirectory, basePackage, conf.artifact().code().generationPackage()).render();
+		new TerminalRenderer(terminal, srcDirectory, basePackage, conf.artifact().groupId().toLowerCase() + "." + Formatters.snakeCaseToCamelCase().format(conf.artifact().name()).toString().toLowerCase()).render();
 		File resDirectory = new File(root, "res");
 		resDirectory.mkdirs();
 		writeManifest(resDirectory);

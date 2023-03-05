@@ -13,20 +13,19 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.intino.ness.datahubterminalplugin.Formatters.firstUpperCase;
-import static io.intino.ness.datahubterminalplugin.Formatters.snakeCaseToCamelCase;
+import static io.intino.ness.datahubterminalplugin.Formatters.*;
 
 class TerminalRenderer {
 	private final Terminal terminal;
 	private final File srcDir;
 	private final String rootPackage;
-	private final String entitiesPackage;
+	private final String ontologyPackage;
 
-	TerminalRenderer(Terminal terminal, File srcDir, String rootPackage, String entitiesPackage) {
+	TerminalRenderer(Terminal terminal, File srcDir, String rootPackage, String ontologyPackage) {
 		this.terminal = terminal;
 		this.srcDir = srcDir;
 		this.rootPackage = rootPackage;
-		this.entitiesPackage = entitiesPackage;
+		this.ontologyPackage = ontologyPackage;
 	}
 
 	void render() {
@@ -49,8 +48,16 @@ class TerminalRenderer {
 			terminal.subscribe().measurementTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
 		}
 		if (terminal.bpm() != null) addBpm(builder);
-//		if(!terminal.graph().entityList().isEmpty()) builder.add("entities", new FrameBuilder("entities").add("package", rootPackage));
+		if(terminal.datamarts() != null) addDatamarts(builder);
 		return builder.toFrame();
+	}
+
+	private void addDatamarts(FrameBuilder builder) {
+		for(Datamart datamart : terminal.datamarts().datamartNames()) {
+			builder.add("datamart", new FrameBuilder("datamart")
+					.add("name", datamart.name$())
+					.add("package", ontologyPackage + ".datamarts." + javaValidName().format(datamart.name$().toLowerCase()).toString()));
+		}
 	}
 
 	private Frame[] messageFrames() {

@@ -79,8 +79,7 @@ public class EntityFrameFactory {
 		final Parameter parent = parameter(entity.core$(), "entity");
 		builder.add("parent", parent != null ? withFullPackage(((Entity) parent.values().get(0)).name$()) : baseEntityName());
 		builder.add("normalizeId", new FrameBuilder("normalizeId", (entity.isAbstract() || entity.isDecorable()) ? "abstract" : "").add("package", workingPackage).add("name", entity.name$()).toFrame());
-		if (entity.isDecorable() || entity.isAbstract()) builder.add("isAbstract", "abstract");
-		if (entity.isDecorable()) builder.add("abstract", "abstract");
+		builder.add("isAbstract", entity.isAbstract() ? "abstract" : "");
 		return builder;
 	}
 

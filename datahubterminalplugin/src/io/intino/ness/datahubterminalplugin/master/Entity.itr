@@ -12,7 +12,7 @@ def type(entity & class)
 
 	public[ $isAbstract+firstLowerCase] class $abstract~$name+FirstUpperCase extends $parent {
 
-		public static final EntityDefinition definition = $datamart+FirstUpperCase~Datamart.definition.$name+firstLowerCase~EntityDefinition;
+		public static final EntityDefinition definition = (($package.$datamart+FirstUpperCase~DatamartImpl.$datamart+FirstUpperCase~DatamartDefinition) $datamart+FirstUpperCase~Datamart.definition).$name+firstLowerCase~EntityDefinition;
 
 		[$attribute+wordDeclaration...[$NL]]
 
