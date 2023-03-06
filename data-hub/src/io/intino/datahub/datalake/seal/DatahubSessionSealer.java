@@ -24,6 +24,7 @@ public class DatahubSessionSealer implements SessionSealer {
 	@Override
 	public synchronized void seal(Predicate<Datalake.Store.Tank<? extends Event>> sortingPolicy) {
 		try {
+			treatedDir.mkdirs();
 			sealEvents(sortingPolicy);
 		} catch (Throwable e) {
 			Logger.error(e);
