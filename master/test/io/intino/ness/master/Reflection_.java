@@ -35,8 +35,8 @@ public class Reflection_ {
 		boolean isAncestor = entityDefinition.isAncestorOf(otherDefinition);
 		boolean isDescendant = entityDefinition.isDescendantOf(otherDefinition);
 
-		List<ConceptDefinition> ancestors = entityDefinition.ancestors();
-		List<ConceptDefinition> descendants = entityDefinition.descendants();
+		List<EntityDefinition> ancestors = entityDefinition.ancestors();
+		List<EntityDefinition> descendants = entityDefinition.descendants();
 
 		String nameValueFromReflection = entityDefinition.attribute("name")
 				.flatMap(attr -> attr.value(entity)).map(v -> v.as(String.class)).orElse(null);

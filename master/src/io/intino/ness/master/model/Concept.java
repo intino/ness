@@ -17,8 +17,9 @@ public interface Concept {
 
 	void addChangeListener(ChangeListener listener);
 
-	ConceptDefinition getDefinition();
+	ConceptDefinition<?> getDefinition();
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	default boolean instanceOf(ConceptDefinition definition) {
 		ConceptDefinition myDefinition = getDefinition();
 		return myDefinition.equals(definition) || myDefinition.isDescendantOf(definition);
@@ -56,16 +57,11 @@ public interface Concept {
 				return (T) (value);
 			}
 
-			public String asString() {
-				return as(String.class);
-			}
-
 			@Override
 			public boolean equals(Object o) {
 				if (this == o) return true;
 				if (o == null || getClass() != o.getClass()) return false;
-				Value value1 = (Value) o;
-				return Objects.equals(value, value1.value);
+				return Objects.equals(value, ((Value) o).value);
 			}
 
 			@Override
