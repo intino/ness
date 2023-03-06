@@ -43,7 +43,10 @@ Concept:{0..1} Datalake
 			sub Message
 				var Model.Message message
 				var boolean sortingRequired = true
-			sub Measurement > var Model.Measurement measurement
+			sub Measurement
+				var Model.Measurement measurement
+				var integer period
+				var word:Scale periodScale;
 
 Concept:Named Datamart
 	var word:SnapshotScale scale
