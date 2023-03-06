@@ -12,6 +12,8 @@ import io.intino.ness.datahubterminalplugin.Formatters;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static io.intino.ness.datahubterminalplugin.Formatters.*;
 
@@ -39,17 +41,33 @@ class TerminalRenderer {
 		if (datalake != null) builder.add("datalake", "").add("scale", datalake.scale().name());
 		builder.add("message", messageFrames());
 		builder.add("measurement", measurementFrames());
-		if (terminal.publish() != null) {
-			terminal.publish().messageTanks().forEach(tank -> builder.add("publish", frameOf(tank)));
-			terminal.publish().measurementTanks().forEach(tank -> builder.add("publish", frameOf(tank)));
-		}
-		if (terminal.subscribe() != null) {
-			terminal.subscribe().messageTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
-			terminal.subscribe().measurementTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
-		}
-		if (terminal.bpm() != null) addBpm(builder);
 		if(terminal.datamarts() != null) addDatamarts(builder);
+		if (terminal.publish() != null) addPublish(builder);
+		if (terminal.subscribe() != null) addSubscribe(builder);
+		if (terminal.bpm() != null) addBpm(builder);
 		return builder.toFrame();
+	}
+
+	private void addSubscribe(FrameBuilder builder) {
+		terminal.subscribe().messageTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
+		if(terminal.datamarts() != null) addSubscribeForTheDatamartEvents(builder);
+		terminal.subscribe().measurementTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
+	}
+
+	private void addSubscribeForTheDatamartEvents(FrameBuilder builder) {
+		Set<String> tanksAlreadySubscribedTo = terminal.subscribe().messageTanks().stream().map(Layer::name$).collect(Collectors.toSet());
+		for(Datamart datamart : terminal.datamarts().datamartNames()) {
+			List<Tank.Message> tanks = datamart.entityList().stream().map(Entity::from).collect(Collectors.toList());
+			for(Tank.Message tank : tanks) {
+				if(tanksAlreadySubscribedTo.add(tank.name$()))
+					builder.add("subscribe", frameOf(tank));
+			}
+		}
+	}
+
+	private void addPublish(FrameBuilder builder) {
+		terminal.publish().messageTanks().forEach(tank -> builder.add("publish", frameOf(tank)));
+		terminal.publish().measurementTanks().forEach(tank -> builder.add("publish", frameOf(tank)));
 	}
 
 	private void addDatamarts(FrameBuilder builder) {
