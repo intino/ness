@@ -10,9 +10,7 @@ import io.intino.ness.datahubterminalplugin.Commons;
 import io.intino.ness.datahubterminalplugin.Formatters;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.intino.ness.datahubterminalplugin.Formatters.*;
@@ -50,17 +48,19 @@ class TerminalRenderer {
 
 	private void addSubscribe(FrameBuilder builder) {
 		terminal.subscribe().messageTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
-		if(terminal.datamarts() != null) addSubscribeForTheDatamartEvents(builder);
+		if(terminal.datamarts() != null) addSubscribeForThedevents(builder);
 		terminal.subscribe().measurementTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
 	}
 
-	private void addSubscribeForTheDatamartEvents(FrameBuilder builder) {
+	private void addSubscribeForThedevents(FrameBuilder builder) {
 		Set<String> tanksAlreadySubscribedTo = terminal.subscribe().messageTanks().stream().map(Layer::name$).collect(Collectors.toSet());
-		for(Datamart datamart : terminal.datamarts().datamartNames()) {
-			List<Tank.Message> tanks = datamart.entityList().stream().map(Entity::from).collect(Collectors.toList());
+		for(Datamart datamart : terminal.datamarts().list()) {
+			List<Tank.Message> tanks = datamart.entityList().stream().map(Entity::from).filter(Objects::nonNull).distinct().collect(Collectors.toList());
 			for(Tank.Message tank : tanks) {
-				if(tanksAlreadySubscribedTo.add(tank.name$()))
+				if(tanksAlreadySubscribedTo.add(tank.name$())) {
 					builder.add("subscribe", frameOf(tank));
+				}
+//				builder.add("devent", frameOf(tank, datamart));
 			}
 		}
 	}
@@ -71,11 +71,32 @@ class TerminalRenderer {
 	}
 
 	private void addDatamarts(FrameBuilder builder) {
-		for(Datamart datamart : terminal.datamarts().datamartNames()) {
-			builder.add("datamart", new FrameBuilder("datamart")
-					.add("name", datamart.name$())
-					.add("package", ontologyPackage + ".datamarts." + javaValidName().format(datamart.name$().toLowerCase()).toString()));
+		for(Datamart datamart : terminal.datamarts().list()) {
+			builder.add("datamart", frameOf(datamart));
 		}
+	}
+
+	private FrameBuilder frameOf(Datamart datamart) {
+		return new FrameBuilder("datamart")
+				.add("name", datamart.name$())
+				.add("package", ontologyPackage + ".datamarts." + javaValidName().format(datamart.name$().toLowerCase()).toString())
+				.add("devent", eventsOf(datamart));
+	}
+
+	private FrameBuilder[] eventsOf(Datamart datamart) {
+		return datamart.entityList().stream()
+				.map(Entity::from)
+				.filter(Objects::nonNull)
+				.distinct()
+				.map(tank -> frameOf(tank, datamart))
+				.toArray(FrameBuilder[]::new);
+	}
+
+	private FrameBuilder frameOf(Tank.Message tank, Datamart datamart) {
+		return new FrameBuilder("devent")
+				.add("message", tank.message().name$())
+				.add("namespaceQn", namespace(tank.message()).replace(".", ""))
+				.add("datamart", datamart.name$());
 	}
 
 	private Frame[] messageFrames() {
@@ -156,11 +177,20 @@ class TerminalRenderer {
 		return event.core$().owner().is(Namespace.class) ? event.core$().ownerAs(Namespace.class).qn().toLowerCase() : "";
 	}
 
-	private List<Tank.Message> messageTanks() {
-		List<Tank.Message> tanks = new ArrayList<>();
+	private Collection<Tank.Message> messageTanks() {
+		Collection<Tank.Message> tanks = new LinkedHashSet<>();
 		if (terminal.publish() != null) tanks.addAll(terminal.publish().messageTanks());
 		if (terminal.subscribe() != null) tanks.addAll(terminal.subscribe().messageTanks());
+		if (terminal.datamarts() != null) tanks.addAll(messageTanksOf(terminal.datamarts()));
 		return tanks;
+	}
+
+	private Collection<Tank.Message> messageTanksOf(Terminal.Datamarts datamarts) {
+		return datamarts.list().stream()
+				.flatMap(d -> d.entityList().stream())
+				.map(Entity::from)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toSet());
 	}
 
 	private List<Tank.Measurement> measurementTanks() {

@@ -5,7 +5,6 @@ import io.intino.datahub.model.*;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
-import io.intino.magritte.framework.Concept;
 import io.intino.magritte.framework.Layer;
 import io.intino.magritte.framework.Node;
 import io.intino.ness.datahubterminalplugin.util.ErrorUtils;

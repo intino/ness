@@ -22,8 +22,6 @@ def type(terminal)
 	import java.lang.reflect.Field;
     import java.lang.reflect.Method;
 
-	[$entities+import]
-
 	public class $name+snakeCaseToCamelCase+firstUpperCase {
 		public static String$[] subscriptionChannels = new String$[]{$subscribe+channel};
 
@@ -34,6 +32,7 @@ def type(terminal)
 		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector) {
 			this.connector = connector;
 			[$datamart+instantiate...[$NL]]
+			[$datamart+addDatamartSubscribersCall...[$NL]]
 		}
 
 		public void publish(Object event) {
@@ -102,6 +101,8 @@ def type(terminal)
 				throw new RuntimeException(e);
 			}
 		}
+
+		[$datamart+addDatamartSubscribers...[$NL$NL]]
 
 
 		public class BatchSession {
@@ -210,6 +211,20 @@ def type(datamart) trigger(getter)
 	public $package.$name+FirstUpperCase~Datamart $name+firstLowerCase~Datamart() {
 		return $name+firstLowerCase~Datamart.init();
 	}
+end
+
+def type(datamart) trigger(addDatamartSubscribersCall)
+	addDatamartSubscribers($name+firstLowerCase~Datamart);
+end
+
+def type(datamart) trigger(addDatamartSubscribers)
+	private void addDatamartSubscribers($package.$name+FirstUpperCase~DatamartImpl datamart) {
+		[$devent+addSubscribe...[$NL]]
+	}
+end
+
+def type(devent) trigger(addSubscribe)
+	subscribe(($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_$datamart_$message");
 end
 
 def trigger(if)
