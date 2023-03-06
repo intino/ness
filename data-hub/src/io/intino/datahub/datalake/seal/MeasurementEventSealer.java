@@ -14,6 +14,7 @@ import io.intino.alexandria.message.Message;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -32,20 +33,14 @@ class MeasurementEventSealer {
 		try (MeasurementEventWriter writer = new MeasurementEventWriter(datalakeFile)) {
 			writer.write(streamOf(sessions).map(e -> {
 				Message message = e.toMessage();
-				double[] values = values(message);
 				String[] measurements = message.get("measurements").as(String[].class);
-				return new MeasurementEvent(e.type(), e.ss(), e.ts(), measurements, values);
+				return new MeasurementEvent(e.type(), e.ss(), e.ts(), measurements, values(message));
 			}));
 		}
-
 	}
 
 	private static double[] values(Message message) {
-		return message.attributes().stream()
-				.filter(a -> !a.equals("ts"))
-				.filter(a -> !a.equals("sensor"))
-				.filter(a -> !a.equals("measurements"))
-				.mapToDouble(a -> message.get(a).asDouble()).toArray();
+		return Arrays.stream(message.get("values").as(String[].class)).mapToDouble(((Double::parseDouble))).toArray();
 	}
 
 	private Stream<MessageEvent> streamOf(List<File> files) throws IOException {

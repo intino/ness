@@ -37,13 +37,9 @@ public class MeasurementRenderer {
 				.add("package", packageName);
 		List<Frame> list = new ArrayList<>();
 		List<Measurement.Value> valueList = measurement.valueList();
-		for (int i = 0, valueListSize = valueList.size(); i < valueListSize; i++) {
-			Measurement.Value m = valueList.get(i);
-			Frame frame = frame(measurement.name$(), m, i);
-			list.add(frame);
-		}
-		Frame[] object = list.toArray(new Frame[0]);
-		eventFrame.add("value", object);
+		for (int i = 0, valueListSize = valueList.size(); i < valueListSize; i++)
+			list.add(frame(measurement.name$(), valueList.get(i), i));
+		eventFrame.add("value", list.toArray(new Frame[0]));
 		return eventFrame.toFrame();
 	}
 
