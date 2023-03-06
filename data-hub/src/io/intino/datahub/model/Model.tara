@@ -66,6 +66,7 @@ Concept Namespace
 	var string qn = @qn is private reactive
 	has Namespace
 	has Message
+	has Measurement
 
 Concept Measurement > Concept:{1..*} Value
 

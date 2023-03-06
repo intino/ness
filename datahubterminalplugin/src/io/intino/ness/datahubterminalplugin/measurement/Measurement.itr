@@ -2,16 +2,19 @@ def type(measurement)
 	package $package+ValidPackage;
 
 	public class $name+firstUpperCase extends io.intino.alexandria.event.measurement.MeasurementEvent implements java.io.Serializable {
+
+		private static final String$[] declaredMeasurements = new String$[]{$value+nameQuoted...[, ]};
+
 		public $name+firstUpperCase(String sensor) {
-			super("$name+firstUpperCase", sensor, java.time.Instant.now(), new String$[]{$value+name...[,]}, new double$[$size]);
+			super("$name+firstUpperCase", sensor, java.time.Instant.now(), declaredMeasurements, new double$[$size]);
 		}
 
 		public $name+firstUpperCase(String sensor, java.time.Instant ts) {
-			super("$name+firstUpperCase", sensor, ts, new String$[]{$value+name...[,]}, new double$[$size]);
+			super("$name+firstUpperCase", sensor, ts, declaredMeasurements, new double$[$size]);
 		}
 
 		public $name+firstUpperCase(io.intino.alexandria.message.Message message) {
-			super("$name+firstUpperCase", message.get("sensor").asString(), message.get("ts").asInstant(), message.get("measurements").as(String$[].class), message.get("measurements").as(double$[].class));
+			super("$name+firstUpperCase", message.get("ss").asString(), message.get("ts").asInstant(), message.get("measurements").as(String$[].class), java.util.Arrays.stream(message.get("values").as(String$[].class)).mapToDouble(Double::parseDouble).toArray());
 		}
 
 		[$value+getter...[$NL$NL]]
@@ -29,14 +32,14 @@ def type(measurement)
 	}
 end
 
+def trigger(nameQuoted)
+	"$name"
+end
+
 def trigger(getter)
 	public double $name+firstLowerCase() {
 		return values$[$index];
 	}
-end
-
-def trigger(name)
-	$name
 end
 
 def trigger(setter)
