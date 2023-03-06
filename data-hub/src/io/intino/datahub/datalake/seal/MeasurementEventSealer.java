@@ -31,7 +31,7 @@ class MeasurementEventSealer {
 
 	public void seal(Fingerprint fingerprint, List<File> sessions) throws IOException {
 		File file = datalakeFile(fingerprint);
-		try (ZitWriter writer = file.exists() ? new ZitWriter(file) : initFile(fingerprint, file)) {
+		try (ZitWriter writer = file.exists() && file.length() > 0 ? new ZitWriter(file) : initFile(fingerprint, file)) {
 			if (writer == null) return;
 			streamOf(sessions)
 					.map(e -> new MeasurementEvent(e.type(), e.ss(), e.ts(), e.toMessage().get("measurements").as(String[].class), values(e.toMessage())))
