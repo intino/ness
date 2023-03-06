@@ -6,46 +6,56 @@ import io.intino.alexandria.datalake.file.FileStore;
 import io.intino.alexandria.event.Event;
 import io.intino.alexandria.event.EventStream;
 import io.intino.alexandria.event.measurement.MeasurementEvent;
-import io.intino.alexandria.event.measurement.MeasurementEventWriter;
 import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.event.message.MessageEventReader;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
+import io.intino.alexandria.zit.ZitWriter;
+import io.intino.alexandria.zit.model.Period;
+import io.intino.magritte.framework.Layer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
 class MeasurementEventSealer {
 	private final Datalake datalake;
+	private final io.intino.datahub.model.Datalake dlDefinition;
 
-	MeasurementEventSealer(Datalake datalake) {
+	MeasurementEventSealer(Datalake datalake, io.intino.datahub.model.Datalake dlDefinition) {
 		this.datalake = datalake;
+		this.dlDefinition = dlDefinition;
 	}
 
 	public void seal(Fingerprint fingerprint, List<File> sessions) throws IOException {
-		seal(datalakeFile(fingerprint), sessions);
+		File file = datalakeFile(fingerprint);
+		try (ZitWriter writer = file.exists() ? new ZitWriter(file) : initFile(fingerprint, file)) {
+			if (writer == null) return;
+			streamOf(sessions)
+					.map(e -> new MeasurementEvent(e.type(), e.ss(), e.ts(), e.toMessage().get("measurements").as(String[].class), values(e.toMessage())))
+					.forEach(m -> writer.put(m.ts(), m.values()));
+		}
 	}
 
-	private void seal(File datalakeFile, List<File> sessions) throws IOException {
-		try (MeasurementEventWriter writer = new MeasurementEventWriter(datalakeFile)) {
-			writer.write(streamOf(sessions).map(e -> {
-				Message message = e.toMessage();
-				double[] values = values(message);
-				String[] measurements = message.get("measurements").as(String[].class);
-				return new MeasurementEvent(e.type(), e.ss(), e.ts(), measurements, values);
-			}));
+	private ZitWriter initFile(Fingerprint fingerprint, File datalakeFile) {
+		String tankName = fingerprint.tank();
+		io.intino.datahub.model.Datalake.Tank tank = dlDefinition.tank(t -> t.qn().equals(tankName));
+		if (tank == null) return null;
+		try {
+			return new ZitWriter(datalakeFile,
+					fingerprint.source(),
+					Period.of(tank.asMeasurement().period(), tank.asMeasurement().periodScale().chronoUnit()),
+					tank.asMeasurement().measurement().valueList().stream().map(Layer::name$).toArray(String[]::new));
+		} catch (IOException e) {
+			Logger.error(e);
+			return null;
 		}
-
 	}
 
 	private static double[] values(Message message) {
-		return message.attributes().stream()
-				.filter(a -> !a.equals("ts"))
-				.filter(a -> !a.equals("sensor"))
-				.filter(a -> !a.equals("measurements"))
-				.mapToDouble(a -> message.get(a).asDouble()).toArray();
+		return Arrays.stream(message.get("values").as(String[].class)).mapToDouble(((Double::parseDouble))).toArray();
 	}
 
 	private Stream<MessageEvent> streamOf(List<File> files) throws IOException {

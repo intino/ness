@@ -42,7 +42,7 @@ public class EventSessionSealer {
 
 	public void seal(Predicate<String> sorting) {
 		messageSealer = new EventSealer(datalake, sorting, tmpDir);
-		measurementSealer = new MeasurementEventSealer(datalake);
+		measurementSealer = new MeasurementEventSealer(datalake, graphDl);
 		sessions(stageDir).collect(groupingBy(EventSessionSealer::fingerprintOf)).entrySet()
 				.stream().sorted(comparing(t -> t.getKey().toString()))
 				.parallel()

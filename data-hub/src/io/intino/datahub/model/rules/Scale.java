@@ -2,9 +2,21 @@ package io.intino.datahub.model.rules;
 
 import io.intino.magritte.lang.model.Rule;
 
-public enum Scale implements Rule<Enum> {
+import java.time.temporal.ChronoUnit;
 
-	Year, Month, Day, Hour, Minute;
+public enum Scale implements Rule<Enum> {
+	Year(ChronoUnit.YEARS), Month(ChronoUnit.MONTHS), Day(ChronoUnit.DAYS), Hour(ChronoUnit.HOURS), Minute(ChronoUnit.MINUTES);
+
+	private final ChronoUnit chronoUnit;
+
+	Scale(ChronoUnit chronoUnit) {
+		this.chronoUnit = chronoUnit;
+	}
+
+
+	public ChronoUnit chronoUnit() {
+		return chronoUnit;
+	}
 
 	@Override
 	public boolean accept(Enum value) {
