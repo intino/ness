@@ -50,30 +50,33 @@ public class EntityMounterFrameFactory {
 			"Instant", "Set<Instant>"
 	);
 
-	private final String workingPackage;
+	private final String destinationPackage;
+	private final String ontologyPackage;
 	private final Datamart datamart;
 
-	public EntityMounterFrameFactory(String workingPackage, Datamart datamart) {
-		this.workingPackage = workingPackage;
+	public EntityMounterFrameFactory(String destinationPackage, String ontologyPackage, Datamart datamart) {
+		this.destinationPackage = destinationPackage;
+		this.ontologyPackage = ontologyPackage;
 		this.datamart = datamart;
 	}
 
 	public Map<String, Frame> create(Entity entity) {
 		if(entity.isAbstract()) return new HashMap<>(0);
-		return Map.of(getMounterPath(entity, workingPackage), frameOf(entity).toFrame());
+		return Map.of(getMounterPath(entity, destinationPackage), frameOf(entity).toFrame());
 	}
 
 	private FrameBuilder frameOf(Entity entity) {
 		FrameBuilder builder = new FrameBuilder("mounter")
 				.add("message")
-				.add("package", workingPackage)
+				.add("package", destinationPackage)
+				.add("ontologypackage", ontologyPackage)
 				.add("datamart", datamart.name$())
 				.add("name", entity.core$().name())
 				.add("attribute", attributesOf(entity).toArray(Frame[]::new));
-		if (!datamart.structList().isEmpty()) builder.add("hasStructs", new FrameBuilder().add("package", workingPackage));
+		if (!datamart.structList().isEmpty()) builder.add("hasStructs", new FrameBuilder().add("package", destinationPackage));
 		final Parameter parent = parameter(entity.core$(), "entity");
 		builder.add("parent", parent != null ? ((Entity) parent.values().get(0)).name$() : "io.intino.ness.master.model.Entity");
-		builder.add("normalizeId", new FrameBuilder("normalizeId", (entity.isAbstract() || entity.isDecorable()) ? "abstract" : "").add("package", workingPackage).add("name", entity.name$()).toFrame());
+		builder.add("normalizeId", new FrameBuilder("normalizeId", (entity.isAbstract() || entity.isDecorable()) ? "abstract" : "").add("package", destinationPackage).add("name", entity.name$()).toFrame());
 		if (entity.isDecorable() || entity.isAbstract()) builder.add("isAbstract", "abstract");
 		if (entity.isDecorable()) builder.add("abstract", "abstract");
 		return builder;
@@ -154,7 +157,7 @@ public class EntityMounterFrameFactory {
 		builder.add("name", node.name())
 				.add("owner", node.owner().name())
 				.add("type", type)
-				.add("package", workingPackage)
+				.add("package", destinationPackage)
 				.add("index", node.owner().componentList().indexOf(node))
 				.add("entityOwner", owner.name());
 
@@ -207,7 +210,7 @@ public class EntityMounterFrameFactory {
 	private Frame structFrame(Struct node) {
 		return new FrameBuilder("struct")
 				.add("name", node.core$().name())
-				.add("package", workingPackage)
+				.add("package", destinationPackage)
 				.add("attribute", node.attributeList().stream().map(node1 -> attrFrameOf(node1.core$(), node.core$())).toArray())
 				.toFrame();
 	}
@@ -216,7 +219,7 @@ public class EntityMounterFrameFactory {
 		FrameBuilder builder = new FrameBuilder(c.conceptList().stream().map(Concept::name).toArray(String[]::new));
 		return builder
 				.add("type", type)
-				.add("package", workingPackage)
+				.add("package", destinationPackage)
 				.add("value", defaultValueOf(type, defaultValue))
 				.toFrame();
 	}

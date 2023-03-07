@@ -127,6 +127,7 @@ public class OntologyPublisher {
 			if (sourceDirectory.getName().equals("shared"))
 				builder.add("sourceDirectory", sourceDirectory.getAbsolutePath());
 		builder.add("event", new FrameBuilder().add("version", versions.get("event")));
+		builder.add("master", new FrameBuilder().add("version", versions.get("master")));
 		final File pomFile = new File(root, "pom.xml");
 		Commons.write(pomFile.toPath(), new PomTemplate().render(builder.toFrame()));
 		return pomFile;

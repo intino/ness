@@ -10,9 +10,9 @@ def type(entity & class)
 
 	import $package.$datamart+FirstUpperCase~Datamart;
 
-	public[ $isAbstract+firstLowerCase] class $abstract~$name+FirstUpperCase extends $parent {
+	public[ $isAbstract+firstLowerCase] class $name+FirstUpperCase extends $parent {
 
-		public static final EntityDefinition definition = (($package.$datamart+FirstUpperCase~DatamartImpl.$datamart+FirstUpperCase~DatamartDefinition) $datamart+FirstUpperCase~Datamart.definition).$name+firstLowerCase~EntityDefinition;
+		public static final EntityDefinition definition = new $package.$datamart+FirstUpperCase~Entity.EntityDefinitionInternal("$name+FirstUpperCase");
 
 		[$attribute+wordDeclaration...[$NL]]
 

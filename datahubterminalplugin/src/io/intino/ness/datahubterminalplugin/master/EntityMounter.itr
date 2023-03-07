@@ -19,7 +19,7 @@ def !type(abstract) type(mounter) type(message)
 	package $package.mounters;
 
 	import io.intino.ness.master.Datamart.EntityListener;
-	import $package.$datamart+FirstUpperCase~Datamart;
+	import $ontologypackage.$datamart+FirstUpperCase~Datamart;
 
 	import java.time.*;
 	import java.util.*;
@@ -28,7 +28,7 @@ def !type(abstract) type(mounter) type(message)
 	import io.intino.alexandria.event.Event;
 	import io.intino.alexandria.event.message.MessageEvent;
 	import io.intino.alexandria.message.Message;
-	import $package.$datamart+FirstUpperCase~Entity;
+	import $ontologypackage.$datamart+FirstUpperCase~Entity;
 
 	import static $package.$datamart+FirstUpperCase~Mounter.Operation.*;
 
@@ -66,7 +66,7 @@ def !type(abstract) type(mounter) type(message)
 		private $datamart+FirstUpperCase~Entity findOrCreateEntity(String id, Operation$[$] operation) {
 			$datamart+FirstUpperCase~Entity entity = entities.get($package.entities.$name+FirstUpperCase.definition, id);
 			if(entity == null) {
-				entity = new $package.entities.$name+FirstUpperCase(id, entities.datamart());
+				entity = new $ontologypackage.entities.$name+FirstUpperCase(id, entities.datamart());
 				entities.add(entity);
 				operation$[0$] = Create;
 			}

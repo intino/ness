@@ -171,5 +171,52 @@ def type(entity & base)
 				return type().getSimpleName() + " " + name() + " = " + value();
 			}
 		}
+
+		protected static final class EntityDefinitionInternal implements EntityDefinition {
+
+        	private final String entityName;
+        	private EntityDefinition definition;
+
+        	public EntityDefinitionInternal(String entityName) {
+        		this.entityName = entityName;
+        	}
+
+        	@Override
+        	public boolean isAbstract() {
+        		return definition().isAbstract();
+        	}
+
+        	@Override
+        	public String fullName() {
+        		return definition().fullName();
+        	}
+
+        	@Override
+        	public List<AttributeDefinition> declaredAttributes() {
+        		return definition().declaredAttributes();
+        	}
+
+        	@Override
+        	public java.util.Optional<EntityDefinition> parent() {
+        		return definition().parent();
+        	}
+
+        	@Override
+        	public List<EntityDefinition> descendants() {
+        		return definition().descendants();
+        	}
+
+        	@Override
+        	public Class<?> javaClass() {
+        		return definition().javaClass();
+        	}
+
+        	private EntityDefinition definition() {
+        		if(definition == null) {
+        			definition = $datamart+FirstUpperCase~Datamart.definition.entity(entityName).orElseThrow(() -> new IllegalStateException("$datamart+FirstUpperCase~Datamart is not initialized"));
+        		}
+        		return definition;
+        	}
+        }
 	}
 end

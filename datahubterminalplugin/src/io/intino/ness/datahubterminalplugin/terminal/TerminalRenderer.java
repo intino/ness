@@ -1,5 +1,6 @@
 package io.intino.ness.datahubterminalplugin.terminal;
 
+import io.intino.Configuration;
 import io.intino.datahub.model.*;
 import io.intino.datahub.model.Datalake.Tank;
 import io.intino.itrules.Frame;
@@ -8,8 +9,11 @@ import io.intino.itrules.Template;
 import io.intino.magritte.framework.Layer;
 import io.intino.ness.datahubterminalplugin.Commons;
 import io.intino.ness.datahubterminalplugin.Formatters;
+import io.intino.ness.datahubterminalplugin.master.DatamartsRenderer;
+import io.intino.plugin.PluginLauncher;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,12 +23,18 @@ class TerminalRenderer {
 	private final Terminal terminal;
 	private final File srcDir;
 	private final String rootPackage;
+	private final Configuration conf;
+	private final PrintStream logger;
+	private final PluginLauncher.Notifier notifier;
 	private final String ontologyPackage;
 
-	TerminalRenderer(Terminal terminal, File srcDir, String rootPackage, String ontologyPackage) {
+	TerminalRenderer(Terminal terminal, File srcDir, String rootPackage, Configuration conf, PrintStream logger, PluginLauncher.Notifier notifier, String ontologyPackage) {
 		this.terminal = terminal;
 		this.srcDir = srcDir;
 		this.rootPackage = rootPackage;
+		this.conf = conf;
+		this.logger = logger;
+		this.notifier = notifier;
 		this.ontologyPackage = ontologyPackage;
 	}
 
@@ -39,7 +49,7 @@ class TerminalRenderer {
 		if (datalake != null) builder.add("datalake", "").add("scale", datalake.scale().name());
 		builder.add("message", messageFrames());
 		builder.add("measurement", measurementFrames());
-		if(terminal.datamarts() != null) addDatamarts(builder);
+		if(terminal.datamarts() != null) renderDatamarts(builder);
 		if (terminal.publish() != null) addPublish(builder);
 		if (terminal.subscribe() != null) addSubscribe(builder);
 		if (terminal.bpm() != null) addBpm(builder);
@@ -70,10 +80,11 @@ class TerminalRenderer {
 		terminal.publish().measurementTanks().forEach(tank -> builder.add("publish", frameOf(tank)));
 	}
 
-	private void addDatamarts(FrameBuilder builder) {
+	private void renderDatamarts(FrameBuilder builder) {
 		for(Datamart datamart : terminal.datamarts().list()) {
 			builder.add("datamart", frameOf(datamart));
 		}
+		new DatamartsRenderer(srcDir, terminal.graph(), conf, logger, notifier, ontologyPackage).render(terminal, rootPackage);
 	}
 
 	private FrameBuilder frameOf(Datamart datamart) {

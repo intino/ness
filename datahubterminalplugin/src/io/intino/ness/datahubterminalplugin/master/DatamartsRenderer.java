@@ -45,6 +45,25 @@ public class DatamartsRenderer {
 		this.templates = new Templates();
 	}
 
+	public void render(Terminal terminal, String terminalPackage) {
+		TerminalInfo terminalInfo = new TerminalInfo(terminal, terminalPackage);
+		String basePackage = modelPackage + ".datamarts";
+		for(Datamart datamart : terminal.datamarts().list()) {
+			this.modelPackage = basePackage + "." + datamart.name$().toLowerCase();
+			renderDatamart(datamart, terminalInfo);
+		}
+	}
+
+	private void renderDatamart(Datamart datamart, TerminalInfo terminalInfo) {
+		try {
+			write(renderImplementationOf(datamart, terminalInfo));
+			write(entityMounterClassesOf(datamart, terminalInfo));
+		} catch (Throwable e) {
+			notifier.notifyError("Error during java className generation: " + ErrorUtils.getMessage(e));
+			throw new RuntimeException(e);
+		}
+	}
+
 	public void render() {
 		String basePackage = modelPackage + ".datamarts";
 		for(Datamart datamart : model.datamartList()) {
@@ -56,7 +75,7 @@ public class DatamartsRenderer {
 
 	private void renderDatamart(Datamart datamart) {
 		try {
-			write(renderClassesOf(datamart));
+			write(renderInterfaceOf(datamart));
 		} catch (Throwable e) {
 			notifier.notifyError("Error during java className generation: " + ErrorUtils.getMessage(e));
 			throw new RuntimeException(e);
@@ -68,28 +87,32 @@ public class DatamartsRenderer {
 			logger.println("Rendering entities and structs of " + datamart.name$() + "...");
 			write(structClassesOf(datamart));
 			write(entityClassesOf(datamart));
-			write(entityMounterClassesOf(datamart));
 		} catch (Exception e) {
 			notifier.notifyError("Error during java className generation: " + ErrorUtils.getMessage(e));
 			throw new RuntimeException(e);
 		}
 	}
 
-	private Map<String, String> entityMounterClassesOf(Datamart datamart) {
+	private Map<String, String> entityMounterClassesOf(Datamart datamart, TerminalInfo terminalInfo) {
 		Map<String, String> outputs = new HashMap<>();
-		outputs.put(destination(baseEntityMounterName(datamart)), templates.entityMounter.render(entityMounterInterface(datamart)));
-		datamart.entityList().forEach(e -> outputs.putAll(renderEntityMounter(e, datamart)));
+		outputs.put(destination(baseEntityMounterName(datamart, terminalInfo)), templates.entityMounter.render(entityMounterInterface(datamart, terminalInfo)));
+		datamart.entityList().forEach(e -> outputs.putAll(renderEntityMounter(e, datamart, terminalInfo)));
 		return outputs;
 	}
 
-	private String baseEntityMounterName(Datamart datamart) {
-		return modelPackage + "." + javaValidName().format(firstUpperCase(datamart.name$()) + "Mounter").toString();
+	private String baseEntityMounterName(Datamart datamart, TerminalInfo terminalInfo) {
+		return terminalInfo.terminalPackage + "." + subPackageOf(datamart) + "." + firstUpperCase(datamart.name$()) + "Mounter";
 	}
 
-	private FrameBuilder entityMounterInterface(Datamart datamart) {
+	private FrameBuilder entityMounterInterface(Datamart datamart, TerminalInfo terminalInfo) {
 		return new FrameBuilder("mounter", "interface")
-				.add("package", modelPackage)
+				.add("package", terminalInfo.terminalPackage + subPackageOf(datamart))
+				.add("ontologypackage", modelPackage)
 				.add("datamart", datamart.name$());
+	}
+
+	private String subPackageOf(Datamart datamart) {
+		return ".datamarts." + javaValidName().format(datamart.name$().toLowerCase());
 	}
 
 	private Map<String, String> entityClassesOf(Datamart datamart) {
@@ -116,37 +139,33 @@ public class DatamartsRenderer {
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
-	private Map<String, String> renderClassesOf(Datamart datamart) {
-		String name = datamart.name$();
-		String theInterface = modelPackage + DOT + firstUpperCase().format(javaValidName().format(name + "Datamart").toString());
-		String theImplementation = modelPackage + DOT + firstUpperCase().format(javaValidName().format(name + "DatamartImpl").toString());
-		return Map.of(
-				destination(theInterface), templates.datamart.render(datamartInterfaceBuilder(datamart).toFrame()),
-				destination(theImplementation), templates.datamart.render(datamartImplBuilder(datamart).toFrame())
-		);
+	private Map<String, String> renderInterfaceOf(Datamart datamart) {
+		String theInterface = modelPackage + DOT + firstUpperCase().format(javaValidName().format(datamart.name$() + "Datamart").toString());
+		return Map.of(destination(theInterface), templates.datamart.render(datamartInterfaceBuilder(datamart).toFrame()));
+	}
+
+	private Map<String, String> renderImplementationOf(Datamart datamart, TerminalInfo terminalInfo) {
+		String theImplementation = modelPackage + DOT + firstUpperCase().format(javaValidName().format(datamart.name$() + "DatamartImpl").toString());
+		return Map.of(destination(theImplementation), templates.datamart.render(datamartImplBuilder(datamart, terminalInfo).toFrame()));
 	}
 
 	private FrameBuilder datamartInterfaceBuilder(Datamart datamart) {
-		FrameBuilder builder = new FrameBuilder("datamart", "interface").add("package", modelPackage);
+		FrameBuilder builder = new FrameBuilder("datamart", "interface");
+		builder.add("package", modelPackage);
 		builder.add("name", datamart.name$());
 		builder.add("entity", entitiesOf(datamart));
 		return builder;
 	}
 
-	private FrameBuilder datamartImplBuilder(Datamart datamart) {
-		FrameBuilder builder = new FrameBuilder("datamart", "message", "impl").add("package", modelPackage);
+	private FrameBuilder datamartImplBuilder(Datamart datamart, TerminalInfo terminalInfo) {
+		FrameBuilder builder = new FrameBuilder("datamart", "message", "impl");
+		builder.add("package", terminalInfo.terminalPackage + subPackageOf(datamart));
 		builder.add("name", datamart.name$()).add("scale", datamart.scale().name());
 		builder.add("entity", entitiesOf(datamart));
 		builder.add("struct", structsOf(datamart));
 		builder.add("numEntities", datamart.entityList().size());
 		builder.add("numStructs", datamart.structList().size());
-		if(!datamart.entityList().isEmpty()) {
-			builder.add("importEntities", "import " + modelPackage + ".entities.*;");
-			builder.add("importMounters", "import " + modelPackage + ".mounters.*;");
-		}
-		if(!datamart.structList().isEmpty()) {
-			builder.add("importStructs", "import " + modelPackage + ".structs.*;");
-		}
+		builder.add("ontologypackage", modelPackage);
 		return builder;
 	}
 
@@ -183,13 +202,13 @@ public class DatamartsRenderer {
 	private Frame[] attributeFrames(Stream<Node> attributes, Datamart datamart) {
 		return attributes
 				.map(a -> a.is(EntityData.class)
-						? attributeFrameBuilder(a.as(EntityData.class), datamart)
+						? attributeFrameBuilder(a.as(EntityData.class))
 						: attributeFrameBuilder(a.as(StructData.class), datamart))
 				.map(FrameBuilder::toFrame)
 				.toArray(Frame[]::new);
 	}
 
-	private FrameBuilder attributeFrameBuilder(EntityData attr, Datamart datamart) {
+	private FrameBuilder attributeFrameBuilder(EntityData attr) {
 
 		FrameBuilder b = new FrameBuilder("attribute").add("name", attr.name$());
 
@@ -236,13 +255,6 @@ public class DatamartsRenderer {
 		if(node.isStruct()) return node.asStruct().struct().name$();
 		if(node.isEntity()) return node.asEntity().entity().name$();
 		throw new RuntimeException("Unknown type of " + node.name$());
-	}
-
-	private String typeOfWithCollections(EntityData node) {
-		if(node.isList()) return "List";
-		if(node.isSet()) return "Set";
-		if(node.isMap()) return "Map";
-		return typeOf(node);
 	}
 
 	private String typeOf(StructData node) {
@@ -318,8 +330,9 @@ public class DatamartsRenderer {
 				);
 	}
 
-	private Map<String, String> renderEntityMounter(Entity entity, Datamart datamart) {
-		return new EntityMounterFrameFactory(modelPackage, datamart).create(entity).entrySet().stream()
+	private Map<String, String> renderEntityMounter(Entity entity, Datamart datamart, TerminalInfo terminalInfo) {
+		return new EntityMounterFrameFactory(terminalInfo.terminalPackage + subPackageOf(datamart), modelPackage, datamart)
+				.create(entity).entrySet().stream()
 				.collect(toMap(
 						e -> entityDestination(e.getKey()),
 						e -> templates.entityMounter.render(e.getValue()))
@@ -356,6 +369,15 @@ public class DatamartsRenderer {
 
 	private String entityDestination(String path) {
 		return new File(srcFolder, path.replace(DOT, separator) + JAVA).getAbsolutePath();
+	}
+
+	public static class TerminalInfo {
+		public final Terminal terminal;
+		public final String terminalPackage;
+		public TerminalInfo(Terminal terminal, String terminalPackage) {
+			this.terminal = terminal;
+			this.terminalPackage = terminalPackage;
+		}
 	}
 
 	private static class Templates {

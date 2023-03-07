@@ -1,8 +1,6 @@
 def type(datamart & interface)
 	package $package;
 
-	import io.intino.alexandria.Timetag;
-
 	import java.util.List;
 	import java.util.Map;
 	import java.util.concurrent.ConcurrentHashMap;
@@ -15,11 +13,10 @@ def type(datamart & interface)
 
 	public interface $name+FirstUpperCase~Datamart extends Datamart {
 
-		DatamartDefinition definition = new $name+FirstUpperCase~DatamartImpl.$name+FirstUpperCase~DatamartDefinition();
+		DatamartDefinition definition = new $name+FirstUpperCase~Datamart.DatamartDefinitionInternal();
 
-		List<Timetag> listSnapshots();
-
-		$name+FirstUpperCase~Datamart snapshot(Timetag timetag);
+		List<String> listSnapshots();
+		$name+FirstUpperCase~Datamart snapshot(String timetag);
 
 		$entity+getterSignature...[$NL$NL]
 
@@ -78,6 +75,23 @@ def type(datamart & interface)
         		return entitiesByType.values().stream().filter(map -> map.containsKey(id)).findFirst();
         	}
         }
+
+		final class DatamartDefinitionInternal implements DatamartDefinition {
+			private DatamartDefinition definition;
+			private DatamartDefinitionInternal() {}
+			@Override
+			public String name() {return definition().name();}
+			@Override
+			public Datamart.Scale scale() {return definition().scale();}
+			@Override
+			public Query<EntityDefinition> entities() {return definition().entities();}
+			@Override
+			public Query<StructDefinition> structs() {return definition().structs();}
+			private DatamartDefinition definition() {
+				if(definition == null) throw new IllegalStateException("$name+FirstUpperCase~Datamart is not initialized");
+				return definition;
+			}
+		}
 	}
 end
 
@@ -100,12 +114,14 @@ def type(datamart & message & impl)
 	import java.util.stream.Stream;
 	import java.util.stream.Collectors;
 
+	import $ontologypackage.*;
+
 	import static java.util.Objects.requireNonNull;
 
 	public class $name+FirstUpperCase~DatamartImpl implements $name+FirstUpperCase~Datamart {
 
 		private static final String DATAHUB_MESSAGE_TOPIC = "service.ness.datalake.messagestore";
-		private static final $name+FirstUpperCase~DatamartImpl.$name+FirstUpperCase~DatamartDefinition definition = ($name+FirstUpperCase~DatamartImpl.$name+FirstUpperCase~DatamartDefinition) $name+FirstUpperCase~Datamart.definition;
+		private static final $name+FirstUpperCase~DatamartImpl.$name+FirstUpperCase~DatamartDefinition definition = new $name+FirstUpperCase~DatamartImpl.$name+FirstUpperCase~DatamartDefinition();
 
 		private final Connector connector;
 		private final AtomicBoolean initialized = new AtomicBoolean(false);
@@ -156,7 +172,7 @@ def type(datamart & message & impl)
 		}
 
 		@Override
-        public List<Timetag> listSnapshots() {
+        public List<String> listSnapshots() {
         	try {
         		javax.jms.Message message = connector.requestResponse(DATAHUB_MESSAGE_TOPIC, listSnapshotsRequest());
         		return handleListSnapshotsResponse(message);
@@ -172,22 +188,22 @@ def type(datamart & message & impl)
         	return message;
         }
 
-        private List<Timetag> handleListSnapshotsResponse(javax.jms.Message message) throws Exception {
-        	return java.util.Arrays.stream(((javax.jms.TextMessage) message).getText().split(",")).map(Timetag::of).collect(Collectors.toList());
+        private List<String> handleListSnapshotsResponse(javax.jms.Message message) throws Exception {
+        	return java.util.Arrays.stream(((javax.jms.TextMessage) message).getText().split(",")).collect(Collectors.toList());
         }
 
         @Override
-        public synchronized $name+FirstUpperCase~Datamart snapshot(Timetag timetag) {
+        public synchronized $name+FirstUpperCase~Datamart snapshot(String timetag) {
         	if(timetag == null) return this;
         	return new $name+FirstUpperCase~DatamartImpl(connector) {
         		@Override
         		protected String snapshotTimetag() {
-        			return timetag.value();
+        			return timetag;
         		}
         		@Override
-        		public synchronized MasterDatamart snapshot(Timetag timetag) {
+        		public synchronized MasterDatamart snapshot(String timetag) {
         			if(timetag == null) return $name+FirstUpperCase~DatamartImpl.this;
-        			return snapshotTimetag().equals(timetag.value()) ? this : super.snapshot(timetag);
+        			return snapshotTimetag().equals(timetag) ? this : super.snapshot(timetag);
         		}
         	}.init();
         }
@@ -264,12 +280,12 @@ def type(datamart & message & impl)
 
 			@Override
 			public Query<EntityDefinition> entities() {
-				return new Query<>(List.of([$entity+definition...[,]]));
+				return new Query<EntityDefinition>(List.of([$entity+definition...[,]]));
 			}
 
 			@Override
 			public Query<StructDefinition> structs() {
-				return new Query<>(List.of([$struct+definition...[,]]));
+				return new Query<StructDefinition>(List.of([$struct+definition...[,]]));
 			}
 
 			@Override
@@ -297,6 +313,18 @@ def type(datamart & message & impl)
 			// Seriously why the heck are you reading this?? Are you a masochist or what
 
             [$struct+declareDefinition...[$NL]]
+		}
+
+		static {
+			try {
+				Object ref = $name+firstUpperCase~Datamart.class.getDeclaredField("definition").get(null);
+				java.lang.reflect.Field field = ref.getClass().getDeclaredField("definition");
+				field.setAccessible(true);
+				field.set(ref, definition);
+				field.setAccessible(false);
+			} catch (Exception e) {
+				throw new ExceptionInInitializerError("Could not set $name+firstUpperCase~Datamart.definition field");
+			}
 		}
     }
 end

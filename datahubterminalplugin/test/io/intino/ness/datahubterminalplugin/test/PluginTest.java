@@ -52,6 +52,7 @@ public class PluginTest {
 	public void should_build_test_terminals() {
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
 		launcher.deleteTempDirOnPublish(false);
+		launcher.publishTerminalsIfOntologyFails(true);
 		launcher.moduleStructure(new ModuleStructure(List.of(
 						new File(TEST_MODULE_PATH + "/src")),
 						List.of(new File(TEST_MODULE_PATH + "/res")),

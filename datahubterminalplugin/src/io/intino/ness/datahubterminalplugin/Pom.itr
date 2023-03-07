@@ -82,7 +82,7 @@ def trigger(master)
 	<dependency>
       	<groupId>io.intino.ness</groupId>
       	<artifactId>master</artifactId>
-      	<version>$masterVersion</version>
+      	<version>$version</version>
     </dependency>
 end
 

@@ -1,7 +1,6 @@
 package io.intino.ness.datahubterminalplugin;
 
 import io.intino.alexandria.logger.Logger;
-import io.intino.datahub.model.Datalake.Tank;
 import io.intino.datahub.model.NessGraph;
 import io.intino.datahub.model.Terminal;
 import io.intino.magritte.framework.Graph;
@@ -29,6 +28,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private static final String MAX_INGESTION_VERSION = "6.0.0";
 	private static final String MAX_EVENT_VERSION = "5.0.0";
 	private boolean deleteTempDirOnPublish = true;
+	private boolean publishTerminalsIfOntologyFails = false;
 
 	@Override
 	public void run() {
@@ -45,7 +45,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		NessGraph graph = loadGraph(resDirectory);
 		if (hasErrors(graph)) return;
 		Map<String, String> versions = versions();
-		if (!publishOntology(graph, versions, tempDir));
+		if (!publishOntology(graph, versions, tempDir) && !publishTerminalsIfOntologyFails) return;
 		publishTerminals(graph, versions, tempDir);
 		logger().println("Finished generation of terminals!");
 	}
@@ -217,5 +217,9 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 
 	public void deleteTempDirOnPublish(boolean deleteTempDirOnPublish) {
 		this.deleteTempDirOnPublish = deleteTempDirOnPublish;
+	}
+
+	public void publishTerminalsIfOntologyFails(boolean publishTerminalsIfOntologyFails) {
+		this.publishTerminalsIfOntologyFails = publishTerminalsIfOntologyFails;
 	}
 }
