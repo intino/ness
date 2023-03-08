@@ -6,7 +6,6 @@ import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.magritte.framework.Concept;
 import io.intino.magritte.framework.Node;
-import io.intino.ness.datahubterminalplugin.Formatters;
 
 import java.util.HashMap;
 import java.util.List;
@@ -95,12 +94,26 @@ public class EntityFrameFactory {
 		FrameBuilder builder = new FrameBuilder().add("attribute");
 		node.conceptList().forEach(aspect -> builder.add(aspect.name()));
 
-		EntityData attr = node.as(EntityData.class);
-		String type = typeOf(attr);
-
 		if(owner.is(Entity.Abstract.class) || owner.is(Entity.Decorable.class))
 			builder.add("castToSubclass", "(" + owner.name() + ")");
 
+		String type = typeOf(node);
+
+		if(node.is(EntityData.class)) handleEntityData(node, builder, type);
+
+		builder.add("name", node.name())
+				.add("owner", node.owner().name())
+				.add("package", workingPackage)
+				.add("index", node.owner().componentList().indexOf(node))
+				.add("entityOwner", owner.name());
+
+		processParameters(node, builder, type);
+
+		return builder.toFrame();
+	}
+
+	private static void handleEntityData(Node node, FrameBuilder builder, String type) {
+		EntityData attr = node.as(EntityData.class);
 		if(attr.isList() || attr.isSet()) {
 			String collectionType = attr.isList() ? "List" : "Set";
 			builder.add("type", collectionType + "<" + type + ">");
@@ -113,16 +126,6 @@ public class EntityFrameFactory {
 		} else {
 			builder.add("type", type);
 		}
-
-		builder.add("name", node.name())
-				.add("owner", node.owner().name())
-				.add("package", workingPackage)
-				.add("index", node.owner().componentList().indexOf(node))
-				.add("entityOwner", owner.name());
-
-		processParameters(node, builder, type);
-
-		return builder.toFrame();
 	}
 
 	private void processParameters(Node node, FrameBuilder builder, String type) {
@@ -195,6 +198,25 @@ public class EntityFrameFactory {
 		return typeOf(node);
 	}
 
+	private String typeOf(Node node) {
+		if(node.is(EntityData.class)) return typeOf(node.as(EntityData.class));
+		if(node.is(StructData.class)) return typeOf(node.as(StructData.class));
+		throw new IllegalArgumentException("Node " + node.name() + " must be an EntityData or a StructData");
+	}
+
+	private String typeOf(StructData node) {
+		if(node.isDouble()) return "Double";
+		if(node.isInteger()) return "Integer";
+		if(node.isLong()) return "Long";
+		if(node.isBoolean()) return "Boolean";
+		if(node.isString()) return "String";
+		if(node.isDate()) return "LocalDate";
+		if(node.isDateTime()) return "LocalDateTime";
+		if(node.isInstant()) return "Instant";
+		if(node.isWord()) return node.asWord().name$();
+		throw new RuntimeException("Unknown type of " + node.name$());
+	}
+
 	private String typeOf(EntityData node) {
 		if(node.isDouble()) return "Double";
 		if(node.isInteger()) return "Integer";
@@ -205,8 +227,9 @@ public class EntityFrameFactory {
 		if(node.isDateTime()) return "LocalDateTime";
 		if(node.isInstant()) return "Instant";
 		if(node.isWord()) return node.asWord().name$();
-		if(node.isStruct()) return node.asStruct().struct().name$();
+		if(node.isStruct()) return workingPackage + ".structs." + node.asStruct().struct().name$();
 		if(node.isEntity()) return node.asEntity().entity().name$();
+		if(node.isMap()) return "Map";
 		throw new RuntimeException("Unknown type of " + node.name$());
 	}
 

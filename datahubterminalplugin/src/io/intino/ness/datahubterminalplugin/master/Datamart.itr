@@ -107,8 +107,10 @@ def type(datamart & message & impl)
 
 	import org.apache.activemq.command.ActiveMQTextMessage;
 
-	import java.util.ArrayList;
 	import java.util.List;
+	import java.util.ArrayList;
+	import java.util.Map;
+	import java.util.HashMap;
 	import java.util.Optional;
 	import java.util.concurrent.atomic.AtomicBoolean;
 	import java.util.stream.Stream;
@@ -127,10 +129,12 @@ def type(datamart & message & impl)
 		private final AtomicBoolean initialized = new AtomicBoolean(false);
 		private final List<EntityListener> entityListeners = new ArrayList<>();
 		private final $name+FirstUpperCase~Datamart.Entities entities;
+		private final Map<String, List<MasterMounter>> mounters = new HashMap<>();
 
     	public $name+FirstUpperCase~DatamartImpl(Connector connector) {
     		this.connector = requireNonNull(connector);
     		this.entities = new $name+FirstUpperCase~Datamart.Entities(this);
+    		initMounters();
     	}
 
 		public synchronized $name+FirstUpperCase~DatamartImpl init() {
@@ -255,9 +259,11 @@ def type(datamart & message & impl)
 		}
 
 		public void mount(Event event) {
-			switch(event.type()) {
-				[$entity+mountSwitchCase...[$NL]]
-			}
+			mounters.getOrDefault("$event+FirstUpperCase", java.util.Collections.emptyList()).forEach(mounter -> mounter.mount(event));
+		}
+
+		private void initMounters() {
+			[$entity+registerMounter...[$NL]]
 		}
 
 		private static int availableThreads() {
@@ -370,7 +376,7 @@ def type(entity) trigger(declareDefinition)
 end
 
 def type(struct) trigger(declareDefinition)
-	public final StructDefinition $name+FirstUpperCase~StructDefinition = new StructDefinition() {
+	public final StructDefinition $name+firstLowerCase~StructDefinition = new StructDefinition() {
 		private final List<AttributeDefinition> declaredAttributes = initAttributeDefinitions();
 		public String fullName() {return "$fullName";}
 		public String name() {return "$name";}
@@ -432,8 +438,8 @@ def type(attribute) trigger(addDefinition)
 	});
 end
 
-def !type(abstract) type(entity) trigger(mountSwitchCase)
-	case "$name+FirstUpperCase": new $package.mounters.$name+FirstUpperCase~Mounter(entities, entityListeners).mount(event); break;
+def !type(abstract) type(entity) trigger(registerMounter)
+	mounters.computeIfAbsent("$event+firstUpperCase", type -> new ArrayList<>(1)).add(new $package.mounters.$name+FirstUpperCase~Mounter(entities, entityListeners));
 end
 
 def type(subclass) trigger(getAllStream)

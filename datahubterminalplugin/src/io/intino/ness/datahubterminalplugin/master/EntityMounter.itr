@@ -128,6 +128,14 @@ def type(attribute) type(entity) trigger(parseMethod)
 	}
 end
 
+def type(attribute) type(struct) trigger(parseMethod)
+	private $type parse$name+FirstUpperCase(Message m) {
+		m.get
+
+		return m.get("$name").as($type~.class);
+	}
+end
+
 def type(attribute) trigger(parseMethod)
 	private $type parse$name+FirstUpperCase(Message m) {
 		return m.get("$name").as($type~.class);

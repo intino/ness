@@ -118,6 +118,7 @@ class TerminalRenderer {
 						.add("namespace", namespace(m))
 						.add("namespaceQn", namespace(m).replace(".", ""))
 						.add("name", m.name$())
+						.add("typename", firstUpperCase(m.name$()))
 						.add("type", messagePackage(m) + "." + firstUpperCase(m.name$())).toFrame())
 				.toArray(Frame[]::new);
 	}
@@ -130,6 +131,7 @@ class TerminalRenderer {
 						.add("namespace", namespace(m))
 						.add("namespaceQn", namespace(m).replace(".", ""))
 						.add("name", m.name$())
+						.add("typename", firstUpperCase(m.name$()))
 						.add("type", measurementPackage(m) + "." + firstUpperCase(m.name$())).toFrame())
 				.toArray(Frame[]::new);
 	}

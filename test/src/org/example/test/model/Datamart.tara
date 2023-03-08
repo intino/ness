@@ -13,7 +13,15 @@ Datamart(scale = Day) master
 		Attribute users as Entity(User) List
 		Attribute channels as Entity(Channel) List
 
+	Struct Coords
+		Attribute x as Integer
+		Attribute y as Integer
+
 	Entity Channel > from = dl.channelAssertion
+		Attribute coordinate as Struct(Coords)
+		Attribute listOfStructs as Struct(Coords) List
+		Attribute setOfStructs as Struct(Coords) Set
+		Attribute map as Map
 
 	Entity System as Abstract
 		Attribute container as Entity(System)
@@ -21,7 +29,7 @@ Datamart(scale = Day) master
 		Attribute area as Entity(Area)
 		Attribute host as Entity(Host)
 
-	Entity Asset as ExtensionOf(System) > from = dl.assetAssertion
+	Entity Asset as ExtensionOf(System) > from = dl.systemAssertion
 		Attribute area as Entity(Area)
 		Attribute host as Entity(Host)
 

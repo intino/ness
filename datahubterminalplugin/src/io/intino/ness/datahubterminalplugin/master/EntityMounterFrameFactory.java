@@ -132,8 +132,9 @@ public class EntityMounterFrameFactory {
 		if(node.isDateTime()) return "LocalDateTime";
 		if(node.isInstant()) return "Instant";
 		if(node.isWord()) return node.asWord().name$();
-		if(node.isStruct()) return node.asStruct().struct().name$();
-		if(node.isEntity()) return node.asEntity().entity().name$();
+		if(node.isStruct()) return ontologyPackage + ".structs." + node.asStruct().struct().name$();
+		if(node.isEntity()) return ontologyPackage + ".entities." + node.asEntity().entity().name$();
+		if(node.isMap()) return "Map";
 		throw new RuntimeException("Unknown type of " + node.name$());
 	}
 

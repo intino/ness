@@ -171,19 +171,20 @@ public class DatamartsRenderer {
 
 	private Frame[] entitiesOf(Datamart datamart) {
 		return datamart.entityList().stream()
-				.map(c -> {
+				.map(entity -> {
 					final FrameBuilder b = new FrameBuilder("entity").add("package", modelPackage);
-					b.add("name", c.name$()).add("fullName", fullNameOf(c));
-					b.add("attribute", attributeFrames(c.attributeList().stream().map(Layer::core$), datamart));
-					if(c.isExtensionOf()) b.add("parent", c.asExtensionOf().entity().name$());
-					if (c.isAbstract()) {
+					b.add("name", entity.name$()).add("fullName", fullNameOf(entity));
+					b.add("attribute", attributeFrames(entity.attributeList().stream().map(Layer::core$), datamart));
+					if(entity.from() != null) b.add("event", entity.from().message().name$());
+					if(entity.isExtensionOf()) b.add("parent", entity.asExtensionOf().entity().name$());
+					if (entity.isAbstract()) {
 						b.add("abstract");
-						Frame[] subclasses = subclassesOf(c, datamart);
+						Frame[] subclasses = subclassesOf(entity, datamart);
 						if (subclasses.length > 0) {
 							b.add("subclass", subclasses);
 						}
 					}
-					b.add("isAbstract", c.isAbstract());
+					b.add("isAbstract", entity.isAbstract());
 					return b.toFrame();
 				}).toArray(Frame[]::new);
 	}
@@ -213,13 +214,16 @@ public class DatamartsRenderer {
 		FrameBuilder b = new FrameBuilder("attribute").add("name", attr.name$());
 
 		if(attr.isList() || attr.isSet()) {
-			b.add("type", attr.isList() ? "List" : "Set");
+			b.add("type", attr.isList() ? "java.util.List" : "java.util.Set");
 			b.add("collection");
 			String parameterType = typeOf(attr);
 			String parameterTypeName = parameterType;
 			if(attr.isEntity()) {
 				parameterType = modelPackage + ".entities." + attr.asEntity().entity().name$();
 				parameterTypeName = attr.asEntity().entity().name$();
+			} else if(attr.isStruct()) {
+				parameterType = modelPackage + ".structs." + attr.asStruct().struct().name$();
+				parameterTypeName = attr.asStruct().struct().name$();
 			}
 			b.add("parameterType", parameterType);
 			b.add("parameterTypeName", parameterTypeName);
@@ -227,10 +231,13 @@ public class DatamartsRenderer {
 			if(attr.isEntity()) param.add("entity");
 			else if(attr.isStruct()) param.add("struct");
 			b.add("parameter", param);
+		} else if(attr.isMap()) {
+			b.add("type", "java.util.Map").add("collection").add("parameterTypeName", "java.lang.String").add("parameterType", "java.lang.String");
+			b.add("parameter", new FrameBuilder("parameter"));
 		} else if(attr.isEntity()) {
 			b.add("type", modelPackage + ".entities." + attr.asEntity().entity().name$());
-		} else if(attr.isMap()) {
-			b.add("type", "Map").add("collection").add("parameterType", "java.lang.String");
+		}  else if(attr.isStruct()) {
+			b.add("type", modelPackage + ".structs." + attr.asStruct().struct().name$());
 		}
 
 		return b;

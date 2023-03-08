@@ -17,6 +17,7 @@ def type(terminal)
 	import java.util.Map;
     import java.util.Collections;
 	import java.util.concurrent.TimeUnit;
+	import java.util.stream.Stream;
 	import java.util.stream.Collectors;
 
 	import java.lang.reflect.Field;
@@ -35,11 +36,31 @@ def type(terminal)
 			[$datamart+addDatamartSubscribersCall...[$NL]]
 		}
 
-		public void publish(Object event) {
-			$publish+if...[$NL]
+		[$datamart+getter...[$NL]]
+
+		public void publish(Event event) {
+			switch(event.type()) {
+				$publish+publishSwitchCase...[$NL]
+			}
 		}
 
-		[$datamart+getter...[$NL]]
+		public void publish(Event first, Event ...others) {
+			publish(Stream.concat(Stream.of(first), java.util.Arrays.stream(others)));
+        }
+
+		public void publish(Event$[$] events) {
+			publish(java.util.Arrays.stream(events));
+        }
+
+       	public void publish(java.util.Collection<Event> events) {
+       		publish(events.stream());
+        }
+
+		public void publish(Stream<Event> events) {
+			events.filter(e -> channelOf(e.type()) != null)
+				.collect(Collectors.groupingBy(Event::type))
+				.forEach((type, eventList) -> connector.sendEvents(channelOf(type), eventList));
+		}
 
 		public io.intino.alexandria.datalake.Datalake datalake() {
 			try {
@@ -104,6 +125,12 @@ def type(terminal)
 
 		[$datamart+addDatamartSubscribers...[$NL$NL]]
 
+		private String channelOf(String type) {
+			switch(type) {
+				[$publish+channelOfSwitchCase...[$NL]]
+			}
+			return null;
+		}
 
 		public class BatchSession {
 			private final java.io.File temporalStage;
@@ -227,8 +254,12 @@ def type(devent) trigger(addSubscribe)
 	subscribe(($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_$datamart_$message");
 end
 
-def trigger(if)
-	if (event instanceof $type) publish(($type) event);
+def trigger(publishSwitchCase)
+	case "$typename+FirstUpperCase": publish(($type) event); break;
+end
+
+def trigger(channelOfSwitchCase)
+	case "$typename+FirstUpperCase": return "$channel";
 end
 
 def !type(bpm) trigger(tankOf)
@@ -251,6 +282,17 @@ def !type(bpm) trigger(publish)
 	public void publish($type $message+firstLowerCase) {
 		connector.sendEvent("$channel", $message+firstLowerCase);
 	}
+
+	public void publish($type first, $type ...others) {
+		$type$[$] array = new $type$[1 + others.length$];
+		array$[0$] = first;
+		java.lang.System.arraycopy(others, 0, array, 1, others.length);
+    	publish(array);
+    }
+
+	public void publish($type$[$] events) {
+    	connector.sendEvents("$channel", java.util.Arrays.asList(events));
+    }
 end
 
 def type(measurement) trigger(subscribe)
