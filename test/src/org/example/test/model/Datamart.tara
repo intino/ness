@@ -29,7 +29,7 @@ Datamart(scale = Day) master
 		Attribute area as Entity(Area)
 		Attribute host as Entity(Host)
 
-	Entity Asset as ExtensionOf(System) > from = dl.systemAssertion
+	Entity Asset as ExtensionOf(System) > from = dl.assetAssertion
 		Attribute area as Entity(Area)
 		Attribute host as Entity(Host)
 

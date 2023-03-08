@@ -44,6 +44,6 @@ public class MasterDatamartMessageMounter {
 	}
 
 	private static boolean isDisabled(Message message) {
-		return !message.contains("enabled") || message.get("enabled").asBoolean();
+		return message.contains("enabled") && !message.get("enabled").asBoolean();
 	}
 }

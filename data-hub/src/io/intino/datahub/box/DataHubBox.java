@@ -122,12 +122,12 @@ public class DataHubBox extends AbstractBox {
 		if (graph.datalake() != null) {
 			this.datalake = new FileDatalake(datalakeDirectory());
 		}
+		if (graph.datamartList() != null && !graph.datamartList().isEmpty()) {
+			initMasterDatamarts();
+		}
 		if (graph.broker() != null) {
 			configureBroker();
 			nessService = new NessService(this);
-		}
-		if (graph.datamartList() != null && !graph.datamartList().isEmpty()) {
-			initMasterDatamarts();
 		}
 		sentinels = new Sentinels(this);
 	}

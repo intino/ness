@@ -63,6 +63,10 @@ public class MessageStoreRequest {
 	}
 
 	private Stream<Message> downloadDatamart(String datamartName, String timetag) {
+		if(timetag.isEmpty()) {
+			MasterDatamart<?> datamart = box.datamarts().get(datamartName);
+			return datamart == null ? null : downloadDatamart(datamart);
+		}
 		return loadMostRecentSnapshotTo(box.datamarts().root(), datamartName, asTimetag(timetag), box.graph())
 				.map(MasterDatamart.Snapshot::datamart)
 				.map(this::downloadDatamart)

@@ -24,6 +24,7 @@ public class MapMessageMasterDatamart implements MasterDatamart<Message> {
 		this.messages = Collections.synchronizedMap(messages);
 		this.subscribedEvents = definition.entityList().stream()
 				.map(Entity::from)
+				.filter(Objects::nonNull)
 				.map(m -> m.message().name$())
 				.collect(Collectors.toSet());
 	}

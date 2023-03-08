@@ -21,8 +21,9 @@ public class MasterDatamartSerializer {
 	public static void serialize(MasterDatamart<?> datamart, OutputStream outputStream) throws IOException {
 		if(datamart.elementType().equals(Message.class)) {
 			serializeMessageDatamart((MasterDatamart<Message>) datamart, outputStream);
+		} else {
+			throw new IllegalArgumentException("Datamart of " + datamart.elementType() + " not supported");
 		}
-		throw new IllegalArgumentException("Datamart of " + datamart.elementType() + " not supported");
 	}
 
 	private static void serializeMessageDatamart(MasterDatamart<Message> datamart, OutputStream outputStream) throws IOException {

@@ -62,6 +62,7 @@ public class MessageMasterDatamartFactory {
 
 	private Iterator<MessageEvent> reflowEntityTanksFrom(Timetag fromTimetag, Datamart definition) {
 		return definition.entityList().stream()
+				.filter(e -> e.from() != null)
 				.map(e -> datalake.messageStore().tank(e.from().name$()))
 				.flatMap(t -> fromTimetag == null ? t.content() : t.content((ss, ts) -> !ts.isBefore(fromTimetag)))
 				.iterator();
