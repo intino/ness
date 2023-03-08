@@ -146,10 +146,9 @@
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-spring:5.17.4" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-pool:5.17.4" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-jms-pool:5.17.4" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:message:3.1.0" level="project" />
-    <orderEntry type="library" name="Intino: org.antlr:antlr4-runtime:4.11.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.2.1" level="project" />
     <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.10" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:5.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:message:4.0.0" level="project" />
   </component>
 </module>
