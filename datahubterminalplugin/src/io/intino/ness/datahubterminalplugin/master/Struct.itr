@@ -1,0 +1,81 @@
+def type(struct)
+	package $package.structs;
+
+	import java.time.*;
+	import java.util.*;
+	import java.util.stream.*;
+
+	public class $name+FirstUpperCase {
+
+		$attribute+field...[$NL]
+
+		public $name+FirstUpperCase($attribute+parameter...[, ]) {
+			$attribute+assign...[$NL]
+		}
+
+		$attribute+getter...[$NL$NL]
+
+		[$expression+expressionDeclaration...[$NL$NL]]
+
+		@Override
+		public boolean equals(Object obj) {
+			if(obj == null) return false;
+			if(!obj.getClass().equals(getClass())) return false;
+			$name+FirstUpperCase other = ($name+FirstUpperCase) obj;
+			return $attribute+equals...[ && ];
+		}
+
+		@Override
+        public int hashCode() {
+        	return Objects.hash($attribute...[, ]);
+        }
+
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			$attribute+toString...[$NL]
+			sb.delete(sb.length() - 1, sb.length());
+			return sb.toString();
+		}
+	}
+end
+
+def trigger(getter)
+	public $type $name+firstLowerCase() {
+		return $name+firstLowerCase;
+	}
+end
+
+def trigger(assign)
+	this.$name+firstLowerCase = $name+firstLowerCase;
+end
+
+def trigger(field)
+	private final $type $name+firstLowerCase;
+end
+
+def trigger(parameter)
+	$type $name+firstLowerCase
+end
+
+def trigger(equals)
+	Objects.equals(this.$name+firstLowerCase, other.$name+firstLowerCase)
+end
+
+def trigger(toString)
+	sb.append(this.$name+firstLowerCase).append(',');
+end
+
+def type(attribute)
+	this.$name+firstLowerCase
+end
+
+def trigger(expressionDeclaration)
+	$modifier $returnType $name([$parameter+parameterDeclaration...[, ]]) {
+		$expression
+	}
+end
+
+def trigger(parameterDeclaration)
+	$type $name
+end

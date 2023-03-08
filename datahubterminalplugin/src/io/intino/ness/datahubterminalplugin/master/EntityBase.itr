@@ -1,139 +1,52 @@
 def type(entity & base)
-package $package;
+	package $package;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Objects;
+	import java.util.Collection;
+	import java.util.Map;
+	import java.util.List;
+	import java.util.ArrayList;
+	import java.util.Objects;
 
-import io.intino.ness.master.model.*;
-import io.intino.ness.master.reflection.*;
-import io.intino.ness.master.model.Concept.Attribute.Value;
+	import io.intino.ness.master.model.*;
+	import io.intino.ness.master.reflection.*;
+	import io.intino.ness.master.model.Concept.Attribute.Value;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
-public abstract class $datamart+FirstUpperCase~Entity implements Entity {
+	public abstract class $datamart+FirstUpperCase~Entity implements Entity {
 
-	private final String id;
-	private final $datamart~Datamart datamart;
-	private final Map<String, Attribute> attributes;
-	private List<ChangeListener> listeners;
-
-	public $datamart+FirstUpperCase~Entity(String id, $datamart~Datamart) {
-		this.id = id;
-		this.datamart = datamart;
-		this.attributes = createAllAttributes();
-	}
-
-	@Override
-	public String id() {
-		return id;
-	}
-
-	@Override
-	public boolean enabled() {
-		return enabled;
-	}
-
-	@Override
-	public $datamart+FirstUpperCase~Datamart datamart() {
-		return datamart;
-	}
-
-	@Override
-	public Concept.Attribute attribute(String name) {
-		return attributes.get(name);
-	}
-
-	@Override
-	public List<Concept.Attribute> attributes() {
-		return new ArrayList<>(attributes.values());
-	}
-
-	@Override
-	public void addChangeListener(ChangeListener listener) {
-		if(listener == null) throw new NullPointerException("ChangeListener cannot be null");
-		if(listeners == null) listeners = new ArrayList<>(1);
-		listeners.add(listener);
-	}
-
-	@Override
-	public EntityDefinition getDefinition() {
-		return datamart.getDefinition().entity(getClass().getSimpleName());
-	}
-
-	protected final void updateAttribute(String name, Object newValue) {
-		Attribute attribute = attribute(name);
-		Value oldValue = attribute.value();
-		attribute.setValue(newValue);
-		if(!oldValue.equals(attribute.value())) notifyChangeListeners(attribute, oldValue);
-	}
-
-	private void notifyChangeListeners(Attribute attribute, Value oldValue) {
-		if(listeners == null) return;
-		for(ChangeListener listener : listeners) {
-			try {listener.onChange(this, attribute, oldValue);} catch(Throwable e) {}
-		}
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		return id.equals(((Entity) o).id());
-	}
-
-	@Override
-	public int hashCode() {
-		return id.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return id;
-	}
-
-	protected Collection<Attribute> initDeclaredAttributes() {
-		return new ArrayList<>();
-	}
-
-	private Map<String, Attribute> createAllAttributes() {
-		Collection<Attribute> declaredAttribs = initDeclaredAttributes();
-		Map<String, Attribute> attributes = new java.util.LinkedHashMap<>(2 + declaredAttribs.size());
-		attributes.put("id", new Attribute("id", id));
-        attributes.put("enabled", new Attribute("enabled", true));
-        declaredAttribs.forEach(attr -> attributes.put(attr.name(), attr));
-        return this;
-	}
-
-	protected final class Attribute implements Concept.Attribute {
-
-		private final String name;
-		private Value value;
+		private final String id;
+		private final $datamart+FirstUpperCase~Datamart datamart;
+		private final Map<String, Attribute> attributes;
 		private List<ChangeListener> listeners;
 
-		public Attribute(String name) {
-        	this(name, null);
-        }
-
-		public Attribute(String name, Object initialValue) {
-			this.name = name;
-			this.value = new Value(initialValue);
+		public $datamart+FirstUpperCase~Entity(String id, $datamart+FirstUpperCase~Datamart datamart) {
+			this.id = id;
+			this.datamart = datamart;
+			this.attributes = createAllAttributes();
 		}
 
 		@Override
-		public String name() {
-			return name;
+		public String id() {
+			return id;
 		}
 
 		@Override
-		public AttributeDefinition getDefinition() {
-			return $datamart+FirstUpperCase~Entity.this.getDefinition().attribute(name);
+		public boolean enabled() {
+			return attribute("enabled").value().as(Boolean.class);
 		}
 
 		@Override
-		public Value value() {
-			return value;
+		public $datamart+FirstUpperCase~Datamart datamart() {
+			return datamart;
+		}
+
+		@Override
+		public Attribute attribute(String name) {
+			return attributes.get(name);
+		}
+
+		@Override
+		public List<Concept.Attribute> attributes() {
+			return new ArrayList<>(attributes.values());
 		}
 
 		@Override
@@ -143,18 +56,17 @@ public abstract class $datamart+FirstUpperCase~Entity implements Entity {
 			listeners.add(listener);
 		}
 
-		private void setValue(Object newValue) {
-			Value oldValue = this.value;
-			this.value = new Value(newValue);
-			if(!oldValue.equals(newValue)) notifyChangeListeners(oldValue, newValue);
+		void updateAttribute(String name, Object newValue) {
+			Attribute attribute = attribute(name);
+			Value oldValue = attribute.value();
+			attribute.setValue(newValue);
+			if(!oldValue.equals(attribute.value())) notifyChangeListeners(attribute, oldValue);
 		}
 
-		private void notifyChangeListeners(Value oldValue, Value newValue) {
+		private void notifyChangeListeners(Attribute attribute, Value oldValue) {
 			if(listeners == null) return;
 			for(ChangeListener listener : listeners) {
-				try {
-					listener.onValueChange(oldValue, newValue);
-				} catch(Throwable ignored) {}
+				try {listener.onChange(this, attribute, oldValue);} catch(Throwable e) {}
 			}
 		}
 
@@ -162,19 +74,149 @@ public abstract class $datamart+FirstUpperCase~Entity implements Entity {
 		public boolean equals(Object o) {
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
-			Attribute other = (Attribute) o;
-			return name().equals(other.name()) && type().equals(other.type()) && value.equals(other.value());
+			return id.equals(((Entity) o).id());
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(name, type, value);
+			return id.hashCode();
 		}
 
 		@Override
 		public String toString() {
-			return type.getSimpleName() + " " + name + " = " + value;
+			return id;
 		}
+
+		protected Collection<Attribute> initDeclaredAttributes() {
+			List<Attribute> attributes = new ArrayList<>();
+			attributes.add(new Attribute("id", id));
+			attributes.add(new Attribute("enabled", true));
+			return attributes;
+		}
+
+		private Map<String, Attribute> createAllAttributes() {
+			Collection<Attribute> declaredAttribs = initDeclaredAttributes();
+			Map<String, Attribute> attributes = new java.util.LinkedHashMap<>(2 + declaredAttribs.size());
+	        declaredAttribs.forEach(attr -> attributes.put(attr.name(), attr));
+	        return attributes;
+		}
+
+		protected final class Attribute implements Concept.Attribute {
+
+			private final String name;
+			private Value value;
+			private List<ChangeListener> listeners;
+
+			public Attribute(String name) {
+	        	this(name, null);
+	        }
+
+			public Attribute(String name, Object initialValue) {
+				this.name = name;
+				this.value = new Value(initialValue);
+			}
+
+			@Override
+			public AttributeDefinition getDefinition() {
+				return $datamart+FirstUpperCase~Entity.this.getDefinition().attribute(name).get();
+			}
+
+			@Override
+	        public String name() {
+	        	return name;
+	        }
+
+			@Override
+			public Value value() {
+				return value;
+			}
+
+			@Override
+			public void addChangeListener(ChangeListener listener) {
+				if(listener == null) throw new NullPointerException("ChangeListener cannot be null");
+				if(listeners == null) listeners = new ArrayList<>(1);
+				listeners.add(listener);
+			}
+
+			private void setValue(Object newValue) {
+				Value oldValue = this.value;
+				this.value = new Value(newValue);
+				if(!oldValue.equals(newValue)) notifyChangeListeners(oldValue, this.value);
+			}
+
+			private void notifyChangeListeners(Value oldValue, Value newValue) {
+				if(listeners == null) return;
+				for(ChangeListener listener : listeners) {
+					try {
+						listener.onValueChange(oldValue, newValue);
+					} catch(Throwable ignored) {}
+				}
+			}
+
+			@Override
+			public boolean equals(Object o) {
+				if (this == o) return true;
+				if (o == null || getClass() != o.getClass()) return false;
+				Attribute other = (Attribute) o;
+				return name().equals(other.name()) && type().equals(other.type()) && value.equals(other.value());
+			}
+
+			@Override
+			public int hashCode() {
+				return Objects.hash(name(), type(), value());
+			}
+
+			@Override
+			public String toString() {
+				return type().getSimpleName() + " " + name() + " = " + value();
+			}
+		}
+
+		protected static final class EntityDefinitionInternal implements EntityDefinition {
+
+        	private final String entityName;
+        	private EntityDefinition definition;
+
+        	public EntityDefinitionInternal(String entityName) {
+        		this.entityName = entityName;
+        	}
+
+        	@Override
+        	public boolean isAbstract() {
+        		return definition().isAbstract();
+        	}
+
+        	@Override
+        	public String fullName() {
+        		return definition().fullName();
+        	}
+
+        	@Override
+        	public List<AttributeDefinition> declaredAttributes() {
+        		return definition().declaredAttributes();
+        	}
+
+        	@Override
+        	public java.util.Optional<EntityDefinition> parent() {
+        		return definition().parent();
+        	}
+
+        	@Override
+        	public List<EntityDefinition> descendants() {
+        		return definition().descendants();
+        	}
+
+        	@Override
+        	public Class<?> javaClass() {
+        		return definition().javaClass();
+        	}
+
+        	private EntityDefinition definition() {
+        		if(definition == null) {
+        			definition = $datamart+FirstUpperCase~Datamart.definition.entity(entityName).orElseThrow(() -> new IllegalStateException("$datamart+FirstUpperCase~Datamart is not initialized"));
+        		}
+        		return definition;
+        	}
+        }
 	}
-}
 end

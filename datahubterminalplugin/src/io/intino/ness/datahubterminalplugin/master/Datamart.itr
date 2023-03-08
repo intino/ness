@@ -1,102 +1,218 @@
 def type(datamart & interface)
 	package $package;
 
-	import java.util.Arrays;
-    import java.util.List;
-    import java.util.UUID;
-    import java.util.stream.Stream;
-    import java.util.stream.Collectors;
-    import $package.entities.*;
+	import java.util.List;
+	import java.util.Map;
+	import java.util.concurrent.ConcurrentHashMap;
+	import java.util.stream.Stream;
+	import java.util.stream.Collectors;
 
-	public interface $name+FirstUpperCase~Datamart implements Datamart {
+	import io.intino.ness.master.Datamart;
+	import io.intino.ness.master.model.Entity;
+	import io.intino.ness.master.reflection.*;
+
+	public interface $name+FirstUpperCase~Datamart extends Datamart {
+
+		DatamartDefinition definition = new $name+FirstUpperCase~Datamart.DatamartDefinitionInternal();
+
+		List<String> listSnapshots();
+		$name+FirstUpperCase~Datamart snapshot(String timetag);
+
 		$entity+getterSignature...[$NL$NL]
-	}
 
-	interface Node<T extends $name+FirstUpperCase~Entity> {
+		class Entities {
 
-		int size();
+			private final $name+FirstUpperCase~Datamart datamart;
+			private final Map<EntityDefinition, Map<String, $name+FirstUpperCase~Entity>> entitiesByType;
 
-		T get(String id);
+			public Entities($name+FirstUpperCase~Datamart datamart) {
+				this.datamart = datamart;
+				this.entitiesByType = new ConcurrentHashMap<>();
+				datamart.getDefinition().entities().forEach(entity -> entitiesByType.put(entity, new ConcurrentHashMap<>()));
+			}
 
-		void put(String id, T entity);
+			public $name+FirstUpperCase~Datamart datamart() {
+				return datamart;
+			}
 
-		void remove(String id);
+        	public int size() {
+        		return entitiesByType.values().stream().mapToInt(Map::size).sum();
+        	}
 
-		Stream<T> stream();
+        	public $name+FirstUpperCase~Entity get(String id) {
+        		return mapOf(id).map(map -> map.get(id)).orElse(null);
+        	}
+
+			@SuppressWarnings("unchecked")
+        	public <T extends $name+FirstUpperCase~Entity> T get(EntityDefinition type, String id) {
+        		return (T) entitiesByType.get(type).get(id);
+            }
+
+        	public void add($name+FirstUpperCase~Entity entity) {
+        		entitiesByType.get(entity.getDefinition()).put(entity.id(), entity);
+        	}
+
+        	public void remove(String id) {
+        		mapOf(id).ifPresent(map -> map.remove(id));
+        	}
+
+        	public Stream<$name+FirstUpperCase~Entity> stream() {
+        		return entitiesByType.values().stream().flatMap(map -> map.values().stream());
+        	}
+
+			@SuppressWarnings("unchecked")
+        	public <T extends $name+FirstUpperCase~Entity> Stream<T> stream(EntityDefinition type) {
+        		return (Stream<T>) entitiesByType.entrySet().stream()
+        			.filter(e -> e.getKey().equals(type) || e.getKey().isDescendantOf(type))
+        			.flatMap(e -> e.getValue().values().stream());
+        	}
+
+        	public Stream<Entity> streamGeneric() {
+            	return entitiesByType.values().stream().flatMap(map -> map.values().stream());
+            }
+
+        	private java.util.Optional<Map<String, $name+FirstUpperCase~Entity>> mapOf(String id) {
+        		return entitiesByType.values().stream().filter(map -> map.containsKey(id)).findFirst();
+        	}
+        }
+
+		final class DatamartDefinitionInternal implements DatamartDefinition {
+			private DatamartDefinition definition;
+			private DatamartDefinitionInternal() {}
+			@Override
+			public String name() {return definition().name();}
+			@Override
+			public Datamart.Scale scale() {return definition().scale();}
+			@Override
+			public Query<EntityDefinition> entities() {return definition().entities();}
+			@Override
+			public Query<StructDefinition> structs() {return definition().structs();}
+			private DatamartDefinition definition() {
+				if(definition == null) throw new IllegalStateException("$name+FirstUpperCase~Datamart is not initialized");
+				return definition;
+			}
+		}
 	}
 end
 
 def type(datamart & message & impl)
 	package $package;
 
+	import io.intino.alexandria.Timetag;
+	import io.intino.alexandria.event.Event;
 	import io.intino.alexandria.logger.Logger;
 	import io.intino.alexandria.terminal.Connector;
+	import io.intino.ness.master.reflection.*;
+	import io.intino.ness.master.model.Entity;
+
 	import org.apache.activemq.command.ActiveMQTextMessage;
 
-	import javax.jms.Message;
-	import java.time.Instant;
-	import java.util.ArrayList;
-	import java.util.Collections;
 	import java.util.List;
-	import java.util.Set;
+	import java.util.ArrayList;
 	import java.util.Map;
-	import java.util.concurrent.*;
+	import java.util.HashMap;
+	import java.util.Optional;
 	import java.util.concurrent.atomic.AtomicBoolean;
-	import java.util.concurrent.atomic.AtomicReference;
 	import java.util.stream.Stream;
+	import java.util.stream.Collectors;
 
-	import static io.intino.ness.master.messages.DownloadMasterMessage.PROPERTY_ENTITY_SERIALIZER;
-	import static io.intino.ness.master.messages.DownloadMasterMessage.PROPERTY_ERROR;
+	import $ontologypackage.*;
+
 	import static java.util.Objects.requireNonNull;
 
-	import $package+validPackage~.master.Entities;
-	import $package+validPackage~.master.EntitiesView;
-	import $package.master.entities.*;
-
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	class $name+FirstUpperCase~DatamartImpl implements $name+FirstUpperCase~Datamart {
+	public class $name+FirstUpperCase~DatamartImpl implements $name+FirstUpperCase~Datamart {
 
 		private static final String DATAHUB_MESSAGE_TOPIC = "service.ness.datalake.messagestore";
-
-		private static final DatamartDefinition $name~Definition = initDatamartDefinition();
-
-    	$entity+node...[$NL]
+		private static final $name+FirstUpperCase~DatamartImpl.$name+FirstUpperCase~DatamartDefinition definition = new $name+FirstUpperCase~DatamartImpl.$name+FirstUpperCase~DatamartDefinition();
 
 		private final Connector connector;
 		private final AtomicBoolean initialized = new AtomicBoolean(false);
 		private final List<EntityListener> entityListeners = new ArrayList<>();
+		private final $name+FirstUpperCase~Datamart.Entities entities;
+		private final Map<String, List<MasterMounter>> mounters = new HashMap<>();
 
     	public $name+FirstUpperCase~DatamartImpl(Connector connector) {
     		this.connector = requireNonNull(connector);
+    		this.entities = new $name+FirstUpperCase~Datamart.Entities(this);
+    		initMounters();
     	}
 
-		public synchronized void init() {
+		public synchronized $name+FirstUpperCase~DatamartImpl init() {
 			try {
-				if(!initialized.compareAndSet(false, true)) return;
+				if(!initialized.compareAndSet(false, true)) return this;
 				downloadDatamartFromDatahub();
-				initDatahubMessageListener();
-				Logger.info("$name~Datamart (" + connector.clientId() + ") initialized successfully.");
+				Logger.info("$name+FirstUpperCase~Datamart (" + (snapshotTimetag().isEmpty() ? "" : "snapshot " + snapshotTimetag() + ", ")  + connector.clientId() + ") initialized successfully.");
 			} catch(Exception e) {
-				throw new MasterInitializationException("Entities failed to start: " + e.getMessage(), e);
+				throw new ExceptionInInitializerError("Entities failed to start because a " + e.getClass().getName() + " occurred: " + e.getMessage());
 			}
+			return this;
 		}
 
 		@Override
-    	public void addEntityListener(EntityListener listener) {
-    		if(listener == null) throw new NullPointerException("EntityListener cannot be null");
-    		entityListeners.add(listener);
-    	}
+		public int size() {
+			return entities.size();
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T extends Entity> T get(String id) {
+			return (T) entities.get(id);
+		}
+
+		@Override
+		public Stream<Entity> entities() {
+			return entities.streamGeneric();
+		}
+
+		@Override
+		public void addEntityListener(EntityListener listener) {
+			if(listener == null) throw new NullPointerException("EntityListener cannot be null");
+			entityListeners.add(listener);
+		}
+
+		@Override
+		public DatamartDefinition getDefinition() {
+			return definition;
+		}
+
+		@Override
+        public List<String> listSnapshots() {
+        	try {
+        		javax.jms.Message message = connector.requestResponse(DATAHUB_MESSAGE_TOPIC, listSnapshotsRequest());
+        		return handleListSnapshotsResponse(message);
+        	} catch (Exception e) {
+        		Logger.error("Could not download list of available snapshots: " + e.getMessage(), e);
+        		return java.util.Collections.emptyList();
+        	}
+        }
+
+        private javax.jms.Message listSnapshotsRequest() throws Exception {
+        	ActiveMQTextMessage message = new ActiveMQTextMessage();
+        	message.setText("datamart:" + name() + ":snapshots");
+        	return message;
+        }
+
+        private List<String> handleListSnapshotsResponse(javax.jms.Message message) throws Exception {
+        	return java.util.Arrays.stream(((javax.jms.TextMessage) message).getText().split(",")).collect(Collectors.toList());
+        }
+
+        @Override
+        public synchronized $name+FirstUpperCase~Datamart snapshot(String timetag) {
+        	if(timetag == null) return this;
+        	return new $name+FirstUpperCase~DatamartImpl(connector) {
+        		@Override
+        		protected String snapshotTimetag() {
+        			return timetag;
+        		}
+        		@Override
+        		public synchronized MasterDatamart snapshot(String timetag) {
+        			if(timetag == null) return $name+FirstUpperCase~DatamartImpl.this;
+        			return snapshotTimetag().equals(timetag) ? this : super.snapshot(timetag);
+        		}
+        	}.init();
+        }
 
     	$entity+getter...[$NL$NL]
-
-    	private void publishMessage(Message message) {
-    		connector.sendTopicMessage(ENTITIES_TOPIC, message);
-    	}
-
-		protected void initDatahubMessageListener() {
-			this.entityConsumer = new EntityMessageConsumer();
-			connector.attachListener(DATAHUB_MESSAGE_TOPIC, connector.clientId() + "-" + DATAHUB_MESSAGE_TOPIC, entityConsumer);
-		}
 
 		private void downloadDatamartFromDatahub() {
 			Logger.debug("Downloading datamart from datahub...");
@@ -108,7 +224,7 @@ def type(datamart & message & impl)
 
 		private Stream<Event> downloadEvents() {
 			try {
-				Message message = connector.requestResponse(DATAHUB_MESSAGE_TOPIC, downloadRequest());
+				javax.jms.Message message = connector.requestResponse(DATAHUB_MESSAGE_TOPIC, downloadRequest());
 				return handleDownloadResponse(message);
 			} catch (NullPointerException e) {
 				throw new RuntimeException("Could not download datamart: no response from datahub.");
@@ -117,10 +233,9 @@ def type(datamart & message & impl)
 			}
 		}
 
-		private Message downloadRequest() throws Exception {
+		private javax.jms.Message downloadRequest() throws Exception {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
 			message.setText("datamart:" + name() + ":" + snapshotTimetag());
-			message.compress();
 			return message;
 		}
 
@@ -129,11 +244,11 @@ def type(datamart & message & impl)
 		}
 
 		private Stream<Event> handleDownloadResponse(javax.jms.Message message) throws Exception {
-			BytesMessage m = (BytesMessage) message;
+			javax.jms.BytesMessage m = (javax.jms.BytesMessage) message;
 			int size = m.getIntProperty("content-size");
 			byte$[$] bytes = new byte$[size$];
 			m.readBytes(bytes, size);
-			return io.intino.alexandria.zim.ZimStream.of(new ByteArrayInputStream(bytes)).map(io.intino.alexandria.events.message.MessageEvent::new);
+			return io.intino.alexandria.zim.ZimStream.of(new java.io.ByteArrayInputStream(bytes)).map(io.intino.alexandria.event.message.MessageEvent::new);
 		}
 
 		private void loadEntitiesFromEvents(Stream<Event> events) {
@@ -144,110 +259,187 @@ def type(datamart & message & impl)
 		}
 
 		public void mount(Event event) {
-			switch(event.type()) {
-				[$entity+mountSwitchCase...[$NL]]
-			}
+			mounters.getOrDefault("$event+FirstUpperCase", java.util.Collections.emptyList()).forEach(mounter -> mounter.mount(event));
 		}
 
-		private Message readMessage(String str) {
-			return new MessageReader(str).next();
+		private void initMounters() {
+			[$entity+registerMounter...[$NL]]
 		}
 
 		private static int availableThreads() {
 			return Runtime.getRuntime().availableProcessors();
 		}
 
-		private static DatamartDefinition initDatamartDefinition() {
-			return new DatamartDefinition() {
+		// WARNING: extremely compacted and ugly code ahead... continue at your own discretion.
 
-				private final List<io.intino.ness.master.reflection.EntityDefinition> entities = initEntityDefinitions();
-				private final List<io.intino.ness.master.reflection.StructDefinition> structs = initStructDefinitions();
+		public static final class $name+FirstUpperCase~DatamartDefinition implements DatamartDefinition {
 
-				@Override
-				public String name() {
-					return "$name";
+			@Override
+			public String name() {
+				return "$name";
+			}
+
+			@Override
+			public Scale scale() {
+				return Scale.$scale;
+			}
+
+			@Override
+			public Query<EntityDefinition> entities() {
+				return new Query<EntityDefinition>(List.of([$entity+definition...[,]]));
+			}
+
+			@Override
+			public Query<StructDefinition> structs() {
+				return new Query<StructDefinition>(List.of([$struct+definition...[,]]));
+			}
+
+			@Override
+			public Optional<EntityDefinition> entity(String name) {
+				switch(name) {
+					[$entity+defSwitchCase...[$NL]]
 				}
+				return Optional.empty();
+			}
 
-				@Override
-				public Scale scale() {
-					return Scale.$scale;
-				}
+			@Override
+        	public Optional<StructDefinition> struct(String name) {
+        		switch(name) {
+        			[$struct+defSwitchCase...[$NL]]
+        		}
+        		return Optional.empty();
+        	}
 
-				@Override
-				public Query<io.intino.ness.master.reflection.EntityDefinition> entities() {
-					return new Query<>(entities);
-				}
+			private $name+FirstUpperCase~DatamartDefinition datamart() {
+				return this;
+			}
 
-				@Override
-				public Query<io.intino.ness.master.reflection.StructDefinition> structs() {
-					return new Query<>(structs);
-				}
+			[$entity+declareDefinition...[$NL]]
 
-				private List<io.intino.ness.master.reflection.EntityDefinition> initEntityDefinitions() {
-					List<io.intino.ness.master.reflection.EntityDefinition> list = new ArrayList<>($numEntities);
-					[$entity+addDefinition...[$NL]]
-					return list;
-				}
+			// Seriously why the heck are you reading this?? Are you a masochist or what
 
-				private List<io.intino.ness.master.reflection.StructDefinition> initStructDefinitions() {
-					List<io.intino.ness.master.reflection.StructDefinition> list = new ArrayList<>($numStructs);
-					[$struct+addDefinition...[$NL]]
-					return list;
-				}
-			};
+            [$struct+declareDefinition...[$NL]]
+		}
+
+		static {
+			try {
+				Object ref = $name+firstUpperCase~Datamart.class.getDeclaredField("definition").get(null);
+				java.lang.reflect.Field field = ref.getClass().getDeclaredField("definition");
+				field.setAccessible(true);
+				field.set(ref, definition);
+				field.setAccessible(false);
+			} catch (Exception e) {
+				throw new ExceptionInInitializerError("Could not set $name+firstUpperCase~Datamart.definition field");
+			}
 		}
     }
 end
 
-def type(entity) trigger(addDefinition)
-	list.add(new EntityDefinition() {
+def type(entity) trigger(definition)
+	$name+firstLowerCase~EntityDefinition
+end
 
-		@Override
-		public String fullName() {
-			return "$fullName";
+def type(struct) trigger(definition)
+	$name+firstLowerCase~StructDefinition
+end
+
+def type(entity) trigger(defSwitchCase)
+	case "$name+FirstUpperCase": return Optional.of($name+firstLowerCase~EntityDefinition);
+end
+
+def type(struct) trigger(defSwitchCase)
+	case "$name+FirstUpperCase": return Optional.of($name+firstLowerCase~StructDefinition);
+end
+
+def type(entity) trigger(declareDefinition)
+	public final EntityDefinition $name+firstLowerCase~EntityDefinition = new EntityDefinition() {
+		private final List<AttributeDefinition> declaredAttributes = initAttributeDefinitions();
+		public String fullName() {return "$fullName";}
+		public String name() {return "$name";}
+		public boolean isAbstract() {return $isAbstract;}
+		public List<AttributeDefinition> declaredAttributes() {	return declaredAttributes;}
+		public Optional<EntityDefinition> parent() {return datamart().entity("$parent");}
+		public List<EntityDefinition> descendants() {return datamart().entities().instanceOf(this);}
+		public Class<?> javaClass() {return $package.entities.$name+FirstUpperCase.class;}
+		private List<AttributeDefinition> initAttributeDefinitions() {
+			List<AttributeDefinition> list = new ArrayList<>($numAttributes);
+        	[$attribute+addDefinition...[$NL]]
+        	return list;
 		}
-
-		@Override
-		public String name() {
-			return "$name";
+		public boolean equals(Object other) {
+			if(other == null || other.getClass() != getClass()) return false;
+			return fullName().equals(((EntityDefinition)other).fullName());
 		}
+		public int hashCode() {return fullName().hashCode();}
+		public String toString() {return fullName();}
+	};
+end
 
-		@Override
-		public List<AttributeDefinition> declaredAttributes() {
-			return null;
+def type(struct) trigger(declareDefinition)
+	public final StructDefinition $name+firstLowerCase~StructDefinition = new StructDefinition() {
+		private final List<AttributeDefinition> declaredAttributes = initAttributeDefinitions();
+		public String fullName() {return "$fullName";}
+		public String name() {return "$name";}
+		public List<AttributeDefinition> declaredAttributes() {return declaredAttributes;}
+		public Optional<StructDefinition> parent() {return datamart().struct("$parent");}
+		public List<StructDefinition> descendants() {return datamart().structs().instanceOf(this);}
+		public Class<?> javaClass() {return $package.structs.$name+FirstUpperCase.class;}
+		private List<AttributeDefinition> initAttributeDefinitions() {
+			List<AttributeDefinition> list = new ArrayList<>($numAttributes);
+        	[$attribute+addDefinition...[$NL]]
+        	return list;
 		}
+		public boolean equals(Object other) {
+        	if(other == null || other.getClass() != getClass()) return false;
+        	return fullName().equals(((StructDefinition)other).fullName());
+        }
+        public int hashCode() {return fullName().hashCode();}
+        public String toString() {return fullName();}
+	};
+end
 
-		@Override
-		public Optional<ConceptDefinition> parent() {
-			return Optional.empty();
-		}
+def type(subclass) trigger(name)
+	"$name+FirstUpperCase"
+end
 
-		@Override
-		public List<ConceptDefinition> descendants() {
-			return null;
-		}
-
-		@Override
-		public Class<?> javaClass() {
-			return null;
+def type(attribute) type(collection) trigger(addDefinition)
+	list.add(new AttributeDefinition() {
+		public String name() {return "$name";}
+		public Class<?> type() {return $type~.class;}
+		public List<ParameterDefinition> parameters() {
+			return List.of(new ParameterDefinition() {
+				public Optional<ConceptDefinition<?>> asConceptDefinition() {
+					return $parameter+asConceptDefinition;
+				}
+				public Class<?> javaClass() {
+					return $parameterType~.class;
+				}
+			});
 		}
 	});
 end
 
-def type(entity) trigger(node)
-	private final Node<$name+FirstUpperCase> $name+firstLowerCase~Node = new $nodeImpl<>();
+def type(parameter) type(entity) trigger(asConceptDefinition)
+	Optional.of(datamart().$name+firstLowerCase~EntityDefinition)
 end
 
-def type(entity) trigger(mountSwitchCase)
-	case "$name+FirstUpperCase":
-		synchronized($name+firstLowerCase~Node) {
-	 		new $package.mounters.$name+FirstUpperCase($name+firstLowerCase~Node).mount(event);
-		}
-		break;
+def type(parameter) type(struct) trigger(asConceptDefinition)
+	Optional.of(datamart().$name+firstLowerCase~StructDefinition)
 end
 
-def type(subclass) trigger(getById)
-	case "$name+firstLowerCase": return $name+firstLowerCase(id);
+def type(parameter) trigger(asConceptDefinition)
+	Optional.empty()
+end
+
+def type(attribute) trigger(addDefinition)
+	list.add(new AttributeDefinition() {
+		public String name() {return "$name";}
+		public Class<?> type() {return $type~.class;}
+	});
+end
+
+def !type(abstract) type(entity) trigger(registerMounter)
+	mounters.computeIfAbsent("$event+firstUpperCase", type -> new ArrayList<>(1)).add(new $package.mounters.$name+FirstUpperCase~Mounter(entities, entityListeners));
 end
 
 def type(subclass) trigger(getAllStream)
@@ -257,11 +449,7 @@ end
 def type(abstract) trigger(getter)
 	@Override
 	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
-		if(id == null) return null;
-    	switch(Triplet.typeOf(id)) {
-    		$subclass+getById...[$NL]
-    	}
-    	return $name+Plural+firstLowerCase().filter(e -> id.equals(e.id().value())).findFirst().orElse(null);
+		return id == null ? null : ($package.entities.$name+FirstUpperCase) entities.get(definition.$name+firstLowerCase~EntityDefinition, id);
 	}
 
 	@Override
@@ -275,13 +463,12 @@ end
 def !type(abstract) trigger(getter)
 	@Override
 	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
-		if(id == null) return null;
-		return $name+firstLowerCase~Node.get(id);
+		return id == null ? null : entities.get(definition.$name+firstLowerCase~EntityDefinition, id);
 	}
 
 	@Override
 	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
-		return $name+firstLowerCase~Node.stream();
+		return entities.stream(definition.$name+firstLowerCase~EntityDefinition);
 	}
 end
 

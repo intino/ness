@@ -51,6 +51,7 @@ Concept:{0..1} Datalake
 Concept:Named Datamart
 	var word:SnapshotScale scale
 	has Entity
+	has Struct
 
 Concept:Named Terminal
 	Concept:{0..1} Bpm
@@ -61,6 +62,8 @@ Concept:Named Terminal
 	Concept:{0..1} Subscribe
 		var Datalake.Tank.Message[] messageTanks
 		var Datalake.Tank.Measurement[] measurementTanks = empty
+	Concept:{0..1} Datamarts
+		var Datamart[] list
 
 Concept Namespace
 	var string qn = @qn is private reactive
@@ -77,6 +80,7 @@ Concept:AvoidEventAttributes Message
 		var Component element
 		var boolean multiple = true
 	Aspect ExtensionOf > var Message parent
+	Aspect Assertion
 
 Concept Component
 	var boolean multiple = true

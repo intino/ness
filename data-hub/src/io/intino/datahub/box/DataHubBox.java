@@ -11,9 +11,9 @@ import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.broker.jms.JmsBrokerService;
 import io.intino.datahub.datalake.BrokerSessions;
 import io.intino.datahub.datalake.seal.DatahubSessionSealer;
-import io.intino.datahub.master.MasterDatamartRepository;
-import io.intino.datahub.master.datamarts.messages.MapMessageMasterDatamart;
-import io.intino.datahub.master.datamarts.messages.MessageMasterDatamartFactory;
+import io.intino.datahub.datamart.MasterDatamartRepository;
+import io.intino.datahub.datamart.messages.MapMessageMasterDatamart;
+import io.intino.datahub.datamart.messages.MessageMasterDatamartFactory;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Message;
 import io.intino.datahub.model.NessGraph;
@@ -155,7 +155,7 @@ public class DataHubBox extends AbstractBox {
 
 	private void loadBrokerService() {
 		if (this.graph.broker() != null && graph.broker().implementation() == null)
-			graph.broker().implementation(() -> new JmsBrokerService(graph, brokerStage()));
+			graph.broker().implementation(() -> new JmsBrokerService(this, brokerStage()));
 	}
 
 	private void configureBroker() {
@@ -187,7 +187,7 @@ public class DataHubBox extends AbstractBox {
 	private void initMasterDatamarts() {
 		File datamartsRoot = new File(configuration.home(), "datamarts");
 		masterDatamarts = new MasterDatamartRepository(datamartsRoot);
-		MessageMasterDatamartFactory datamartFactory = new MessageMasterDatamartFactory(datamartsRoot, datalake);
+		MessageMasterDatamartFactory datamartFactory = new MessageMasterDatamartFactory(graph, datamartsRoot, datalake);
 		for (Datamart datamart : graph.datamartList()) {
 			initDatamart(datamartFactory, datamart);
 		}
@@ -201,7 +201,7 @@ public class DataHubBox extends AbstractBox {
 			Logger.debug("MasterDatamart " + datamart.name$() + " initialized!");
 		} catch (IOException e) {
 			Logger.error("Could not initialize datamart " + datamart.name$() + ": " + e.getMessage(), e);
-			masterDatamarts.put(datamart.name$(), new MapMessageMasterDatamart(datamart.name$())); // TODO
+			masterDatamarts.put(datamart.name$(), new MapMessageMasterDatamart(datamart));
 		}
 	}
 }

@@ -1,32 +1,36 @@
-package io.intino.datahub.master.datamarts.messages;
+package io.intino.datahub.datamart.messages;
 
 import io.intino.alexandria.message.Message;
-import io.intino.datahub.master.MasterDatamart;
+import io.intino.datahub.datamart.MasterDatamart;
+import io.intino.datahub.model.Datamart;
+import io.intino.datahub.model.Entity;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MapMessageMasterDatamart implements MasterDatamart<Message> {
 
-	private final String name;
+	private final Datamart definition;
 	private final Map<String, Message> messages;
+	private final Set<String> subscribedEvents;
 
-	public MapMessageMasterDatamart(String name) {
-		this.name = name;
-		this.messages = new HashMap<>();
+	public MapMessageMasterDatamart(Datamart definition) {
+		this(definition, new HashMap<>(128));
 	}
 
-	public MapMessageMasterDatamart(String name, Map<String, Message> messages) {
-		this.name = name;
-		this.messages = messages;
+	public MapMessageMasterDatamart(Datamart definition, Map<String, Message> messages) {
+		this.definition = definition;
+		this.messages = Collections.synchronizedMap(messages);
+		this.subscribedEvents = definition.entityList().stream()
+				.map(Entity::from)
+				.map(m -> m.message().name$())
+				.collect(Collectors.toSet());
 	}
 
 	@Override
 	public String name() {
-		return name;
+		return definition.name$();
 	}
 
 	@Override
@@ -46,22 +50,7 @@ public class MapMessageMasterDatamart implements MasterDatamart<Message> {
 
 	@Override
 	public void put(String id, Message newMessage) {
-		Message oldMessage = messages.get(id);
-		if(oldMessage != null)
-			update(oldMessage, newMessage);
-		else
-			messages.put(id, newMessage);
-	}
-
-	private void update(Message message, Message changes) {
-		for(String attribute : changes.attributes()) {
-			message.set(attribute, changes.get(attribute).data());
-		}
-		// TODO: how to update old components??
-		List<Message> components = message.components();
-		for(Message newComponent : changes.components()) {
-			if(!components.contains(newComponent)) message.add(newComponent);
-		}
+		messages.put(id, newMessage);
 	}
 
 	@Override
@@ -98,10 +87,15 @@ public class MapMessageMasterDatamart implements MasterDatamart<Message> {
 		return Message.class;
 	}
 
+	@Override
+	public Collection<String> subscribedEvents() {
+		return subscribedEvents;
+	}
+
 	private void fail(MasterDatamart<Message> other, Map.Entry<String, Message> entry, String id) {
 		Message message = get(id);
 		if(!message.type().equals(entry.getValue().type()))
-			throw new IllegalStateException("Failed to merge datamart " + other.name() + " into " + name
+			throw new IllegalStateException("Failed to merge datamart " + other.name() + " into " + name()
 					+ ": A message with id '" + id + "' is already present.");
 	}
 }

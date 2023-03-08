@@ -30,7 +30,6 @@ public class BrokerSessions {
 		Logger.info("Pushing broker events");
 		pushTemporalSessions();
 		Logger.info("Pushed broker events");
-
 	}
 
 	private void pushTemporalSessions() {

@@ -10,17 +10,15 @@ import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.jms.MessageReader;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
-import io.intino.datahub.master.MasterDatamart;
-import io.intino.datahub.master.serialization.MasterDatamartSerializer;
-import io.intino.datahub.master.serialization.MasterDatamartSnapshots;
+import io.intino.datahub.datamart.MasterDatamart;
+import io.intino.datahub.datamart.serialization.MasterDatamartSerializer;
+import io.intino.datahub.datamart.serialization.MasterDatamartSnapshots;
 import org.apache.activemq.command.ActiveMQBytesMessage;
 import org.apache.activemq.command.ActiveMQTextMessage;
-import org.apache.activemq.util.ByteSequence;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -31,8 +29,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.intino.datahub.broker.jms.MessageTranslator.toJmsMessage;
-import static io.intino.datahub.master.serialization.MasterDatamartSnapshots.loadMostRecentSnapshotTo;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static io.intino.datahub.datamart.serialization.MasterDatamartSnapshots.loadMostRecentSnapshotTo;
 import static java.util.stream.Collectors.toList;
 
 public class MessageStoreRequest {
@@ -66,7 +63,7 @@ public class MessageStoreRequest {
 	}
 
 	private Stream<Message> downloadDatamart(String datamartName, String timetag) {
-		return loadMostRecentSnapshotTo(box.datamarts().root(), datamartName, asTimetag(timetag))
+		return loadMostRecentSnapshotTo(box.datamarts().root(), datamartName, asTimetag(timetag), box.graph())
 				.map(MasterDatamart.Snapshot::datamart)
 				.map(this::downloadDatamart)
 				.orElse(null);

@@ -4,13 +4,13 @@ import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
-import io.intino.datahub.master.MasterDatamart;
-import io.intino.datahub.master.serialization.MasterDatamartSnapshots;
+import io.intino.datahub.datamart.MasterDatamart;
+import io.intino.datahub.datamart.serialization.MasterDatamartSnapshots;
 import io.intino.datahub.model.rules.SnapshotScale;
 
 import java.time.LocalDate;
 
-import static io.intino.datahub.master.MasterDatamart.Snapshot.shouldCreateSnapshot;
+import static io.intino.datahub.datamart.MasterDatamart.Snapshot.shouldCreateSnapshot;
 
 public class DatamartsSnapshotAction {
 
@@ -32,7 +32,7 @@ public class DatamartsSnapshotAction {
 	private void createSnapshotIfNecessary(Timetag today, MasterDatamart<?> datamart) {
 		try {
 			if(shouldCreateSnapshot(today, scaleOf(datamart)))
-				MasterDatamartSnapshots.save(box.datamarts().root(), today, datamart);
+				MasterDatamartSnapshots.saveSnapshot(box.datamarts().root(), today, datamart);
 		} catch (Throwable e) {
 			Logger.error("Failed to handle snapshot of " + datamart.name() + ": " + e.getMessage(), e);
 		}

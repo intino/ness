@@ -3,8 +3,10 @@ package io.intino.datahub.broker.jms;
 import io.intino.alexandria.Scale;
 import io.intino.alexandria.jms.*;
 import io.intino.alexandria.logger.Logger;
+import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.model.Broker;
+import io.intino.datahub.model.Data;
 import io.intino.datahub.model.Datalake;
 import io.intino.datahub.model.NessGraph;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -38,8 +40,9 @@ import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 
 public class JmsBrokerService implements BrokerService {
 	private static final String NESS = "ness";
+
+	private final DataHubBox box;
 	private final File root;
-	private final NessGraph graph;
 	private final File brokerStage;
 	private final BrokerManager brokerManager;
 	private final PipeManager pipeManager;
@@ -47,13 +50,13 @@ public class JmsBrokerService implements BrokerService {
 
 	private org.apache.activemq.broker.BrokerService service;
 
-	public JmsBrokerService(NessGraph graph, File brokerStage) {
-		this.root = new File(graph.broker().path());
-		this.graph = graph;
+	public JmsBrokerService(DataHubBox box, File brokerStage) {
+		this.box = box;
+		this.root = new File(box.graph().broker().path());
 		this.brokerStage = brokerStage;
 		configure();
-		this.brokerManager = new BrokerManager(graph, new AdvisoryManager(jmsBroker()));
-		this.pipeManager = new PipeManager(brokerManager, graph.broker().pipeList());
+		this.brokerManager = new BrokerManager(box.graph(), new AdvisoryManager(jmsBroker()));
+		this.pipeManager = new PipeManager(brokerManager, box.graph().broker().pipeList());
 	}
 
 	public void start() {
@@ -87,6 +90,10 @@ public class JmsBrokerService implements BrokerService {
 		return brokerManager;
 	}
 
+	private NessGraph graph() {
+		return box.graph();
+	}
+
 	private void configure() {
 		try {
 			service = new org.apache.activemq.broker.BrokerService();
@@ -104,7 +111,7 @@ public class JmsBrokerService implements BrokerService {
 			addPolicies();
 			addTCPConnector();
 			addMQTTConnector();
-			graph.broker().bridgeList().forEach(this::addJmsBridge);
+			graph().broker().bridgeList().forEach(this::addJmsBridge);
 		} catch (Exception e) {
 			Logger.error("Error configuring: " + e.getMessage(), e);
 		}
@@ -113,7 +120,7 @@ public class JmsBrokerService implements BrokerService {
 	private List<AuthenticationUser> registerUsers() {
 		ArrayList<AuthenticationUser> users = new ArrayList<>();
 		users.add(new AuthenticationUser(NESS, NESS, "admin"));
-		for (Broker.User user : graph.broker().userList())
+		for (Broker.User user : graph().broker().userList())
 			users.add(new AuthenticationUser(user.name(), user.password(), "users"));
 		return users;
 	}
@@ -170,15 +177,15 @@ public class JmsBrokerService implements BrokerService {
 
 	private void addTCPConnector() throws Exception {
 		TransportConnector connector = new TransportConnector();
-		connector.setUri(new URI("tcp://0.0.0.0:" + graph.broker().port() + "?transport.useKeepAlive=true"));
+		connector.setUri(new URI("tcp://0.0.0.0:" + graph().broker().port() + "?transport.useKeepAlive=true"));
 		connector.setName("OWireConn");
 		service.addConnector(connector);
 	}
 
 	private void addMQTTConnector() throws Exception {
-		if (graph.broker().secondaryPort() == 0) return;
+		if (graph().broker().secondaryPort() == 0) return;
 		TransportConnector mqtt = new TransportConnector();
-		mqtt.setUri(new URI("mqtt://0.0.0.0:" + graph.broker().secondaryPort()));
+		mqtt.setUri(new URI("mqtt://0.0.0.0:" + graph().broker().secondaryPort()));
 		mqtt.setName("MQTTConn");
 		service.addConnector(mqtt);
 	}
@@ -319,8 +326,12 @@ public class JmsBrokerService implements BrokerService {
 		private void initMessageTankConsumers() {
 			if (graph.datalake() == null) return;
 			brokerStage.mkdirs();
-			graph.datalake().tankList().forEach(t -> brokerManager.registerTopicConsumer(t.qn(), new MessageSerializer(brokerStage, t, scale(t)).create()));
+			graph.datalake().tankList().forEach(this::registerMessageTankConsumer);
 			Logger.info("Tanks ignited!");
+		}
+
+		private void registerMessageTankConsumer(Datalake.Tank t) {
+			brokerManager.registerTopicConsumer(t.qn(), new MessageSerializer(brokerStage, t, scale(t), box.datamarts()).create());
 		}
 
 		private void registerProcessStatus(Scale scale, Datalake.ProcessStatus ps) {

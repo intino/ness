@@ -1,0 +1,99 @@
+def type(entity & class)
+	package $package.entities;
+
+	import io.intino.ness.master.model.*;
+	import io.intino.ness.master.reflection.EntityDefinition;
+
+	import java.time.*;
+	import java.util.*;
+	import java.util.stream.*;
+
+	import $package.$datamart+FirstUpperCase~Datamart;
+
+	public[ $isAbstract+firstLowerCase] class $name+FirstUpperCase extends $parent {
+
+		public static final EntityDefinition definition = new $package.$datamart+FirstUpperCase~Entity.EntityDefinitionInternal("$name+FirstUpperCase");
+
+		[$attribute+wordDeclaration...[$NL]]
+
+		public $abstract~$name+FirstUpperCase(String id, $datamart+FirstUpperCase~Datamart datamart) {
+			$parent+super
+		}
+
+		@Override
+        public EntityDefinition getDefinition() {
+        	return definition;
+        }
+
+		[$attribute+getter...[$NL$NL]]
+
+		[$expression+expressionDeclaration...[$NL$NL]]
+
+		protected Collection<Attribute> initDeclaredAttributes() {
+			Collection<Attribute> attributes = super.initDeclaredAttributes();
+			[$attribute+initAttribute...[$NL]]
+			return attributes;
+		}
+    }
+end
+
+def trigger(super)
+	super(id, datamart);
+end
+
+def trigger(abstract)
+	Abstract
+end
+
+def type(attribute) trigger(initAttribute)
+	attributes.add(new Attribute("$name", $defaultValue));
+end
+
+def type(word) trigger(wordDeclaration)
+	public enum $name+firstUpperCase {$value...[, ]}
+end
+
+def trigger(expressionDeclaration)
+	$modifier $returnType $name([$parameter+parameterDeclaration...[, ]]) {
+		$expression
+	}
+end
+
+def trigger(parameterDeclaration)
+	$type $name
+end
+
+def type(list | set) type(entity) trigger(getter)
+	public $type $name+firstLowerCase() {
+		return attribute("$name+firstLowerCase").value().<Collection<String>>as().stream()
+			.map(datamart()::$typeParameter+firstLowerCase)
+			.collect(Collectors.to$collectionType());
+	}
+end
+
+def type(entity) trigger(getter)
+	public $type $name+firstLowerCase() {
+		return datamart().$type+firstLowerCase(attribute("$name+firstLowerCase").value().as(String.class));
+	}
+end
+
+def trigger(getter)
+	public $type $name+firstLowerCase() {
+		return attribute("$name+firstLowerCase").value().<$type>as();
+	}
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
