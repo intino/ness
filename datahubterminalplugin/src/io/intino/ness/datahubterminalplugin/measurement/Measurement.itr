@@ -13,6 +13,10 @@ def type(measurement)
 			super("$name+firstUpperCase", sensor, ts, declaredMeasurements, new double$[$size]);
 		}
 
+		public $name+firstUpperCase(io.intino.alexandria.event.measurement.MeasurementEvent event) {
+			super("$name+firstUpperCase", event.ss(), event.ts(), event.measurements(), event.values());
+		}
+
 		public $name+firstUpperCase(io.intino.alexandria.message.Message message) {
 			super("$name+firstUpperCase", message.get("ss").asString(), message.get("ts").asInstant(), message.get("measurements").as(String$[].class), java.util.Arrays.stream(message.get("values").as(String$[].class)).mapToDouble(Double::parseDouble).toArray());
 		}
