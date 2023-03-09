@@ -1,22 +1,25 @@
 package io.intino.datahub.datamart.serialization;
 
-import io.intino.alexandria.Json;
 import io.intino.alexandria.message.Message;
+import io.intino.alexandria.zim.ZimStream;
 import io.intino.alexandria.zim.ZimWriter;
+import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.datamart.messages.MapMessageMasterDatamart;
+import io.intino.datahub.model.Data;
 import io.intino.datahub.model.Datamart;
-import io.intino.datahub.model.NessGraph;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.Serializable;
+import java.io.*;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class MasterDatamartSerializer {
+
+	public static void serialize(MasterDatamart<?> datamart, File file) throws IOException {
+		serialize(datamart, new FileOutputStream(file));
+	}
 
 	public static void serialize(MasterDatamart<?> datamart, OutputStream outputStream) throws IOException {
 		if(datamart.elementType().equals(Message.class)) {
@@ -35,26 +38,19 @@ public class MasterDatamartSerializer {
 		}
 	}
 
-	public static <T> MasterDatamart<T> deserialize(Reader reader, NessGraph graph) throws IOException {
-		try(reader) {
-			SerializedDatamart sd = Json.fromJson(reader, SerializedDatamart.class);
-			return (MasterDatamart<T>) new MapMessageMasterDatamart(definitionOf(sd.name, graph), sd.data);
+	public static <T> MasterDatamart<T> deserialize(File file, Datamart definition) throws IOException {
+		return deserialize(new FileInputStream(file), definition);
+	}
+
+	public static <T> MasterDatamart<T> deserialize(InputStream inputStream, Datamart definition) throws IOException {
+		try(Stream<Message> messages = ZimStream.of(inputStream)) {
+			return (MasterDatamart<T>) new MapMessageMasterDatamart(definition, messages);
 		}
 	}
 
-	private static Datamart definitionOf(String name, NessGraph graph) {
-		return graph.datamartList().stream()
-				.filter(d -> d.name$().equals(name))
-				.findFirst().orElseThrow(() -> new IllegalArgumentException("No datamart named " + name + " defined"));
-	}
-
-	private static class SerializedDatamart implements Serializable {
-		private final String name;
-		private final Map data;
-
-		public SerializedDatamart(String name, Map data) {
-			this.name = name;
-			this.data = data;
-		}
+	public static File backupFileOf(Datamart datamart, DataHubBox box) {
+		File file = new File(box.configuration().backupDirectory(), "datamarts/" + datamart.name$() + ".backup");
+		file.getParentFile().mkdirs();
+		return file;
 	}
 }

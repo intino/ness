@@ -6,8 +6,11 @@ import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Entity;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.Collections.synchronizedMap;
 
 public class MapMessageMasterDatamart implements MasterDatamart<Message> {
 
@@ -19,9 +22,19 @@ public class MapMessageMasterDatamart implements MasterDatamart<Message> {
 		this(definition, new HashMap<>(128));
 	}
 
+	public MapMessageMasterDatamart(Datamart definition, Stream<Message> messages) {
+		this.definition = definition;
+		this.messages = synchronizedMap(messages.filter(m -> m.contains("id")).collect(Collectors.toMap(m -> m.get("id").asString(), Function.identity())));
+		this.subscribedEvents = definition.entityList().stream()
+				.map(Entity::from)
+				.filter(Objects::nonNull)
+				.map(m -> m.message().name$())
+				.collect(Collectors.toSet());
+	}
+
 	public MapMessageMasterDatamart(Datamart definition, Map<String, Message> messages) {
 		this.definition = definition;
-		this.messages = Collections.synchronizedMap(messages);
+		this.messages = synchronizedMap(messages);
 		this.subscribedEvents = definition.entityList().stream()
 				.map(Entity::from)
 				.filter(Objects::nonNull)

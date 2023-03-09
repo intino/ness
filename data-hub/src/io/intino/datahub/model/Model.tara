@@ -50,6 +50,7 @@ Concept:{0..1} Datalake
 
 Concept:Named Datamart
 	var word:SnapshotScale scale
+	var boolean saveOnExit = true
 	has Entity
 	has Struct
 

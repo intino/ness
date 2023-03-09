@@ -5,6 +5,7 @@ import io.intino.alexandria.Timetag;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.datamart.MasterDatamart.Snapshot;
+import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.NessGraph;
 
 import java.io.*;
@@ -36,17 +37,23 @@ public class MasterDatamartSnapshots {
 	}
 
 	public static <T> Optional<Snapshot<T>> loadMostRecentSnapshotTo(File datamartsRoot, String datamartName, Timetag timetag, NessGraph graph) {
-		return findSnapshotFileOf(snapshotDirOf(datamartsRoot, datamartName), timetag).map(f -> deserialize(f, graph));
+		return findSnapshotFileOf(snapshotDirOf(datamartsRoot, datamartName), timetag).map(f -> deserialize(f, datamartName, graph));
 	}
 
-	private static <T> Snapshot<T> deserialize(File file, NessGraph graph) {
+	private static <T> Snapshot<T> deserialize(File file, String datamartName, NessGraph graph) {
 		try {
-			MasterDatamart<T> datamart = MasterDatamartSerializer.deserialize(new BufferedReader(new FileReader(file)), graph);
+			MasterDatamart<T> datamart = MasterDatamartSerializer.deserialize(new FileInputStream(file), definitionOf(datamartName, graph));
 			return new Snapshot<>(timetagOf(file), datamart);
 		} catch (IOException e) {
 			Logger.error("Failed to deserialize datamart snapshot " + file.getName() + ": " + e.getMessage(), e);
 			return null;
 		}
+	}
+
+	private static Datamart definitionOf(String name, NessGraph graph) {
+		return graph.datamartList().stream()
+				.filter(d -> d.name$().equals(name))
+				.findFirst().orElseThrow(() -> new IllegalArgumentException("No datamart named " + name + " defined"));
 	}
 
 	private static Timetag timetagOf(File file) {

@@ -16,7 +16,6 @@ import java.util.Map;
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
 import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
 
-// TODO: parse attributes from parent entities and implicit attributes from event T.T
 public class EntityMounterFrameFactory implements ConceptRenderer {
 	private static final String DOT = ".";
 

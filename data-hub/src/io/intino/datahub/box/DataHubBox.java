@@ -14,6 +14,7 @@ import io.intino.datahub.datalake.seal.DatahubSessionSealer;
 import io.intino.datahub.datamart.MasterDatamartRepository;
 import io.intino.datahub.datamart.messages.MapMessageMasterDatamart;
 import io.intino.datahub.datamart.messages.MessageMasterDatamartFactory;
+import io.intino.datahub.datamart.serialization.MasterDatamartSerializer;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Message;
 import io.intino.datahub.model.NessGraph;
@@ -187,11 +188,22 @@ public class DataHubBox extends AbstractBox {
 	private void initMasterDatamarts() {
 		File datamartsRoot = new File(configuration.home(), "datamarts");
 		masterDatamarts = new MasterDatamartRepository(datamartsRoot);
-		MessageMasterDatamartFactory datamartFactory = new MessageMasterDatamartFactory(graph, datamartsRoot, datalake);
+		MessageMasterDatamartFactory datamartFactory = new MessageMasterDatamartFactory(this, datamartsRoot, datalake);
 		for (Datamart datamart : graph.datamartList()) {
 			initDatamart(datamartFactory, datamart);
 		}
 		Logger.info("MasterDatamarts initialized (" + masterDatamarts.size() + ")");
+		Runtime.getRuntime().addShutdownHook(new Thread(this::saveDatamartBackups, "DatamartBackupsThread"));
+	}
+
+	private void saveDatamartBackups() {
+		for (Datamart datamart : graph.datamartList()) {
+			try {
+				MasterDatamartSerializer.serialize(masterDatamarts.get(datamart.name$()), MasterDatamartSerializer.backupFileOf(datamart, this));
+			} catch (Throwable e) {
+				Logger.error("Failed to save backup of " + datamart.name$() + ": " + e.getMessage(), e);
+			}
+		}
 	}
 
 	private void initDatamart(MessageMasterDatamartFactory datamartFactory, Datamart datamart) {

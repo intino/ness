@@ -4,14 +4,16 @@ import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.datalake.Datalake;
 import io.intino.alexandria.event.message.MessageEvent;
+import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
+import io.intino.datahub.box.DataHubBox;
+import io.intino.datahub.datamart.serialization.MasterDatamartSerializer;
 import io.intino.datahub.datamart.serialization.MasterDatamartSnapshots;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.NessGraph;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.Iterator;
 import java.util.Optional;
 
@@ -20,33 +22,51 @@ import static io.intino.datahub.datamart.serialization.MasterDatamartSnapshots.s
 
 public class MessageMasterDatamartFactory {
 
-	private final NessGraph graph;
+	private final DataHubBox box;
 	private final File datamartsRoot;
 	private final Datalake datalake;
 
-	public MessageMasterDatamartFactory(NessGraph graph, File datamartsRoot, Datalake datalake) {
-		this.graph = graph;
+	public MessageMasterDatamartFactory(DataHubBox box, File datamartsRoot, Datalake datalake) {
+		this.box = box;
 		this.datamartsRoot = datamartsRoot;
 		this.datalake = datalake;
 	}
 
 	public MasterDatamart<Message> create(Datamart definition) throws IOException {
-		Optional<MasterDatamart.Snapshot<Message>> snapshot = MasterDatamartSnapshots.loadMostRecentSnapshot(datamartsRoot, definition.name$(), graph);
+		Reference<MasterDatamart<Message>> datamart = new Reference<>();
+		Reference<Timetag> fromTimetag = new Reference<>();
 
-		MasterDatamart<Message> datamart;
-		Timetag fromTimetag;
-
-		if (snapshot.isPresent()) {
-			datamart = snapshot.get().datamart();
-			fromTimetag = snapshot.get().timetag();
-		} else {
-			datamart = new MapMessageMasterDatamart(definition);
-			fromTimetag = null;
+		if(failedToLoadLastBackupOf(definition, datamart, fromTimetag)) {
+			if (failedToLoadLastSnapshotOf(definition, datamart, fromTimetag)) {
+				datamart.value = new MapMessageMasterDatamart(definition);
+				fromTimetag.value = null;
+			}
+			reflow(datamart.value, fromTimetag.value, definition);
 		}
 
-		reflow(datamart, fromTimetag, definition);
+		return datamart.value;
+	}
 
-		return datamart;
+	private boolean failedToLoadLastBackupOf(Datamart definition, Reference<MasterDatamart<Message>> datamart, Reference<Timetag> fromTimetag) {
+		File backup = MasterDatamartSerializer.backupFileOf(definition, box);
+		if(!backup.exists()) return true;
+		try {
+			datamart.value = MasterDatamartSerializer.deserialize(backup, definition);
+		} catch (IOException e) {
+			Logger.error("Could not deserialize datamart " + definition.name$() + " from " + backup + ": " + e.getMessage(), e);
+			return true;
+		}
+		return false;
+	}
+
+	private boolean failedToLoadLastSnapshotOf(Datamart definition, Reference<MasterDatamart<Message>> datamart, Reference<Timetag> fromTimetag) {
+		Optional<MasterDatamart.Snapshot<Message>> snapshot = MasterDatamartSnapshots.loadMostRecentSnapshot(datamartsRoot, definition.name$(), box.graph());
+		if(snapshot.isPresent()) {
+			datamart.value = snapshot.get().datamart();
+			fromTimetag.value = snapshot.get().timetag();
+			return false;
+		}
+		return true;
 	}
 
 	private void reflow(MasterDatamart<Message> datamart, Timetag fromTimetag, Datamart definition) throws IOException {
@@ -66,5 +86,9 @@ public class MessageMasterDatamartFactory {
 				.map(e -> datalake.messageStore().tank(e.from().name$()))
 				.flatMap(t -> fromTimetag == null ? t.content() : t.content((ss, ts) -> !ts.isBefore(fromTimetag)))
 				.iterator();
+	}
+
+	private static class Reference<T> {
+		public T value;
 	}
 }
