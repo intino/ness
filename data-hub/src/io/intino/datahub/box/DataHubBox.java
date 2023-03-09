@@ -199,9 +199,10 @@ public class DataHubBox extends AbstractBox {
 	private void saveDatamartBackups() {
 		for (Datamart datamart : graph.datamartList()) {
 			try {
+				if(!datamart.saveOnExit()) continue;
 				MasterDatamartSerializer.serialize(masterDatamarts.get(datamart.name$()), MasterDatamartSerializer.backupFileOf(datamart, this));
 			} catch (Throwable e) {
-				Logger.error("Failed to save backup of " + datamart.name$() + ": " + e.getMessage(), e);
+				try {Logger.error("Failed to save backup of " + datamart.name$() + ": " + e.getMessage(), e);} catch(Throwable ignored) {}
 			}
 		}
 	}
