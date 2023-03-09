@@ -6,13 +6,11 @@ end
 
 def trigger(event)
 	public class $name+firstUpperCase [extends $parent] implements java.io.Serializable {
-		$split
-
 		[$attribute+declaration...[$NL]]
 		[$component+declaration...[$NL]]
 
 		public $name+firstUpperCase(String ss[, String $assertionId]) {
-			[this(new io.intino.alexandria.event.message.MessageEvent("$parentSuper", ss))?super("$name", ss)];
+			this(new io.intino.alexandria.event.message.MessageEvent("$name", ss).toMessage()[, $assertionId]);
 		}
 
 		public $name+firstUpperCase(io.intino.alexandria.event.message.MessageEvent event) {
@@ -21,7 +19,13 @@ def trigger(event)
 
 		public $name+firstUpperCase(io.intino.alexandria.message.Message message) {
 			super(message);
-			if(!message.contains("id")) throw new IllegalArgumentException("Assertion events must have an id");
+			[if (!message.contains("id")) throw new IllegalArgumentException("Assertion events must have an id");$assertionId+semicolon]
+		}
+
+		private $name+firstUpperCase(io.intino.alexandria.message.Message message, String id) {
+			super(message);
+			if (id == null) throw new IllegalArgumentException("Assertion Id cannot be null");
+			this.message.set("id", id);
 		}
 
 		public $name+firstUpperCase ts(java.time.Instant ts) {
@@ -56,18 +60,23 @@ def trigger(event)
 	}
 end
 
+def trigger(put)
+	if ($this == null) throw new IllegalArgumentException("Assertion Id cannot be null");
+	this.message.set("id", $this);
+end
+
 def trigger(component)
 	public static class $name+firstUpperCase [extends $parent] implements java.io.Serializable {
 		[$attribute+declaration...[$NL]]
 		[$component+declaration...[$NL]]
-		[$parent+delegate?protected io.intino.alexandria.message.Message message;]
+		[$parent+semicolon?protected io.intino.alexandria.message.Message message;]
 
 		public $name+firstUpperCase() {
 			[this(new io.intino.alexandria.message.Message("$parentSuper")?this.message = new io.intino.alexandria.message.Message("$name");]
 		}
 
 		public $name+firstUpperCase(io.intino.alexandria.message.Message message) {
-			[super(message)$parent+delegate?this.message = message;]
+			[super(message)$parent+semicolon?this.message = message;]
 		}
 
 		$attribute+getter...[$NL$NL]
@@ -90,27 +99,7 @@ def type(default) trigger(super)
 	super(")
 end
 
-def trigger(split)
-	public enum Split {
-		$enum+asEnum...[, ];
-
-		public abstract String qn();
-
-		public static Split splitByQn(String qn) {
-			return java.util.Arrays.stream(values()).filter(c -> c.qn().equals(qn)).findFirst().orElse(null);
-		}
-	}
-end
-
-def trigger(asEnum)
-	$value+snakeCaseToCamelCase {
-		public String qn() {
-			return "$qn";
-		}
-	}
-end
-
-def trigger(delegate)
+def trigger(semicolon)
 	;
 
 end
