@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import io.intino.Configuration;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.model.Datalake.Tank;
-import io.intino.datahub.model.Message;
 import io.intino.datahub.model.Namespace;
 import io.intino.datahub.model.Terminal;
+import io.intino.magritte.framework.Layer;
 import io.intino.ness.datahubterminalplugin.*;
 import io.intino.ness.datahubterminalplugin.MavenTerminalExecutor.Target;
 import io.intino.plugin.PluginLauncher.Notifier;
@@ -112,8 +112,12 @@ public class TerminalPublisher {
 	}
 
 	private void writeManifest(File srcDirectory) {
-		List<String> publish = terminal.publish() != null ? terminal.publish().messageTanks().stream().map(this::eventQn).collect(Collectors.toList()) : Collections.emptyList();
-		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().messageTanks().stream().map(this::eventQn).collect(Collectors.toList()) : Collections.emptyList();
+		List<String> publish = terminal.publish() != null ? terminal.publish().messageTanks().stream().map(this::eventQn).collect(Collectors.toList()) : new ArrayList<>();
+		if (terminal.publish() != null)
+			publish.addAll(terminal.publish().measurementTanks().stream().map(this::eventQn).collect(Collectors.toList()));
+		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().messageTanks().stream().map(this::eventQn).collect(Collectors.toList()) : new ArrayList<>();
+		if (terminal.subscribe() != null)
+			subscribe.addAll(terminal.subscribe().measurementTanks().stream().map(this::eventQn).collect(Collectors.toList()));
 		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses());
 		try {
 			Files.write(new File(srcDirectory, "terminal.mf").toPath(), new Gson().toJson(manifest).getBytes());
@@ -128,10 +132,14 @@ public class TerminalPublisher {
 
 	private Map<String, String> tankClasses() {
 		Map<String, String> tankClasses = new HashMap<>();
-		if (terminal.publish() != null)
-			terminal.publish().messageTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + namespace(t.message()).toLowerCase() + t.message().name$()));
-		if (terminal.subscribe() != null)
-			terminal.subscribe().messageTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + namespace(t.message()).toLowerCase() + t.message().name$()));
+		if (terminal.publish() != null) {
+			terminal.publish().messageTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + eventQn(t)));
+			terminal.publish().measurementTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + eventQn(t)));
+		}
+		if (terminal.subscribe() != null) {
+			terminal.subscribe().messageTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + eventQn(t)));
+			terminal.subscribe().measurementTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + eventQn(t)));
+		}
 		if (terminal.bpm() != null)
 			tankClasses.put(terminal.bpm().processStatusClass().substring(terminal.bpm().processStatusClass().lastIndexOf(".") + 1), terminal.bpm().processStatusClass());
 		return tankClasses;
@@ -141,8 +149,12 @@ public class TerminalPublisher {
 		return namespace(tank.message()) + tank.message().name$();
 	}
 
-	private String namespace(Message message) {
-		return message.core$().owner().is(Namespace.class) ? message.core$().ownerAs(Namespace.class).qn() + "." : "";
+	private String eventQn(Tank.Measurement tank) {
+		return namespace(tank.measurement()) + tank.measurement().name$();
+	}
+
+	private String namespace(Layer event) {
+		return event.core$().owner().is(Namespace.class) ? event.core$().ownerAs(Namespace.class).qn() + "." : "";
 	}
 
 

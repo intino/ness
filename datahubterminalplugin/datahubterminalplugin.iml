@@ -17,6 +17,7 @@
       <sourceFolder url="file://$MODULE_DIR$/temp/test/test-terminal/src" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/temp/test/monitor-terminal/src" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/temp/test/wizard-terminal/src" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/temp/cesar/monitor-terminal/src" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -46,7 +47,6 @@
     <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.10" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:json:1.2.0" level="project" />
     <orderEntry type="module" module-name="data-hub" />
-    <orderEntry type="library" name="Intino: io.intino.ness:master:2.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.1.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.0.5" level="project" />
     <orderEntry type="library" name="Intino: commons-codec:commons-codec:1.10" level="project" />
@@ -161,7 +161,6 @@
     <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-core:2.14.2" level="project" />
     <orderEntry type="library" name="Intino: org.slf4j:slf4j-api:1.7.36" level="project" />
     <orderEntry type="library" name="Intino: commons-logging:commons-logging:1.0.3" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:message:3.1.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: org.antlr:antlr4-runtime:4.11.1" level="project" />
+    <orderEntry type="module" module-name="master" />
   </component>
 </module>
