@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "6.0.0") data-hub-terminal-plugin
+Artifact("io.intino.ness", "6.0.1") data-hub-terminal-plugin
 	Imports
 		Compile("io.intino", "data-hub", "7.1.0")
 		Compile("io.intino.ness", "master", "2.0.0")
