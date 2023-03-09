@@ -106,7 +106,6 @@
     <orderEntry type="library" name="Intino: com.beust:jcommander:1.48" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:jms:1.4.1" level="project" />
     <orderEntry type="library" name="Intino: org.apache.xbean:xbean-spring:4.22" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.23.3" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:http:1.5.11" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:rest-accessor:2.4.2" level="project" />
     <orderEntry type="library" name="Intino: com.opencsv:opencsv:5.7.1" level="project" />
@@ -139,7 +138,6 @@
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-pool:5.17.4" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-jms-pool:5.17.4" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:5.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino:data-hub:7.1.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:message:4.0.0" level="project" />
     <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-databind:2.14.2" level="project" />
     <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-annotations:2.14.2" level="project" />
@@ -147,5 +145,8 @@
     <orderEntry type="library" name="Intino: org.slf4j:slf4j-api:1.7.36" level="project" />
     <orderEntry type="library" name="Intino: commons-logging:commons-logging:1.0.3" level="project" />
     <orderEntry type="module" module-name="master" />
+    <orderEntry type="library" name="Intino: io.intino:data-hub:8.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.23.6" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.ness:master:2.0.0" level="project" />
   </component>
 </module>
