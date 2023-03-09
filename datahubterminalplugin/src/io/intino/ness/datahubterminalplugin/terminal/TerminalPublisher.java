@@ -133,12 +133,12 @@ public class TerminalPublisher {
 	private Map<String, String> tankClasses() {
 		Map<String, String> tankClasses = new HashMap<>();
 		if (terminal.publish() != null) {
-			terminal.publish().messageTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + eventQn(t)));
-			terminal.publish().measurementTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + eventQn(t)));
+			terminal.publish().messageTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".message." + eventQn(t)));
+			terminal.publish().measurementTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".measurements." + eventQn(t)));
 		}
 		if (terminal.subscribe() != null) {
-			terminal.subscribe().messageTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + eventQn(t)));
-			terminal.subscribe().measurementTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".events." + eventQn(t)));
+			terminal.subscribe().messageTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".messages." + eventQn(t)));
+			terminal.subscribe().measurementTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".measurements." + eventQn(t)));
 		}
 		if (terminal.bpm() != null)
 			tankClasses.put(terminal.bpm().processStatusClass().substring(terminal.bpm().processStatusClass().lastIndexOf(".") + 1), terminal.bpm().processStatusClass());
