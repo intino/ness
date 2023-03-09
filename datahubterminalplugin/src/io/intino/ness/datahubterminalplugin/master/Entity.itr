@@ -66,14 +66,14 @@ end
 def type(list | set) type(entity) trigger(getter)
 	public $type $name+firstLowerCase() {
 		return attribute("$name+firstLowerCase").value().<Collection<String>>as().stream()
-			.map(datamart()::$typeParameter+firstLowerCase)
+			.map(datamart()::$typename+firstLowerCase)
 			.collect(Collectors.to$collectionType());
 	}
 end
 
 def type(entity) trigger(getter)
 	public $type $name+firstLowerCase() {
-		return datamart().$type+firstLowerCase(attribute("$name+firstLowerCase").value().as(String.class));
+		return datamart().$typename+firstLowerCase(attribute("$name+firstLowerCase").value().as(String.class));
 	}
 end
 

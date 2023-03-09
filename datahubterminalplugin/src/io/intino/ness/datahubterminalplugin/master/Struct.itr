@@ -6,6 +6,7 @@ def type(struct)
 	import java.util.stream.*;
 
 	public class $name+FirstUpperCase {
+	//TODO: definition
 
 		$attribute+field...[$NL]
 

@@ -6,7 +6,6 @@ import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
 import io.intino.magritte.framework.Layer;
-import io.intino.magritte.framework.Node;
 import io.intino.ness.datahubterminalplugin.util.ErrorUtils;
 import io.intino.plugin.PluginLauncher;
 
@@ -22,7 +21,7 @@ import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
 import static java.io.File.separator;
 import static java.util.stream.Collectors.toMap;
 
-public class DatamartsRenderer {
+public class DatamartsRenderer implements ConceptRenderer {
 	private static final String DOT = ".";
 	private static final String JAVA = ".java";
 
@@ -174,7 +173,7 @@ public class DatamartsRenderer {
 				.map(entity -> {
 					final FrameBuilder b = new FrameBuilder("entity").add("package", modelPackage);
 					b.add("name", entity.name$()).add("fullName", fullNameOf(entity));
-					b.add("attribute", attributeFrames(entity.attributeList().stream().map(Layer::core$), datamart));
+					b.add("attribute", attributeFrames(attributesOf(entity)));
 					if(entity.from() != null) b.add("event", entity.from().message().name$());
 					if(entity.isExtensionOf()) b.add("parent", entity.asExtensionOf().entity().name$());
 					if (entity.isAbstract()) {
@@ -191,46 +190,27 @@ public class DatamartsRenderer {
 
 	private Frame[] structsOf(Datamart datamart) {
 		return datamart.structList().stream()
-				.map(c -> {
+				.map(struct -> {
 					final FrameBuilder b = new FrameBuilder("struct").add("package", modelPackage);
-					b.add("name", c.name$()).add("fullName", fullNameOf(c));
-					b.add("attribute", attributeFrames(c.attributeList().stream().map(Layer::core$), datamart));
-					if(c.isExtensionOf()) b.add("parent", c.asExtensionOf().struct().name$());
+					b.add("name", struct.name$()).add("fullName", fullNameOf(struct));
+					b.add("attribute", attributeFrames(attributesOf(struct)));
+					if(struct.isExtensionOf()) b.add("parent", struct.asExtensionOf().struct().name$());
 					return b.toFrame();
 				}).toArray(Frame[]::new);
 	}
 
-	private Frame[] attributeFrames(Stream<Node> attributes, Datamart datamart) {
-		return attributes
-				.map(a -> a.is(EntityData.class)
-						? attributeFrameBuilder(a.as(EntityData.class))
-						: attributeFrameBuilder(a.as(StructData.class), datamart))
+	private Frame[] attributeFrames(List<ConceptAttribute> attributes) {
+		return attributes.stream()
+				.map(this::attributeFrameBuilder)
 				.map(FrameBuilder::toFrame)
 				.toArray(Frame[]::new);
 	}
 
-	private FrameBuilder attributeFrameBuilder(EntityData attr) {
-
+	private FrameBuilder attributeFrameBuilder(ConceptAttribute attr) {
 		FrameBuilder b = new FrameBuilder("attribute").add("name", attr.name$());
 
 		if(attr.isList() || attr.isSet()) {
-			b.add("type", attr.isList() ? "java.util.List" : "java.util.Set");
-			b.add("collection");
-			String parameterType = typeOf(attr);
-			String parameterTypeName = parameterType;
-			if(attr.isEntity()) {
-				parameterType = modelPackage + ".entities." + attr.asEntity().entity().name$();
-				parameterTypeName = attr.asEntity().entity().name$();
-			} else if(attr.isStruct()) {
-				parameterType = modelPackage + ".structs." + attr.asStruct().struct().name$();
-				parameterTypeName = attr.asStruct().struct().name$();
-			}
-			b.add("parameterType", parameterType);
-			b.add("parameterTypeName", parameterTypeName);
-			FrameBuilder param = new FrameBuilder("parameter").add("name", parameterTypeName);
-			if(attr.isEntity()) param.add("entity");
-			else if(attr.isStruct()) param.add("struct");
-			b.add("parameter", param);
+			setAttribCollectionInfo(attr, b);
 		} else if(attr.isMap()) {
 			b.add("type", "java.util.Map").add("collection").add("parameterTypeName", "java.lang.String").add("parameterType", "java.lang.String");
 			b.add("parameter", new FrameBuilder("parameter"));
@@ -238,44 +218,31 @@ public class DatamartsRenderer {
 			b.add("type", modelPackage + ".entities." + attr.asEntity().entity().name$());
 		}  else if(attr.isStruct()) {
 			b.add("type", modelPackage + ".structs." + attr.asStruct().struct().name$());
+		} else {
+			b.add("type", attr.type());
 		}
 
 		return b;
 	}
 
-	private FrameBuilder attributeFrameBuilder(StructData attr, Datamart datamart) {
-		return new FrameBuilder("attribute")
-				.add("name", attr.name$())
-				.add("type", typeOf(attr));
-	}
-
-	private String typeOf(EntityData node) {
-		if(node.isDouble()) return "Double";
-		if(node.isInteger()) return "Integer";
-		if(node.isLong()) return "Long";
-		if(node.isBoolean()) return "Boolean";
-		if(node.isString()) return "String";
-		if(node.isDate()) return "LocalDate";
-		if(node.isDateTime()) return "LocalDateTime";
-		if(node.isInstant()) return "Instant";
-		if(node.isWord()) return node.asWord().name$();
-		if(node.isStruct()) return node.asStruct().struct().name$();
-		if(node.isEntity()) return node.asEntity().entity().name$();
-		throw new RuntimeException("Unknown type of " + node.name$());
-	}
-
-	private String typeOf(StructData node) {
-		if(node.isDouble()) return "Double";
-		if(node.isInteger()) return "Integer";
-		if(node.isLong()) return "Long";
-		if(node.isBoolean()) return "Boolean";
-		if(node.isString()) return "String";
-		if(node.isDate()) return "LocalDate";
-		if(node.isDateTime()) return "LocalDateTime";
-		if(node.isInstant()) return "Instant";
-		if(node.isWord()) return node.asWord().name$();
-		if(node.isEntity()) return node.asEntity().entity().name$();
-		throw new RuntimeException("Unknown type of " + node.name$());
+	private void setAttribCollectionInfo(ConceptAttribute attr, FrameBuilder b) {
+		b.add("type", attr.isList() ? "java.util.List" : "java.util.Set");
+		b.add("collection");
+		String parameterType = attr.type();
+		String parameterTypeName = parameterType;
+		if(attr.isEntity()) {
+			parameterType = modelPackage + ".entities." + attr.asEntity().entity().name$();
+			parameterTypeName = attr.asEntity().entity().name$();
+		} else if(attr.isStruct()) {
+			parameterType = modelPackage + ".structs." + attr.asStruct().struct().name$();
+			parameterTypeName = attr.asStruct().struct().name$();
+		}
+		b.add("parameterType", parameterType);
+		b.add("parameterTypeName", parameterTypeName);
+		FrameBuilder param = new FrameBuilder("parameter").add("name", parameterTypeName);
+		if(attr.isEntity()) param.add("entity");
+		else if(attr.isStruct()) param.add("struct");
+		b.add("parameter", param);
 	}
 
 	private String fullNameOf(Entity e) {

@@ -27,18 +27,11 @@ public class Client {
 			.set("language", "es"));
 
 	public static void main(String[] args) throws IOException {
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		ZimWriter zimWriter = new ZimWriter(outputStream);
-		zimWriter.write(event.toMessage());
-		zimWriter.close();
-
-		byte[] bytes = outputStream.toByteArray();
-		List<Message> messages = ZimStream.of(new ByteArrayInputStream(bytes)).collect(Collectors.toList());
 
 		TestTerminal terminal = new TestTerminal(connector());
 		MasterDatamart datamart = terminal.masterDatamart();
 
-		terminal.publish(event);
+		terminal.publish(new UserAssertion(event));
 
 		System.out.println(datamart.user("user1"));
 	}

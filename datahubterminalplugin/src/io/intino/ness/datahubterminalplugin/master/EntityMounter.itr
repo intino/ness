@@ -111,14 +111,14 @@ def type(attribute) type(set) type(entity) trigger(parseMethod)
 end
 
 def type(attribute) type(list) trigger(parseMethod)
-	private java.util.List<$type> parse$name+FirstUpperCase(Message m) { // TODO: check
-		return java.util.Arrays.asList(m.get("$name").as($type$[$].class));
+	private java.util.List<$typeParameter> parse$name+FirstUpperCase(Message m) { // TODO: check
+		return java.util.Arrays.asList(m.get("$name").as($typeParameter$[$].class));
 	}
 end
 
 def type(attribute) type(set) trigger(parseMethod)
-	private java.util.Set<$type> parse$name+FirstUpperCase(Message m) { // TODO: check
-		return java.util.Set.of(m.get("$name").as($type$[$].class));
+	private java.util.Set<$typeParameter> parse$name+FirstUpperCase(Message m) { // TODO: check
+		return java.util.Set.of(m.get("$name").as($typeParameter$[$].class));
 	}
 end
 
@@ -130,9 +130,13 @@ end
 
 def type(attribute) type(struct) trigger(parseMethod)
 	private $type parse$name+FirstUpperCase(Message m) {
-		m.get
-
 		return m.get("$name").as($type~.class);
+	}
+end
+
+def type(attribute) type(map) trigger(parseMethod)
+	private java.util.Map<String, String> parse$name+FirstUpperCase(Message m) {
+		return m.get("$name").as(java.util.Map.class);
 	}
 end
 

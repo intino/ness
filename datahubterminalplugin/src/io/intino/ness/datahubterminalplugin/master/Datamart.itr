@@ -217,15 +217,16 @@ def type(datamart & message & impl)
 		private void downloadDatamartFromDatahub() {
 			Logger.debug("Downloading datamart from datahub...");
     		long start = java.lang.System.currentTimeMillis();
-			loadEntitiesFromEvents(downloadEvents());
+    		int$[$] numEvents = new int$[1$];
+			loadEntitiesFromEvents(downloadEvents(numEvents), numEvents);
 			long time = java.lang.System.currentTimeMillis() - start;
 			Logger.debug("Datamart downloaded from datahub after " + time + " ms");
 		}
 
-		private Stream<Event> downloadEvents() {
+		private Stream<Event> downloadEvents(int$[$] numEvents) {
 			try {
 				javax.jms.Message message = connector.requestResponse(DATAHUB_MESSAGE_TOPIC, downloadRequest());
-				return handleDownloadResponse(message);
+				return handleDownloadResponse(message, numEvents);
 			} catch (NullPointerException e) {
 				throw new RuntimeException("Could not download datamart: no response from datahub.");
 			} catch (Exception e) {
@@ -243,23 +244,24 @@ def type(datamart & message & impl)
 			return "";
 		}
 
-		private Stream<Event> handleDownloadResponse(javax.jms.Message message) throws Exception {
+		private Stream<Event> handleDownloadResponse(javax.jms.Message message, int$[$] numEvents) throws Exception {
 			javax.jms.BytesMessage m = (javax.jms.BytesMessage) message;
+			numEvents$[0$] = m.getIntProperty("size");
 			int size = m.getIntProperty("content-size");
 			byte$[$] bytes = new byte$[size$];
 			m.readBytes(bytes, size);
 			return io.intino.alexandria.zim.ZimStream.of(new java.io.ByteArrayInputStream(bytes)).map(io.intino.alexandria.event.message.MessageEvent::new);
 		}
 
-		private void loadEntitiesFromEvents(Stream<Event> events) {
-			if(availableThreads() >= 4)
-				events.forEach(this::mount);
-			else
+		private void loadEntitiesFromEvents(Stream<Event> events, int$[$] numEvents) {
+			if(availableThreads() >= 4 && numEvents$[0$] > 100)
 				events.parallel().forEach(this::mount);
+			else
+				events.forEach(this::mount);
 		}
 
 		public void mount(Event event) {
-			mounters.getOrDefault("$event+FirstUpperCase", java.util.Collections.emptyList()).forEach(mounter -> mounter.mount(event));
+			mounters.getOrDefault(event.type(), java.util.Collections.emptyList()).forEach(mounter -> mounter.mount(event));
 		}
 
 		private void initMounters() {

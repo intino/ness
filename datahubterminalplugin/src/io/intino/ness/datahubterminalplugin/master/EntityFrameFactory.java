@@ -7,15 +7,13 @@ import io.intino.itrules.FrameBuilder;
 import io.intino.magritte.framework.Concept;
 import io.intino.magritte.framework.Node;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
 import static io.intino.ness.datahubterminalplugin.Formatters.firstUpperCase;
 import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
 
-public class EntityFrameFactory {
+public class EntityFrameFactory implements ConceptRenderer {
 	private static final String DOT = ".";
 
 	static final Map<String, String> TheTypes = Map.of(
@@ -72,7 +70,7 @@ public class EntityFrameFactory {
 				.add("package", workingPackage)
 				.add("datamart", datamart.name$())
 				.add("name", entity.core$().name())
-				.add("attribute", entity.core$().componentList().stream().filter(a -> a.is(EntityData.class)).map(a -> attrFrameOf(a, entity.core$())).toArray())
+				.add("attribute", attributesOf(entity).stream().map(this::attrFrameOf).toArray(FrameBuilder[]::new))
 				.add("expression", entity.core$().componentList().stream().filter(a -> a.is(Expression.class)).map(ExpressionHelper::exprFrameOf).toArray());
 		if (!datamart.structList().isEmpty()) builder.add("hasStructs", new FrameBuilder().add("package", workingPackage));
 		final Parameter parent = parameter(entity.core$(), "entity");
@@ -83,45 +81,47 @@ public class EntityFrameFactory {
 	}
 
 	private String withFullPackage(String parent) {
-		return workingPackage + ".entities." + parent;
+		return entitiesPackage() + parent;
 	}
 
 	private String baseEntityName() {
 		return workingPackage + "." + firstUpperCase(datamart.name$()) + "Entity";
 	}
 
-	private Frame attrFrameOf(Node node, Node owner) {
+	private FrameBuilder attrFrameOf(ConceptAttribute attr) {
 		FrameBuilder builder = new FrameBuilder().add("attribute");
-		node.conceptList().forEach(aspect -> builder.add(aspect.name()));
+		attr.conceptList().forEach(aspect -> builder.add(aspect.name()));
+
+		Node owner = attr.owner();
 
 		if(owner.is(Entity.Abstract.class) || owner.is(Entity.Decorable.class))
 			builder.add("castToSubclass", "(" + owner.name() + ")");
 
-		String type = typeOf(node);
+		String type = attr.type();
+		builder.add("typename", type);
+		if(attr.isEntity()) type = entitiesPackage() + type;
+		else if(attr.isStruct()) type = structsPackage() + type;
 
-		if(node.is(EntityData.class)) handleEntityData(node, builder, type);
+		handleCollectionType(attr, builder, type);
 
-		builder.add("name", node.name())
-				.add("owner", node.owner().name())
+		builder.add("name", attr.name$())
+				.add("owner", owner.name())
 				.add("package", workingPackage)
-				.add("index", node.owner().componentList().indexOf(node))
+				.add("index", owner.componentList().indexOf(attr.core$()))
 				.add("entityOwner", owner.name());
 
-		processParameters(node, builder, type);
+		processParameters(attr.core$(), builder, type);
 
-		return builder.toFrame();
+		return builder;
 	}
 
-	private static void handleEntityData(Node node, FrameBuilder builder, String type) {
-		EntityData attr = node.as(EntityData.class);
+	private void handleCollectionType(ConceptAttribute attr, FrameBuilder builder, String type) {
 		if(attr.isList() || attr.isSet()) {
 			String collectionType = attr.isList() ? "List" : "Set";
 			builder.add("type", collectionType + "<" + type + ">");
-			builder.add("typeParameter", type);
 			builder.add("collectionType", collectionType);
 		} else if(attr.isMap()) {
 			builder.add("type", "Map<String, String>");
-			builder.add("typeParameter", "java.lang.String");
 			builder.add("collectionType", "Map");
 		} else {
 			builder.add("type", type);
@@ -163,78 +163,29 @@ public class EntityFrameFactory {
 		return type.equals("Date") ? "dd/MM/yyyy" : "dd/MM/yyyy HH:mm:ss";
 	}
 
-	private Frame structFrame(Struct node) {
+	private Frame structFrame(Struct struct) {
 		return new FrameBuilder("struct")
-				.add("name", node.core$().name())
+				.add("name", struct.core$().name())
 				.add("package", workingPackage)
-				.add("attribute", node.attributeList().stream().map(node1 -> attrFrameOf(node1.core$(), node.core$())).toArray())
+				.add("attribute", attributesOf(struct).stream().map(this::attrFrameOf).toArray())
 				.toFrame();
 	}
 
-	private Frame defaultValue(Node c, String type, Parameter defaultValue) {
-		FrameBuilder builder = new FrameBuilder(c.conceptList().stream().map(Concept::name).toArray(String[]::new));
-		return builder
-				.add("type", type)
-				.add("package", workingPackage)
-				.add("value", defaultValueOf(type, defaultValue))
-				.toFrame();
+	private String defaultValue(Node c, String type, Parameter defaultValue) {
+		return defaultValueOf(type, defaultValue);
+//		FrameBuilder builder = new FrameBuilder(c.conceptList().stream().map(Concept::name).toArray(String[]::new)).add("defaultValue");
+//		return builder
+//				.add("type", type)
+//				.add("package", workingPackage)
+//				.add("value", defaultValueOf(type, defaultValue))
+//				.toFrame();
 	}
 
 	private static String defaultValueOf(String type, Parameter defaultValue) {
-		if(type.contains("List<")) return "null";
-		if(type.contains("Set<")) return "null";
-		if(type.contains("Map<")) return "null";
+		if(type.contains("List<")) return "new java.util.ArrayList<>()";
+		if(type.contains("Set<")) return "new java.util.HashSet<>()";
+		if(type.contains("Map<")) return "new java.util.HashMap<>()";
 		return defaultValue.values().get(0).toString();
-	}
-
-	public static String typeParameterOf(String type) {
-		return type.substring(type.indexOf("<") + 1, type.lastIndexOf(">"));
-	}
-
-	private String typeOfWithCollections(EntityData node) {
-		if(node.isList()) return "List";
-		if(node.isSet()) return "Set";
-		if(node.isMap()) return "Map";
-		return typeOf(node);
-	}
-
-	private String typeOf(Node node) {
-		if(node.is(EntityData.class)) return typeOf(node.as(EntityData.class));
-		if(node.is(StructData.class)) return typeOf(node.as(StructData.class));
-		throw new IllegalArgumentException("Node " + node.name() + " must be an EntityData or a StructData");
-	}
-
-	private String typeOf(StructData node) {
-		if(node.isDouble()) return "Double";
-		if(node.isInteger()) return "Integer";
-		if(node.isLong()) return "Long";
-		if(node.isBoolean()) return "Boolean";
-		if(node.isString()) return "String";
-		if(node.isDate()) return "LocalDate";
-		if(node.isDateTime()) return "LocalDateTime";
-		if(node.isInstant()) return "Instant";
-		if(node.isWord()) return node.asWord().name$();
-		throw new RuntimeException("Unknown type of " + node.name$());
-	}
-
-	private String typeOf(EntityData node) {
-		if(node.isDouble()) return "Double";
-		if(node.isInteger()) return "Integer";
-		if(node.isLong()) return "Long";
-		if(node.isBoolean()) return "Boolean";
-		if(node.isString()) return "String";
-		if(node.isDate()) return "LocalDate";
-		if(node.isDateTime()) return "LocalDateTime";
-		if(node.isInstant()) return "Instant";
-		if(node.isWord()) return node.asWord().name$();
-		if(node.isStruct()) return workingPackage + ".structs." + node.asStruct().struct().name$();
-		if(node.isEntity()) return node.asEntity().entity().name$();
-		if(node.isMap()) return "Map";
-		throw new RuntimeException("Unknown type of " + node.name$());
-	}
-
-	public static boolean isProperTypeName(String s) {
-		return !s.equals("Set") && !s.equals("List") && !s.equals("Optional") && !s.equals("Type") && !s.equals("Required");
 	}
 
 	private Parameter parameter(Node c, String name) {
@@ -250,5 +201,13 @@ public class EntityFrameFactory {
 
 	private String calculateDecorableEntityPath(Node node, String aPackage) {
 		return aPackage + DOT + "entities" + DOT + firstUpperCase().format(javaValidName().format(node.name()).toString());
+	}
+
+	private String structsPackage() {
+		return workingPackage + ".structs.";
+	}
+
+	private String entitiesPackage() {
+		return workingPackage + ".entities.";
 	}
 }

@@ -211,6 +211,18 @@ def type(entity & base)
         		return definition().javaClass();
         	}
 
+        	@Override
+        	public boolean equals(Object o) {
+        		if(o == null) return false;
+        		if(o instanceof EntityDefinition) return o.equals(definition());
+        		return false;
+        	}
+
+        	@Override
+        	public int hashCode() {
+        		return java.util.Objects.hash(definition());
+        	}
+
         	private EntityDefinition definition() {
         		if(definition == null) {
         			definition = $datamart+FirstUpperCase~Datamart.definition.entity(entityName).orElseThrow(() -> new IllegalStateException("$datamart+FirstUpperCase~Datamart is not initialized"));

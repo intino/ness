@@ -11,8 +11,8 @@ def trigger(event)
 		[$attribute+declaration...[$NL]]
 		[$component+declaration...[$NL]]
 
-		public $name+firstUpperCase(String ss) {
-			[super(new io.intino.alexandria.event.message.MessageEvent("$parentSuper", ss))?super("$name", ss)];
+		public $name+firstUpperCase(String ss[, String $assertionId]) {
+			[this(new io.intino.alexandria.event.message.MessageEvent("$parentSuper", ss))?super("$name", ss)];
 		}
 
 		public $name+firstUpperCase(io.intino.alexandria.event.message.MessageEvent event) {
@@ -21,6 +21,7 @@ def trigger(event)
 
 		public $name+firstUpperCase(io.intino.alexandria.message.Message message) {
 			super(message);
+			if(!message.contains("id")) throw new IllegalArgumentException("Assertion events must have an id");
 		}
 
 		public $name+firstUpperCase ts(java.time.Instant ts) {

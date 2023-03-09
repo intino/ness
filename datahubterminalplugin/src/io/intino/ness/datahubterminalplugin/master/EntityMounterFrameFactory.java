@@ -1,54 +1,24 @@
 package io.intino.ness.datahubterminalplugin.master;
 
 
-import io.intino.datahub.model.*;
+import io.intino.datahub.model.Datamart;
+import io.intino.datahub.model.Entity;
+import io.intino.datahub.model.Struct;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.magritte.framework.Concept;
 import io.intino.magritte.framework.Node;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
 import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
 
 // TODO: parse attributes from parent entities and implicit attributes from event T.T
-public class EntityMounterFrameFactory {
+public class EntityMounterFrameFactory implements ConceptRenderer {
 	private static final String DOT = ".";
-
-	static final Map<String, String> TheTypes = Map.of(
-			"String", "String",
-			"Double", "double",
-			"Integer", "int",
-			"Long", "long",
-			"Boolean", "boolean",
-			"Date", "LocalDate",
-			"DateTime", "LocalDateTime",
-			"Instant", "Instant"
-	);
-
-	static final Map<String, String> ListTypes = Map.of(
-			"String", "List<String>",
-			"Double", "List<Double>",
-			"Integer", "List<Integer>",
-			"Boolean", "List<Boolean>",
-			"Long", "List<Long>",
-			"Date", "List<LocalDate>",
-			"DateTime", "List<LocalDateTime>",
-			"Instant", "List<Instant>"
-	);
-
-	static final Map<String, String> SetTypes = Map.of(
-			"String", "Set<String>",
-			"Double", "Set<Double>",
-			"Integer", "Set<Integer>",
-			"Boolean", "Set<Boolean>",
-			"Long", "Set<Long>",
-			"Date", "Set<LocalDate>",
-			"DateTime", "Set<LocalDateTime>",
-			"Instant", "Set<Instant>"
-	);
 
 	private final String destinationPackage;
 	private final String ontologyPackage;
@@ -72,7 +42,7 @@ public class EntityMounterFrameFactory {
 				.add("ontologypackage", ontologyPackage)
 				.add("datamart", datamart.name$())
 				.add("name", entity.core$().name())
-				.add("attribute", attributesOf(entity).toArray(Frame[]::new));
+				.add("attribute", attributesOf(entity).stream().map(this::attrFrameOf).toArray(FrameBuilder[]::new));
 		if (!datamart.structList().isEmpty()) builder.add("hasStructs", new FrameBuilder().add("package", destinationPackage));
 		final Parameter parent = parameter(entity.core$(), "entity");
 		builder.add("parent", parent != null ? ((Entity) parent.values().get(0)).name$() : "io.intino.ness.master.model.Entity");
@@ -82,96 +52,54 @@ public class EntityMounterFrameFactory {
 		return builder;
 	}
 
-	private Collection<Frame> attributesOf(Entity entity) {
-		Map<String, FrameBuilder> attribs = new LinkedHashMap<>();
-		getAttributesFromEvent(entity, entity.from().message().attributeList(), attribs);
-		getAttributesFromParents(entity, attribs);
-		getAttributesFromEntity(entity.attributeList(), attribs);
-		return attribs.values().stream().map(FrameBuilder::toFrame).collect(Collectors.toList());
-	}
-
-	private void getAttributesFromEvent(Entity entity, List<Attribute> attributes, Map<String, FrameBuilder> map) {
-		for(Attribute attr : attributes) {
-			if(entity.exclude().contains(attr.name$())) continue;
-			FrameBuilder b = new FrameBuilder("attribute");
-			if(attr.isList()) b.add("list");
-			map.put(attr.name$(), b.add("name", attr.name$()).add("type", typeOf(attr)));
-		}
-	}
-
-	private void getAttributesFromParents(Entity entity, Map<String, FrameBuilder> map) {
-		if(!entity.isExtensionOf()) return;
-		List<Entity.Attribute> attributes = new ArrayList<>();
-		Entity parent = entity.asExtensionOf().entity();
-		while(parent != null) {
-			attributes.addAll(parent.attributeList());
-			parent = parent.isExtensionOf() ? parent.asExtensionOf().entity() : null;
-		}
-		Collections.reverse(attributes);
-		getAttributesFromEntity(attributes, map);
-	}
-
-	private void getAttributesFromEntity(List<Entity.Attribute> attributes, Map<String, FrameBuilder> map) {
-		for(Entity.Attribute attr : attributes) {
-			FrameBuilder b = new FrameBuilder("attribute");
-			if(attr.isList()) b.add("list");
-			if(attr.isSet()) b.add("set");
-			if(attr.isMap()) b.add("map");
-			if(attr.isEntity()) b.add("entity");
-			map.put(attr.name$(), b.add("name", attr.name$()).add("type", typeOf(attr)));
-		}
-	}
-
-	private String typeOf(EntityData node) {
-		if(node.isDouble()) return "Double";
-		if(node.isInteger()) return "Integer";
-		if(node.isLong()) return "Long";
-		if(node.isBoolean()) return "Boolean";
-		if(node.isString()) return "String";
-		if(node.isDate()) return "LocalDate";
-		if(node.isDateTime()) return "LocalDateTime";
-		if(node.isInstant()) return "Instant";
-		if(node.isWord()) return node.asWord().name$();
-		if(node.isStruct()) return ontologyPackage + ".structs." + node.asStruct().struct().name$();
-		if(node.isEntity()) return ontologyPackage + ".entities." + node.asEntity().entity().name$();
-		if(node.isMap()) return "Map";
-		throw new RuntimeException("Unknown type of " + node.name$());
-	}
-
-	private String typeOf(Attribute node) {
-		if(node.isReal()) return "Double";
-		if(node.isInteger()) return "Integer";
-		if(node.isLongInteger()) return "Long";
-		if(node.isBool()) return "Boolean";
-		if(node.isText()) return "String";
-		if(node.isDate()) return "LocalDate";
-		if(node.isDateTime()) return "Instant";
-		if(node.isWord()) return node.asWord().name$();
-		throw new RuntimeException("Unknown type of " + node.name$());
-	}
-
-	private Frame attrFrameOf(Node node, Node owner) {
+	private FrameBuilder attrFrameOf(ConceptAttribute attr) {
 		FrameBuilder builder = new FrameBuilder().add("attribute");
-		node.conceptList().forEach(aspect -> builder.add(aspect.name()));
-		String type = typeOf(node);
+		attr.conceptList().forEach(aspect -> builder.add(aspect.name()));
 
-		builder.add("name", node.name())
-				.add("owner", node.owner().name())
-				.add("type", type)
-				.add("package", destinationPackage)
-				.add("index", node.owner().componentList().indexOf(node))
-				.add("entityOwner", owner.name());
+		Node owner = attr.owner();
 
 		if(owner.is(Entity.Abstract.class) || owner.is(Entity.Decorable.class))
 			builder.add("castToSubclass", "(" + owner.name() + ")");
 
-		if(type.contains("List<") || type.contains("Set<")) {
-			builder.add("typeParameter", typeParameterOf(type));
-		} // TODO: for maps
+		String type = attr.type();
+		builder.add("typename", type);
+		if(attr.isEntity()) type = entitiesPackage() + type;
+		else if(attr.isStruct()) type = structsPackage() + type;
 
-		processParameters(node, builder, type);
+		handleCollectionType(attr, builder, type);
 
-		return builder.toFrame();
+		builder.add("name", attr.name$())
+				.add("owner", owner.name())
+				.add("package", ontologyPackage)
+				.add("index", owner.componentList().indexOf(attr.core$()))
+				.add("entityOwner", owner.name());
+
+		processParameters(attr.core$(), builder, type);
+
+		return builder;
+	}
+
+	private String entitiesPackage() {
+		return ontologyPackage + ".entities.";
+	}
+
+	private String structsPackage() {
+		return ontologyPackage + ".structs.";
+	}
+
+	private static void handleCollectionType(ConceptAttribute attr, FrameBuilder builder, String type) {
+		if(attr.isList() || attr.isSet()) {
+			String collectionType = attr.isList() ? "List" : "Set";
+			builder.add("type", collectionType + "<" + type + ">");
+			builder.add("typeParameter", type);
+			builder.add("collectionType", collectionType);
+		} else if(attr.isMap()) {
+			builder.add("type", "Map<String, String>");
+			builder.add("typeParameter", "java.lang.String");
+			builder.add("collectionType", "Map");
+		} else {
+			builder.add("type", type);
+		}
 	}
 
 	private void processParameters(Node node, FrameBuilder builder, String type) {
@@ -208,11 +136,11 @@ public class EntityMounterFrameFactory {
 		return type.equals("Date") ? "dd/MM/yyyy" : "dd/MM/yyyy HH:mm:ss";
 	}
 
-	private Frame structFrame(Struct node) {
+	private Frame structFrame(Struct struct) {
 		return new FrameBuilder("struct")
-				.add("name", node.core$().name())
+				.add("name", struct.core$().name())
 				.add("package", destinationPackage)
-				.add("attribute", node.attributeList().stream().map(node1 -> attrFrameOf(node1.core$(), node.core$())).toArray())
+				.add("attribute", attributesOf(struct).stream().map(this::attrFrameOf).toArray())
 				.toFrame();
 	}
 
@@ -230,29 +158,6 @@ public class EntityMounterFrameFactory {
 		if(type.contains("Set<")) return "null";
 		if(type.contains("Map<")) return "null";
 		return defaultValue.values().get(0).toString();
-	}
-
-	public static String typeParameterOf(String type) {
-		return type.substring(type.indexOf("<") + 1, type.lastIndexOf(">"));
-	}
-
-	public static String typeOf(Node node) {
-		String aspect = node.conceptList().stream().map(Concept::name).filter(EntityMounterFrameFactory::isProperTypeName).findFirst().orElse("");
-
-		boolean list = node.conceptList().stream().anyMatch(a -> a.name().equals("List"));
-		if (list) return ListTypes.getOrDefault(aspect, "List<" + firstUpperCase().format(node.name()).toString() + ">");
-
-		boolean set = node.conceptList().stream().anyMatch(a -> a.name().equals("Set"));
-		if (set) return SetTypes.getOrDefault(aspect, "Set<" + firstUpperCase().format(node.name()).toString() + ">");
-
-		boolean map = node.conceptList().stream().anyMatch(a -> a.name().equals("Map"));
-		if (map) return "Map<String, String>";
-
-		return TheTypes.getOrDefault(aspect, firstUpperCase().format(node.name()).toString());
-	}
-
-	public static boolean isProperTypeName(String s) {
-		return !s.equals("Set") && !s.equals("List") && !s.equals("Optional") && !s.equals("Type") && !s.equals("Required");
 	}
 
 	private Parameter parameter(Node c, String name) {
