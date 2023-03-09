@@ -58,6 +58,7 @@ def type(entity & base)
 
 		void updateAttribute(String name, Object newValue) {
 			Attribute attribute = attribute(name);
+			if(attribute == null || name.equals("id")) return;
 			Value oldValue = attribute.value();
 			attribute.setValue(newValue);
 			if(!oldValue.equals(attribute.value())) notifyChangeListeners(attribute, oldValue);
@@ -175,7 +176,6 @@ def type(entity & base)
 		protected static final class EntityDefinitionInternal implements EntityDefinition {
 
         	private final String entityName;
-        	private EntityDefinition definition;
 
         	public EntityDefinitionInternal(String entityName) {
         		this.entityName = entityName;
@@ -220,14 +220,11 @@ def type(entity & base)
 
         	@Override
         	public int hashCode() {
-        		return java.util.Objects.hash(definition());
+        		return definition().hashCode();
         	}
 
         	private EntityDefinition definition() {
-        		if(definition == null) {
-        			definition = $datamart+FirstUpperCase~Datamart.definition.entity(entityName).orElseThrow(() -> new IllegalStateException("$datamart+FirstUpperCase~Datamart is not initialized"));
-        		}
-        		return definition;
+        		return $datamart+FirstUpperCase~Datamart.definition.entity(entityName).orElseThrow(() -> new IllegalStateException("$datamart+FirstUpperCase~Datamart is not initialized"));
         	}
         }
 	}

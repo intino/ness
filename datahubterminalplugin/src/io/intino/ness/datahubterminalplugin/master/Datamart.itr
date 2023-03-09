@@ -261,7 +261,12 @@ def type(datamart & message & impl)
 		}
 
 		public void mount(Event event) {
-			mounters.getOrDefault(event.type(), java.util.Collections.emptyList()).forEach(mounter -> mounter.mount(event));
+			if(event == null) return;
+			try {
+				java.util.Optional.ofNullable(this.mounters.get(event.type())).ifPresent(mounters -> mounters.forEach(mounter -> mounter.mount(event)));
+			} catch(Exception e) {
+				Logger.error("Failed to mount event of type " + event.type() + ": " + e.getMessage(), e);
+			}
 		}
 
 		private void initMounters() {
