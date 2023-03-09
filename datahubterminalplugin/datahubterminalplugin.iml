@@ -1,25 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_11" inherit-compiler-output="true">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_17" inherit-compiler-output="true">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/test-res" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/gc/crmTerminal/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/gc/digestorTerminal/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/test/master/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/cesar/master/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/cinepolis/master/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/test/testTerminal/src" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/cesar/monitoring-terminal/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/test/ontology/src" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/cesar/ontology/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/test/test-terminal/src" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/test/monitor-terminal/src" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/test/wizard-terminal/src" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/temp/cesar/monitor-terminal/src" isTestSource="false" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="17" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Intino: io.intino.magritte:language:1.3.0" level="project" />
     <orderEntry type="library" name="Intino: com.esotericsoftware:kryo:4.0.0" level="project" />
@@ -46,7 +32,6 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.2.1" level="project" />
     <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.10" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:json:1.2.0" level="project" />
-    <orderEntry type="module" module-name="data-hub" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.1.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.0.5" level="project" />
     <orderEntry type="library" name="Intino: commons-codec:commons-codec:1.10" level="project" />
