@@ -36,5 +36,10 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:json:1.2.0" level="project" />
     <orderEntry type="module" module-name="master" />
     <orderEntry type="library" name="Intino: io.intino.ness:master:2.0.0" level="project" />
+    <orderEntry type="module" module-name="data-hub" />
+    <orderEntry type="module" module-name="datalake-inspector" />
+    <orderEntry type="library" name="Intino: commons-io:commons-io:2.6" level="project" />
+    <orderEntry type="library" name="Intino: commons-codec:commons-codec:1.15" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:1.7.36" level="project" />
   </component>
 </module>
