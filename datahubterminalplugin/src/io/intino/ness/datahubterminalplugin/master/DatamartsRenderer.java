@@ -5,14 +5,12 @@ import io.intino.datahub.model.*;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
-import io.intino.magritte.framework.Layer;
 import io.intino.ness.datahubterminalplugin.util.ErrorUtils;
 import io.intino.plugin.PluginLauncher;
 
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
 import static io.intino.ness.datahubterminalplugin.Formatters.customize;
@@ -116,9 +114,13 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 	private Map<String, String> entityClassesOf(Datamart datamart) {
 		Map<String, String> outputs = new HashMap<>();
-		outputs.put(entityDestination(entityBaseName(datamart)), templates.entityBase.render(entityBaseBuilder(datamart)));
+		renderEntityBase(datamart, outputs);
 		datamart.entityList().forEach(e -> outputs.putAll(renderEntity(e, datamart)));
 		return outputs;
+	}
+
+	private void renderEntityBase(Datamart datamart, Map<String, String> outputs) {
+		outputs.put(entityDestination(entityBaseName(datamart)), templates.entityBase.render(entityBaseBuilder(datamart)));
 	}
 
 	private String entityBaseName(Datamart datamart) {
@@ -132,10 +134,26 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private Map<String, String> structClassesOf(Datamart datamart) {
-		return datamart.structList().stream()
-				.map(this::renderStruct)
-				.flatMap(e -> e.entrySet().stream())
-				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+		Map<String, String> output = new HashMap<>();
+		renderStructBase(datamart, output);
+		datamart.structList().stream()
+				.map(struct -> renderStruct(datamart, struct))
+				.forEach(output::putAll);
+		return output;
+	}
+
+	private void renderStructBase(Datamart datamart, Map<String, String> output) {
+		output.put(destination(structBaseName(datamart)), templates.structBase.render(structBaseBuilder(datamart)));
+	}
+
+	private String structBaseName(Datamart datamart) {
+		return modelPackage + "." + javaValidName().format(firstUpperCase(datamart.name$()) + "Struct").toString();
+	}
+
+	private FrameBuilder structBaseBuilder(Datamart datamart) {
+		return new FrameBuilder("struct", "base")
+				.add("package", modelPackage)
+				.add("datamart", datamart.name$());
 	}
 
 	private Map<String, String> renderInterfaceOf(Datamart datamart) {
@@ -296,8 +314,8 @@ public class DatamartsRenderer implements ConceptRenderer {
 				);
 	}
 
-	private Map<String, String> renderStruct(Struct struct) {
-		return new StructFrameFactory(modelPackage).create(struct).entrySet().stream()
+	private Map<String, String> renderStruct(Datamart datamart, Struct struct) {
+		return new StructFrameFactory(datamart, modelPackage).create(struct).entrySet().stream()
 				.collect(toMap(
 						e -> destination(e.getKey()),
 						e -> templates.struct.render(e.getValue()))
@@ -345,14 +363,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return new File(srcFolder, path.replace(DOT, separator) + JAVA).getAbsolutePath();
 	}
 
-	public static class TerminalInfo {
-		public final Terminal terminal;
-		public final String terminalPackage;
-		public TerminalInfo(Terminal terminal, String terminalPackage) {
-			this.terminal = terminal;
-			this.terminalPackage = terminalPackage;
-		}
-	}
+	public record TerminalInfo(Terminal terminal, String terminalPackage) { }
 
 	private static class Templates {
 		final Template datamart = customize(new DatamartTemplate());
@@ -360,5 +371,6 @@ public class DatamartsRenderer implements ConceptRenderer {
 		final Template entity = customize(new EntityTemplate());
 		final Template entityMounter = customize(new EntityMounterTemplate());
 		final Template struct = customize(new StructTemplate());
+		final Template structBase = customize(new StructBaseTemplate());
 	}
 }

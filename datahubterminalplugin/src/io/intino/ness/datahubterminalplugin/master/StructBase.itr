@@ -1,0 +1,159 @@
+def type(struct & base)
+	package $package;
+
+	import io.intino.ness.master.model.Concept;
+	import io.intino.ness.master.model.Struct;
+	import io.intino.ness.master.reflection.AttributeDefinition;
+	import io.intino.ness.master.reflection.StructDefinition;
+
+	import java.util.ArrayList;
+	import java.util.List;
+	import java.util.Map;
+	import java.util.Objects;
+
+	public abstract class $datamart+FirstUpperCase~Struct implements Struct {
+
+		private final $datamart+FirstUpperCase~Datamart datamart;
+		private final Map<String, Attribute> attributes;
+
+		public $datamart+FirstUpperCase~Struct($datamart+FirstUpperCase~Datamart datamart, Map<String, Object> attributes) {
+			this.datamart = datamart;
+			this.attributes = new java.util.LinkedHashMap<>(attributes.size());
+			attributes.forEach((k, v) -> this.attributes.put(k, new Attribute(k, v)));
+		}
+
+		@Override
+		public Attribute attribute(String name) {
+			return attributes.get(name);
+		}
+
+		@Override
+		public List<Concept.Attribute> attributes() {
+			return new ArrayList<>(attributes.values());
+		}
+
+		@Override
+		public $datamart+FirstUpperCase~Datamart datamart() {
+			return datamart;
+		}
+
+		@Override
+		public void addChangeListener(ChangeListener listener) {
+			// Structs are read only
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			return attributes.equals((($datamart+FirstUpperCase~Struct)o).attributes);
+		}
+
+		@Override
+		public int hashCode() {
+			return attributes.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return getClass().getSimpleName() + ": " + attributes;
+		}
+
+		protected final class Attribute implements Concept.Attribute {
+
+			private final String name;
+			private final Value value;
+
+			public Attribute(String name, Object initialValue) {
+				this.name = name;
+				this.value = new Value(initialValue);
+			}
+
+			@Override
+			public AttributeDefinition getDefinition() {
+				return $datamart+FirstUpperCase~Struct.this.getDefinition().attribute(name).get();
+			}
+
+			@Override
+	        public String name() {
+	        	return name;
+	        }
+
+			@Override
+			public Value value() {
+				return value;
+			}
+
+			@Override
+			public void addChangeListener(ChangeListener listener) {}
+
+			@Override
+			public boolean equals(Object o) {
+				if (this == o) return true;
+				if (o == null || getClass() != o.getClass()) return false;
+				Attribute other = (Attribute) o;
+				return name().equals(other.name()) && type().equals(other.type()) && value.equals(other.value());
+			}
+
+			@Override
+			public int hashCode() {
+				return Objects.hash(name(), type(), value());
+			}
+
+			@Override
+			public String toString() {
+				return type().getSimpleName() + " " + name() + " = " + value();
+			}
+		}
+
+		protected static final class StructDefinitionInternal implements StructDefinition {
+
+        	private final String structName;
+
+        	public StructDefinitionInternal(String structName) {
+        		this.structName = structName;
+        	}
+
+        	@Override
+        	public String fullName() {
+        		return definition().fullName();
+        	}
+
+        	@Override
+        	public List<AttributeDefinition> declaredAttributes() {
+        		return definition().declaredAttributes();
+        	}
+
+        	@Override
+        	public java.util.Optional<StructDefinition> parent() {
+        		return definition().parent();
+        	}
+
+        	@Override
+        	public List<StructDefinition> descendants() {
+        		return definition().descendants();
+        	}
+
+        	@Override
+        	public Class<?> javaClass() {
+        		return definition().javaClass();
+        	}
+
+        	@Override
+        	public boolean equals(Object o) {
+        		if(o == null) return false;
+        		if(o instanceof StructDefinition) return o.equals(definition());
+        		return false;
+        	}
+
+        	@Override
+        	public int hashCode() {
+        		return definition().hashCode();
+        	}
+
+        	private StructDefinition definition() {
+        		return $datamart+FirstUpperCase~Datamart.definition.struct(structName).orElseThrow(() -> new IllegalStateException("$datamart+FirstUpperCase~Datamart is not initialized"));
+        	}
+        }
+	}
+end

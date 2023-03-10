@@ -29,6 +29,7 @@ def type(entity & class)
 
 		[$expression+expressionDeclaration...[$NL$NL]]
 
+		@Override
 		protected Collection<Attribute> initDeclaredAttributes() {
 			Collection<Attribute> attributes = super.initDeclaredAttributes();
 			[$attribute+initAttribute...[$NL]]

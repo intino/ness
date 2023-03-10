@@ -18,7 +18,7 @@ def trigger(event)
 		}
 
 		public $name+firstUpperCase(io.intino.alexandria.message.Message message) {
-			this(message[, message.get("$assertionId").asString()]);
+			[this(message, message.get("$assertionId").asString())?super(message)];
 		}
 
 		private $name+firstUpperCase(io.intino.alexandria.message.Message message, String id) {

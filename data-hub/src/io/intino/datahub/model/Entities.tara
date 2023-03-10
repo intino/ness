@@ -97,5 +97,3 @@ Concept StructData is abstract
 		sub Word
 			var string[] values
 			var string defaultValue= empty
-		sub Entity
-			var Entities.Entity entity

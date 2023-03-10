@@ -2,6 +2,7 @@ package io.intino.ness.datahubterminalplugin.master;
 
 import io.intino.datahub.model.EntityData;
 import io.intino.magritte.framework.Concept;
+import io.intino.magritte.framework.Layer;
 import io.intino.magritte.framework.Node;
 
 import java.lang.reflect.Method;
@@ -102,7 +103,7 @@ public class ConceptAttribute {
 		return getOrDefault("isMap", false);
 	}
 
-	public Node asWord() {
+	public <T extends Layer> T asWord() {
 		return getOrDefault("asWord", null);
 	}
 
@@ -123,7 +124,7 @@ public class ConceptAttribute {
 		if(isDate()) return "LocalDate";
 		if(isDateTime()) return "LocalDateTime";
 		if(isInstant()) return "Instant";
-		if(isWord()) return asWord().name();
+		if(isWord()) return asWord().name$();
 		if(isStruct()) return asStruct().struct().name$();
 		if(isEntity()) return asEntity().entity().name$();
 		if(isMap()) return "Map";

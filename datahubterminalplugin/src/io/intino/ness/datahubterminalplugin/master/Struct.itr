@@ -1,22 +1,30 @@
 def type(struct)
 	package $package.structs;
 
+    import io.intino.ness.master.reflection.StructDefinition;
+
 	import java.time.*;
 	import java.util.*;
 	import java.util.stream.*;
 
-	public class $name+FirstUpperCase {
-	//TODO: definition
+	import $package.$datamart+FirstUpperCase~Datamart;
 
-		$attribute+field...[$NL]
+	public class $name+FirstUpperCase extends $parent {
 
-		public $name+FirstUpperCase($attribute+parameter...[, ]) {
-			$attribute+assign...[$NL]
+		public static final StructDefinition definition = new $package.$datamart+FirstUpperCase~Struct.StructDefinitionInternal("$name+FirstUpperCase");
+
+		public $name+FirstUpperCase($datamart+FirstUpperCase~Datamart datamart, $attribute+parameter...[, ]) {
+			super(datamart, asMap([$attribute+name...[, ]]));
 		}
 
-		$attribute+getter...[$NL$NL]
+		[$attribute+getter...[$NL$NL]]
 
 		[$expression+expressionDeclaration...[$NL$NL]]
+
+		@Override
+		public StructDefinition getDefinition() {
+			return definition;
+		}
 
 		@Override
 		public boolean equals(Object obj) {
@@ -28,43 +36,57 @@ def type(struct)
 
 		@Override
         public int hashCode() {
-        	return Objects.hash($attribute...[, ]);
+        	return Objects.hash($attribute+get...[, ]);
         }
 
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			$attribute+toString...[$NL]
-			sb.delete(sb.length() - 1, sb.length());
+			if(sb.length() > 0) sb.setLength(sb.length() - 1);
 			return sb.toString();
 		}
+
+		private static java.util.Map<String, Object> asMap($attribute+parameter...[, ]) {
+    		return new java.util.LinkedHashMap<>() {{
+    			[$attribute+putIntoMap...[$NL]]
+    		}};
+    	}
 	}
+end
+
+def type(attribute) trigger(get)
+	this.$name+firstLowerCase()
+end
+
+def type(attribute) trigger(initAttribute)
+	attributes.add(new Attribute("$name", $defaultValue));
 end
 
 def trigger(getter)
 	public $type $name+firstLowerCase() {
-		return $name+firstLowerCase;
+		return attribute("$name+firstLowerCase").value().<$type>as();
 	}
-end
-
-def trigger(assign)
-	this.$name+firstLowerCase = $name+firstLowerCase;
-end
-
-def trigger(field)
-	private final $type $name+firstLowerCase;
 end
 
 def trigger(parameter)
 	$type $name+firstLowerCase
 end
 
+def trigger(name)
+	$name+firstLowerCase
+end
+
+def trigger(putIntoMap)
+	put("$name+firstLowerCase", $name+firstLowerCase);
+end
+
 def trigger(equals)
-	Objects.equals(this.$name+firstLowerCase, other.$name+firstLowerCase)
+	Objects.equals(this.$name+firstLowerCase(), other.$name+firstLowerCase())
 end
 
 def trigger(toString)
-	sb.append(this.$name+firstLowerCase).append(',');
+	sb.append(this.$name+firstLowerCase()).append(',');
 end
 
 def type(attribute)
