@@ -133,7 +133,7 @@ public class TerminalPublisher {
 	private Map<String, String> tankClasses() {
 		Map<String, String> tankClasses = new HashMap<>();
 		if (terminal.publish() != null) {
-			terminal.publish().messageTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".message." + eventQn(t)));
+			terminal.publish().messageTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".messages." + eventQn(t)));
 			terminal.publish().measurementTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".measurements." + eventQn(t)));
 		}
 		if (terminal.subscribe() != null) {
