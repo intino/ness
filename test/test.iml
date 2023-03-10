@@ -8,7 +8,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
     </content>
-    <orderEntry type="jdk" jdkName="11" jdkType="JavaSDK" />
+    <orderEntry type="jdk" jdkName="openjdk-18" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="data-hub" />
     <orderEntry type="module" module-name="datalake-inspector" />
@@ -109,7 +109,6 @@
     <orderEntry type="library" name="Intino: com.beust:jcommander:1.48" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:jms:1.4.1" level="project" />
     <orderEntry type="library" name="Intino: org.apache.xbean:xbean-spring:4.22" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.23.3" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:http:1.5.11" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:rest-accessor:2.4.2" level="project" />
     <orderEntry type="library" name="Intino: com.opencsv:opencsv:5.7.1" level="project" />
@@ -157,5 +156,6 @@
     <orderEntry type="library" name="Intino: io.intino.ness:master:2.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.23.6" level="project" />
   </component>
 </module>

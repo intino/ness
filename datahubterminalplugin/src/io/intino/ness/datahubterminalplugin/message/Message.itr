@@ -18,15 +18,17 @@ def trigger(event)
 		}
 
 		public $name+firstUpperCase(io.intino.alexandria.message.Message message) {
-			super(message);
-			[if (!message.contains("id")) throw new IllegalArgumentException("Assertion events must have an id");$assertionId+semicolon]
+			this(message[, message.get("$assertionId").asString()]);
 		}
 
 		private $name+firstUpperCase(io.intino.alexandria.message.Message message, String id) {
 			super(message);
-			if (id == null) throw new IllegalArgumentException("Assertion Id cannot be null");
-			this.message.set("id", id);
+			this.message.set("id", java.util.Objects.requireNonNull(id, "Assertion Id cannot be null"));
 		}
+
+		[public String id() {
+			return message.get("$assertionId").asString();
+		}]
 
 		public $name+firstUpperCase ts(java.time.Instant ts) {
 			super.ts(ts);
