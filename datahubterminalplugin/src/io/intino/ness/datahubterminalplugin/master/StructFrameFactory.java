@@ -40,11 +40,11 @@ public class StructFrameFactory implements ConceptRenderer {
 				.add("name", struct.name$())
 				.add("datamart", datamart.name$())
 				.add("parent", workingPackage + "." + firstUpperCase().format(datamart.name$()) + "Struct")
-				.add("attribute", attributesOf(struct).stream().map(this::attrFrameOf).toArray())
-				.add("expression", struct.methodList().stream().map(Layer::core$).map(ExpressionHelper::exprFrameOf).toArray());
+				.add("expression", struct.methodList().stream().map(e -> ExpressionHelper.exprFrameOf(e, workingPackage)).toArray(Frame[]::new))
+				.add("attribute", attributesOf(struct).stream().map(this::attrFrameOf).toArray(Frame[]::new));
 	}
 
-		private Frame attrFrameOf(ConceptAttribute attr) {
+	private Frame attrFrameOf(ConceptAttribute attr) {
 		FrameBuilder builder = new FrameBuilder().add("attribute");
 		String type = attr.type();
 		builder.add(type);

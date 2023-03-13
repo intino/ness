@@ -54,13 +54,13 @@ def type(word) trigger(wordDeclaration)
 	public enum $name+firstUpperCase {$value...[, ]}
 end
 
-def trigger(expressionDeclaration)
+def type(expression) trigger(expressionDeclaration)
 	$modifier $returnType $name([$parameter+parameterDeclaration...[, ]]) {
-		$expression
+		$expr
 	}
 end
 
-def trigger(parameterDeclaration)
+def type(parameter) trigger(parameterDeclaration)
 	$type $name
 end
 

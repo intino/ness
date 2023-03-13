@@ -154,8 +154,6 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:terminal-jms:5.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.test.datahubtest:ontology:1.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Intino: io.intino.ness:master:2.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.23.6" level="project" />
   </component>
 </module>

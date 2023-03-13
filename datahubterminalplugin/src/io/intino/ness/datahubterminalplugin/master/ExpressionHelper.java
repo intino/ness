@@ -1,12 +1,9 @@
 package io.intino.ness.datahubterminalplugin.master;
 
-import io.intino.datahub.model.Entity;
+import io.intino.datahub.model.EntityData;
 import io.intino.datahub.model.Expression;
-import io.intino.datahub.model.Struct;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
-import io.intino.magritte.framework.Concept;
-import io.intino.magritte.framework.Node;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -14,24 +11,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
-import static io.intino.ness.datahubterminalplugin.master.EntityFrameFactory.*;
+import static java.lang.Character.isWhitespace;
 
 public class ExpressionHelper {
 
 	public static final String DEFAULT_ITR_INDENTATION = "        ";
 
-	public static Frame exprFrameOf(Node node) {
-		FrameBuilder builder = new FrameBuilder().add("expression");
-
-		Expression expr = node.as(Expression.class);
+	public static Frame exprFrameOf(Expression expr, String ontologyPackage) {
+		FrameBuilder builder = new FrameBuilder("expression");
 
 		builder.add("modifier", expr.isPrivate() ? "private" : "public");
-		builder.add("name", expr.name$());
-		builder.add("returnType", returnTypeOf(expr));
-		builder.add("expression", expressionOf(expr));
+		builder.add("name", expr.name$().trim());
+		builder.add("returnType", returnTypeOf(expr, ontologyPackage));
+		builder.add("expr", expressionOf(expr));
 
-		List<Frame> parameters = parametersOf(expr);
+		List<Frame> parameters = parametersOf(expr, ontologyPackage);
 		if(!parameters.isEmpty()) builder.add("parameter", parameters.toArray(Frame[]::new));
 
 		return builder.toFrame();
@@ -42,18 +36,31 @@ public class ExpressionHelper {
 	}
 
 	private static String decorateExpr(Expression expr, String exprStr) {
-		exprStr = exprStr.trim();
+		exprStr = exprStr.replace("System.out.", "java.lang.System.out.").trim();
 		if(StringUtils.countMatches(exprStr, "\n") == 0) {
 			if(!expr.isRoutine() && !exprStr.startsWith("return")) exprStr = "return " + exprStr;
 			if(!exprStr.endsWith(";")) exprStr += ";";
 			return exprStr;
 		}
 		String[] lines = exprStr.split("\n", -1);
-		return Arrays.stream(lines).map(ExpressionHelper::removeDefaultItrIndentation).collect(Collectors.joining("\n"));
+		String indentation = indentationOf(lines);
+		return Arrays.stream(lines).map(line -> removeFirstIndentation(line, indentation)).collect(Collectors.joining("\n"));
 	}
 
-	private static String removeDefaultItrIndentation(String line) {
-		return !line.startsWith(DEFAULT_ITR_INDENTATION) ? line : line.substring(DEFAULT_ITR_INDENTATION.length());
+	private static String removeFirstIndentation(String line, String indentation) {
+		return line.startsWith(indentation) ? line.substring(indentation.length()) : line;
+	}
+
+	private static String indentationOf(String[] lines) {
+		return indentationOf(Arrays.stream(lines).filter(l -> l.endsWith(";") && isWhitespace(l.charAt(0))).findFirst().orElse(""));
+	}
+
+	private static String indentationOf(String line) {
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; isWhitespace(line.charAt(i)); i++) {
+			sb.append(line.charAt(i));
+		}
+		return sb.toString();
 	}
 
 	private static String rawExpressionOf(Expression expr) {
@@ -65,43 +72,27 @@ public class ExpressionHelper {
 		}
 	}
 
-	private static List<Frame> parametersOf(Expression expr) {
+	private static List<Frame> parametersOf(Expression expr, String ontologyPackage) {
 		if(expr.isGetter()) return Collections.emptyList();
 		return expr.core$().componentList().stream()
 				.filter(c -> c.is(Expression.Function.Parameter.class) || c.is(Expression.Routine.Parameter.class))
-				.map(ExpressionHelper::frameOfParameter)
+				.map(c -> frameOfParameter(c.as(EntityData.class), ontologyPackage))
 				.collect(Collectors.toList());
 	}
 
-	private static Frame frameOfParameter(Node c) {
+	private static Frame frameOfParameter(EntityData data, String ontologyPackage) {
 		FrameBuilder builder = new FrameBuilder("parameter");
-		String type = javaName(type(c), c);
-		builder.add("type", type);
-		builder.add("name", c.name());
+		builder.add("type", type(new ConceptAttribute(data, null), ontologyPackage));
+		builder.add("name", data.name$());
 		return builder.toFrame();
 	}
 
-	private static String javaName(String type, Node node) {
-		Parameter entity = parameter(node, "entity");
-		if (entity != null) {
-			return ((Entity) entity.values().get(0)).name$();
-		}
-
-		Parameter struct = parameter(node, "struct");
-		if (struct != null) {
-			Node structNode = ((Struct) struct.values().get(0)).core$();
-			return structNode.name();
-		}
-
-		return type;
-	}
-
-	private static String returnTypeOf(Expression expr) {
-		if(expr.isFunction()) return javaName(type(expr.asFunction().returnType().core$()), expr.asFunction().returnType().core$());
-		if(expr.isDoubleGetter()) return "double";
-		if(expr.isIntegerGetter()) return "int";
-		if(expr.isLongGetter()) return "long";
-		if(expr.isBooleanGetter()) return "boolean";
+	private static String returnTypeOf(Expression expr, String ontologyPackage) {
+		if(expr.isFunction()) return type(new ConceptAttribute(expr.asFunction().returnType(), expr.core$()), ontologyPackage);
+		if(expr.isDoubleGetter()) return "Double";
+		if(expr.isIntegerGetter()) return "Integer";
+		if(expr.isLongGetter()) return "Long";
+		if(expr.isBooleanGetter()) return "Boolean";
 		if(expr.isStringGetter()) return "String";
 		if(expr.isDateGetter()) return "LocalDate";
 		if(expr.isDateTimeGetter()) return "LocalDateTime";
@@ -109,25 +100,15 @@ public class ExpressionHelper {
 		return "void";
 	}
 
-	private static Parameter parameter(Node c, String name) {
-		List<?> values = c.variables().get(name);
-		return values == null ? null : Parameter.of(values);
+	private static String type(ConceptAttribute attr, String ontologyPackage) {
+		String type = attr.type();
+
+		if(attr.isEntity()) type = ontologyPackage + ".entities." + type;
+		else if(attr.isStruct()) type = ontologyPackage + ".structs." + type;
+
+		if(attr.isList()) return "List<" + type + ">";
+		if(attr.isSet()) return "Set<" + type + ">";
+
+		return type;
 	}
-
-	private static String type(Node node) {
-		String aspect = node.conceptList().stream().map(Concept::name).filter(ExpressionHelper::isProperTypeName).findFirst().orElse("");
-
-		boolean list = node.conceptList().stream().anyMatch(a -> a.name().equals("List"));
-		if (list) return ListTypes.getOrDefault(aspect, "List<" + firstUpperCase().format(node.name()).toString() + ">");
-
-		boolean set = node.conceptList().stream().anyMatch(a -> a.name().equals("Set"));
-		if (set) return SetTypes.getOrDefault(aspect, "Set<" + firstUpperCase().format(node.name()).toString() + ">");
-
-		return TheTypes.getOrDefault(aspect, firstUpperCase().format(node.name()).toString());
-	}
-
-	private static boolean isProperTypeName(String s) {
-		return !s.equals("Set") && !s.equals("List") && !s.equals("Optional") && !s.equals("Type") && !s.equals("Required");
-	}
-
 }

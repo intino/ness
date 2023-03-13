@@ -16,39 +16,6 @@ import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
 public class EntityFrameFactory implements ConceptRenderer {
 	private static final String DOT = ".";
 
-	static final Map<String, String> TheTypes = Map.of(
-			"String", "String",
-			"Double", "double",
-			"Integer", "int",
-			"Long", "long",
-			"Boolean", "boolean",
-			"Date", "LocalDate",
-			"DateTime", "LocalDateTime",
-			"Instant", "Instant"
-	);
-
-	static final Map<String, String> ListTypes = Map.of(
-			"String", "List<String>",
-			"Double", "List<Double>",
-			"Integer", "List<Integer>",
-			"Boolean", "List<Boolean>",
-			"Long", "List<Long>",
-			"Date", "List<LocalDate>",
-			"DateTime", "List<LocalDateTime>",
-			"Instant", "List<Instant>"
-	);
-
-	static final Map<String, String> SetTypes = Map.of(
-			"String", "Set<String>",
-			"Double", "Set<Double>",
-			"Integer", "Set<Integer>",
-			"Boolean", "Set<Boolean>",
-			"Long", "Set<Long>",
-			"Date", "Set<LocalDate>",
-			"DateTime", "Set<LocalDateTime>",
-			"Instant", "Set<Instant>"
-	);
-
 	private final String workingPackage;
 	private final Datamart datamart;
 
@@ -71,7 +38,7 @@ public class EntityFrameFactory implements ConceptRenderer {
 				.add("datamart", datamart.name$())
 				.add("name", entity.core$().name())
 				.add("attribute", attributesOf(entity).stream().map(this::attrFrameOf).toArray(FrameBuilder[]::new))
-				.add("expression", entity.core$().componentList().stream().filter(a -> a.is(Expression.class)).map(ExpressionHelper::exprFrameOf).toArray());
+				.add("expression", entity.methodList().stream().map(m -> ExpressionHelper.exprFrameOf(m, workingPackage)).toArray(Frame[]::new));
 		if (!datamart.structList().isEmpty()) builder.add("hasStructs", new FrameBuilder().add("package", workingPackage));
 		final Parameter parent = parameter(entity.core$(), "entity");
 		builder.add("parent", parent != null ? withFullPackage(((Entity) parent.values().get(0)).name$()) : baseEntityName());

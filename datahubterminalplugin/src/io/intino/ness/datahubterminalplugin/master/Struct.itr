@@ -55,6 +55,16 @@ def type(struct)
 	}
 end
 
+def type(expression) trigger(expressionDeclaration)
+	$modifier $returnType $name([$parameter+parameterDeclaration...[, ]]) {
+		$expr
+	}
+end
+
+def type(parameter) trigger(parameterDeclaration)
+	$type $name
+end
+
 def type(attribute) trigger(get)
 	this.$name+firstLowerCase()
 end
@@ -69,11 +79,11 @@ def trigger(getter)
 	}
 end
 
-def trigger(parameter)
+def type(attribute) trigger(parameter)
 	$type $name+firstLowerCase
 end
 
-def trigger(name)
+def type(attribute) trigger(name)
 	$name+firstLowerCase
 end
 
@@ -91,14 +101,4 @@ end
 
 def type(attribute)
 	this.$name+firstLowerCase
-end
-
-def trigger(expressionDeclaration)
-	$modifier $returnType $name([$parameter+parameterDeclaration...[, ]]) {
-		$expression
-	}
-end
-
-def trigger(parameterDeclaration)
-	$type $name
 end
