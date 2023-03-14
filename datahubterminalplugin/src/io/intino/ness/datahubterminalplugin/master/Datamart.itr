@@ -143,7 +143,7 @@ def type(datamart & message & impl)
 				downloadDatamartFromDatahub();
 				Logger.info("$name+FirstUpperCase~Datamart (" + (snapshotTimetag().isEmpty() ? "" : "snapshot " + snapshotTimetag() + ", ")  + connector.clientId() + ") initialized successfully.");
 			} catch(Exception e) {
-				throw new ExceptionInInitializerError("Entities failed to start because a " + e.getClass().getName() + " occurred: " + e.getMessage());
+				throw new ExceptionInInitializerError("$name+FirstUpperCase~Datamart failed to start because a " + e.getClass().getName() + " occurred: " + e.getMessage());
 			}
 			return this;
 		}
@@ -228,7 +228,7 @@ def type(datamart & message & impl)
 				javax.jms.Message message = connector.requestResponse(DATAHUB_MESSAGE_TOPIC, downloadRequest());
 				return handleDownloadResponse(message, numEvents);
 			} catch (NullPointerException e) {
-				throw new RuntimeException("Could not download datamart: no response from datahub.");
+				throw new NullPointerException("Could not download datamart: no response from datahub.");
 			} catch (Exception e) {
 				throw new RuntimeException("Could not download datamart: " + e.getMessage());
 			}
