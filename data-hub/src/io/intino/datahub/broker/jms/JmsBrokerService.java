@@ -331,6 +331,7 @@ public class JmsBrokerService implements BrokerService {
 		}
 
 		private void registerMessageTankConsumer(Datalake.Tank t) {
+			if(!t.isMessage() || t.asMessage() == null || t.asMessage().message() == null) return;
 			brokerManager.registerTopicConsumer(t.qn(), new MessageSerializer(brokerStage, t, scale(t), box.datamarts()).create());
 		}
 
