@@ -110,14 +110,28 @@ def type(attribute) type(set) type(entity) trigger(parseMethod)
 	}
 end
 
+def type(attribute) type(list | set) type(date | datetime) trigger(parseMethod)
+	private static final java.time.format.DateTimeFormatter $name+FirstUpperCase~Formatter = java.time.format.DateTimeFormatter.ofPattern("$format");
+	private $type parse$name+FirstUpperCase(Message m) {
+		try {
+			return java.util.Arrays.stream(m.get("$name").as(String$[$].class))
+				.map(s -> {try{return $typeParameter.parse(s, $name+FirstUpperCase~Formatter);}catch(Exception ignored){return null;}})
+				.filter(java.util.Objects::nonNull)
+				.collect(java.util.stream.Collectors.to$collectionType+FirstUpperCase());
+		} catch(Exception ignored) {
+			return $defaultValue;
+		}
+	}
+end
+
 def type(attribute) type(list) trigger(parseMethod)
-	private java.util.List<$typeParameter> parse$name+FirstUpperCase(Message m) { // TODO: check
+	private java.util.List<$typeParameter> parse$name+FirstUpperCase(Message m) {
 		return java.util.Arrays.asList(m.get("$name").as($typeParameter$[$].class));
 	}
 end
 
 def type(attribute) type(set) trigger(parseMethod)
-	private java.util.Set<$typeParameter> parse$name+FirstUpperCase(Message m) { // TODO: check
+	private java.util.Set<$typeParameter> parse$name+FirstUpperCase(Message m) {
 		return java.util.Set.of(m.get("$name").as($typeParameter$[$].class));
 	}
 end
@@ -137,6 +151,27 @@ end
 def type(attribute) type(map) trigger(parseMethod)
 	private java.util.Map<String, String> parse$name+FirstUpperCase(Message m) {
 		return m.get("$name").as(java.util.Map.class);
+	}
+end
+
+def type(attribute) type(date | datetime) trigger(parseMethod)
+	private static final java.time.format.DateTimeFormatter $name+FirstUpperCase~Formatter = java.time.format.DateTimeFormatter.ofPattern("$format");
+	private $type parse$name+FirstUpperCase(Message m) {
+		try {
+			return $type.parse((m.get("$name").asString()), $name+FirstUpperCase~Formatter);
+		} catch(Exception ignored) {
+			return $defaultValue;
+		}
+	}
+end
+
+def type(attribute) type(word) trigger(parseMethod)
+	private $type parse$name+FirstUpperCase(Message m) {
+		try {
+			return $type.valueOf(m.get("$name").asString());
+		} catch(Exception ignored) {
+			return $defaultValue;
+		}
 	}
 end
 

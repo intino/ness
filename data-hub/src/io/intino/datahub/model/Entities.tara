@@ -70,8 +70,6 @@ Concept EntityData is abstract
 			var Entities.Entity entity
 		sub Map
 			var string type = "java.util.Map" is reactive private
-//			Concept:{1..1}:RequiresAspect Key extends EntityData
-//			Concept:{1..1}:RequiresAspect Value extends EntityData
 
 
 Concept StructData is abstract
@@ -94,6 +92,3 @@ Concept StructData is abstract
 			var string format = "dd/MM/yyyy HH:mm:ss"
 		sub Instant
 			var instant defaultValue = empty
-		sub Word
-			var string[] values
-			var string defaultValue= empty

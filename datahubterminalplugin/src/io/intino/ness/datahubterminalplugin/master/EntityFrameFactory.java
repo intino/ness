@@ -68,6 +68,7 @@ public class EntityFrameFactory implements ConceptRenderer {
 		builder.add("typename", type);
 		if(attr.isEntity()) type = entitiesPackage() + type;
 		else if(attr.isStruct()) type = structsPackage() + type;
+		else if(attr.isWord()) type = firstUpperCase(type);
 
 		handleCollectionType(attr, builder, type);
 

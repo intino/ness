@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.intino.ness.datahubterminalplugin.Formatters.firstUpperCase;
 import static java.lang.Character.isWhitespace;
 
 public class ExpressionHelper {
@@ -36,15 +37,24 @@ public class ExpressionHelper {
 	}
 
 	private static String decorateExpr(Expression expr, String exprStr) {
-		exprStr = exprStr.replace("System.out.", "java.lang.System.out.").trim();
-		if(StringUtils.countMatches(exprStr, "\n") == 0) {
-			if(!expr.isRoutine() && !exprStr.startsWith("return")) exprStr = "return " + exprStr;
-			if(!exprStr.endsWith(";")) exprStr += ";";
-			return exprStr;
-		}
+		exprStr = exprStr.replace("System.out.", "java.lang.System.out.");
+		if(StringUtils.countMatches(exprStr, "\n") == 0) return formatOneLineMethod(expr, exprStr);
+		return formatMultilineMethod(exprStr);
+	}
+
+	private static String formatMultilineMethod(String exprStr) {
+		if(exprStr.startsWith("\n")) exprStr = exprStr.substring(1);
+		if(exprStr.endsWith("\n")) exprStr = exprStr.substring(0, exprStr.length() - 1);
 		String[] lines = exprStr.split("\n", -1);
 		String indentation = indentationOf(lines);
 		return Arrays.stream(lines).map(line -> removeFirstIndentation(line, indentation)).collect(Collectors.joining("\n"));
+	}
+
+	private static String formatOneLineMethod(Expression expr, String exprStr) {
+		exprStr = exprStr.trim();
+		if(!expr.isRoutine() && !exprStr.startsWith("return")) exprStr = "return " + exprStr;
+		if(!exprStr.endsWith(";")) exprStr += ";";
+		return exprStr;
 	}
 
 	private static String removeFirstIndentation(String line, String indentation) {
@@ -105,6 +115,7 @@ public class ExpressionHelper {
 
 		if(attr.isEntity()) type = ontologyPackage + ".entities." + type;
 		else if(attr.isStruct()) type = ontologyPackage + ".structs." + type;
+		else if(attr.isWord()) type = firstUpperCase(type);
 
 		if(attr.isList()) return "List<" + type + ">";
 		if(attr.isSet()) return "Set<" + type + ">";

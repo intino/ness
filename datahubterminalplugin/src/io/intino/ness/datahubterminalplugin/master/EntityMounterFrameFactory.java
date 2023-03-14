@@ -8,6 +8,7 @@ import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.magritte.framework.Concept;
 import io.intino.magritte.framework.Node;
+import io.intino.ness.datahubterminalplugin.Formatters;
 
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +65,7 @@ public class EntityMounterFrameFactory implements ConceptRenderer {
 		builder.add("typename", type);
 		if(attr.isEntity()) type = entitiesPackage() + type;
 		else if(attr.isStruct()) type = structsPackage() + type;
+		else if(attr.isWord()) type = entitiesPackage() + attr.owner().name() + "." + Formatters.firstUpperCase(type);
 
 		handleCollectionType(attr, builder, type);
 
@@ -107,6 +109,7 @@ public class EntityMounterFrameFactory implements ConceptRenderer {
 
 		Parameter defaultValue = DefaultValueHelper.getDefaultValue(node);
 		if (defaultValue != null) builder.add("defaultValue", defaultValue(node, type, defaultValue));
+		else builder.add("defaultValue", "null");
 
 		Parameter format = parameter(node, "format");
 		if (format != null) builder.add("format", format.values().get(0));

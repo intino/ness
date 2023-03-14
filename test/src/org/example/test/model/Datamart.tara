@@ -12,10 +12,34 @@ Datamart(scale = Day) master
 	Entity Team > from = dl.teamAssertion
 		Attribute users as Entity(User) List
 		Attribute channels as Entity(Channel) List
+		Attribute someWord as Word("A" "B" "C")
+        Attribute theDateTime as DateTime(format="dd/MM/yyyy HH:mm:ss")
+
+		// public String firstUserName();
+		Method firstUserName as StringGetter("users().isEmpty() ? null : users().get(0).id()")
+
+		// public void println(String message);
+		Method println as Routine("System.out.println(message)") > Parameter message as String
+
+		// public LocalDate dateOf(User user);
+		Method dateOf as Function
+			ReturnType as Date
+			Parameter user as Entity(User)
+			expression = "
+			if(user == null) return LocalDate.now();
+			if(user.toString().isEmpty()) {
+				return LocalDate.now().minusDays(10);
+			}
+			return LocalDate.parse(user.toString());
+			"
+
 
 	Struct Coords
 		Attribute x as Integer
 		Attribute y as Integer
+		Attribute theDate as Date
+		Attribute theDateTime as DateTime
+		Attribute theInstant as Instant
 
 		Method getSum as IntegerGetter("x() + y()")
 

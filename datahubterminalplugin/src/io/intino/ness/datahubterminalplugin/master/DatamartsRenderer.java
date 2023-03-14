@@ -236,6 +236,8 @@ public class DatamartsRenderer implements ConceptRenderer {
 			b.add("type", modelPackage + ".entities." + attr.asEntity().entity().name$());
 		}  else if(attr.isStruct()) {
 			b.add("type", modelPackage + ".structs." + attr.asStruct().struct().name$());
+		} else if(attr.isWord()) {
+			b.add("type", modelPackage + ".entities." + attr.owner().name() + "." + attr.type());
 		} else {
 			b.add("type", attr.type());
 		}
@@ -254,12 +256,15 @@ public class DatamartsRenderer implements ConceptRenderer {
 		} else if(attr.isStruct()) {
 			parameterType = modelPackage + ".structs." + attr.asStruct().struct().name$();
 			parameterTypeName = attr.asStruct().struct().name$();
+		} else if(attr.isWord()) {
+			parameterType = modelPackage + ".entities." + attr.owner().name() + "." + parameterType;
 		}
 		b.add("parameterType", parameterType);
 		b.add("parameterTypeName", parameterTypeName);
 		FrameBuilder param = new FrameBuilder("parameter").add("name", parameterTypeName);
 		if(attr.isEntity()) param.add("entity");
 		else if(attr.isStruct()) param.add("struct");
+		else if(attr.isWord()) param.add("word");
 		b.add("parameter", param);
 	}
 

@@ -115,6 +115,9 @@ def type(datamart & message & impl)
 	import java.util.concurrent.atomic.AtomicBoolean;
 	import java.util.stream.Stream;
 	import java.util.stream.Collectors;
+	import java.time.LocalDate;
+	import java.time.LocalDateTime;
+	import java.time.Instant;
 
 	import $ontologypackage.*;
 

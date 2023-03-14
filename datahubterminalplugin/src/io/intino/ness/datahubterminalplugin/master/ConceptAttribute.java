@@ -1,12 +1,15 @@
 package io.intino.ness.datahubterminalplugin.master;
 
 import io.intino.datahub.model.EntityData;
+import io.intino.datahub.model.StructData;
 import io.intino.magritte.framework.Concept;
 import io.intino.magritte.framework.Layer;
 import io.intino.magritte.framework.Node;
 
 import java.lang.reflect.Method;
 import java.util.List;
+
+import static io.intino.ness.datahubterminalplugin.Formatters.firstUpperCase;
 
 @SuppressWarnings("unchecked")
 public class ConceptAttribute {
@@ -19,7 +22,7 @@ public class ConceptAttribute {
 		this.owner = owner;
 	}
 
-	public <T> T owner() {
+	public <T extends Node> T owner() {
 		return (T) owner;
 	}
 
@@ -124,7 +127,7 @@ public class ConceptAttribute {
 		if(isDate()) return "LocalDate";
 		if(isDateTime()) return "LocalDateTime";
 		if(isInstant()) return "Instant";
-		if(isWord()) return asWord().name$();
+		if(isWord()) return firstUpperCase(asWord().name$());
 		if(isStruct()) return asStruct().struct().name$();
 		if(isEntity()) return asEntity().entity().name$();
 		if(isMap()) return "Map";

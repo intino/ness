@@ -3,15 +3,13 @@ package io.intino.ness.datahubterminalplugin.master;
 
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Struct;
-import io.intino.datahub.model.StructData;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
-import io.intino.magritte.framework.Layer;
 import io.intino.magritte.framework.Node;
 import io.intino.magritte.framework.Predicate;
+import io.intino.ness.datahubterminalplugin.Formatters;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
@@ -50,12 +48,6 @@ public class StructFrameFactory implements ConceptRenderer {
 		builder.add(type);
 
 		builder.add("name", attr.name$()).add("owner", attr.core$().owner().name()).add("type", type);
-
-		if(attr.isWord()) {
-			StructData.Word word = attr.asWord();
-			List<String> values = word.values();
-			if (values != null) builder.add("value", values.toArray());
-		}
 
 		Parameter defaultValue = DefaultValueHelper.getDefaultValue(attr.core$());
 		if (defaultValue != null) builder.add("defaultValue", defaultValue(attr.core$(), type, defaultValue));
