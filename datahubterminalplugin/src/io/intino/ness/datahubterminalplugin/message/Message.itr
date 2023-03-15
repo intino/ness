@@ -22,8 +22,7 @@ def trigger(event)
 		}
 
 		private $name+firstUpperCase(io.intino.alexandria.message.Message message, String id) {
-			super(message);
-			this.message.set("id", java.util.Objects.requireNonNull(id, "Assertion Id cannot be null"));
+			super(message.set("id", java.util.Objects.requireNonNull(id, "Assertion Id cannot be null")));
 		}
 
 		[public String id() {

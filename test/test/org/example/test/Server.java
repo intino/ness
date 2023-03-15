@@ -6,6 +6,7 @@ import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.box.DataHubConfiguration;
 import io.intino.datahub.model.NessGraph;
 import io.intino.magritte.framework.Graph;
+import io.intino.test.datahubtest.messages.assertions.AssetAssertion;
 
 import java.io.File;
 
@@ -14,6 +15,7 @@ public class Server {
 	private static final String[] stashes = {"Solution"};
 
 	public static void main(String[] args) {
+		new AssetAssertion("hola", "theid");
 		DataHubConfiguration conf = new DataHubConfiguration(arguments());
 		NessGraph graph = new Graph().loadStashes(stashes).as(NessGraph.class);
 		loadUsers(conf.home(), graph);
