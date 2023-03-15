@@ -11,7 +11,7 @@ public class StructTemplate extends Template {
 			rule().condition((type("expression")), (trigger("expressiondeclaration"))).output(mark("modifier")).output(literal(" ")).output(mark("returnType")).output(literal(" ")).output(mark("name")).output(literal("(")).output(expression().output(mark("parameter", "parameterDeclaration").multiple(", "))).output(literal(") {\n\t")).output(mark("expr")).output(literal("\n}")),
 			rule().condition((type("parameter")), (trigger("parameterdeclaration"))).output(mark("type")).output(literal(" ")).output(mark("name")),
 			rule().condition((type("attribute")), (trigger("get"))).output(literal("this.")).output(mark("name", "firstLowerCase")).output(literal("()")),
-			rule().condition((type("attribute")), (trigger("initattribute"))).output(literal("attributes.add(new Attribute(\"")).output(mark("name")).output(literal("\", ")).output(mark("defaultValue")).output(literal("));")),
+			rule().condition((type("attribute")), not(type("inherited")), (trigger("initattribute"))).output(literal("attributes.add(new Attribute(\"")).output(mark("name")).output(literal("\", ")).output(mark("defaultValue")).output(literal("));")),
 			rule().condition((trigger("getter"))).output(literal("public ")).output(mark("type")).output(literal(" ")).output(mark("name", "firstLowerCase")).output(literal("() {\n\treturn attribute(\"")).output(mark("name", "firstLowerCase")).output(literal("\").value().<")).output(mark("type")).output(literal(">as();\n}")),
 			rule().condition((type("attribute")), (trigger("parameter"))).output(mark("type")).output(literal(" ")).output(mark("name", "firstLowerCase")),
 			rule().condition((type("attribute")), (trigger("name"))).output(mark("name", "firstLowerCase")),

@@ -69,7 +69,7 @@ def type(attribute) trigger(get)
 	this.$name+firstLowerCase()
 end
 
-def type(attribute) trigger(initAttribute)
+def type(attribute) !type(inherited) trigger(initAttribute)
 	attributes.add(new Attribute("$name", $defaultValue));
 end
 

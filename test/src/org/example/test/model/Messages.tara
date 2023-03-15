@@ -1,0 +1,140 @@
+dsl Ness
+
+Namespace monitoring
+	Message AnomalyTypeAssertion as Assertion
+		Attribute group as Text
+		Attribute issueEn as Text
+		Attribute issueEs as Text
+		Attribute issuePt as Text
+	Message AnomalyRuleAssertion as Assertion > Attribute detector as Text
+
+	Message AnomalyBundle
+		Attribute place as Text
+		Component Anomaly
+			Attribute code as Text
+			Attribute triggerValue as Text
+	Message Notification
+		Attribute destination as Text
+		Attribute content as Text
+		Attribute contentType as Word("text" "file" "image" "question")
+	Message State
+		Attribute observable as Text
+		Attribute value as Word("Off" "On")
+
+	Message Log
+		Attribute server as Text
+		Attribute module as Text
+		Attribute file as Text
+		Attribute value as Text
+
+	Measurement AssetStatus
+		Value memory
+		Value hdd
+		Value cpu
+		Value kernelTemperature
+		Value temperature
+		Value mBytesReadFromNetwork
+		Value mBytesSentToNetwork
+		Value openFiles
+		Value threads
+		Value processCount
+		Value systemProcessCount
+
+	Measurement ProcessStatus
+		Value memory
+		Value cpu
+		Value threads
+		Value openFiles
+		Value mBytesRead
+		Value mBytesWritten
+
+	Measurement RdbmsStatement
+		Value totalCpuTime
+		Value totalElapsedTime
+		Value executionCount
+		Value callsPerSecond
+		Value maxLogicalReads
+		Value maxLogicalWrites
+
+
+Message Operation
+	Attribute user as Text
+	Attribute server as Text
+	Attribute process as Text
+	Attribute operation as Text
+	Attribute result as Text
+	Component Parameter
+		Attribute type as Text
+		Attribute name as Text
+
+Message UserAssertion as Assertion
+	Attribute name as Text
+	Attribute language as Text
+	Attribute displayName as Text
+	Attribute email as Text
+
+Message TeamAssertion as Assertion
+	Attribute displayName as Text
+	Attribute users as Text List
+	Attribute channels as Text List
+
+Message ChannelAssertion as Assertion
+	Attribute displayName as Text
+
+Namespace inventory
+	Message AreaAssertion as Assertion
+	Message ObservableAssertion as Assertion
+		Attribute container as Text
+		Attribute team as Text
+		Attribute area as Text
+	Message SystemAssertion as ExtensionOf(ObservableAssertion)
+	Message AssetAssertion as ExtensionOf(SystemAssertion)
+	Message HardwareAssertion as ExtensionOf(AssetAssertion)
+		Attribute ip as Text
+		Attribute publicIp as Text
+
+	Message ServerAssertion as ExtensionOf(HardwareAssertion)
+		Attribute architecture as Text
+		Attribute os as Text
+		Attribute cores as Integer
+		Attribute diskSize as LongInteger  //MB
+		Attribute memorySize as LongInteger //MB
+		Attribute processes as Integer
+		Attribute maxOpenFiles as LongInteger
+		Attribute jvm as Text
+		Attribute consulVersion as Text
+		Attribute isp as Text
+
+	Message SoftwareAssertion as ExtensionOf(SystemAssertion)
+	Message ServiceAssertion as ExtensionOf(SoftwareAssertion)
+	Message RdbmsServiceAssertion as ExtensionOf(ServiceAssertion)  > Attribute url as Text
+
+	Message PersonAssertion as ExtensionOf(ObservableAssertion)
+	Message BusinessUnitAssertion as ExtensionOf(ObservableAssertion)
+
+	Message ApplicationAssertion as ExtensionOf(SoftwareAssertion)
+		Attribute name as Text
+		Attribute user as Text
+		Attribute startingTime as DateTime
+		Attribute pid as Integer
+		Attribute commandLine as Text
+		Attribute state as Word("NEW" "RUNNING" "SLEEPING" "WAITING" "ZOMBIE" "STOPPED" "OTHER" "INVALID" "SUSPENDED")
+
+	Message JavaApplicationAssertion as ExtensionOf(SoftwareAssertion)
+		Attribute classpathPrefix as Text
+		Attribute mainArtifact as Text
+		Attribute debugPort as Integer
+		Attribute jmxPort as Integer
+		Attribute minMemory as Integer
+		Attribute maxMemory as Integer
+		Attribute classpath as Text List
+		Attribute inputArguments as Text List
+		Attribute jvmParameter as Text List
+		Attribute jvmVersion as Text
+		Component Operation
+			Attribute name as Text
+			Attribute returnType as Text
+			Attribute description as Text
+			Component Parameter
+				Attribute type as Text
+				Attribute name as Text

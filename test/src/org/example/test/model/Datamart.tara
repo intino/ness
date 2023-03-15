@@ -5,78 +5,51 @@ use Datalake
 Datamart(scale = Day) master
 
 	Entity Area > from = dl.areaAssertion
-	Entity Host > from = dl.hostAssertion
 
 	Entity User > from = dl.userAssertion
 
 	Entity Team > from = dl.teamAssertion
 		Attribute users as Entity(User) List
 		Attribute channels as Entity(Channel) List
-		Attribute someWord as Word("A" "B" "C")
-        Attribute theDateTime as DateTime(format="dd/MM/yyyy HH:mm:ss")
-
-		// public String firstUserName();
-		Method firstUserName as StringGetter("users().isEmpty() ? null : users().get(0).id()")
-
-		// public void println(String message);
-		Method println as Routine("System.out.println(message)") > Parameter message as String
-
-		// public LocalDate dateOf(User user);
-		Method dateOf as Function
-			ReturnType as Date
-			Parameter user as Entity(User)
-			expression = "
-			if(user == null) return LocalDate.now();
-			if(user.toString().isEmpty()) {
-				return LocalDate.now().minusDays(10);
-			}
-			return LocalDate.parse(user.toString());
-			"
-
-
-	Struct Coords
-		Attribute x as Integer
-		Attribute y as Integer
-		Attribute theDate as Date
-		Attribute theDateTime as DateTime
-		Attribute theInstant as Instant
-
-		Method getSum as IntegerGetter("x() + y()")
-
 
 	Entity Channel > from = dl.channelAssertion
-		Attribute coordinate as Struct(Coords)
-		Attribute listOfStructs as Struct(Coords) List
-		Attribute setOfStructs as Struct(Coords) Set
-		Attribute map as Map
 
-		Method doSomething as Routine > expression = "System.out.println(\"Hola!\" + listOfStructs())"
-
-		Method func as Function
-			ReturnType as DateTime
-        	Parameter x as Integer
-        	Parameter y as String
-        	Parameter z as Struct(Coords) List
-        	expression = "
-			if(x <= 0) return LocalDateTime.now();
-			if(x > 0) return LocalDateTime.parse(y);
-			return null;
-        	"
-
-	Entity System as Abstract
-		Attribute container as Entity(System)
-		Attribute team as Entity(Team)
+	Entity Observable as Abstract
+		Attribute container as Entity(Observable)
 		Attribute area as Entity(Area)
-		Attribute host as Entity(Host)
+		Attribute team as Entity(Team)
+
+	Entity System as Abstract ExtensionOf(Observable)
 
 	Entity Asset as ExtensionOf(System) > from = dl.assetAssertion
-		Attribute area as Entity(Area)
-		Attribute host as Entity(Host)
+	Entity Hardware as ExtensionOf(Asset) > from = dl.hardwareAssertion
+	Entity Software as ExtensionOf(System) > from = dl.softwareAssertion
+
+	Entity Service as Abstract ExtensionOf(Software)
+	Entity RdbmsService as ExtensionOf(Service) > from = dl.rdbmsServiceAssertion
+
+	Entity Application as ExtensionOf(Software)
+		Attribute name as String
+		Attribute user as String
+		Attribute startingTime as DateTime
+		Attribute pid as Integer
+		Attribute commandLine as String
+		Attribute state as Word("NEW" "RUNNING" "SLEEPING" "WAITING" "ZOMBIE" "STOPPED" "OTHER" "INVALID" "SUSPENDED")
+
+	Entity JavaApplication as ExtensionOf(Application)
+		Attribute classpathPrefix as String
+		Attribute mainArtifact as String
+		Attribute debugPort as Integer
+		Attribute jmxPort as Integer
+		Attribute minMemory as Integer
+		Attribute maxMemory as Integer
+		Attribute classpath as String List
+		Attribute inputArguments as String List
+		Attribute jvmParameter as String List
+		Attribute jvmVersion as String
+
+	Entity Person as ExtensionOf(Observable) > from = dl.personAssertion
+	Entity BusinessUnit as ExtensionOf(Observable) > from = dl.businessUnitAssertion
 
 	Entity AnomalyType > from = dl.anomalyTypeAssertion
-
 	Entity AnomalyRule > from = dl.anomalyRuleAssertion
-
-	Entity Service as Abstract ExtensionOf(System)
-	Entity RdbmsService as ExtensionOf(Service) > from = dl.rdbmsServiceAssertion
-	Entity ApplicationService as ExtensionOf(Service) > from = dl.applicationServiceAssertion

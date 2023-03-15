@@ -1,23 +1,30 @@
 dsl Ness
 
-use Events
+use Messages
 
 Datalake(scale = Day, path = "{datalake}") dl
 	Seal > Cron(pattern = "0 0 4 1/1 * ? *", timeZone = empty)
 
-	Tank mode as Message(it.Mode)
-	Tank assetStatus as Message(it.Status)
-	Tank assetInfo as Message(it.Info)
-	Tank anomaly as Message(monitoring.AnomalyBundle)
-	Tank notification as Message(monitoring.Notification)
+	Tank state as Message(monitoring.State)
+	Tank assetStatus as Measurement(monitoring.AssetStatus, 5, Minute)
+	Tank processStatus as Measurement(monitoring.ProcessStatus, 5, Minute)
+	Tank rdbmsStatement as Measurement(monitoring.RdbmsStatement, 5, Minute)
+	Tank anomaly as Message (monitoring.AnomalyBundle)
+	Tank notification as Message (monitoring.Notification)
+	Tank anomalyRuleAssertion as Message(monitoring.AnomalyRuleAssertion)
+	Tank anomalyTypeAssertion as Message(monitoring.AnomalyTypeAssertion)
 
-	Tank userAssertion as Message(assertions.UserAssertion)
-	Tank teamAssertion as Message(assertions.TeamAssertion)
-	Tank channelAssertion as Message(assertions.ChannelAssertion)
-	Tank areaAssertion as Message(assertions.AreaAssertion)
-	Tank hostAssertion as Message(assertions.HostAssertion)
-	Tank assetAssertion as Message(assertions.AssetAssertion)
-	Tank anomalyRuleAssertion as Message(assertions.AnomalyRuleAssertion)
-	Tank anomalyTypeAssertion as Message(assertions.AnomalyTypeAssertion)
-	Tank rdbmsServiceAssertion as Message(assertions.RdbmsServiceAssertion)
-	Tank applicationServiceAssertion as Message(assertions.ApplicationServiceAssertion)
+	Tank userAssertion as Message(UserAssertion)
+	Tank teamAssertion as Message(TeamAssertion)
+	Tank channelAssertion as Message(ChannelAssertion)
+
+	Tank areaAssertion as Message(inventory.AreaAssertion)
+	Tank personAssertion as Message(inventory.PersonAssertion)
+	Tank assetAssertion as Message(inventory.AssetAssertion)
+	Tank hardwareAssertion as Message(inventory.HardwareAssertion)
+	Tank serverAssertion as Message(inventory.ServerAssertion)
+	Tank softwareAssertion as Message(inventory.SoftwareAssertion)
+	Tank applicationAssertion as Message(inventory.ApplicationAssertion)
+	Tank javaApplicationAssertion as Message(inventory.JavaApplicationAssertion)
+	Tank rdbmsServiceAssertion as Message(inventory.RdbmsServiceAssertion)
+	Tank businessUnitAssertion as Message(inventory.BusinessUnitAssertion)

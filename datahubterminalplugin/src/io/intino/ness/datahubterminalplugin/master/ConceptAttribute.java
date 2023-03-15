@@ -16,10 +16,20 @@ public class ConceptAttribute {
 
 	private final Object attribute;
 	private final Node owner;
+	private boolean inherited;
 
 	public ConceptAttribute(Object attribute, Node owner) {
 		this.attribute = attribute;
 		this.owner = owner;
+	}
+
+	public boolean inherited() {
+		return inherited;
+	}
+
+	public ConceptAttribute inherited(boolean inherited) {
+		this.inherited = inherited;
+		return this;
 	}
 
 	public <T extends Node> T owner() {

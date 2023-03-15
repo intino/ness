@@ -17,7 +17,7 @@ public interface ConceptRenderer {
 		Map<String, ConceptAttribute> map = new LinkedHashMap<>();
 		if(entity.from() != null) Helper.getAttributesFromEvent(entity, entity.from().message().attributeList(), map);
 		Helper.getAttributesFromParents(entity, map);
-		Helper.getAttributesFromEntity(entity, entity.attributeList(), map);
+		Helper.getAttributesFromEntity(entity, entity.attributeList(), map, false);
 		return new ArrayList<>(map.values());
 	}
 
@@ -38,11 +38,11 @@ public interface ConceptRenderer {
 				parent = parent.isExtensionOf() ? parent.asExtensionOf().entity() : null;
 			}
 			Collections.reverse(attributes);
-			getAttributesFromEntity(entity, attributes, map);
+			getAttributesFromEntity(entity, attributes, map, true);
 		}
 
-		private static void getAttributesFromEntity(Entity entity, List<Entity.Attribute> attributeList, Map<String, ConceptAttribute> attribs) {
-			attributeList.forEach(a -> attribs.put(a.name$(), new ConceptAttribute(a, entity.core$())));
+		private static void getAttributesFromEntity(Entity entity, List<Entity.Attribute> attributeList, Map<String, ConceptAttribute> attribs, boolean inherited) {
+			attributeList.forEach(a -> attribs.put(a.name$(), new ConceptAttribute(a, entity.core$()).inherited(inherited)));
 		}
 	}
 }

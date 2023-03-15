@@ -1,35 +1,32 @@
 dsl Ness
 
-use Datalake
 use Datamart
+use Datalake
 
 Broker(path = empty, port = 63000, secondaryPort = 1884)
 	User("trooper", "trooper")
+	User("wizard", "wizard")
 	User("consul", "consul")
 	User("connector", "connector")
 	User("master", "master")
 
-//Terminal trooper-terminal
-//	Subscribe(dl.anomaly dl.assetInfo dl.assetStatus dl.mode dl.userAssertion dl.assetAssertion dl.teamAssertion dl.channelAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion dl.areaAssertion dl.hostAssertion dl.anomalyTypeAssertion)
-//	Publish(dl.notification dl.assetAssertion)
-//
+Terminal test-terminal
+	Subscribe(dl.anomaly dl.state, dl.assetStatus dl.processStatus dl.rdbmsStatement)
+	Publish(dl.notification)
+	Datamarts(master)
+
 //Terminal monitor-terminal
-//	Publish(dl.assetInfo dl.assetStatus dl.mode)
-//	Subscribe(empty)
+//	Publish(dl.serverAssertion, dl.assetStatus dl.processStatus dl.rdbmsStatement)
 //
 //Terminal wizard-terminal
 //	Publish(dl.anomaly)
-//	Subscribe(dl.mode dl.assetInfo dl.assetStatus dl.assetAssertion dl.anomalyTypeAssertion dl.anomalyRuleAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion)
+//	Subscribe(dl.state, dl.assetStatus)
+//	Datamarts(master)
 //
 //Terminal connector-terminal
-//	Publish(dl.userAssertion dl.teamAssertion dl.channelAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion)
-//	Subscribe(dl.notification dl.userAssertion dl.teamAssertion dl.channelAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion)
+//	Subscribe(dl.notification)
 //
 //Terminal master-terminal
-//	Subscribe(dl.anomaly dl.assetInfo dl.assetStatus dl.mode dl.userAssertion dl.assetAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion dl.teamAssertion dl.channelAssertion dl.areaAssertion dl.hostAssertion dl.anomalyTypeAssertion)
-//	Publish(dl.anomaly dl.assetStatus dl.anomalyTypeAssertion dl.areaAssertion dl.assetAssertion dl.channelAssertion dl.hostAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion dl.teamAssertion dl.userAssertion)
-
-Terminal test-terminal
-	Subscribe(dl.anomaly dl.assetInfo dl.assetStatus dl.mode dl.userAssertion dl.assetAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion dl.teamAssertion dl.channelAssertion dl.areaAssertion dl.hostAssertion dl.anomalyTypeAssertion)
-	Publish(dl.anomaly dl.assetStatus dl.anomalyTypeAssertion dl.areaAssertion dl.assetAssertion dl.channelAssertion dl.hostAssertion dl.rdbmsServiceAssertion dl.applicationServiceAssertion dl.teamAssertion dl.userAssertion)
-	Datamarts(master)
+//	Publish(dl.anomaly dl.state, dl.assetStatus dl.processStatus dl.rdbmsStatement)
+//	Subscribe(dl.anomaly  dl.state, empty)
+//	Datamarts(master)

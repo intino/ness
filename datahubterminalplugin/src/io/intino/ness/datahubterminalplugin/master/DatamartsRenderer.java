@@ -242,6 +242,8 @@ public class DatamartsRenderer implements ConceptRenderer {
 			b.add("type", attr.type());
 		}
 
+		if(attr.inherited()) b.add("inherited");
+
 		return b;
 	}
 

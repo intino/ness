@@ -47,6 +47,8 @@ public class StructFrameFactory implements ConceptRenderer {
 		String type = attr.type();
 		builder.add(type);
 
+		if(attr.inherited())builder.add("inherited");
+
 		builder.add("name", attr.name$()).add("owner", attr.core$().owner().name()).add("type", type);
 
 		Parameter defaultValue = DefaultValueHelper.getDefaultValue(attr.core$());

@@ -64,6 +64,8 @@ public class EntityFrameFactory implements ConceptRenderer {
 		if(owner.is(Entity.Abstract.class) || owner.is(Entity.Decorable.class))
 			builder.add("castToSubclass", "(" + owner.name() + ")");
 
+		if(attr.inherited())builder.add("inherited");
+
 		String type = attr.type();
 		builder.add("typename", type);
 		if(attr.isEntity()) type = entitiesPackage() + type;

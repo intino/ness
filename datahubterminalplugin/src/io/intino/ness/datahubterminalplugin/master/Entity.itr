@@ -46,11 +46,11 @@ def trigger(abstract)
 	Abstract
 end
 
-def type(attribute) trigger(initAttribute)
+def type(attribute) !type(inherited) trigger(initAttribute)
 	attributes.add(new Attribute("$name", $defaultValue));
 end
 
-def type(word) trigger(wordDeclaration)
+def type(word) !type(inherited) trigger(wordDeclaration)
 	public enum $name+firstUpperCase {$value...[, ]}
 end
 
