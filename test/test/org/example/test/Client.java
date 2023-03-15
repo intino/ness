@@ -6,8 +6,8 @@ import io.intino.alexandria.terminal.JmsConnector;
 import io.intino.ness.master.reflection.EntityDefinition;
 import io.intino.test.datahubtest.TestTerminal;
 import io.intino.test.datahubtest.datamarts.master.MasterDatamart;
+import io.intino.test.datahubtest.datamarts.master.entities.JavaApplication;
 import io.intino.test.datahubtest.datamarts.master.entities.User;
-import io.intino.test.datahubtest.messages.assertions.UserAssertion;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,9 +28,13 @@ public class Client {
 			TestTerminal terminal = new TestTerminal(connector());
 			MasterDatamart datamart = terminal.masterDatamart();
 
-			System.out.println(datamart.user("user1").name());
-			terminal.publish(new UserAssertion(event));
-			System.out.println(datamart.user("user1").name());
+			var def = JavaApplication.definition;
+			System.out.println(def.attributes());
+			System.out.println(def.declaredAttributes());
+
+//			System.out.println(datamart.user("user1").name());
+//			terminal.publish(new UserAssertion(event));
+//			System.out.println(datamart.user("user1").name());
 
 		} finally {
 			EntityDefinition definition = User.definition;

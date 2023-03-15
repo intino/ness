@@ -412,20 +412,26 @@ def type(subclass) trigger(name)
 	"$name+FirstUpperCase"
 end
 
-def type(attribute) type(collection) trigger(addDefinition)
+def type(attribute) !type(inherited) type(collection) trigger(addDefinition)
 	list.add(new AttributeDefinition() {
 		public String name() {return "$name";}
 		public Class<?> type() {return $type~.class;}
+		public String toString() {return name();}
 		public List<ParameterDefinition> parameters() {
 			return List.of(new ParameterDefinition() {
-				public Optional<ConceptDefinition<?>> asConceptDefinition() {
-					return $parameter+asConceptDefinition;
-				}
-				public Class<?> javaClass() {
-					return $parameterType~.class;
-				}
+				public Optional<ConceptDefinition<?>> asConceptDefinition() {return $parameter+asConceptDefinition;}
+				public Class<?> javaClass() {return $parameterType~.class;}
+				public String toString() {return javaClass().getSimpleName();}
 			});
 		}
+	});
+end
+
+def type(attribute) !type(inherited) trigger(addDefinition)
+	list.add(new AttributeDefinition() {
+		public String name() {return "$name";}
+		public Class<?> type() {return $type~.class;}
+		public String toString() {return name();}
 	});
 end
 
@@ -439,13 +445,6 @@ end
 
 def type(parameter) trigger(asConceptDefinition)
 	Optional.empty()
-end
-
-def type(attribute) trigger(addDefinition)
-	list.add(new AttributeDefinition() {
-		public String name() {return "$name";}
-		public Class<?> type() {return $type~.class;}
-	});
 end
 
 def !type(abstract) type(entity) trigger(registerMounter)
