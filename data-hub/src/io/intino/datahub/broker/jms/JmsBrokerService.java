@@ -6,7 +6,6 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.model.Broker;
-import io.intino.datahub.model.Data;
 import io.intino.datahub.model.Datalake;
 import io.intino.datahub.model.NessGraph;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -221,7 +220,7 @@ public class JmsBrokerService implements BrokerService {
 
 		void start() {
 			startNessSession();
-			initMessageTankConsumers();
+			initTankConsumers();
 			Datalake.ProcessStatus processStatus = graph.datalake().processStatus();
 			if (processStatus != null) registerProcessStatus(datalakeScale(), processStatus);
 		}
@@ -323,15 +322,14 @@ public class JmsBrokerService implements BrokerService {
 			}
 		}
 
-		private void initMessageTankConsumers() {
+		private void initTankConsumers() {
 			if (graph.datalake() == null) return;
 			brokerStage.mkdirs();
-			graph.datalake().tankList().forEach(this::registerMessageTankConsumer);
+			graph.datalake().tankList().forEach(this::registerTankConsumer);
 			Logger.info("Tanks ignited!");
 		}
 
-		private void registerMessageTankConsumer(Datalake.Tank t) {
-			if(!t.isMessage() || t.asMessage() == null || t.asMessage().message() == null) return;
+		private void registerTankConsumer(Datalake.Tank t) {
 			brokerManager.registerTopicConsumer(t.qn(), new MessageSerializer(brokerStage, t, scale(t), box.datamarts()).create());
 		}
 
