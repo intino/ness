@@ -28,6 +28,10 @@ public class Client {
 			TestTerminal terminal = new TestTerminal(connector());
 			MasterDatamart datamart = terminal.masterDatamart();
 
+			System.out.println(JavaApplication.definition.descendants());
+
+			datamart.observable("hola");
+
 			var def = JavaApplication.definition;
 			System.out.println(def.attributes());
 			System.out.println(def.declaredAttributes());
