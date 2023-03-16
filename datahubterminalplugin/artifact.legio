@@ -29,7 +29,6 @@ Artifact("io.intino.ness", "6.0.11") data-hub-terminal-plugin
 		Test("io.intino.alexandria", "terminal-jms", "5.0.0")
 		Test("io.intino.alexandria", "ingestion", "5.0.0")
 		Test("io.intino.alexandria", "bpm-framework", "3.0.0")
-		Test("io.intino.ness", "master", "2.0.0")
 
 		Test("junit", "junit", "4.13.2")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, attachSources = true)
