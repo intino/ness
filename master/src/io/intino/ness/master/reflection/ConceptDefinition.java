@@ -50,11 +50,11 @@ public interface ConceptDefinition<T extends ConceptDefinition<T>> {
 	List<T> descendants();
 
 	default boolean isAncestorOf(T other) {
-		return ancestors().stream().anyMatch(a -> a.fullName().equals(other.fullName()));
+		return descendants().stream().anyMatch(a -> a.fullName().equals(other.fullName()));
 	}
 
 	default boolean isDescendantOf(T other) {
-		return descendants().stream().anyMatch(a -> a.fullName().equals(other.fullName()));
+		return ancestors().stream().anyMatch(a -> a.fullName().equals(other.fullName()));
 	}
 
 	Class<?> javaClass();
