@@ -19,6 +19,7 @@ Datalake(scale = Day, path = "{datalake}") dl
 	Tank channelAssertion as Message(ChannelAssertion)
 
 	Tank areaAssertion as Message(inventory.AreaAssertion)
+	Tank hostAssertion as Message(inventory.HostAssertion)
 	Tank personAssertion as Message(inventory.PersonAssertion)
 	Tank assetAssertion as Message(inventory.AssetAssertion)
 	Tank hardwareAssertion as Message(inventory.HardwareAssertion)

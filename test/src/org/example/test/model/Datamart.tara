@@ -4,15 +4,16 @@ use Datalake
 
 Datamart(scale = Day) master
 
-	Entity Area > from = dl.areaAssertion
+	Entity(from = dl.areaAssertion) Area
+	Entity(from = dl.hostAssertion) Host
 
-	Entity User > from = dl.userAssertion
+	Entity(from = dl.userAssertion) User
 
-	Entity Team > from = dl.teamAssertion
+	Entity(from = dl.teamAssertion) Team
 		Attribute users as Entity(User) List
 		Attribute channels as Entity(Channel) List
 
-	Entity Channel > from = dl.channelAssertion
+	Entity(from = dl.channelAssertion) Channel
 
 	Entity Observable as Abstract
 		Attribute container as Entity(Observable)
@@ -21,14 +22,27 @@ Datamart(scale = Day) master
 
 	Entity System as Abstract ExtensionOf(Observable)
 
-	Entity Asset as ExtensionOf(System) > from = dl.assetAssertion
-	Entity Hardware as ExtensionOf(Asset) > from = dl.hardwareAssertion
-	Entity Software as ExtensionOf(System) > from = dl.softwareAssertion
+	Entity(from = dl.assetAssertion) Asset as ExtensionOf(System)
+		Attribute observer as Entity(Hardware)
 
+	Entity(from = dl.hardwareAssertion) Hardware as ExtensionOf(System)
+	Entity(from = dl.serverAssertion) Server as ExtensionOf(Hardware)
+		Attribute architecture as String
+		Attribute os as String
+		Attribute cores as Integer
+		Attribute diskSize as Long  //MB
+		Attribute memorySize as Long //MB
+		Attribute processes as Integer
+		Attribute maxOpenFiles as Long
+		Attribute jvm as String
+		Attribute consulVersion as String
+		Attribute isp as String
+
+	Entity(from = dl.softwareAssertion) Software as ExtensionOf(System)
 	Entity Service as Abstract ExtensionOf(Software)
-	Entity RdbmsService as ExtensionOf(Service) > from = dl.rdbmsServiceAssertion
+	Entity(from = dl.rdbmsServiceAssertion) RdbmsService as ExtensionOf(Service)
 
-	Entity Application as ExtensionOf(Software)
+	Entity(from = dl.applicationAssertion) Application as ExtensionOf(Software)
 		Attribute name as String
 		Attribute user as String
 		Attribute startingTime as DateTime
@@ -36,7 +50,7 @@ Datamart(scale = Day) master
 		Attribute commandLine as String
 		Attribute state as Word("NEW" "RUNNING" "SLEEPING" "WAITING" "ZOMBIE" "STOPPED" "OTHER" "INVALID" "SUSPENDED")
 
-	Entity JavaApplication as ExtensionOf(Application)
+	Entity(from = dl.javaApplicationAssertion) JavaApplication as ExtensionOf(Application)
 		Attribute classpathPrefix as String
 		Attribute mainArtifact as String
 		Attribute debugPort as Integer
@@ -48,8 +62,8 @@ Datamart(scale = Day) master
 		Attribute jvmParameter as String List
 		Attribute jvmVersion as String
 
-	Entity Person as ExtensionOf(Observable) > from = dl.personAssertion
-	Entity BusinessUnit as ExtensionOf(Observable) > from = dl.businessUnitAssertion
+	Entity(from = dl.personAssertion) Person as ExtensionOf(Observable)
+	Entity(from = dl.businessUnitAssertion) BusinessUnit as ExtensionOf(Observable)
 
-	Entity AnomalyType > from = dl.anomalyTypeAssertion
-	Entity AnomalyRule > from = dl.anomalyRuleAssertion
+	Entity(from = dl.anomalyTypeAssertion) AnomalyType
+	Entity(from = dl.anomalyRuleAssertion) AnomalyRule

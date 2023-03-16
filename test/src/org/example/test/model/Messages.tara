@@ -83,13 +83,17 @@ Message ChannelAssertion as Assertion
 
 Namespace inventory
 	Message AreaAssertion as Assertion
+	Message HostAssertion as Assertion
+
 	Message ObservableAssertion as Assertion
 		Attribute container as Text
 		Attribute team as Text
 		Attribute area as Text
+		Attribute host as Text
+
 	Message SystemAssertion as ExtensionOf(ObservableAssertion)
 	Message AssetAssertion as ExtensionOf(SystemAssertion)
-	Message HardwareAssertion as ExtensionOf(AssetAssertion)
+	Message HardwareAssertion as ExtensionOf(SystemAssertion)
 		Attribute ip as Text
 		Attribute publicIp as Text
 

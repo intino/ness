@@ -15,7 +15,8 @@ public interface ConceptRenderer {
 
 	default List<ConceptAttribute> attributesOf(Entity entity) {
 		Map<String, ConceptAttribute> map = new LinkedHashMap<>();
-		if(entity.from() != null) Helper.getAttributesFromEvent(entity, entity.from().message().attributeList(), map);
+		// TODO: the user has to explicitly declare the attributes??
+//		if(entity.from() != null) Helper.getAttributesFromEvent(entity, entity.from().message().attributeList(), map);
 		Helper.getAttributesFromParents(entity, map);
 		Helper.getAttributesFromEntity(entity, entity.attributeList(), map, false);
 		return new ArrayList<>(map.values());
