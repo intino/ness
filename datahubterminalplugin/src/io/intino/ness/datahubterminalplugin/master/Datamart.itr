@@ -374,8 +374,9 @@ def type(entity) trigger(declareDefinition)
 		public String name() {return "$name";}
 		public boolean isAbstract() {return $isAbstract;}
 		public List<AttributeDefinition> declaredAttributes() {	return declaredAttributes;}
-		public Optional<EntityDefinition> parent() {return datamart().entity("$parent");}
-		public List<EntityDefinition> descendants() {return datamart().entities().instanceOf(this);}
+		public Optional<EntityDefinition> parent() {return [Optional.of($parent+firstLowerCase~EntityDefinition)?Optional.empty()];}
+		public List<EntityDefinition> ancestors() {return java.util.List.of([$ancestor+definition...[,]]);}
+		public List<EntityDefinition> descendants() {return java.util.List.of([$descendant+definition...[,]]);}
 		public Class<?> javaClass() {return $package.entities.$name+FirstUpperCase.class;}
 		private List<AttributeDefinition> initAttributeDefinitions() {
 			List<AttributeDefinition> list = new ArrayList<>($numAttributes);
@@ -397,8 +398,9 @@ def type(struct) trigger(declareDefinition)
 		public String fullName() {return "$fullName";}
 		public String name() {return "$name";}
 		public List<AttributeDefinition> declaredAttributes() {return declaredAttributes;}
-		public Optional<StructDefinition> parent() {return datamart().struct("$parent");}
-		public List<StructDefinition> descendants() {return datamart().structs().instanceOf(this);}
+		public Optional<StructDefinition> parent() {return [Optional.of($parent+firstLowerCase~StructDefinition)?Optional.empty()];}
+		public List<StructDefinition> ancestors() {return java.util.List.of([$ancestor+definition...[,]]);}
+		public List<StructDefinition> descendants() {return java.util.List.of([$descendant+definition...[,]]);}
 		public Class<?> javaClass() {return $package.structs.$name+FirstUpperCase.class;}
 		private List<AttributeDefinition> initAttributeDefinitions() {
 			List<AttributeDefinition> list = new ArrayList<>($numAttributes);
@@ -416,6 +418,14 @@ end
 
 def type(subclass) trigger(name)
 	"$name+FirstUpperCase"
+end
+
+def type(entity) type(descendant | ancestor) trigger(definition)
+	$name+FirstUpperCase~EntityDefinition
+end
+
+def type(struct) type(descendant | ancestor) trigger(definition)
+	$name+FirstUpperCase~StructDefinition
 end
 
 def type(attribute) !type(inherited) type(collection) trigger(addDefinition)

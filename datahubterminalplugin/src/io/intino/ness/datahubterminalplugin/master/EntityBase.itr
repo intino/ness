@@ -207,6 +207,11 @@ def type(entity & base)
         	}
 
         	@Override
+            public List<EntityDefinition> ancestors() {
+            	return definition().ancestors();
+            }
+
+        	@Override
         	public List<EntityDefinition> descendants() {
         		return definition().descendants();
         	}

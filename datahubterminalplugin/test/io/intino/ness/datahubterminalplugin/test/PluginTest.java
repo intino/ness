@@ -23,7 +23,7 @@ public class PluginTest {
 	private static final String WORKSPACE_ROOT = isWindows() ? "C:/Users/naits/Desktop/" : USER_HOME + "/workspace";
 	private static final String TEST_MODULE_PATH = isWindows() ? "C:/Users/naits/Desktop/IntinoDev/ness/test" : USER_HOME + "/workspace/infrastructure/ness/test";
 	private static final String INTELLIJ_MAVEN_PLUGIN = isWindows() ? "C:\\Users\\naits\\AppData\\Local\\JetBrains\\Toolbox\\apps\\IDEA-C\\ch-0\\223.8617.56\\plugins\\maven\\lib\\maven3" : "/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3/";
-	private static final String JAVA_HOME = isWindows() ? "C:/Program Files/Java/jdk-11.0.2" : "/Library/Java/JavaVirtualMachines/jdk-11.0.10.jdk/Contents/Home";
+	private static final String JAVA_HOME = System.getenv("JAVA_HOME");
 	private static final String CESAR_PROJECT_PATH = isWindows() ? "C:/Users/naits/Desktop/IntinoDev/cesar/datahub/" : USER_HOME + "/workspace/projects/cesar/datahub/";
 //	private static final String CESAR_PROJECT_PATH = WORKSPACE_ROOT + "IntinoDev/cesar/datahub/";
 

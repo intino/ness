@@ -120,6 +120,11 @@ def type(struct & base)
         	}
 
         	@Override
+        	public String name() {
+        		return definition().name();
+        	}
+
+        	@Override
         	public List<AttributeDefinition> declaredAttributes() {
         		return definition().declaredAttributes();
         	}
@@ -128,6 +133,11 @@ def type(struct & base)
         	public java.util.Optional<StructDefinition> parent() {
         		return definition().parent();
         	}
+
+            @Override
+            public List<StructDefinition> ancestors() {
+            	return definition().ancestors();
+            }
 
         	@Override
         	public List<StructDefinition> descendants() {

@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 public interface ConceptDefinition<T extends ConceptDefinition<T>> {
 
 	char NAME_SEPARATOR = '.';
+	String NAME_SEPARATOR_REGEX = "\\.";
 
 	String fullName();
 
@@ -50,11 +51,17 @@ public interface ConceptDefinition<T extends ConceptDefinition<T>> {
 	List<T> descendants();
 
 	default boolean isAncestorOf(T other) {
-		return descendants().stream().anyMatch(a -> a.fullName().equals(other.fullName()));
+		final String me = this.name();
+		String[] ancestors = other.fullName().split(NAME_SEPARATOR_REGEX);
+		for(int i = 0;i < ancestors.length - 1;i++) {
+			if(ancestors[i].equals(me)) return true;
+		}
+		return false;
 	}
 
+	@SuppressWarnings("unchecked")
 	default boolean isDescendantOf(T other) {
-		return ancestors().stream().anyMatch(a -> a.fullName().equals(other.fullName()));
+		return other.isAncestorOf((T) this);
 	}
 
 	Class<?> javaClass();

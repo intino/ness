@@ -185,6 +185,22 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return builder;
 	}
 
+	private Frame[] structsOf(Datamart datamart) {
+		return datamart.structList().stream()
+				.map(struct -> {
+					final FrameBuilder b = new FrameBuilder("struct").add("package", modelPackage);
+					b.add("name", struct.name$()).add("fullName", fullNameOf(struct));
+					b.add("attribute", attributeFrames(attributesOf(struct)));
+					if(struct.isExtensionOf()) {
+						b.add("parent", struct.asExtensionOf().struct().name$());
+						b.add("ancestor", ancestorsOf(struct));
+					}
+					setDescendantsInfo(datamart, struct, b);
+					return b.toFrame();
+				}).toArray(Frame[]::new);
+	}
+
+
 	private Frame[] entitiesOf(Datamart datamart) {
 		return datamart.entityList().stream()
 				.map(entity -> {
@@ -192,27 +208,73 @@ public class DatamartsRenderer implements ConceptRenderer {
 					b.add("name", entity.name$()).add("fullName", fullNameOf(entity));
 					b.add("attribute", attributeFrames(attributesOf(entity)));
 					if(entity.from() != null) b.add("event", entity.from().message().name$());
-					if(entity.isExtensionOf()) b.add("parent", entity.asExtensionOf().entity().name$());
+					if(entity.isExtensionOf()) {
+						b.add("parent", entity.asExtensionOf().entity().name$());
+						b.add("ancestor", ancestorsOf(entity));
+					}
 					if (entity.isAbstract()) b.add("abstract");
 					b.add("isAbstract", entity.isAbstract());
-					Frame[] subclasses = framesOfDescendants(entity, datamart);
-					if (subclasses.length > 0) {
-						b.add("superclass");
-						b.add("subclass", subclasses);
-					}
+					setDescendantsInfo(datamart, entity, b);
 					return b.toFrame();
 				}).toArray(Frame[]::new);
 	}
 
-	private Frame[] structsOf(Datamart datamart) {
-		return datamart.structList().stream()
-				.map(struct -> {
-					final FrameBuilder b = new FrameBuilder("struct").add("package", modelPackage);
-					b.add("name", struct.name$()).add("fullName", fullNameOf(struct));
-					b.add("attribute", attributeFrames(attributesOf(struct)));
-					if(struct.isExtensionOf()) b.add("parent", struct.asExtensionOf().struct().name$());
-					return b.toFrame();
-				}).toArray(Frame[]::new);
+	private void setDescendantsInfo(Datamart datamart, Entity entity, FrameBuilder b) {
+		Entity[] descendants = descendantsOf(entity, datamart);
+		if(descendants.length == 0) return;
+
+		b.add("superclass");
+
+		List<Frame> descendantsFrames = new ArrayList<>();
+		List<Frame> subclassesFrames = new ArrayList<>();
+
+		for(Entity descendant : descendants) {
+			descendantsFrames.add(new FrameBuilder("descendant").add("entity").add("name", descendant.name$()).toFrame());
+			if(!descendant.isAbstract())
+				subclassesFrames.add(new FrameBuilder("subclass").add("name", descendant.name$()).toFrame());
+		}
+
+		b.add("descendant", descendantsFrames.toArray(Frame[]::new));
+		if(!subclassesFrames.isEmpty()) b.add("subclass", subclassesFrames.toArray(Frame[]::new));
+	}
+
+	private void setDescendantsInfo(Datamart datamart, Struct struct, FrameBuilder b) {
+		Struct[] descendants = descendantsOf(struct, datamart);
+		if(descendants.length == 0) return;
+
+		b.add("superclass");
+
+		b.add("descendant", Arrays.stream(descendants)
+				.map(descendant -> new FrameBuilder("descendant").add("struct").add("name", descendant.name$()).toFrame())
+				.toArray(Frame[]::new));
+	}
+
+	private Frame[] ancestorsOf(Entity entity) {
+		List<Frame> ancestors = new ArrayList<>();
+		Entity parent = entity.asExtensionOf().entity();
+		while(parent != null) {
+			ancestors.add(new FrameBuilder("ancestor", "entity").add("name", parent.name$()).toFrame());
+			parent = parent.isExtensionOf() ? parent.asExtensionOf().entity() : null;
+		}
+		return ancestors.toArray(Frame[]::new);
+	}
+
+	private Frame ancestorFrameOf(Entity entity) {
+		return new FrameBuilder("ancestor", "entity").add("name", entity.name$()).toFrame();
+	}
+
+	private Frame ancestorFrameOf(Struct struct) {
+		return new FrameBuilder("ancestor", "struct").add("name", struct.name$()).toFrame();
+	}
+
+	private Frame[] ancestorsOf(Struct struct) {
+		List<Frame> ancestors = new ArrayList<>();
+		Struct parent = struct.asExtensionOf().struct();
+		while(parent != null) {
+			ancestors.add(new FrameBuilder("ancestor", "struct").add("name", parent.name$()).toFrame());
+			parent = parent.isExtensionOf() ? parent.asExtensionOf().struct() : null;
+		}
+		return ancestors.toArray(Frame[]::new);
 	}
 
 	private Frame[] attributeFrames(List<ConceptAttribute> attributes) {
@@ -298,7 +360,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private Frame[] framesOfDescendants(Entity parent, Datamart datamart) {
-		return Arrays.stream(descendantsOf(parent, datamart))
+		return Arrays.stream(upperLevelDescendantsOf(parent, datamart))
 				.map(c -> new FrameBuilder("subclass")
 						.add("package", modelPackage + ".master")
 						.add("name", c.name$()).toFrame())
@@ -306,6 +368,14 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private Entity[] descendantsOf(Entity parent, Datamart datamart) {
+		return datamart.entityList(e -> isDescendantOf(e, parent)).toArray(Entity[]::new);
+	}
+
+	private Struct[] descendantsOf(Struct parent, Datamart datamart) {
+		return datamart.structList(e -> isDescendantOf(e, parent)).toArray(Struct[]::new);
+	}
+
+	private Entity[] upperLevelDescendantsOf(Entity parent, Datamart datamart) {
 		List<Entity> upperLevelDescendants = new ArrayList<>();
 
 		for (Entity entity : datamart.entityList(e -> isDescendantOf(e, parent) && !e.isAbstract())) {
@@ -328,6 +398,12 @@ public class DatamartsRenderer implements ConceptRenderer {
 	private static boolean isDescendantOf(Entity node, Entity expectedParent) {
 		if(!node.isExtensionOf()) return false;
 		Entity parent = node.asExtensionOf().entity();
+		return parent.equals(expectedParent) || isDescendantOf(parent, expectedParent);
+	}
+
+	private static boolean isDescendantOf(Struct node, Struct expectedParent) {
+		if(!node.isExtensionOf()) return false;
+		Struct parent = node.asExtensionOf().struct();
 		return parent.equals(expectedParent) || isDescendantOf(parent, expectedParent);
 	}
 
