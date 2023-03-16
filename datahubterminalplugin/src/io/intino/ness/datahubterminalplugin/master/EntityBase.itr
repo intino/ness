@@ -192,6 +192,11 @@ def type(entity & base)
         	}
 
         	@Override
+        	public String name() {
+        		return definition().name();
+        	}
+
+        	@Override
         	public List<AttributeDefinition> declaredAttributes() {
         		return definition().declaredAttributes();
         	}

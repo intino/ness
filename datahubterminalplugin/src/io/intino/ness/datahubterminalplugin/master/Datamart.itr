@@ -28,7 +28,7 @@ def type(datamart & interface)
 			public Entities($name+FirstUpperCase~Datamart datamart) {
 				this.datamart = datamart;
 				this.entitiesByType = new ConcurrentHashMap<>();
-				datamart.getDefinition().entities().forEach(entity -> entitiesByType.put(entity, new ConcurrentHashMap<>()));
+				datamart.getDefinition().entities().stream().filter(e -> !e.isAbstract()).forEach(entity -> entitiesByType.put(entity, new ConcurrentHashMap<>()));
 			}
 
 			public $name+FirstUpperCase~Datamart datamart() {
@@ -43,9 +43,17 @@ def type(datamart & interface)
         		return mapOf(id).map(map -> map.get(id)).orElse(null);
         	}
 
+        	public <T extends $name+FirstUpperCase~Entity> T getDescendant(EntityDefinition definition, String id) {
+        		T entity = get(definition, id);
+        		return entity != null ? entity: definition.descendants().stream()
+        			.filter(descendant -> !descendant.isAbstract())
+        			.map(descendant -> this.<T>get(descendant, id))
+        			.filter(java.util.Objects::nonNull).findFirst().orElse(null);
+        	}
+
 			@SuppressWarnings("unchecked")
         	public <T extends $name+FirstUpperCase~Entity> T get(EntityDefinition type, String id) {
-        		return (T) entitiesByType.get(type).get(id);
+        		return entitiesByType.containsKey(type) ? (T) entitiesByType.get(type).get(id) : null;
             }
 
         	public void add($name+FirstUpperCase~Entity entity) {
@@ -62,9 +70,7 @@ def type(datamart & interface)
 
 			@SuppressWarnings("unchecked")
         	public <T extends $name+FirstUpperCase~Entity> Stream<T> stream(EntityDefinition type) {
-        		return (Stream<T>) entitiesByType.entrySet().stream()
-        			.filter(e -> e.getKey().equals(type) || e.getKey().isDescendantOf(type))
-        			.flatMap(e -> e.getValue().values().stream());
+        		return (Stream<T>) (entitiesByType.containsKey(type) ? entitiesByType.get(type).values().stream() : Stream.empty());
         	}
 
         	public Stream<Entity> streamGeneric() {
@@ -455,10 +461,10 @@ def type(subclass) trigger(getAllStream)
 	$name+Plural+firstLowerCase()
 end
 
-def type(abstract) trigger(getter)
+def type(superclass) trigger(getter)
 	@Override
 	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
-		return id == null ? null : ($package.entities.$name+FirstUpperCase) entities.get(definition.$name+firstLowerCase~EntityDefinition, id);
+		return id == null ? null : entities.getDescendant(definition.$name+firstLowerCase~EntityDefinition, id);
 	}
 
 	@Override
@@ -469,7 +475,7 @@ def type(abstract) trigger(getter)
 	}
 end
 
-def !type(abstract) trigger(getter)
+def trigger(getter)
 	@Override
 	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
 		return id == null ? null : entities.get(definition.$name+firstLowerCase~EntityDefinition, id);

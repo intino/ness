@@ -10,7 +10,6 @@ import io.intino.plugin.PluginLauncher;
 
 import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
 import static io.intino.ness.datahubterminalplugin.Formatters.customize;
@@ -194,14 +193,13 @@ public class DatamartsRenderer implements ConceptRenderer {
 					b.add("attribute", attributeFrames(attributesOf(entity)));
 					if(entity.from() != null) b.add("event", entity.from().message().name$());
 					if(entity.isExtensionOf()) b.add("parent", entity.asExtensionOf().entity().name$());
-					if (entity.isAbstract()) {
-						b.add("abstract");
-						Frame[] subclasses = subclassesOf(entity, datamart);
-						if (subclasses.length > 0) {
-							b.add("subclass", subclasses);
-						}
-					}
+					if (entity.isAbstract()) b.add("abstract");
 					b.add("isAbstract", entity.isAbstract());
+					Frame[] subclasses = framesOfDescendants(entity, datamart);
+					if (subclasses.length > 0) {
+						b.add("superclass");
+						b.add("subclass", subclasses);
+					}
 					return b.toFrame();
 				}).toArray(Frame[]::new);
 	}
@@ -299,18 +297,38 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return String.join(".", names);
 	}
 
-	private Frame[] subclassesOf(Entity parent, Datamart datamart) {
-		return datamart.entityList().stream()
-				.filter(e -> isSubclassOf(e, parent))
-				.map(c -> new FrameBuilder("subclass").add("package", modelPackage + ".master")
+	private Frame[] framesOfDescendants(Entity parent, Datamart datamart) {
+		return Arrays.stream(descendantsOf(parent, datamart))
+				.map(c -> new FrameBuilder("subclass")
+						.add("package", modelPackage + ".master")
 						.add("name", c.name$()).toFrame())
 				.toArray(Frame[]::new);
 	}
 
-	private static boolean isSubclassOf(Entity node, Entity expectedParent) {
+	private Entity[] descendantsOf(Entity parent, Datamart datamart) {
+		List<Entity> upperLevelDescendants = new ArrayList<>();
+
+		for (Entity entity : datamart.entityList(e -> isDescendantOf(e, parent) && !e.isAbstract())) {
+			if(anAncestorOfThisEntityIsAlreadyPresent(entity, upperLevelDescendants)) continue;
+			removeAnyDescendantOfThisEntityIfPresent(entity, upperLevelDescendants);
+			upperLevelDescendants.add(entity);
+		}
+
+		return upperLevelDescendants.toArray(new Entity[0]);
+	}
+
+	private boolean anAncestorOfThisEntityIsAlreadyPresent(Entity entity, List<Entity> upperLevelDescendants) {
+		return upperLevelDescendants.stream().anyMatch(ancestor -> isDescendantOf(entity, ancestor));
+	}
+
+	private void removeAnyDescendantOfThisEntityIfPresent(Entity ancestor, List<Entity> upperLevelDescendants) {
+		upperLevelDescendants.removeIf(e -> isDescendantOf(e, ancestor));
+	}
+
+	private static boolean isDescendantOf(Entity node, Entity expectedParent) {
 		if(!node.isExtensionOf()) return false;
 		Entity parent = node.asExtensionOf().entity();
-		return parent.equals(expectedParent) || isSubclassOf(parent, expectedParent);
+		return parent.equals(expectedParent) || isDescendantOf(parent, expectedParent);
 	}
 
 	private Map<String, String> renderEntity(Entity entity, Datamart datamart) {

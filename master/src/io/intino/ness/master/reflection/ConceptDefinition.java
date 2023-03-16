@@ -14,7 +14,7 @@ public interface ConceptDefinition<T extends ConceptDefinition<T>> {
 	default String name() {
 		String fullName = fullName();
 		int nameBegin = fullName.lastIndexOf(NAME_SEPARATOR);
-		return nameBegin < 0 ? fullName : fullName.substring(nameBegin);
+		return nameBegin < 0 ? fullName : fullName.substring(nameBegin + 1);
 	}
 
 	default List<AttributeDefinition> attributes() {
