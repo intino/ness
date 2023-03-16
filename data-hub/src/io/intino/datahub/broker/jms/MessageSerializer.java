@@ -1,4 +1,4 @@
-	package io.intino.datahub.broker.jms;
+package io.intino.datahub.broker.jms;
 
 import io.intino.alexandria.Fingerprint;
 import io.intino.alexandria.Scale;
@@ -46,17 +46,15 @@ class MessageSerializer {
 	}
 
 	private void consume(Iterator<Message> messages) {
-		while(messages.hasNext()) {
+		while (messages.hasNext()) {
 			Message message = messages.next();
 			save(message);
-			mount(message);
+			if (tank.isMessage()) mount(message);
 		}
 	}
 
 	private void mount(Message message) {
-		for(MasterDatamartMessageMounter mounter : mounters) {
-			mounter.mount(message);
-		}
+		for (MasterDatamartMessageMounter mounter : mounters) mounter.mount(message);
 	}
 
 	private void save(Message message) {
@@ -82,7 +80,8 @@ class MessageSerializer {
 	}
 
 	private static MasterDatamartMessageMounter[] createMountersFor(Datalake.Tank tank, MasterDatamartRepository datamartsRepo) {
-		if(!tank.isMessage() || tank.asMessage() == null || tank.asMessage().message() == null) return new MasterDatamartMessageMounter[0];
+		if (!tank.isMessage() || tank.asMessage() == null || tank.asMessage().message() == null)
+			return new MasterDatamartMessageMounter[0];
 		return datamartsRepo.datamarts().stream()
 				.filter(d -> d.elementType().equals(Message.class))
 				.filter(d -> d.subscribedEvents().contains(tank.asMessage().message().name$()))
