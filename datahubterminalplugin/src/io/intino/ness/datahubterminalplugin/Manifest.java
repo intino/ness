@@ -10,7 +10,9 @@ public class Manifest {
 	public List<String> publish;
 	public List<String> subscribe;
 	public Map<String, String> tankClasses;
-	public final List<String> parameters = Arrays.asList("terminal_url", "terminal_user", "terminal_password", "terminal_clientId", "terminal_working_directory");
+	public final List<String> connectionParameters = Arrays.asList("datahub_url", "datahub_user", "datahub_password", "datahub_clientId", "keystore_file",
+			"truststore_file", "keystore_password", "trustStore_password", "datahub_outbox_directory");
+	public final List<String> additionalParameters = List.of("datahub_outbox_directory");
 
 	public Manifest(String name, String qn, List<String> publish, List<String> subscribe, Map<String, String> tankClasses) {
 		this.terminal = name;
