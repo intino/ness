@@ -2,7 +2,7 @@ dsl Ness
 
 use Datalake
 
-Datamart(scale = Day, saveOnExit = false) master
+Datamart(scale = None) master
 
 	Entity(from = dl.areaAssertion) Area
 	Entity(from = dl.hostAssertion) Host

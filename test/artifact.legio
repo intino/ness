@@ -6,6 +6,8 @@ Artifact("org.example", "1.0.0") test as Solution
 	Imports
 		Test("junit", "junit", "4.13")
 		Test("org.apache.activemq", "activemq-client", "5.17.1")
+		Test("org.apache.groovy", "groovy-all", "4.0.10")
+
 
 	IntinoPlugin("io.intino.ness:data-hub-accessor-plugin:2.3.4", "io.intino.ness.datahubaccessorplugin.DataHubAccessorsPluginLauncher")
 	Package(mode = ModulesAndLibrariesLinkedByManifest) as Runnable(mainClass = "org.example.test.model.Main")

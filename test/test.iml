@@ -158,5 +158,52 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: javax.jmdns:jmdns:3.4.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-all:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-ant:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.ant:ant:1.10.13" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.ant:ant-junit:1.10.13" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.ant:ant-launcher:1.10.13" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.ant:ant-antlr:1.10.13" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-cli-picocli:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: info.picocli:picocli:4.7.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-console:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: com.github.javaparser:javaparser-core:3.25.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.ow2.asm:asm-util:9.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.ow2.asm:asm:9.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.ow2.asm:asm-tree:9.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.ow2.asm:asm-analysis:9.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.abego.treelayout:org.abego.treelayout.core:1.0.3" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.ivy:ivy:2.5.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-datetime:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-docgenerator:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: com.thoughtworks.qdox:qdox:1.12.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-groovydoc:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-groovysh:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: jline:jline:2.14.6" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-jmx:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-json:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-jsr223:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-macro:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-nio:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-servlet:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-sql:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-swing:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-templates:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-test:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-test-junit5:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.junit.jupiter:junit-jupiter-api:5.9.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.opentest4j:opentest4j:1.2.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.junit.platform:junit-platform-launcher:1.9.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.junit.platform:junit-platform-engine:1.9.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.junit.platform:junit-platform-commons:1.9.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.junit.jupiter:junit-jupiter-engine:5.9.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-xml:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.groovy:groovy-yaml:4.0.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.yaml:snakeyaml:1.33" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: com.fasterxml.jackson.core:jackson-core:2.14.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: com.fasterxml.jackson.core:jackson-databind:2.14.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: com.fasterxml.jackson.core:jackson-annotations:2.14.2" level="project" />
   </component>
 </module>
