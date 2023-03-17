@@ -16,8 +16,8 @@ public class SSL_ {
 		ActiveMQSslConnectionFactory connectionFactory = new ActiveMQSslConnectionFactory("ssl://localhost:63000");
 		connectionFactory.setKeyStore(new File("../temp/datahub/client.jks").getAbsolutePath());
 		connectionFactory.setTrustStore(new File("../temp/datahub/client.jts").getAbsolutePath());
-		connectionFactory.setKeyStorePassword("vaquep0");
-		connectionFactory.setTrustStorePassword("vaquep0");
+		connectionFactory.setKeyStorePassword("xxxxx");
+		connectionFactory.setTrustStorePassword("xxxx");
 		connectionFactory.setUserName("consul");
 		connectionFactory.setPassword("consul");
 		Connection connection = connectionFactory.createConnection();
