@@ -11,7 +11,7 @@ public class Manifest {
 	public List<String> subscribe;
 	public Map<String, String> tankClasses;
 	public final List<String> connectionParameters = Arrays.asList("datahub_url", "datahub_user", "datahub_password", "datahub_clientId", "keystore_file",
-			"truststore_file", "keystore_password", "trustStore_password", "datahub_outbox_directory");
+			"truststore_file", "keystore_password", "trustStore_password");
 	public final List<String> additionalParameters = List.of("datahub_outbox_directory");
 
 	public Manifest(String name, String qn, List<String> publish, List<String> subscribe, Map<String, String> tankClasses) {
