@@ -11,6 +11,7 @@ import io.intino.datahub.model.NessGraph;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQSession;
 import org.apache.activemq.broker.BrokerPlugin;
+import org.apache.activemq.broker.SslContext;
 import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.broker.region.policy.ConstantPendingMessageLimitStrategy;
 import org.apache.activemq.broker.region.policy.PolicyEntry;
@@ -26,8 +27,17 @@ import org.apache.activemq.security.SimpleAuthenticationPlugin;
 import org.apache.activemq.store.kahadb.KahaDBPersistenceAdapter;
 
 import javax.jms.*;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.TrustManagerFactory;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URI;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +53,7 @@ public class JmsBrokerService implements BrokerService {
 	private final DataHubBox box;
 	private final File root;
 	private final File brokerStage;
+	private final SSLConfiguration sslConfiguration;
 	private final BrokerManager brokerManager;
 	private final PipeManager pipeManager;
 	private final Map<String, VirtualDestinationInterceptor> pipes = new HashMap<>();
@@ -50,9 +61,14 @@ public class JmsBrokerService implements BrokerService {
 	private org.apache.activemq.broker.BrokerService service;
 
 	public JmsBrokerService(DataHubBox box, File brokerStage) {
+		this(box, brokerStage, null);
+	}
+
+	public JmsBrokerService(DataHubBox box, File brokerStage, SSLConfiguration sslConfiguration) {
 		this.box = box;
 		this.root = new File(box.graph().broker().path());
 		this.brokerStage = brokerStage;
+		this.sslConfiguration = sslConfiguration;
 		configure();
 		this.brokerManager = new BrokerManager(box.graph(), new AdvisoryManager(jmsBroker()));
 		this.pipeManager = new PipeManager(brokerManager, box.graph().broker().pipeList());
@@ -65,7 +81,7 @@ public class JmsBrokerService implements BrokerService {
 			this.service.waitUntilStarted();
 			this.brokerManager.start();
 			this.pipeManager.start();
-			Logger.info("Broker started!");
+			Logger.info("Broker started in port " + graph().broker().port());
 		} catch (Exception e) {
 			Logger.error(e.getMessage(), e);
 		}
@@ -108,8 +124,11 @@ public class JmsBrokerService implements BrokerService {
 			service.setAdvisorySupport(true);
 			service.setPlugins(new BrokerPlugin[]{new SimpleAuthenticationPlugin(registerUsers()), new JavaRuntimeConfigurationPlugin(), new TimeStampingBrokerPlugin()});
 			addPolicies();
-			addTCPConnector();
-			addMQTTConnector();
+			if (sslConfiguration != null) addSSLConnector();
+			else {
+				addTCPConnector();
+				addMQTTConnector();
+			}
 			graph().broker().bridgeList().forEach(this::addJmsBridge);
 		} catch (Exception e) {
 			Logger.error("Error configuring: " + e.getMessage(), e);
@@ -179,6 +198,29 @@ public class JmsBrokerService implements BrokerService {
 		connector.setUri(new URI("tcp://0.0.0.0:" + graph().broker().port() + "?transport.useKeepAlive=true"));
 		connector.setName("OWireConn");
 		service.addConnector(connector);
+	}
+
+	private void addSSLConnector() throws Exception {
+		TransportConnector connector = new TransportConnector();
+		connector.setUri(new URI("ssl://0.0.0.0:" + graph().broker().port() + "?transport.useKeepAlive=true&amp;needClientAuth=true"));
+		connector.setName("ssl");
+		configureSSL();
+		service.addConnector(connector);
+	}
+
+	private void configureSSL() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
+		KeyStore keyStore = KeyStore.getInstance("JKS");
+		keyStore.load(new FileInputStream(sslConfiguration.keyStore()), sslConfiguration.keyStorePassword());
+		KeyStore trustStore = KeyStore.getInstance("JKS");
+		trustStore.load(new FileInputStream(sslConfiguration.trustStore()), sslConfiguration.trustStorePassword());
+
+		KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
+		keyManagerFactory.init(keyStore, sslConfiguration.keyStorePassword());
+
+		TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance("SunX509");
+		trustManagerFactory.init(trustStore);
+		service.setSslContext(new SslContext(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null));
+
 	}
 
 	private void addMQTTConnector() throws Exception {

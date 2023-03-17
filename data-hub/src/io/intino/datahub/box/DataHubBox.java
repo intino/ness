@@ -9,6 +9,7 @@ import io.intino.datahub.box.service.jms.NessService;
 import io.intino.datahub.box.service.scheduling.Sentinels;
 import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.broker.jms.JmsBrokerService;
+import io.intino.datahub.broker.jms.SSLConfiguration;
 import io.intino.datahub.datalake.BrokerSessions;
 import io.intino.datahub.datalake.seal.DatahubSessionSealer;
 import io.intino.datahub.datamart.MasterDatamartRepository;
@@ -156,7 +157,11 @@ public class DataHubBox extends AbstractBox {
 
 	private void loadBrokerService() {
 		if (this.graph.broker() != null && graph.broker().implementation() == null)
-			graph.broker().implementation(() -> new JmsBrokerService(this, brokerStage()));
+			graph.broker().implementation(() -> new JmsBrokerService(this, brokerStage(), configuration.keyStorePath() != null ? sslConfiguration() : null));
+	}
+
+	private SSLConfiguration sslConfiguration() {
+		return new SSLConfiguration(new File(configuration.keyStorePath()), new File(configuration.trustStorePath()), configuration.keyStorePassword().toCharArray(), configuration.trustStorePassword().toCharArray());
 	}
 
 	private void configureBroker() {
@@ -200,10 +205,13 @@ public class DataHubBox extends AbstractBox {
 	private void saveDatamartBackups() {
 		for (Datamart datamart : graph.datamartList()) {
 			try {
-				if(!datamart.saveOnExit()) continue;
+				if (!datamart.saveOnExit()) continue;
 				MasterDatamartSerializer.serialize(masterDatamarts.get(datamart.name$()), MasterDatamartSerializer.backupFileOf(datamart, this));
 			} catch (Throwable e) {
-				try {Logger.error("Failed to save backup of " + datamart.name$() + ": " + e.getMessage(), e);} catch(Throwable ignored) {}
+				try {
+					Logger.error("Failed to save backup of " + datamart.name$() + ": " + e.getMessage(), e);
+				} catch (Throwable ignored) {
+				}
 			}
 		}
 	}

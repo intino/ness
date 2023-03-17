@@ -45,6 +45,7 @@ class MeasurementEventSealer {
 		if (tank == null) return null;
 		try {
 			return new ZitWriter(datalakeFile,
+					tank.asMeasurement().measurement().name$(),
 					fingerprint.source(),
 					Period.of(tank.asMeasurement().period(), tank.asMeasurement().periodScale().chronoUnit()),
 					tank.asMeasurement().measurement().valueList().stream().map(Layer::name$).toArray(String[]::new));
