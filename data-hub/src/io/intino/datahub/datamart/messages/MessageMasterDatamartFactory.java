@@ -3,6 +3,7 @@ package io.intino.datahub.datamart.messages;
 import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.datalake.Datalake;
+import io.intino.alexandria.datalake.file.message.MessageEventTank;
 import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
@@ -15,7 +16,9 @@ import io.intino.datahub.model.NessGraph;
 
 import java.io.*;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static io.intino.datahub.datamart.MasterDatamart.Snapshot.shouldCreateSnapshot;
 import static io.intino.datahub.datamart.serialization.MasterDatamartSnapshots.saveSnapshot;
@@ -72,18 +75,21 @@ public class MessageMasterDatamartFactory {
 	private void reflow(MasterDatamart<Message> datamart, Timetag fromTimetag, Datamart definition) throws IOException {
 		MasterDatamartMessageMounter mounter = new MasterDatamartMessageMounter(datamart);
 		Iterator<MessageEvent> iterator = reflowEntityTanksFrom(fromTimetag, definition);
+		int count = 0;
 		while (iterator.hasNext()) {
 			MessageEvent event = iterator.next();
 			Timetag timetag = Timetag.of(event.ts(), Scale.Day);
-			if (shouldCreateSnapshot(timetag, definition.scale())) saveSnapshot(datamartsRoot, timetag, datamart);
+			if (shouldCreateSnapshot(timetag, definition.scale(), definition.firstDayOfWeek())) saveSnapshot(datamartsRoot, timetag, datamart);
 			mounter.mount(event.toMessage());
+			++count;
 		}
+		Logger.info("Reflow finished for datamart " + datamart.name() + " (events = " + count + ")");
 	}
 
 	private Iterator<MessageEvent> reflowEntityTanksFrom(Timetag fromTimetag, Datamart definition) {
 		return definition.entityList().stream()
 				.filter(e -> e.from() != null)
-				.map(e -> datalake.messageStore().tank(e.from().name$()))
+				.map(e -> datalake.messageStore().tank(e.from().message().core$().fullName().replace("$", ".")))
 				.flatMap(t -> fromTimetag == null ? t.content() : t.content((ss, ts) -> !ts.isBefore(fromTimetag)))
 				.iterator();
 	}

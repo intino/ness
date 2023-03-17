@@ -2,7 +2,7 @@ dsl Ness
 
 use Datalake
 
-Datamart(scale = Day) master
+Datamart(scale = Day, saveOnExit = false) master
 
 	Entity(from = dl.areaAssertion) Area
 	Entity(from = dl.hostAssertion) Host
@@ -17,8 +17,9 @@ Datamart(scale = Day) master
 
 	Entity Observable as Abstract
 		Attribute container as Entity(Observable)
-		Attribute area as Entity(Area)
 		Attribute team as Entity(Team)
+		Attribute area as Entity(Area)
+		Attribute host as Entity(Host)
 
 	Entity System as Abstract ExtensionOf(Observable)
 
@@ -26,6 +27,9 @@ Datamart(scale = Day) master
 		Attribute observer as Entity(Hardware)
 
 	Entity(from = dl.hardwareAssertion) Hardware as ExtensionOf(System)
+		Attribute ip as String
+		Attribute publicIp as String
+
 	Entity(from = dl.serverAssertion) Server as ExtensionOf(Hardware)
 		Attribute architecture as String
 		Attribute os as String
@@ -41,6 +45,7 @@ Datamart(scale = Day) master
 	Entity(from = dl.softwareAssertion) Software as ExtensionOf(System)
 	Entity Service as Abstract ExtensionOf(Software)
 	Entity(from = dl.rdbmsServiceAssertion) RdbmsService as ExtensionOf(Service)
+		Attribute url as String
 
 	Entity(from = dl.applicationAssertion) Application as ExtensionOf(Software)
 		Attribute name as String

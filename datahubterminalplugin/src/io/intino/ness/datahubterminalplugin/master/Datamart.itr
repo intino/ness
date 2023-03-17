@@ -471,7 +471,7 @@ def type(subclass) trigger(getAllStream)
 	$name+Plural+firstLowerCase()
 end
 
-def type(superclass) trigger(getter)
+def type(abstract) trigger(getter)
 	@Override
 	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
 		return id == null ? null : entities.getDescendant(definition.$name+firstLowerCase~EntityDefinition, id);
@@ -480,6 +480,21 @@ def type(superclass) trigger(getter)
 	@Override
 	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
 		return Stream.of(
+			$subclass+getAllStream...[,$NL]
+		).<$package.entities.$name+FirstUpperCase>flatMap(java.util.function.Function.identity());//.distinct();
+	}
+end
+
+def type(superclass) !type(abstract) trigger(getter)
+	@Override
+	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
+		return id == null ? null : entities.getDescendant(definition.$name+firstLowerCase~EntityDefinition, id);
+	}
+
+	@Override
+	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
+		return Stream.of(
+			entities.<$package.entities.$name+FirstUpperCase>stream(definition.$name+firstLowerCase~EntityDefinition),
 			$subclass+getAllStream...[,$NL]
 		).<$package.entities.$name+FirstUpperCase>flatMap(java.util.function.Function.identity());//.distinct();
 	}

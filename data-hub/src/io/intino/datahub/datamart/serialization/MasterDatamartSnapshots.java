@@ -20,8 +20,10 @@ import static java.util.Collections.reverseOrder;
 
 public class MasterDatamartSnapshots {
 
+	public static final String SNAPSHOT_EXTENSION = ".datamart.snapshot";
+
 	public static void saveSnapshot(File datamartsRoot, Timetag timetag, MasterDatamart<?> datamart) throws IOException {
-		File file = snapshotDirOf(datamartsRoot, datamart.name() + "/" + timetag.value() + ".datamart.snapshot");
+		File file = snapshotDirOf(datamartsRoot, datamart.name() + "/" + timetag.value() + SNAPSHOT_EXTENSION);
 		file.getParentFile().mkdirs();
 		MasterDatamartSerializer.serialize(datamart, new FileOutputStream(file));
 	}
@@ -57,8 +59,14 @@ public class MasterDatamartSnapshots {
 	}
 
 	private static Timetag timetagOf(File file) {
-		String name = file.getName();
-		return Timetag.of(name.substring(name.indexOf('.')));
+		try {
+			String name = file.getName().replace(SNAPSHOT_EXTENSION, "");
+			Timetag timetag = Timetag.of(name.substring(name.indexOf('.') + 1));
+			timetag.datetime();
+			return timetag;
+		} catch (Exception ignored) {
+			return null;
+		}
 	}
 
 	private static File snapshotDirOf(File datamartsRoot, String datamartName) {
@@ -72,7 +80,7 @@ public class MasterDatamartSnapshots {
 	}
 
 	private static List<File> listSnapshotFilesIn(File dir) {
-		File[] files = dir.listFiles(f -> f.getName().endsWith(".datamart.snapshot"));
+		File[] files = dir.listFiles(f -> f.getName().endsWith(SNAPSHOT_EXTENSION) && timetagOf(f) != null);
 		if(files == null || files.length == 0) return emptyList();
 		return Arrays.asList(files);
 	}

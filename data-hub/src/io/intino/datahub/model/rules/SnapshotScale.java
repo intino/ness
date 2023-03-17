@@ -4,7 +4,7 @@ import io.intino.magritte.lang.model.Rule;
 
 public enum SnapshotScale implements Rule<Enum> {
 
-	Year, Month, Week, Day;
+	None, Year, Month, Week, Day;
 
 	@Override
 	public boolean accept(Enum value) {

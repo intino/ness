@@ -186,13 +186,14 @@ public class DataHubBox extends AbstractBox {
 	}
 
 	private void initMasterDatamarts() {
-		File datamartsRoot = new File(configuration.home(), "datamarts");
+		File datamartsRoot = new File(configuration.home(), "datahub/datamarts");
 		masterDatamarts = new MasterDatamartRepository(datamartsRoot);
 		MessageMasterDatamartFactory datamartFactory = new MessageMasterDatamartFactory(this, datamartsRoot, datalake);
+		long start = System.currentTimeMillis();
 		for (Datamart datamart : graph.datamartList()) {
 			initDatamart(datamartFactory, datamart);
 		}
-		Logger.info("MasterDatamarts initialized (" + masterDatamarts.size() + ")");
+		Logger.info("MasterDatamarts initialized (" + masterDatamarts.size() + ") after " + (System.currentTimeMillis() - start) + " ms");
 		Runtime.getRuntime().addShutdownHook(new Thread(this::saveDatamartBackups, "DatamartBackupsThread"));
 	}
 

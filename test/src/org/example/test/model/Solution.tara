@@ -11,15 +11,15 @@ Broker(path = empty, port = 63000, secondaryPort = 1884)
 	User("master", "master")
 
 Terminal test-terminal
-	Subscribe(dl.anomaly dl.state, dl.assetStatus dl.processStatus dl.rdbmsStatement)
-	Publish(dl.notification)
+	Subscribe(dl.anomalyBundle dl.state, dl.assetStatus dl.processStatus dl.rdbmsStatement)
+	Publish(dl.notification dl.serverAssertion dl.rdbmsServiceAssertion dl.applicationAssertion dl.javaApplicationAssertion)
 	Datamarts(master)
-
+//
 //Terminal monitor-terminal
 //	Publish(dl.serverAssertion, dl.assetStatus dl.processStatus dl.rdbmsStatement)
 //
 //Terminal wizard-terminal
-//	Publish(dl.anomaly)
+//	Publish(dl.anomalyBundle)
 //	Subscribe(dl.state, dl.assetStatus)
 //	Datamarts(master)
 //
@@ -27,6 +27,6 @@ Terminal test-terminal
 //	Subscribe(dl.notification)
 //
 //Terminal master-terminal
-//	Publish(dl.anomaly dl.state, dl.assetStatus dl.processStatus dl.rdbmsStatement)
-//	Subscribe(dl.anomaly  dl.state, empty)
+//	Publish(dl.anomalyBundle dl.state dl.anomalyTypeAssertion dl.areaAssertion dl.hostAssertion dl.userAssertion dl.channelAssertion dl.teamAssertion dl.serverAssertion dl.rdbmsServiceAssertion dl.applicationAssertion dl.javaApplicationAssertion, dl.assetStatus dl.processStatus dl.rdbmsStatement)
+//	Subscribe(dl.anomalyBundle  dl.state, empty)
 //	Datamarts(master)

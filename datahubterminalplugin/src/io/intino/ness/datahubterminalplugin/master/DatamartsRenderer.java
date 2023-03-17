@@ -222,28 +222,15 @@ public class DatamartsRenderer implements ConceptRenderer {
 	private void setDescendantsInfo(Datamart datamart, Entity entity, FrameBuilder b) {
 		Entity[] descendants = descendantsOf(entity, datamart);
 		if(descendants.length == 0) return;
-
 		b.add("superclass");
-
-		List<Frame> descendantsFrames = new ArrayList<>();
-		List<Frame> subclassesFrames = new ArrayList<>();
-
-		for(Entity descendant : descendants) {
-			descendantsFrames.add(new FrameBuilder("descendant").add("entity").add("name", descendant.name$()).toFrame());
-			if(!descendant.isAbstract())
-				subclassesFrames.add(new FrameBuilder("subclass").add("name", descendant.name$()).toFrame());
-		}
-
-		b.add("descendant", descendantsFrames.toArray(Frame[]::new));
-		if(!subclassesFrames.isEmpty()) b.add("subclass", subclassesFrames.toArray(Frame[]::new));
+		b.add("descendant", Arrays.stream(descendants).map(e -> new FrameBuilder("descendant").add("entity").add("name", e.name$()).toFrame()).toArray(Frame[]::new));
+		b.add("subclass", framesOfUpperLevelDescendants(entity, datamart));
 	}
 
 	private void setDescendantsInfo(Datamart datamart, Struct struct, FrameBuilder b) {
 		Struct[] descendants = descendantsOf(struct, datamart);
 		if(descendants.length == 0) return;
-
 		b.add("superclass");
-
 		b.add("descendant", Arrays.stream(descendants)
 				.map(descendant -> new FrameBuilder("descendant").add("struct").add("name", descendant.name$()).toFrame())
 				.toArray(Frame[]::new));
@@ -359,7 +346,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return String.join(".", names);
 	}
 
-	private Frame[] framesOfDescendants(Entity parent, Datamart datamart) {
+	private Frame[] framesOfUpperLevelDescendants(Entity parent, Datamart datamart) {
 		return Arrays.stream(upperLevelDescendantsOf(parent, datamart))
 				.map(c -> new FrameBuilder("subclass")
 						.add("package", modelPackage + ".master")

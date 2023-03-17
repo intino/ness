@@ -35,29 +35,14 @@ public interface MasterDatamart<T> {
 
 	Collection<String> subscribedEvents();
 
-	class Snapshot<T> {
+	record Snapshot<T>(Timetag timetag, MasterDatamart<T> datamart) {
 
-		private final Timetag timetag;
-		private final MasterDatamart<T> datamart;
-
-		public Snapshot(Timetag timetag, MasterDatamart<T> datamart) {
-			this.timetag = timetag;
-			this.datamart = datamart;
-		}
-
-		public Timetag timetag() {
-			return timetag;
-		}
-
-		public MasterDatamart<T> datamart() {
-			return datamart;
-		}
-
-		public static boolean shouldCreateSnapshot(Timetag timetag, SnapshotScale scale) {
-			switch(scale) {
+		public static boolean shouldCreateSnapshot(Timetag timetag, SnapshotScale scale, io.intino.datahub.model.rules.DayOfWeek firstDayOfWeek) {
+			switch (scale) {
+				case None: return false;
 				case Year: return isFirstDayOfYear(timetag);
 				case Month: return isFirstDayOfMonth(timetag);
-				case Week: return isFirstDayOfWeek(timetag);
+				case Week: return isFirstDayOfWeek(timetag, firstDayOfWeek);
 				case Day: return true;
 			}
 			Logger.error("Unknown snapshot scale for datamarts: " + scale);
@@ -72,8 +57,8 @@ public interface MasterDatamart<T> {
 			return today.day() == 1;
 		}
 
-		private static boolean isFirstDayOfWeek(Timetag today) {
-			return today.datetime().getDayOfWeek() == DayOfWeek.MONDAY; // TODO: specify first day of week?
+		private static boolean isFirstDayOfWeek(Timetag today, io.intino.datahub.model.rules.DayOfWeek firstDayOfWeek) {
+			return today.datetime().getDayOfWeek().name().equalsIgnoreCase(firstDayOfWeek.name()); // TODO: specify first day of week?
 		}
 	}
 }
