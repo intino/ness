@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 public class MasterDatamartSerializer {
 
 	public static void serialize(MasterDatamart<?> datamart, File file) throws IOException {
+		file.getParentFile().mkdirs();
 		serialize(datamart, new FileOutputStream(file));
 	}
 
@@ -49,8 +50,6 @@ public class MasterDatamartSerializer {
 	}
 
 	public static File backupFileOf(Datamart datamart, DataHubBox box) {
-		File file = new File(box.configuration().backupDirectory(), "datamarts/" + datamart.name$() + ".backup");
-		file.getParentFile().mkdirs();
-		return file;
+		return new File(box.configuration().backupDirectory(), "datamarts/" + datamart.name$() + ".backup");
 	}
 }
