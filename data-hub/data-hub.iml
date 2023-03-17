@@ -149,8 +149,6 @@
     <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.10.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.23.9" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:scheduler-framework:1.2.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:5.0.0" level="project" />
   </component>
 </module>

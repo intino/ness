@@ -6,6 +6,7 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.datamart.serialization.MasterDatamartSnapshots;
+import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.rules.SnapshotScale;
 
 import java.time.LocalDate;
@@ -31,14 +32,15 @@ public class DatamartsSnapshotAction {
 
 	private void createSnapshotIfNecessary(Timetag today, MasterDatamart<?> datamart) {
 		try {
-			if(shouldCreateSnapshot(today, scaleOf(datamart)))
+			Datamart definition = definitionOf(datamart);
+			if(shouldCreateSnapshot(today, definition.scale(), definition.firstDayOfWeek()))
 				MasterDatamartSnapshots.saveSnapshot(box.datamarts().root(), today, datamart);
 		} catch (Throwable e) {
 			Logger.error("Failed to handle snapshot of " + datamart.name() + ": " + e.getMessage(), e);
 		}
 	}
 
-	private SnapshotScale scaleOf(MasterDatamart<?> datamart) {
-		return box.graph().datamartList(d -> d.name$().equals(datamart.name())).findFirst().get().scale();
+	private Datamart definitionOf(MasterDatamart<?> datamart) {
+		return box.graph().datamartList(d -> d.name$().equals(datamart.name())).findFirst().get();
 	}
 }
