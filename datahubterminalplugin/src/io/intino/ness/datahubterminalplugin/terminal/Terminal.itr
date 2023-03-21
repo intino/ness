@@ -31,6 +31,10 @@ def type(terminal)
 		[$datamart+declaration...[$NL]]
 
 		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector) {
+			this(connector[,$datamart+retryConfigDefault]);
+		}
+
+		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector[, $datamart+retryConfigArg]) {
 			this.connector = connector;
 			[$datamart+instantiate...[$NL]]
 			[$datamart+addDatamartSubscribersCall...[$NL]]
@@ -223,7 +227,41 @@ def type(terminal)
 
 		$message+interface...[$NL$NL]
 		$measurement+interface...[$NL$NL]
+
+		[$datamart+retryConfigClass]
 	}
+end
+
+def trigger(retryConfigClass)
+	public static class DatamartsRetryConfig {
+		public final long initialTimeoutAmount;
+		public final java.util.concurrent.TimeUnit timeoutUnit;
+		public final float timeoutMultiplier;
+		public final int maxAttempts;
+
+		public DatamartsRetryConfig() {
+			this(1, java.util.concurrent.TimeUnit.MINUTES, 2.0f, 5);
+		}
+
+		public DatamartsRetryConfig(long initialTimeoutAmount, java.util.concurrent.TimeUnit timeoutUnit, float timeoutMultiplier, int maxAttempts) {
+        	this.initialTimeoutAmount = initialTimeoutAmount;
+            this.timeoutUnit = timeoutUnit;
+            this.timeoutMultiplier = timeoutMultiplier;
+            this.maxAttempts = maxAttempts;
+        }
+	}
+end
+
+def trigger(retryConfigArg)
+	DatamartsRetryConfig datamartsRetryConfig
+end
+
+def trigger(retryConfigAssign)
+	this.datamartsRetryConfig = datamartsRetryConfig;
+end
+
+def trigger(retryConfigDefault)
+	new DatamartsRetryConfig()
 end
 
 def type(datamart) trigger(declaration)
@@ -231,7 +269,7 @@ def type(datamart) trigger(declaration)
 end
 
 def type(datamart) trigger(instantiate)
-	this.$name+firstLowerCase~Datamart = new $package.$name+FirstUpperCase~DatamartImpl(connector);
+	this.$name+firstLowerCase~Datamart = new $package.$name+FirstUpperCase~DatamartImpl(connector, datamartsRetryConfig);
 end
 
 def type(datamart) trigger(getter)

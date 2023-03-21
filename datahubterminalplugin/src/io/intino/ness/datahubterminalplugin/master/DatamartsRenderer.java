@@ -182,6 +182,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 		builder.add("numEntities", datamart.entityList().size());
 		builder.add("numStructs", datamart.structList().size());
 		builder.add("ontologypackage", modelPackage);
+		builder.add("terminal", String.format(terminalInfo.terminalPackage + "." + firstUpperCase(javaValidName().format(terminalInfo.terminal.name$()).toString())));
 		return builder;
 	}
 

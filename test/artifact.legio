@@ -1,7 +1,7 @@
 dsl Legio
 
 Artifact("org.example", "1.0.0") test as Solution
-	Model("Ness", "8.0.4", sdkVersion = "4.2.3")
+	Model("Ness", "8.1.4", sdkVersion = "4.2.3")
 	DataHub("io.intino.test.datahubtest", "test-terminal", "1.0.0-SNAPSHOT")
 	Imports
 		Test("junit", "junit", "4.13")

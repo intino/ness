@@ -1,7 +1,6 @@
 package org.example.test.datamart;
 
 import groovy.lang.GroovyShell;
-import groovy.util.GroovyScriptEngine;
 import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.message.Message;
 import io.intino.alexandria.terminal.JmsConnector;
@@ -12,7 +11,6 @@ import io.intino.test.datahubtest.datamarts.master.entities.JavaApplication;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
-import java.nio.file.Paths;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.time.Instant;
@@ -87,8 +85,7 @@ public class DatamartImplTest {
 
 	private static JmsConnector connector() {
 		JmsConnector jmsConnector = new JmsConnector(
-				"failover:(tcp://localhost:63000)",
-				"test", "test", "test",
+				new io.intino.alexandria.jms.ConnectionConfig("failover:(tcp://localhost:63000)", "test", "test", "test"),
 				new File("temp/cache")
 		);
 		jmsConnector.start();
