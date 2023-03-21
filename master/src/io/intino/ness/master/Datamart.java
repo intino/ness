@@ -58,6 +58,6 @@ public interface Datamart {
 	}
 
 	enum Scale {
-		Year, Month, Week, Day
+		Year, Month, Week, Day, None
 	}
 }
