@@ -12,6 +12,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.stream.Collectors.joining;
+
 public class MeasurementRenderer {
 	private final Measurement measurement;
 	private final File destination;
@@ -36,9 +38,9 @@ public class MeasurementRenderer {
 				.add("size", measurement.valueList().size())
 				.add("package", packageName);
 		List<Frame> list = new ArrayList<>();
-		List<Measurement.Value> valueList = measurement.valueList();
-		for (int i = 0, valueListSize = valueList.size(); i < valueListSize; i++)
-			list.add(frame(measurement.name$(), valueList.get(i), i));
+		List<Measurement.Value> values = measurement.valueList();
+		for (int i = 0; i < values.size(); i++)
+			list.add(frame(measurement.name$(), values.get(i), i));
 		eventFrame.add("value", list.toArray(new Frame[0]));
 		return eventFrame.toFrame();
 	}
@@ -46,9 +48,16 @@ public class MeasurementRenderer {
 	private static Frame frame(String measurement, Measurement.Value v, int i) {
 		return new FrameBuilder("value")
 				.add("index", i)
-				.add("name", v.name$())
+				.add("name", v.name$() + toString(v.attributeList()))
 				.add("owner", measurement)
 				.toFrame();
+	}
+
+	private static String toString(List<Measurement.Value.Attribute> attributes) {
+		if (attributes.isEmpty()) return "";
+		return "|" + attributes.stream()
+				.map(a -> a.name$() + ":" + a.value())
+				.collect(joining("|"));
 	}
 
 	private String rootPackage() {

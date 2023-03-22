@@ -73,7 +73,10 @@ Concept Namespace
 	has Message
 	has Measurement
 
-Concept Measurement > Concept:{1..*} Value
+Concept Measurement
+	Concept:{1..*} Value
+		Concept:Named Attribute
+			var string value
 
 Concept:AvoidEventAttributes Message
 	has:Named:RequiresAspect Attribute
