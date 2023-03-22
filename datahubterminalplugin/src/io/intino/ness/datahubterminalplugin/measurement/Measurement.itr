@@ -29,7 +29,7 @@ def type(measurement)
 			io.intino.alexandria.message.Message message = new io.intino.alexandria.message.Message(this.getClass().getSimpleName());
 			message.set("ts", this.ts);
 			message.set("ss", this.source);
-			java.util.Arrays.stream(measurements).forEach(m -> message.append("measurements", m));
+			java.util.Arrays.stream(measurements).forEach(m -> message.append("measurements", m.toString()));
 			java.util.Arrays.stream(values).forEach(m -> message.append("values", m));
 			return new io.intino.alexandria.event.message.MessageEvent(message);
 		}
