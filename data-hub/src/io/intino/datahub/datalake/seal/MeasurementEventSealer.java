@@ -12,12 +12,13 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.alexandria.zit.ZitWriter;
 import io.intino.alexandria.zit.model.Period;
-import io.intino.magritte.framework.Layer;
+import io.intino.datahub.model.Measurement;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class MeasurementEventSealer {
@@ -48,11 +49,21 @@ class MeasurementEventSealer {
 					tank.asMeasurement().measurement().name$(),
 					fingerprint.source(),
 					Period.of(tank.asMeasurement().period(), tank.asMeasurement().periodScale().chronoUnit()),
-					tank.asMeasurement().measurement().valueList().stream().map(Layer::name$).toArray(String[]::new));
+					sensorModel(tank));
 		} catch (IOException e) {
 			Logger.error(e);
 			return null;
 		}
+	}
+
+	private static String[] sensorModel(io.intino.datahub.model.Datalake.Tank tank) {
+		return tank.asMeasurement().measurement().valueList().stream()
+				.map(value -> value.name$() + (value.attributeList().isEmpty() ? "" : "|" + toString(value.attributeList()))).
+				toArray(String[]::new);
+	}
+
+	private static String toString(List<Measurement.Value.Attribute> attrs) {
+		return attrs.stream().map(a -> a.name$() + ":" + a.value()).collect(Collectors.joining("|"));
 	}
 
 	private static double[] values(Message message) {
