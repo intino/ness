@@ -46,7 +46,7 @@ public class MessageStoreRequest {
 			return content.startsWith("datamart") ? handleDatamartDownload(content) : handleDatalakeDownload(content);
 		} catch (Throwable e) {
 			Logger.error(e);
-			return null;
+			return Stream.empty();
 		}
 	}
 
@@ -65,12 +65,12 @@ public class MessageStoreRequest {
 	private Stream<Message> downloadDatamart(String datamartName, String timetag) {
 		if(timetag.isEmpty()) {
 			MasterDatamart<?> datamart = box.datamarts().get(datamartName);
-			return datamart == null ? null : downloadDatamart(datamart);
+			return datamart == null ? Stream.empty() : downloadDatamart(datamart);
 		}
 		return loadMostRecentSnapshotTo(box.datamarts().root(), datamartName, asTimetag(timetag), box.graph())
 				.map(MasterDatamart.Snapshot::datamart)
 				.map(this::downloadDatamart)
-				.orElse(null);
+				.orElse(Stream.empty());
 	}
 
 	private Timetag asTimetag(String timetag) {
@@ -103,7 +103,7 @@ public class MessageStoreRequest {
 			return Stream.of(message);
 		} catch (Exception e) {
 			Logger.error(e);
-			return null;
+			return Stream.empty();
 		}
 	}
 
@@ -116,14 +116,14 @@ public class MessageStoreRequest {
 			JsonObject jsonObject = Json.fromString(request, JsonObject.class);
 			if ("reflow".equals(jsonObject.get("operation").getAsString())) return reflow(jsonObject);
 		}
-		return null;
+		return Stream.empty();
 	}
 
 	private Stream<Message> reflow(JsonObject request) {
 		String tank = request.get("tank").getAsString();
 		List<String> tubs = new ArrayList<>();
 		request.get("tubs").getAsJsonArray().forEach(v -> tubs.add(v.getAsString()));
-		List<File> files = filesOf(tank, tubs).collect(toList());
+		List<File> files = filesOf(tank, tubs).toList();
 		return IntStream.range(0, files.size())
 				.mapToObj(i -> toMessage(read(files.get(i)), i < files.size() - 1))
 				.filter(Objects::nonNull);
@@ -158,9 +158,9 @@ public class MessageStoreRequest {
 		return new Tank(t.name(), t.scale().name(), t.sources().map(Datalake.Store.Source::name).collect(toList()));
 	}
 
-	private static <T> T fail(String msg) {
+	private static <T> Stream<T> fail(String msg) {
 		Logger.error(msg);
-		return null;
+		return Stream.empty();
 	}
 
 	private static class Tank {

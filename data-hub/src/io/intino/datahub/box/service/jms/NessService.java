@@ -31,27 +31,33 @@ public class NessService {
 	private void response(BrokerManager manager, Message request, Message response) {
 		new Thread(() -> {
 			try {
-				QueueProducer queueProducer = producer(manager, request);
 				if (response == null) return;
+				QueueProducer queueProducer = producer(manager, request);
+				if(queueProducer == null) return;
 				response.setJMSCorrelationID(request.getJMSCorrelationID());
 				queueProducer.produce(response);
-			} catch (JMSException e) {
-				Logger.error(e);
+			} catch (Throwable e) {
+				Logger.error("Error while handling response: " + e.getMessage(), e);
 			}
 		}).start();
 	}
 
 	private void response(BrokerManager manager, Message request, Stream<Message> response) {
+		if(response == null) return;
 		QueueProducer producer = producer(manager, request);
 		if (producer == null) return;
-		new Thread(() -> response.forEach(m -> {
+		new Thread(() -> handleResponse(request, response, producer)).start();
+	}
+
+	private void handleResponse(Message request, Stream<Message> response, QueueProducer producer) {
+		response.forEach(m -> {
 			try {
 				m.setJMSCorrelationID(request.getJMSCorrelationID());
 				producer.produce(m);
-			} catch (JMSException e) {
-				Logger.error(e);
+			} catch (Throwable e) {
+				Logger.error("Error while handling response: " + e.getMessage(), e);
 			}
-		})).start();
+		});
 	}
 
 	private static QueueProducer producer(BrokerManager manager, Message request) {
