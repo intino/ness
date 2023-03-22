@@ -49,7 +49,7 @@ class TerminalRenderer {
 		if (datalake != null) builder.add("datalake", "").add("scale", datalake.scale().name());
 		builder.add("message", messageFrames());
 		builder.add("measurement", measurementFrames());
-		if(terminal.datamarts() != null) renderDatamarts(builder);
+		if (terminal.datamarts() != null) renderDatamarts(builder);
 		if (terminal.publish() != null) addPublish(builder);
 		if (terminal.subscribe() != null) addSubscribe(builder);
 		if (terminal.bpm() != null) addBpm(builder);
@@ -58,16 +58,16 @@ class TerminalRenderer {
 
 	private void addSubscribe(FrameBuilder builder) {
 		terminal.subscribe().messageTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
-		if(terminal.datamarts() != null) addSubscribeForThedevents(builder);
+		if (terminal.datamarts() != null) addSubscribeForThedevents(builder);
 		terminal.subscribe().measurementTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
 	}
 
 	private void addSubscribeForThedevents(FrameBuilder builder) {
 		Set<String> tanksAlreadySubscribedTo = terminal.subscribe().messageTanks().stream().map(Layer::name$).collect(Collectors.toSet());
-		for(Datamart datamart : terminal.datamarts().list()) {
+		for (Datamart datamart : terminal.datamarts().list()) {
 			List<Tank.Message> tanks = datamart.entityList().stream().map(Entity::from).filter(Objects::nonNull).distinct().collect(Collectors.toList());
-			for(Tank.Message tank : tanks) {
-				if(tanksAlreadySubscribedTo.add(tank.name$())) {
+			for (Tank.Message tank : tanks) {
+				if (tanksAlreadySubscribedTo.add(tank.name$())) {
 					builder.add("subscribe", frameOf(tank));
 				}
 //				builder.add("devent", frameOf(tank, datamart));
@@ -81,7 +81,7 @@ class TerminalRenderer {
 	}
 
 	private void renderDatamarts(FrameBuilder builder) {
-		for(Datamart datamart : terminal.datamarts().list()) {
+		for (Datamart datamart : terminal.datamarts().list()) {
 			builder.add("datamart", frameOf(datamart));
 		}
 		new DatamartsRenderer(srcDir, terminal.graph(), conf, logger, notifier, ontologyPackage).render(terminal, rootPackage);
@@ -90,6 +90,7 @@ class TerminalRenderer {
 	private FrameBuilder frameOf(Datamart datamart) {
 		return new FrameBuilder("datamart")
 				.add("name", datamart.name$())
+				.add("terminal", terminal.name$())
 				.add("package", ontologyPackage + ".datamarts." + javaValidName().format(datamart.name$().toLowerCase()).toString())
 				.add("devent", eventsOf(datamart));
 	}

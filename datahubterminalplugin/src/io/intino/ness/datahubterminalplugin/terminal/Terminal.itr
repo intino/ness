@@ -31,14 +31,10 @@ def type(terminal)
 		[$datamart+declaration...[$NL]]
 
 		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector) {
-			this(connector[,$datamart+retryConfigDefault]);
+			[this(connector, $datamart+retryConfigDefault);?this.connector = connector;]
 		}
 
-		public $name+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector[, $datamart+retryConfigArg]) {
-			this.connector = connector;
-			[$datamart+instantiate...[$NL]]
-			[$datamart+addDatamartSubscribersCall...[$NL]]
-		}
+		[$datamart+constructor]
 
 		[$datamart+getter...[$NL]]
 
@@ -252,8 +248,12 @@ def trigger(retryConfigClass)
 	}
 end
 
-def trigger(retryConfigArg)
-	DatamartsRetryConfig datamartsRetryConfig
+def trigger(constructor)
+	public $terminal+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector, DatamartsRetryConfig datamartsRetryConfig) {
+		this.connector = connector;
+		this.$name+firstLowerCase~Datamart = new $package.$name+FirstUpperCase~DatamartImpl(connector, datamartsRetryConfig);
+		addDatamartSubscribers(this.$name+firstLowerCase~Datamart);
+	}
 end
 
 def trigger(retryConfigAssign)
@@ -269,17 +269,13 @@ def type(datamart) trigger(declaration)
 end
 
 def type(datamart) trigger(instantiate)
-	this.$name+firstLowerCase~Datamart = new $package.$name+FirstUpperCase~DatamartImpl(connector, datamartsRetryConfig);
+
 end
 
 def type(datamart) trigger(getter)
 	public $package.$name+FirstUpperCase~Datamart $name+firstLowerCase~Datamart() {
 		return $name+firstLowerCase~Datamart.init();
 	}
-end
-
-def type(datamart) trigger(addDatamartSubscribersCall)
-	addDatamartSubscribers($name+firstLowerCase~Datamart);
 end
 
 def type(datamart) trigger(addDatamartSubscribers)
