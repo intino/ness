@@ -3,11 +3,11 @@ message: "If you use this software, please cite it as below."
 authors:
   - family-names: Roncal Andrés
     given-names: Octavio
-    - family-names: Evora Gomez
 	orcid: https://orcid.org/0000-0003-3503-3833
+  - family-names: Evora Gomez
 	given-names: José
 	orcid: https://orcid.org/0000-0001-9348-7265
-    - family-names: Hernandez Cabrera
+  - family-names: Hernandez Cabrera
 	given-names: José Juan
 	orcid: https://orcid.org/0000-0001-8818-2993
 
