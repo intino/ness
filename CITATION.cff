@@ -1,9 +1,13 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 authors:
-  - family-names: Roncal Andrés, Evora Gomez, Hernandez Cabrera
-    given-names: Octavio, Jose, Jose Juan
-    orcid: https://orcid.org/1234-5678-9101-1121
+  - family-names: Roncal Andrés
+    given-names: Octavio
+    - family-names: Evora Gomez
+	given-names: José
+    - family-names: Hernandez Cabrera
+	given-names: José Juan
+
 title: "Ness. A framework to create a Data Hub"
 version: 8.2.0
 doi: 10.5281/zenodo.1234
