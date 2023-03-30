@@ -10,7 +10,7 @@ import javax.jms.TextMessage;
 import java.util.Collections;
 import java.util.Iterator;
 
-public class MessageTranslator {
+public class JmsMessageTranslator {
 
 	public static Iterator<Message> toInlMessages(javax.jms.Message message) {
 		try {

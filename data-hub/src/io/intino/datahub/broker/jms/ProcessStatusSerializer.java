@@ -34,7 +34,7 @@ class ProcessStatusSerializer {
 	}
 
 	Consumer<javax.jms.Message> create() {
-		return message -> save(MessageTranslator.toInlMessages(message));
+		return message -> save(JmsMessageTranslator.toInlMessages(message));
 	}
 
 	private void save(Iterator<Message> messages) {

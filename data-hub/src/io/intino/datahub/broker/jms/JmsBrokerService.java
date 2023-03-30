@@ -372,7 +372,7 @@ public class JmsBrokerService implements BrokerService {
 		}
 
 		private void registerTankConsumer(Datalake.Tank t) {
-			brokerManager.registerTopicConsumer(t.qn(), new MessageSerializer(brokerStage, t, scale(t), box.datamarts()).create());
+			brokerManager.registerTopicConsumer(t.qn(), new JmsMessageSerializer(brokerStage, t, scale(t), box.datamarts()).create());
 		}
 
 		private void registerProcessStatus(Scale scale, Datalake.ProcessStatus ps) {

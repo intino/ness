@@ -47,6 +47,8 @@ Concept:{0..1} Datalake
 				var Model.Measurement measurement
 				var integer period
 				var word:Scale periodScale;
+			sub Resource
+				var Model.Resource resourceEvent
 
 Concept:Named Datamart
 	var word:SnapshotScale scale
@@ -77,6 +79,8 @@ Concept Measurement
 	Concept:{1..*} Value
 		Concept:Named Attribute
 			var string value
+
+Concept Resource
 
 Concept:AvoidEventAttributes Message
 	has:Named:RequiresAspect Attribute

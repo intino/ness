@@ -12,21 +12,23 @@ Broker(path = empty, port = 63000, secondaryPort = 1884)
 
 Terminal test-terminal
 	Subscribe(dl.anomalyBundle dl.state, dl.assetStatus dl.processStatus dl.rdbmsStatement)
-	Publish(dl.notification dl.serverAssertion dl.rdbmsServiceAssertion dl.applicationAssertion dl.javaApplicationAssertion)
+	Publish(dl.notification dl.assetAssertion dl.hardwareAssertion dl.peripheralDeviceAssertion dl.networkDeviceAssertion dl.machineAssertion dl.softwareAssertion dl.consulAssertion dl.serviceAssertion dl.rdbmsServiceAssertion dl.queryAssertion dl.applicationAssertion dl.javaApplicationAssertion dl.businessUnitAssertion)
 	Datamarts(master)
-//
-//Terminal monitor-terminal
-//	Publish(dl.serverAssertion, dl.assetStatus dl.processStatus dl.rdbmsStatement)
-//
+
+Terminal monitor-terminal
+	Publish(dl.machineAssertion dl.applicationAssertion dl.javaApplicationAssertion, dl.assetStatus dl.processStatus dl.rdbmsStatement)
+
 //Terminal wizard-terminal
 //	Publish(dl.anomalyBundle)
 //	Subscribe(dl.state, dl.assetStatus)
 //	Datamarts(master)
 //
 //Terminal connector-terminal
+//	Publish(dl.userAssertion dl.channelAssertion)
 //	Subscribe(dl.notification)
+//	Datamarts(master)
 //
 //Terminal master-terminal
-//	Publish(dl.anomalyBundle dl.state dl.anomalyTypeAssertion dl.areaAssertion dl.hostAssertion dl.userAssertion dl.channelAssertion dl.teamAssertion dl.serverAssertion dl.rdbmsServiceAssertion dl.applicationAssertion dl.javaApplicationAssertion, dl.assetStatus dl.processStatus dl.rdbmsStatement)
+//	Publish(dl.anomalyBundle dl.state dl.anomalyTypeAssertion dl.areaAssertion dl.userAssertion dl.channelAssertion dl.teamAssertion dl.assetAssertion dl.hardwareAssertion dl.peripheralDeviceAssertion dl.networkDeviceAssertion dl.machineAssertion dl.softwareAssertion dl.consulAssertion dl.serviceAssertion dl.rdbmsServiceAssertion dl.queryAssertion dl.applicationAssertion dl.javaApplicationAssertion dl.businessUnitAssertion, dl.assetStatus dl.processStatus dl.rdbmsStatement)
 //	Subscribe(dl.anomalyBundle  dl.state, empty)
 //	Datamarts(master)

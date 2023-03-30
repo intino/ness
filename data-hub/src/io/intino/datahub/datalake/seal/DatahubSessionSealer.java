@@ -22,22 +22,21 @@ public class DatahubSessionSealer implements SessionSealer {
 	}
 
 	@Override
-	public synchronized void seal(Predicate<Datalake.Store.Tank<? extends Event>> sortingPolicy) {
+	public synchronized void seal(TankFilter tankFilter) {
 		try {
 			treatedDir.mkdirs();
-			sealEvents(sortingPolicy);
+			sealEvents(tankFilter);
 		} catch (Throwable e) {
 			Logger.error(e);
 		}
 	}
 
-	private void sealEvents(Predicate<Datalake.Store.Tank<? extends Event>> sortingPolicy) {
-		new EventSessionSealer(datalake, graphDl, stageDir, tempDir(), treatedDir).seal(t -> check(t, sortingPolicy));
+	private void sealEvents(TankFilter tankFilter) {
+		new EventSessionSealer(datalake, graphDl, stageDir, tempDir(), treatedDir).seal(t -> check(t, tankFilter));
 	}
 
-	private boolean check(String tank, Predicate<Datalake.Store.Tank<? extends Event>> sortingPolicy) {
-		return sortingPolicy.test(datalake.messageStore().tank(tank))
-				|| sortingPolicy.test(datalake.measurementStore().tank(tank));
+	private boolean check(String tank, TankFilter tankFilter) {
+		return tankFilter.test(datalake.messageStore().tank(tank)) || tankFilter.test(datalake.measurementStore().tank(tank));
 	}
 
 	private File tempDir() {

@@ -1,13 +1,11 @@
 package io.intino.ness.datahubterminalplugin.ontology;
 
 import io.intino.Configuration;
-import io.intino.datahub.model.Datalake;
-import io.intino.datahub.model.Measurement;
-import io.intino.datahub.model.Message;
-import io.intino.datahub.model.NessGraph;
+import io.intino.datahub.model.*;
 import io.intino.ness.datahubterminalplugin.master.DatamartsRenderer;
 import io.intino.ness.datahubterminalplugin.measurement.MeasurementRenderer;
 import io.intino.ness.datahubterminalplugin.message.MessageRenderer;
+import io.intino.ness.datahubterminalplugin.resource.ResourceRenderer;
 import io.intino.plugin.PluginLauncher;
 
 import java.io.File;
@@ -37,6 +35,7 @@ public class OntologyRenderer {
 	public boolean render() {
 		renderMessages();
 		renderMeasurements();
+		renderResources();
 		renderDatamarts();
 		return true;
 	}
@@ -47,6 +46,10 @@ public class OntologyRenderer {
 
 	private void renderMeasurements() {
 		measurements().forEach(m -> new MeasurementRenderer(m, srcDir, basePackage).render());
+	}
+
+	private void renderResources() {
+		graph.core$().find(Resource.class).forEach(r -> new ResourceRenderer(r, srcDir, basePackage).render());
 	}
 
 	private void renderDatamarts() {

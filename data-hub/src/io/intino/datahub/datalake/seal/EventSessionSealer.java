@@ -1,17 +1,17 @@
 package io.intino.datahub.datalake.seal;
 
+import io.intino.alexandria.FS;
 import io.intino.alexandria.Fingerprint;
 import io.intino.alexandria.datalake.Datalake;
-import io.intino.alexandria.datalake.file.FS;
 import io.intino.alexandria.event.Event.Format;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.sealing.EventSealer;
+import io.intino.alexandria.sealing.SessionSealer;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static io.intino.alexandria.Session.SessionExtension;
@@ -25,7 +25,7 @@ public class EventSessionSealer {
 	private final File stageDir;
 	private final File tmpDir;
 	private final File treatedDir;
-	private EventSealer messageSealer;
+	private EventSealer eventSealer;
 	private MeasurementEventSealer measurementSealer;
 
 	public EventSessionSealer(Datalake datalake, io.intino.datahub.model.Datalake graphDl, File stageDir, File tmpDir, File treatedDir) {
@@ -40,8 +40,8 @@ public class EventSessionSealer {
 		seal(t -> true);
 	}
 
-	public void seal(Predicate<String> sorting) {
-		messageSealer = new EventSealer(datalake, sorting, tmpDir);
+	public void seal(SessionSealer.TankNameFilter tankNameFilter) {
+		eventSealer = new EventSealer(datalake, tankNameFilter, tmpDir);
 		measurementSealer = new MeasurementEventSealer(datalake, graphDl);
 		sessions(stageDir).collect(groupingBy(EventSessionSealer::fingerprintOf)).entrySet()
 				.stream().sorted(comparing(t -> t.getKey().toString()))
@@ -51,9 +51,10 @@ public class EventSessionSealer {
 
 	private void seal(Map.Entry<Fingerprint, List<File>> e) {
 		try {
-			Format format = formatOf(e.getKey().tank());
-			if (format == Message) messageSealer.seal(e.getKey(), e.getValue());
-			else if (format == Measurement) measurementSealer.seal(e.getKey(), e.getValue());
+			switch(formatOf(e.getKey().tank())) {
+				case Message, Resource -> eventSealer.seal(e.getKey(), e.getValue());
+				case Measurement -> measurementSealer.seal(e.getKey(), e.getValue());
+			}
 			moveTreated(e);
 		} catch (IOException ex) {
 			Logger.error(ex);
@@ -64,7 +65,14 @@ public class EventSessionSealer {
 		return graphDl.tankList().stream()
 				.filter(tank -> matches(tankName, tank))
 				.findFirst()
-				.map(tank -> (tank.isMessage() ? Message : Measurement)).orElse(Unknown);
+				.map(this::formatOf).orElse(Unknown);
+	}
+
+	private Format formatOf(io.intino.datahub.model.Datalake.Tank tank) {
+		if(tank.isMessage()) return Message;
+		if(tank.isMeasurement()) return Measurement;
+		if(tank.isResource()) return Resource;
+		return Unknown;
 	}
 
 	private static boolean matches(String tankName, io.intino.datahub.model.Datalake.Tank tank) {
@@ -78,11 +86,15 @@ public class EventSessionSealer {
 
 	private static Stream<File> sessions(File stage) {
 		if (!stage.exists()) return Stream.empty();
-		return FS.allFilesIn(stage, f -> f.getName().endsWith(SessionExtension) && f.length() > 0f);
+		try {
+			return FS.allFilesIn(stage, f -> f.getName().endsWith(SessionExtension) && f.length() > 0L);
+		} catch (IOException e) {
+			Logger.error("Error while listing sessions in " + stage + ": " + e.getMessage(), e);
+			return Stream.empty();
+		}
 	}
 
 	private static Fingerprint fingerprintOf(File file) {
 		return Fingerprint.of(file);
 	}
-
 }

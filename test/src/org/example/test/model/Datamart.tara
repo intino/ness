@@ -4,33 +4,38 @@ use Datalake
 
 Datamart(scale = None) master
 
-	Entity(from = dl.areaAssertion) Area
-	Entity(from = dl.hostAssertion) Host
-
 	Entity(from = dl.userAssertion) User
+		Attribute email as String
+		Attribute displayName as String
+		Attribute name as String
+		Attribute language as String
 
 	Entity(from = dl.teamAssertion) Team
+		Attribute displayName as String
 		Attribute users as Entity(User) List
 		Attribute channels as Entity(Channel) List
 
 	Entity(from = dl.channelAssertion) Channel
+		Attribute displayName as String
+
+	Entity(from = dl.areaAssertion) Area
 
 	Entity Observable as Abstract
-		Attribute container as Entity(Observable)
+		Attribute host as Entity(Observable)
+		Attribute observer as Entity(Observable)
+
+	Entity Administrable as Abstract ExtensionOf(Observable)
 		Attribute team as Entity(Team)
 		Attribute area as Entity(Area)
-		Attribute host as Entity(Host)
 
-	Entity System as Abstract ExtensionOf(Observable)
-
-	Entity(from = dl.assetAssertion) Asset as ExtensionOf(System)
-		Attribute observer as Entity(Hardware)
-
-	Entity(from = dl.hardwareAssertion) Hardware as ExtensionOf(System)
+	Entity(from = dl.assetAssertion) Asset as ExtensionOf(Administrable)
+	Entity(from = dl.hardwareAssertion) Hardware as ExtensionOf(Administrable)
+	Entity(from = dl.peripheralDeviceAssertion) PeripheralDevice as ExtensionOf(Hardware)
+	Entity(from = dl.networkDeviceAssertion) NetworkDevice as ExtensionOf(Hardware)
 		Attribute ip as String
 		Attribute publicIp as String
 
-	Entity(from = dl.serverAssertion) Server as ExtensionOf(Hardware)
+	Entity(from = dl.machineAssertion) Machine as ExtensionOf(Hardware)
 		Attribute architecture as String
 		Attribute os as String
 		Attribute cores as Integer
@@ -39,13 +44,20 @@ Datamart(scale = None) master
 		Attribute processes as Integer
 		Attribute maxOpenFiles as Long
 		Attribute jvm as String
-		Attribute consulVersion as String
 		Attribute isp as String
+		Attribute ip as String
+		Attribute publicIp as String
 
-	Entity(from = dl.softwareAssertion) Software as ExtensionOf(System)
-	Entity Service as Abstract ExtensionOf(Software)
-	Entity(from = dl.rdbmsServiceAssertion) RdbmsService as ExtensionOf(Service)
+	Entity(from = dl.softwareAssertion) Software as ExtensionOf(Administrable)
+	Entity(from = dl.consulAssertion) Consul as ExtensionOf(Software)
+		Attribute version as String
+
+	Entity(from = dl.serviceAssertion) Service as ExtensionOf(Software)
 		Attribute url as String
+	Entity(from = dl.rdbmsServiceAssertion) RdbmsService as ExtensionOf(Service)
+	Entity(from = dl.queryAssertion) Query as ExtensionOf(Observable)
+		Attribute query as String
+		Attribute hash as String
 
 	Entity(from = dl.applicationAssertion) Application as ExtensionOf(Software)
 		Attribute name as String
@@ -71,4 +83,8 @@ Datamart(scale = None) master
 	Entity(from = dl.businessUnitAssertion) BusinessUnit as ExtensionOf(Observable)
 
 	Entity(from = dl.anomalyTypeAssertion) AnomalyType
+		Attribute issueEs as String
+		Attribute issuePt as String
+		Attribute issueEn as String
+
 	Entity(from = dl.anomalyRuleAssertion) AnomalyRule

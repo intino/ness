@@ -6,7 +6,7 @@ import io.intino.alexandria.jms.QueueProducer;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.broker.BrokerManager;
-import io.intino.datahub.broker.jms.MessageTranslator;
+import io.intino.datahub.broker.jms.JmsMessageTranslator;
 import org.apache.activemq.command.ActiveMQTempQueue;
 
 import javax.jms.Destination;
@@ -25,7 +25,7 @@ public class NessService {
 	}
 
 	private void response(BrokerManager manager, Message requestMessage, String response) {
-		response(manager, requestMessage, MessageTranslator.toJmsMessage(response));
+		response(manager, requestMessage, JmsMessageTranslator.toJmsMessage(response));
 	}
 
 	private void response(BrokerManager manager, Message request, Message response) {

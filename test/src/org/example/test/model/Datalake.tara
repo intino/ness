@@ -1,6 +1,6 @@
 dsl Ness
 
-use Messages
+use Events
 
 Datalake(scale = Day, path = "{datalake}") dl
 	Seal > Cron(pattern = "0 0 4 1/1 * ? *", timeZone = empty)
@@ -19,13 +19,17 @@ Datalake(scale = Day, path = "{datalake}") dl
 	Tank channelAssertion as Message(ChannelAssertion)
 
 	Tank areaAssertion as Message(inventory.AreaAssertion)
-	Tank hostAssertion as Message(inventory.HostAssertion)
 	Tank personAssertion as Message(inventory.PersonAssertion)
 	Tank assetAssertion as Message(inventory.AssetAssertion)
 	Tank hardwareAssertion as Message(inventory.HardwareAssertion)
-	Tank serverAssertion as Message(inventory.ServerAssertion)
+	Tank peripheralDeviceAssertion as Message(inventory.PeripheralDeviceAssertion)
+	Tank networkDeviceAssertion as Message(inventory.NetworkDeviceAssertion)
+	Tank machineAssertion as Message(inventory.MachineAssertion)
 	Tank softwareAssertion as Message(inventory.SoftwareAssertion)
+	Tank consulAssertion as Message(inventory.ConsulAssertion)
+	Tank serviceAssertion as Message(inventory.ServiceAssertion)
+	Tank rdbmsServiceAssertion as Message(inventory.RdbmsServiceAssertion)
+	Tank queryAssertion as Message(inventory.QueryAssertion)
 	Tank applicationAssertion as Message(inventory.ApplicationAssertion)
 	Tank javaApplicationAssertion as Message(inventory.JavaApplicationAssertion)
-	Tank rdbmsServiceAssertion as Message(inventory.RdbmsServiceAssertion)
 	Tank businessUnitAssertion as Message(inventory.BusinessUnitAssertion)

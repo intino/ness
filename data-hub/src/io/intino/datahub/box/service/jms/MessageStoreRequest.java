@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static io.intino.datahub.broker.jms.MessageTranslator.toJmsMessage;
+import static io.intino.datahub.broker.jms.JmsMessageTranslator.toJmsMessage;
 import static io.intino.datahub.datamart.serialization.MasterDatamartSnapshots.loadMostRecentSnapshotTo;
 import static java.util.stream.Collectors.toList;
 

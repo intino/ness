@@ -1,0 +1,153 @@
+dsl Ness
+
+Namespace monitoring
+	Message AnomalyTypeAssertion as Assertion
+		Attribute group as Text
+		Attribute issueEn as Text
+		Attribute issueEs as Text
+		Attribute issuePt as Text
+	Message AnomalyRuleAssertion as Assertion > Attribute detector as Text
+
+	Message AnomalyBundle
+		Attribute place as Text
+		Component Anomaly
+			Attribute code as Text
+			Attribute triggerValue as Text
+	Message Notification
+		Attribute destination as Text
+		Attribute content as Text
+		Attribute contentType as Word("text" "file" "image" "question")
+	Message State
+		Attribute observable as Text
+		Attribute value as Word("Off" "On")
+
+	Message Log
+		Attribute server as Text
+		Attribute module as Text
+		Attribute file as Text
+		Attribute value as Text
+
+	Measurement AssetStatus
+		Value memory > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("Memoria") es; Attribute("Memory") en; Attribute("Memória") pt;
+		Value hdd > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("HDD") es; Attribute("HDD") en; Attribute("HDD") pt;
+		Value cpu > Attribute("%") metric; Attribute("2") decimalCount; Attribute("CPU") es; Attribute("CPU") en; Attribute("CPU") pt;
+		Value kernelTemperature > Attribute("ºC") metric; Attribute("0") decimalCount; Attribute("Temperatura núcleo") es; Attribute("Kernel temperature") en; Attribute("Temperatura nucleo") pt;
+		Value temperature > Attribute("ºC") metric; Attribute("0") decimalCount; Attribute("Temperatura") es; Attribute("Temperature") en; Attribute("Temperatura") pt;
+		Value mBytesReadFromNetwork > Attribute("bytes") metric; Attribute("0") decimalCount; Attribute("Datos recibidos") es; Attribute("Received data") en; Attribute("Dados recebidos") pt;
+		Value mBytesSentToNetwork > Attribute("bytes") metric; Attribute("0") decimalCount; Attribute("Datos enviados") es; Attribute("Sent data") en; Attribute("Dados enviados") pt;
+		Value openFiles > Attribute("0") decimalCount; Attribute("Ficheros abiertos") es; Attribute("Open files") en; Attribute("Ficheros abertos") pt;
+		Value threads > Attribute("0") decimalCount; Attribute("Hilos") es; Attribute("Threads") en; Attribute("Tópicos") pt;
+		Value processCount > Attribute("0") decimalCount; Attribute("Nº procesos") es; Attribute("Nº processes") en; Attribute("Nº processos") pt;
+		Value systemProcessCount > Attribute("0") decimalCount; Attribute("Nº procesos sistema") es; Attribute("Nº system processes") en; Attribute("Nº processos sistema") pt;
+
+	Measurement ProcessStatus
+		Value memory > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("Memoria") es; Attribute("Memory") en; Attribute("Memória") pt;
+		Value cpu > Attribute("%") metric; Attribute("2") decimalCount; Attribute("CPU") es; Attribute("CPU") en; Attribute("CPU") pt;
+		Value threads > Attribute("0") decimalCount; Attribute("Hilos") es; Attribute("Threads") en; Attribute("Tópicos") pt;
+		Value openFiles > Attribute("0") decimalCount; Attribute("Ficheros abiertos") es; Attribute("Open files") en; Attribute("Ficheros abertos") pt;
+		Value mBytesRead > Attribute("bytes") metric; Attribute("0") decimalCount; Attribute("Datos leídos") es; Attribute("Read data") en; Attribute("Dados lidos") pt;
+		Value mBytesWritten > Attribute("bytes") metric; Attribute("0") decimalCount; Attribute("Datos escritos") es; Attribute("Written data") en; Attribute("Dados escritos") pt;
+
+	Measurement RdbmsStatement
+		Value totalCpuTime > Attribute("%") metric; Attribute("0") decimalCount; Attribute("Tiempo CPU") es; Attribute("CPU time") en; Attribute("Tempo CPU") pt;
+		Value totalElapsedTime > Attribute("%") metric; Attribute("0") decimalCount; Attribute("Tiempo transcurrido") es; Attribute("Elapsed time") en; Attribute("Tempo decorrido") pt;
+		Value executionCount > Attribute("0") decimalCount; Attribute("Ejecuciones") es; Attribute("Executions") en; Attribute("Execuções") pt;
+		Value callsPerSecond > Attribute("calls/seg") metric; Attribute("0") decimalCount; Attribute("Llamadas") es; Attribute("Calls") en; Attribute("Chamadas") pt;
+		Value maxLogicalReads > Attribute("0") decimalCount; Attribute("Lecturas lógicas") es; Attribute("Logical reads") en; Attribute("Leituras lógicas") pt;
+		Value maxLogicalWrites > Attribute("0") decimalCount; Attribute("Escrituras lógicas") es; Attribute("Logical writes") en; Attribute("Escritas lógicas") pt;
+
+Message Operation
+	Attribute user as Text
+	Attribute server as Text
+	Attribute process as Text
+	Attribute operation as Text
+	Attribute result as Text
+	Component Parameter
+		Attribute type as Text
+		Attribute name as Text
+
+Message UserAssertion as Assertion
+	Attribute name as Text
+	Attribute language as Text
+	Attribute displayName as Text
+	Attribute email as Text
+
+Message TeamAssertion as Assertion
+	Attribute displayName as Text
+	Attribute users as Text List
+	Attribute channels as Text List
+
+Message ChannelAssertion as Assertion
+	Attribute displayName as Text
+
+Namespace inventory
+	Message AreaAssertion as Assertion
+
+	Message ObservableAssertion as Assertion
+		Attribute host as Text
+		Attribute observer as Text
+
+	Message AdministrableAssertion as ExtensionOf(ObservableAssertion)
+		Attribute team as Text
+		Attribute area as Text
+
+	Message AssetAssertion as ExtensionOf(AdministrableAssertion)
+	Message HardwareAssertion as ExtensionOf(AdministrableAssertion)
+	Message PeripheralDeviceAssertion as ExtensionOf(HardwareAssertion)
+	Message NetworkDeviceAssertion as ExtensionOf(HardwareAssertion)
+		Attribute ip as Text
+		Attribute publicIp as Text
+
+	Message MachineAssertion as ExtensionOf(HardwareAssertion)
+		Attribute architecture as Text
+		Attribute os as Text
+		Attribute cores as Integer
+		Attribute diskSize as LongInteger  //MB
+		Attribute memorySize as LongInteger //MB
+		Attribute processes as Integer
+		Attribute maxOpenFiles as LongInteger
+		Attribute jvm as Text
+		Attribute isp as Text
+		Attribute ip as Text List
+		Attribute publicIp as Text
+
+	Message SoftwareAssertion as ExtensionOf(AdministrableAssertion)
+	Message ConsulAssertion as ExtensionOf(SoftwareAssertion)
+		Attribute version as Text
+
+	Message ServiceAssertion as ExtensionOf(SoftwareAssertion)
+		Attribute url as Text
+	Message RdbmsServiceAssertion as ExtensionOf(ServiceAssertion)
+	Message QueryAssertion as ExtensionOf(ObservableAssertion)
+		Attribute query as Text
+		Attribute hash as Text
+
+	Message PersonAssertion as ExtensionOf(ObservableAssertion)
+	Message BusinessUnitAssertion as ExtensionOf(ObservableAssertion)
+
+	Message ApplicationAssertion as ExtensionOf(SoftwareAssertion)
+		Attribute name as Text
+		Attribute user as Text
+		Attribute startingTime as DateTime
+		Attribute pid as Integer
+		Attribute commandLine as Text
+		Attribute state as Word("NEW" "RUNNING" "SLEEPING" "WAITING" "ZOMBIE" "STOPPED" "OTHER" "INVALID" "SUSPENDED")
+
+	Message JavaApplicationAssertion as ExtensionOf(ApplicationAssertion)
+		Attribute classpathPrefix as Text
+		Attribute mainArtifact as Text
+		Attribute debugPort as Integer
+		Attribute jmxPort as Integer
+		Attribute minMemory as Integer
+		Attribute maxMemory as Integer
+		Attribute classpath as Text List
+		Attribute inputArguments as Text List
+		Attribute jvmParameter as Text List
+		Attribute jvmVersion as Text
+		Component Operation
+			Attribute name as Text
+			Attribute returnType as Text
+			Attribute description as Text
+			Component Parameter
+				Attribute type as Text
+				Attribute name as Text
