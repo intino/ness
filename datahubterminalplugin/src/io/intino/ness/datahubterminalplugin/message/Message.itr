@@ -234,8 +234,7 @@ end
 
 def type(word & multiple) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase(java.util.List<$type+FirstUpperCase> $name+firstLowerCase) {
-		this.message.remove("$name+firstLowerCase");
-		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v.name()));
+		this.message.set("$name+firstLowerCase", $name+firstLowerCase);
 		return this;
 	}
 end
@@ -272,16 +271,14 @@ end
 
 def type(primitive & multiple) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase(java.util.List<$type> $name+firstLowerCase) {
-		this.message.remove("$name+firstLowerCase");
-		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v));
+		this.message.set("$name+firstLowerCase", $name+firstLowerCase);
 		return this;
 	}
 end
 
 def type(primitive & multiple) trigger(setter)
 	public $owner+firstUpperCase $name+firstLowerCase(java.util.List<$type> $name+firstLowerCase) {
-		this.message.remove("$name+firstLowerCase");
-		$name+firstLowerCase.forEach(v -> this.message.append("$name+firstLowerCase", v));
+		this.message.set("$name+firstLowerCase", $name+firstLowerCase);
 		return this;
 	}
 end
