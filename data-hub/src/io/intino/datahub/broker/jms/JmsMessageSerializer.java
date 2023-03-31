@@ -54,7 +54,7 @@ class JmsMessageSerializer {
 	}
 
 	private static MasterDatamartMessageMounter[] createMountersFor(Datalake.Tank tank, MasterDatamartRepository datamartsRepo) {
-		if (!tank.isMessage() || tank.asMessage() == null || tank.asMessage().message() == null)
+		if (datamartsRepo == null || !tank.isMessage() || tank.asMessage() == null || tank.asMessage().message() == null)
 			return new MasterDatamartMessageMounter[0];
 		return datamartsRepo.datamarts().stream()
 				.filter(d -> d.elementType().equals(Message.class))
