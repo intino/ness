@@ -14,6 +14,8 @@ Datalake(scale = Day, path = "{datalake}") dl
 	Tank anomalyRuleAssertion as Message(monitoring.AnomalyRuleAssertion)
 	Tank anomalyTypeAssertion as Message(monitoring.AnomalyTypeAssertion)
 
+	Tank document as Resource(monitoring.Document)
+
 	Tank userAssertion as Message(UserAssertion)
 	Tank teamAssertion as Message(TeamAssertion)
 	Tank channelAssertion as Message(ChannelAssertion)

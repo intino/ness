@@ -49,6 +49,7 @@ class TerminalRenderer {
 		if (datalake != null) builder.add("datalake", "").add("scale", datalake.scale().name());
 		builder.add("message", messageFrames());
 		builder.add("measurement", measurementFrames());
+//		builder.add("resource", resourceFrames()); TODO
 		if (terminal.datamarts() != null) renderDatamarts(builder);
 		if (terminal.publish() != null) addPublish(builder);
 		if (terminal.subscribe() != null) addSubscribe(builder);
@@ -60,6 +61,7 @@ class TerminalRenderer {
 		terminal.subscribe().messageTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
 		if (terminal.datamarts() != null) addSubscribeForThedevents(builder);
 		terminal.subscribe().measurementTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
+//		terminal.subscribe().resourceTanks().forEach(tank -> builder.add("subscribe", frameOf(tank))); TODO
 	}
 
 	private void addSubscribeForThedevents(FrameBuilder builder) {
@@ -78,6 +80,7 @@ class TerminalRenderer {
 	private void addPublish(FrameBuilder builder) {
 		terminal.publish().messageTanks().forEach(tank -> builder.add("publish", frameOf(tank)));
 		terminal.publish().measurementTanks().forEach(tank -> builder.add("publish", frameOf(tank)));
+//		terminal.publish().resourceTanks().forEach(tank -> builder.add("publish", frameOf(tank))); TODO
 	}
 
 	private void renderDatamarts(FrameBuilder builder) {
@@ -137,6 +140,19 @@ class TerminalRenderer {
 				.toArray(Frame[]::new);
 	}
 
+	private Frame[] resourceFrames() {
+		return resourceTanks().stream()
+				.map(Tank.Resource::resourceEvent)
+				.distinct()
+				.map(r -> new FrameBuilder("resource")
+						.add("namespace", namespace(r))
+						.add("namespaceQn", namespace(r).replace(".", ""))
+						.add("name", r.name$())
+						.add("typename", firstUpperCase(r.name$()))
+						.add("type", resourcePackage(r) + "." + firstUpperCase(r.name$())).toFrame())
+				.toArray(Frame[]::new);
+	}
+
 	private void addBpm(FrameBuilder builder) {
 		String statusQn = terminal.bpm().processStatusClass();
 		String processStatusQName = statusQn.substring(statusQn.lastIndexOf(".") + 1);
@@ -155,6 +171,19 @@ class TerminalRenderer {
 		return new FrameBuilder("message").
 				add("type", messagesPackage + "." + firstUpperCase(tank.message().name$())).
 				add("message", tank.message().name$()).
+				add("typeName", tank.name$()).
+				add("namespace", namespace).
+				add("namespaceQn", namespace.replace(".", "")).
+				add("typeWithNamespace", (namespace.isEmpty() ? "" : namespace + ".") + firstUpperCase(tank.name$())).
+				add("channel", tank.qn()).toFrame();
+	}
+
+	private Frame frameOf(Tank.Resource tank) {
+		String messagesPackage = resourcePackage(tank.resourceEvent());
+		String namespace = namespace(tank.resourceEvent());
+		return new FrameBuilder("measurement").
+				add("type", messagesPackage + "." + firstUpperCase(tank.resourceEvent().name$())).
+				add("message", tank.resourceEvent().name$()).
 				add("typeName", tank.name$()).
 				add("namespace", namespace).
 				add("namespaceQn", namespace.replace(".", "")).
@@ -187,6 +216,12 @@ class TerminalRenderer {
 		return aPackage;
 	}
 
+	private String resourcePackage(Resource event) {
+		String aPackage = rootPackage + ".resources";
+		if (event.core$().owner().is(Namespace.class)) aPackage = aPackage + "." + namespace(event);
+		return aPackage;
+	}
+
 	private String namespace(Layer event) {
 		return event.core$().owner().is(Namespace.class) ? event.core$().ownerAs(Namespace.class).qn().toLowerCase() : "";
 	}
@@ -211,6 +246,13 @@ class TerminalRenderer {
 		List<Tank.Measurement> tanks = new ArrayList<>();
 		if (terminal.publish() != null) tanks.addAll(terminal.publish().measurementTanks());
 		if (terminal.subscribe() != null) tanks.addAll(terminal.subscribe().measurementTanks());
+		return tanks;
+	}
+
+	private List<Tank.Resource> resourceTanks() {
+		List<Tank.Resource> tanks = new ArrayList<>();
+		if (terminal.publish() != null) tanks.addAll(terminal.publish().resourceTanks());
+		if (terminal.subscribe() != null) tanks.addAll(terminal.subscribe().resourceTanks());
 		return tanks;
 	}
 

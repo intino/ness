@@ -21,6 +21,8 @@ Namespace monitoring
 		Attribute observable as Text
 		Attribute value as Word("Off" "On")
 
+	Resource Document
+
 	Message Log
 		Attribute server as Text
 		Attribute module as Text

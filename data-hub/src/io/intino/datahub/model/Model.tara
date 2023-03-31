@@ -63,9 +63,11 @@ Concept:Named Terminal
 	Concept:{0..1} Publish
 		var Datalake.Tank.Message[] messageTanks
 		var Datalake.Tank.Measurement[] measurementTanks = empty
+		var Datalake.Tank.Resource[] resourceTanks = empty
 	Concept:{0..1} Subscribe
 		var Datalake.Tank.Message[] messageTanks
 		var Datalake.Tank.Measurement[] measurementTanks = empty
+		var Datalake.Tank.Resource[] resourceTanks = empty
 	Concept:{0..1} Datamarts
 		var Datamart[] list
 
@@ -74,6 +76,7 @@ Concept Namespace
 	has Namespace
 	has Message
 	has Measurement
+	has Resource
 
 Concept Measurement
 	Concept:{1..*} Value
