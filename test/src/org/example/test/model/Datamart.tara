@@ -51,6 +51,8 @@ Datamart(scale = None) master
 	Entity(from = dl.softwareAssertion) Software as ExtensionOf(Administrable)
 	Entity(from = dl.consulAssertion) Consul as ExtensionOf(Software)
 		Attribute version as String
+		Attribute installedActivities as String List
+		Attribute enabledActivities as String List
 
 	Entity(from = dl.serviceAssertion) Service as ExtensionOf(Software)
 		Attribute url as String

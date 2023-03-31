@@ -127,13 +127,15 @@ end
 
 def type(attribute) type(list) trigger(parseMethod)
 	private java.util.List<$typeParameter> parse$name+FirstUpperCase(Message m) {
-		return java.util.Arrays.asList(m.get("$name").as($typeParameter$[$].class));
+		var value = m.get("$name");
+		return value.data().isEmpty() ? java.util.Collections.emptyList() : value.asList($typeParameter~.class);
 	}
 end
 
 def type(attribute) type(set) trigger(parseMethod)
 	private java.util.Set<$typeParameter> parse$name+FirstUpperCase(Message m) {
-		return java.util.Set.of(m.get("$name").as($typeParameter$[$].class));
+		var value = m.get("$name");
+		return value.data().isEmpty() ? java.util.Collections.emptySet() : value.asSet($typeParameter~.class);
 	}
 end
 

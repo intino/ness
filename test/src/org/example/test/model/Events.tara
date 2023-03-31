@@ -21,8 +21,6 @@ Namespace monitoring
 		Attribute observable as Text
 		Attribute value as Word("Off" "On")
 
-	Resource Document
-
 	Message Log
 		Attribute server as Text
 		Attribute module as Text
@@ -30,33 +28,33 @@ Namespace monitoring
 		Attribute value as Text
 
 	Measurement AssetStatus
-		Value memory > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("Memoria") es; Attribute("Memory") en; Attribute("Memória") pt;
-		Value hdd > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("HDD") es; Attribute("HDD") en; Attribute("HDD") pt;
-		Value cpu > Attribute("%") metric; Attribute("2") decimalCount; Attribute("CPU") es; Attribute("CPU") en; Attribute("CPU") pt;
-		Value kernelTemperature > Attribute("ºC") metric; Attribute("0") decimalCount; Attribute("Temperatura núcleo") es; Attribute("Kernel temperature") en; Attribute("Temperatura nucleo") pt;
-		Value temperature > Attribute("ºC") metric; Attribute("0") decimalCount; Attribute("Temperatura") es; Attribute("Temperature") en; Attribute("Temperatura") pt;
-		Value mBytesReadFromNetwork > Attribute("bytes") metric; Attribute("0") decimalCount; Attribute("Datos recibidos") es; Attribute("Received data") en; Attribute("Dados recebidos") pt;
-		Value mBytesSentToNetwork > Attribute("bytes") metric; Attribute("0") decimalCount; Attribute("Datos enviados") es; Attribute("Sent data") en; Attribute("Dados enviados") pt;
-		Value openFiles > Attribute("0") decimalCount; Attribute("Ficheros abiertos") es; Attribute("Open files") en; Attribute("Ficheros abertos") pt;
-		Value threads > Attribute("0") decimalCount; Attribute("Hilos") es; Attribute("Threads") en; Attribute("Tópicos") pt;
-		Value processCount > Attribute("0") decimalCount; Attribute("Nº procesos") es; Attribute("Nº processes") en; Attribute("Nº processos") pt;
-		Value systemProcessCount > Attribute("0") decimalCount; Attribute("Nº procesos sistema") es; Attribute("Nº system processes") en; Attribute("Nº processos sistema") pt;
+		Value usedRAM > Attribute("MB") metric; Attribute("0") decimalCount
+		Value usedHDD > Attribute("MB") metric; Attribute("0") decimalCount
+		Value usedCPU > Attribute("%") metric; Attribute("2") decimalCount
+		Value kernelTemperature > Attribute("ºC") metric; Attribute("0") decimalCount
+		Value externalTemperature > Attribute("ºC") metric; Attribute("0") decimalCount
+		Value dataReceived > Attribute("MB") metric; Attribute("0") decimalCount
+		Value dataSent > Attribute("MB") metric; Attribute("0") decimalCount
+		Value openFiles > Attribute("0") decimalCount
+		Value threads > Attribute("0") decimalCount
+		Value systemProcesses > Attribute("0") decimalCount
+		Value applications > Attribute("0") decimalCount
+		Value unknownApplications > Attribute("0") decimalCount
 
 	Measurement ProcessStatus
-		Value memory > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("Memoria") es; Attribute("Memory") en; Attribute("Memória") pt;
-		Value cpu > Attribute("%") metric; Attribute("2") decimalCount; Attribute("CPU") es; Attribute("CPU") en; Attribute("CPU") pt;
-		Value threads > Attribute("0") decimalCount; Attribute("Hilos") es; Attribute("Threads") en; Attribute("Tópicos") pt;
-		Value openFiles > Attribute("0") decimalCount; Attribute("Ficheros abiertos") es; Attribute("Open files") en; Attribute("Ficheros abertos") pt;
-		Value mBytesRead > Attribute("bytes") metric; Attribute("0") decimalCount; Attribute("Datos leídos") es; Attribute("Read data") en; Attribute("Dados lidos") pt;
-		Value mBytesWritten > Attribute("bytes") metric; Attribute("0") decimalCount; Attribute("Datos escritos") es; Attribute("Written data") en; Attribute("Dados escritos") pt;
+		Value usedRAM > Attribute("MB") metric; Attribute("0") decimalCount
+		Value usedCPU > Attribute("%") metric; Attribute("2") decimalCount
+		Value threads > Attribute("0") decimalCount
+		Value openFiles > Attribute("0") decimalCount
+		Value dataRead > Attribute("MB") metric; Attribute("0") decimalCount
+		Value dataWritten > Attribute("MB") metric; Attribute("0") decimalCount
 
 	Measurement RdbmsStatement
-		Value totalCpuTime > Attribute("%") metric; Attribute("0") decimalCount; Attribute("Tiempo CPU") es; Attribute("CPU time") en; Attribute("Tempo CPU") pt;
-		Value totalElapsedTime > Attribute("%") metric; Attribute("0") decimalCount; Attribute("Tiempo transcurrido") es; Attribute("Elapsed time") en; Attribute("Tempo decorrido") pt;
-		Value executionCount > Attribute("0") decimalCount; Attribute("Ejecuciones") es; Attribute("Executions") en; Attribute("Execuções") pt;
-		Value callsPerSecond > Attribute("calls/seg") metric; Attribute("0") decimalCount; Attribute("Llamadas") es; Attribute("Calls") en; Attribute("Chamadas") pt;
-		Value maxLogicalReads > Attribute("0") decimalCount; Attribute("Lecturas lógicas") es; Attribute("Logical reads") en; Attribute("Leituras lógicas") pt;
-		Value maxLogicalWrites > Attribute("0") decimalCount; Attribute("Escrituras lógicas") es; Attribute("Logical writes") en; Attribute("Escritas lógicas") pt;
+		Value cpuTime > Attribute("seconds") metric; Attribute("0") decimalCount
+		Value elapsedTime > Attribute("seconds") metric; Attribute("0") decimalCount
+		Value executions > Attribute("0") decimalCount
+		Value logicalReads > Attribute("0") decimalCount
+		Value logicalWrites > Attribute("0") decimalCount
 
 Message Operation
 	Attribute user as Text
@@ -116,6 +114,8 @@ Namespace inventory
 	Message SoftwareAssertion as ExtensionOf(AdministrableAssertion)
 	Message ConsulAssertion as ExtensionOf(SoftwareAssertion)
 		Attribute version as Text
+		Attribute installedActivities as Text List
+		Attribute enabledActivities as Text List
 
 	Message ServiceAssertion as ExtensionOf(SoftwareAssertion)
 		Attribute url as Text
@@ -130,6 +130,7 @@ Namespace inventory
 	Message ApplicationAssertion as ExtensionOf(SoftwareAssertion)
 		Attribute name as Text
 		Attribute user as Text
+		Attribute tag as Text
 		Attribute startingTime as DateTime
 		Attribute pid as Integer
 		Attribute commandLine as Text
