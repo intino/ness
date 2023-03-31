@@ -19,14 +19,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private static final String MINIMUM_BPM_VERSION = "3.0.0";
 	private static final String MINIMUM_TERMINAL_JMS_VERSION = "5.0.0";
-	private static final String MINIMUM_EVENT_VERSION = "4.0.0";
-	private static final String MINIMUM_INGESTION_VERSION = "5.0.0";
-	private static final String MINIMUM_MASTER_VERSION = "2.0.0";
-	private static final String MINIMUM_DATALAKE_VERSION = "6.0.0";
+	private static final String MINIMUM_EVENT_VERSION = "5.0.0";
+	private static final String MAX_EVENT_VERSION = "5.0.0";
+	private static final String MINIMUM_INGESTION_VERSION = "5.0.1";
+	private static final String MINIMUM_MASTER_VERSION = "2.0.4";
+	private static final String MINIMUM_DATALAKE_VERSION = "7.0.0";
 	private static final String MAX_DATALAKE_VERSION = "7.0.0";
 	private static final String MAX_TERMINAL_JMS_VERSION = "6.0.0";
 	private static final String MAX_INGESTION_VERSION = "6.0.0";
-	private static final String MAX_EVENT_VERSION = "5.0.0";
 	private boolean deleteTempDirOnPublish = true;
 	private boolean publishTerminalsIfOntologyFails = false;
 

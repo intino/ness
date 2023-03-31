@@ -169,9 +169,13 @@ def type(terminal)
 
 			public void push(String host, String user, String dataHubStageAbsolutePath) {
 				session.close();
-				List<File> files = io.intino.alexandria.ingestion.FS.allFilesIn(temporalStage, path -> path.getName().endsWith(io.intino.alexandria.Session.SessionExtension)).collect(Collectors.toList());
-				upload(files, host, user, dataHubStageAbsolutePath);
-				temporalStage.renameTo(new File(temporalStage.getParentFile(), temporalStage.getName() + ".treated"));
+				try {
+					List<File> files = io.intino.alexandria.FS.allFilesIn(temporalStage, path -> path.getName().endsWith(io.intino.alexandria.Session.SessionExtension)).collect(Collectors.toList());
+                	upload(files, host, user, dataHubStageAbsolutePath);
+                	temporalStage.renameTo(new File(temporalStage.getParentFile(), temporalStage.getName() + ".treated"));
+				} catch(Exception e) {
+					Logger.error(e);
+				}
 			}
 
 			public synchronized void seal() {
