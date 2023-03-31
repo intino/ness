@@ -84,6 +84,7 @@ def !type(abstract) type(mounter) type(message)
 		}
 
 		private Object parse(String attribute, Message message) {
+			if(message.get(attribute).isNull()) return null;
 			switch(attribute) {
 				[$attribute+parseSwitchCase...[$NL]]
 			}

@@ -47,6 +47,27 @@ public class PluginTest {
 	}
 
 	@Test
+	public void should_build_custom_terminals() {
+		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
+		launcher.deleteTempDirOnPublish(false);
+		launcher.publishTerminalsIfOntologyFails(true);
+		launcher.moduleStructure(new ModuleStructure(List.of(
+						new File("C:\\Users\\naits\\Desktop\\MonentiaDev\\core\\data-hub\\src")),
+						List.of(new File("C:\\Users\\naits\\Desktop\\MonentiaDev\\core\\data-hub\\res")),
+						new File(NESS_DIR + "/out")))
+				.systemProperties(new SystemProperties(new File(INTELLIJ_MAVEN_PLUGIN),
+						new File(JAVA_HOME)))
+				.logger(System.out)
+				.invokedPhase(PluginLauncher.Phase.INSTALL)
+				.notifier(notifier())
+				.moduleConfiguration(testConfiguration());
+		File temp = new File(NESS_DIR + "/datahubterminalplugin/temp/custom");
+//		FileUtils.deleteDirectory(temp);
+		temp.mkdirs();
+		launcher.run(temp);
+	}
+
+	@Test
 	public void should_build_test_terminals() {
 		DataHubTerminalsPluginLauncher launcher = new DataHubTerminalsPluginLauncher();
 		launcher.deleteTempDirOnPublish(false);
