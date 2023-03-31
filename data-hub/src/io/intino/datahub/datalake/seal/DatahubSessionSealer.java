@@ -1,12 +1,10 @@
 package io.intino.datahub.datalake.seal;
 
 import io.intino.alexandria.datalake.Datalake;
-import io.intino.alexandria.event.Event;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.sealing.SessionSealer;
 
 import java.io.File;
-import java.util.function.Predicate;
 
 public class DatahubSessionSealer implements SessionSealer {
 	private final Datalake datalake;

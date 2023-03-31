@@ -7,7 +7,6 @@ import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.datamart.serialization.MasterDatamartSnapshots;
 import io.intino.datahub.model.Datamart;
-import io.intino.datahub.model.rules.SnapshotScale;
 
 import java.time.LocalDate;
 

@@ -18,15 +18,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private static final String MINIMUM_BPM_VERSION = "3.0.0";
+	private static final String MAX_BPM_VERSION = "4.0.0";
 	private static final String MINIMUM_TERMINAL_JMS_VERSION = "5.0.0";
 	private static final String MINIMUM_EVENT_VERSION = "5.0.0";
-	private static final String MAX_EVENT_VERSION = "5.0.0";
 	private static final String MINIMUM_INGESTION_VERSION = "5.0.1";
 	private static final String MINIMUM_MASTER_VERSION = "2.0.4";
 	private static final String MINIMUM_DATALAKE_VERSION = "7.0.0";
-	private static final String MAX_DATALAKE_VERSION = "7.0.0";
+	private static final String MAX_DATALAKE_VERSION = "8.0.0";
 	private static final String MAX_TERMINAL_JMS_VERSION = "6.0.0";
 	private static final String MAX_INGESTION_VERSION = "6.0.0";
+	private static final String MAX_EVENT_VERSION = "6.0.0";
 	private boolean deleteTempDirOnPublish = true;
 	private boolean publishTerminalsIfOntologyFails = false;
 
@@ -173,7 +174,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	}
 
 	private String suitableDatalakeVersion(List<String> versions) {
-		return versions.stream().filter(v -> v.compareTo(MAX_DATALAKE_VERSION) < 0).findFirst().orElse(MINIMUM_EVENT_VERSION);
+		return versions.stream().filter(v -> v.compareTo(MAX_DATALAKE_VERSION) < 0).findFirst().orElse(MINIMUM_DATALAKE_VERSION);
 	}
 
 	private boolean isSnapshotVersion() {
@@ -182,8 +183,9 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 
 
 	private String bpmVersion() {
-		List<String> bpmVersions = ArtifactoryConnector.bpmVersions();
-		return bpmVersions.isEmpty() ? MINIMUM_BPM_VERSION : bpmVersions.get(bpmVersions.size() - 1);
+		List<String> versions = ArtifactoryConnector.bpmVersions();
+		return versions.stream().filter(v -> v.compareTo(MAX_BPM_VERSION) < 0).findFirst().orElse(MINIMUM_BPM_VERSION);
+
 	}
 
 	private String participle() {
