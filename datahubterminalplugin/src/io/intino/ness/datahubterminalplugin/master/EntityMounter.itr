@@ -101,13 +101,15 @@ end
 
 def type(attribute) type(list) type(entity) trigger(parseMethod)
 	private java.util.List<String> parse$name+FirstUpperCase(Message m) {
-		return java.util.Arrays.asList(m.get("$name").as(String$[$].class));
+		var value = m.get("$name");
+		return value.data().isEmpty() ? java.util.Collections.emptyList() : value.asList(String.class);
 	}
 end
 
 def type(attribute) type(set) type(entity) trigger(parseMethod)
 	private java.util.Set<String> parse$name+FirstUpperCase(Message m) {
-		return java.util.Set.of(m.get("$name").as(String$[$].class));
+		var value = m.get("$name");
+		return value.data().isEmpty() ? java.util.Collections.emptySet() : value.asSet(String.class);
 	}
 end
 
@@ -153,7 +155,8 @@ end
 
 def type(attribute) type(map) trigger(parseMethod)
 	private java.util.Map<String, String> parse$name+FirstUpperCase(Message m) {
-		return m.get("$name").as(java.util.Map.class);
+		var value = m.get("$name");
+		return value.data().isEmpty() ? java.util.Collections.emptyMap() : value.as(java.util.Map.class);
 	}
 end
 
