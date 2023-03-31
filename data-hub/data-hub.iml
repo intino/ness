@@ -142,5 +142,13 @@
     <orderEntry type="library" scope="TEST" name="Intino: junit:junit:4.13.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.hamcrest:hamcrest-core:1.3" level="project" />
     <orderEntry type="module" module-name="datalake-inspector" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.1.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:7.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:7.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:event:5.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:zim:5.1.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:message:4.1.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:5.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:session:2.0.1" level="project" />
   </component>
 </module>

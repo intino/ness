@@ -40,5 +40,12 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:datalake:6.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:event:4.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:primitives:1.0.5" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.4.6" level="project" />
+    <orderEntry type="library" name="Intino: commons-io:commons-io:2.6" level="project" />
+    <orderEntry type="library" name="Intino: commons-codec:commons-codec:1.15" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zim:5.0.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:message:4.0.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:1.7.36" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:session:2.0.0" level="project" />
   </component>
 </module>
