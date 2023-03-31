@@ -391,8 +391,10 @@ def type(entity) trigger(declareDefinition)
 		public List<EntityDefinition> descendants() {return java.util.List.of([$descendant+definition...[,]]);}
 		public Class<?> javaClass() {return $package.entities.$name+FirstUpperCase.class;}
 		private List<AttributeDefinition> initAttributeDefinitions() {
-			List<AttributeDefinition> list = new ArrayList<>($numAttributes);
+			ArrayList<AttributeDefinition> list = new ArrayList<>();
+			[$hasNoParents+addIdAndEnabledAttributes]
         	[$attribute+addDefinition...[$NL]]
+        	list.trimToSize();
         	return list;
 		}
 		public boolean equals(Object other) {
@@ -438,6 +440,19 @@ end
 
 def type(struct) type(descendant | ancestor) trigger(definition)
 	$name+FirstUpperCase~StructDefinition
+end
+
+def trigger(addIdAndEnabledAttributes)
+	list.add(new AttributeDefinition() {
+		public String name() {return "id";}
+		public Class<?> type() {return String.class;}
+		public String toString() {return name();}
+	});
+	list.add(new AttributeDefinition() {
+		public String name() {return "enabled";}
+		public Class<?> type() {return Boolean.class;}
+		public String toString() {return name();}
+	});
 end
 
 def type(attribute) !type(inherited) type(collection) trigger(addDefinition)

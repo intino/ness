@@ -212,6 +212,8 @@ public class DatamartsRenderer implements ConceptRenderer {
 					if(entity.isExtensionOf()) {
 						b.add("parent", entity.asExtensionOf().entity().name$());
 						b.add("ancestor", ancestorsOf(entity));
+					} else {
+						b.add("hasNoParents", "true");
 					}
 					if (entity.isAbstract()) b.add("abstract");
 					b.add("isAbstract", entity.isAbstract());

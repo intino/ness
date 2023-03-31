@@ -10,10 +10,10 @@ Broker(path = empty, port = 63000, secondaryPort = 1884)
 	User("connector", "connector")
 	User("master", "master")
 
-Terminal test-terminal
-	Subscribe(dl.anomalyBundle dl.state, dl.assetStatus dl.processStatus dl.rdbmsStatement)
-	Publish(dl.notification dl.assetAssertion dl.hardwareAssertion dl.peripheralDeviceAssertion dl.networkDeviceAssertion dl.machineAssertion dl.softwareAssertion dl.consulAssertion dl.serviceAssertion dl.rdbmsServiceAssertion dl.queryAssertion dl.applicationAssertion dl.javaApplicationAssertion dl.businessUnitAssertion)
-	Datamarts(master)
+//Terminal test-terminal
+//	Subscribe(dl.anomalyBundle dl.state, dl.assetStatus dl.processStatus dl.rdbmsStatement)
+//	Publish(dl.notification dl.assetAssertion dl.hardwareAssertion dl.peripheralDeviceAssertion dl.networkDeviceAssertion dl.machineAssertion dl.softwareAssertion dl.consulAssertion dl.serviceAssertion dl.rdbmsServiceAssertion dl.queryAssertion dl.applicationAssertion dl.javaApplicationAssertion dl.businessUnitAssertion)
+//	Datamarts(master)
 
 //Terminal trooper-terminal
 //	Subscribe(dl.anomalyBundle dl.state, dl.assetStatus dl.processStatus dl.rdbmsStatement)
@@ -34,3 +34,8 @@ Terminal test-terminal
 //	Publish(dl.anomalyBundle dl.state dl.anomalyTypeAssertion dl.areaAssertion dl.userAssertion dl.channelAssertion dl.teamAssertion dl.assetAssertion dl.hardwareAssertion dl.peripheralDeviceAssertion dl.networkDeviceAssertion dl.machineAssertion dl.softwareAssertion dl.consulAssertion dl.serviceAssertion dl.rdbmsServiceAssertion dl.queryAssertion dl.applicationAssertion dl.javaApplicationAssertion dl.businessUnitAssertion, dl.assetStatus dl.processStatus dl.rdbmsStatement)
 //	Subscribe(dl.anomalyBundle  dl.state, empty)
 //	Datamarts(master)
+
+Terminal test-terminal
+	Publish(dl.anomalyBundle dl.state dl.anomalyTypeAssertion dl.areaAssertion dl.userAssertion dl.channelAssertion dl.teamAssertion dl.assetAssertion dl.hardwareAssertion dl.peripheralDeviceAssertion dl.networkDeviceAssertion dl.machineAssertion dl.softwareAssertion dl.consulAssertion dl.serviceAssertion dl.rdbmsServiceAssertion dl.queryAssertion dl.applicationAssertion dl.javaApplicationAssertion dl.businessUnitAssertion, dl.assetStatus dl.processStatus dl.rdbmsStatement)
+	Subscribe(dl.anomalyBundle  dl.state, empty)
+	Datamarts(master)

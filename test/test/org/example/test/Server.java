@@ -24,6 +24,7 @@ public class Server {
 	private static void loadUsers(File workspace, NessGraph nessGraph) {
 		try {
 			nessGraph.broker().create().user("test", "test");
+			nessGraph.broker().create().user("test2", "test2");
 		} catch (Exception e) {
 			Logger.error(e);
 		}
