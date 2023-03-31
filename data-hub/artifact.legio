@@ -1,14 +1,14 @@
 dsl Legio
 
-Artifact("io.intino", "9.0.0-SNAPSHOT") data-hub as Product
+Artifact("io.intino", "9.0.0") data-hub as Product
 	Model("Proteo", "3.4.4", "4.2.3") > outLanguage = "Ness"
 	Box("Konos", "10.0.0")
 	Imports
 		Compile("io.intino.alexandria", "json", "1.2.2")
 		Compile("io.intino.alexandria", "core-framework", "2.1.2")
 		Compile("io.intino.alexandria", "jmx", "1.0.5")
-		Compile("io.intino.alexandria", "primitives", "1.1.0-SNAPSHOT")
-		Compile("io.intino.alexandria", "sealing", "7.0.0-SNAPSHOT")
+		Compile("io.intino.alexandria", "primitives", "1.1.0")
+		Compile("io.intino.alexandria", "sealing", "7.0.0")
 		Compile("io.intino.alexandria", "ui-framework", "4.23.9")
 			Exclude("io.intino.alexandria", "driver-r")
 			Exclude("io.intino.alexandria", "driver-shiny")
