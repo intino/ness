@@ -4,7 +4,6 @@ import io.intino.alexandria.Timetag;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.model.rules.SnapshotScale;
 
-import java.time.DayOfWeek;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;

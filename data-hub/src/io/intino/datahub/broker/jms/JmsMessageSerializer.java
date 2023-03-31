@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static io.intino.alexandria.Timetag.of;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.time.ZoneOffset.UTC;

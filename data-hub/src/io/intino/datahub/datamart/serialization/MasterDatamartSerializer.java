@@ -6,12 +6,10 @@ import io.intino.alexandria.zim.ZimWriter;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.datamart.messages.MapMessageMasterDatamart;
-import io.intino.datahub.model.Data;
 import io.intino.datahub.model.Datamart;
 
 import java.io.*;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
