@@ -15,17 +15,16 @@ def type(terminal)
 	import java.time.Instant;
 	import java.util.List;
 	import java.util.Map;
-    import java.util.Collections;
+	import java.util.Collections;
 	import java.util.concurrent.TimeUnit;
 	import java.util.stream.Stream;
 	import java.util.stream.Collectors;
 
 	import java.lang.reflect.Field;
-    import java.lang.reflect.Method;
+	import java.lang.reflect.Method;
 
 	public class $name+snakeCaseToCamelCase+firstUpperCase {
 		public static String$[] subscriptionChannels = new String$[]{$subscribe+channel};
-
 		private final io.intino.alexandria.terminal.Connector connector;
 		private final java.util.Map<java.util.function.BiConsumer<?, String>, List<java.util.function.Consumer<io.intino.alexandria.event.Event>>> consumers = new java.util.HashMap<>();
 		[$datamart+declaration...[$NL]]
@@ -38,6 +37,10 @@ def type(terminal)
 
 		[$datamart+getter...[$NL]]
 
+		public void initDatamarts() {
+			[$datamart+init...[$NL]]
+		}
+
 		public void publish(Event event) {
 			switch(event.type()) {
 				$publish+publishSwitchCase...[$NL]
@@ -46,15 +49,15 @@ def type(terminal)
 
 		public void publish(Event first, Event ...others) {
 			publish(Stream.concat(Stream.of(first), java.util.Arrays.stream(others)));
-        }
+		}
 
 		public void publish(Event$[$] events) {
 			publish(java.util.Arrays.stream(events));
-        }
+		}
 
-       	public void publish(java.util.Collection<Event> events) {
-       		publish(events.stream());
-        }
+		public void publish(java.util.Collection<Event> events) {
+			publish(events.stream());
+		}
 
 		public void publish(Stream<Event> events) {
 			events.filter(e -> channelOf(e.type()) != null)
@@ -150,7 +153,7 @@ def type(terminal)
 			}
 
 			public void feed(Event event) throws java.io.IOException {
-                session.put(tankOf(event), event.ss(), Timetag.of(event.ts(), this.scale), event.format(), event);
+				session.put(tankOf(event), event.ss(), Timetag.of(event.ts(), this.scale), event.format(), event);
 			}
 
 			public void feed(Event event, Scale scale) throws java.io.IOException {
@@ -171,8 +174,8 @@ def type(terminal)
 				session.close();
 				try {
 					List<File> files = io.intino.alexandria.FS.allFilesIn(temporalStage, path -> path.getName().endsWith(io.intino.alexandria.Session.SessionExtension)).collect(Collectors.toList());
-                	upload(files, host, user, dataHubStageAbsolutePath);
-                	temporalStage.renameTo(new File(temporalStage.getParentFile(), temporalStage.getName() + ".treated"));
+					upload(files, host, user, dataHubStageAbsolutePath);
+					temporalStage.renameTo(new File(temporalStage.getParentFile(), temporalStage.getName() + ".treated"));
 				} catch(Exception e) {
 					Logger.error(e);
 				}
@@ -180,9 +183,9 @@ def type(terminal)
 
 			public synchronized void seal() {
 				connector.requestResponse("service.ness.seal", request("Seal", Map.of("stage", temporalStage.getName())));
-        	}
+			}
 
-            private void upload(List<File> sessions, String host, String user, String dataHubStageAbsolutePath) {
+			private void upload(List<File> sessions, String host, String user, String dataHubStageAbsolutePath) {
 				try {
 					String connectionChain = user + "@" + host + ":" + dataHubStageAbsolutePath;
 					Logger.info("Uploading sessions to " + connectionChain + "...");
@@ -198,10 +201,10 @@ def type(terminal)
 
 			}
 
-            private String tankOf(Event event) {
-            	$publish+tankOf...[$NL]
-            	return event.type();
-            }
+			private String tankOf(Event event) {
+				$publish+tankOf...[$NL]
+				return event.type();
+			}
 		}
 
 		public static class Config {
@@ -244,11 +247,11 @@ def trigger(retryConfigClass)
 		}
 
 		public DatamartsRetryConfig(long initialTimeoutAmount, java.util.concurrent.TimeUnit timeoutUnit, float timeoutMultiplier, int maxAttempts) {
-        	this.initialTimeoutAmount = initialTimeoutAmount;
-            this.timeoutUnit = timeoutUnit;
-            this.timeoutMultiplier = timeoutMultiplier;
-            this.maxAttempts = maxAttempts;
-        }
+			this.initialTimeoutAmount = initialTimeoutAmount;
+			this.timeoutUnit = timeoutUnit;
+			this.timeoutMultiplier = timeoutMultiplier;
+			this.maxAttempts = maxAttempts;
+		}
 	}
 end
 
@@ -256,8 +259,13 @@ def trigger(constructor)
 	public $terminal+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector, DatamartsRetryConfig datamartsRetryConfig) {
 		this.connector = connector;
 		this.$name+firstLowerCase~Datamart = new $package.$name+FirstUpperCase~DatamartImpl(connector, datamartsRetryConfig);
-		addDatamartSubscribers(this.$name+firstLowerCase~Datamart);
 	}
+end
+
+
+def trigger(init)
+	addDatamartSubscribers(this.$name+firstLowerCase~Datamart);
+	$name+firstLowerCase~Datamart.init();
 end
 
 def trigger(retryConfigAssign)
@@ -278,7 +286,7 @@ end
 
 def type(datamart) trigger(getter)
 	public $package.$name+FirstUpperCase~Datamart $name+firstLowerCase~Datamart() {
-		return $name+firstLowerCase~Datamart.init();
+		return $name+firstLowerCase~Datamart;
 	}
 end
 
@@ -325,12 +333,12 @@ def !type(bpm) trigger(publish)
 		$type$[$] array = new $type$[1 + others.length$];
 		array$[0$] = first;
 		java.lang.System.arraycopy(others, 0, array, 1, others.length);
-    	publish(array);
-    }
+		publish(array);
+	}
 
 	public void publish($type$[$] events) {
-    	connector.sendEvents("$channel", java.util.Arrays.asList(events));
-    }
+		connector.sendEvents("$channel", java.util.Arrays.asList(events));
+	}
 end
 
 def type(measurement) trigger(subscribe)
