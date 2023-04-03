@@ -24,7 +24,7 @@ public class ArtifactoryConnector {
 			connection.setReadTimeout(2000);
 			return connection.getInputStream();
 		} catch (Throwable e) {
-			return null;
+			return InputStream.nullInputStream();
 		}
 	}
 
@@ -131,14 +131,8 @@ public class ArtifactoryConnector {
 	}
 
 	private static ByteArrayOutputStream read(InputStream stream) throws Throwable {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		if (stream == null) return baos;
-		try (stream) {
-			byte[] byteChunk = new byte[4096];
-			int n;
-			while ((n = stream.read(byteChunk)) > 0)
-				baos.write(byteChunk, 0, n);
-		}
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(8192);
+		try (stream) {stream.transferTo(baos);}
 		return baos;
 	}
 }

@@ -173,12 +173,20 @@ def type(terminal)
 			public void push(String host, String user, String dataHubStageAbsolutePath) {
 				session.close();
 				try {
-					List<File> files = io.intino.alexandria.FS.allFilesIn(temporalStage, path -> path.getName().endsWith(io.intino.alexandria.Session.SessionExtension)).collect(Collectors.toList());
+					List<File> files = allFilesIn(temporalStage.toPath(), path -> path.getName().endsWith(io.intino.alexandria.Session.SessionExtension)).collect(Collectors.toList());
 					upload(files, host, user, dataHubStageAbsolutePath);
 					temporalStage.renameTo(new File(temporalStage.getParentFile(), temporalStage.getName() + ".treated"));
 				} catch(Exception e) {
 					Logger.error(e);
 				}
+			}
+
+			private static Stream<File> allFilesIn(java.nio.file.Path path, java.util.function.Predicate<File> filter) throws Exception {
+				Stream.Builder<File> streamBuilder = Stream.builder();
+				try (Stream<java.nio.file.Path> paths = java.nio.file.Files.walk(path)) {
+					paths.filter(p -> java.nio.file.Files.isRegularFile(p) && filter.test(p.toFile())).forEach(p -> streamBuilder.add(p.toFile()));
+				}
+				return streamBuilder.build();
 			}
 
 			public synchronized void seal() {
@@ -313,8 +321,8 @@ def !type(bpm) trigger(tankOf)
 end
 
 def type(bpm) trigger(publish)
-	public void publish($type $message+firstLowerCase) {
-		connector.sendEvent("$channel", $message+firstLowerCase);
+	public void publish($type $typeName+firstLowerCase) {
+		connector.sendEvent("$channel", $typeName+firstLowerCase);
 	}
 end
 

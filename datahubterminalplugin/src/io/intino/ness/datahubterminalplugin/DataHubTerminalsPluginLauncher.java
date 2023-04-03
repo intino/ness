@@ -23,6 +23,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private static final String MINIMUM_EVENT_VERSION = "5.0.0";
 	private static final String MINIMUM_INGESTION_VERSION = "5.0.1";
 	private static final String MINIMUM_MASTER_VERSION = "2.0.4";
+	private static final String MAX_MASTER_VERSION = "3.0.0";
 	private static final String MINIMUM_DATALAKE_VERSION = "7.0.0";
 	private static final String MAX_DATALAKE_VERSION = "8.0.0";
 	private static final String MAX_TERMINAL_JMS_VERSION = "6.0.0";
@@ -131,61 +132,35 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	}
 
 	private String terminalJmsVersion() {
-		List<String> terminalVersions = ArtifactoryConnector.terminalVersions();
-		Collections.reverse(terminalVersions);
-		return terminalVersions.isEmpty() ? MINIMUM_TERMINAL_JMS_VERSION : suitableTerminalVersion(terminalVersions);
-	}
-
-	private String ingestionVersion() {
-		List<String> versions = ArtifactoryConnector.ingestionVersions();
-		Collections.reverse(versions);
-		return versions.isEmpty() ? MINIMUM_INGESTION_VERSION : suitableIngestionVersion(versions);
+		return suitableVersion(ArtifactoryConnector.terminalVersions(), MINIMUM_TERMINAL_JMS_VERSION, MAX_TERMINAL_JMS_VERSION);
 	}
 
 	private String masterVersion() {
-		List<String> versions = ArtifactoryConnector.masterVersions();
-		Collections.reverse(versions);
-		return versions.isEmpty() ? MINIMUM_MASTER_VERSION : suitableIngestionVersion(versions);
+		return suitableVersion(ArtifactoryConnector.masterVersions(), MINIMUM_MASTER_VERSION, MAX_MASTER_VERSION);
+	}
+
+	private String ingestionVersion() {
+		return suitableVersion(ArtifactoryConnector.ingestionVersions(), MINIMUM_INGESTION_VERSION, MAX_INGESTION_VERSION);
 	}
 
 	private String eventVersion() {
-		List<String> versions = ArtifactoryConnector.eventVersions();
-		Collections.reverse(versions);
-		return versions.isEmpty() ? MINIMUM_EVENT_VERSION : suitableEventVersion(versions);
+		return suitableVersion(ArtifactoryConnector.eventVersions(), MINIMUM_EVENT_VERSION, MAX_EVENT_VERSION);
 	}
-
 
 	private String datalakeVersion() {
-		List<String> versions = ArtifactoryConnector.datalakeVersions();
-		Collections.reverse(versions);
-		return versions.isEmpty() ? MINIMUM_DATALAKE_VERSION : suitableDatalakeVersion(versions);
+		return suitableVersion(ArtifactoryConnector.datalakeVersions(), MINIMUM_DATALAKE_VERSION, MAX_DATALAKE_VERSION);
 	}
 
-	private String suitableTerminalVersion(List<String> versions) {
-		return versions.stream().filter(version -> version.compareTo(MAX_TERMINAL_JMS_VERSION) < 0).findFirst().orElse(MINIMUM_TERMINAL_JMS_VERSION);
+	private String bpmVersion() {
+		return suitableVersion(ArtifactoryConnector.bpmVersions(), MINIMUM_BPM_VERSION, MAX_BPM_VERSION);
 	}
 
-	private String suitableIngestionVersion(List<String> versions) {
-		return versions.stream().filter(v -> v.compareTo(MAX_INGESTION_VERSION) < 0).findFirst().orElse(MINIMUM_INGESTION_VERSION);
-	}
-
-	private String suitableEventVersion(List<String> versions) {
-		return versions.stream().filter(v -> v.compareTo(MAX_EVENT_VERSION) < 0).findFirst().orElse(MINIMUM_EVENT_VERSION);
-	}
-
-	private String suitableDatalakeVersion(List<String> versions) {
-		return versions.stream().filter(v -> v.compareTo(MAX_DATALAKE_VERSION) < 0).findFirst().orElse(MINIMUM_DATALAKE_VERSION);
+	private String suitableVersion(List<String> versions, String min, String max) {
+		return versions.stream().sorted(Comparator.reverseOrder()).filter(v -> v.compareTo(max) < 0).findFirst().orElse(min);
 	}
 
 	private boolean isSnapshotVersion() {
 		return configuration().artifact().version().contains("SNAPSHOT");
-	}
-
-
-	private String bpmVersion() {
-		List<String> versions = ArtifactoryConnector.bpmVersions();
-		return versions.stream().filter(v -> v.compareTo(MAX_BPM_VERSION) < 0).findFirst().orElse(MINIMUM_BPM_VERSION);
-
 	}
 
 	private String participle() {
