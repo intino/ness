@@ -1,161 +1,168 @@
 package org.example.test;
 
+import io.intino.alexandria.jms.ConnectionConfig;
+import io.intino.alexandria.jms.JmsProducer;
+import io.intino.alexandria.jms.QueueProducer;
+import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.terminal.JmsConnector;
 import io.intino.test.datahubtest.TestTerminal;
 import io.intino.test.datahubtest.datamarts.master.MasterDatamart;
-import io.intino.test.datahubtest.messages.inventory.ConsulAssertion;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import io.intino.test.datahubtest.datamarts.master.MasterDatamartImpl;
+import io.intino.test.datahubtest.messages.inventory.JavaApplicationAssertion;
+import org.apache.activemq.command.ActiveMQTextMessage;
 
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageNotWriteableException;
+import javax.jms.TemporaryQueue;
 import java.io.File;
-import java.nio.file.Files;
-import java.util.Collections;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
-import static java.nio.file.StandardOpenOption.CREATE;
-import static org.junit.Assert.*;
-
-// Start Server, then PublisherClient, and then run this test
-// Working directory should be $ProjectFileDir$
 public class Client {
 
-	private static final String ss = "default";
+	public static void main(String[] args) throws Exception {
+		if(true || args[0].equals("test")) {
+			main2(args);
+			return;
+		}
 
-	private static TestTerminal terminal;
-	private static MasterDatamart datamart;
+		int count = 0;
+		String user = args[0];
+		String password = args[1];
+		String clientId = args[2];
 
-	@BeforeClass
-	public static void setup() {
-		terminal = new TestTerminal(connector());
-		terminal.initDatamarts();
-		datamart = terminal.masterDatamart();
-	}
+		JmsConnector connector = connector(user, password, clientId);
 
-	@Test
-	public void should_update_master_from_other_app() throws Exception {
-		System.out.println("\nother-app");
+		ActiveMQTextMessage message = new ActiveMQTextMessage();
+		message.setText("datamart:master:");
 
-		ConsulAssertion event;
-		String id = "consul-" + System.currentTimeMillis();
-
-		assertNull(datamart.consul(id));
-
-		System.out.println("Creating event");
-
-		event = new ConsulAssertion(ss, id);
-		event.installedActivities(List.of("activity1"));
-		notifyPublisherApp(event);
-
-		assertNotNull(datamart.consul(id));
-		assertNotNull(datamart.consul(id).installedActivities());
-		assertEquals(List.of("activity1"), datamart.consul(id).installedActivities());
-
-		System.out.println("Event modified 1");
-
-		event = new ConsulAssertion(ss, id);
-		event.installedActivities(List.of("activity1", "activity2"));
-		notifyPublisherApp(event);
-
-		assertNotNull(datamart.consul(id));
-		assertNotNull(datamart.consul(id).installedActivities());
-		assertEquals(List.of("activity1", "activity2"), datamart.consul(id).installedActivities());
-
-		System.out.println("Event modified 2");
-
-		event = new ConsulAssertion(ss, id);
-		event.installedActivities(List.of("activity1", "activity2"));
-		notifyPublisherApp(event);
-
-		assertNotNull(datamart.consul(id));
-		assertNotNull(datamart.consul(id).installedActivities());
-		assertEquals(List.of("activity1", "activity2"), datamart.consul(id).installedActivities());
-
-		System.out.println("Event modified 3");
-
-		event = new ConsulAssertion(ss, id);
-		event.installedActivities(Collections.emptyList());
-		notifyPublisherApp(event);
-
-		assertNotNull(datamart.consul(id));
-		assertNotNull(datamart.consul(id).installedActivities());
-		assertEquals(Collections.emptyList(), datamart.consul(id).installedActivities());
-
-		System.out.println("Done: " + datamart.consul(id));
-	}
-
-	private void notifyPublisherApp(ConsulAssertion event) throws Exception {
-		File ok = new File("temp/ok");
-		ok.delete();
-		File file = new File("temp/consul-assertion-to-publish.inl");
-		Files.writeString(file.toPath(), event.toString(), CREATE);
-		waitUntilOkFileIsPresent(ok);
-	}
-
-	private void waitUntilOkFileIsPresent(File ok) throws InterruptedException {
 		while(true) {
-			Thread.sleep(1000);
-			if(ok.exists()) return;
+			Message m = connector.requestResponse("service.ness.datalake.messagestore", message, 5, TimeUnit.SECONDS);
+			System.out.println(m);
+			Thread.sleep(2000);
 		}
 	}
 
-	@Test
-	public void should_update_master_from_same_app() {
-		System.out.println("\nsame-app");
+	public static void main2(String[] args) throws InterruptedException {
+		int count = 0;
+		String user = args[0];
+		String password = args[1];
+		String clientId = args[2];
 
-		ConsulAssertion event;
-		String id = "consul-" + System.currentTimeMillis();
+		JmsConnector connector = connector(user, password, clientId);
+		TestTerminal terminal = new TestTerminal(connector);
+		System.out.println(user + ": Initializing datamarts...");
+		terminal.initDatamarts();
+//
+		MasterDatamart datamart = terminal.masterDatamart();
 
-		assertNull(datamart.consul(id));
+//		addSubscribers(connector, terminal, (MasterDatamartImpl) datamart);
+//		((MasterDatamartImpl)datamart).init();
 
-		System.out.println("Creating event");
+		System.out.println(user + ": Datamarts initialized");
 
-		event = new ConsulAssertion(ss, id);
-		event.installedActivities(List.of("activity1"));
-		terminal.publish(event);
 
-		assertNotNull(datamart.consul(id));
-		assertNotNull(datamart.consul(id).installedActivities());
-		assertEquals(List.of("activity1"), datamart.consul(id).installedActivities());
+		while(true) {
+			System.out.println("=============\n\n");
+			Thread.sleep(3000);
 
-		System.out.println("Event modified 1");
+			datamart.entities().forEach(System.out::println);
+			System.out.println();
+			System.out.println(user + ": Datamart size = " + datamart.size() + " entities");
 
-		event = new ConsulAssertion(ss, id);
-		event.installedActivities(List.of("activity1", "activity2"));
-		terminal.publish(event);
+			JavaApplicationAssertion event = new JavaApplicationAssertion(user, "app-" + user + "-" + ++count);
+			event.name(user + System.currentTimeMillis());
+			event.classpath(List.of(String.valueOf(System.currentTimeMillis())));
+			event.debugPort(new Random().nextInt(65000));
+			event.jmxPort(new Random().nextInt(65000));
+			event.maxMemory(new Random().nextInt(65000));
 
-		assertNotNull(datamart.consul(id));
-		assertNotNull(datamart.consul(id).installedActivities());
-		assertEquals(List.of("activity1", "activity2"), datamart.consul(id).installedActivities());
+			terminal.publish(event);
 
-		System.out.println("Event modified 2");
-
-		event = new ConsulAssertion(ss, id);
-		event.installedActivities(List.of("activity1", "activity2"));
-		terminal.publish(event);
-
-		assertNotNull(datamart.consul(id));
-		assertNotNull(datamart.consul(id).installedActivities());
-		assertEquals(List.of("activity1", "activity2"), datamart.consul(id).installedActivities());
-
-		System.out.println("Event modified 3");
-
-		event = new ConsulAssertion(ss, id);
-		event.installedActivities(Collections.emptyList());
-		terminal.publish(event);
-
-		assertNotNull(datamart.consul(id));
-		assertNotNull(datamart.consul(id).installedActivities());
-		assertEquals(Collections.emptyList(), datamart.consul(id).installedActivities());
-
-		System.out.println("Done: " + datamart.consul(id));
+			System.out.println(user + ": Event " + event.id() + " published");
+		}
 	}
 
-	private static JmsConnector connector() {
-		JmsConnector jmsConnector = new JmsConnector(
-				new io.intino.alexandria.jms.ConnectionConfig("failover:(tcp://localhost:63000)", "test", "test", "test"),
+	private static void addSubscribers(JmsConnector connector, TestTerminal terminal, MasterDatamartImpl datamart) {
+		terminal.subscribe((TestTerminal.UserAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_UserAssertion");
+		terminal.subscribe((TestTerminal.TeamAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_TeamAssertion");
+		terminal.subscribe((TestTerminal.ChannelAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_ChannelAssertion");
+		terminal.subscribe((TestTerminal.InventoryAreaAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_AreaAssertion");
+		terminal.subscribe((TestTerminal.InventoryAssetAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_AssetAssertion");
+		terminal.subscribe((TestTerminal.InventoryHardwareAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_HardwareAssertion");
+		terminal.subscribe((TestTerminal.InventoryPeripheralDeviceAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_PeripheralDeviceAssertion");
+		terminal.subscribe((TestTerminal.InventoryNetworkDeviceAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_NetworkDeviceAssertion");
+		terminal.subscribe((TestTerminal.InventoryMachineAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_MachineAssertion");
+		terminal.subscribe((TestTerminal.InventorySoftwareAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_SoftwareAssertion");
+		terminal.subscribe((TestTerminal.InventoryConsulAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_ConsulAssertion");
+		terminal.subscribe((TestTerminal.InventoryServiceAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_ServiceAssertion");
+		terminal.subscribe((TestTerminal.InventoryRdbmsServiceAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_RdbmsServiceAssertion");
+		terminal.subscribe((TestTerminal.InventoryQueryAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_QueryAssertion");
+		terminal.subscribe((TestTerminal.InventoryApplicationAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_ApplicationAssertion");
+		terminal.subscribe((TestTerminal.InventoryJavaApplicationAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_JavaApplicationAssertion");
+		terminal.subscribe((TestTerminal.InventoryPersonAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_PersonAssertion");
+		terminal.subscribe((TestTerminal.InventoryBusinessUnitAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_BusinessUnitAssertion");
+		terminal.subscribe((TestTerminal.MonitoringAnomalyTypeAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_AnomalyTypeAssertion");
+		terminal.subscribe((TestTerminal.MonitoringAnomalyRuleAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_AnomalyRuleAssertion");
+	}
+
+	private static JmsConnector connector(String user, String password, String clientId) {
+		JmsConnector jmsConnector = new MyJmsConnector(
+				new io.intino.alexandria.jms.ConnectionConfig("failover:(tcp://localhost:63000)", user, password, clientId),
 				new File("temp/cache")
 		);
 		jmsConnector.start();
 		return jmsConnector;
+	}
+
+	public static class MyJmsConnector extends JmsConnector {
+
+		public MyJmsConnector(ConnectionConfig config, File outboxDirectory) {
+			super(config, outboxDirectory);
+		}
+
+		@Override
+		public void requestResponse(String path, javax.jms.Message message, Consumer<Message> onResponse) {
+			if (session() == null) {
+				Logger.error("Connection lost. Invalid session");
+				return;
+			}
+			try {
+				QueueProducer producer = new QueueProducer(session(), path);
+				TemporaryQueue temporaryQueue = session().createTemporaryQueue();
+				javax.jms.MessageConsumer consumer = session().createConsumer(temporaryQueue);
+				consumer.setMessageListener(m -> acceptMessage(onResponse, consumer, m));
+				message.setJMSReplyTo(temporaryQueue);
+				message.setJMSCorrelationID(createRandomString());
+				sendMessage(producer, message, 10000);
+				producer.close();
+			} catch (JMSException e) {
+				Logger.error(e);
+			}
+		}
+
+		private boolean sendMessage(JmsProducer producer, javax.jms.Message message, int expirationTimeInSeconds) {
+			final boolean[] result = {false};
+			try {
+				Thread thread = new Thread(() -> result[0] = producer.produce(message, expirationTimeInSeconds));
+				thread.start();
+				thread.join(1000);
+				thread.interrupt();
+			} catch (InterruptedException ignored) {
+			}
+			return result[0];
+		}
+
+		private void acceptMessage(Consumer<javax.jms.Message> onResponse, javax.jms.MessageConsumer consumer, javax.jms.Message m) {
+			try {
+				onResponse.accept(m);
+				consumer.close();
+			} catch (JMSException e) {
+				Logger.error(e);
+			}
+		}
 	}
 }

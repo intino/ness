@@ -6,14 +6,16 @@ import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.box.DataHubConfiguration;
 import io.intino.datahub.model.NessGraph;
 import io.intino.magritte.framework.Graph;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
 
 public class Server {
 
 	private static final String[] stashes = {"Solution"};
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		DataHubConfiguration conf = new DataHubConfiguration(arguments());
 		NessGraph graph = new Graph().loadStashes(stashes).as(NessGraph.class);
 		loadUsers(conf.home(), graph);
@@ -25,18 +27,22 @@ public class Server {
 		try {
 			nessGraph.broker().create().user("test", "test");
 			nessGraph.broker().create().user("test2", "test2");
+			nessGraph.broker().create().user("test3", "test3");
 		} catch (Exception e) {
 			Logger.error(e);
 		}
 	}
 
-	private static String[] arguments() {
+	private static String[] arguments() throws IOException {
+		File home = new File("./temp/test");
+		if(home.exists()) FileUtils.deleteDirectory(home);
+		home.mkdirs();
 		return new String[] {
-				"home=./temp/",
-				"datalake_directory=./temp/datalake",
+				"home=./temp/test/",
+				"datalake_directory=./temp/test/datalake",
 				"broker_port=63000",
 				"broker_secondary_port=1882",
-				"backup_directory=./temp/backup",
+				"backup_directory=./temp/test/backup",
 				"ui_port=9020"
 		};
 	}

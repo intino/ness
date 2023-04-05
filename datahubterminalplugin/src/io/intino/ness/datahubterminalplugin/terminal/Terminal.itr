@@ -272,8 +272,8 @@ end
 
 
 def trigger(init)
-	addDatamartSubscribers(this.$name+firstLowerCase~Datamart);
 	$name+firstLowerCase~Datamart.init();
+	addDatamartSubscribers(this.$name+firstLowerCase~Datamart);
 end
 
 def trigger(retryConfigAssign)
@@ -305,7 +305,7 @@ def type(datamart) trigger(addDatamartSubscribers)
 end
 
 def type(devent) trigger(addSubscribe)
-	subscribe(($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_$datamart_$message");
+	subscribe(($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer) (event, topic) -> datamart.mount(event), connector.clientId() + "_$datamart_$message");
 end
 
 def trigger(publishSwitchCase)
