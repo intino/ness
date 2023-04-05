@@ -47,7 +47,7 @@ def trigger(abstract)
 end
 
 def type(attribute) !type(inherited) trigger(initAttribute)
-	attributes.add(new Attribute("$name", $defaultValue));
+	attributes.add(new Attribute("$name", null));
 end
 
 def type(word) !type(inherited) trigger(wordDeclaration)

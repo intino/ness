@@ -27,6 +27,7 @@ public class Client {
 	@BeforeClass
 	public static void setup() {
 		terminal = new TestTerminal(connector());
+		terminal.initDatamarts();
 		datamart = terminal.masterDatamart();
 	}
 
