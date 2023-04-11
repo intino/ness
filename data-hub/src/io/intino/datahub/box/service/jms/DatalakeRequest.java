@@ -34,7 +34,7 @@ public class DatalakeRequest {
 
 	public Stream<Message> accept(Message request) {
 		try {
-			return handleDatalakeDownload(MessageReader.textFrom(request));
+			return handleDatalakeDownload(MessageReader.textFrom(request).trim());
 		} catch (Throwable e) {
 			Logger.error(e);
 			return Stream.empty();
