@@ -67,7 +67,7 @@ def type(terminal)
 
 		public io.intino.alexandria.datalake.Datalake datalake() {
 			try {
-				Message message = connector.requestResponse("service.ness.datalake.eventstore", request("Datalake"), 5, TimeUnit.SECONDS);
+				Message message = connector.requestResponse("service.ness.datalake.messagestore", request("Datalake"), 5, TimeUnit.SECONDS);
 				if(message == null) return null;
 
 				String path = ((TextMessage)message).getText();
