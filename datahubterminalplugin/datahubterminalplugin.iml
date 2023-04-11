@@ -8,6 +8,7 @@
       <sourceFolder url="file://$MODULE_DIR$/temp/test/test-terminal/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/temp/test/master-terminal/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/temp/custom/bpmTerminal/src" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/temp/custom/cuentaMaestraTerminal/src" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

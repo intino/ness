@@ -156,13 +156,22 @@ class TerminalRenderer {
 	private void addBpm(FrameBuilder builder) {
 		String statusQn = terminal.bpm().processStatusClass();
 		String processStatusQName = statusQn.substring(statusQn.lastIndexOf(".") + 1);
-		FrameBuilder bpmBuilder = new FrameBuilder("default", "bpm").
-				add("type", statusQn).
-				add("typeName", processStatusQName);
+		FrameBuilder bpmBuilder = new FrameBuilder("default", "bpm")
+				.add("type", statusQn)
+				.add("typeName", processStatusQName);
 		bpmBuilder.add("channel", processStatusQName);
 		builder.add("subscribe", bpmBuilder);
 		builder.add("publish", bpmBuilder);
-		builder.add("event", new FrameBuilder("event").add("name", processStatusQName).add("type", statusQn).toFrame());
+		builder.add("event", new FrameBuilder("event")
+				.add("type", statusQn)
+				.add("name", processStatusQName)
+				.add("typename", processStatusQName)
+				.toFrame());
+		builder.add("processstatus", new FrameBuilder("event")
+				.add("type", statusQn)
+				.add("name", processStatusQName)
+				.add("typename", processStatusQName)
+				.toFrame());
 	}
 
 	private Frame frameOf(Tank.Message tank) {

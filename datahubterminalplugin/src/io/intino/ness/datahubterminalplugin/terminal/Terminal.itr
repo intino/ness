@@ -238,6 +238,7 @@ def type(terminal)
 
 		$message+interface...[$NL$NL]
 		$measurement+interface...[$NL$NL]
+		$processstatus+interface...[$NL$NL]
 
 		[$datamart+retryConfigClass]
 	}
