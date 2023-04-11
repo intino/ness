@@ -131,7 +131,7 @@ def type(datamart & message & impl)
 
 	public class $name+FirstUpperCase~DatamartImpl implements $name+FirstUpperCase~Datamart {
 
-		private static final String DATAHUB_MESSAGE_TOPIC = "service.ness.datalake.messagestore";
+		private static final String DATAHUB_MESSAGE_TOPIC = "service.ness.datamarts";
 		private static final $name+FirstUpperCase~DatamartImpl.$name+FirstUpperCase~DatamartDefinition definition = new $name+FirstUpperCase~DatamartImpl.$name+FirstUpperCase~DatamartDefinition();
 
 		private final Connector connector;
