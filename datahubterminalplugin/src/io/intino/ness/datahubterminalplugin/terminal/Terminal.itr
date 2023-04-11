@@ -68,11 +68,9 @@ def type(terminal)
 		public io.intino.alexandria.datalake.Datalake datalake() {
 			try {
 				Message message = connector.requestResponse("service.ness.datalake.messagestore", request("Datalake"), 5, TimeUnit.SECONDS);
-				if(message == null) return null;
-
-				String path = ((TextMessage)message).getText();
-				if(path == null) return null;
-
+				if (message == null) return null;
+				String path = ((TextMessage) message).getText();
+				if (path == null) return null;
 				return new File(path).exists()
 						? new io.intino.alexandria.datalake.file.FileDatalake(new File(path))
 						: new io.intino.alexandria.terminal.remotedatalake.RemoteDatalake((io.intino.alexandria.terminal.JmsConnector) connector);
@@ -101,7 +99,7 @@ def type(terminal)
 
 		public synchronized Instant requestLastSeal() {
 			Message message = connector.requestResponse("service.ness.seal.last", request("LastSeal"), 10, TimeUnit.MINUTES);
-			if(message == null) return Instant.now();
+			if (message == null) return Instant.now();
 			try {
 				return Instant.parse(((TextMessage)message).getText());
 			} catch (Exception e) {
