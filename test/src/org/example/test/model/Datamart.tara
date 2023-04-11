@@ -3,7 +3,6 @@ dsl Ness
 use Datalake
 
 Datamart(scale = None) master
-
 	Entity(from = dl.userAssertion) User
 		Attribute email as String
 		Attribute displayName as String
@@ -15,14 +14,21 @@ Datamart(scale = None) master
 		Attribute users as Entity(User) List
 		Attribute channels as Entity(Channel) List
 
-	Entity(from = dl.channelAssertion) Channel
-		Attribute displayName as String
-
+	Entity(from = dl.channelAssertion) Channel > Attribute displayName as String
 	Entity(from = dl.areaAssertion) Area
+
+	Entity(from = dl.analysisAssertion) Analysis
+		Attribute observable as String
+		Struct Anomaly
+			Attribute code as String
+			Attribute level as Word("Error" "Warning")
+			Attribute period as String
+			Attribute triggerValue as String
 
 	Entity Observable as Abstract
 		Attribute host as Entity(Observable)
 		Attribute observer as Entity(Observable)
+		Attribute tags as String List
 
 	Entity Administrable as Abstract ExtensionOf(Observable)
 		Attribute team as Entity(Team)
@@ -83,10 +89,3 @@ Datamart(scale = None) master
 
 	Entity(from = dl.personAssertion) Person as ExtensionOf(Observable)
 	Entity(from = dl.businessUnitAssertion) BusinessUnit as ExtensionOf(Observable)
-
-	Entity(from = dl.anomalyTypeAssertion) AnomalyType
-		Attribute issueEs as String
-		Attribute issuePt as String
-		Attribute issueEn as String
-
-	Entity(from = dl.anomalyRuleAssertion) AnomalyRule

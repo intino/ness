@@ -1,22 +1,26 @@
 dsl Ness
 
-Namespace monitoring
-	Message AnomalyTypeAssertion as Assertion
-		Attribute group as Text
-		Attribute issueEn as Text
-		Attribute issueEs as Text
-		Attribute issuePt as Text
-	Message AnomalyRuleAssertion as Assertion > Attribute detector as Text
-
-	Message AnomalyBundle
-		Attribute place as Text
+Namespace analysis
+	Message Analysis as Assertion
+		Attribute observable as Text
 		Component Anomaly
 			Attribute code as Text
+			Attribute level as Word("Error" "Warning")
+			Attribute period as Text
 			Attribute triggerValue as Text
+
+	Measurement AssetAnalysis
+		Value availability > Attribute("OFF 0, ON 100") format; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("DOWN") tail;Attribute("Poisson") distribution;
+		Value health > Attribute("100") max;Attribute("0") min; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("DOWN") tail;Attribute("Poisson") distribution;
+		Value risk > Attribute("100") max;Attribute("0") min; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Poisson") distribution;
+
+Namespace actuation
 	Message Notification
 		Attribute destination as Text
 		Attribute content as Text
 		Attribute contentType as Word("text" "file" "image" "question")
+
+Namespace monitoring
 	Message State
 		Attribute observable as Text
 		Attribute value as Word("Off" "On")
@@ -28,33 +32,33 @@ Namespace monitoring
 		Attribute value as Text
 
 	Measurement AssetStatus
-		Value usedRAM > Attribute("MB") metric; Attribute("0") decimalCount
-		Value usedHDD > Attribute("MB") metric; Attribute("0") decimalCount
-		Value usedCPU > Attribute("%") metric; Attribute("2") decimalCount
-		Value kernelTemperature > Attribute("ºC") metric; Attribute("0") decimalCount
-		Value externalTemperature > Attribute("ºC") metric; Attribute("0") decimalCount
-		Value dataReceived > Attribute("MB") metric; Attribute("0") decimalCount
-		Value dataSent > Attribute("MB") metric; Attribute("0") decimalCount
-		Value openFiles > Attribute("0") decimalCount
-		Value threads > Attribute("0") decimalCount
-		Value systemProcesses > Attribute("0") decimalCount
-		Value applications > Attribute("0") decimalCount
-		Value unknownApplications > Attribute("0") decimalCount
+		Value usedRAM > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
+		Value usedHDD > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
+		Value usedCPU > Attribute("%") metric; Attribute("2") decimalCount; Attribute("avg") operator; Attribute("100") max;Attribute("UP") tail;Attribute("Normal") distribution;
+		Value kernelTemperature > Attribute("ºC") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
+		Value externalTemperature > Attribute("ºC") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
+		Value dataReceived > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;
+		Value dataSent > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;
+		Value openFiles > Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
+		Value threads > Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
+		Value systemProcesses > Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
+		Value applications > Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;
+		Value unknownApplications > Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;
 
-	Measurement ProcessStatus
-		Value usedRAM > Attribute("MB") metric; Attribute("0") decimalCount
-		Value usedCPU > Attribute("%") metric; Attribute("2") decimalCount
-		Value threads > Attribute("0") decimalCount
-		Value openFiles > Attribute("0") decimalCount
-		Value dataRead > Attribute("MB") metric; Attribute("0") decimalCount
-		Value dataWritten > Attribute("MB") metric; Attribute("0") decimalCount
+	Measurement ApplicationStatus
+		Value usedRAM > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;
+		Value usedCPU > Attribute("%") metric; Attribute("2") decimalCount; Attribute("avg") operator; Attribute("100") max;Attribute("UP") tail;
+		Value threads > Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
+		Value openFiles > Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
+		Value dataRead > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;
+		Value dataWritten > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;
 
 	Measurement RdbmsStatement
-		Value cpuTime > Attribute("seconds") metric; Attribute("0") decimalCount
-		Value elapsedTime > Attribute("seconds") metric; Attribute("0") decimalCount
-		Value executions > Attribute("0") decimalCount
-		Value logicalReads > Attribute("0") decimalCount
-		Value logicalWrites > Attribute("0") decimalCount
+		Value cpuTime > Attribute("seconds") metric;Attribute("0") decimalCount;Attribute("UP") tail;Attribute("Normal") distribution;
+		Value elapsedTime > Attribute("seconds") metric;Attribute("UP") tail;Attribute("0") decimalCount
+		Value executions > Attribute("0") decimalCount;Attribute("UP") tail;Attribute("Normal") distribution;
+		Value logicalReads > Attribute("0") decimalCount;Attribute("UP") tail;Attribute("Normal") distribution;
+		Value logicalWrites > Attribute("0") decimalCount;Attribute("UP") tail;Attribute("Normal") distribution;
 
 Message Operation
 	Attribute user as Text
@@ -86,6 +90,7 @@ Namespace inventory
 	Message ObservableAssertion as Assertion
 		Attribute host as Text
 		Attribute observer as Text
+		Attribute tags as Text List
 
 	Message AdministrableAssertion as ExtensionOf(ObservableAssertion)
 		Attribute team as Text
@@ -130,9 +135,8 @@ Namespace inventory
 	Message ApplicationAssertion as ExtensionOf(SoftwareAssertion)
 		Attribute name as Text
 		Attribute user as Text
-		Attribute tag as Text
 		Attribute startingTime as DateTime
-		Attribute pid as Integer
+		Attribute pids as Integer List
 		Attribute commandLine as Text
 		Attribute state as Word("NEW" "RUNNING" "SLEEPING" "WAITING" "ZOMBIE" "STOPPED" "OTHER" "INVALID" "SUSPENDED")
 

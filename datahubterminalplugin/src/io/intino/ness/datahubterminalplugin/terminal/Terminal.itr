@@ -350,6 +350,27 @@ def !type(bpm) trigger(publish)
 	}
 end
 
+def type(bpm) trigger(subscribe)
+	public void subscribe(ProcessStatusConsumer onEventReceived, String subscriberId) {
+		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new io.intino.alexandria.bpm.ProcessStatus(((MessageEvent) event).toMessage()), "ProcessStatus");} catch(Throwable e) { Logger.error(e); }}));
+		connector.attachListener("ProcessStatus", subscriberId, consumers.get(onEventReceived).get(0));
+	}
+
+	public void subscribe(ProcessStatusConsumer onEventReceived, String subscriberId, java.util.function.Predicate<Instant> filter) {
+		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new io.intino.alexandria.bpm.ProcessStatus(((MessageEvent) event).toMessage()), "ProcessStatus");} catch(Throwable e) { Logger.error(e); }}));
+		connector.attachListener("ProcessStatus", subscriberId, consumers.get(onEventReceived).get(0), filter);
+	}
+
+	public void subscribe(ProcessStatusConsumer onEventReceived) {
+		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new io.intino.alexandria.bpm.ProcessStatus(((MessageEvent) event).toMessage()), "ProcessStatus");} catch(Throwable e) { Logger.error(e); }}));
+		connector.attachListener("ProcessStatus", consumers.get(onEventReceived).get(0));
+	}
+
+	public void unsubscribe(ProcessStatusConsumer onEventReceived) {
+		consumers.get(onEventReceived).forEach(connector::detachListeners);
+	}
+end
+
 def type(measurement) trigger(subscribe)
 	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId) {
 		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type(((MessageEvent) event).toMessage()), "$channel");} catch(Throwable e) { Logger.error(e); }}));

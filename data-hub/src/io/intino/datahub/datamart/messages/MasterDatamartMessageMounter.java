@@ -32,11 +32,12 @@ public class MasterDatamartMessageMounter {
 		for(String attribute : changes.attributes()) {
 			message.set(attribute, changes.get(attribute).data());
 		}
-		// TODO: how to update old components??
-		List<Message> components = message.components();
-		for(Message newComponent : changes.components()) {
-			if(!components.contains(newComponent)) message.add(newComponent);
-		}
+		removeAllComponents(message);
+		message.add(changes.components());
+	}
+
+	private void removeAllComponents(Message message) {
+		message.components().forEach(message::remove);
 	}
 
 	private boolean isInvalidId(String id) {
