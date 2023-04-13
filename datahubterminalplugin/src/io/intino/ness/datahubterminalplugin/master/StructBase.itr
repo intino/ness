@@ -37,6 +37,12 @@ def type(struct & base)
 			return datamart;
 		}
 
+		void updateAttribute(String name, Object newValue) {
+			Attribute attribute = attribute(name);
+			if(attribute == null) return;
+			attribute.setValue(newValue);
+		}
+
 		@Override
 		public void addChangeListener(ChangeListener listener) {
 			// Structs are read only

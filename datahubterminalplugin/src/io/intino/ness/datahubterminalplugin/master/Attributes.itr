@@ -1,0 +1,61 @@
+def type(attribute) !type(inherited) trigger(initAttribute)
+	attributes.add(new Attribute("$name+firstLowerCase", null));
+end
+
+def type(word) !type(inherited) trigger(wordDeclaration)
+	public enum $name+firstUpperCase {$value...[, ]}
+end
+
+def type(expression) trigger(expressionDeclaration)
+	$modifier $returnType $name([$parameter+parameterDeclaration...[, ]]) {
+		$expr
+	}
+end
+
+def type(parameter) trigger(parameterDeclaration)
+	$type $name
+end
+
+def type(list | set) type(entity) trigger(getter)
+	public $type $name+firstLowerCase() {
+		return attribute("$name+firstLowerCase").value().<Collection<String>>as().stream()
+			.map(datamart()::$typename+firstLowerCase)
+			.collect(Collectors.to$collectionType());
+	}
+end
+
+def type(entity) trigger(getter)
+	public $type $name+firstLowerCase() {
+		return datamart().$typename+firstLowerCase(attribute("$name+firstLowerCase").value().as(String.class));
+	}
+end
+
+def trigger(getter)
+	public $type $name+firstLowerCase() {
+		return attribute("$name+firstLowerCase").value().<$type>as();
+	}
+end
+
+def trigger(equals)
+	Objects.equals(this.$name+firstLowerCase(), other.$name+firstLowerCase())
+end
+
+def trigger(toString)
+	sb.append(this.$name+firstLowerCase()).append(',');
+end
+
+def type(attribute) trigger(get)
+	this.$name+firstLowerCase()
+end
+
+def type(attribute) trigger(parameter)
+	$type $name+firstLowerCase
+end
+
+def type(attribute) trigger(name)
+	$name+firstLowerCase
+end
+
+def trigger(putIntoMap)
+	put("$name+firstLowerCase", $name+firstLowerCase);
+end

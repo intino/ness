@@ -1,7 +1,6 @@
 package io.intino.ness.datahubterminalplugin.master;
 
 import io.intino.datahub.model.EntityData;
-import io.intino.datahub.model.StructData;
 import io.intino.magritte.framework.Concept;
 import io.intino.magritte.framework.Layer;
 import io.intino.magritte.framework.Node;
@@ -147,6 +146,10 @@ public class ConceptAttribute {
 	public Node core$() {
 		Node node = getOrDefault("core$", null);
 		return node != null ? node : (Node) attribute;
+	}
+
+	public boolean shouldAddPackageBeforeName() {
+		return true;
 	}
 
 	private <T> T getOrDefault(String name, T defValue) {

@@ -105,8 +105,8 @@ public class Client {
 		terminal.subscribe((TestTerminal.InventoryJavaApplicationAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_JavaApplicationAssertion");
 		terminal.subscribe((TestTerminal.InventoryPersonAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_PersonAssertion");
 		terminal.subscribe((TestTerminal.InventoryBusinessUnitAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_BusinessUnitAssertion");
-		terminal.subscribe((TestTerminal.MonitoringAnomalyTypeAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_AnomalyTypeAssertion");
-		terminal.subscribe((TestTerminal.MonitoringAnomalyRuleAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_AnomalyRuleAssertion");
+//		terminal.subscribe((TestTerminal.MonitoringAnomalyTypeAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_AnomalyTypeAssertion");
+//		terminal.subscribe((TestTerminal.MonitoringAnomalyRuleAssertionConsumer) (event, topic) -> datamart.init().mount(event), connector.clientId() + "_master_AnomalyRuleAssertion");
 	}
 
 	private static JmsConnector connector(String user, String password, String clientId) {

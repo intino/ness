@@ -4,12 +4,16 @@ import io.intino.Configuration;
 import io.intino.datahub.model.*;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
+import io.intino.itrules.RuleSet;
 import io.intino.itrules.Template;
 import io.intino.ness.datahubterminalplugin.util.ErrorUtils;
 import io.intino.plugin.PluginLauncher;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
 import static io.intino.ness.datahubterminalplugin.Formatters.customize;
@@ -187,20 +191,39 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private Frame[] structsOf(Datamart datamart) {
-		return datamart.structList().stream()
-				.map(struct -> {
-					final FrameBuilder b = new FrameBuilder("struct").add("package", modelPackage);
-					b.add("name", struct.name$()).add("fullName", fullNameOf(struct));
-					b.add("attribute", attributeFrames(attributesOf(struct)));
-					if(struct.isExtensionOf()) {
-						b.add("parent", struct.asExtensionOf().struct().name$());
-						b.add("ancestor", ancestorsOf(struct));
-					}
-					setDescendantsInfo(datamart, struct, b);
-					return b.toFrame();
-				}).toArray(Frame[]::new);
+		List<Frame> structFrames = datamart.structList().stream()
+				.flatMap(struct -> framesOf(datamart, struct, modelPackage + ".structs", null))
+				.collect(Collectors.toList());
+
+		for(Entity entity : datamart.entityList()) {
+			entity.structList().stream()
+					.flatMap(struct -> framesOf(datamart, struct, modelPackage + ".entities." + entity.name$(), entity.name$()))
+					.forEach(structFrames::add);
+		}
+
+		return structFrames.toArray(Frame[]::new);
 	}
 
+	private Stream<Frame> framesOf(Datamart datamart, Struct struct, String thePackage, String owner) {
+		String fullname = owner == null ? fullNameOf(struct) : owner + StructFrameFactory.STRUCT_INTERNAL_CLASS_SEP + fullNameOf(struct);
+		FrameBuilder b = new FrameBuilder("struct");
+		b.add("package", thePackage);
+		b.add("name", struct.name$());
+		b.add("fullName", fullname);
+		b.add("attribute", attributeFrames(attributesOf(struct)));
+//		if(struct.isExtensionOf()) {
+//			b.add("parent", struct.asExtensionOf().struct().name$());
+//			b.add("ancestor", ancestorsOf(struct));
+//		}
+//		setDescendantsInfo(datamart, struct, b);
+
+		List<Frame> frames = new ArrayList<>(1);
+		frames.add(b.toFrame());
+
+		for(Struct s : struct.structList()) framesOf(datamart, s, thePackage + "." + struct.name$(), fullname).forEach(frames::add);
+
+		return frames.stream();
+	}
 
 	private Frame[] entitiesOf(Datamart datamart) {
 		return datamart.entityList().stream()
@@ -257,15 +280,15 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return new FrameBuilder("ancestor", "struct").add("name", struct.name$()).toFrame();
 	}
 
-	private Frame[] ancestorsOf(Struct struct) {
-		List<Frame> ancestors = new ArrayList<>();
-		Struct parent = struct.asExtensionOf().struct();
-		while(parent != null) {
-			ancestors.add(new FrameBuilder("ancestor", "struct").add("name", parent.name$()).toFrame());
-			parent = parent.isExtensionOf() ? parent.asExtensionOf().struct() : null;
-		}
-		return ancestors.toArray(Frame[]::new);
-	}
+//	private Frame[] ancestorsOf(Struct struct) {
+//		List<Frame> ancestors = new ArrayList<>();
+//		Struct parent = struct.asExtensionOf().struct();
+//		while(parent != null) {
+//			ancestors.add(new FrameBuilder("ancestor", "struct").add("name", parent.name$()).toFrame());
+//			parent = parent.isExtensionOf() ? parent.asExtensionOf().struct() : null;
+//		}
+//		return ancestors.toArray(Frame[]::new);
+//	}
 
 	private Frame[] attributeFrames(List<ConceptAttribute> attributes) {
 		return attributes.stream()
@@ -333,20 +356,21 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return String.join(".", names);
 	}
 
-	private String fullNameOf(Struct e) {
-		if(!e.isExtensionOf()) return e.name$();
-
-		List<String> names = new ArrayList<>(4);
-
-		Struct parent = e.asExtensionOf().struct();
-		while(parent != null) {
-			names.add(parent.name$());
-			parent = parent.isExtensionOf() ? parent.asExtensionOf().struct() : null;
-		}
-		names.add(e.name$());
-
-		Collections.reverse(names);
-		return String.join(".", names);
+	private String fullNameOf(Struct s) {
+		return s.name$();
+//		if(!s.isExtensionOf()) return s.name$();
+//
+//		List<String> names = new ArrayList<>(4);
+//
+//		Struct parent = s.asExtensionOf().struct();
+//		while(parent != null) {
+//			names.add(parent.name$());
+//			parent = parent.isExtensionOf() ? parent.asExtensionOf().struct() : null;
+//		}
+//		names.add(s.name$());
+//
+//		Collections.reverse(names);
+//		return String.join(".", names);
 	}
 
 	private Frame[] framesOfUpperLevelDescendants(Entity parent, Datamart datamart) {
@@ -392,9 +416,10 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private static boolean isDescendantOf(Struct node, Struct expectedParent) {
-		if(!node.isExtensionOf()) return false;
-		Struct parent = node.asExtensionOf().struct();
-		return parent.equals(expectedParent) || isDescendantOf(parent, expectedParent);
+		return false;
+//		if(!node.isExtensionOf()) return false;
+//		Struct parent = node.asExtensionOf().struct();
+//		return parent.equals(expectedParent) || isDescendantOf(parent, expectedParent);
 	}
 
 	private Map<String, String> renderEntity(Entity entity, Datamart datamart) {
@@ -454,14 +479,47 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return new File(srcFolder, path.replace(DOT, separator) + JAVA).getAbsolutePath();
 	}
 
+	@Override
+	public Datamart datamart() {
+		return null;
+	}
+
+	@Override
+	public String workingPackage() {
+		return null;
+	}
+
 	public record TerminalInfo(Terminal terminal, String terminalPackage) { }
 
 	private static class Templates {
 		final Template datamart = customize(new DatamartTemplate());
 		final Template entityBase = customize(new EntityBaseTemplate());
-		final Template entity = customize(new EntityTemplate());
+		final Template entity = append(customize(new EntityTemplate()), customize(new StructTemplate()), customize(new AttributesTemplate()));
 		final Template entityMounter = customize(new EntityMounterTemplate());
 		final Template struct = customize(new StructTemplate());
-		final Template structBase = customize(new StructBaseTemplate());
+		final Template structBase = append(customize(new StructBaseTemplate()), customize(new AttributesTemplate()));
+
+		private static Template append(Template t1, Template... others) {
+			RuleSet rules = new RuleSet();
+			addRulesOf(t1, rules);
+			for(Template t : others) addRulesOf(t, rules);
+			return new Template() {
+				@Override
+				protected RuleSet ruleSet() {
+					return rules;
+				}
+			};
+		}
+
+		private static void addRulesOf(Template t, RuleSet rules) {
+			try {
+				Method method = t.getClass().getDeclaredMethod("ruleSet");
+				method.setAccessible(true);
+				RuleSet ruleSet = (RuleSet) method.invoke(t);
+				ruleSet.forEach(rules::add);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 }

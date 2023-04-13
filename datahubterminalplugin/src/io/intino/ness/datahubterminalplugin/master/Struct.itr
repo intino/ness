@@ -1,17 +1,16 @@
-def type(struct)
-	package $package.structs;
+def type(struct & class)
 
-    import io.intino.ness.master.reflection.StructDefinition;
+	[$standalone+header]
 
-	import java.time.*;
-	import java.util.*;
-	import java.util.stream.*;
+	public[$static] class $name+FirstUpperCase extends $parent {
 
-	import $package.$datamart+FirstUpperCase~Datamart;
+		public static final StructDefinition definition = new $package.$datamart+FirstUpperCase~Struct.StructDefinitionInternal("$definitionname+FirstUpperCase");
 
-	public class $name+FirstUpperCase extends $parent {
+		[$attribute+wordDeclaration...[$NL]]
 
-		public static final StructDefinition definition = new $package.$datamart+FirstUpperCase~Struct.StructDefinitionInternal("$name+FirstUpperCase");
+		public $name+FirstUpperCase($datamart+FirstUpperCase~Datamart datamart) {
+			super(datamart, java.util.Collections.emptyMap());
+		}
 
 		public $name+FirstUpperCase($datamart+FirstUpperCase~Datamart datamart, $attribute+parameter...[, ]) {
 			super(datamart, asMap([$attribute+name...[, ]]));
@@ -52,53 +51,18 @@ def type(struct)
     			[$attribute+putIntoMap...[$NL]]
     		}};
     	}
+    	[$struct+struct...[$NL$NL]]
 	}
 end
 
-def type(expression) trigger(expressionDeclaration)
-	$modifier $returnType $name([$parameter+parameterDeclaration...[, ]]) {
-		$expr
-	}
-end
+def trigger(header)
+	package $package.structs;
 
-def type(parameter) trigger(parameterDeclaration)
-	$type $name
-end
+    import io.intino.ness.master.reflection.StructDefinition;
 
-def type(attribute) trigger(get)
-	this.$name+firstLowerCase()
-end
+	import java.time.*;
+	import java.util.*;
+	import java.util.stream.*;
 
-def type(attribute) !type(inherited) trigger(initAttribute)
-	attributes.add(new Attribute("$name", $defaultValue));
-end
-
-def trigger(getter)
-	public $type $name+firstLowerCase() {
-		return attribute("$name+firstLowerCase").value().<$type>as();
-	}
-end
-
-def type(attribute) trigger(parameter)
-	$type $name+firstLowerCase
-end
-
-def type(attribute) trigger(name)
-	$name+firstLowerCase
-end
-
-def trigger(putIntoMap)
-	put("$name+firstLowerCase", $name+firstLowerCase);
-end
-
-def trigger(equals)
-	Objects.equals(this.$name+firstLowerCase(), other.$name+firstLowerCase())
-end
-
-def trigger(toString)
-	sb.append(this.$name+firstLowerCase()).append(',');
-end
-
-def type(attribute)
-	this.$name+firstLowerCase
+	import $package.$datamart+FirstUpperCase~Datamart;
 end

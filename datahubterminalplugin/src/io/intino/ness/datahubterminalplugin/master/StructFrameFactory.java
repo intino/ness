@@ -5,18 +5,18 @@ import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Struct;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
-import io.intino.magritte.framework.Node;
-import io.intino.magritte.framework.Predicate;
-import io.intino.ness.datahubterminalplugin.Formatters;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
 import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
 
 public class StructFrameFactory implements ConceptRenderer {
 	private static final String DOT = ".";
+	public static final String STRUCT_INTERNAL_CLASS_SEP = "$";
 
 	private final Datamart datamart;
 	private final String workingPackage;
@@ -27,44 +27,55 @@ public class StructFrameFactory implements ConceptRenderer {
 	}
 
 	public Map<String, Frame> create(Struct struct) {
-		Map<String, Frame> map = new HashMap<>(4);
-		map.put(calculateStructPath(struct, workingPackage), frameOf(struct).toFrame());
+		return create(struct, null);
+	}
+
+	public Map<String, Frame> create(Struct struct, String ownerName) {
+		Map<String, Frame> map = new HashMap<>(1);
+		map.put(calculateStructPath(struct, workingPackage), frameOf(struct, ownerName).toFrame());
 		return map;
 	}
 
-	private FrameBuilder frameOf(Struct struct) {
-		return new FrameBuilder("struct", "class")
+	private FrameBuilder frameOf(Struct struct, String ownerName) {
+		boolean internalClass = ownerName != null;
+		String name = ownerName + STRUCT_INTERNAL_CLASS_SEP + struct.name$();
+
+		List<Frame> attributes = attributesOf(struct).stream().map(this::attrFrameOf).map(FrameBuilder::toFrame).collect(Collectors.toList());
+
+		FrameBuilder builder = new FrameBuilder("struct", "class")
 				.add("package", workingPackage)
 				.add("name", struct.name$())
+				.add("definitionname", name)
 				.add("datamart", datamart.name$())
 				.add("parent", workingPackage + "." + firstUpperCase().format(datamart.name$()) + "Struct")
 				.add("expression", struct.methodList().stream().map(e -> ExpressionHelper.exprFrameOf(e, workingPackage)).toArray(Frame[]::new))
-				.add("attribute", attributesOf(struct).stream().map(this::attrFrameOf).toArray(Frame[]::new));
+				.add("struct", struct.structList().stream().map(s -> frameOf(s, name)).map(FrameBuilder::toFrame).toArray(Frame[]::new));
+
+		if(internalClass) builder.add("static", " static");
+		else builder.add("standalone", header());
+
+		struct.structList().stream().map(s -> attrFrameOf(attrOf(struct.core$(), s)).toFrame()).forEach(attributes::add);
+
+		builder.add("attribute", attributes.toArray(Frame[]::new));
+
+		return builder;
 	}
 
-	private Frame attrFrameOf(ConceptAttribute attr) {
-		FrameBuilder builder = new FrameBuilder().add("attribute");
-		String type = attr.type();
-		builder.add(type);
-
-		if(attr.inherited())builder.add("inherited");
-
-		builder.add("name", attr.name$()).add("owner", attr.core$().owner().name()).add("type", type);
-
-		Parameter defaultValue = DefaultValueHelper.getDefaultValue(attr.core$());
-		if (defaultValue != null) builder.add("defaultValue", defaultValue(attr.core$(), type, defaultValue));
-
-		String entity = attr.isEntity() ? attr.asEntity().entity().name$() : null;
-		if (entity != null) builder.add("entity", entity);
-		return builder.toFrame();
-	}
-
-	private Frame defaultValue(Node attr, String type, Parameter defaultValue) {
-		FrameBuilder builder = new FrameBuilder(attr.conceptList().stream().map(Predicate::name).toArray(String[]::new));
-		return builder
-				.add("type", type)
-				.add("value", defaultValue.values().get(0).toString())
+	private Frame header() {
+		return new FrameBuilder("standalone")
+				.add("package", workingPackage)
+				.add("datamart", datamart.name$())
 				.toFrame();
+	}
+
+	@Override
+	public Datamart datamart() {
+		return datamart;
+	}
+
+	@Override
+	public String workingPackage() {
+		return workingPackage;
 	}
 
 	private String calculateStructPath(Struct struct, String thePackage) {

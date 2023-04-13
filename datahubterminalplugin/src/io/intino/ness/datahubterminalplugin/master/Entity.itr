@@ -2,7 +2,7 @@ def type(entity & class)
 	package $package.entities;
 
 	import io.intino.ness.master.model.*;
-	import io.intino.ness.master.reflection.EntityDefinition;
+	import io.intino.ness.master.reflection.*;
 
 	import java.time.*;
 	import java.util.*;
@@ -10,7 +10,7 @@ def type(entity & class)
 
 	import $package.$datamart+FirstUpperCase~Datamart;
 
-	public[ $isAbstract+firstLowerCase] class $name+FirstUpperCase extends $parent {
+	public[$isAbstract+firstLowerCase] class $name+FirstUpperCase extends $parent {
 
 		public static final EntityDefinition definition = new $package.$datamart+FirstUpperCase~Entity.EntityDefinitionInternal("$name+FirstUpperCase");
 
@@ -35,6 +35,7 @@ def type(entity & class)
 			[$attribute+initAttribute...[$NL]]
 			return attributes;
 		}
+    	[$struct+struct...[$NL$NL]]
     }
 end
 
@@ -46,43 +47,6 @@ def trigger(abstract)
 	Abstract
 end
 
-def type(attribute) !type(inherited) trigger(initAttribute)
-	attributes.add(new Attribute("$name", null));
-end
-
-def type(word) !type(inherited) trigger(wordDeclaration)
-	public enum $name+firstUpperCase {$value...[, ]}
-end
-
-def type(expression) trigger(expressionDeclaration)
-	$modifier $returnType $name([$parameter+parameterDeclaration...[, ]]) {
-		$expr
-	}
-end
-
-def type(parameter) trigger(parameterDeclaration)
-	$type $name
-end
-
-def type(list | set) type(entity) trigger(getter)
-	public $type $name+firstLowerCase() {
-		return attribute("$name+firstLowerCase").value().<Collection<String>>as().stream()
-			.map(datamart()::$typename+firstLowerCase)
-			.collect(Collectors.to$collectionType());
-	}
-end
-
-def type(entity) trigger(getter)
-	public $type $name+firstLowerCase() {
-		return datamart().$typename+firstLowerCase(attribute("$name+firstLowerCase").value().as(String.class));
-	}
-end
-
-def trigger(getter)
-	public $type $name+firstLowerCase() {
-		return attribute("$name+firstLowerCase").value().<$type>as();
-	}
-end
 
 
 

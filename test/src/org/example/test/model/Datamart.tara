@@ -86,6 +86,13 @@ Datamart(scale = None) master
 		Attribute inputArguments as String List
 		Attribute jvmParameter as String List
 		Attribute jvmVersion as String
+		Struct Operation
+        	Attribute name as String
+        	Attribute returnType as String
+        	Attribute description as String
+        	Struct Parameter
+        		Attribute type as String
+        		Attribute name as String
 
 	Entity(from = dl.personAssertion) Person as ExtensionOf(Observable)
 	Entity(from = dl.businessUnitAssertion) BusinessUnit as ExtensionOf(Observable)

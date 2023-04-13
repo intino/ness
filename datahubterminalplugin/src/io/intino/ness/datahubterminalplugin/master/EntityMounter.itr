@@ -9,6 +9,10 @@ def type(mounter & interface)
     		entity.updateAttribute(attribute, value);
     	}
 
+       	default void update($datamart+FirstUpperCase~Struct struct, String attribute, Object value) {
+       		struct.updateAttribute(attribute, value);
+       	}
+
     	enum Operation {
     		Create, Update, Remove, Skip
     	}
@@ -58,7 +62,17 @@ def !type(abstract) type(mounter) type(message)
 				if(attr.equals("enabled") && !message.get("enabled").asBoolean()) {
 					operation$[0$] = operation$[0$] == Create ? Skip : Remove;
 					entities.remove(entity.id());
-					break;
+					return;
+				}
+			}
+			processComponentsOf(message);
+		}
+
+		private void processComponentsOf(Message message) {
+			for(Message component : message.components()) {
+				$datamart+FirstUpperCase~Struct struct = instantiateStructOf(component.type());
+				for(String attribute : component.attributes()) {
+
 				}
 			}
 		}

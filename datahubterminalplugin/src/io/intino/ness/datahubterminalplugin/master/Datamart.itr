@@ -376,7 +376,7 @@ def type(entity) trigger(defSwitchCase)
 end
 
 def type(struct) trigger(defSwitchCase)
-	case "$name+FirstUpperCase": return Optional.of($name+firstLowerCase~StructDefinition);
+	case "$fullName+FirstUpperCase": return Optional.of($fullName+firstLowerCase~StructDefinition);
 end
 
 def type(entity) trigger(declareDefinition)
@@ -407,7 +407,7 @@ def type(entity) trigger(declareDefinition)
 end
 
 def type(struct) trigger(declareDefinition)
-	public final StructDefinition $name+firstLowerCase~StructDefinition = new StructDefinition() {
+	public final StructDefinition $fullName+firstLowerCase~StructDefinition = new StructDefinition() {
 		private final List<AttributeDefinition> declaredAttributes = initAttributeDefinitions();
 		public String fullName() {return "$fullName";}
 		public String name() {return "$name";}
@@ -415,7 +415,7 @@ def type(struct) trigger(declareDefinition)
 		public Optional<StructDefinition> parent() {return [Optional.of($parent+firstLowerCase~StructDefinition)?Optional.empty()];}
 		public List<StructDefinition> ancestors() {return java.util.List.of([$ancestor+definition...[,]]);}
 		public List<StructDefinition> descendants() {return java.util.List.of([$descendant+definition...[,]]);}
-		public Class<?> javaClass() {return $package.structs.$name+FirstUpperCase.class;}
+		public Class<?> javaClass() {return $package.$name+FirstUpperCase.class;}
 		private List<AttributeDefinition> initAttributeDefinitions() {
 			List<AttributeDefinition> list = new ArrayList<>($numAttributes);
         	[$attribute+addDefinition...[$NL]]

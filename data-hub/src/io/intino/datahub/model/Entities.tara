@@ -2,24 +2,23 @@ dsl Proteo
 
 use Model
 
-Concept:Named Entity is component
+Concept:Named Entity
 	var Datalake.Tank.Message from = empty // TODO: OR add rule mustBeAssertion
-	var string[] exclude = empty
+	var string id = empty
+	has Struct
 	Concept:Named:RequiresAspect Attribute extends EntityData
 	Concept:Named:RequiresAspect Method extends Expression
-	has Component
 	Aspect ExtensionOf > var Entity entity
 	Aspect Abstract
 		var Datalake.Tank.Message from = empty is private final
 	Aspect Decorable
-	has Struct
 
-Concept:Named Struct is component
+Concept:Named Struct
 	var boolean multiple = true
-	Concept:Named:RequiresAspect Attribute extends StructData
+	Concept:Named:RequiresAspect Attribute extends EntityData
 	Concept:Named:RequiresAspect Method extends Expression
 	has Struct
-	Aspect ExtensionOf > var Struct struct
+//	Aspect ExtensionOf > var Struct struct
 
 Concept Expression is abstract
 	Aspect Private
@@ -42,8 +41,6 @@ Concept Expression is abstract
    		Concept:Named:RequiresAspect Parameter extends EntityData
 
 Concept EntityData is abstract
-	Aspect Required
-	Aspect Optional
 	Aspect List
 	Aspect Set
 	Aspect Type
@@ -73,28 +70,3 @@ Concept EntityData is abstract
 			var Entities.Entity entity
 		sub Map
 			var string type = "java.util.Map" is reactive private
-
-
-Concept StructData is abstract
-	Aspect Required
-	Aspect Optional
-	Aspect Type
-		sub Double
-			var double defaultValue = empty
-		sub Integer
-			var integer defaultValue = empty
-		sub Long
-			var long defaultValue = empty
-		sub Boolean
-			var boolean defaultValue = empty
-		sub String
-			var string defaultValue = empty
-		sub Date
-			var string format = "dd/MM/yyyy"
-		sub DateTime
-			var string format = "dd/MM/yyyy HH:mm:ss"
-		sub Instant
-			var instant defaultValue = empty
-		sub Word
-			var string[] values
-			var string defaultValue = empty
