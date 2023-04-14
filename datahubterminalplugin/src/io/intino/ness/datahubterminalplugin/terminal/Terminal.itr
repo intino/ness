@@ -308,7 +308,7 @@ def type(devent) trigger(addSubscribe)
 end
 
 def trigger(publishSwitchCase)
-	case "$typename+FirstUpperCase": publish((event instanceof $type ? (($type) event) : new $type(((io.intino.alexandria.event.message.MessageEvent) event).toMessage()))); break;
+	case "$typename+FirstUpperCase": publish((event instanceof $type $typename+firstLowerCase ? $typename+firstLowerCase : new $type(((io.intino.alexandria.event.message.MessageEvent) event).toMessage()))); break;
 end
 
 def trigger(channelOfSwitchCase)

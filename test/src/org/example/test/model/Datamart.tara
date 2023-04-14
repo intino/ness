@@ -4,31 +4,31 @@ use Datalake
 
 Datamart(scale = None) master
 	Entity(from = dl.userAssertion) User
-		Attribute email as String
-		Attribute displayName as String
-		Attribute name as String
-		Attribute language as String
+		Attribute email as Text
+		Attribute displayName as Text
+		Attribute name as Text
+		Attribute language as Text
 
 	Entity(from = dl.teamAssertion) Team
-		Attribute displayName as String
+		Attribute displayName as Text
 		Attribute users as Entity(User) List
 		Attribute channels as Entity(Channel) List
 
-	Entity(from = dl.channelAssertion) Channel > Attribute displayName as String
+	Entity(from = dl.channelAssertion) Channel > Attribute displayName as Text
 	Entity(from = dl.areaAssertion) Area
 
 	Entity(from = dl.analysisAssertion) Analysis
-		Attribute observable as String
+		Attribute observable as Text
 		Struct Anomaly
-			Attribute code as String
+			Attribute code as Text
 			Attribute level as Word("Error" "Warning")
-			Attribute period as String
-			Attribute triggerValue as String
+			Attribute period as Text
+			Attribute triggerValue as Text
 
 	Entity Observable as Abstract
 		Attribute host as Entity(Observable)
 		Attribute observer as Entity(Observable)
-		Attribute tags as String List
+		Attribute tags as Text List
 
 	Entity Administrable as Abstract ExtensionOf(Observable)
 		Attribute team as Entity(Team)
@@ -38,61 +38,61 @@ Datamart(scale = None) master
 	Entity(from = dl.hardwareAssertion) Hardware as ExtensionOf(Administrable)
 	Entity(from = dl.peripheralDeviceAssertion) PeripheralDevice as ExtensionOf(Hardware)
 	Entity(from = dl.networkDeviceAssertion) NetworkDevice as ExtensionOf(Hardware)
-		Attribute ip as String
-		Attribute publicIp as String
+		Attribute ip as Text
+		Attribute publicIp as Text
 
 	Entity(from = dl.machineAssertion) Machine as ExtensionOf(Hardware)
-		Attribute architecture as String
-		Attribute os as String
+		Attribute architecture as Text
+		Attribute os as Text
 		Attribute cores as Integer
 		Attribute diskSize as Long  //MB
 		Attribute memorySize as Long //MB
 		Attribute processes as Integer
 		Attribute maxOpenFiles as Long
-		Attribute jvm as String
-		Attribute isp as String
-		Attribute ip as String
-		Attribute publicIp as String
+		Attribute jvm as Text
+		Attribute isp as Text
+		Attribute ip as Text
+		Attribute publicIp as Text
 
 	Entity(from = dl.softwareAssertion) Software as ExtensionOf(Administrable)
 	Entity(from = dl.consulAssertion) Consul as ExtensionOf(Software)
-		Attribute version as String
-		Attribute installedActivities as String List
-		Attribute enabledActivities as String List
+		Attribute version as Text
+		Attribute installedActivities as Text List
+		Attribute enabledActivities as Text List
 
 	Entity(from = dl.serviceAssertion) Service as ExtensionOf(Software)
-		Attribute url as String
+		Attribute url as Text
 	Entity(from = dl.rdbmsServiceAssertion) RdbmsService as ExtensionOf(Service)
 	Entity(from = dl.queryAssertion) Query as ExtensionOf(Observable)
-		Attribute query as String
-		Attribute hash as String
+		Attribute query as Text
+		Attribute hash as Text
 
 	Entity(from = dl.applicationAssertion) Application as ExtensionOf(Software)
-		Attribute name as String
-		Attribute user as String
+		Attribute name as Text
+		Attribute user as Text
 		Attribute startingTime as DateTime
 		Attribute pid as Integer
-		Attribute commandLine as String
+		Attribute commandLine as Text
 		Attribute state as Word("NEW" "RUNNING" "SLEEPING" "WAITING" "ZOMBIE" "STOPPED" "OTHER" "INVALID" "SUSPENDED")
 
 	Entity(from = dl.javaApplicationAssertion) JavaApplication as ExtensionOf(Application)
-		Attribute classpathPrefix as String
-		Attribute mainArtifact as String
+		Attribute classpathPrefix as Text
+		Attribute mainArtifact as Text
 		Attribute debugPort as Integer
 		Attribute jmxPort as Integer
 		Attribute minMemory as Integer
 		Attribute maxMemory as Integer
-		Attribute classpath as String List
-		Attribute inputArguments as String List
-		Attribute jvmParameter as String List
-		Attribute jvmVersion as String
+		Attribute classpath as Text List
+		Attribute inputArguments as Text List
+		Attribute jvmParameter as Text List
+		Attribute jvmVersion as Text
 		Struct Operation
-        	Attribute name as String
-        	Attribute returnType as String
-        	Attribute description as String
+        	Attribute name as Text
+        	Attribute returnType as Text
+        	Attribute description as Text
         	Struct Parameter
-        		Attribute type as String
-        		Attribute name as String
+        		Attribute type as Text
+        		Attribute name as Text
 
 	Entity(from = dl.personAssertion) Person as ExtensionOf(Observable)
 	Entity(from = dl.businessUnitAssertion) BusinessUnit as ExtensionOf(Observable)

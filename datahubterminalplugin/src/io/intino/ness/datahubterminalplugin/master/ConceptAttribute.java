@@ -1,6 +1,7 @@
 package io.intino.ness.datahubterminalplugin.master;
 
 import io.intino.datahub.model.EntityData;
+import io.intino.datahub.model.Struct;
 import io.intino.magritte.framework.Concept;
 import io.intino.magritte.framework.Layer;
 import io.intino.magritte.framework.Node;
@@ -20,6 +21,10 @@ public class ConceptAttribute {
 	public ConceptAttribute(Object attribute, Node owner) {
 		this.attribute = attribute;
 		this.owner = owner;
+	}
+
+	public String ownerFullName() {
+		return owner.name();
 	}
 
 	public boolean inherited() {
@@ -104,7 +109,8 @@ public class ConceptAttribute {
 	}
 
 	public boolean isStruct() {
-		return getOrDefault("isStruct", false);
+//		return getOrDefault("isStruct", false);
+		return attribute instanceof Struct;
 	}
 
 	public boolean isEntity() {
@@ -119,7 +125,7 @@ public class ConceptAttribute {
 		return getOrDefault("asWord", null);
 	}
 
-	public EntityData.Struct asStruct() {
+	public Struct asStruct() {
 		return getOrDefault("asStruct", null);
 	}
 
@@ -137,7 +143,7 @@ public class ConceptAttribute {
 		if(isDateTime()) return "LocalDateTime";
 		if(isInstant()) return "Instant";
 		if(isWord()) return firstUpperCase(asWord().name$());
-		if(isStruct()) return asStruct().struct().name$();
+		if(isStruct()) return asStruct().name$();
 		if(isEntity()) return asEntity().entity().name$();
 		if(isMap()) return "Map";
 		throw new RuntimeException("Unknown type of " + name$());

@@ -368,7 +368,7 @@ def type(entity) trigger(definition)
 end
 
 def type(struct) trigger(definition)
-	$name+firstLowerCase~StructDefinition
+	$fullName+firstLowerCase~StructDefinition
 end
 
 def type(entity) trigger(defSwitchCase)
@@ -457,7 +457,7 @@ end
 
 def type(attribute) !type(inherited) type(collection) trigger(addDefinition)
 	list.add(new AttributeDefinition() {
-		public String name() {return "$name";}
+		public String name() {return "$name+firstLowerCase";}
 		public Class<?> type() {return $type~.class;}
 		public String toString() {return name();}
 		public List<ParameterDefinition> parameters() {
@@ -472,7 +472,7 @@ end
 
 def type(attribute) !type(inherited) trigger(addDefinition)
 	list.add(new AttributeDefinition() {
-		public String name() {return "$name";}
+		public String name() {return "$name+firstLowerCase";}
 		public Class<?> type() {return $type~.class;}
 		public String toString() {return name();}
 	});

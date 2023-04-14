@@ -19,6 +19,7 @@ import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
 import static io.intino.ness.datahubterminalplugin.Formatters.customize;
 import static io.intino.ness.datahubterminalplugin.Formatters.firstUpperCase;
 import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
+import static io.intino.ness.datahubterminalplugin.master.StructFrameFactory.STRUCT_INTERNAL_CLASS_SEP;
 import static java.io.File.separator;
 import static java.util.stream.Collectors.toMap;
 
@@ -205,12 +206,17 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private Stream<Frame> framesOf(Datamart datamart, Struct struct, String thePackage, String owner) {
-		String fullname = owner == null ? fullNameOf(struct) : owner + StructFrameFactory.STRUCT_INTERNAL_CLASS_SEP + fullNameOf(struct);
+		String fullname = owner == null ? fullNameOf(struct) : owner + STRUCT_INTERNAL_CLASS_SEP + fullNameOf(struct);
 		FrameBuilder b = new FrameBuilder("struct");
 		b.add("package", thePackage);
 		b.add("name", struct.name$());
 		b.add("fullName", fullname);
-		b.add("attribute", attributeFrames(attributesOf(struct)));
+		b.add("attribute", attributeFrames(attributesOf(struct, (a, o) -> new ConceptAttribute(a, o) {
+			@Override
+			public String ownerFullName() {
+				return fullname.replace(STRUCT_INTERNAL_CLASS_SEP, ".");
+			}
+		})));
 //		if(struct.isExtensionOf()) {
 //			b.add("parent", struct.asExtensionOf().struct().name$());
 //			b.add("ancestor", ancestorsOf(struct));
@@ -243,6 +249,20 @@ public class DatamartsRenderer implements ConceptRenderer {
 					setDescendantsInfo(datamart, entity, b);
 					return b.toFrame();
 				}).toArray(Frame[]::new);
+	}
+
+	@Override
+	public List<ConceptAttribute> attributesOf(Entity entity) {
+		List<ConceptAttribute> attributes = ConceptRenderer.super.attributesOf(entity);
+		entity.structList().stream().map(struct -> attrOf(entity.core$(), struct)).forEach(attributes::add);
+		return attributes;
+	}
+
+	@Override
+	public List<ConceptAttribute> attributesOf(Struct struct) {
+		List<ConceptAttribute> attributes = ConceptRenderer.super.attributesOf(struct);
+		struct.structList().stream().map(s -> attrOf(struct.core$(), s)).forEach(attributes::add);
+		return attributes;
 	}
 
 	private void setDescendantsInfo(Datamart datamart, Entity entity, FrameBuilder b) {
@@ -298,7 +318,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private FrameBuilder attributeFrameBuilder(ConceptAttribute attr) {
-		FrameBuilder b = new FrameBuilder("attribute").add("name", attr.name$());
+		FrameBuilder b = new FrameBuilder("attribute");
 
 		if(attr.isList() || attr.isSet()) {
 			setAttribCollectionInfo(attr, b);
@@ -308,12 +328,14 @@ public class DatamartsRenderer implements ConceptRenderer {
 		} else if(attr.isEntity()) {
 			b.add("type", modelPackage + ".entities." + attr.asEntity().entity().name$());
 		}  else if(attr.isStruct()) {
-			b.add("type", modelPackage + ".structs." + attr.asStruct().struct().name$());
+			b.add("type", modelPackage + ".entities." + attr.ownerFullName() + "." + attr.asStruct().name$());
 		} else if(attr.isWord()) {
-			b.add("type", modelPackage + ".entities." + attr.owner().name() + "." + attr.type());
+			b.add("type", modelPackage + ".entities." + attr.ownerFullName() + "." + attr.type());
 		} else {
 			b.add("type", attr.type());
 		}
+
+		b.add("name", attr.name$());
 
 		if(attr.inherited()) b.add("inherited");
 
@@ -329,17 +351,25 @@ public class DatamartsRenderer implements ConceptRenderer {
 			parameterType = modelPackage + ".entities." + attr.asEntity().entity().name$();
 			parameterTypeName = attr.asEntity().entity().name$();
 		} else if(attr.isStruct()) {
-			parameterType = modelPackage + ".structs." + attr.asStruct().struct().name$();
-			parameterTypeName = attr.asStruct().struct().name$();
+			parameterType = modelPackage + ".entities." + attr.ownerFullName() + "." + attr.asStruct().name$();
+			parameterTypeName = attr.asStruct().name$();
 		} else if(attr.isWord()) {
 			parameterType = modelPackage + ".entities." + attr.owner().name() + "." + parameterType;
 		}
 		b.add("parameterType", parameterType);
 		b.add("parameterTypeName", parameterTypeName);
-		FrameBuilder param = new FrameBuilder("parameter").add("name", parameterTypeName);
+
+		FrameBuilder param = new FrameBuilder("parameter");
 		if(attr.isEntity()) param.add("entity");
 		else if(attr.isStruct()) param.add("struct");
 		else if(attr.isWord()) param.add("word");
+
+		if(attr.isStruct()) {
+			param.add("name", attr.ownerFullName() + STRUCT_INTERNAL_CLASS_SEP + attr.asStruct().name$());
+		} else {
+			param.add("name", parameterTypeName);
+		}
+
 		b.add("parameter", param);
 	}
 

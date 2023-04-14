@@ -6,6 +6,7 @@ import io.intino.itrules.FrameBuilder;
 import io.intino.magritte.framework.Node;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static io.intino.ness.datahubterminalplugin.Formatters.firstUpperCase;
@@ -29,13 +30,21 @@ public interface ConceptRenderer {
 	}
 
 	default List<ConceptAttribute> attributesOf(Struct struct) {
-		return struct.attributeList().stream().map(a -> new ConceptAttribute(a, struct.core$())).collect(Collectors.toList());
+		return attributesOf(struct, ConceptAttribute::new);
+	}
+
+	default List<ConceptAttribute> attributesOf(Struct struct, BiFunction<Object, Node, ConceptAttribute> ctor) {
+		return struct.attributeList().stream().map(a -> ctor.apply(a, struct.core$())).collect(Collectors.toList());
 	}
 
 	default List<ConceptAttribute> attributesOf(Entity entity) {
+		return attributesOf(entity, ConceptAttribute::new);
+	}
+
+	default List<ConceptAttribute> attributesOf(Entity entity, BiFunction<Object, Node, ConceptAttribute> ctor) {
 		Map<String, ConceptAttribute> map = new LinkedHashMap<>();
-		Helper.getAttributesFromParents(entity, map);
-		Helper.getAttributesFromEntity(entity, entity.attributeList(), map, false);
+		Helper.getAttributesFromParents(entity, map, ctor);
+		Helper.getAttributesFromEntity(entity, entity.attributeList(), map, false, ctor);
 		return new ArrayList<>(map.values());
 	}
 
@@ -62,13 +71,8 @@ public interface ConceptRenderer {
 			}
 
 			@Override
-			public EntityData.Struct asStruct() {
-				return new EntityData.Struct(owner) {
-					@Override
-					public Struct struct() {
-						return structAttr;
-					}
-				};
+			public Struct asStruct() {
+				return structAttr;
 			}
 		};
 	}
@@ -88,7 +92,7 @@ public interface ConceptRenderer {
 		builder.add("typename", type);
 		if(attr.isEntity() && attr.shouldAddPackageBeforeName()) type = entitiesPackage() + type;
 		else if(attr.isStruct() && attr.shouldAddPackageBeforeName()) type = structsPackage() + type;
-		else if(attr.isWord()) type = owner.name() + "." + firstUpperCase(type);
+		else if(attr.isWord()) type = attr.ownerFullName() + "." + firstUpperCase(type);
 
 		handleCollectionType(attr, builder, type);
 
@@ -175,7 +179,7 @@ public interface ConceptRenderer {
 
 	class Helper {
 
-		private static void getAttributesFromParents(Entity entity, Map<String, ConceptAttribute> map) {
+		private static void getAttributesFromParents(Entity entity, Map<String, ConceptAttribute> map, BiFunction<Object, Node, ConceptAttribute> ctor) {
 			if(!entity.isExtensionOf()) return;
 			List<Entity.Attribute> attributes = new ArrayList<>();
 			Entity parent = entity.asExtensionOf().entity();
@@ -184,11 +188,12 @@ public interface ConceptRenderer {
 				parent = parent.isExtensionOf() ? parent.asExtensionOf().entity() : null;
 			}
 			Collections.reverse(attributes);
-			getAttributesFromEntity(entity, attributes, map, true);
+			getAttributesFromEntity(entity, attributes, map, true, ctor);
 		}
 
-		private static void getAttributesFromEntity(Entity entity, List<Entity.Attribute> attributeList, Map<String, ConceptAttribute> attribs, boolean inherited) {
-			attributeList.forEach(a -> attribs.put(a.name$(), new ConceptAttribute(a, entity.core$()).inherited(inherited)));
+		private static void getAttributesFromEntity(Entity entity, List<Entity.Attribute> attributeList,
+													Map<String, ConceptAttribute> attribs, boolean inherited, BiFunction<Object, Node, ConceptAttribute> ctor) {
+			attributeList.forEach(a -> attribs.put(a.name$(), ctor.apply(a, entity.core$()).inherited(inherited)));
 		}
 	}
 }

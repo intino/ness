@@ -18,7 +18,6 @@ Concept:Named Struct
 	Concept:Named:RequiresAspect Attribute extends EntityData
 	Concept:Named:RequiresAspect Method extends Expression
 	has Struct
-//	Aspect ExtensionOf > var Struct struct
 
 Concept Expression is abstract
 	Aspect Private
@@ -28,7 +27,7 @@ Concept Expression is abstract
 		sub IntegerGetter
 		sub LongGetter
 		sub BooleanGetter
-		sub StringGetter
+		sub TextGetter
 		sub DateGetter
 		sub DateTimeGetter
 		sub InstantGetter
@@ -53,7 +52,7 @@ Concept EntityData is abstract
 			var long defaultValue = empty
 		sub Boolean
 			var boolean defaultValue = empty
-		sub String
+		sub Text
 			var string defaultValue = empty
 		sub Date
 			var string format = "dd/MM/yyyy"
@@ -63,9 +62,7 @@ Concept EntityData is abstract
 			var instant defaultValue = empty
 		sub Word
 			var string[] values
-			var string defaultValue= empty
-		sub Struct
-			var Entities.Struct struct
+			var string defaultValue = empty
 		sub Entity
 			var Entities.Entity entity
 		sub Map

@@ -68,7 +68,7 @@ def type(struct & base)
 		protected final class Attribute implements Concept.Attribute {
 
 			private final String name;
-			private final Value value;
+			private Value value;
 
 			public Attribute(String name, Object initialValue) {
 				this.name = name;
@@ -88,6 +88,10 @@ def type(struct & base)
 			@Override
 			public Value value() {
 				return value;
+			}
+
+			private void setValue(Object newValue) {
+				this.value = new Value(newValue);
 			}
 
 			@Override

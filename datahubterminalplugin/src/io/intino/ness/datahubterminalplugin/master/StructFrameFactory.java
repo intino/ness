@@ -6,6 +6,7 @@ import io.intino.datahub.model.Struct;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,8 @@ public class StructFrameFactory implements ConceptRenderer {
 				.add("parent", workingPackage + "." + firstUpperCase().format(datamart.name$()) + "Struct")
 				.add("expression", struct.methodList().stream().map(e -> ExpressionHelper.exprFrameOf(e, workingPackage)).toArray(Frame[]::new))
 				.add("struct", struct.structList().stream().map(s -> frameOf(s, name)).map(FrameBuilder::toFrame).toArray(Frame[]::new));
+
+		if(struct.multiple()) builder.add("multiple");
 
 		if(internalClass) builder.add("static", " static");
 		else builder.add("standalone", header());

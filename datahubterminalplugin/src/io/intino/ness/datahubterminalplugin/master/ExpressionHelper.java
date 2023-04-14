@@ -103,7 +103,7 @@ public class ExpressionHelper {
 		if(expr.isIntegerGetter()) return "Integer";
 		if(expr.isLongGetter()) return "Long";
 		if(expr.isBooleanGetter()) return "Boolean";
-		if(expr.isStringGetter()) return "String";
+		if(expr.isTextGetter()) return "String";
 		if(expr.isDateGetter()) return "LocalDate";
 		if(expr.isDateTimeGetter()) return "LocalDateTime";
 		if(expr.isInstantGetter()) return "Instant";

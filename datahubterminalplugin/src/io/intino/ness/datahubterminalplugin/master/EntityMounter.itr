@@ -33,6 +33,7 @@ def !type(abstract) type(mounter) type(message)
 	import io.intino.alexandria.event.message.MessageEvent;
 	import io.intino.alexandria.message.Message;
 	import $ontologypackage.$datamart+FirstUpperCase~Entity;
+	import $ontologypackage.entities.$name+FirstUpperCase;
 
 	import static $package.$datamart+FirstUpperCase~Mounter.Operation.*;
 
@@ -56,31 +57,23 @@ def !type(abstract) type(mounter) type(message)
 			if(operation$[0$] != Skip) notifyListeners(operation$[0$], entity);
 		}
 
-		private void updateAttributes(Message message, Operation$[$] operation, $datamart+FirstUpperCase~Entity entity) {
+		private void updateAttributes(Message message, Operation$[$] operation, $datamart+FirstUpperCase~Entity owner) {
 			for(String attr : message.attributes()) {
-				update(entity, attr, parse(attr, message));
+				update(owner, attr, parse(attr, message));
 				if(attr.equals("enabled") && !message.get("enabled").asBoolean()) {
 					operation$[0$] = operation$[0$] == Create ? Skip : Remove;
-					entities.remove(entity.id());
+					entities.remove(owner.id());
 					return;
 				}
 			}
-			processComponentsOf(message);
-		}
 
-		private void processComponentsOf(Message message) {
-			for(Message component : message.components()) {
-				$datamart+FirstUpperCase~Struct struct = instantiateStructOf(component.type());
-				for(String attribute : component.attributes()) {
-
-				}
-			}
+			[Map<String, List<Message>> components = message.components().stream().collect(Collectors.groupingBy(Message::type));$NL~$struct+setStructComponent...[$NL]]
 		}
 
 		private $datamart+FirstUpperCase~Entity findOrCreateEntity(String id, Operation$[$] operation) {
 			$datamart+FirstUpperCase~Entity entity = entities.get($package.entities.$name+FirstUpperCase.definition, id);
 			if(entity == null) {
-				entity = new $ontologypackage.entities.$name+FirstUpperCase(id, entities.datamart());
+				entity = new $name+FirstUpperCase(id, entities.datamart());
 				entities.add(entity);
 				operation$[0$] = Create;
 			}
@@ -106,7 +99,51 @@ def !type(abstract) type(mounter) type(message)
 		}
 
 		[$attribute+parseMethod...[$NL$NL]]
+
+		[$struct+factory...[$NL$NL]]
 	}
+end
+
+def type(struct) trigger(factory)
+	 private class $name~StructFactory {
+
+		private List<$package.$fullName> create(List<Message> components) {
+    		List<$package.$fullName> structs = new ArrayList<>();
+    		for(Message component : components) structs.add(create(component));
+    		return structs;
+		}
+
+		private $package.$fullName create(Message component) {
+			$package.$fullName owner = new $package.$fullName(entities.datamart());
+			for(String attrib : component.attributes()) {
+				update(owner, attrib, this.parse(attrib, component));
+			}
+
+			[Map<String, List<Message>> components = component.components().stream().collect(Collectors.groupingBy(Message::type));$NL~$struct+setStructComponent...[$NL]]
+
+			return owner;
+		}
+
+	 	private Object parse(String attribute, Message message) {
+        	if(message.get(attribute).isNull()) return null;
+        	switch(attribute) {
+        		[$attribute+parseSwitchCase...[$NL]]
+        	}
+        	return null;
+        }
+
+        [$attribute+parseMethod...[$NL$NL]]
+
+        [$struct+factory...[$NL$NL]]
+	 }
+end
+
+def type(multiple) trigger(setStructComponent)
+if(components.containsKey("$type")) update(owner, "$attribName+firstLowerCase", new $name~StructFactory().create(components.get("$type")));
+end
+
+def trigger(setStructComponent)
+if(components.containsKey("$type")) update(owner, "$attribName+firstLowerCase", new $name~StructFactory().create(components.get("$type").get(0)));
 end
 
 def trigger(parseSwitchCase)
@@ -186,9 +223,9 @@ def type(attribute) type(date | datetime) trigger(parseMethod)
 end
 
 def type(attribute) type(word) trigger(parseMethod)
-	private $type parse$name+FirstUpperCase(Message m) {
+	private $package.entities.$type parse$name+FirstUpperCase(Message m) {
 		try {
-			return $type.valueOf(m.get("$name").asString());
+			return $package.entities.$type.valueOf(m.get("$name").asString());
 		} catch(Exception ignored) {
 			return $defaultValue;
 		}
