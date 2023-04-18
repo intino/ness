@@ -15,14 +15,14 @@ public class Model {
 
 	private static String nameOf(Datalake.Tank self) {
 		if(self.isMessage()) return self.asMessage().message.name$();
-		if(self.isMeasurement()) return self.asMeasurement().measurement.name$();
+		if(self.isMeasurement()) return self.asMeasurement().sensor.name$();
 		if(self.isResource()) return self.asResource().resourceEvent.name$();
 		throw new IllegalArgumentException("Unknown tank type of " + self.name$());
 	}
 
 	private static String namespace(Datalake.Tank self) {
 		if(self.isMessage()) return eventNamespace(self.asMessage().message);
-		if(self.isMeasurement()) return eventNamespace(self.asMeasurement().measurement);
+		if(self.isMeasurement()) return eventNamespace(self.asMeasurement().sensor);
 		if(self.isResource()) return eventNamespace(self.asResource().resourceEvent);
 		throw new IllegalArgumentException("Unknown tank type of " + self.name$());
 	}

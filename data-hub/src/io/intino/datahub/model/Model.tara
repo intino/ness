@@ -44,7 +44,7 @@ Concept:{0..1} Datalake
 				var Model.Message message
 				var boolean sortingRequired = true
 			sub Measurement
-				var Model.Sensor measurement
+				var Model.Sensor sensor
 				var integer period
 				var word:Scale periodScale;
 			sub Resource

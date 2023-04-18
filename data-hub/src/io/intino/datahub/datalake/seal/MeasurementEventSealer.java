@@ -46,7 +46,7 @@ class MeasurementEventSealer {
 		if (tank == null) return null;
 		try {
 			return new ZitWriter(datalakeFile,
-					tank.asMeasurement().measurement().name$(),
+					tank.asMeasurement().sensor().name$(),
 					fingerprint.source(),
 					Period.of(tank.asMeasurement().period(), tank.asMeasurement().periodScale().chronoUnit()),
 					sensorModel(tank));
@@ -57,7 +57,7 @@ class MeasurementEventSealer {
 	}
 
 	private static String[] sensorModel(io.intino.datahub.model.Datalake.Tank tank) {
-		return tank.asMeasurement().measurement().magnitudeList().stream()
+		return tank.asMeasurement().sensor().magnitudeList().stream()
 				.map(m -> m.id() + (m.attributeList().isEmpty() ? "" : "|" + toString(m.attributeList()))).
 				toArray(String[]::new);
 	}

@@ -36,8 +36,6 @@
     <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.10.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zim:5.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:message:4.0.0" level="project" />
-    <orderEntry type="module" module-name="data-hub" />
-    <orderEntry type="library" name="Intino: io.intino:data-hub:9.1.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.4.4" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.1.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.1.1" level="project" />
@@ -148,5 +146,6 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:terminal-jms:5.2.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.5.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino:data-hub:9.2.0" level="project" />
   </component>
 </module>

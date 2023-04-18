@@ -56,10 +56,10 @@ public class OntologyRenderer {
 		new DatamartsRenderer(srcDir, graph, conf, logger, notifier, basePackage).render();
 	}
 
-	private List<Measurement> measurements() {
+	private List<Sensor> measurements() {
 		return graph.datalake() == null ? Collections.emptyList() : graph.datalake().tankList().stream()
 				.filter(Datalake.Tank::isMeasurement)
-				.map(tank -> tank.asMeasurement().measurement())
+				.map(tank -> tank.asMeasurement().sensor())
 				.collect(Collectors.toList());
 	}
 }

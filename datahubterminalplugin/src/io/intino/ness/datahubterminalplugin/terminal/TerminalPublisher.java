@@ -150,7 +150,7 @@ public class TerminalPublisher {
 	}
 
 	private String eventQn(Tank.Measurement tank) {
-		return namespace(tank.measurement()) + tank.measurement().name$();
+		return namespace(tank.sensor()) + tank.sensor().name$();
 	}
 
 	private String namespace(Layer event) {

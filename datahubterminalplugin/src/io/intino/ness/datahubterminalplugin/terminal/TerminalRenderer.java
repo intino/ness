@@ -129,7 +129,7 @@ class TerminalRenderer {
 
 	private Frame[] measurementFrames() {
 		return measurementTanks().stream()
-				.map(Tank.Measurement::measurement)
+				.map(Tank.Measurement::sensor)
 				.distinct()
 				.map(m -> new FrameBuilder("measurement")
 						.add("namespace", namespace(m))
@@ -206,11 +206,11 @@ class TerminalRenderer {
 	}
 
 	private Frame frameOf(Tank.Measurement tank) {
-		String messagesPackage = measurementPackage(tank.measurement());
-		String namespace = namespace(tank.measurement());
+		String messagesPackage = measurementPackage(tank.sensor());
+		String namespace = namespace(tank.sensor());
 		return new FrameBuilder("measurement").
-				add("type", messagesPackage + "." + firstUpperCase(tank.measurement().name$())).
-				add("message", tank.measurement().name$()).
+				add("type", messagesPackage + "." + firstUpperCase(tank.sensor().name$())).
+				add("message", tank.sensor().name$()).
 				add("typeName", tank.name$()).
 				add("namespace", namespace).
 				add("namespaceQn", namespace.replace(".", "")).
@@ -224,7 +224,7 @@ class TerminalRenderer {
 		return aPackage;
 	}
 
-	private String measurementPackage(Measurement event) {
+	private String measurementPackage(Sensor event) {
 		String aPackage = rootPackage + ".measurements";
 		if (event.core$().owner().is(Namespace.class)) aPackage = aPackage + "." + namespace(event);
 		return aPackage;
