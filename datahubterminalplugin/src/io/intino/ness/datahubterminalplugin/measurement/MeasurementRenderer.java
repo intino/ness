@@ -47,7 +47,8 @@ public class MeasurementRenderer {
 	private static Frame frame(String measurement, Magnitude magnitude, int i) {
 		FrameBuilder fb = new FrameBuilder("value")
 				.add("index", i)
-				.add("name", magnitude.id())
+				.add("id", magnitude.id())
+				.add("name", magnitude.name$())
 				.add("owner", measurement);
 		if (!magnitude.attributeList().isEmpty()) fb.add("attribute", toString(magnitude.attributeList()));
 		return fb.toFrame();
