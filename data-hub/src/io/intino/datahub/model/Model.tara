@@ -44,7 +44,7 @@ Concept:{0..1} Datalake
 				var Model.Message message
 				var boolean sortingRequired = true
 			sub Measurement
-				var Model.Measurement measurement
+				var Model.Sensor measurement
 				var integer period
 				var word:Scale periodScale;
 			sub Resource
@@ -75,11 +75,12 @@ Concept Namespace
 	var string qn = @qn is private reactive
 	has Namespace
 	has Message
-	has Measurement
+	has Sensor
 	has Resource
 
-Concept Measurement
-	Concept:{1..*} Value
+Concept Sensor
+	Concept:{1..*} Magnitude
+		var string id
 		Concept:Named Attribute
 			var string value
 

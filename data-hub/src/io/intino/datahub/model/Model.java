@@ -35,7 +35,7 @@ public class Model {
 		return message.core$().owner().is(Namespace.class) ? message.core$().ownerAs(Namespace.class).qn() : "";
 	}
 
-	private static String eventNamespace(Measurement measurement) {
-		return measurement.core$().owner().is(Namespace.class) ? measurement.core$().ownerAs(Namespace.class).qn() : "";
+	private static String eventNamespace(Sensor sensor) {
+		return sensor.core$().owner().is(Namespace.class) ? sensor.core$().ownerAs(Namespace.class).qn() : "";
 	}
 }

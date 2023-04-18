@@ -12,7 +12,7 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.alexandria.zit.ZitWriter;
 import io.intino.alexandria.zit.model.Period;
-import io.intino.datahub.model.Measurement;
+import io.intino.datahub.model.Sensor;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,12 +57,12 @@ class MeasurementEventSealer {
 	}
 
 	private static String[] sensorModel(io.intino.datahub.model.Datalake.Tank tank) {
-		return tank.asMeasurement().measurement().valueList().stream()
-				.map(value -> value.name$() + (value.attributeList().isEmpty() ? "" : "|" + toString(value.attributeList()))).
+		return tank.asMeasurement().measurement().magnitudeList().stream()
+				.map(m -> m.id() + (m.attributeList().isEmpty() ? "" : "|" + toString(m.attributeList()))).
 				toArray(String[]::new);
 	}
 
-	private static String toString(List<Measurement.Value.Attribute> attrs) {
+	private static String toString(List<Sensor.Magnitude.Attribute> attrs) {
 		return attrs.stream().map(a -> a.name$() + ":" + a.value()).collect(Collectors.joining("|"));
 	}
 
