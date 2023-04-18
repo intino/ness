@@ -44,12 +44,12 @@ public class MeasurementRenderer {
 		return eventFrame.toFrame();
 	}
 
-	private static Frame frame(String measurement, Magnitude value, int i) {
+	private static Frame frame(String measurement, Magnitude magnitude, int i) {
 		FrameBuilder fb = new FrameBuilder("value")
 				.add("index", i)
-				.add("name", value.name$())
+				.add("name", magnitude.id())
 				.add("owner", measurement);
-		if (!value.attributeList().isEmpty()) fb.add("attribute", toString(value.attributeList()));
+		if (!magnitude.attributeList().isEmpty()) fb.add("attribute", toString(magnitude.attributeList()));
 		return fb.toFrame();
 	}
 
