@@ -141,7 +141,8 @@ end
 
 def type(repository) !type(distribution) trigger(release)
 	<repository>
-		<id>$name-~$random</id>
+		<id>$name</id>
+		<name>$name-~$random</name>
 		<url>$url</url>
 		[<snapshots><enabled>$snapshot</enabled></snapshots>]
 	</repository>
