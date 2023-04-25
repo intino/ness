@@ -63,7 +63,7 @@ class MeasurementEventSealer {
 	}
 
 	private static String toString(List<Sensor.Magnitude.Attribute> attrs) {
-		return attrs.stream().map(a -> a.name$() + ":" + a.value()).collect(Collectors.joining("|"));
+		return attrs.stream().map(a -> a.name$() + "=" + a.value()).collect(Collectors.joining(":"));
 	}
 
 	private static double[] values(Message message) {
