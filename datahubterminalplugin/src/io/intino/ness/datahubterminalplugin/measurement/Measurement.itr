@@ -37,7 +37,7 @@ def type(measurement)
 end
 
 def trigger(nameQuoted)
-	"$id[|$attribute...[|]]"
+	"$id[:$attribute...[:]]"
 end
 
 def trigger(getter)
