@@ -56,7 +56,7 @@ public class MeasurementRenderer {
 
 	private static String[] toString(List<Magnitude.Attribute> attributes) {
 		return attributes.stream()
-				.map(a -> a.name$() + ":" + a.value())
+				.map(a -> a.name$() + "=" + a.value())
 				.toArray(String[]::new);
 	}
 
