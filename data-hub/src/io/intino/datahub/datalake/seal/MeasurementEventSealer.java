@@ -58,7 +58,7 @@ class MeasurementEventSealer {
 
 	private static String[] sensorModel(io.intino.datahub.model.Datalake.Tank tank) {
 		return tank.asMeasurement().sensor().magnitudeList().stream()
-				.map(m -> m.id() + (m.attributeList().isEmpty() ? "" : "|" + toString(m.attributeList()))).
+				.map(m -> m.id() + (m.attributeList().isEmpty() ? "" : ":" + toString(m.attributeList()))).
 				toArray(String[]::new);
 	}
 
