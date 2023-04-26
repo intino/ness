@@ -150,7 +150,7 @@ def type(datamart & message & impl)
 
 		public synchronized $name+FirstUpperCase~DatamartImpl init() {
 			try {
-				if(!initialized.compareAndSet(false, true)) return this;
+				if (!initialized.compareAndSet(false, true)) return this;
 				downloadDatamartFromDatahub();
 				Logger.info("$name+FirstUpperCase~Datamart (" + (snapshotTimetag().isEmpty() ? "" : "snapshot " + snapshotTimetag() + ", ")  + connector.clientId() + ") initialized successfully.");
 			} catch(Exception e) {
@@ -225,6 +225,7 @@ def type(datamart & message & impl)
     	$entity+getter...[$NL$NL]
 
 		private void downloadDatamartFromDatahub() {
+			if (connector instanceof io.intino.alexandria.terminal.StubConnector) return;
 			Logger.debug("Downloading datamart from datahub...");
     		long start = java.lang.System.currentTimeMillis();
     		int$[$] numEvents = new int$[1$];
