@@ -51,11 +51,26 @@ Concept:{0..1} Datalake
 				var Model.Resource resourceEvent
 
 Concept:Named Datamart
-	var word:SnapshotScale scale
-	var boolean saveOnExit = false
 	var word:DayOfWeek firstDayOfWeek = MONDAY
+	Concept:{0..1} Snapshots
+		var word:SnapshotScale scale
+		var boolean saveOnExit = false
 	has Entity
 	has Struct
+	has Timeline
+	has Reel
+
+Concept:Named Timeline
+	var Datalake.Tank.Measurement source
+	var Entity entity
+	Concept:Named Attribute
+		var Sensor.Magnitude magnitude
+		var Entity.Attribute from
+
+Concept:Named Reel
+	var Entity source = empty
+	var Datalake.Tank.Message from = empty
+
 
 Concept:Named Terminal
 	Concept:{0..1} Bpm
