@@ -76,7 +76,7 @@ public class MessageMasterDatamartFactory {
 		while (iterator.hasNext()) {
 			MessageEvent event = iterator.next();
 			Timetag timetag = Timetag.of(event.ts(), Scale.Day);
-			if (shouldCreateSnapshot(timetag, definition.scale(), definition.firstDayOfWeek())) saveSnapshot(datamartsRoot, timetag, datamart);
+			if (shouldCreateSnapshot(timetag, definition.snapshots().scale(), definition.snapshots().firstDayOfWeek())) saveSnapshot(datamartsRoot, timetag, datamart);
 			mounter.mount(event.toMessage());
 			++count;
 		}

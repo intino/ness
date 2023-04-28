@@ -32,7 +32,7 @@ public class DatamartsSnapshotAction {
 	private void createSnapshotIfNecessary(Timetag today, MasterDatamart<?> datamart) {
 		try {
 			Datamart definition = definitionOf(datamart);
-			if(shouldCreateSnapshot(today, definition.scale(), definition.firstDayOfWeek()))
+			if(shouldCreateSnapshot(today, definition.snapshots().scale(), definition.snapshots().firstDayOfWeek()))
 				MasterDatamartSnapshots.saveSnapshot(box.datamarts().root(), today, datamart);
 		} catch (Throwable e) {
 			Logger.error("Failed to handle snapshot of " + datamart.name() + ": " + e.getMessage(), e);

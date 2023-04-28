@@ -75,6 +75,7 @@ Concept:Named Reel
 Concept:Named Terminal
 	Concept:{0..1} Bpm
 		var string processStatusClass = "io.intino.alexandria.bpm.ProcessStatus" is private
+		var string namespace
 	Concept:{0..1} Publish
 		var Datalake.Tank.Message[] messageTanks
 		var Datalake.Tank.Measurement[] measurementTanks = empty

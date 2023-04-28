@@ -181,7 +181,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	private FrameBuilder datamartImplBuilder(Datamart datamart, TerminalInfo terminalInfo) {
 		FrameBuilder builder = new FrameBuilder("datamart", "message", "impl");
 		builder.add("package", terminalInfo.terminalPackage + subPackageOf(datamart));
-		builder.add("name", datamart.name$()).add("scale", datamart.scale().name());
+		builder.add("name", datamart.name$()).add("scale", datamart.snapshots().scale().name());
 		builder.add("entity", entitiesOf(datamart));
 		builder.add("struct", structsOf(datamart));
 		builder.add("numEntities", datamart.entityList().size());
