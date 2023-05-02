@@ -43,9 +43,9 @@ class JmsMessageSerializer {
 	}
 
 	Consumer<javax.jms.Message> create() {
-		if(tank.isMessage()) return new MessageHandler();
-		if(tank.isMeasurement()) return new MeasurementHandler();
-		if(tank.isResource()) return new ResourceHandler();
+		if (tank.isMessage()) return new MessageHandler();
+		if (tank.isMeasurement()) return new MeasurementHandler();
+		if (tank.isResource()) return new ResourceHandler();
 		return Handler.empty();
 	}
 
@@ -65,7 +65,8 @@ class JmsMessageSerializer {
 
 	private interface Handler extends Consumer<javax.jms.Message> {
 		static Handler empty() {
-			return m -> {};
+			return m -> {
+			};
 		}
 	}
 
@@ -98,8 +99,12 @@ class JmsMessageSerializer {
 
 		protected File destination(Message message) {
 			MessageEvent event = new MessageEvent(message);
-			String fingerprint = Fingerprint.of(tank.qn(), event.ss(), timetag(event.ts()), Format.Message).name();
+			String fingerprint = Fingerprint.of(tank.qn(), withOutParameters(event.ss()), timetag(event.ts()), Format.Message).name();
 			return new File(stage, fingerprint + Session.SessionExtension);
+		}
+
+		private String withOutParameters(String ss) {
+			return ss.contains("?") ? ss.substring(0, ss.indexOf("?")) : ss;
 		}
 
 		private void write(Path path, Message message) {
@@ -135,7 +140,7 @@ class JmsMessageSerializer {
 		}
 
 		private void appendToDestinationFile(ResourceEvent event, File destination) throws IOException {
-			try(EventWriter<ResourceEvent> writer = new ResourceEventWriter(destination, true)) {
+			try (EventWriter<ResourceEvent> writer = new ResourceEventWriter(destination, true)) {
 				writer.write(event);
 			}
 		}
