@@ -271,7 +271,7 @@ public class LocalMasterDatamart implements MasterDatamart {
 		public ReelStore(Datamart definition, File root) {
 			super(root);
 			this.subscribedEvents = definition.reelList().stream()
-					.map(Reel::source)
+					.map(Reel::entity)
 					.filter(Objects::nonNull)
 					.map(m -> m.from().name$())
 					.collect(Collectors.toSet());

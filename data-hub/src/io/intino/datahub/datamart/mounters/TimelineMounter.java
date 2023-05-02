@@ -25,28 +25,24 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	public void mount(Message message) {
 		if (message == null) return;
 		try {
-			String ss = message.get("ss").asString();
-			if (ss == null) return;
-
+			MeasurementEvent event = measurementEvent(message);
+			if (event.ss() == null) return;
+			String ss = withOutParameters(event.ss());
 			TimelineFile timelineFile = datamart.timelineStore().get(ss);
 			if (timelineFile == null) timelineFile = createTimelineFile(ss);
-			update(timelineFile, message);
+			update(timelineFile, event);
 		} catch (Exception e) {
 			Logger.error("Could not mount message " + message + ": " + e.getMessage(), e);
 		}
 	}
 
-	private void update(TimelineFile timelineFile, Message message) {
-		append(timelineFile, measurementEvent(message));
-	}
-
-	private void append(TimelineFile tlFile, MeasurementEvent event) {
+	private void update(TimelineFile tlFile, MeasurementEvent event) {
 		DataSession session = null;
 		try {
 			session = tlFile.add();
 			checkTs(event.ts(), tlFile, session);
 			if (tlFile.next().isBefore(event.ts()) || Math.abs(Duration.between(event.ts(), tlFile.next()).getSeconds()) / 60 <= 1)
-				append(event, session);
+				update(event, session);
 		} catch (IOException e) {
 			Logger.error(e);
 		} finally {
@@ -66,7 +62,7 @@ public final class TimelineMounter extends MasterDatamartMounter {
 		if (lapse > tlFile.period().duration() * 2) session.set(ts);
 	}
 
-	private void append(MeasurementEvent event, DataSession session) {
+	private void update(MeasurementEvent event, DataSession session) {
 		IntStream.range(0, event.measurements().length).forEach(i -> session.set(event.measurements()[i].name(), event.values()[i]));
 	}
 
@@ -76,5 +72,9 @@ public final class TimelineMounter extends MasterDatamartMounter {
 
 	private TimelineFile createTimelineFile(String ss) throws IOException {
 		return TimelineFile.create(new File(box().datamartTimelinesDirectory(datamart.name()), ss + TIMELINE_EXTENSION), ss);
+	}
+
+	private String withOutParameters(String ss) {
+		return ss.contains("?") ? ss.substring(0, ss.indexOf("?")) : ss;
 	}
 }
