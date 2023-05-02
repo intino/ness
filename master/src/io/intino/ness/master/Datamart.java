@@ -1,8 +1,10 @@
 package io.intino.ness.master;
 
-import io.intino.ness.master.model.Concept;
 import io.intino.ness.master.model.Entity;
+import io.intino.ness.master.model.Node;
 import io.intino.ness.master.reflection.DatamartDefinition;
+import io.intino.sumus.chronos.Reel;
+import io.intino.sumus.chronos.Timeline;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -16,6 +18,10 @@ public interface Datamart {
 	default Scale scale() {return getDefinition().scale();}
 
 	int size();
+
+	Node<Timeline> timeline(String id);
+
+	Node<Reel> reel(String id);
 
 	<T extends Entity> T get(String id);
 

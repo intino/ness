@@ -1,7 +1,8 @@
 dsl Legio
 
-Artifact("io.intino.ness", "2.0.4") master
+Artifact("io.intino.ness", "2.1.0-SNAPSHOT") master
 	Imports
+		Compile("io.intino.sumus", "chronos", "1.0.6")
 		Test("junit", "junit", "4.13.2")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, attachSources =true)
 	Distribution > Artifactory("intino-maven")

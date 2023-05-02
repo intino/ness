@@ -41,15 +41,24 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	}
 
 	private void append(TimelineFile tlFile, MeasurementEvent event) {
+		DataSession session = null;
 		try {
-			DataSession session = tlFile.add();
+			session = tlFile.add();
 			checkTs(event.ts(), tlFile, session);
 			if (tlFile.next().isBefore(event.ts()) || Math.abs(Duration.between(event.ts(), tlFile.next()).getSeconds()) / 60 <= 1)
 				append(event, session);
-			session.close();
 		} catch (IOException e) {
 			Logger.error(e);
+		} finally {
+			close(session);
 		}
+	}
+
+	private void close(DataSession session) {
+		if(session == null) return;
+		try {
+			session.close();
+		} catch (IOException ignored) {}
 	}
 
 	private static void checkTs(Instant ts, TimelineFile tlFile, DataSession session) throws IOException {

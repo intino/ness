@@ -199,7 +199,7 @@ def type(datamart & message & impl)
 
         private javax.jms.Message listSnapshotsRequest() throws Exception {
         	ActiveMQTextMessage message = new ActiveMQTextMessage();
-        	message.setText("datamart:" + name() + ":snapshots");
+        	message.setText("datamart=" + name() + ";operation=snapshots");
         	return message;
         }
 
@@ -228,15 +228,25 @@ def type(datamart & message & impl)
 			if (connector instanceof io.intino.alexandria.terminal.StubConnector) return;
 			Logger.debug("Downloading datamart from datahub...");
     		long start = java.lang.System.currentTimeMillis();
-    		int$[$] numEvents = new int$[1$];
-			loadEntitiesFromEvents(downloadEvents(numEvents), numEvents);
+    		downloadEntities();
+    		downloadTimelines();
+    		downloadReels();
 			long time = java.lang.System.currentTimeMillis() - start;
 			Logger.debug("Datamart downloaded from datahub after " + time + " ms");
 		}
 
-		private Stream<Event> downloadEvents(int$[$] numEvents) {
+		private void downloadReels() {
+			// TODO
+		}
+
+		private void downloadTimelines() {
+			// TODO
+		}
+
+		private void downloadEntities() {
 			try {
-				javax.jms.Message message = requestResponseFromDatahub("downloadEvents", downloadRequest());
+				int$[$] numEvents = new int$[1$];
+				javax.jms.Message message = requestResponseFromDatahub("downloadEvents", downloadEntitiesRequest());
 				return handleDownloadResponse(message, numEvents);
 			} catch (NullPointerException e) {
 				throw new NullPointerException("Could not download datamart: no response from datahub.");
@@ -245,9 +255,9 @@ def type(datamart & message & impl)
 			}
 		}
 
-		private javax.jms.Message downloadRequest() throws Exception {
+		private javax.jms.Message downloadEntitiesRequest() throws Exception {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
-			message.setText("datamart:" + name() + ":" + snapshotTimetag());
+			message.setText("datamart=" + name() + (snapshotTimetag().isEmpty() ? "" : ";timetag=" + snapshotTimetag()));
 			return message;
 		}
 

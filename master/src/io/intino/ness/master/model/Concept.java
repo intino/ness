@@ -7,13 +7,13 @@ import io.intino.ness.master.reflection.ConceptDefinition;
 import java.util.List;
 import java.util.Objects;
 
-public interface Concept {
+public sealed interface Concept permits Entity, Struct {
+
+	Datamart datamart();
 
 	Attribute attribute(String name);
 
 	List<Attribute> attributes();
-
-	Datamart datamart();
 
 	void addChangeListener(ChangeListener listener);
 

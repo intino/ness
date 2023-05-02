@@ -43,6 +43,7 @@ public class LocalMasterDatamart implements MasterDatamart {
 		this.reels = new ReelStore(definition, new File(directory, "reels"));
 	}
 
+	@Override
 	public Datamart definition() {
 		return definition;
 	}

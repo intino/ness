@@ -5,6 +5,7 @@ import io.intino.alexandria.message.Message;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.mounters.MasterDatamartMounter;
 import io.intino.datahub.model.Datalake;
+import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.rules.SnapshotScale;
 import io.intino.sumus.chronos.ReelFile;
 import io.intino.sumus.chronos.TimelineFile;
@@ -14,6 +15,8 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public interface MasterDatamart {
+
+	Datamart definition();
 
 	DataHubBox box();
 

@@ -176,6 +176,7 @@ public class DatamartsRequest {
 		Map<String, String> args = new LinkedHashMap<>(command.length - 1);
 		for(int i = 1;i < command.length;i++) {
 			String[] entry = command[i].split("=", 2);
+			if(entry.length < 2) continue;
 			args.put(entry[0].trim(), entry[1].trim());
 		}
 		return args;
