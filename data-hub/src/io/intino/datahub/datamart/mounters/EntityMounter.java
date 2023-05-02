@@ -1,35 +1,46 @@
-package io.intino.datahub.datamart.messages;
+package io.intino.datahub.datamart.mounters;
 
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.datahub.datamart.MasterDatamart;
 
-public class MasterDatamartMessageMounter {
+public final class EntityMounter extends MasterDatamartMounter {
 
-	private final MasterDatamart<Message> datamart;
-
-	public MasterDatamartMessageMounter(MasterDatamart<Message> datamart) {
-		this.datamart = datamart;
+	public EntityMounter(MasterDatamart datamart) {
+		super(datamart);
 	}
 
+	@Override
 	public void mount(Message message) {
+		if (message == null) return;
 		try {
 			String id = message.get("id").asString();
 			if (isInvalidId(id) || isDisabled(message)) return;
-			Message oldMessage = datamart.get(id);
-			if(oldMessage != null) {
-				if(!oldMessage.type().equals(message.type())) throw new MismatchMessageTypeException("Id " + id + " already exists with a different message type: old=" + oldMessage.type() + ", new=" + message.type());
-				update(oldMessage, message);
-			} else {
-				datamart.put(id, message);
-			}
+
+			Message oldMessage = datamart.entityStore().get(id);
+
+			if (oldMessage != null)
+				update(message, id, oldMessage);
+			else
+				addNewEntity(message, id);
+
 		} catch (Throwable e) {
 			Logger.error("Failed to mount message of type " + message.type() + ": " + e.getMessage(), e);
 		}
 	}
 
+	private void addNewEntity(Message message, String id) {
+		datamart.entityStore().put(id, message);
+	}
+
+	private void update(Message message, String id, Message oldMessage) {
+		if (!oldMessage.type().equals(message.type()))
+			throw new MismatchMessageTypeException("Id " + id + " already exists with a different message type: old=" + oldMessage.type() + ", new=" + message.type());
+		update(oldMessage, message);
+	}
+
 	private void update(Message message, Message changes) {
-		for(String attribute : changes.attributes()) {
+		for (String attribute : changes.attributes()) {
 			message.set(attribute, changes.get(attribute).data());
 		}
 		removeAllComponents(message);
