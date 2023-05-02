@@ -16,17 +16,27 @@ public final class EntityMounter extends MasterDatamartMounter {
 		try {
 			String id = message.get("id").asString();
 			if (isInvalidId(id) || isDisabled(message)) return;
+
 			Message oldMessage = datamart.entityStore().get(id);
-			if (oldMessage != null) {
-				if (!oldMessage.type().equals(message.type()))
-					throw new MismatchMessageTypeException("Id " + id + " already exists with a different message type: old=" + oldMessage.type() + ", new=" + message.type());
-				update(oldMessage, message);
-			} else {
-				datamart.entityStore().put(id, message);
-			}
+
+			if (oldMessage != null)
+				update(message, id, oldMessage);
+			else
+				addNewEntity(message, id);
+
 		} catch (Throwable e) {
 			Logger.error("Failed to mount message of type " + message.type() + ": " + e.getMessage(), e);
 		}
+	}
+
+	private void addNewEntity(Message message, String id) {
+		datamart.entityStore().put(id, message);
+	}
+
+	private void update(Message message, String id, Message oldMessage) {
+		if (!oldMessage.type().equals(message.type()))
+			throw new MismatchMessageTypeException("Id " + id + " already exists with a different message type: old=" + oldMessage.type() + ", new=" + message.type());
+		update(oldMessage, message);
 	}
 
 	private void update(Message message, Message changes) {

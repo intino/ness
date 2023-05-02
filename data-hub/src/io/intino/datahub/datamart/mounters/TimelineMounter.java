@@ -21,7 +21,7 @@ public final class TimelineMounter extends MasterDatamartMounter {
 		if(message == null) return;
 		try {
 			String ss = message.get("ss").asString();
-			if(ss == null) throw new IllegalArgumentException("Message has no ss");
+			if(ss == null) return;
 
 			TimelineFile timelineFile = datamart.timelineStore().get(ss);
 			if(timelineFile == null) timelineFile = createTimelineFile(ss);
