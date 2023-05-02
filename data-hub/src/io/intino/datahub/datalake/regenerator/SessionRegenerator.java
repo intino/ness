@@ -57,7 +57,7 @@ public class SessionRegenerator {
 		RegeneratorReporter reporter = new RegeneratorReporter(reportFile);
 		for (File session : sessions()) {
 			if (notSuitable(session, mapper.filter())) continue;
-			MessageWriter writer = new MessageWriter(zim(temp(session))); // TODO: OR which compression? Zim?
+			MessageWriter writer = new MessageWriter(zim(temp(session)));
 			try (MessageEventReader reader = new MessageEventReader(session)) {
 				reader.forEachRemaining(e -> {
 					String before = e.toString();

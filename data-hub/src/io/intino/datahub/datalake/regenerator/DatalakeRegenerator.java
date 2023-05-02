@@ -44,7 +44,7 @@ public class DatalakeRegenerator {
 				.flatMap(Datalake.Store.Tank::sources)
 				.flatMap(Datalake.Store.Source::tubs)
 				.forEach(tub -> {
-					MessageWriter writer = new MessageWriter(zim(temp(tub))); // TODO: OR which compression? Zim?
+					MessageWriter writer = new MessageWriter(zim(temp(tub)));
 					tub.events().forEach(e -> {
 						String before = e.toMessage().toString();
 						MessageEvent after = e;

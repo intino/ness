@@ -40,9 +40,9 @@ public class MasterDatamartSerializer {
 	}
 
 	public void serialize(MasterDatamart datamart, OutputStream outputStream) throws IOException {
-		try(ZimWriter writer = new ZimWriter(outputStream)) {
+		try (ZimWriter writer = new ZimWriter(outputStream)) {
 			Iterator<Message> messages = datamart.entityStore().stream().iterator();
-			while(messages.hasNext()) {
+			while (messages.hasNext()) {
 				writer.write(messages.next());
 			}
 		}
@@ -53,7 +53,7 @@ public class MasterDatamartSerializer {
 	}
 
 	public MasterDatamart deserialize(InputStream inputStream, Datamart definition) throws IOException {
-		try(Stream<Message> messages = ZimStream.of(inputStream)) {
+		try (Stream<Message> messages = ZimStream.of(inputStream)) {
 			return new LocalMasterDatamart(box, definition).reflow(messages);
 		}
 	}
@@ -125,12 +125,12 @@ public class MasterDatamartSerializer {
 
 	private List<File> listSnapshotFilesIn(File dir) {
 		File[] files = dir.listFiles(f -> f.getName().endsWith(SNAPSHOT_EXTENSION) && timetagOf(f) != null);
-		if(files == null || files.length == 0) return emptyList();
+		if (files == null || files.length == 0) return emptyList();
 		return Arrays.asList(files);
 	}
 
 	private boolean snapshotIsEqualOrBefore(Timetag snapshotTimetag, Timetag targetTimetag) {
-		if(snapshotTimetag == null) return false; // TODO: check
+		if (snapshotTimetag == null) return false; // TODO: check
 		return snapshotTimetag.equals(targetTimetag) || snapshotTimetag.isBefore(targetTimetag);
 	}
 }
