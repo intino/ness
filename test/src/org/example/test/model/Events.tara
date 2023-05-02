@@ -1,18 +1,18 @@
 dsl Ness
 
 Namespace analysis
-	Message Analysis as Assertion
-		Attribute observable as Text
-		Component Anomaly
-			Attribute code as Text
-			Attribute level as Word("Error" "Warning")
-			Attribute period as Text
-			Attribute triggerValue as Text
+	Sensor Analysis
+		Magnitude("availability") availability > Attribute("OFF 0, ON 100") format; Attribute("avg") operator;Attribute("DOWN") tail;Attribute("Poisson") distribution;
+		Magnitude("health") health > Attribute("100") max;Attribute("0") min; Attribute("%.,0f") format; Attribute("avg") operator;Attribute("DOWN") tail;Attribute("Poisson") distribution;
+		Magnitude("risk") risk > Attribute("100") max;Attribute("0") min; Attribute("%.,0f") format; Attribute("avg") operator;Attribute("UP") tail;Attribute("Poisson") distribution;
 
-	Measurement AssetAnalysis
-		Value availability > Attribute("OFF 0, ON 100") format; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("DOWN") tail;Attribute("Poisson") distribution;
-		Value health > Attribute("100") max;Attribute("0") min; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("DOWN") tail;Attribute("Poisson") distribution;
-		Value risk > Attribute("100") max;Attribute("0") min; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Poisson") distribution;
+	Message DiagnosisAssertion as Assertion
+		Attribute observable as Text
+		Component(multiple = true) Anomaly
+			Attribute name as Text
+			Attribute type as Word("Finding" "Sign")
+			Attribute period as Text
+			Attribute trigger as Text
 
 Namespace actuation
 	Message Notification
@@ -31,34 +31,34 @@ Namespace monitoring
 		Attribute file as Text
 		Attribute value as Text
 
-	Measurement AssetStatus
-		Value usedRAM > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
-		Value usedHDD > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
-		Value usedCPU > Attribute("%") metric; Attribute("2") decimalCount; Attribute("avg") operator; Attribute("100") max;Attribute("UP") tail;Attribute("Normal") distribution;
-		Value kernelTemperature > Attribute("ºC") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
-		Value externalTemperature > Attribute("ºC") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
-		Value dataReceived > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;
-		Value dataSent > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;
-		Value openFiles > Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
-		Value threads > Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
-		Value systemProcesses > Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
-		Value applications > Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;
-		Value unknownApplications > Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;
+	Sensor AssetStatus
+		Magnitude("usage.RAM") usageRAM > Attribute("MB") unit; Attribute("%.,2f") format; Attribute("avg") operator; Attribute("UP") tail; Attribute("Normal") distribution;
+		Magnitude("usage.HDD") usageHDD > Attribute("MB") unit; Attribute("%.,2f") format; Attribute("avg") operator; Attribute("UP") tail; Attribute("Normal") distribution
+		Magnitude("usage.CPU") usageCPU > Attribute("%") unit; Attribute("%.,2f") format; Attribute("avg") operator; Attribute("UP") tail; Attribute("Normal") distribution;
+		Magnitude("usage.threads") usageThreads > Attribute("%.,0f") format; Attribute("avg") operator;Attribute("UP") tail; Attribute("Normal") distribution;
+		Magnitude("usage.files") usageFiles > Attribute("%.,0f") format; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
+		Magnitude("temperature.kernel") temperatureKernel > Attribute("ºC") unit; Attribute("%.,0f") format; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
+		Magnitude("temperature.external") temperatureExternal > Attribute("ºC") unit; Attribute("%.,0f") format; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
+		Magnitude("data.received") dataReceived > Attribute("MB") unit; Attribute("%.,0f") format; Attribute("avg") operator;Attribute("UP") tail;
+		Magnitude("data.sent") dataSent > Attribute("MB") unit; Attribute("%.,0f") format; Attribute("avg") operator;Attribute("UP") tail;
+		Magnitude("applications.system") applicationsSystem > Attribute("%.,0f") format; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
+		Magnitude("applications.known") applicationsKnown > Attribute("%.,0f") format; Attribute("avg") operator;Attribute("UP") tail;
+		Magnitude("applications.unknown") applicationsUnknown > Attribute("%.,0f") format; Attribute("avg") operator;Attribute("UP") tail;
 
-	Measurement ApplicationStatus
-		Value usedRAM > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;
-		Value usedCPU > Attribute("%") metric; Attribute("2") decimalCount; Attribute("avg") operator; Attribute("100") max;Attribute("UP") tail;
-		Value threads > Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
-		Value openFiles > Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
-		Value dataRead > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;
-		Value dataWritten > Attribute("MB") metric; Attribute("0") decimalCount; Attribute("avg") operator;Attribute("UP") tail;
+	Sensor ApplicationStatus
+		Magnitude("usage.RAM") usageRAM > Attribute("%") unit; Attribute("%.,2f") format; Attribute("avg") operator;Attribute("UP") tail;
+		Magnitude("usage.CPU") usageCPU > Attribute("%") unit; Attribute("%.,2f") format; Attribute("avg") operator;Attribute("100") max;Attribute("UP") tail;
+		Magnitude("usage.threads") usageThreads > Attribute("%.,0f") format; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
+		Magnitude("usage.files") usageFiles > Attribute("%.,0f") format; Attribute("avg") operator;Attribute("UP") tail;Attribute("Normal") distribution;
+		Magnitude("data.read") dataRead > Attribute("MB") unit; Attribute("%.,0f") format; Attribute("avg") operator;Attribute("UP") tail;
+		Magnitude("data.written") dataWritten > Attribute("MB") unit; Attribute("%.,0f") format; Attribute("avg") operator;Attribute("UP") tail;
 
-	Measurement RdbmsStatement
-		Value cpuTime > Attribute("seconds") metric;Attribute("0") decimalCount;Attribute("UP") tail;Attribute("Normal") distribution;
-		Value elapsedTime > Attribute("seconds") metric;Attribute("UP") tail;Attribute("0") decimalCount
-		Value executions > Attribute("0") decimalCount;Attribute("UP") tail;Attribute("Normal") distribution;
-		Value logicalReads > Attribute("0") decimalCount;Attribute("UP") tail;Attribute("Normal") distribution;
-		Value logicalWrites > Attribute("0") decimalCount;Attribute("UP") tail;Attribute("Normal") distribution;
+	Sensor RdbmsStatement
+		Magnitude("usage.executions") usageExecutions > Attribute("%.,0f") format;Attribute("UP") tail;Attribute("Normal") distribution;
+		Magnitude("usage.logical.reads") usageLogicalReads > Attribute("%.,0f") format;Attribute("UP") tail;Attribute("Normal") distribution;
+		Magnitude("usage.logical.writes") usageLogicalWrites > Attribute("%.,0f") format;Attribute("UP") tail;Attribute("Normal") distribution;
+		Magnitude("time.CPU") timeCPU > Attribute("seconds") unit;Attribute("%.,0f") format;Attribute("UP") tail;Attribute("Normal") distribution;
+		Magnitude("time.elapsed") timeElapsed > Attribute("seconds") unit;Attribute("UP") tail;Attribute("%.,0f") format
 
 Message Operation
 	Attribute user as Text

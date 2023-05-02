@@ -10,27 +10,22 @@ Broker(path = empty, port = 63000, secondaryPort = 1884)
 	User("connector", "connector")
 	User("master", "master")
 
-Terminal test-terminal
-	Subscribe(dl.analysisAssertion dl.state, dl.assetAnalysis dl.assetStatus dl.applicationStatus dl.rdbmsStatement)
-	Publish(dl.notification dl.assetAssertion dl.hardwareAssertion dl.peripheralDeviceAssertion dl.networkDeviceAssertion dl.machineAssertion dl.softwareAssertion dl.consulAssertion dl.serviceAssertion dl.rdbmsServiceAssertion dl.queryAssertion dl.applicationAssertion dl.javaApplicationAssertion dl.businessUnitAssertion)
-	Datamarts(master)
-
 Terminal trooper-terminal
-	Subscribe(dl.analysisAssertion dl.state, dl.assetAnalysis dl.assetStatus dl.applicationStatus dl.rdbmsStatement)
+	Subscribe(dl.diagnosisAssertion dl.state, dl.analysis dl.assetStatus dl.applicationStatus dl.rdbmsStatement)
 	Publish(dl.notification dl.assetAssertion dl.hardwareAssertion dl.peripheralDeviceAssertion dl.networkDeviceAssertion dl.machineAssertion dl.softwareAssertion dl.consulAssertion dl.serviceAssertion dl.rdbmsServiceAssertion dl.queryAssertion dl.applicationAssertion dl.javaApplicationAssertion dl.businessUnitAssertion)
 	Datamarts(master)
 
-//Terminal wizard-terminal
-//	Publish(dl.analysisAssertion)
-//	Subscribe(dl.state, dl.assetAnalysis dl.assetStatus dl.rdbmsStatement dl.applicationStatus)
-//	Datamarts(master)
-//
-//Terminal connector-terminal
-//	Publish(dl.userAssertion dl.channelAssertion)
-//	Subscribe(dl.notification)
-//	Datamarts(master)
-//
-//Terminal master-terminal
-//	Publish(dl.analysisAssertion dl.state dl.areaAssertion dl.userAssertion dl.channelAssertion dl.teamAssertion dl.assetAssertion dl.hardwareAssertion dl.peripheralDeviceAssertion dl.networkDeviceAssertion dl.machineAssertion dl.softwareAssertion dl.consulAssertion dl.serviceAssertion dl.rdbmsServiceAssertion dl.queryAssertion dl.applicationAssertion dl.javaApplicationAssertion dl.businessUnitAssertion, dl.assetStatus dl.applicationStatus dl.rdbmsStatement)
-//	Subscribe(dl.analysisAssertion  dl.state, empty)
-//	Datamarts(master)
+Terminal wizard-terminal
+	Publish(dl.diagnosisAssertion)
+	Subscribe(dl.state dl.machineAssertion dl.diagnosisAssertion, dl.analysis dl.assetStatus dl.rdbmsStatement dl.applicationStatus)
+	Datamarts(master)
+
+Terminal connector-terminal
+	Publish(dl.userAssertion dl.channelAssertion)
+	Subscribe(dl.notification)
+	Datamarts(master)
+
+Terminal master-terminal
+	Publish(dl.diagnosisAssertion dl.state dl.areaAssertion dl.userAssertion dl.channelAssertion dl.teamAssertion dl.assetAssertion dl.hardwareAssertion dl.peripheralDeviceAssertion dl.networkDeviceAssertion dl.machineAssertion dl.softwareAssertion dl.consulAssertion dl.serviceAssertion dl.rdbmsServiceAssertion dl.queryAssertion dl.applicationAssertion dl.javaApplicationAssertion dl.businessUnitAssertion, dl.assetStatus dl.applicationStatus dl.rdbmsStatement)
+	Subscribe(dl.diagnosisAssertion  dl.state, empty)
+	Datamarts(master)

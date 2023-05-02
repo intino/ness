@@ -6,11 +6,11 @@ Datalake(scale = Day, path = "{datalake}") dl
 	Seal > Cron(pattern = "0 0 4 1/1 * ? *", timeZone = empty)
 
 	Tank state as Message(monitoring.State)
-	Tank assetAnalysis as Measurement(analysis.AssetAnalysis, 1, Hour)
+	Tank analysis as Measurement(analysis.Analysis, 1, Hour)
 	Tank assetStatus as Measurement(monitoring.AssetStatus, 5, Minute)
 	Tank applicationStatus as Measurement(monitoring.ApplicationStatus, 5, Minute)
 	Tank rdbmsStatement as Measurement(monitoring.RdbmsStatement, 5, Minute)
-	Tank analysisAssertion as Message(analysis.Analysis)
+	Tank diagnosisAssertion as Message(Events.analysis.DiagnosisAssertion)
 	Tank notification as Message(actuation.Notification)
 
 	Tank userAssertion as Message(UserAssertion)

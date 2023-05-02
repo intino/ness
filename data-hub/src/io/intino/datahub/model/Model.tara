@@ -53,7 +53,7 @@ Concept:{0..1} Datalake
 Concept:Named Datamart
 	var boolean saveOnExit = false
 	Concept:{0..1} Snapshots
-		var word:SnapshotScale scale
+		var word:SnapshotScale scale = None
 		var word:DayOfWeek firstDayOfWeek = MONDAY
 	has Entity
 	has Struct

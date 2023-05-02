@@ -9,6 +9,7 @@
       <sourceFolder url="file://$MODULE_DIR$/temp/test/master-terminal/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/temp/custom/bpmTerminal/src" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/temp/custom/cuentaMaestraTerminal/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/temp/custom/ontology/src" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -36,15 +37,10 @@
     <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.4.4" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.1.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.1.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:7.0.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:event:5.0.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:iterator-stream:1.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:resource-cleaner:1.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:zim:5.1.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:message:4.1.0" level="project" />
     <orderEntry type="library" name="Intino: com.github.luben:zstd-jni:1.5.4-1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zit:1.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:session:2.0.2" level="project" />
     <orderEntry type="library" name="Intino: com.sparkjava:spark-core:2.9.3" level="project" />
     <orderEntry type="library" name="Intino: commons-codec:commons-codec:1.10" level="project" />
     <orderEntry type="library" name="Intino: org.bouncycastle:bcmail-jdk15:1.45" level="project" />
@@ -142,10 +138,19 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.5.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:1.7.36" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:terminal-jms:5.3.2" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:bpm-framework:3.1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:primitives:1.1.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino:data-hub:9.3.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:7.0.2" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:event:5.0.2" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:zim:5.1.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:message:4.1.2" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:session:2.0.3" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:datalake:7.0.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:event:5.0.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zim:5.1.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:message:4.1.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.3" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:bpm-framework:3.1.1" level="project" />
   </component>
 </module>

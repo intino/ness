@@ -1,8 +1,14 @@
 dsl Ness
 
+use Events
 use Datalake
 
-Datamart(scale = None) master
+Datamart master
+	Timeline(source = dl.assetStatus, entity = Machine) AssetStatus
+		Attribute(magnitude = monitoring.AssetStatus.usageRAM, from = Machine.memorySize) max
+	Timeline(source = dl.applicationStatus, entity = Application) ApplicationStatus
+	Timeline(source = dl.rdbmsStatement, entity = Query) RdbmsStatement
+
 	Entity(from = dl.userAssertion) User
 		Attribute email as Text
 		Attribute displayName as Text
@@ -17,14 +23,13 @@ Datamart(scale = None) master
 	Entity(from = dl.channelAssertion) Channel > Attribute displayName as Text
 	Entity(from = dl.areaAssertion) Area
 
-	Entity(from = dl.analysisAssertion) Analysis
+	Entity(from = dl.diagnosisAssertion) Analysis
 		Attribute observable as Text
 		Struct Anomaly
 			Attribute code as Text
 			Attribute level as Word("Error" "Warning")
 			Attribute period as Text
 			Attribute triggerValue as Text
-
 	Entity Observable as Abstract
 		Attribute host as Entity(Observable)
 		Attribute observer as Entity(Observable)
@@ -86,13 +91,6 @@ Datamart(scale = None) master
 		Attribute inputArguments as Text List
 		Attribute jvmParameter as Text List
 		Attribute jvmVersion as Text
-		Struct Operation
-        	Attribute name as Text
-        	Attribute returnType as Text
-        	Attribute description as Text
-        	Struct Parameter
-        		Attribute type as Text
-        		Attribute name as Text
 
 	Entity(from = dl.personAssertion) Person as ExtensionOf(Observable)
 	Entity(from = dl.businessUnitAssertion) BusinessUnit as ExtensionOf(Observable)

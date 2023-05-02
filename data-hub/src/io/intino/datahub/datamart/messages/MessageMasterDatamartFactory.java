@@ -11,6 +11,8 @@ import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.datamart.serialization.MasterDatamartSerializer;
 import io.intino.datahub.datamart.serialization.MasterDatamartSnapshots;
 import io.intino.datahub.model.Datamart;
+import io.intino.datahub.model.rules.DayOfWeek;
+import io.intino.datahub.model.rules.SnapshotScale;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,11 +74,13 @@ public class MessageMasterDatamartFactory {
 	private void reflow(MasterDatamart<Message> datamart, Timetag fromTimetag, Datamart definition) throws IOException {
 		MasterDatamartMessageMounter mounter = new MasterDatamartMessageMounter(datamart);
 		Iterator<MessageEvent> iterator = reflowEntityTanksFrom(fromTimetag, definition);
+		SnapshotScale scale = definition.snapshots() == null ? SnapshotScale.None : Optional.ofNullable(definition.snapshots().scale()).orElse(SnapshotScale.None);
+		DayOfWeek firstDayOfWeek = definition.snapshots() == null ? DayOfWeek.MONDAY : definition.snapshots().firstDayOfWeek();
 		int count = 0;
 		while (iterator.hasNext()) {
 			MessageEvent event = iterator.next();
 			Timetag timetag = Timetag.of(event.ts(), Scale.Day);
-			if (shouldCreateSnapshot(timetag, definition.snapshots().scale(), definition.snapshots().firstDayOfWeek())) saveSnapshot(datamartsRoot, timetag, datamart);
+			if (shouldCreateSnapshot(timetag, scale, firstDayOfWeek)) saveSnapshot(datamartsRoot, timetag, datamart);
 			mounter.mount(event.toMessage());
 			++count;
 		}

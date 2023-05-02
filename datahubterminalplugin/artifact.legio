@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "6.6.4-SNAPSHOT") data-hub-terminal-plugin
+Artifact("io.intino.ness", "6.7.0-SNAPSHOT") data-hub-terminal-plugin
 	Imports
 		Compile("io.intino.ness", "master", "2.0.4")
 		Compile("io.intino", "data-hub", "9.3.0-SNAPSHOT")
@@ -27,8 +27,8 @@ Artifact("io.intino.ness", "6.6.4-SNAPSHOT") data-hub-terminal-plugin
 
 		Test("io.intino.legio", "model", "3.2.0")
 		Test("io.intino.alexandria", "terminal-jms", "5.3.2")
-		Test("io.intino.alexandria", "ingestion", "5.0.2")
-		Test("io.intino.alexandria", "bpm-framework", "3.1.0")
+		Test("io.intino.alexandria", "ingestion", "5.0.3")
+		Test("io.intino.alexandria", "bpm-framework", "3.1.1")
 
 		Test("junit", "junit", "4.13.2")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, attachSources = true)
