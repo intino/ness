@@ -27,10 +27,6 @@ public interface MasterDatamart {
 
 	Stream<MasterDatamartMounter> createMountersFor(Datalake.Tank tank);
 
-	enum NodeType {
-		Entity, Timeline, Reel
-	}
-
 	interface Store<T> {
 		int size();
 		boolean contains(String id);
