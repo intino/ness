@@ -10,6 +10,7 @@ Artifact("io.intino", "9.3.0-SNAPSHOT") data-hub as Product
 		Compile("io.intino.alexandria", "primitives", "1.1.1")
 		Compile("io.intino.alexandria", "sealing", "7.0.1")
 		Compile("io.intino.alexandria", "ui-framework", "4.25.1")
+		Compile("io.intino.sumus", "chronos", "1.0.6")
 			Exclude("io.intino.alexandria", "driver-r")
 			Exclude("io.intino.alexandria", "driver-shiny")
 		Compile("io.intino.alexandria", "exceptions", "2.1.1")

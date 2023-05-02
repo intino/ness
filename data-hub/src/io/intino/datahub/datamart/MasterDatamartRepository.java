@@ -8,7 +8,7 @@ import java.util.Map;
 public class MasterDatamartRepository {
 
 	private final File datamartsRoot;
-	private final Map<String, MasterDatamart<?>> datamarts;
+	private final Map<String, MasterDatamart> datamarts;
 
 	public MasterDatamartRepository(File datamartsRoot) {
 		this.datamartsRoot = datamartsRoot;
@@ -27,12 +27,11 @@ public class MasterDatamartRepository {
 		return datamarts.containsKey(name);
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> MasterDatamart<T> get(String name) {
-		return (MasterDatamart<T>) datamarts.get(name);
+	public MasterDatamart get(String name) {
+		return datamarts.get(name);
 	}
 
-	public void put(String name, MasterDatamart<?> datamart) {
+	public void put(String name, MasterDatamart datamart) {
 		datamarts.put(name, datamart);
 	}
 
@@ -44,7 +43,7 @@ public class MasterDatamartRepository {
 		datamarts.clear();
 	}
 
-	public Collection<MasterDatamart<?>> datamarts() {
+	public Collection<MasterDatamart> datamarts() {
 		return datamarts.values();
 	}
 }

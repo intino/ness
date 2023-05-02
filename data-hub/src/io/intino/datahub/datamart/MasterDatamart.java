@@ -1,51 +1,58 @@
 package io.intino.datahub.datamart;
 
 import io.intino.alexandria.Timetag;
-import io.intino.alexandria.logger.Logger;
+import io.intino.alexandria.message.Message;
+import io.intino.datahub.box.DataHubBox;
+import io.intino.datahub.datamart.mounters.MasterDatamartMounter;
+import io.intino.datahub.model.Datalake;
 import io.intino.datahub.model.rules.SnapshotScale;
+import io.intino.sumus.chronos.ReelFile;
+import io.intino.sumus.chronos.TimelineFile;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public interface MasterDatamart<T> {
+public interface MasterDatamart {
+
+	DataHubBox box();
 
 	String name();
 
-	int size();
+	Store<Message> entityStore();
 
-	boolean contains(String id);
+	Store<TimelineFile> timelineStore();
 
-	T get(String id);
+	Store<ReelFile> reelStore();
 
-	void put(String id, T value);
+	Stream<MasterDatamartMounter> createMountersFor(Datalake.Tank tank);
 
-	void putAll(MasterDatamart<T> other);
+	enum NodeType {
+		Entity, Timeline, Reel
+	}
 
-	void remove(String id);
+	interface Store<T> {
+		int size();
+		boolean contains(String id);
+		T get(String id);
+		void put(String id, T value);
+		void remove(String id);
+		Stream<T> stream();
+		Map<String, T> toMap();
+		Collection<String> subscribedEvents();
+		boolean isSubscribedTo(Datalake.Tank tank);
+	}
 
-	void clear();
-
-	Stream<T> elements();
-
-	Map<String, T> toMap();
-
-	Class<T> elementType();
-
-	Collection<String> subscribedEvents();
-
-	record Snapshot<T>(Timetag timetag, MasterDatamart<T> datamart) {
+	record Snapshot(Timetag timetag, MasterDatamart datamart) {
 
 		public static boolean shouldCreateSnapshot(Timetag timetag, SnapshotScale scale, io.intino.datahub.model.rules.DayOfWeek firstDayOfWeek) {
-			switch (scale) {
-				case None: return false;
-				case Year: return isFirstDayOfYear(timetag);
-				case Month: return isFirstDayOfMonth(timetag);
-				case Week: return isFirstDayOfWeek(timetag, firstDayOfWeek);
-				case Day: return true;
-			}
-			Logger.error("Unknown snapshot scale for datamarts: " + scale);
-			return false;
+			return switch (scale) {
+				case None -> false;
+				case Day -> true;
+				case Year -> isFirstDayOfYear(timetag);
+				case Month -> isFirstDayOfMonth(timetag);
+				case Week -> isFirstDayOfWeek(timetag, firstDayOfWeek);
+			};
 		}
 
 		private static boolean isFirstDayOfYear(Timetag today) {
@@ -57,7 +64,7 @@ public interface MasterDatamart<T> {
 		}
 
 		private static boolean isFirstDayOfWeek(Timetag today, io.intino.datahub.model.rules.DayOfWeek firstDayOfWeek) {
-			return today.datetime().getDayOfWeek().name().equalsIgnoreCase(firstDayOfWeek.name()); // TODO: specify first day of week?
+			return today.datetime().getDayOfWeek().name().equalsIgnoreCase(firstDayOfWeek.name());
 		}
 	}
 }

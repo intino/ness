@@ -13,7 +13,7 @@ import io.intino.datahub.broker.jms.SSLConfiguration;
 import io.intino.datahub.datalake.BrokerSessions;
 import io.intino.datahub.datalake.seal.DatahubSessionSealer;
 import io.intino.datahub.datamart.MasterDatamartRepository;
-import io.intino.datahub.datamart.messages.MapMessageMasterDatamart;
+import io.intino.datahub.datamart.impl.LocalMasterDatamart;
 import io.intino.datahub.datamart.messages.MessageMasterDatamartFactory;
 import io.intino.datahub.datamart.serialization.MasterDatamartSerializer;
 import io.intino.datahub.model.Datamart;
@@ -25,8 +25,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class DataHubBox extends AbstractBox {
+
+	public static final String TIMELINE_EXTENSION = ".timeline";
+	public static final String REEL_EXTENSION = ".reel";
 
 	private FileDatalake datalake;
 	private BrokerService brokerService;
@@ -36,6 +42,7 @@ public class DataHubBox extends AbstractBox {
 	private NessGraph graph;
 	private Instant lastSeal;
 	private MasterDatamartRepository masterDatamarts;
+	private MasterDatamartSerializer datamartSerializer;
 
 	public DataHubBox(String[] args) {
 		super(args);
@@ -118,6 +125,36 @@ public class DataHubBox extends AbstractBox {
 		return masterDatamarts;
 	}
 
+	public File datamartsRoot() {
+		return new File(configuration.home(), "datamarts/datahub");
+	}
+
+	public File datamartDirectory(String name) {
+		return new File(datamartsRoot(), name);
+	}
+
+	public File datamartTimelinesDirectory(String name) {
+		return new File(datamartDirectory(name), "timelines");
+	}
+
+	public File datamartReelsDirectory(String name) {
+		return new File(datamartDirectory(name), "reels");
+	}
+
+	public List<File> datamartTimelineFiles(String datamartName) {
+		File[] files = datamartTimelinesDirectory(datamartName).listFiles(f -> f.isFile() && f.getName().endsWith(TIMELINE_EXTENSION));
+		return files == null ? Collections.emptyList() : Arrays.asList(files);
+	}
+
+	public List<File> datamartReelFiles(String datamartName) {
+		File[] files = datamartReelsDirectory(datamartName).listFiles(f -> f.isFile() && f.getName().endsWith(REEL_EXTENSION));
+		return files == null ? Collections.emptyList() : Arrays.asList(files);
+	}
+
+	public MasterDatamartSerializer datamartSerializer() {
+		return datamartSerializer;
+	}
+
 	public void beforeStart() {
 		stageDirectory().mkdirs();
 		loadBrokerService();
@@ -191,22 +228,26 @@ public class DataHubBox extends AbstractBox {
 	}
 
 	private void initMasterDatamarts() {
-		File datamartsRoot = new File(configuration.home(), "datahub/datamarts");
-		masterDatamarts = new MasterDatamartRepository(datamartsRoot);
-		MessageMasterDatamartFactory datamartFactory = new MessageMasterDatamartFactory(this, datamartsRoot, datalake);
+		this.datamartSerializer = new MasterDatamartSerializer(this);
+		this.masterDatamarts = new MasterDatamartRepository(datamartsRoot());
+		initDatamarts();
+		Runtime.getRuntime().addShutdownHook(new Thread(this::saveDatamartBackups, "DatamartBackupsThread"));
+	}
+
+	private void initDatamarts() {
+		MessageMasterDatamartFactory datamartFactory = new MessageMasterDatamartFactory(this, datalake);
 		long start = System.currentTimeMillis();
 		for (Datamart datamart : graph.datamartList()) {
 			initDatamart(datamartFactory, datamart);
 		}
 		Logger.info("MasterDatamarts initialized (" + masterDatamarts.size() + ") after " + (System.currentTimeMillis() - start) + " ms");
-		Runtime.getRuntime().addShutdownHook(new Thread(this::saveDatamartBackups, "DatamartBackupsThread"));
 	}
 
 	private void saveDatamartBackups() {
 		for (Datamart datamart : graph.datamartList()) {
 			try {
 				if (!datamart.saveOnExit()) continue;
-				MasterDatamartSerializer.serialize(masterDatamarts.get(datamart.name$()), MasterDatamartSerializer.backupFileOf(datamart, this));
+				datamartSerializer.saveBackup(masterDatamarts.get(datamart.name$()));
 			} catch (Throwable e) {
 				try {
 					Logger.error("Failed to save backup of " + datamart.name$() + ": " + e.getMessage(), e);
@@ -223,7 +264,7 @@ public class DataHubBox extends AbstractBox {
 			Logger.debug("MasterDatamart " + datamart.name$() + " initialized!");
 		} catch (IOException e) {
 			Logger.error("Could not initialize datamart " + datamart.name$() + ": " + e.getMessage(), e);
-			masterDatamarts.put(datamart.name$(), new MapMessageMasterDatamart(datamart));
+			masterDatamarts.put(datamart.name$(), new LocalMasterDatamart(this, datamart));
 		}
 	}
 }

@@ -8,9 +8,8 @@ import io.intino.alexandria.event.resource.ResourceEvent;
 import io.intino.alexandria.event.resource.ResourceEventWriter;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
-import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.datamart.MasterDatamartRepository;
-import io.intino.datahub.datamart.messages.MasterDatamartMessageMounter;
+import io.intino.datahub.datamart.mounters.MasterDatamartMounter;
 import io.intino.datahub.model.Datalake;
 
 import javax.jms.BytesMessage;
@@ -33,7 +32,7 @@ class JmsMessageSerializer {
 	private final File stage;
 	private final Datalake.Tank tank;
 	private final Scale scale;
-	private final MasterDatamartMessageMounter[] mounters;
+	private final MasterDatamartMounter[] mounters;
 
 	JmsMessageSerializer(File stage, Datalake.Tank tank, Scale scale, MasterDatamartRepository datamarts) {
 		this.stage = stage;
@@ -53,14 +52,10 @@ class JmsMessageSerializer {
 		return Timetag.of(LocalDateTime.ofInstant(ts, UTC), scale);
 	}
 
-	private static MasterDatamartMessageMounter[] createMountersFor(Datalake.Tank tank, MasterDatamartRepository datamartsRepo) {
-		if (datamartsRepo == null || !tank.isMessage() || tank.asMessage() == null || tank.asMessage().message() == null)
-			return new MasterDatamartMessageMounter[0];
+	private static MasterDatamartMounter[] createMountersFor(Datalake.Tank tank, MasterDatamartRepository datamartsRepo) {
 		return datamartsRepo.datamarts().stream()
-				.filter(d -> d.elementType().equals(Message.class))
-				.filter(d -> d.subscribedEvents().contains(tank.asMessage().message().name$()))
-				.map(d -> new MasterDatamartMessageMounter((MasterDatamart<Message>) d))
-				.toArray(MasterDatamartMessageMounter[]::new);
+				.flatMap(datamart -> datamart.createMountersFor(tank))
+				.toArray(MasterDatamartMounter[]::new);
 	}
 
 	private interface Handler extends Consumer<javax.jms.Message> {
@@ -80,13 +75,13 @@ class JmsMessageSerializer {
 			while (messages.hasNext()) {
 				Message message = messages.next();
 				save(message);
-				if (tank.isMessage()) mount(message);
+				mount(message);
 			}
 		}
 
 		private void mount(Message message) {
 			try {
-				for (MasterDatamartMessageMounter mounter : mounters) mounter.mount(message);
+				for (MasterDatamartMounter mounter : mounters) mounter.mount(message);
 			} catch (Exception e) {
 				Logger.error("Error while mounting message of tank " + tank.name$() + ": " + e.getMessage(), e);
 			}
