@@ -1,5 +1,6 @@
 package org.example.test;
 
+import io.intino.alexandria.event.measurement.MeasurementEvent;
 import io.intino.alexandria.jms.ConnectionConfig;
 import io.intino.alexandria.jms.JmsProducer;
 import io.intino.alexandria.jms.QueueProducer;
@@ -28,6 +29,7 @@ import java.util.function.Consumer;
 
 public class Client {
 
+	@SuppressWarnings("all")
 	public static void main(String[] args) throws Exception {
 		JmsConnector connector = connector("test", "test", "test");
 		TestTerminal terminal = new TestTerminal(connector);
@@ -38,14 +40,18 @@ public class Client {
 		MasterDatamart datamart = terminal.masterDatamart();
 
 		Machine machine = datamart.machine("1234");
-		Node<Timeline> machineTl = datamart.assetStatusTimeline(machine);
-		machineTl.setEventListener((t, event) -> {
-			System.out.println(t.id() + ": " + event);
+
+		Node<Timeline> timelineNode = datamart.assetStatusTimeline(machine); // datamart.assetStatusTimeline(machine.id());
+
+		timelineNode.setEventListener((thisTimelineNode, event) -> {
+			System.out.println(thisTimelineNode.id());
+			if(event instanceof MeasurementEvent m) {
+				// ...
+			}
 		});
 
-		terminal.publish(new AssetStatus("test").applicationsKnown(2));
-
-//		Timeline timeline = machineTl.get();
+		Timeline timeline = timelineNode.get(); // Might send a request to the DH
+		// ...
 	}
 
 	public static void main2(String[] args) throws InterruptedException {
