@@ -69,10 +69,10 @@ Concept:Named Timeline
 
 Concept:Named Reel
 	var Entity entity = empty
-	var Datalake.Tank.Message stateEvent = empty
-	Concept:{1..1} Mapping
-		var Attribute from
-		var word:{Append Set} type
+	Concept Signal
+		var Datalake.Tank.Message event = empty
+		var Attribute attribute
+		var word:{Append Set} operation
 
 Concept:Named Terminal
 	Concept:{0..1} Bpm

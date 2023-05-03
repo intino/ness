@@ -8,12 +8,14 @@ import io.intino.datahub.model.Attribute;
 import io.intino.datahub.model.Component;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Reel;
+import io.intino.datahub.model.Reel.Signal.Operation;
 import io.intino.sumus.chronos.Reel.Shot;
 import io.intino.sumus.chronos.Reel.State;
 import io.intino.sumus.chronos.ReelFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static io.intino.datahub.box.DataHubBox.REEL_EXTENSION;
@@ -40,15 +42,17 @@ public final class ReelMounter extends MasterDatamartMounter {
 
 	private void update(ReelFile reelFile, MessageEvent event) throws IOException {
 		Datamart datamart = this.datamart.definition();
-		Reel reel = datamart.reel(r -> r.stateEvent().name$().equals(event.type()));
-		if (reel == null) return;
-		Reel.Mapping mapping = reel.mapping();
-		String[] values = mappingAttribute(event.toMessage(), mapping.from());
-		if (mapping.type().equals(Reel.Mapping.Type.Set))
-			reelFile.set(event.ts(), values);
-		else if (values.length == 1) {
-			reelFile.append(new Shot(event.ts(), mapping.from().name$(), values[0].equals(State.On.name()) ? State.On : State.Off));
+		List<Reel> reels = datamart.reelList(r -> r.signal(s -> s.event().name$().equals(event.type())) != null);
+		for (Reel reel : reels) {
+			Reel.Signal signal = reel.signal(s -> s.event().name$().equals(event.type()));
+			String[] values = mappingAttribute(event.toMessage(), signal.attribute());
+			if (signal.operation().equals(Operation.Set))
+				reelFile.set(event.ts(), values);
+			else if (values.length == 1) {
+				reelFile.append(new Shot(event.ts(), signal.attribute().name$(), values[0].equals(State.On.name()) ? State.On : State.Off));
+			}
 		}
+
 	}
 
 	private String[] mappingAttribute(Message message, Attribute from) {
