@@ -24,15 +24,18 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	@Override
 	public void mount(Message message) {
 		if (message == null) return;
+		mount(measurementEvent(message));
+	}
+
+	public void mount(MeasurementEvent event) {
 		try {
-			MeasurementEvent event = measurementEvent(message);
 			if (event.ss() == null) return;
 			String ss = withOutParameters(event.ss());
 			TimelineFile timelineFile = datamart.timelineStore().get(ss);
 			if (timelineFile == null) timelineFile = createTimelineFile(ss);
 			update(timelineFile, event);
 		} catch (Exception e) {
-			Logger.error("Could not mount message " + message + ": " + e.getMessage(), e);
+			Logger.error("Could not mount event " + event.type() + ", ss = " + event.ss() + ": " + e.getMessage(), e);
 		}
 	}
 

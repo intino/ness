@@ -5,10 +5,14 @@ import io.intino.alexandria.jms.JmsProducer;
 import io.intino.alexandria.jms.QueueProducer;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.terminal.JmsConnector;
+import io.intino.sumus.chronos.Timeline;
 import io.intino.test.datahubtest.TestTerminal;
 import io.intino.test.datahubtest.datamarts.master.MasterDatamart;
+import io.intino.test.datahubtest.datamarts.master.MasterDatamart.Node;
 import io.intino.test.datahubtest.datamarts.master.MasterDatamartImpl;
+import io.intino.test.datahubtest.datamarts.master.entities.Machine;
 import io.intino.test.datahubtest.messages.inventory.JavaApplicationAssertion;
+import io.intino.test.datahubtest.messages.inventory.MachineAssertion;
 import org.apache.activemq.command.ActiveMQTextMessage;
 
 import javax.jms.JMSException;
@@ -24,26 +28,17 @@ import java.util.function.Consumer;
 public class Client {
 
 	public static void main(String[] args) throws Exception {
-		if(true || args[0].equals("test")) {
-			main2(args);
-			return;
-		}
+		JmsConnector connector = connector("test", "test", "test");
+		TestTerminal terminal = new TestTerminal(connector);
+		terminal.initDatamarts();
 
-		int count = 0;
-		String user = args[0];
-		String password = args[1];
-		String clientId = args[2];
+		terminal.publish(new MachineAssertion("test", "1234").architecture("ARM"));
 
-		JmsConnector connector = connector(user, password, clientId);
+		MasterDatamart datamart = terminal.masterDatamart();
 
-		ActiveMQTextMessage message = new ActiveMQTextMessage();
-		message.setText("datamart:master:");
-
-		while(true) {
-			Message m = connector.requestResponse("service.ness.datalake.messagestore", message, 5, TimeUnit.SECONDS);
-			System.out.println(m);
-			Thread.sleep(2000);
-		}
+		Machine machine = datamart.machine("1234");
+		Node<Timeline> machineTl = datamart.assetStatusTimeline(machine);
+		Timeline timeline = machineTl.get();
 	}
 
 	public static void main2(String[] args) throws InterruptedException {

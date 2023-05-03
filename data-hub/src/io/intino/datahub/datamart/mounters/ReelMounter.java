@@ -28,7 +28,7 @@ public final class ReelMounter extends MasterDatamartMounter {
 	public void mount(Message message) {
 		if (message == null) return;
 		MessageEvent event = new MessageEvent(message);
-		String ss = withOutParameters(event.ss());
+		String ss = withoutParameters(event.ss());
 		ReelFile reelFile = datamart.reelStore().get(ss);
 		try {
 			if (reelFile == null) reelFile = reelFile(ss);
@@ -72,7 +72,7 @@ public final class ReelMounter extends MasterDatamartMounter {
 		return ReelFile.open(new File(box().datamartTimelinesDirectory(datamart.name()), ss + REEL_EXTENSION));
 	}
 
-	private String withOutParameters(String ss) {
+	private String withoutParameters(String ss) {
 		return ss.contains("?") ? ss.substring(0, ss.indexOf("?")) : ss;
 	}
 }

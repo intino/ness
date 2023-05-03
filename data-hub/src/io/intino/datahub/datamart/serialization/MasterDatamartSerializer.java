@@ -26,7 +26,7 @@ import static java.util.Collections.reverseOrder;
 
 public class MasterDatamartSerializer {
 
-	public static final String SNAPSHOT_EXTENSION = ".datamart.snapshot";
+	public static final String SNAPSHOT_EXTENSION = ".dm-snapshot.zim";
 
 	private final DataHubBox box;
 
@@ -78,17 +78,17 @@ public class MasterDatamartSerializer {
 				.collect(Collectors.toList());
 	}
 
-	public Optional<MasterDatamart.Snapshot> loadMostRecentSnapshot(String datamartName, NessGraph graph) {
-		return loadMostRecentSnapshotTo(datamartName, Timetag.of(LocalDate.now(), Scale.Day), graph);
+	public Optional<MasterDatamart.Snapshot> loadMostRecentSnapshot(String datamartName) {
+		return loadMostRecentSnapshotTo(datamartName, Timetag.of(LocalDate.now(), Scale.Day));
 	}
 
-	public Optional<MasterDatamart.Snapshot> loadMostRecentSnapshotTo(String datamartName, Timetag timetag, NessGraph graph) {
-		return findSnapshotFileOf(snapshotDirOf(datamartName), timetag).map(f -> loadSnapshot(f, datamartName, graph));
+	public Optional<MasterDatamart.Snapshot> loadMostRecentSnapshotTo(String datamartName, Timetag timetag) {
+		return findSnapshotFileOf(snapshotDirOf(datamartName), timetag).map(f -> loadSnapshot(f, datamartName));
 	}
 
-	private MasterDatamart.Snapshot loadSnapshot(File file, String datamartName, NessGraph graph) {
+	private MasterDatamart.Snapshot loadSnapshot(File file, String datamartName) {
 		try {
-			MasterDatamart datamart = deserialize(new FileInputStream(file), definitionOf(datamartName, graph));
+			MasterDatamart datamart = deserialize(new FileInputStream(file), definitionOf(datamartName));
 			return new MasterDatamart.Snapshot(timetagOf(file), datamart);
 		} catch (IOException e) {
 			Logger.error("Failed to deserialize datamart snapshot " + file.getName() + ": " + e.getMessage(), e);
@@ -96,8 +96,8 @@ public class MasterDatamartSerializer {
 		}
 	}
 
-	private Datamart definitionOf(String name, NessGraph graph) {
-		return graph.datamartList().stream()
+	private Datamart definitionOf(String name) {
+		return box.graph().datamartList().stream()
 				.filter(d -> d.name$().equals(name))
 				.findFirst().orElseThrow(() -> new IllegalArgumentException("No datamart named " + name + " defined"));
 	}

@@ -38,11 +38,11 @@ public class Server {
 		if(home.exists()) FileUtils.deleteDirectory(home);
 		home.mkdirs();
 		return new String[] {
-				"home=./temp/test/",
-				"datalake_directory=./temp/test/datalake",
+				"home=./temp/",
+				"datalake_directory=./temp/datalake",
 				"broker_port=63000",
 				"broker_secondary_port=1882",
-				"backup_directory=./temp/test/backup",
+				"backup_directory=./temp/backup",
 				"ui_port=9020"
 		};
 	}

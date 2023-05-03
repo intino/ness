@@ -18,7 +18,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -80,7 +79,7 @@ public class DatamartsRequest {
 	}
 
 	private Stream<Message> downloadTimeline(MasterDatamart datamart, Map<String, String> args) {
-		return downloadChronos(args, box.datamartTimelinesDirectory(datamart.name()), REEL_EXTENSION);
+		return downloadChronos(args, box.datamartTimelinesDirectory(datamart.name()), TIMELINE_EXTENSION);
 	}
 
 	private Stream<Message> downloadChronos(Map<String, String> args, File dir, String extension) {
@@ -144,7 +143,7 @@ public class DatamartsRequest {
 
 	private Stream<Message> downloadEntities(MasterDatamart datamart, Map<String, String> args) {
 		Optional<String> timetag = Optional.ofNullable(args.get("timetag"));
-		return timetag.map(s -> box.datamartSerializer().loadMostRecentSnapshotTo(datamart.name(), asTimetag(s), box.graph())
+		return timetag.map(s -> box.datamartSerializer().loadMostRecentSnapshotTo(datamart.name(), asTimetag(s))
 				.map(MasterDatamart.Snapshot::datamart)
 				.map(this::downloadEntities)
 				.orElse(Stream.empty())).orElseGet(() -> datamart == null ? Stream.empty() : downloadEntities(datamart));
@@ -185,11 +184,11 @@ public class DatamartsRequest {
 	}
 
 	private Map<String, String> parseArgumentsFrom(String request) {
-		String[] command = request.split(":", -1);
+		String[] command = request.split(";", -1);
 		Map<String, String> args = new LinkedHashMap<>(command.length - 1);
-		for(int i = 1;i < command.length;i++) {
-			String[] entry = command[i].split("=", 2);
-			if(entry.length < 2) continue;
+		for(String argument : command) {
+			String[] entry = argument.split("=", 2);
+			if (entry.length < 2) continue;
 			args.put(entry[0].trim(), entry[1].trim());
 		}
 		return args;
