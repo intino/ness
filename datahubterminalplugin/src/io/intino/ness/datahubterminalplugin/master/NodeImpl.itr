@@ -41,7 +41,7 @@ def type(default) trigger(nodeImpl)
 		}
 
 		@Override
-		public void setEventListener(EventListener listener) {
+		public void setEventListener(EventListener<io.intino.sumus.chronos.$chronosObject> listener) {
 			this.listener = listener;
 		}
 
@@ -50,7 +50,7 @@ def type(default) trigger(nodeImpl)
 				try {
 					if(listener == null || !source.equals(event.type())) return;
 					cache = null;
-					listener.onEventReceived(id, event);
+					listener.onEventReceived(this, event);
 				} catch(Throwable e) {
 					Logger.error(e);
 				}

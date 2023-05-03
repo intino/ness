@@ -11,6 +11,7 @@ import io.intino.test.datahubtest.datamarts.master.MasterDatamart;
 import io.intino.test.datahubtest.datamarts.master.MasterDatamart.Node;
 import io.intino.test.datahubtest.datamarts.master.MasterDatamartImpl;
 import io.intino.test.datahubtest.datamarts.master.entities.Machine;
+import io.intino.test.datahubtest.measurements.monitoring.AssetStatus;
 import io.intino.test.datahubtest.messages.inventory.JavaApplicationAssertion;
 import io.intino.test.datahubtest.messages.inventory.MachineAssertion;
 import org.apache.activemq.command.ActiveMQTextMessage;
@@ -38,7 +39,13 @@ public class Client {
 
 		Machine machine = datamart.machine("1234");
 		Node<Timeline> machineTl = datamart.assetStatusTimeline(machine);
-		Timeline timeline = machineTl.get();
+		machineTl.setEventListener((t, event) -> {
+			System.out.println(t.id() + ": " + event);
+		});
+
+		terminal.publish(new AssetStatus("test").applicationsKnown(2));
+
+//		Timeline timeline = machineTl.get();
 	}
 
 	public static void main2(String[] args) throws InterruptedException {
