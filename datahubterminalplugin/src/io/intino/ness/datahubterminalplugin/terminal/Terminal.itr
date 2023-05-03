@@ -45,6 +45,7 @@ def type(terminal)
 			switch(event.type()) {
 				$publish+publishSwitchCase...[$NL]
 			}
+			Logger.warn(getClass().getSimpleName() + " is not configured to publish " + event.type() + " events.");
 		}
 
 		public void publish(Event first, Event ...others) {

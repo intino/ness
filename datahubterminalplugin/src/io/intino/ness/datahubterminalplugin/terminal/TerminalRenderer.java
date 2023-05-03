@@ -67,7 +67,7 @@ class TerminalRenderer {
 	private void addSubscribeForThedevents(FrameBuilder builder) {
 		Set<String> tanksAlreadySubscribedTo = terminal.subscribe().messageTanks().stream().map(Layer::name$).collect(Collectors.toSet());
 		for (Datamart datamart : terminal.datamarts().list()) {
-			List<Tank.Message> tanks = datamart.entityList().stream().map(Entity::from).filter(Objects::nonNull).distinct().collect(Collectors.toList());
+			List<Tank.Message> tanks = datamart.entityList().stream().map(Entity::from).filter(Objects::nonNull).distinct().toList();
 			for (Tank.Message tank : tanks) {
 				if (tanksAlreadySubscribedTo.add(tank.name$())) {
 					builder.add("subscribe", frameOf(tank));
@@ -99,12 +99,42 @@ class TerminalRenderer {
 	}
 
 	private FrameBuilder[] eventsOf(Datamart datamart) {
+		Map<String, FrameBuilder> events = new HashMap<>();
+		events.putAll(entityEventsOf(datamart));
+		events.putAll(timelineEventsOf(datamart));
+		events.putAll(reelEventsOf(datamart));
+		return events.values().toArray(FrameBuilder[]::new);
+	}
+
+	private Map<String, FrameBuilder> reelEventsOf(Datamart datamart) {
+		return datamart.reelList().stream()
+				.map(Reel::stateEvent)
+				.filter(Objects::nonNull)
+				.distinct()
+				.collect(Collectors.toMap(Layer::name$, tank -> frameOf(tank, datamart)));
+	}
+
+	private Map<String, FrameBuilder> timelineEventsOf(Datamart datamart) {
+		return datamart.timelineList().stream()
+				.map(Timeline::source)
+				.filter(Objects::nonNull)
+				.distinct()
+				.collect(Collectors.toMap(Layer::name$, tank -> frameOf(tank, datamart)));
+	}
+
+	private Map<String, FrameBuilder> entityEventsOf(Datamart datamart) {
 		return datamart.entityList().stream()
 				.map(Entity::from)
 				.filter(Objects::nonNull)
 				.distinct()
-				.map(tank -> frameOf(tank, datamart))
-				.toArray(FrameBuilder[]::new);
+				.collect(Collectors.toMap(Layer::name$, tank -> frameOf(tank, datamart)));
+	}
+
+	private FrameBuilder frameOf(Tank.Measurement tank, Datamart datamart) {
+		return new FrameBuilder("devent")
+				.add("message", tank.sensor().name$())
+				.add("namespaceQn", namespace(tank.sensor()).replace(".", ""))
+				.add("datamart", datamart.name$());
 	}
 
 	private FrameBuilder frameOf(Tank.Message tank, Datamart datamart) {

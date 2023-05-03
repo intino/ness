@@ -91,18 +91,28 @@ public class TerminalPublisher {
 	}
 
 	private boolean duplicatedEvents() {
-		final Set<String> duplicatedPublish = terminal.publish() != null ? findDuplicates(terminal.publish().messageTanks().stream().map(Tank.Message::qn).collect(Collectors.toList())) : Collections.emptySet();
-		final Set<String> duplicatedSubscribe = terminal.subscribe() != null ? findDuplicates(terminal.subscribe().messageTanks().stream().map(Tank.Message::qn).collect(Collectors.toList())) : Collections.emptySet();
+		// If an error raises from here, terminal in .tara probably mixes tanks from various types (messages, measurements or resources)
+
+		Set<String> duplicatedPublish = terminal.publish() != null
+				? findDuplicates(terminal.publish().messageTanks().stream().map(Tank.Message::qn).toList())
+				: Collections.emptySet();
+
+		Set<String> duplicatedSubscribe = terminal.subscribe() != null
+				? findDuplicates(terminal.subscribe().messageTanks().stream().map(Tank.Message::qn).toList())
+				: Collections.emptySet();
+
 		if (!duplicatedPublish.isEmpty()) {
 			logger.println("Duplicated publishing event in terminal " + terminal.name$() + ": " + String.join(", ", duplicatedPublish));
 			notifier.notifyError("Duplicated publishing event in terminal " + terminal.name$() + ": " + String.join(", ", duplicatedPublish));
 			return true;
 		}
+
 		if (!duplicatedSubscribe.isEmpty()) {
 			logger.println("Duplicated subscription event in terminal " + terminal.name$() + ": " + String.join(", ", duplicatedPublish));
 			notifier.notifyError("Duplicated subscription event in terminal " + terminal.name$() + ": " + String.join(", ", duplicatedPublish));
 			return true;
 		}
+
 		return false;
 	}
 

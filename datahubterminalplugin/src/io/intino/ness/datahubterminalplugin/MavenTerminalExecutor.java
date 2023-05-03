@@ -7,6 +7,7 @@ import org.apache.maven.shared.invoker.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,15 +53,16 @@ public class MavenTerminalExecutor {
 		goals.add("install");
 		if (!goal.isEmpty()) goals.add(goal);
 		InvocationRequest request = new DefaultInvocationRequest().setPomFile(pom).setGoals(goals);
-		Invoker invoker = new DefaultInvoker().setMavenHome(systemProperties.mavenHome);
-		log(invoker);
+		request.setInputStream(InputStream.nullInputStream());
+		log(request);
 		config(request, systemProperties.mavenHome);
+		Invoker invoker = new DefaultInvoker().setMavenHome(systemProperties.mavenHome);
 		return invoker.execute(request);
 	}
 
-	private void log(Invoker invoker) {
-		invoker.setErrorHandler(logger::println);
-//		invoker.setOutputHandler(logger::println);
+	private void log(InvocationRequest request) {
+		request.setErrorHandler(logger::println);
+//		request.setOutputHandler(logger::println);
 	}
 
 	private void config(InvocationRequest request, File mavenHome) {

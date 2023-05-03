@@ -12,6 +12,7 @@ import org.apache.maven.shared.invoker.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,6 +98,7 @@ public class OntologyPublisher {
 		goals.add("install");
 		if (!goal.isEmpty()) goals.add(goal);
 		InvocationRequest request = new DefaultInvocationRequest().setPomFile(pom).setGoals(goals);
+		request.setInputStream(InputStream.nullInputStream());
 		Invoker invoker = new DefaultInvoker().setMavenHome(systemProperties.mavenHome);
 		log(request);
 		config(request, systemProperties.mavenHome);
