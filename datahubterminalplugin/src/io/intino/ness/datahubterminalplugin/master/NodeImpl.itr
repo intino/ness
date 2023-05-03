@@ -1,0 +1,104 @@
+def type(default) trigger(nodeImpl)
+
+	private class $chronosObject~Node implements Node<io.intino.sumus.chronos.$chronosObject> {
+
+		private final String id;
+		private final String source;
+		private volatile File file;
+		private volatile java.lang.ref.SoftReference<io.intino.sumus.chronos.$chronosObject> cache;
+		private volatile EventListener listener;
+
+		private $chronosObject~Node(String id, String source) {
+			this.id = requireNonNull(id);
+			this.source = requireNonNull(source);
+		}
+
+		@Override
+		public String id() {
+			return id;
+		}
+
+		@Override
+		public io.intino.sumus.chronos.$chronosObject get() {
+			synchronized(this) {
+				try {
+					if(cache != null) {
+						io.intino.sumus.chronos.$chronosObject $chronosObject+firstLowerCase = cache.get();
+						if($chronosObject+firstLowerCase != null) return $chronosObject+firstLowerCase;
+					}
+
+					io.intino.sumus.chronos.$chronosObject $chronosObject+firstLowerCase = (file != null && file.exists())
+						? loadFile()
+						: downloadFromDatahub();
+
+					cache = new java.lang.ref.SoftReference<>($chronosObject+firstLowerCase);
+					return $chronosObject+firstLowerCase;
+
+				} catch(Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+
+		@Override
+		public void setEventListener(EventListener listener) {
+			this.listener = listener;
+		}
+
+		private void notifyEvent(io.intino.alexandria.event.Event event) {
+			synchronized(this) {
+				try {
+					if(listener == null || !source.equals(event.type())) return;
+					cache = null;
+					listener.onEventReceived(id, event);
+				} catch(Throwable e) {
+					Logger.error(e);
+				}
+			}
+		}
+
+		private io.intino.sumus.chronos.$chronosObject loadFile() throws Exception {
+			return io.intino.sumus.chronos.$chronosObject~File.open(file).$chronosObject+firstLowerCase();
+		}
+
+		private io.intino.sumus.chronos.$chronosObject downloadFromDatahub() throws Exception {
+			javax.jms.Message response = requestResponseFromDatahub("get-$chronosObject+firstLowerCase=" + id(), request("path"));
+
+			if(response instanceof javax.jms.TextMessage textResponse) {
+				file = getFile(textResponse);
+				if(file != null && file.exists()) return loadFile();
+				file = null;
+				response = requestResponseFromDatahub("get-$chronosObject+firstLowerCase=" + id(), request("download"));
+			}
+
+			return readFromBytes((javax.jms.BytesMessage) response);
+		}
+
+		private io.intino.sumus.chronos.$chronosObject readFromBytes(javax.jms.BytesMessage m) throws Exception {
+			int size = m.getIntProperty("size");
+			byte$[$] bytes = new byte$[size$];
+			m.readBytes(bytes, size);
+
+			file = File.createTempFile(id(), ".$chronosObject+firstLowerCase");
+			java.nio.file.Files.write(file.toPath(), bytes, java.nio.file.StandardOpenOption.CREATE);
+			file.deleteOnExit();
+
+			return loadFile();
+		}
+
+		private File getFile(javax.jms.TextMessage m) {
+			try {
+				return new File(m.getText());
+			} catch(Exception e) {
+				return null;
+			}
+		}
+
+		private javax.jms.Message request(String mode) throws Exception {
+			ActiveMQTextMessage message = new ActiveMQTextMessage();
+			String command = "datamart=" + name() + ";operation=get-$chronosObject+firstLowerCase;id=" + id() + ";mode=" + mode;
+			message.setText(command);
+			return message;
+		}
+	}
+end

@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -66,32 +67,33 @@ public class DatamartsRequest {
 		return switch(args.get("operation")) {
 			case "snapshots" -> listAvailableSnapshotsOf(datamart);
 			case "entities" -> downloadEntities(datamart, args);
-			case "timelines" -> listTimelineFiles(datamart, args);
+			case "list-timelines" -> listTimelineFiles(datamart, args);
 			case "get-timeline" -> downloadTimeline(datamart, args);
-			case "reels" -> listReelFiles(datamart, args);
+			case "list-reels" -> listReelFiles(datamart, args);
 			case "get-reel" -> downloadReel(datamart, args);
 			default -> Stream.empty();
 		};
 	}
 
 	private Stream<Message> downloadReel(MasterDatamart datamart, Map<String, String> args) {
-		String reelId = args.get("id");
-		if(reelId == null) {
-			Logger.error("Reel download requested but timeline-id argument not found");
-			return Stream.empty();
-		}
-		File reelFile = new File(box.datamartReelsDirectory(datamart.name()), reelId + REEL_EXTENSION);
-		return reelFile.exists() ? download(reelFile) : Stream.empty();
+		return downloadChronos(args, box.datamartReelsDirectory(datamart.name()), REEL_EXTENSION);
 	}
 
 	private Stream<Message> downloadTimeline(MasterDatamart datamart, Map<String, String> args) {
-		String timelineId = args.get("id");
-		if(timelineId == null) {
-			Logger.error("Timeline download requested but timeline-id argument not found");
+		return downloadChronos(args, box.datamartTimelinesDirectory(datamart.name()), REEL_EXTENSION);
+	}
+
+	private Stream<Message> downloadChronos(Map<String, String> args, File dir, String extension) {
+		String id = args.get("id");
+		if(id == null) {
+			Logger.error("Chronos object download requested but id argument not found");
 			return Stream.empty();
 		}
-		File timelineFile = new File(box.datamartTimelinesDirectory(datamart.name()), timelineId + TIMELINE_EXTENSION);
-		return timelineFile.exists() ? download(timelineFile) : Stream.empty();
+		File file = new File(dir, id + extension);
+		if(!file.exists()) return Stream.empty();
+
+		String mode = args.getOrDefault("mode", "download");
+		return mode.equals("path") ? path(file) : download(file);
 	}
 
 	private Stream<Message> download(File file) {
@@ -105,6 +107,17 @@ public class DatamartsRequest {
 			return Stream.of(message);
 		} catch (Exception e) {
 			Logger.error("Could not send file " + file.getAbsolutePath() + ": " + e.getMessage(), e);
+			return Stream.empty();
+		}
+	}
+
+	private Stream<Message> path(File file) {
+		try {
+			ActiveMQTextMessage message = new ActiveMQTextMessage();
+			message.setText(file.getAbsolutePath());
+			return Stream.of(message);
+		} catch (Exception e) {
+			Logger.error("Could not send file path " + file.getAbsolutePath() + ": " + e.getMessage(), e);
 			return Stream.empty();
 		}
 	}

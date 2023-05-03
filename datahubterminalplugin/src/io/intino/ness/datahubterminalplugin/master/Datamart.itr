@@ -20,6 +20,10 @@ def type(datamart & interface)
 
 		$entity+getterSignature...[$NL$NL]
 
+		$timeline+getterSignature...[$NL$NL]
+
+		$reel+getterSignature...[$NL$NL]
+
 		class Entities {
 
 			private final $name+FirstUpperCase~Datamart datamart;
@@ -82,6 +86,19 @@ def type(datamart & interface)
         	}
         }
 
+        interface Node<T> {
+
+        	String id();
+
+        	T get();
+
+        	void setEventListener(EventListener listener);
+
+        	interface EventListener {
+        		void onEventReceived(String id, io.intino.alexandria.event.Event event);
+        	}
+        }
+
 		final class DatamartDefinitionInternal implements DatamartDefinition {
 			private DatamartDefinition definition;
 			private DatamartDefinitionInternal() {}
@@ -113,11 +130,8 @@ def type(datamart & message & impl)
 
 	import org.apache.activemq.command.ActiveMQTextMessage;
 
-	import java.util.List;
-	import java.util.ArrayList;
-	import java.util.Map;
-	import java.util.HashMap;
-	import java.util.Optional;
+	import java.io.File;
+	import java.util.*;
 	import java.util.concurrent.atomic.AtomicBoolean;
 	import java.util.stream.Stream;
 	import java.util.stream.Collectors;
@@ -134,12 +148,17 @@ def type(datamart & message & impl)
 		private static final String DATAHUB_MESSAGE_TOPIC = "service.ness.datamarts";
 		private static final $name+FirstUpperCase~DatamartImpl.$name+FirstUpperCase~DatamartDefinition definition = new $name+FirstUpperCase~DatamartImpl.$name+FirstUpperCase~DatamartDefinition();
 
+		[private static final Set<String> TIMELINE_EVENTS = Set.of($timelineEvents);]
+		[private static final Set<String> REEL_EVENTS = Set.of($reelEvents);]
+
 		private final Connector connector;
 		private final $terminal~.DatamartsRetryConfig retryConfig;
 		private final AtomicBoolean initialized = new AtomicBoolean(false);
 		private final List<EntityListener> entityListeners = new ArrayList<>();
-		private final $name+FirstUpperCase~Datamart.Entities entities;
 		private final Map<String, List<MasterMounter>> mounters = new HashMap<>();
+		private final $name+FirstUpperCase~Datamart.Entities entities;
+		[$hasTimelines~private final Map<String, TimelineNode> timelines = new HashMap<>();]
+		[$hasReels~private final Map<String, ReelNode> reels = new HashMap<>();]
 
     	public $name+FirstUpperCase~DatamartImpl(Connector connector, $terminal~.DatamartsRetryConfig retryConfig) {
     		this.connector = requireNonNull(connector);
@@ -223,31 +242,23 @@ def type(datamart & message & impl)
         }
 
     	$entity+getter...[$NL$NL]
+    	[$timeline+getter...[$NL$NL]]
+    	[$reel+getter...[$NL$NL]]
 
 		private void downloadDatamartFromDatahub() {
 			if (connector instanceof io.intino.alexandria.terminal.StubConnector) return;
 			Logger.debug("Downloading datamart from datahub...");
     		long start = java.lang.System.currentTimeMillis();
-    		downloadEntities();
-    		downloadTimelines();
-    		downloadReels();
+    		int$[$] eventCount = new int$[1$];
+    		loadEntitiesFromEvents(downloadEntities(eventCount), eventCount);
 			long time = java.lang.System.currentTimeMillis() - start;
 			Logger.debug("Datamart downloaded from datahub after " + time + " ms");
 		}
 
-		private void downloadReels() {
-			// TODO
-		}
-
-		private void downloadTimelines() {
-			// TODO
-		}
-
-		private void downloadEntities() {
+		private Stream<Event> downloadEntities(int$[$] eventCount) {
 			try {
-				int$[$] numEvents = new int$[1$];
 				javax.jms.Message message = requestResponseFromDatahub("downloadEvents", downloadEntitiesRequest());
-				return handleDownloadResponse(message, numEvents);
+				return handleDownloadResponse(message, eventCount);
 			} catch (NullPointerException e) {
 				throw new NullPointerException("Could not download datamart: no response from datahub.");
 			} catch (Exception e) {
@@ -257,7 +268,7 @@ def type(datamart & message & impl)
 
 		private javax.jms.Message downloadEntitiesRequest() throws Exception {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
-			message.setText("datamart=" + name() + (snapshotTimetag().isEmpty() ? "" : ";timetag=" + snapshotTimetag()));
+			message.setText("datamart=" + name() + ";operation=entities" + (snapshotTimetag().isEmpty() ? "" : ";timetag=" + snapshotTimetag()));
 			return message;
 		}
 
@@ -265,17 +276,17 @@ def type(datamart & message & impl)
 			return "";
 		}
 
-		private Stream<Event> handleDownloadResponse(javax.jms.Message message, int$[$] numEvents) throws Exception {
+		private Stream<Event> handleDownloadResponse(javax.jms.Message message, int$[$] eventCount) throws Exception {
 			javax.jms.BytesMessage m = (javax.jms.BytesMessage) message;
-			numEvents$[0$] = m.getIntProperty("size");
-			int size = m.getIntProperty("content-size");
+			eventCount$[0$] = m.getIntProperty("size");
+			int size = m.getIntProperty("size");
 			byte$[$] bytes = new byte$[size$];
 			m.readBytes(bytes, size);
 			return io.intino.alexandria.zim.ZimStream.of(new java.io.ByteArrayInputStream(bytes)).map(io.intino.alexandria.event.message.MessageEvent::new);
 		}
 
-		private void loadEntitiesFromEvents(Stream<Event> events, int$[$] numEvents) {
-			if(availableThreads() >= 4 && numEvents$[0$] > 100)
+		private void loadEntitiesFromEvents(Stream<Event> events, int$[$] eventCount) {
+			if(availableThreads() >= 4 && eventCount$[0$] > 1000)
 				events.parallel().forEach(this::mount);
 			else
 				events.forEach(this::mount);
@@ -283,6 +294,22 @@ def type(datamart & message & impl)
 
 		public void mount(Event event) {
 			if(event == null) return;
+			mountEntities(event);
+			[$hasTimelines~mountTimelines(event);]
+			[$hasReels~mountReels(event);]
+		}
+
+		[$hasReels~private void mountReels(Event event) {
+			if(reels.isEmpty() || !REEL_EVENTS.contains(event.type())) return;
+			reels.values().forEach(reel -> reel.notifyEvent(event));
+		}]
+
+		[$hasTimelines~private void mountTimelines(Event event) {
+			if(timelines.isEmpty() || !TIMELINE_EVENTS.contains(event.type())) return;
+			timelines.values().forEach(timeline -> timeline.notifyEvent(event));
+		}]
+
+		private void mountEntities(Event event) {
 			try {
 				java.util.Optional.ofNullable(this.mounters.get(event.type())).ifPresent(mounters -> mounters.forEach(mounter -> mounter.mount(event)));
 			} catch(Exception e) {
@@ -309,8 +336,11 @@ def type(datamart & message & impl)
         	throw new RuntimeException("Datahub did not respond to the request '" + requestName + "' after " + retryConfig.maxAttempts);
         }
 
-		// WARNING: extremely compacted and ugly code ahead... continue at your own discretion.
+		[$timelineNode+nodeImpl]
 
+		[$reelNode+nodeImpl]
+
+		// WARNING: extremely compacted and ugly code ahead... continue at your own discretion.
 		public static final class $name+FirstUpperCase~DatamartDefinition implements DatamartDefinition {
 
 			@Override
@@ -354,8 +384,6 @@ def type(datamart & message & impl)
 			}
 
 			[$entity+declareDefinition...[$NL]]
-
-			// Seriously why the heck are you reading this?? Are you a masochist or what
 
             [$struct+declareDefinition...[$NL]]
 		}
@@ -509,6 +537,20 @@ def type(subclass) trigger(getAllStream)
 	$name+Plural+firstLowerCase()
 end
 
+def type(timeline) trigger(getter)
+	@Override
+	public Node<io.intino.sumus.chronos.Timeline> $name+FirstLowerCase~Timeline(String id) {
+		return timelines.computeIfAbsent(id, theId -> new TimelineNode(id, "$source"));
+	}
+end
+
+def type(reel) trigger(getter)
+	@Override
+	public Node<io.intino.sumus.chronos.Reel> $name+FirstLowerCase~Reel(String id) {
+		return reels.computeIfAbsent(id, theId -> new ReelNode(id, "$source"));
+	}
+end
+
 def type(abstract) trigger(getter)
 	@Override
 	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
@@ -550,8 +592,18 @@ def trigger(getter)
 	}
 end
 
-def trigger(getterSignature)
+def type(entity) trigger(getterSignature)
 	$package.entities.$name+FirstUpperCase $name+firstLowerCase(String id);
 	Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase();
 	default List<$package.entities.$name+FirstUpperCase> $name+firstLowerCase~List() {return $name+Plural+firstLowerCase().collect(Collectors.toList());}
+end
+
+def type(timeline) trigger(getterSignature)
+	default Node<io.intino.sumus.chronos.Timeline> $name+firstLowerCase~Timeline($package.entities.$entity+firstUpperCase entity) {return $name+firstLowerCase~Timeline(entity.id());}
+	Node<io.intino.sumus.chronos.Timeline> $name+firstLowerCase~Timeline(String id);
+end
+
+def type(timeline) trigger(getterSignature)
+	default Node<io.intino.sumus.chronos.Reel> $name+firstLowerCase~Reel($package.entities.$entity+firstUpperCase entity) {return $name+firstLowerCase~Reel(entity.id());}
+	Node<io.intino.sumus.chronos.Reel> $name+firstLowerCase~Reel(String id);
 end

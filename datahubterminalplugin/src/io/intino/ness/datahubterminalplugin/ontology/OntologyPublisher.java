@@ -24,7 +24,6 @@ public class OntologyPublisher {
 	private final File root;
 	private final NessGraph graph;
 	private final Configuration conf;
-	private final List<File> resDirectories;
 	private final List<File> sourceDirectories;
 	private final Map<String, String> versions;
 	private final PluginLauncher.SystemProperties systemProperties;
@@ -38,7 +37,6 @@ public class OntologyPublisher {
 		this.root = root;
 		this.graph = graph;
 		this.conf = configuration;
-		this.resDirectories = moduleStructure.resDirectories;
 		this.sourceDirectories = moduleStructure.sourceDirectories;
 		this.versions = versions;
 		this.systemProperties = systemProperties;
@@ -56,8 +54,7 @@ public class OntologyPublisher {
 				notifier.notifyError("The Version " + conf.artifact().version() + " is Already Distributed.");
 				return false;
 			}
-			if (!new OntologyRenderer(graph, conf, sourceDirectory(), basePackage, logger, notifier).render())
-				return false;
+			if (!new OntologyRenderer(graph, conf, sourceDirectory(), basePackage, logger, notifier).render()) return false;
 			logger.println("Publishing ontology...");
 			mvn(invokedPhase == PluginLauncher.Phase.INSTALL ? "install" : "deploy");
 			logger.println("Ontology published!");
@@ -83,12 +80,15 @@ public class OntologyPublisher {
 	private void mvn(String goal) throws IOException, MavenInvocationException {
 		final File pom = createPom(root, basePackage, conf.artifact().version());
 		final InvocationResult result = invoke(pom, goal);
-		if (result != null && result.getExitCode() != 0) {
-			logger.println(errorStream.toString());
-			if (result.getExecutionException() != null)
-				throw new IOException("Failed to publish accessor.", result.getExecutionException());
-			else throw new IOException("Failed to publish accessor. Exit code: " + result.getExitCode());
-		} else if (result == null) throw new IOException("Failed to publish accessor. Maven HOME not found");
+		if (result != null && result.getExitCode() != 0) fail(result);
+		else if (result == null) throw new IOException("Failed to publish accessor. Maven HOME not found");
+	}
+
+	private void fail(InvocationResult result) throws IOException {
+		logger.println(errorStream.toString());
+		if (result.getExecutionException() != null)
+			throw new IOException("Failed to publish accessor.", result.getExecutionException());
+		else throw new IOException("Failed to publish accessor. Exit code: " + result.getExitCode());
 	}
 
 	private InvocationResult invoke(File pom, String goal) throws MavenInvocationException {
@@ -98,15 +98,15 @@ public class OntologyPublisher {
 		if (!goal.isEmpty()) goals.add(goal);
 		InvocationRequest request = new DefaultInvocationRequest().setPomFile(pom).setGoals(goals);
 		Invoker invoker = new DefaultInvoker().setMavenHome(systemProperties.mavenHome);
-		log(invoker);
+		log(request);
 		config(request, systemProperties.mavenHome);
 		return invoker.execute(request);
 	}
 
-	private void log(Invoker invoker) {
-		invoker.setErrorHandler(logger::println);
+	private void log(InvocationRequest request) { // TODO: OR check compatibility (invoker -> request, invoker.setErrorHandler is deprecated)
+		request.setErrorHandler(logger::println);
 //		invoker.setOutputHandler(logger::println);
-		invoker.setOutputHandler(s -> errorStream.append(s).append("\n"));
+		request.setOutputHandler(s -> errorStream.append(s).append("\n"));
 	}
 
 	private void config(InvocationRequest request, File mavenHome) {
@@ -122,15 +122,32 @@ public class OntologyPublisher {
 			if (isSnapshotVersion()) buildDistroFrame(builder, conf.artifact().distribution().snapshot());
 			else buildDistroFrame(builder, conf.artifact().distribution().release());
 		}
+		addSourceDirectories(builder);
+		addDependencies(builder);
+		final File pomFile = new File(root, "pom.xml");
+		Commons.write(pomFile.toPath(), new PomTemplate().render(builder.toFrame()));
+		return pomFile;
+	}
+
+	private void addDependencies(FrameBuilder builder) {
+		builder.add("event", new FrameBuilder().add("version", versions.get("event")));
+		if(dependsOnMaster()) builder.add("master", new FrameBuilder().add("version", versions.get("master")));
+		if(dependsOnChronos()) builder.add("chronos", new FrameBuilder().add("version", versions.get("chronos")));
+	}
+
+	private void addSourceDirectories(FrameBuilder builder) {
 		builder.add("sourceDirectory", sourceDirectory().getAbsolutePath());
 		for (File sourceDirectory : sourceDirectories)
 			if (sourceDirectory.getName().equals("shared"))
 				builder.add("sourceDirectory", sourceDirectory.getAbsolutePath());
-		builder.add("event", new FrameBuilder().add("version", versions.get("event")));
-		builder.add("master", new FrameBuilder().add("version", versions.get("master")));
-		final File pomFile = new File(root, "pom.xml");
-		Commons.write(pomFile.toPath(), new PomTemplate().render(builder.toFrame()));
-		return pomFile;
+	}
+
+	private boolean dependsOnMaster() {
+		return !graph.datamartList().isEmpty();
+	}
+
+	private boolean dependsOnChronos() {
+		return graph.datamartList().stream().anyMatch(d -> !d.timelineList().isEmpty() || !d.reelList().isEmpty());
 	}
 
 	private boolean isSnapshotVersion() {

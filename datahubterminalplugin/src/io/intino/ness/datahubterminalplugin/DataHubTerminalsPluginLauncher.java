@@ -17,6 +17,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DataHubTerminalsPluginLauncher extends PluginLauncher {
+	private static final String MINIMUM_CHRONOS_VERSION = "1.0.6";
+	private static final String MAX_CHRONOS_VERSION = "2.0.0";
 	private static final String MINIMUM_BPM_VERSION = "3.1.1";
 	private static final String MAX_BPM_VERSION = "4.0.0";
 	private static final String MINIMUM_TERMINAL_JMS_VERSION = "5.0.0";
@@ -58,7 +60,9 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 				"bpm", bpmVersion(),
 				"master", masterVersion(),
 				"event", eventVersion(),
-				"datalake", datalakeVersion());
+				"datalake", datalakeVersion(),
+				"chronos", chronosVersion()
+		);
 	}
 
 	private boolean publishOntology(NessGraph graph, Map<String, String> versions, File tempDir) {
@@ -149,6 +153,10 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 
 	private String datalakeVersion() {
 		return suitableVersion(ArtifactoryConnector.datalakeVersions(), MINIMUM_DATALAKE_VERSION, MAX_DATALAKE_VERSION);
+	}
+
+	private String chronosVersion() {
+		return suitableVersion(ArtifactoryConnector.chronosVersions(), MINIMUM_CHRONOS_VERSION, MAX_CHRONOS_VERSION);
 	}
 
 	private String bpmVersion() {

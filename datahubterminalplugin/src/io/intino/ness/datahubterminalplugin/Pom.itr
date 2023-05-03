@@ -74,8 +74,17 @@ def type(pom)
 		[$terminal]
 		[$bpm]
 		[$master]
+		[$chronos]
 	</dependencies>
 </project>
+end
+
+def trigger(chronos)
+	<dependency>
+      	<groupId>io.intino.sumus</groupId>
+      	<artifactId>chronos</artifactId>
+      	<version>$version</version>
+    </dependency>
 end
 
 def trigger(master)

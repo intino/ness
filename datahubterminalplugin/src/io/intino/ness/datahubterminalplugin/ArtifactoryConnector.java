@@ -28,6 +28,15 @@ public class ArtifactoryConnector {
 		}
 	}
 
+	public static List<String> chronosVersions() { // TODO: OR check
+		try {
+			URL url = new URL(INTINO_RELEASES + "/io/intino/sumus/chronos/maven-metadata.xml");
+			return extractVersions(read(connect(url)).toString());
+		} catch (Throwable e) {
+			return Collections.emptyList();
+		}
+	}
+
 	public static List<String> terminalVersions() {
 		try {
 			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/terminal-jms/maven-metadata.xml");

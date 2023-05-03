@@ -14,6 +14,7 @@ import io.intino.sumus.chronos.TimelineFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;

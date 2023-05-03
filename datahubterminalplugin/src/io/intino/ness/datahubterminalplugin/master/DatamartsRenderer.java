@@ -2,6 +2,7 @@ package io.intino.ness.datahubterminalplugin.master;
 
 import io.intino.Configuration;
 import io.intino.datahub.model.*;
+import io.intino.datahub.model.rules.SnapshotScale;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.RuleSet;
@@ -16,9 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
-import static io.intino.ness.datahubterminalplugin.Formatters.customize;
-import static io.intino.ness.datahubterminalplugin.Formatters.firstUpperCase;
-import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
+import static io.intino.ness.datahubterminalplugin.Formatters.*;
 import static io.intino.ness.datahubterminalplugin.master.StructFrameFactory.STRUCT_INTERNAL_CLASS_SEP;
 import static java.io.File.separator;
 import static java.util.stream.Collectors.toMap;
@@ -102,7 +101,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private String baseEntityMounterName(Datamart datamart, TerminalInfo terminalInfo) {
-		return terminalInfo.terminalPackage + "." + subPackageOf(datamart) + "." + firstUpperCase(datamart.name$()) + "Mounter";
+		return terminalInfo.terminalPackage + "." + subPackageOf(datamart) + "." + firstUpperCase().format(datamart.name$()) + "Mounter";
 	}
 
 	private FrameBuilder entityMounterInterface(Datamart datamart, TerminalInfo terminalInfo) {
@@ -128,7 +127,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private String entityBaseName(Datamart datamart) {
-		return modelPackage + "." + javaValidName().format(firstUpperCase(datamart.name$()) + "Entity").toString();
+		return modelPackage + "." + javaValidName().format(firstUpperCase().format(datamart.name$()) + "Entity").toString();
 	}
 
 	private FrameBuilder entityBaseBuilder(Datamart datamart) {
@@ -151,7 +150,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private String structBaseName(Datamart datamart) {
-		return modelPackage + "." + javaValidName().format(firstUpperCase(datamart.name$()) + "Struct").toString();
+		return modelPackage + "." + javaValidName().format(firstUpperCase().format(datamart.name$()) + "Struct").toString();
 	}
 
 	private FrameBuilder structBaseBuilder(Datamart datamart) {
@@ -175,19 +174,87 @@ public class DatamartsRenderer implements ConceptRenderer {
 		builder.add("package", modelPackage);
 		builder.add("name", datamart.name$());
 		builder.add("entity", entitiesOf(datamart));
+		if(!datamart.timelineList().isEmpty()) builder.add("timeline", timelinesOf(datamart));
+		if(!datamart.reelList().isEmpty()) builder.add("reel", reelsOf(datamart));
 		return builder;
+	}
+
+	private Frame reelNode() {
+		FrameBuilder b = new FrameBuilder("reelNode", "default"); // TODO: Node implementation specified in Model?
+		b.add("chronosObject", "Reel");
+		return b.toFrame();
+	}
+
+	private String reelEvents(Datamart datamart) {
+		return datamart.reelList().stream()
+				.map(r -> quoted().format(r.stateEvent().message().name$()).toString())
+				.collect(Collectors.joining(","));
+	}
+
+	private Frame[] reelsOf(Datamart datamart) {
+		return datamart.reelList().stream().map(this::reelFrame).toArray(Frame[]::new);
+	}
+
+	private Frame reelFrame(Reel reel) {
+		FrameBuilder b = new FrameBuilder("reel");
+		b.add("package", modelPackage);
+		b.add("name", reel.name$());
+		b.add("source", reel.stateEvent().message().name$());
+		b.add("entity", reel.entity().name$());
+		return b.toFrame();
+	}
+
+	private Frame timelineNode() {
+		FrameBuilder b = new FrameBuilder("timelineNode", "default"); // TODO: Node implementation specified in Model?
+		b.add("chronosObject", "Timeline");
+		return b.toFrame();
+	}
+
+	private String timelineEvents(Datamart datamart) {
+		return datamart.timelineList().stream()
+				.map(t -> quoted().format(t.source().sensor().name$()).toString())
+				.collect(Collectors.joining(","));
+	}
+
+	private Frame[] timelinesOf(Datamart datamart) {
+		return datamart.timelineList().stream().map(this::timelineFrame).toArray(Frame[]::new);
+	}
+
+	private Frame timelineFrame(Timeline timeline) {
+		FrameBuilder b = new FrameBuilder("timeline");
+		b.add("package", modelPackage);
+		b.add("name", timeline.name$());
+		b.add("source", timeline.source().sensor().name$());
+		b.add("entity", timeline.entity().name$());
+		return b.toFrame();
 	}
 
 	private FrameBuilder datamartImplBuilder(Datamart datamart, TerminalInfo terminalInfo) {
 		FrameBuilder builder = new FrameBuilder("datamart", "message", "impl");
 		builder.add("package", terminalInfo.terminalPackage + subPackageOf(datamart));
-		builder.add("name", datamart.name$()).add("scale", datamart.snapshots().scale().name());
+		Datamart.Snapshots snapshots = datamart.snapshots();
+		builder.add("name", datamart.name$()).add("scale", (snapshots == null || snapshots.scale() == null) ? SnapshotScale.None.name() : snapshots.scale().name());
 		builder.add("entity", entitiesOf(datamart));
 		builder.add("struct", structsOf(datamart));
 		builder.add("numEntities", datamart.entityList().size());
 		builder.add("numStructs", datamart.structList().size());
 		builder.add("ontologypackage", modelPackage);
-		builder.add("terminal", String.format(terminalInfo.terminalPackage + "." + firstUpperCase(javaValidName().format(terminalInfo.terminal.name$()).toString())));
+		builder.add("terminal", String.format(terminalInfo.terminalPackage + "." + firstUpperCase().format(javaValidName().format(terminalInfo.terminal.name$()).toString())));
+
+		if(!datamart.timelineList().isEmpty()) {
+			builder.add("hasTimelines", "");
+			builder.add("timelineEvents", timelineEvents(datamart));
+			builder.add("timeline", timelinesOf(datamart));
+			builder.add("timelineNode", timelineNode());
+		}
+
+		if(!datamart.reelList().isEmpty()) {
+			builder.add("hasReels", "");
+			builder.add("reelEvents", reelEvents(datamart));
+			builder.add("reel", reelsOf(datamart));
+			builder.add("reelNode", reelNode());
+		}
+
 		return builder;
 	}
 
@@ -522,7 +589,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	public record TerminalInfo(Terminal terminal, String terminalPackage) { }
 
 	private static class Templates {
-		final Template datamart = customize(new DatamartTemplate());
+		final Template datamart = append(customize(new DatamartTemplate()), customize(new NodeImplTemplate()));
 		final Template entityBase = customize(new EntityBaseTemplate());
 		final Template entity = append(customize(new EntityTemplate()), customize(new StructTemplate()), customize(new AttributesTemplate()));
 		final Template entityMounter = customize(new EntityMounterTemplate());
