@@ -18,11 +18,11 @@ def type(datamart & interface)
 		List<String> listSnapshots();
 		$name+FirstUpperCase~Datamart snapshot(String timetag);
 
-		$entity+getterSignature...[$NL$NL]
+		[$entity+getterSignature...[$NL$NL]]
 
-		$timeline+getterSignature...[$NL$NL]
+		[$timeline+getterSignature...[$NL$NL]]
 
-		$reel+getterSignature...[$NL$NL]
+		[$reel+getterSignature...[$NL$NL]]
 
 		class Entities {
 
@@ -86,14 +86,33 @@ def type(datamart & interface)
         	}
         }
 
-        interface Node<T> {
-
+        interface ChronosNode {
+        	/**<p>Returns the id of the chronos object</p>*/
         	String id();
-        	T get();
-        	void setEventListener(EventListener<T> listener);
+        	/**Clears this node's internal cache, if any, and notifies the datamart to unload this node from memory.*/
+        	void dispose();
+        }
 
-        	interface EventListener<T> {
-        		void onEventReceived(Node<T> node, io.intino.alexandria.event.Event event);
+        interface TimelineNode extends ChronosNode {
+
+        	io.intino.sumus.chronos.Timeline get();
+        	void setEventListener(EventListener listener);
+
+     		interface EventListener {
+        		void onEventReceived(TimelineNode node, io.intino.alexandria.event.Event event);
+        	}
+        }
+
+        interface ReelNode extends ChronosNode {
+
+        	io.intino.sumus.chronos.Reel.State stateOf(String signal);
+			default List<io.intino.sumus.chronos.Reel.State> stateOf(List<String> signals) {return signals.isEmpty() ? java.util.Collections.emptyList() : stateOf(signals.stream());}
+			List<io.intino.sumus.chronos.Reel.State> stateOf(Stream<String> signals);
+        	io.intino.sumus.chronos.Reel get(java.time.Instant from, java.time.Instant to, io.intino.sumus.chronos.Period period);
+        	void setEventListener(EventListener listener);
+
+     		interface EventListener {
+        		void onEventReceived(ReelNode node, io.intino.alexandria.event.Event event);
         	}
         }
 
@@ -155,8 +174,8 @@ def type(datamart & message & impl)
 		private final List<EntityListener> entityListeners = new ArrayList<>();
 		private final Map<String, List<MasterMounter>> mounters = new HashMap<>();
 		private final $name+FirstUpperCase~Datamart.Entities entities;
-		[$hasTimelines~private final Map<String, TimelineNode> timelines = new HashMap<>();]
-		[$hasReels~private final Map<String, ReelNode> reels = new HashMap<>();]
+		[$hasTimelines~private final Map<String, TimelineNodeImpl> timelines = new java.util.concurrent.ConcurrentHashMap<>();]
+		[$hasReels~private final Map<String, ReelNodeImpl> reels = new java.util.concurrent.ConcurrentHashMap<>();]
 
     	public $name+FirstUpperCase~DatamartImpl(Connector connector, $terminal~.DatamartsRetryConfig retryConfig) {
     		this.connector = requireNonNull(connector);
@@ -239,8 +258,10 @@ def type(datamart & message & impl)
         	}.init();
         }
 
-    	$entity+getter...[$NL$NL]
+    	[$entity+getter...[$NL$NL]]
+
     	[$timeline+getter...[$NL$NL]]
+
     	[$reel+getter...[$NL$NL]]
 
 		private void downloadDatamartFromDatahub() {
@@ -537,15 +558,15 @@ end
 
 def type(timeline) trigger(getter)
 	@Override
-	public Node<io.intino.sumus.chronos.Timeline> $name+FirstLowerCase~Timeline(String id) {
-		return timelines.computeIfAbsent(id, theId -> new TimelineNode(id, "$source"));
+	public TimelineNode $name+FirstLowerCase~Timeline(String id) {
+		return timelines.computeIfAbsent(id, theId -> new TimelineNodeImpl(id, "$source"));
 	}
 end
 
 def type(reel) trigger(getter)
 	@Override
-	public Node<io.intino.sumus.chronos.Reel> $name+FirstLowerCase~Reel(String id) {
-		return reels.computeIfAbsent(id, theId -> new ReelNode(id, "$source"));
+	public ReelNode $name+FirstLowerCase~Reel(String id) {
+		return reels.computeIfAbsent(id, theId -> new ReelNodeImpl(id, Set.of($sources)));
 	}
 end
 
@@ -597,11 +618,11 @@ def type(entity) trigger(getterSignature)
 end
 
 def type(timeline) trigger(getterSignature)
-	default Node<io.intino.sumus.chronos.Timeline> $name+firstLowerCase~Timeline($package.entities.$entity+firstUpperCase entity) {return $name+firstLowerCase~Timeline(entity.id());}
-	Node<io.intino.sumus.chronos.Timeline> $name+firstLowerCase~Timeline(String id);
+	default TimelineNode $name+firstLowerCase~Timeline($package.entities.$entity+firstUpperCase entity) {return $name+firstLowerCase~Timeline(entity.id());}
+	TimelineNode $name+firstLowerCase~Timeline(String id);
 end
 
-def type(timeline) trigger(getterSignature)
-	default Node<io.intino.sumus.chronos.Reel> $name+firstLowerCase~Reel($package.entities.$entity+firstUpperCase entity) {return $name+firstLowerCase~Reel(entity.id());}
-	Node<io.intino.sumus.chronos.Reel> $name+firstLowerCase~Reel(String id);
+def type(reel) trigger(getterSignature)
+	default ReelNode $name+firstLowerCase~Reel($package.entities.$entity+firstUpperCase entity) {return $name+firstLowerCase~Reel(entity.id());}
+	ReelNode $name+firstLowerCase~Reel(String id);
 end

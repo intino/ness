@@ -1,31 +1,32 @@
 package org.example.test;
 
+import io.intino.alexandria.Timetag;
 import io.intino.alexandria.event.measurement.MeasurementEvent;
 import io.intino.alexandria.jms.ConnectionConfig;
 import io.intino.alexandria.jms.JmsProducer;
 import io.intino.alexandria.jms.QueueProducer;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.terminal.JmsConnector;
+import io.intino.sumus.chronos.Period;
+import io.intino.sumus.chronos.Reel;
 import io.intino.sumus.chronos.Timeline;
 import io.intino.test.datahubtest.TestTerminal;
 import io.intino.test.datahubtest.datamarts.master.MasterDatamart;
-import io.intino.test.datahubtest.datamarts.master.MasterDatamart.Node;
 import io.intino.test.datahubtest.datamarts.master.MasterDatamartImpl;
 import io.intino.test.datahubtest.datamarts.master.entities.Machine;
-import io.intino.test.datahubtest.measurements.monitoring.AssetStatus;
 import io.intino.test.datahubtest.messages.inventory.JavaApplicationAssertion;
 import io.intino.test.datahubtest.messages.inventory.MachineAssertion;
-import org.apache.activemq.command.ActiveMQTextMessage;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.MessageNotWriteableException;
 import javax.jms.TemporaryQueue;
 import java.io.File;
+import java.time.Instant;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+
+import static io.intino.test.datahubtest.datamarts.master.MasterDatamart.TimelineNode;
 
 public class Client {
 
@@ -41,7 +42,7 @@ public class Client {
 
 		Machine machine = datamart.machine("1234");
 
-		Node<Timeline> timelineNode = datamart.assetStatusTimeline(machine); // datamart.assetStatusTimeline(machine.id());
+		TimelineNode timelineNode = datamart.assetStatusTimeline(machine); // datamart.assetStatusTimeline(machine.id());
 
 		timelineNode.setEventListener((thisTimelineNode, event) -> {
 			System.out.println(thisTimelineNode.id());
@@ -50,8 +51,22 @@ public class Client {
 			}
 		});
 
+		timelineNode.dispose();
+
 		Timeline timeline = timelineNode.get(); // Might send a request to the DH
 		// ...
+
+		MasterDatamart.ReelNode reelNode = datamart.anomaliesReel("observable-id");
+
+		reelNode.setEventListener((thisReelNode, event) -> {
+			// ...
+		});
+
+		Reel reel = reelNode.get(Timetag.of("20230501").instant(), Instant.now(), Period.Minutes); // Might send a request to DH
+
+		Reel.State stateOfA = reelNode.stateOf("A"); // Might send a request to DH
+
+		List<Reel.State> states = reelNode.stateOf(List.of("A", "B", "C")); // Might send a request to DH
 	}
 
 	public static void main2(String[] args) throws InterruptedException {

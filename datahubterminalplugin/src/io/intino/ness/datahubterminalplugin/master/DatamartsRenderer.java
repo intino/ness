@@ -187,7 +187,9 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 	private String reelEvents(Datamart datamart) {
 		return datamart.reelList().stream()
-				.map(r -> quoted().format(r.stateEvent().message().name$()).toString())
+				.flatMap(r -> r.signalList().stream())
+				.map(s -> quoted().format(s.event().message().name$()).toString())
+				.distinct()
 				.collect(Collectors.joining(","));
 	}
 
@@ -199,7 +201,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 		FrameBuilder b = new FrameBuilder("reel");
 		b.add("package", modelPackage);
 		b.add("name", reel.name$());
-		b.add("source", reel.stateEvent().message().name$());
+		b.add("sources", reel.signalList().stream().map(s -> quoted().format(s.event().message().name$()).toString()).collect(Collectors.joining(",")));
 		b.add("entity", reel.entity().name$());
 		return b.toFrame();
 	}

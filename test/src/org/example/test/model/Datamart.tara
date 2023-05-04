@@ -6,8 +6,13 @@ use Datalake
 Datamart master
 	Timeline(source = dl.assetStatus, entity = Machine) AssetStatus
 		Attribute(magnitude = monitoring.AssetStatus.usageRAM, from = Machine.memorySize) max
+		Attribute(magnitude = monitoring.AssetStatus.usageHDD, from = Machine.diskSize) max
+		Attribute(magnitude = monitoring.AssetStatus.usageFiles, from = Machine.maxOpenFiles) max
 	Timeline(source = dl.applicationStatus, entity = Application) ApplicationStatus
 	Timeline(source = dl.rdbmsStatement, entity = Query) RdbmsStatement
+	Reel(entity= Observable) Anomalies
+		Signal(event = dl.state, attribute = monitoring.State.value, operation = Append)
+		Signal(event = dl.diagnosisAssertion, attribute = analysis.DiagnosisAssertion.Anomaly.name, operation = Set)
 
 	Entity(from = dl.userAssertion) User
 		Attribute email as Text

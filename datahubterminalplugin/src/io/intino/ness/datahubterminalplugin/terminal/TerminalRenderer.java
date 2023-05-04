@@ -14,6 +14,7 @@ import io.intino.plugin.PluginLauncher;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,7 @@ class TerminalRenderer {
 		this.terminal = terminal;
 		this.srcDir = srcDir;
 		this.rootPackage = rootPackage;
+		SoftReference r;
 		this.conf = conf;
 		this.logger = logger;
 		this.notifier = notifier;
@@ -108,7 +110,8 @@ class TerminalRenderer {
 
 	private Map<String, FrameBuilder> reelEventsOf(Datamart datamart) {
 		return datamart.reelList().stream()
-				.map(Reel::stateEvent)
+				.flatMap(r -> r.signalList().stream())
+				.map(s -> s.event().message())
 				.filter(Objects::nonNull)
 				.distinct()
 				.collect(Collectors.toMap(Layer::name$, tank -> frameOf(tank, datamart)));
@@ -118,6 +121,7 @@ class TerminalRenderer {
 		return datamart.timelineList().stream()
 				.map(Timeline::source)
 				.filter(Objects::nonNull)
+				.map(Tank.Measurement::sensor)
 				.distinct()
 				.collect(Collectors.toMap(Layer::name$, tank -> frameOf(tank, datamart)));
 	}
@@ -126,21 +130,22 @@ class TerminalRenderer {
 		return datamart.entityList().stream()
 				.map(Entity::from)
 				.filter(Objects::nonNull)
+				.map(Tank.Message::message)
 				.distinct()
 				.collect(Collectors.toMap(Layer::name$, tank -> frameOf(tank, datamart)));
 	}
 
-	private FrameBuilder frameOf(Tank.Measurement tank, Datamart datamart) {
+	private FrameBuilder frameOf(Sensor sensor, Datamart datamart) {
 		return new FrameBuilder("devent")
-				.add("message", tank.sensor().name$())
-				.add("namespaceQn", namespace(tank.sensor()).replace(".", ""))
+				.add("message", sensor.name$())
+				.add("namespaceQn", namespace(sensor).replace(".", ""))
 				.add("datamart", datamart.name$());
 	}
 
-	private FrameBuilder frameOf(Tank.Message tank, Datamart datamart) {
+	private FrameBuilder frameOf(Message message, Datamart datamart) {
 		return new FrameBuilder("devent")
-				.add("message", tank.message().name$())
-				.add("namespaceQn", namespace(tank.message()).replace(".", ""))
+				.add("message", message.name$())
+				.add("namespaceQn", namespace(message).replace(".", ""))
 				.add("datamart", datamart.name$());
 	}
 

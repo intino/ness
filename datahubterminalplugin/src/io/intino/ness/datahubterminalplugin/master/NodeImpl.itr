@@ -1,14 +1,15 @@
-def type(default) trigger(nodeImpl)
+def type(timelineNode & default) trigger(nodeImpl)
 
-	private class $chronosObject~Node implements Node<io.intino.sumus.chronos.$chronosObject> {
+	private class TimelineNodeImpl implements TimelineNode {
 
 		private final String id;
 		private final String source;
 		private volatile File file;
-		private volatile java.lang.ref.SoftReference<io.intino.sumus.chronos.$chronosObject> cache;
+		private volatile java.lang.ref.SoftReference<io.intino.sumus.chronos.Timeline> cache;
 		private volatile EventListener listener;
+		private volatile boolean disposed;
 
-		private $chronosObject~Node(String id, String source) {
+		private TimelineNodeImpl(String id, String source) {
 			this.id = requireNonNull(id);
 			this.source = requireNonNull(source);
 		}
@@ -19,20 +20,32 @@ def type(default) trigger(nodeImpl)
 		}
 
 		@Override
-		public io.intino.sumus.chronos.$chronosObject get() {
+		public void dispose() {
 			synchronized(this) {
+				if(disposed) return;
+				clearCache();
+				listener = null;
+				timelines.remove(id);
+				disposed = true;
+			}
+		}
+
+		@Override
+		public io.intino.sumus.chronos.Timeline get() {
+			synchronized(this) {
+				if(disposed) throw new IllegalStateException("This " + getClass().getSimpleName() + " is disposed.");
 				try {
 					if(cache != null) {
-						io.intino.sumus.chronos.$chronosObject $chronosObject+firstLowerCase = cache.get();
-						if($chronosObject+firstLowerCase != null) return $chronosObject+firstLowerCase;
+						io.intino.sumus.chronos.Timeline timeline = cache.get();
+						if(timeline != null) return timeline;
 					}
 
-					io.intino.sumus.chronos.$chronosObject $chronosObject+firstLowerCase = (file != null && file.exists())
+					io.intino.sumus.chronos.Timeline timeline = (file != null && file.exists())
 						? loadFile()
 						: downloadFromDatahub();
 
-					cache = new java.lang.ref.SoftReference<>($chronosObject+firstLowerCase);
-					return $chronosObject+firstLowerCase;
+					cache = new java.lang.ref.SoftReference<>(timeline);
+					return timeline;
 
 				} catch(Exception e) {
 					throw new RuntimeException(e);
@@ -41,45 +54,54 @@ def type(default) trigger(nodeImpl)
 		}
 
 		@Override
-		public void setEventListener(EventListener<io.intino.sumus.chronos.$chronosObject> listener) {
+		public void setEventListener(EventListener listener) {
 			this.listener = listener;
 		}
 
 		private void notifyEvent(io.intino.alexandria.event.Event event) {
 			synchronized(this) {
+				if(disposed) return;
 				try {
-					if(listener == null || !source.equals(event.type())) return;
-					cache = null;
-					listener.onEventReceived(this, event);
+					if(!source.equals(event.type())) return;
+					clearCache();
+					if(listener != null) listener.onEventReceived(this, event);
 				} catch(Throwable e) {
 					Logger.error(e);
 				}
 			}
 		}
 
-		private io.intino.sumus.chronos.$chronosObject loadFile() throws Exception {
-			return io.intino.sumus.chronos.$chronosObject~File.open(file).$chronosObject+firstLowerCase();
+		private void clearCache() {
+			if(cache != null) {
+				cache.enqueue();
+				cache = null;
+			}
+			file = null;
 		}
 
-		private io.intino.sumus.chronos.$chronosObject downloadFromDatahub() throws Exception {
-			javax.jms.Message response = requestResponseFromDatahub("get-$chronosObject+firstLowerCase=" + id(), request("path"));
+		private io.intino.sumus.chronos.Timeline loadFile() throws Exception {
+			return io.intino.sumus.chronos.Timeline~File.open(file).timeline();
+		}
+
+		private io.intino.sumus.chronos.Timeline downloadFromDatahub() throws Exception {
+			javax.jms.Message response = requestResponseFromDatahub("get-timeline=" + id(), request("path"));
 
 			if(response instanceof javax.jms.TextMessage textResponse) {
 				file = getFile(textResponse);
 				if(file != null && file.exists()) return loadFile();
 				file = null;
-				response = requestResponseFromDatahub("get-$chronosObject+firstLowerCase=" + id(), request("download"));
+				response = requestResponseFromDatahub("get-timeline=" + id(), request("download"));
 			}
 
 			return readFromBytes((javax.jms.BytesMessage) response);
 		}
 
-		private io.intino.sumus.chronos.$chronosObject readFromBytes(javax.jms.BytesMessage m) throws Exception {
+		private io.intino.sumus.chronos.Timeline readFromBytes(javax.jms.BytesMessage m) throws Exception {
 			int size = m.getIntProperty("size");
 			byte$[$] bytes = new byte$[size$];
 			m.readBytes(bytes, size);
 
-			file = File.createTempFile(id(), ".$chronosObject+firstLowerCase");
+			file = File.createTempFile(id(), ".timeline");
 			java.nio.file.Files.write(file.toPath(), bytes, java.nio.file.StandardOpenOption.CREATE);
 			file.deleteOnExit();
 
@@ -96,7 +118,135 @@ def type(default) trigger(nodeImpl)
 
 		private javax.jms.Message request(String mode) throws Exception {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
-			String command = "datamart=" + name() + ";operation=get-$chronosObject+firstLowerCase;id=" + id() + ";mode=" + mode;
+			String command = "datamart=" + name() + ";operation=get-timeline;id=" + id() + ";mode=" + mode;
+			message.setText(command);
+			return message;
+		}
+	}
+end
+
+def type(reelNode & default) trigger(nodeImpl)
+
+	private class ReelNodeImpl implements ReelNode {
+
+		private final String id;
+		private final Set<String> sources;
+		private volatile File file;
+		private volatile EventListener listener;
+		private volatile boolean disposed;
+
+		private ReelNodeImpl(String id, Set<String> sources) {
+			this.id = requireNonNull(id);
+			this.sources = requireNonNull(sources);
+		}
+
+		@Override
+		public String id() {
+			return id;
+		}
+
+		@Override
+		public void dispose() {
+			synchronized(this) {
+				if(disposed) return;
+				clearCache();
+				listener = null;
+				reels.remove(id);
+				disposed = true;
+			}
+		}
+
+		@Override
+		public io.intino.sumus.chronos.Reel.State stateOf(String signal) {
+			return reelFile().stateOf(signal);
+		}
+
+		@Override
+		public List<io.intino.sumus.chronos.Reel.State> stateOf(Stream<String> signals) {
+			var reelFile = reelFile();
+			return signals.map(reelFile::stateOf).toList();
+		}
+
+		@Override
+        public io.intino.sumus.chronos.Reel get(Instant from, Instant to, io.intino.sumus.chronos.Period period) {
+        	return reelFile().reel(from, to).by(period);
+        }
+
+		private io.intino.sumus.chronos.ReelFile reelFile() {
+			synchronized(this) {
+				if(disposed) throw new IllegalStateException("This " + getClass().getSimpleName() + " is disposed.");
+				try {
+					return (file != null && file.exists())
+						? loadFile()
+						: downloadFromDatahub();
+				} catch(Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+
+		@Override
+		public void setEventListener(EventListener listener) {
+			this.listener = listener;
+		}
+
+		private void notifyEvent(io.intino.alexandria.event.Event event) {
+			synchronized(this) {
+				if(disposed) return;
+				try {
+					if(!sources.contains(event.type())) return;
+					clearCache();
+					if(listener != null) listener.onEventReceived(this, event);
+				} catch(Throwable e) {
+					Logger.error(e);
+				}
+			}
+		}
+
+		private void clearCache() {
+			file = null;
+		}
+
+		private io.intino.sumus.chronos.ReelFile loadFile() throws Exception {
+			return io.intino.sumus.chronos.Reel~File.open(file);
+		}
+
+		private io.intino.sumus.chronos.ReelFile downloadFromDatahub() throws Exception {
+			javax.jms.Message response = requestResponseFromDatahub("get-reel=" + id(), request("path"));
+
+			if(response instanceof javax.jms.TextMessage textResponse) {
+				file = getFile(textResponse);
+				if(file != null && file.exists()) return loadFile();
+				file = null;
+				response = requestResponseFromDatahub("get-reel=" + id(), request("download"));
+			}
+
+			return readFromBytes((javax.jms.BytesMessage) response);
+		}
+
+		private io.intino.sumus.chronos.ReelFile readFromBytes(javax.jms.BytesMessage m) throws Exception {
+			int size = m.getIntProperty("size");
+			byte$[$] bytes = new byte$[size$];
+			m.readBytes(bytes, size);
+
+			file = File.createTempFile(id(), ".reel");
+			java.nio.file.Files.write(file.toPath(), bytes, java.nio.file.StandardOpenOption.CREATE);
+			file.deleteOnExit();
+
+			return loadFile();
+		}
+
+		private File getFile(javax.jms.TextMessage m) {
+			try {
+				return new File(m.getText());
+			} catch(Exception e) {
+				return null;
+			}
+		}
+
+		private javax.jms.Message request(String mode) throws Exception {
+			ActiveMQTextMessage message = new ActiveMQTextMessage();
+			String command = "datamart=" + name() + ";operation=get-reel;id=" + id() + ";mode=" + mode;
 			message.setText(command);
 			return message;
 		}
