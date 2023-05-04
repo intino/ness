@@ -24,7 +24,7 @@ public class PluginTest {
 	private static final String TEST_MODULE_PATH = isWindows() ? "C:/Users/naits/Desktop/IntinoDev/ness/test" : USER_HOME + "/workspace/infrastructure/ness/test";
 	private static final String INTELLIJ_MAVEN_PLUGIN = isWindows() ? "C:\\Users\\naits\\AppData\\Local\\JetBrains\\Toolbox\\apps\\IDEA-C\\ch-0\\223.8617.56\\plugins\\maven\\lib\\maven3" : "/Applications/IntelliJ IDEA.app/Contents/plugins/maven/lib/maven3/";
 	private static final String JAVA_HOME = isWindows() ? System.getenv("JAVA_HOME") : "/Users/oroncal/Library/Java/JavaVirtualMachines/openjdk-17.0.1/Contents/Home";
-	private static final String COSMOS_PROJECT_PATH = isWindows() ? "C:/Users/naits/Desktop/IntinoDev/cesar/datahub/" : USER_HOME + "/workspace/infrastructure/cosmos/datahub/";
+	private static final String COSMOS_PROJECT_PATH = isWindows() ? "C:/Users/naits/Desktop/IntinoDev/cosmos-it/datahub/" : USER_HOME + "/workspace/infrastructure/cosmos/datahub/";
 
 	@Test
 	public void should_build_cosmos_terminal() {

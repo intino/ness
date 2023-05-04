@@ -14,7 +14,6 @@ import io.intino.plugin.PluginLauncher;
 
 import java.io.File;
 import java.io.PrintStream;
-import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,7 +35,6 @@ class TerminalRenderer {
 		this.terminal = terminal;
 		this.srcDir = srcDir;
 		this.rootPackage = rootPackage;
-		SoftReference r;
 		this.conf = conf;
 		this.logger = logger;
 		this.notifier = notifier;
