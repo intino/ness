@@ -28,6 +28,9 @@ class TerminalRenderer {
 	private final PrintStream logger;
 	private final PluginLauncher.Notifier notifier;
 	private final String ontologyPackage;
+	private final Set<Tank.Message> messageTanks = new HashSet<>();
+	private final Set<Tank.Measurement> measurementTanks = new HashSet<>();
+	private final Set<Tank.Resource> resourceTanks = new HashSet<>();
 
 	TerminalRenderer(Terminal terminal, File srcDir, String rootPackage, Configuration conf, PrintStream logger, PluginLauncher.Notifier notifier, String ontologyPackage) {
 		this.terminal = terminal;
@@ -49,34 +52,64 @@ class TerminalRenderer {
 		Datalake datalake = terminal.graph().datalake();
 		FrameBuilder builder = new FrameBuilder("terminal").add("package", rootPackage).add("name", terminal.name$());
 		if (datalake != null) builder.add("datalake", "").add("scale", datalake.scale().name());
-		builder.add("message", messageFrames());
-		builder.add("measurement", measurementFrames());
-//		builder.add("resource", resourceFrames()); TODO
-		if (terminal.datamarts() != null) renderDatamarts(builder);
+
 		if (terminal.publish() != null) addPublish(builder);
 		if (terminal.subscribe() != null) addSubscribe(builder);
 		if (terminal.bpm() != null) addBpm(builder);
+
+		if (terminal.datamarts() != null) {
+			renderDatamarts(builder);
+			addSubscribeForThedevents(builder);
+		}
+
+		if(!messageTanks.isEmpty()) builder.add("message", messageFrames());
+		if(!measurementTanks.isEmpty()) builder.add("measurement", measurementFrames());
+		if(!resourceTanks.isEmpty()) builder.add("resource", resourceFrames());
+
 		return builder.toFrame();
 	}
 
 	private void addSubscribe(FrameBuilder builder) {
 		terminal.subscribe().messageTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
-		if (terminal.datamarts() != null) addSubscribeForThedevents(builder);
 		terminal.subscribe().measurementTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
 //		terminal.subscribe().resourceTanks().forEach(tank -> builder.add("subscribe", frameOf(tank))); TODO
 	}
 
 	private void addSubscribeForThedevents(FrameBuilder builder) {
 		Set<String> tanksAlreadySubscribedTo = terminal.subscribe().messageTanks().stream().map(Layer::name$).collect(Collectors.toSet());
+		tanksAlreadySubscribedTo.addAll(terminal.subscribe().measurementTanks().stream().map(Layer::name$).toList());
+		tanksAlreadySubscribedTo.addAll(terminal.subscribe().resourceTanks().stream().map(Layer::name$).toList());
+
 		for (Datamart datamart : terminal.datamarts().list()) {
-			List<Tank.Message> tanks = datamart.entityList().stream().map(Entity::from).filter(Objects::nonNull).distinct().toList();
-			for (Tank.Message tank : tanks) {
-				if (tanksAlreadySubscribedTo.add(tank.name$())) {
-					builder.add("subscribe", frameOf(tank));
-				}
-//				builder.add("devent", frameOf(tank, datamart));
-			}
+			addSubscribersForEntityEvents(builder, tanksAlreadySubscribedTo, datamart);
+			addSubscribersForTimelineEvents(builder, tanksAlreadySubscribedTo, datamart);
+			addSubscriberForReelEvents(builder, tanksAlreadySubscribedTo, datamart);
 		}
+	}
+
+	private void addSubscriberForReelEvents(FrameBuilder builder, Set<String> tanksAlreadySubscribedTo, Datamart datamart) {
+		datamart.reelList().stream()
+				.flatMap(r -> r.signalList().stream())
+				.map(Reel.Signal::event)
+				.filter(Objects::nonNull).distinct()
+				.filter(tank -> tanksAlreadySubscribedTo.add(tank.name$()))
+				.forEach(tank -> builder.add("subscribe", frameOf(tank)));
+	}
+
+	private void addSubscribersForTimelineEvents(FrameBuilder builder, Set<String> tanksAlreadySubscribedTo, Datamart datamart) {
+		datamart.timelineList().stream()
+				.map(Timeline::source)
+				.filter(Objects::nonNull).distinct()
+				.filter(tank -> tanksAlreadySubscribedTo.add(tank.name$()))
+				.forEach(tank -> builder.add("subscribe", frameOf(tank)));
+	}
+
+	private void addSubscribersForEntityEvents(FrameBuilder builder, Set<String> tanksAlreadySubscribedTo, Datamart datamart) {
+		datamart.entityList().stream()
+				.map(Entity::from)
+				.filter(Objects::nonNull).distinct()
+				.filter(tank -> tanksAlreadySubscribedTo.add(tank.name$()))
+				.forEach(tank -> builder.add("subscribe", frameOf(tank)));
 	}
 
 	private void addPublish(FrameBuilder builder) {
@@ -150,7 +183,7 @@ class TerminalRenderer {
 	}
 
 	private Frame[] messageFrames() {
-		return messageTanks().stream()
+		return messageTanks.stream()
 				.map(Tank.Message::message)
 				.distinct()
 				.map(m -> new FrameBuilder("message")
@@ -163,7 +196,7 @@ class TerminalRenderer {
 	}
 
 	private Frame[] measurementFrames() {
-		return measurementTanks().stream()
+		return measurementTanks.stream()
 				.map(Tank.Measurement::sensor)
 				.distinct()
 				.map(m -> new FrameBuilder("measurement")
@@ -176,7 +209,7 @@ class TerminalRenderer {
 	}
 
 	private Frame[] resourceFrames() {
-		return resourceTanks().stream()
+		return resourceTanks.stream()
 				.map(Tank.Resource::resourceEvent)
 				.distinct()
 				.map(r -> new FrameBuilder("resource")
@@ -219,6 +252,7 @@ class TerminalRenderer {
 	}
 
 	private Frame frameOf(Tank.Message tank) {
+		messageTanks.add(tank);
 		String messagesPackage = messagePackage(tank.message());
 		String namespace = namespace(tank.message());
 		return new FrameBuilder("message").
@@ -232,6 +266,7 @@ class TerminalRenderer {
 	}
 
 	private Frame frameOf(Tank.Resource tank) {
+		resourceTanks.add(tank);
 		String messagesPackage = resourcePackage(tank.resourceEvent());
 		String namespace = namespace(tank.resourceEvent());
 		return new FrameBuilder("measurement").
@@ -245,6 +280,7 @@ class TerminalRenderer {
 	}
 
 	private Frame frameOf(Tank.Measurement tank) {
+		measurementTanks.add(tank);
 		String messagesPackage = measurementPackage(tank.sensor());
 		String namespace = namespace(tank.sensor());
 		return new FrameBuilder("measurement").
@@ -277,36 +313,6 @@ class TerminalRenderer {
 
 	private String namespace(Layer event) {
 		return event.core$().owner().is(Namespace.class) ? event.core$().ownerAs(Namespace.class).qn().toLowerCase() : "";
-	}
-
-	private Collection<Tank.Message> messageTanks() {
-		Collection<Tank.Message> tanks = new LinkedHashSet<>();
-		if (terminal.publish() != null) tanks.addAll(terminal.publish().messageTanks());
-		if (terminal.subscribe() != null) tanks.addAll(terminal.subscribe().messageTanks());
-		if (terminal.datamarts() != null) tanks.addAll(messageTanksOf(terminal.datamarts()));
-		return tanks;
-	}
-
-	private Collection<Tank.Message> messageTanksOf(Terminal.Datamarts datamarts) {
-		return datamarts.list().stream()
-				.flatMap(d -> d.entityList().stream())
-				.map(Entity::from)
-				.filter(Objects::nonNull)
-				.collect(Collectors.toSet());
-	}
-
-	private List<Tank.Measurement> measurementTanks() {
-		List<Tank.Measurement> tanks = new ArrayList<>();
-		if (terminal.publish() != null) tanks.addAll(terminal.publish().measurementTanks());
-		if (terminal.subscribe() != null) tanks.addAll(terminal.subscribe().measurementTanks());
-		return tanks;
-	}
-
-	private List<Tank.Resource> resourceTanks() {
-		List<Tank.Resource> tanks = new ArrayList<>();
-		if (terminal.publish() != null) tanks.addAll(terminal.publish().resourceTanks());
-		if (terminal.subscribe() != null) tanks.addAll(terminal.subscribe().resourceTanks());
-		return tanks;
 	}
 
 	private Template template() {
