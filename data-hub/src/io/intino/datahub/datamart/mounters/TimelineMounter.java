@@ -4,6 +4,8 @@ import io.intino.alexandria.event.measurement.MeasurementEvent;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.datahub.datamart.MasterDatamart;
+import io.intino.datahub.model.Timeline;
+import io.intino.sumus.chronos.Period;
 import io.intino.sumus.chronos.TimelineFile;
 import io.intino.sumus.chronos.TimelineFile.DataSession;
 
@@ -32,7 +34,7 @@ public final class TimelineMounter extends MasterDatamartMounter {
 			if (event.ss() == null) return;
 			String ss = withOutParameters(event.ss());
 			TimelineFile timelineFile = datamart.timelineStore().get(ss);
-			if (timelineFile == null) timelineFile = createTimelineFile(ss);
+			if (timelineFile == null) timelineFile = createTimelineFile(event, ss);
 			update(timelineFile, event);
 		} catch (Exception e) {
 			Logger.error("Could not mount event " + event.type() + ", ss = " + event.ss() + ": " + e.getMessage(), e);
@@ -54,10 +56,11 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	}
 
 	private void close(DataSession session) {
-		if(session == null) return;
+		if (session == null) return;
 		try {
 			session.close();
-		} catch (IOException ignored) {}
+		} catch (IOException ignored) {
+		}
 	}
 
 	private static void checkTs(Instant ts, TimelineFile tlFile, DataSession session) throws IOException {
@@ -73,8 +76,16 @@ public final class TimelineMounter extends MasterDatamartMounter {
 		return new MeasurementEvent(message.type(), message.get("ss").asString(), message.get("ts").asInstant(), message.get("measurements").as(String[].class), java.util.Arrays.stream(message.get("values").as(String[].class)).mapToDouble(Double::parseDouble).toArray());
 	}
 
-	private TimelineFile createTimelineFile(String ss) throws IOException {
-		return TimelineFile.create(new File(box().datamartTimelinesDirectory(datamart.name()), ss + TIMELINE_EXTENSION), ss);
+	private TimelineFile createTimelineFile(MeasurementEvent event, String ss) throws IOException {
+		File file = new File(box().datamartTimelinesDirectory(datamart.name()), ss + TIMELINE_EXTENSION);
+		file.getParentFile().mkdirs();
+		TimelineFile timelineFile = TimelineFile.create(file, ss);
+		Timeline timeline = datamart.definition().timelineList().stream()
+				.filter(t -> t.tank().sensor().name$().equals(event.type()))
+				.findFirst()
+				.orElseThrow(() -> new IOException("Tank not found"));
+		timelineFile.timeModel(event.ts(), new Period(timeline.tank().period(), timeline.tank().periodScale().chronoUnit()));
+		return timelineFile;
 	}
 
 	private String withOutParameters(String ss) {

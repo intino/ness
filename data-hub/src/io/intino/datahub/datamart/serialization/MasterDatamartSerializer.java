@@ -102,7 +102,7 @@ public class MasterDatamartSerializer {
 	}
 
 	private File snapshotDirOf(String datamartName) {
-		return new File(box.datamartsRoot(), datamartName);
+		return new File(box.datamartsDirectory(), datamartName);
 	}
 
 	private Optional<File> findSnapshotFileOf(File dir, Timetag timetag) {

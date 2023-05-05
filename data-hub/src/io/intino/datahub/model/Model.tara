@@ -61,7 +61,7 @@ Concept:Named Datamart
 	has:Named Reel
 
 Concept Timeline is component
-	var Datalake.Tank.Measurement source
+	var Datalake.Tank.Measurement tank
 	var Entity entity
 	Concept:Named Attribute
 		var Sensor.Magnitude magnitude
@@ -70,7 +70,7 @@ Concept Timeline is component
 Concept Reel is component
 	var Entity entity = empty
 	Concept Signal
-		var Datalake.Tank.Message event = empty
+		var Datalake.Tank.Message tank = empty
 		var Attribute attribute
 		var word:{Append Set} operation
 

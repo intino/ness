@@ -88,7 +88,7 @@ class TerminalRenderer {
 	private void addSubscriberForReelEvents(FrameBuilder builder, Set<String> tanksAlreadySubscribedTo, Datamart datamart) {
 		datamart.reelList().stream()
 				.flatMap(r -> r.signalList().stream())
-				.map(Reel.Signal::event)
+				.map(Reel.Signal::tank)
 				.filter(Objects::nonNull).distinct()
 				.filter(tank -> tanksAlreadySubscribedTo.add(tank.name$()))
 				.forEach(tank -> builder.add("subscribe", frameOf(tank)));
@@ -96,7 +96,7 @@ class TerminalRenderer {
 
 	private void addSubscribersForTimelineEvents(FrameBuilder builder, Set<String> tanksAlreadySubscribedTo, Datamart datamart) {
 		datamart.timelineList().stream()
-				.map(Timeline::source)
+				.map(Timeline::tank)
 				.filter(Objects::nonNull).distinct()
 				.filter(tank -> tanksAlreadySubscribedTo.add(tank.name$()))
 				.forEach(tank -> builder.add("subscribe", frameOf(tank)));
@@ -142,7 +142,7 @@ class TerminalRenderer {
 	private Map<String, FrameBuilder> reelEventsOf(Datamart datamart) {
 		return datamart.reelList().stream()
 				.flatMap(r -> r.signalList().stream())
-				.map(s -> s.event().message())
+				.map(s -> s.tank().message())
 				.filter(Objects::nonNull)
 				.distinct()
 				.collect(Collectors.toMap(Layer::name$, tank -> frameOf(tank, datamart)));
@@ -150,7 +150,7 @@ class TerminalRenderer {
 
 	private Map<String, FrameBuilder> timelineEventsOf(Datamart datamart) {
 		return datamart.timelineList().stream()
-				.map(Timeline::source)
+				.map(Timeline::tank)
 				.filter(Objects::nonNull)
 				.map(Tank.Measurement::sensor)
 				.distinct()

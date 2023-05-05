@@ -27,12 +27,11 @@ import java.util.stream.Stream;
 
 import static io.intino.datahub.datamart.MasterDatamart.Snapshot.shouldCreateSnapshot;
 
-public class MessageMasterDatamartFactory {
-
+public class DatamartFactory {
 	private final DataHubBox box;
 	private final Datalake datalake;
 
-	public MessageMasterDatamartFactory(DataHubBox box, Datalake datalake) {
+	public DatamartFactory(DataHubBox box, Datalake datalake) {
 		this.box = box;
 		this.datalake = datalake;
 	}
@@ -50,7 +49,6 @@ public class MessageMasterDatamartFactory {
 			// If no snapshot was loaded, reflow all events
 			reflow(datamart.value, fromTimetag.value, definition);
 		} // If loaded from backup, no reflow is performed
-
 		return datamart.value;
 	}
 
@@ -78,15 +76,17 @@ public class MessageMasterDatamartFactory {
 
 	private void reflow(MasterDatamart datamart, Timetag fromTimetag, Datamart definition) throws IOException {
 		reflowEntityEvents(datamart, fromTimetag, definition);
-		reflowTimelineEvents(datamart, fromTimetag, definition);
-		reflowReelEvents(datamart, fromTimetag, definition);
+		if (box.datamartTimelineFiles(datamart.name()).isEmpty())
+			reflowTimelineEvents(datamart, null, definition);
+		if (box.datamartReelFiles(datamart.name()).isEmpty())
+			reflowReelEvents(datamart, definition);
 		Logger.info("Reflow finished for datamart " + datamart.name());
 	}
 
-	private void reflowReelEvents(MasterDatamart datamart, Timetag fromTimetag, Datamart definition) {
+	private void reflowReelEvents(MasterDatamart datamart, Datamart definition) {
 		MasterDatamartMounter mounter = new ReelMounter(datamart);
 		definition.reelList().stream()
-				.map(r -> eventsForReel(fromTimetag, r))
+				.map(this::eventsForReel)
 				.forEach(events -> events.forEach(e -> mounter.mount(e.toMessage())));
 	}
 
@@ -98,10 +98,8 @@ public class MessageMasterDatamartFactory {
 
 	private void reflowEntityEvents(MasterDatamart datamart, Timetag fromTimetag, Datamart definition) throws IOException {
 		MasterDatamartMounter mounter = new EntityMounter(datamart);
-
 		SnapshotScale scale = definition.snapshots() == null ? SnapshotScale.None : Optional.ofNullable(definition.snapshots().scale()).orElse(SnapshotScale.None);
 		DayOfWeek firstDayOfWeek = definition.snapshots() == null ? DayOfWeek.MONDAY : definition.snapshots().firstDayOfWeek();
-
 		Iterator<MessageEvent> iterator = reflowEntityTanksFrom(fromTimetag, definition);
 		while (iterator.hasNext()) {
 			MessageEvent event = iterator.next();
@@ -112,22 +110,21 @@ public class MessageMasterDatamartFactory {
 		}
 	}
 
-	private Stream<MessageEvent> eventsForReel(Timetag fromTimetag, Reel reel) {
+	private Stream<MessageEvent> eventsForReel(Reel reel) {
 		if (reel.signalList().isEmpty()) return Stream.empty();
 		return EventStream.merge(reel.signalList().stream()
 				.map(this::tankOf)
-				.map(t -> fromTimetag == null ? t.content() : t.content((ss, ts) -> !ts.isBefore(fromTimetag))));
+				.map(Datalake.Store.Tank::content));
 	}
 
 	private Datalake.Store.Tank<MessageEvent> tankOf(Reel.Signal s) {
-		return datalake.messageStore().tank(s.event().message().core$().fullName().replace("$", "."));
+		return datalake.messageStore().tank(s.tank().message().core$().fullName().replace("$", "."));
 	}
 
-	// Events are NOT merged across tanks
 	private Iterator<MeasurementEvent> reflowTimelineTanksFrom(Timetag fromTimetag, Datamart definition) {
 		return definition.timelineList().stream()
-				.filter(e -> e.source().sensor() != null)
-				.map(e -> datalake.measurementStore().tank(e.source().sensor().core$().fullName().replace("$", ".")))
+				.filter(e -> e.tank().sensor() != null)
+				.map(e -> datalake.measurementStore().tank(e.tank().sensor().core$().fullName().replace("$", ".")))
 				.flatMap(t -> fromTimetag == null ? t.content() : t.content((ss, ts) -> !ts.isBefore(fromTimetag)))
 				.iterator();
 	}

@@ -188,7 +188,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	private String reelEvents(Datamart datamart) {
 		return datamart.reelList().stream()
 				.flatMap(r -> r.signalList().stream())
-				.map(s -> quoted().format(s.event().message().name$()).toString())
+				.map(s -> quoted().format(s.tank().message().name$()).toString())
 				.distinct()
 				.collect(Collectors.joining(","));
 	}
@@ -201,7 +201,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 		FrameBuilder b = new FrameBuilder("reel");
 		b.add("package", modelPackage);
 		b.add("name", reel.name$());
-		b.add("sources", reel.signalList().stream().map(s -> quoted().format(s.event().message().name$()).toString()).collect(Collectors.joining(",")));
+		b.add("sources", reel.signalList().stream().map(s -> quoted().format(s.tank().message().name$()).toString()).collect(Collectors.joining(",")));
 		b.add("entity", reel.entity().name$());
 		return b.toFrame();
 	}
@@ -214,7 +214,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 	private String timelineEvents(Datamart datamart) {
 		return datamart.timelineList().stream()
-				.map(t -> quoted().format(t.source().sensor().name$()).toString())
+				.map(t -> quoted().format(t.tank().sensor().name$()).toString())
 				.collect(Collectors.joining(","));
 	}
 
@@ -226,7 +226,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 		FrameBuilder b = new FrameBuilder("timeline");
 		b.add("package", modelPackage);
 		b.add("name", timeline.name$());
-		b.add("source", timeline.source().sensor().name$());
+		b.add("source", timeline.tank().sensor().name$());
 		b.add("entity", timeline.entity().name$());
 		return b.toFrame();
 	}

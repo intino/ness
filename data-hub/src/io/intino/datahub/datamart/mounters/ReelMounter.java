@@ -42,38 +42,33 @@ public final class ReelMounter extends MasterDatamartMounter {
 
 	private void update(ReelFile reelFile, MessageEvent event) throws IOException {
 		Datamart datamart = this.datamart.definition();
-		List<Reel> reels = datamart.reelList(r -> r.signal(s -> s.event().name$().equals(event.type())) != null);
+		List<Reel> reels = datamart.reelList(r -> r.signal(s -> s.tank().message().name$().equals(event.type())) != null);
 		for (Reel reel : reels) {
-			Reel.Signal signal = reel.signal(s -> s.event().name$().equals(event.type()));
+			Reel.Signal signal = reel.signal(s -> s.tank().message().name$().equals(event.type()));
 			String[] values = mappingAttribute(event.toMessage(), signal.attribute());
 			if (signal.operation().equals(Operation.Set))
 				reelFile.set(event.ts(), values);
-			else if (values.length == 1) {
+			else if (values.length == 1)
 				reelFile.append(new Shot(event.ts(), signal.attribute().name$(), values[0].equals(State.On.name()) ? State.On : State.Off));
-			}
 		}
-
 	}
 
 	private String[] mappingAttribute(Message message, Attribute from) {
-		if (from.core$().owner().is(Component.class)) {
+		if (from.core$().owner().is(Component.class))
 			return message.components().stream().flatMap(m -> values(message, from)).toArray(String[]::new);
-		} else {
-			return values(message, from).toArray(String[]::new);
-		}
+		else return values(message, from).toArray(String[]::new);
 	}
 
 	private static Stream<String> values(Message message, Attribute from) {
 		Message.Value value = message.get(from.name$());
-		if (!value.isNull()) {
-			return value.asList(String.class).stream();
-		}
+		if (!value.isNull()) return value.asList(String.class).stream();
 		return Stream.empty();
 	}
 
-
 	private ReelFile reelFile(String ss) throws IOException {
-		return ReelFile.open(new File(box().datamartTimelinesDirectory(datamart.name()), ss + REEL_EXTENSION));
+		File file = new File(box().datamartReelsDirectory(datamart.name()), ss + REEL_EXTENSION);
+		file.getParentFile().mkdirs();
+		return ReelFile.open(file);
 	}
 
 	private String withoutParameters(String ss) {

@@ -14,7 +14,7 @@ import io.intino.datahub.datalake.BrokerSessions;
 import io.intino.datahub.datalake.seal.DatahubSessionSealer;
 import io.intino.datahub.datamart.MasterDatamartRepository;
 import io.intino.datahub.datamart.impl.LocalMasterDatamart;
-import io.intino.datahub.datamart.messages.MessageMasterDatamartFactory;
+import io.intino.datahub.datamart.messages.DatamartFactory;
 import io.intino.datahub.datamart.serialization.MasterDatamartSerializer;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Message;
@@ -111,6 +111,14 @@ public class DataHubBox extends AbstractBox {
 		return new File(configuration.home(), "datahub/treated");
 	}
 
+	public File datamartsDirectory() {
+		return new File(configuration.home(), "datahub/datamarts");
+	}
+
+	public File datamartDirectory(String name) {
+		return new File(datamartsDirectory(), name);
+	}
+
 	public File mappersDirectory() {
 		File mappers = new File(configuration.home(), "datahub/mappers");
 		mappers.mkdirs();
@@ -123,14 +131,6 @@ public class DataHubBox extends AbstractBox {
 
 	public MasterDatamartRepository datamarts() {
 		return masterDatamarts;
-	}
-
-	public File datamartsRoot() {
-		return new File(configuration.home(), "datamarts/datahub");
-	}
-
-	public File datamartDirectory(String name) {
-		return new File(datamartsRoot(), name);
 	}
 
 	public File datamartTimelinesDirectory(String name) {
@@ -229,13 +229,13 @@ public class DataHubBox extends AbstractBox {
 
 	private void initMasterDatamarts() {
 		this.datamartSerializer = new MasterDatamartSerializer(this);
-		this.masterDatamarts = new MasterDatamartRepository(datamartsRoot());
+		this.masterDatamarts = new MasterDatamartRepository(datamartsDirectory());
 		initDatamarts();
 		Runtime.getRuntime().addShutdownHook(new Thread(this::saveDatamartBackups, "DatamartBackupsThread"));
 	}
 
 	private void initDatamarts() {
-		MessageMasterDatamartFactory datamartFactory = new MessageMasterDatamartFactory(this, datalake);
+		DatamartFactory datamartFactory = new DatamartFactory(this, datalake);
 		long start = System.currentTimeMillis();
 		for (Datamart datamart : graph.datamartList()) {
 			initDatamart(datamartFactory, datamart);
@@ -257,7 +257,7 @@ public class DataHubBox extends AbstractBox {
 		}
 	}
 
-	private void initDatamart(MessageMasterDatamartFactory datamartFactory, Datamart datamart) {
+	private void initDatamart(DatamartFactory datamartFactory, Datamart datamart) {
 		try {
 			Logger.debug("Initializing MasterDatamart " + datamart.name$() + "...");
 			masterDatamarts.put(datamart.name$(), datamartFactory.create(datamart));
