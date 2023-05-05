@@ -40,7 +40,7 @@ def type(entity & base)
 		}
 
 		@Override
-		public Attribute attribute(String name) {
+		public Concept.Attribute attribute(String name) {
 			return attributes.get(name);
 		}
 
@@ -57,7 +57,7 @@ def type(entity & base)
 		}
 
 		void updateAttribute(String name, Object newValue) {
-			Attribute attribute = attribute(name);
+			Attribute attribute = attributes.get(name);
 			if(attribute == null || name.equals("id")) return;
 			Value oldValue = attribute.value();
 			attribute.setValue(newValue);

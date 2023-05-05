@@ -133,8 +133,8 @@ public class OntologyPublisher {
 
 	private void addDependencies(FrameBuilder builder) {
 		builder.add("event", new FrameBuilder().add("version", versions.get("event")));
-		if(dependsOnMaster()) builder.add("master", new FrameBuilder().add("version", versions.get("master")));
-		if(dependsOnChronos()) builder.add("chronos", new FrameBuilder().add("version", versions.get("chronos")));
+		builder.add("master", new FrameBuilder().add("version", versions.get("master")));
+		builder.add("chronos", new FrameBuilder().add("version", versions.get("chronos")));
 	}
 
 	private void addSourceDirectories(FrameBuilder builder) {
