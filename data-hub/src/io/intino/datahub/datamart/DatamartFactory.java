@@ -92,16 +92,13 @@ public class DatamartFactory {
 			box.datamartSerializer().saveSnapshot(timetag, datamart);
 	}
 
-	private Datalake.Store.Tank<MessageEvent> tankOf(Reel.Signal s) {
-		return datalake.messageStore().tank(s.tank().message().core$().fullName().replace("$", "."));
-	}
-
 	@SuppressWarnings("unchecked")
 	private Iterator<Event> reflowTanksFrom(Timetag fromTimetag, Set<String> entityTanks, Set<String> timelineTanks, Set<String> reelTanks) {
 		Set<String> tankNames = new HashSet<>(entityTanks);
 		tankNames.addAll(timelineTanks);
 		tankNames.addAll(reelTanks);
-		return EventStream.<Event>merge(tanks(tankNames).map(tank -> fromTimetag == null ? tank.content() : tankContentFrom(fromTimetag, tank))).iterator();
+		return EventStream.merge(tanks(tankNames)
+				.map(tank -> (Stream<Event>) (fromTimetag == null ? tank.content() : tankContentFrom(fromTimetag, tank)))).iterator();
 	}
 
 	private static Stream<? extends Event> tankContentFrom(Timetag fromTimetag, Datalake.Store.Tank<? extends Event> tank) {
