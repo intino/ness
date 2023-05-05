@@ -6,8 +6,8 @@ keytool -genkey -alias client -keyalg RSA -keysize 2048 -dname "CN=localhost,OU=
 keytool -export -alias server -keystore server.jks -file server.crt -storepass {server_password};
 keytool -export -alias client -keystore client.jks -file client.crt -storepass {client_password};
 
-keytool -import -alias server -keystore client.jts -file server.crt -storepass {client_password};
-keytool -import -alias client -keystore server.jts -file client.crt -storepass {server_password};
+keytool -import -alias server -keystore client.jts -file server.crt -storepass {server_password};
+keytool -import -alias client -keystore server.jts -file client.crt -storepass {client_password};
 
 
 

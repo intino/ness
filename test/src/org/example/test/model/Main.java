@@ -16,7 +16,7 @@ import static io.intino.alexandria.logger4j.Logger.setLevel;
 
 public class Main {
 
-	private static final String[] stashes = {"Solution", "Events", "Entities"};
+	private static final String[] stashes = {"Solution", "Events", "Datamart", "Datalake"};
 
 	public static void main(String[] args) {
 		DataHubConfiguration configuration = new DataHubConfiguration(args);
