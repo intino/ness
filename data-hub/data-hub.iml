@@ -141,12 +141,6 @@
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-pool:5.18.1" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-jms-pool:5.18.1" level="project" />
     <orderEntry type="module" module-name="datalake-inspector" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Intino: com.fasterxml.jackson.core:jackson-databind:2.13.4.2" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Intino: com.fasterxml.jackson.core:jackson-annotations:2.13.4" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Intino: com.fasterxml.jackson.core:jackson-core:2.13.4" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.sumus:chronos:1.0.6" level="project" />
     <orderEntry type="library" name="Intino: com.tdunning:t-digest:3.3" level="project" />
     <orderEntry type="library" name="Intino: com.github.haifengl:smile-core:3.0.0" level="project" />
     <orderEntry type="library" name="Intino: com.github.haifengl:smile-base:3.0.0" level="project" />
@@ -156,9 +150,6 @@
     <orderEntry type="library" name="Intino: com.github.chen0040:java-reinforcement-learning:1.0.5" level="project" />
     <orderEntry type="library" name="Intino: com.alibaba:fastjson:1.2.41" level="project" />
     <orderEntry type="library" name="Intino: ro.hasna.ts:time-series-math:0.18" level="project" />
-    <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-databind:2.14.2" level="project" />
-    <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-annotations:2.14.2" level="project" />
-    <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-core:2.14.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.1.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:7.0.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:7.0.2" level="project" />
@@ -167,5 +158,9 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:message:4.1.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:5.0.3" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:session:2.0.3" level="project" />
+    <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-databind:2.13.4.2" level="project" />
+    <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-annotations:2.13.4" level="project" />
+    <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-core:2.13.4" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.sumus:chronos:1.0.7" level="project" />
   </component>
 </module>
