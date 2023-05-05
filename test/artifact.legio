@@ -1,15 +1,14 @@
 dsl Legio
 
 Artifact("org.example", "1.0.0") test as Solution
-	Model("Ness", "9.3.0-SNAPSHOT", sdkVersion = "4.2.3")
-	DataHub("io.intino.test.datahubtest", "test-terminal", "1.0.0-SNAPSHOT")
+	Model("Ness", "9.3.0", sdkVersion = "4.2.3")
 	Imports
 		Test("junit", "junit", "4.13")
 		Test("org.apache.activemq", "activemq-client", "5.17.1")
+		Test("io.intino.alexandria", "terminal-jms", "5.3.2")
 		Test("org.apache.groovy", "groovy-all", "4.0.10")
 
 
-	IntinoPlugin("io.intino.ness:data-hub-accessor-plugin:2.3.4", "io.intino.ness.datahubaccessorplugin.DataHubAccessorsPluginLauncher")
 	Package(mode = ModulesAndLibrariesLinkedByManifest) as Runnable(mainClass = "org.example.test.model.Main")
 	Parameter("home")
 	Parameter("backup_directory")
@@ -26,10 +25,10 @@ RunConfiguration dev
 	Argument("backup_directory", "temp/backup")
 	Argument("broker_port", "63000")
 	Argument("broker_secondary_port", "1884")
-	Argument("key_store_path", "temp/datahub/server.jks")
-	Argument("key_store_password", "vaquep0")
-	Argument("trust_store_path", "temp/datahub/server.jts")
-	Argument("trust_store_password", "vaquep0")
+	Argument("key_store_path", "temp/datahub/certs/datahub.jks")
+	Argument("key_store_password", "oAhGPgdAHQ3yDvohTFDc")
+	Argument("trust_store_path", "temp/datahub/certs/datahub.jts")
+	Argument("trust_store_password", "gdgJW6gnjz_Kr.pvQtVq")
 
 Repository("intino-maven")
 	Release("https://artifactory.intino.io/artifactory/releases")
