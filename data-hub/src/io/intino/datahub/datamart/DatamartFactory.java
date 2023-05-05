@@ -5,7 +5,6 @@ import io.intino.alexandria.Timetag;
 import io.intino.alexandria.datalake.Datalake;
 import io.intino.alexandria.event.Event;
 import io.intino.alexandria.event.EventStream;
-import io.intino.alexandria.event.measurement.MeasurementEvent;
 import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.impl.LocalMasterDatamart;
@@ -71,7 +70,7 @@ public class DatamartFactory {
 		TimelineMounter timelineMounter = new TimelineMounter(datamart);
 		ReelMounter reelMounter = new ReelMounter(datamart);
 
-		Iterator<Event> iterator = reflowTanksFrom(fromTimetag, definition, entityTanks, timelineTanks, reelTanks);
+		Iterator<Event> iterator = reflowTanksFrom(fromTimetag, entityTanks, timelineTanks, reelTanks);
 
 		while (iterator.hasNext()) {
 			Event event = iterator.next();
@@ -98,12 +97,11 @@ public class DatamartFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Iterator<Event> reflowTanksFrom(Timetag fromTimetag, Datamart definition, Set<String> entityTanks, Set<String> timelineTanks, Set<String> reelTanks) {
+	private Iterator<Event> reflowTanksFrom(Timetag fromTimetag, Set<String> entityTanks, Set<String> timelineTanks, Set<String> reelTanks) {
 		Set<String> tankNames = new HashSet<>(entityTanks);
 		tankNames.addAll(timelineTanks);
 		tankNames.addAll(reelTanks);
-		return EventStream.<Event>merge(tanksOf(definition, tankNames)
-				.map(tank -> fromTimetag == null ? tank.content() : tankContentFrom(fromTimetag, tank))).iterator();
+		return EventStream.<Event>merge(tanks(tankNames).map(tank -> fromTimetag == null ? tank.content() : tankContentFrom(fromTimetag, tank))).iterator();
 	}
 
 	private static Stream<? extends Event> tankContentFrom(Timetag fromTimetag, Datalake.Store.Tank<? extends Event> tank) {
@@ -111,7 +109,7 @@ public class DatamartFactory {
 		return tank.content((ss, ts) -> !ts.isBefore(fromTimetag));
 	}
 
-	private Stream<Datalake.Store.Tank<? extends Event>> tanksOf(Datamart definition, Set<String> tankNames) {
+	private Stream<Datalake.Store.Tank<? extends Event>> tanks(Set<String> tankNames) {
 		return Stream.of(
 				datalake.messageStore().tanks().filter(t -> tankNames.contains(t.name())),
 				datalake.measurementStore().tanks().filter(t -> tankNames.contains(t.name())),
