@@ -10,7 +10,6 @@ import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.datamart.impl.LocalMasterDatamart;
 import io.intino.datahub.model.Datamart;
-import io.intino.datahub.model.NessGraph;
 
 import java.io.*;
 import java.time.LocalDate;
