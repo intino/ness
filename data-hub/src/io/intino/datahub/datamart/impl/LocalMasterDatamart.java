@@ -11,7 +11,6 @@ import io.intino.datahub.datamart.mounters.TimelineMounter;
 import io.intino.datahub.model.Datalake;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Entity;
-import io.intino.datahub.model.Timeline;
 import io.intino.sumus.chronos.ReelFile;
 import io.intino.sumus.chronos.TimelineFile;
 
@@ -86,6 +85,7 @@ public class LocalMasterDatamart implements MasterDatamart {
 		if (!tank.isMessage()) return Stream.empty();
 		List<MasterDatamartMounter> mounters = new ArrayList<>(2);
 		if (entityStore().isSubscribedTo(tank)) mounters.add(new EntityMounter(this));
+		if (timelineStore().isSubscribedTo(tank)) mounters.add(new TimelineMounter(this));
 		if (reelStore().isSubscribedTo(tank)) mounters.add(new ReelMounter(this));
 		return mounters.stream();
 	}
@@ -218,9 +218,7 @@ public class LocalMasterDatamart implements MasterDatamart {
 		public TimelineStore(Datamart definition, File root) {
 			super(root);
 			this.subscribedEvents = definition.timelineList().stream()
-					.map(Timeline::tank)
-					.filter(Objects::nonNull)
-					.map(m -> m.sensor().name$())
+					.flatMap(t -> Stream.of(t.entity().name$(), t.tank().sensor().name$()))
 					.collect(Collectors.toSet());
 		}
 
@@ -262,9 +260,9 @@ public class LocalMasterDatamart implements MasterDatamart {
 
 		@Override
 		public boolean isSubscribedTo(Datalake.Tank tank) {
-			if (!tank.isMeasurement() || tank.asMeasurement() == null || tank.asMeasurement().sensor() == null)
-				return false;
-			return subscribedEvents().contains(tank.asMeasurement().sensor().name$());
+			Collection<String> events = subscribedEvents();
+			if (tank.isMeasurement() && events.contains(tank.asMeasurement().sensor().name$())) return true;
+			return tank.isMessage() && events.contains(tank.asMessage().message().name$());
 		}
 	}
 

@@ -1,10 +1,14 @@
 package io.intino.datahub.datamart.mounters;
 
 import io.intino.alexandria.event.measurement.MeasurementEvent;
+import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.datahub.datamart.MasterDatamart;
+import io.intino.datahub.model.Entity;
+import io.intino.datahub.model.Sensor;
 import io.intino.datahub.model.Timeline;
+import io.intino.sumus.chronos.Magnitude;
 import io.intino.sumus.chronos.Period;
 import io.intino.sumus.chronos.TimelineFile;
 import io.intino.sumus.chronos.TimelineFile.DataSession;
@@ -13,6 +17,9 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
@@ -26,7 +33,12 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	@Override
 	public void mount(Message message) {
 		if (message == null) return;
-		mount(measurementEvent(message));
+		if (isAssertion(message)) mountAssertion(new MessageEvent(message));
+		else mount(measurementEvent(message));
+	}
+
+	private boolean isAssertion(Message message) {
+		return datamart.definition().timelineList().stream().anyMatch(t -> t.entity().name$().equals(message.type()));
 	}
 
 	public void mount(MeasurementEvent event) {
@@ -85,7 +97,41 @@ public final class TimelineMounter extends MasterDatamartMounter {
 				.findFirst()
 				.orElseThrow(() -> new IOException("Tank not found"));
 		timelineFile.timeModel(event.ts(), new Period(timeline.tank().period(), timeline.tank().periodScale().chronoUnit()));
+		timelineFile.sensorModel(sensorModel(datamart.entityStore().get(ss), timeline));
 		return timelineFile;
+	}
+
+	private void mountAssertion(MessageEvent assertion) {
+		datamart.definition().timelineList().stream().filter(t -> t.entity().name$().equals(assertion.type())).findFirst().ifPresent(t -> {
+			try {
+				File file = new File(box().datamartTimelinesDirectory(datamart.name()) + TIMELINE_EXTENSION);
+				File tlFile = new File(file, assertion.ss());
+				if (!tlFile.exists()) return;
+				TimelineFile timelineFile = TimelineFile.open(tlFile);
+				timelineFile.sensorModel(sensorModel(assertion.toMessage(), t));
+			} catch (IOException e) {
+				Logger.error(e);
+			}
+		});
+	}
+
+	private Magnitude[] sensorModel(Message message, Timeline timeline) {
+		Sensor sensor = timeline.tank().sensor();
+		return sensor.magnitudeList().stream().map(m -> new Magnitude(m.id(), new Magnitude.Model(merge(m, message, m.attributeList(), timeline.attributeList())))).toArray(Magnitude[]::new);
+	}
+
+	private Map<String, String> merge(Sensor.Magnitude m, Message message, List<Sensor.Magnitude.Attribute> magnitudeAttr, List<Timeline.Attribute> timelineAttr) {
+		Map<String, String> attrs = new HashMap<>();
+		for (Sensor.Magnitude.Attribute attribute : magnitudeAttr) attrs.put(attribute.name$(), attribute.value());
+		timelineAttr.stream().filter(a -> a.magnitude().equals(m)).forEach(a -> {
+			String value = valueOf(message, a.from());
+			if (value != null) attrs.put(a.name$(), value);
+		});
+		return attrs;
+	}
+
+	private String valueOf(Message message, Entity.Attribute source) {
+		return message.get(source.name$()).asString();
 	}
 
 	private String withOutParameters(String ss) {
