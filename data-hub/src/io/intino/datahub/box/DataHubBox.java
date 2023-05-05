@@ -14,7 +14,7 @@ import io.intino.datahub.datalake.BrokerSessions;
 import io.intino.datahub.datalake.seal.DatahubSessionSealer;
 import io.intino.datahub.datamart.MasterDatamartRepository;
 import io.intino.datahub.datamart.impl.LocalMasterDatamart;
-import io.intino.datahub.datamart.messages.DatamartFactory;
+import io.intino.datahub.datamart.DatamartFactory;
 import io.intino.datahub.datamart.serialization.MasterDatamartSerializer;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Message;
