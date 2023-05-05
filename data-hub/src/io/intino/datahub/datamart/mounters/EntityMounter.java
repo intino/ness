@@ -1,5 +1,7 @@
 package io.intino.datahub.datamart.mounters;
 
+import io.intino.alexandria.event.Event;
+import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.datahub.datamart.MasterDatamart;
@@ -8,6 +10,11 @@ public final class EntityMounter extends MasterDatamartMounter {
 
 	public EntityMounter(MasterDatamart datamart) {
 		super(datamart);
+	}
+
+	@Override
+	public void mount(Event event) {
+		if(event instanceof MessageEvent e) mount(e.toMessage());
 	}
 
 	@Override

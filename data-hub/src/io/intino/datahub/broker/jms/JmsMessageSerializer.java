@@ -53,7 +53,8 @@ class JmsMessageSerializer {
 	}
 
 	private static MasterDatamartMounter[] createMountersFor(Datalake.Tank tank, MasterDatamartRepository datamartsRepo) {
-		return datamartsRepo.datamarts().stream()
+		return datamartsRepo == null ? new MasterDatamartMounter[0]
+				: datamartsRepo.datamarts().stream()
 				.flatMap(datamart -> datamart.createMountersFor(tank))
 				.toArray(MasterDatamartMounter[]::new);
 	}

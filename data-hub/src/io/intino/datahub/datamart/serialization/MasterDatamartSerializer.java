@@ -57,14 +57,6 @@ public class MasterDatamartSerializer {
 		}
 	}
 
-	public void saveBackup(MasterDatamart datamart) throws IOException {
-		serialize(datamart, backupFileOf(datamart.name()));
-	}
-
-	public File backupFileOf(String datamart) {
-		return new File(box.datamartDirectory(datamart), ".backup");
-	}
-
 	public void saveSnapshot(Timetag timetag, MasterDatamart datamart) throws IOException {
 		File file = snapshotDirOf(datamart.name() + "/" + timetag.value() + SNAPSHOT_EXTENSION);
 		file.getParentFile().mkdirs();

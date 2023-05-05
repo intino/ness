@@ -16,5 +16,7 @@ public abstract sealed class MasterDatamartMounter permits EntityMounter, ReelMo
 		return datamart.box();
 	}
 
+	public abstract void mount(io.intino.alexandria.event.Event event);
+
 	public abstract void mount(Message message);
 }

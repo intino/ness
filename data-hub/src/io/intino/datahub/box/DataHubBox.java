@@ -12,9 +12,9 @@ import io.intino.datahub.broker.jms.JmsBrokerService;
 import io.intino.datahub.broker.jms.SSLConfiguration;
 import io.intino.datahub.datalake.BrokerSessions;
 import io.intino.datahub.datalake.seal.DatahubSessionSealer;
+import io.intino.datahub.datamart.DatamartFactory;
 import io.intino.datahub.datamart.MasterDatamartRepository;
 import io.intino.datahub.datamart.impl.LocalMasterDatamart;
-import io.intino.datahub.datamart.DatamartFactory;
 import io.intino.datahub.datamart.serialization.MasterDatamartSerializer;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Message;
@@ -231,7 +231,6 @@ public class DataHubBox extends AbstractBox {
 		this.datamartSerializer = new MasterDatamartSerializer(this);
 		this.masterDatamarts = new MasterDatamartRepository(datamartsDirectory());
 		initDatamarts();
-		Runtime.getRuntime().addShutdownHook(new Thread(this::saveDatamartBackups, "DatamartBackupsThread"));
 	}
 
 	private void initDatamarts() {
@@ -243,26 +242,12 @@ public class DataHubBox extends AbstractBox {
 		Logger.info("MasterDatamarts initialized (" + masterDatamarts.size() + ") after " + (System.currentTimeMillis() - start) + " ms");
 	}
 
-	private void saveDatamartBackups() {
-		for (Datamart datamart : graph.datamartList()) {
-			try {
-				if (!datamart.saveOnExit()) continue;
-				datamartSerializer.saveBackup(masterDatamarts.get(datamart.name$()));
-			} catch (Throwable e) {
-				try {
-					Logger.error("Failed to save backup of " + datamart.name$() + ": " + e.getMessage(), e);
-				} catch (Throwable ignored) {
-				}
-			}
-		}
-	}
-
 	private void initDatamart(DatamartFactory datamartFactory, Datamart datamart) {
 		try {
 			Logger.debug("Initializing MasterDatamart " + datamart.name$() + "...");
 			masterDatamarts.put(datamart.name$(), datamartFactory.create(datamart));
 			Logger.debug("MasterDatamart " + datamart.name$() + " initialized!");
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			Logger.error("Could not initialize datamart " + datamart.name$() + ": " + e.getMessage(), e);
 			masterDatamarts.put(datamart.name$(), new LocalMasterDatamart(this, datamart));
 		}

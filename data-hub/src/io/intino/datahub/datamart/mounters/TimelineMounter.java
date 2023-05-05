@@ -1,6 +1,8 @@
 package io.intino.datahub.datamart.mounters;
 
+import io.intino.alexandria.event.Event;
 import io.intino.alexandria.event.measurement.MeasurementEvent;
+import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.datahub.datamart.MasterDatamart;
@@ -21,6 +23,12 @@ public final class TimelineMounter extends MasterDatamartMounter {
 
 	public TimelineMounter(MasterDatamart datamart) {
 		super(datamart);
+	}
+
+	@Override
+	public void mount(Event event) {
+		if(event instanceof MeasurementEvent e) mount(e);
+		if(event instanceof MessageEvent e) mount(e.toMessage());
 	}
 
 	@Override
