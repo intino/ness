@@ -137,7 +137,6 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:terminal-jms:5.3.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino:data-hub:9.3.0-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:bpm-framework:3.1.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.sumus:chronos:1.0.6" level="project" />
     <orderEntry type="library" name="Intino: com.tdunning:t-digest:3.3" level="project" />
     <orderEntry type="library" name="Intino: com.github.haifengl:smile-core:3.0.0" level="project" />
     <orderEntry type="library" name="Intino: com.github.haifengl:smile-base:3.0.0" level="project" />
@@ -168,5 +167,9 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zim:5.1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:message:4.1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:primitives:1.1.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.5.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.3" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.sumus:chronos:1.0.7" level="project" />
   </component>
 </module>
