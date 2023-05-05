@@ -58,16 +58,16 @@ Concept:Named Datamart
 	has Entity
 	has Struct
 	has Timeline
-	has Reel
+	has:Named Reel
 
-Concept:Named Timeline
+Concept Timeline is component
 	var Datalake.Tank.Measurement source
 	var Entity entity
 	Concept:Named Attribute
 		var Sensor.Magnitude magnitude
 		var Entity.Attribute from
 
-Concept:Named Reel
+Concept Reel is component
 	var Entity entity = empty
 	Concept Signal
 		var Datalake.Tank.Message event = empty
