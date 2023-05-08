@@ -192,6 +192,11 @@ def type(reelNode & default) trigger(nodeImpl)
 		}
 
 		@Override
+        public io.intino.sumus.chronos.Reel get(io.intino.sumus.chronos.Period period) {
+        	return reelFile().reel().by(period);
+        }
+
+		@Override
         public io.intino.sumus.chronos.Reel get(Instant from, Instant to, io.intino.sumus.chronos.Period period) {
         	return reelFile().reel(from, to).by(period);
         }

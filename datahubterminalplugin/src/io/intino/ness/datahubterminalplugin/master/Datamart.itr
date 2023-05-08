@@ -114,6 +114,7 @@ def type(datamart & interface)
         	io.intino.sumus.chronos.Reel.State stateOf(String signal);
 			default List<io.intino.sumus.chronos.Reel.State> stateOf(List<String> signals) {return signals.isEmpty() ? java.util.Collections.emptyList() : stateOf(signals.stream());}
 			List<io.intino.sumus.chronos.Reel.State> stateOf(Stream<String> signals);
+        	io.intino.sumus.chronos.Reel get(io.intino.sumus.chronos.Period period);
         	io.intino.sumus.chronos.Reel get(java.time.Instant from, java.time.Instant to, io.intino.sumus.chronos.Period period);
         	void setEventListener(EventListener listener);
 

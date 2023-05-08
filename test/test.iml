@@ -207,7 +207,6 @@
     <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-databind:2.13.4.2" level="project" />
     <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-annotations:2.13.4" level="project" />
     <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-core:2.13.4" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.sumus:chronos:1.0.7" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: com.fasterxml.jackson.core:jackson-core:2.14.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: com.fasterxml.jackson.core:jackson-databind:2.14.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: com.fasterxml.jackson.core:jackson-annotations:2.14.2" level="project" />
@@ -222,5 +221,7 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.cosmos.datahub:trooper-terminal:1.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.cosmos.datahub:ontology:1.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.ness:master:2.0.4" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.sumus:chronos:1.0.8" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.sumus:chronos:1.0.7" level="project" />
   </component>
 </module>
