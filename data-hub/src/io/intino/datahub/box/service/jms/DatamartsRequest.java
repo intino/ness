@@ -67,28 +67,35 @@ public class DatamartsRequest {
 			case "snapshots" -> listAvailableSnapshotsOf(datamart);
 			case "entities" -> downloadEntities(datamart, args);
 			case "list-timelines" -> listTimelineFiles(datamart, args);
-			case "get-timeline" -> downloadTimeline(datamart, args);
+			case "get-timeline" -> getTimeline(datamart, args);
 			case "list-reels" -> listReelFiles(datamart, args);
-			case "get-reel" -> downloadReel(datamart, args);
+			case "get-reel" -> getReel(datamart, args);
 			default -> Stream.empty();
 		};
 	}
 
-	private Stream<Message> downloadReel(MasterDatamart datamart, Map<String, String> args) {
-		return downloadChronos(args, box.datamartReelsDirectory(datamart.name()), REEL_EXTENSION);
+	private Stream<Message> getReel(MasterDatamart datamart, Map<String, String> args) {
+		return getChronos(args, box.datamartReelsDirectory(datamart.name()), REEL_EXTENSION);
 	}
 
-	private Stream<Message> downloadTimeline(MasterDatamart datamart, Map<String, String> args) {
-		return downloadChronos(args, box.datamartTimelinesDirectory(datamart.name()), TIMELINE_EXTENSION);
+	private Stream<Message> getTimeline(MasterDatamart datamart, Map<String, String> args) {
+		return getChronos(args, box.datamartTimelinesDirectory(datamart.name()), TIMELINE_EXTENSION);
 	}
 
-	private Stream<Message> downloadChronos(Map<String, String> args, File dir, String extension) {
+	private Stream<Message> getChronos(Map<String, String> args, File dir, String extension) {
 		String id = args.get("id");
 		if(id == null) {
 			Logger.error("Chronos object download requested but id argument not found");
 			return Stream.empty();
 		}
-		File file = new File(dir, id + extension);
+
+		String type = args.get("type");
+		if(type == null) {
+			Logger.error("Chronos object download requested but type argument not found");
+			return Stream.empty();
+		}
+
+		File file = new File(dir, type + File.pathSeparator + id + extension);
 		if(!file.exists()) return Stream.empty();
 
 		String mode = args.getOrDefault("mode", "download");
@@ -122,11 +129,11 @@ public class DatamartsRequest {
 	}
 
 	private Stream<Message> listReelFiles(MasterDatamart datamart, Map<String, String> args) {
-		return listFiles(datamart.name(), box.datamartReelFiles(datamart.name()));
+		return listFiles(datamart.name(), box.datamartReelFiles(datamart.name(), args.get("id")));
 	}
 
 	private Stream<Message> listTimelineFiles(MasterDatamart datamart, Map<String, String> args) {
-		return listFiles(datamart.name(), box.datamartTimelineFiles(datamart.name()));
+		return listFiles(datamart.name(), box.datamartTimelineFiles(datamart.name(), args.get("id")));
 	}
 
 	private Stream<Message> listFiles(String datamart, List<File> files) {

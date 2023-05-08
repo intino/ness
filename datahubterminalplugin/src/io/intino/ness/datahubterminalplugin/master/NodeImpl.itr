@@ -3,15 +3,22 @@ def type(timelineNode & default) trigger(nodeImpl)
 	private class TimelineNodeImpl implements TimelineNode {
 
 		private final String id;
-		private final String source;
+		private final String type;
+		private final Set<String> sources;
 		private volatile File file;
 		private volatile java.lang.ref.SoftReference<io.intino.sumus.chronos.Timeline> cache;
 		private volatile EventListener listener;
 		private volatile boolean disposed;
 
-		private TimelineNodeImpl(String id, String source) {
+		private TimelineNodeImpl(String id, String type, Set<String> sources) {
+			this(id, type, sources, null);
+		}
+
+		private TimelineNodeImpl(String id, String type, Set<String> sources, File file) {
 			this.id = requireNonNull(id);
-			this.source = requireNonNull(source);
+			this.type = requireNonNull(type);
+			this.sources = requireNonNull(sources);
+			this.file = file;
 		}
 
 		@Override
@@ -20,12 +27,17 @@ def type(timelineNode & default) trigger(nodeImpl)
 		}
 
 		@Override
+		public String type() {
+			return type;
+		}
+
+		@Override
 		public void dispose() {
 			synchronized(this) {
 				if(disposed) return;
 				clearCache();
 				listener = null;
-				timelines.remove(id);
+				timelines.remove(id + ":" + type);
 				disposed = true;
 			}
 		}
@@ -62,7 +74,7 @@ def type(timelineNode & default) trigger(nodeImpl)
 			synchronized(this) {
 				if(disposed) return;
 				try {
-					if(!source.equals(event.type())) return;
+					if(!sources.contains(event.type())) return;
 					clearCache();
 					if(listener != null) listener.onEventReceived(this, event);
 				} catch(Throwable e) {
@@ -118,7 +130,7 @@ def type(timelineNode & default) trigger(nodeImpl)
 
 		private javax.jms.Message request(String mode) throws Exception {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
-			String command = "datamart=" + name() + ";operation=get-timeline;id=" + id() + ";mode=" + mode;
+			String command = "datamart=" + name() + ";operation=get-timeline;id=" + id() + ";mode=" + mode + ";type=" + type;
 			message.setText(command);
 			return message;
 		}
@@ -130,14 +142,21 @@ def type(reelNode & default) trigger(nodeImpl)
 	private class ReelNodeImpl implements ReelNode {
 
 		private final String id;
+		private final String type;
 		private final Set<String> sources;
 		private volatile File file;
 		private volatile EventListener listener;
 		private volatile boolean disposed;
 
-		private ReelNodeImpl(String id, Set<String> sources) {
+		private ReelNodeImpl(String id, String type, Set<String> sources) {
+			this(id, type, sources, null);
+		}
+
+		private ReelNodeImpl(String id, String type, Set<String> sources, File file) {
 			this.id = requireNonNull(id);
+			this.type = requireNonNull(type);
 			this.sources = requireNonNull(sources);
+			this.file = file;
 		}
 
 		@Override
@@ -146,12 +165,17 @@ def type(reelNode & default) trigger(nodeImpl)
 		}
 
 		@Override
+		public String type() {
+			return type;
+		}
+
+		@Override
 		public void dispose() {
 			synchronized(this) {
 				if(disposed) return;
 				clearCache();
 				listener = null;
-				reels.remove(id);
+				reels.remove(id + ":" + type);
 				disposed = true;
 			}
 		}
@@ -246,7 +270,7 @@ def type(reelNode & default) trigger(nodeImpl)
 
 		private javax.jms.Message request(String mode) throws Exception {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
-			String command = "datamart=" + name() + ";operation=get-reel;id=" + id() + ";mode=" + mode;
+			String command = "datamart=" + name() + ";operation=get-reel;id=" + id() + ";mode=" + mode + ";type=" + type;
 			message.setText(command);
 			return message;
 		}

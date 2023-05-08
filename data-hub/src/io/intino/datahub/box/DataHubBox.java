@@ -20,13 +20,12 @@ import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Message;
 import io.intino.datahub.model.NessGraph;
 import io.intino.magritte.framework.Graph;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DataHubBox extends AbstractBox {
@@ -141,14 +140,18 @@ public class DataHubBox extends AbstractBox {
 		return new File(datamartDirectory(name), "reels");
 	}
 
-	public List<File> datamartTimelineFiles(String datamartName) {
-		File[] files = datamartTimelinesDirectory(datamartName).listFiles(f -> f.isFile() && f.getName().endsWith(TIMELINE_EXTENSION));
-		return files == null ? Collections.emptyList() : Arrays.asList(files);
+	public List<File> datamartTimelineFiles(String datamartName, String id) {
+		return listFiles(datamartTimelinesDirectory(datamartName), TIMELINE_EXTENSION, id);
 	}
 
-	public List<File> datamartReelFiles(String datamartName) {
-		File[] files = datamartReelsDirectory(datamartName).listFiles(f -> f.isFile() && f.getName().endsWith(REEL_EXTENSION));
-		return files == null ? Collections.emptyList() : Arrays.asList(files);
+	public List<File> datamartReelFiles(String datamartName, String id) {
+		return listFiles(datamartReelsDirectory(datamartName), REEL_EXTENSION, id);
+	}
+
+	private List<File> listFiles(File directory, String extension, String id) {
+		var files = FileUtils.listFiles(directory, new String[] {extension}, true);
+		if(id != null) return files.stream().filter(f -> f.getName().equals(id + extension)).toList();
+		return files instanceof List<File> list ? list : new ArrayList<>(files);
 	}
 
 	public MasterDatamartSerializer datamartSerializer() {

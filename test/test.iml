@@ -219,5 +219,8 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zim:5.1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:message:4.1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:primitives:1.1.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.cosmos.datahub:trooper-terminal:1.0.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.cosmos.datahub:ontology:1.0.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.ness:master:2.0.4" level="project" />
   </component>
 </module>

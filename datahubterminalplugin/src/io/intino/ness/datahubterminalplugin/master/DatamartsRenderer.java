@@ -174,8 +174,14 @@ public class DatamartsRenderer implements ConceptRenderer {
 		builder.add("package", modelPackage);
 		builder.add("name", datamart.name$());
 		builder.add("entity", entitiesOf(datamart));
-		if(!datamart.timelineList().isEmpty()) builder.add("timeline", timelinesOf(datamart));
-		if(!datamart.reelList().isEmpty()) builder.add("reel", reelsOf(datamart));
+		if(!datamart.timelineList().isEmpty()) {
+			builder.add("hasTimelines", "");
+			builder.add("timeline", timelinesOf(datamart));
+		}
+		if(!datamart.reelList().isEmpty()) {
+			builder.add("hasReels", "");
+			builder.add("reel", reelsOf(datamart));
+		}
 		return builder;
 	}
 
@@ -201,9 +207,17 @@ public class DatamartsRenderer implements ConceptRenderer {
 		FrameBuilder b = new FrameBuilder("reel");
 		b.add("package", modelPackage);
 		b.add("name", reel.name$());
-		b.add("sources", reel.signalList().stream().map(s -> quoted().format(s.tank().message().name$()).toString()).collect(Collectors.joining(",")));
+		b.add("sources", sourcesOf(reel));
 		b.add("entity", reel.entity().name$());
 		return b.toFrame();
+	}
+
+	private String sourcesOf(Reel reel) {
+		Set<String> sources = reel.signalList().stream().map(s -> quoted().format(s.tank().message().name$()).toString()).collect(Collectors.toSet());
+		if(reel.entity() != null && reel.entity().from() != null) {
+			sources.add(quoted().format(reel.entity().from().message().name$()).toString());
+		}
+		return String.join(",", sources);
 	}
 
 	private Frame timelineNode() {
@@ -226,9 +240,16 @@ public class DatamartsRenderer implements ConceptRenderer {
 		FrameBuilder b = new FrameBuilder("timeline");
 		b.add("package", modelPackage);
 		b.add("name", timeline.name$());
-		b.add("source", timeline.tank().sensor().name$());
+		b.add("sources", sourcesOf(timeline));
 		b.add("entity", timeline.entity().name$());
 		return b.toFrame();
+	}
+
+	private String sourcesOf(Timeline timeline) {
+		String sensor = quoted().format(timeline.tank().sensor().name$()).toString();
+		if(timeline.entity() != null && timeline.entity().from() != null)
+			return sensor + "," + quoted().format(timeline.entity().from().message().name$()).toString();
+		return sensor;
 	}
 
 	private FrameBuilder datamartImplBuilder(Datamart datamart, TerminalInfo terminalInfo) {

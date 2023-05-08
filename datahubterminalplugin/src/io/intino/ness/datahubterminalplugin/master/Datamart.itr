@@ -20,7 +20,11 @@ def type(datamart & interface)
 
 		[$entity+getterSignature...[$NL$NL]]
 
+		[$hasTimelines~Stream<TimelineNode> timelines(String id);]
+
 		[$timeline+getterSignature...[$NL$NL]]
+
+		[$hasReels~Stream<ReelNode> reels(String id);]
 
 		[$reel+getterSignature...[$NL$NL]]
 
@@ -89,6 +93,8 @@ def type(datamart & interface)
         interface ChronosNode {
         	/**<p>Returns the id of the chronos object</p>*/
         	String id();
+        	/**<p>Returns the type of the chronos object, as defined in the model</p>*/
+        	String type();
         	/**Clears this node's internal cache, if any, and notifies the datamart to unload this node from memory.*/
         	void dispose();
         }
@@ -260,8 +266,10 @@ def type(datamart & message & impl)
 
     	[$entity+getter...[$NL$NL]]
 
+		[$hasTimelines+timelinesByIdMethod]
     	[$timeline+getter...[$NL$NL]]
 
+		[$hasReels+reelsByIdMethod]
     	[$reel+getter...[$NL$NL]]
 
 		private void downloadDatamartFromDatahub() {
@@ -559,15 +567,93 @@ end
 def type(timeline) trigger(getter)
 	@Override
 	public TimelineNode $name+FirstLowerCase~Timeline(String id) {
-		return timelines.computeIfAbsent(id, theId -> new TimelineNodeImpl(id, "$source"));
+		return timelines.computeIfAbsent(id + ":$name", theId -> new TimelineNodeImpl(id, "$name", Set.of($sources)));
 	}
 end
 
 def type(reel) trigger(getter)
 	@Override
 	public ReelNode $name+FirstLowerCase~Reel(String id) {
-		return reels.computeIfAbsent(id, theId -> new ReelNodeImpl(id, Set.of($sources)));
+		return reels.computeIfAbsent(id + ":$name", theId -> new ReelNodeImpl(id, "$name", Set.of($sources)));
 	}
+end
+
+def trigger(timelinesByIdMethod)
+	@Override
+	public Stream<TimelineNode> timelines(String id) {
+		String$[$] files = listTimelineFilesOf(id);
+		return Arrays.stream(files)
+			.map(f -> {
+				File file = new File(f);
+				String type = file.getParentFile().getName();
+				TimelineNodeImpl node = timelines.get(id + ":" + type);
+				if(node == null) {
+					node = new TimelineNodeImpl(id, type, sourcesOfTimeline(type), file.exists() ? file : null);
+					timelines.put(id + ":" + type, node);
+				}
+				return node;
+			});
+	}
+
+	private String$[$] listTimelineFilesOf(String id) {
+		try {
+			ActiveMQTextMessage request = new ActiveMQTextMessage();
+			request.setText("datamart=" + name() + ";operation=list-timelines;id=" + id);
+			javax.jms.Message message = requestResponseFromDatahub("list-timelines=" + id, request);
+			return ((javax.jms.TextMessage)message).getText().split(",");
+		} catch(Exception e) {
+			Logger.error(e);
+			return new String$[0$];
+		}
+	}
+
+	private static Set<String> sourcesOfTimeline(String type) {
+		return switch(type) {
+			[$timeline+sourcesSwitchCase...[$NL]]
+			default -> java.util.Collections.emptySet();
+		};
+	}
+end
+
+def trigger(reelsByIdMethod)
+	@Override
+	public Stream<ReelNode> reels(String id) {
+		String$[$] files = listReelFilesOf(id);
+		return Arrays.stream(files)
+			.map(f -> {
+				File file = new File(f);
+				String type = file.getParentFile().getName();
+				ReelNodeImpl node = reels.get(id + ":" + type);
+				if(node == null) {
+					node = new ReelNodeImpl(id, type, sourcesOfReel(type), file.exists() ? file : null);
+					reels.put(id + ":" + type, node);
+				}
+				return node;
+			});
+	}
+
+	private String$[$] listReelFilesOf(String id) {
+		try {
+			ActiveMQTextMessage request = new ActiveMQTextMessage();
+			request.setText("datamart=" + name() + ";operation=list-reels;id=" + id);
+			javax.jms.Message message = requestResponseFromDatahub("list-reels=" + id, request);
+			return ((javax.jms.TextMessage)message).getText().split(",");
+		} catch(Exception e) {
+			Logger.error(e);
+			return new String$[0$];
+		}
+	}
+
+	private static Set<String> sourcesOfReel(String type) {
+		return switch(type) {
+			[$reel+sourcesSwitchCase...[$NL]]
+			default -> java.util.Collections.emptySet();
+		};
+	}
+end
+
+def trigger(sourcesSwitchCase)
+	case "$type" -> Set.of($sources);
 end
 
 def type(abstract) trigger(getter)
