@@ -368,6 +368,20 @@ def type(datamart & message & impl)
 
 		[$reelNode+nodeImpl]
 
+		private static Set<String> sourcesOfTimeline(String type) {
+        	return switch(type) {
+        		[$timeline+sourcesSwitchCase...[$NL]]
+        		default -> java.util.Collections.emptySet();
+        	};
+        }
+
+		private static Set<String> sourcesOfReel(String type) {
+        	return switch(type) {
+        		[$reel+sourcesSwitchCase...[$NL]]
+        		default -> java.util.Collections.emptySet();
+        	};
+        }
+
 		// WARNING: extremely compacted and ugly code ahead... continue at your own discretion.
 		public static final class $name+FirstUpperCase~DatamartDefinition implements DatamartDefinition {
 
@@ -607,13 +621,6 @@ def trigger(timelinesByIdMethod)
 			return new String$[0$];
 		}
 	}
-
-	private static Set<String> sourcesOfTimeline(String type) {
-		return switch(type) {
-			[$timeline+sourcesSwitchCase...[$NL]]
-			default -> java.util.Collections.emptySet();
-		};
-	}
 end
 
 def trigger(reelsByIdMethod)
@@ -644,17 +651,10 @@ def trigger(reelsByIdMethod)
 			return new String$[0$];
 		}
 	}
-
-	private static Set<String> sourcesOfReel(String type) {
-		return switch(type) {
-			[$reel+sourcesSwitchCase...[$NL]]
-			default -> java.util.Collections.emptySet();
-		};
-	}
 end
 
 def trigger(sourcesSwitchCase)
-	case "$type" -> Set.of($sources);
+	case "$name" -> Set.of($sources);
 end
 
 def type(abstract) trigger(getter)
