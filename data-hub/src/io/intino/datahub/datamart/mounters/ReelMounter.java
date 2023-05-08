@@ -29,7 +29,7 @@ public final class ReelMounter extends MasterDatamartMounter {
 
 	@Override
 	public void mount(Event event) {
-		if(event instanceof MessageEvent e) mount(e.toMessage());
+		if (event instanceof MessageEvent e) mount(e.toMessage());
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public final class ReelMounter extends MasterDatamartMounter {
 			if (signal.operation().equals(Operation.Set))
 				reelFile.set(event.ts(), values);
 			else if (values.length == 1)
-				reelFile.append(new Shot(event.ts(), signal.attribute().name$(), values[0].equals(State.On.name()) ? State.On : State.Off));
+				reelFile.append(new Shot(event.ts(), values[0].equals(State.On.name()) ? State.On : State.Off, signal.attribute().name$()));
 		}
 	}
 
