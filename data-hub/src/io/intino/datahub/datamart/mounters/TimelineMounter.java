@@ -96,7 +96,7 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	}
 
 	private TimelineFile createTimelineFile(MeasurementEvent event, String ss) throws IOException {
-		File file = new File(box().datamartTimelinesDirectory(datamart.name()), ss + TIMELINE_EXTENSION);
+		File file = new File(box().datamartTimelinesDirectory(datamart.name()), event.type() + File.separator + ss + TIMELINE_EXTENSION);
 		file.getParentFile().mkdirs();
 		TimelineFile timelineFile = TimelineFile.create(file, ss);
 		Timeline timeline = datamart.definition().timelineList().stream()
