@@ -11,6 +11,7 @@ public class Client {
 
 	public static void main(String[] args) {
 		TrooperTerminal terminal = new TrooperTerminal(connector("test", "test", "test"));
+		terminal.initDatamarts();
 
 		MasterDatamart dm = terminal.masterDatamart();
 

@@ -16,10 +16,7 @@ import io.intino.datahub.model.rules.DayOfWeek;
 import io.intino.datahub.model.rules.SnapshotScale;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -115,11 +112,14 @@ public class DatamartFactory {
 	}
 
 	private static Set<String> reelTanks(Datamart definition) {
-		return definition.reelList().stream().flatMap(r -> Stream.concat(r.signalList().stream().map(DatamartFactory::tankName), Stream.of(tankName(r.entity())))).collect(Collectors.toSet());
+		return definition.reelList().stream().flatMap(r -> Stream.concat(
+						r.signalList().stream().map(DatamartFactory::tankName),
+						r.entity().from() == null ? Stream.empty() : Stream.of(tankName(r.entity()))))
+				.collect(Collectors.toSet());
 	}
 
 	private static Set<String> timelineTanks(Datamart definition) {
-		return definition.timelineList().stream().flatMap(t -> Stream.of(tankName(t.tank().sensor()), tankName(t.entity()))).collect(Collectors.toSet());
+		return definition.timelineList().stream().flatMap(t -> Stream.of(tankName(t.tank().sensor()), tankName(t.entity()))).filter(Objects::nonNull).collect(Collectors.toSet());
 	}
 
 	private static Set<String> entityTanks(Datamart definition) {
@@ -135,7 +135,7 @@ public class DatamartFactory {
 	}
 
 	private static String tankName(Entity e) {
-		return e.from().message().core$().fullName().replace("$", ".");
+		return e.from() == null ? null : e.from().message().core$().fullName().replace("$", ".");
 	}
 
 	private static class Reference<T> {
