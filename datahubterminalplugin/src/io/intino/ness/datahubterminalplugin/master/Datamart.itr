@@ -6,6 +6,7 @@ def type(datamart & interface)
 	import java.util.concurrent.ConcurrentHashMap;
 	import java.util.stream.Stream;
 	import java.util.stream.Collectors;
+	import java.time.Instant;
 
 	import io.intino.ness.master.Datamart;
 	import io.intino.ness.master.model.Entity;
@@ -101,7 +102,12 @@ def type(datamart & interface)
 
         interface TimelineNode extends ChronosNode {
 
+			io.intino.sumus.chronos.TimelineFile.TimeModel timeModel();
+			io.intino.sumus.chronos.TimelineFile.SensorModel sensorModel();
+			Instant first();
+			Instant last();
         	io.intino.sumus.chronos.Timeline get();
+
         	void setEventListener(EventListener listener);
 
      		interface EventListener {

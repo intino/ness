@@ -12,6 +12,7 @@
       <sourceFolder url="file://$MODULE_DIR$/temp/custom/ontology/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/temp/test/trooper-terminal/src" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/temp/test/connector-terminal/src" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/temp/cosmos/trooper-terminal/src" isTestSource="true" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -160,5 +161,10 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.5.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.3" level="project" />
+    <orderEntry type="library" name="Intino: io.intino:data-hub:9.3.3" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.2.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:http:1.7.2" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:rest-accessor:3.1.2" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.sumus:chronos:1.0.8" level="project" />
   </component>
 </module>

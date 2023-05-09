@@ -6,6 +6,7 @@ def type(timelineNode & default) trigger(nodeImpl)
 		private final String type;
 		private final Set<String> sources;
 		private volatile File file;
+		private volatile io.intino.sumus.chronos.TimelineFile timelineFile;
 		private volatile java.lang.ref.SoftReference<io.intino.sumus.chronos.Timeline> cache;
 		private volatile EventListener listener;
 		private volatile boolean disposed;
@@ -43,6 +44,26 @@ def type(timelineNode & default) trigger(nodeImpl)
 		}
 
 		@Override
+		public io.intino.sumus.chronos.TimelineFile.TimeModel timeModel() {
+			return timelineFile().timeModel();
+		}
+
+		@Override
+		public io.intino.sumus.chronos.TimelineFile.SensorModel sensorModel() {
+			return timelineFile().sensorModel();
+		}
+
+		@Override
+		public Instant first() {
+			return timelineFile().first();
+		}
+
+		@Override
+		public Instant last() {
+			return timelineFile().last();
+		}
+
+		@Override
 		public io.intino.sumus.chronos.Timeline get() {
 			synchronized(this) {
 				if(disposed) throw new IllegalStateException("This " + getClass().getSimpleName() + " is disposed.");
@@ -52,13 +73,26 @@ def type(timelineNode & default) trigger(nodeImpl)
 						if(timeline != null) return timeline;
 					}
 
-					io.intino.sumus.chronos.Timeline timeline = (file != null && file.exists())
-						? loadFile()
-						: downloadFromDatahub();
+					io.intino.sumus.chronos.Timeline timeline = timelineFile().timeline();
 
 					cache = new java.lang.ref.SoftReference<>(timeline);
 					return timeline;
+				} catch(RuntimeException e) {
+					throw e;
+				} catch(Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
 
+		private io.intino.sumus.chronos.TimelineFile timelineFile() {
+			synchronized(this) {
+				if(disposed) throw new IllegalStateException("This " + getClass().getSimpleName() + " is disposed.");
+				try {
+					if(timelineFile != null) return timelineFile;
+					return timelineFile = (file != null && file.exists())
+						? loadFile()
+						: downloadFromDatahub();
 				} catch(Exception e) {
 					throw new RuntimeException(e);
 				}
@@ -88,14 +122,15 @@ def type(timelineNode & default) trigger(nodeImpl)
 				cache.enqueue();
 				cache = null;
 			}
+			timelineFile = null;
 			file = null;
 		}
 
-		private io.intino.sumus.chronos.Timeline loadFile() throws Exception {
-			return io.intino.sumus.chronos.Timeline~File.open(file).timeline();
+		private io.intino.sumus.chronos.TimelineFile loadFile() throws Exception {
+			return io.intino.sumus.chronos.TimelineFile.open(file);
 		}
 
-		private io.intino.sumus.chronos.Timeline downloadFromDatahub() throws Exception {
+		private io.intino.sumus.chronos.TimelineFile downloadFromDatahub() throws Exception {
 			javax.jms.Message response = requestResponseFromDatahub("get-timeline=" + id(), request("path"));
 
 			if(response instanceof javax.jms.TextMessage textResponse) {
@@ -108,7 +143,7 @@ def type(timelineNode & default) trigger(nodeImpl)
 			return readFromBytes((javax.jms.BytesMessage) response);
 		}
 
-		private io.intino.sumus.chronos.Timeline readFromBytes(javax.jms.BytesMessage m) throws Exception {
+		private io.intino.sumus.chronos.TimelineFile readFromBytes(javax.jms.BytesMessage m) throws Exception {
 			int size = m.getIntProperty("size");
 			byte$[$] bytes = new byte$[size$];
 			m.readBytes(bytes, size);
@@ -145,6 +180,7 @@ def type(reelNode & default) trigger(nodeImpl)
 		private final String type;
 		private final Set<String> sources;
 		private volatile File file;
+		private volatile io.intino.sumus.chronos.ReelFile reelFile;
 		private volatile EventListener listener;
 		private volatile boolean disposed;
 
@@ -187,7 +223,7 @@ def type(reelNode & default) trigger(nodeImpl)
 
 		@Override
 		public List<io.intino.sumus.chronos.Reel.State> stateOf(Stream<String> signals) {
-			var reelFile = reelFile();
+			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
 			return signals.map(reelFile::stateOf).toList();
 		}
 
@@ -205,7 +241,8 @@ def type(reelNode & default) trigger(nodeImpl)
 			synchronized(this) {
 				if(disposed) throw new IllegalStateException("This " + getClass().getSimpleName() + " is disposed.");
 				try {
-					return (file != null && file.exists())
+					if(reelFile != null) return reelFile;
+					return reelFile = (file != null && file.exists())
 						? loadFile()
 						: downloadFromDatahub();
 				} catch(Exception e) {
@@ -233,6 +270,7 @@ def type(reelNode & default) trigger(nodeImpl)
 		}
 
 		private void clearCache() {
+			reelFile = null;
 			file = null;
 		}
 

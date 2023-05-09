@@ -5,7 +5,7 @@ import io.intino.cosmos.datahub.TrooperTerminal;
 import io.intino.cosmos.datahub.datamarts.master.MasterDatamart;
 
 import java.io.File;
-import java.util.List;
+import java.util.stream.Stream;
 
 public class Client {
 
@@ -15,8 +15,10 @@ public class Client {
 
 		MasterDatamart dm = terminal.masterDatamart();
 
-		List<MasterDatamart.TimelineNode> t1 = dm.timelines("1").toList();
-		List<MasterDatamart.TimelineNode> t2 = dm.timelines("2").toList();
+		Stream<MasterDatamart.TimelineNode> timelines = dm.timelines("123");
+		Stream<MasterDatamart.ReelNode> reels = dm.reels("123");
+
+		timelines.findFirst().get().sensorModel();
 
 		System.out.println();
 	}
