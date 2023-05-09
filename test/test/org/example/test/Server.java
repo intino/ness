@@ -16,11 +16,19 @@ public class Server {
 	private static final String[] stashes = {"Solution"};
 
 	public static void main(String[] args) throws IOException {
+		normalizeTimelineExtensions();
 		DataHubConfiguration conf = new DataHubConfiguration(arguments());
 		NessGraph graph = new Graph().loadStashes(stashes).as(NessGraph.class);
 		loadUsers(conf.home(), graph);
 		Box box = new DataHubBox(conf).put(graph.core$()).start();
 		Runtime.getRuntime().addShutdownHook(new Thread(box::stop));
+	}
+
+	private static void normalizeTimelineExtensions() {
+		var files = FileUtils.listFiles(new File("C:\\Users\\naits\\Desktop\\IntinoDev\\ness\\temp\\datahub\\datamarts\\master\\timelines"), new String[]{"tl"}, true);
+		for(File file : files) {
+			file.renameTo(new File(file.getAbsolutePath().replace(".tl", ".timeline")));
+		}
 	}
 
 	private static void loadUsers(File workspace, NessGraph nessGraph) {

@@ -15,10 +15,9 @@ public class Client {
 
 		MasterDatamart dm = terminal.masterDatamart();
 
-		Stream<MasterDatamart.TimelineNode> timelines = dm.timelines("123");
-		Stream<MasterDatamart.ReelNode> reels = dm.reels("123");
+		Stream<MasterDatamart.TimelineNode> timelines = dm.timelines("EC2AMAZ-D67CFU1_Code");
 
-		timelines.findFirst().get().sensorModel();
+		MasterDatamart.TimelineNode timeline = timelines.findFirst().get();
 
 		System.out.println();
 	}
