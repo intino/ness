@@ -603,17 +603,22 @@ def trigger(timelinesByIdMethod)
 	@Override
 	public Stream<TimelineNode> timelines(String id) {
 		String$[$] files = listTimelineFilesOf(id);
-		return Arrays.stream(files)
-			.map(f -> {
-				File file = new File(f);
-				String type = file.getParentFile().getName();
-				TimelineNodeImpl node = timelines.get(id + ":" + type);
-				if(node == null) {
-					node = new TimelineNodeImpl(id, type, sourcesOfTimeline(type), file.exists() ? file : null);
-					timelines.put(id + ":" + type, node);
+		return (Stream<TimelineNode>) Arrays.stream(files)
+			.filter(f -> f != null && !f.isEmpty())
+			.<TimelineNode>map(f -> {
+				try {
+					File file = new File(f);
+                	String type = file.getParentFile().getName();
+                	TimelineNodeImpl node = timelines.get(id + ":" + type);
+                	if(node == null) {
+                		node = new TimelineNodeImpl(id, type, sourcesOfTimeline(type), file.exists() ? file : null);
+                		timelines.put(id + ":" + type, node);
+                	}
+                	return node;
+				} catch(Exception ignored) {
+					return null;
 				}
-				return node;
-			});
+			}).filter(java.util.Objects::nonNull);
 	}
 
 	private String$[$] listTimelineFilesOf(String id) {
@@ -633,17 +638,22 @@ def trigger(reelsByIdMethod)
 	@Override
 	public Stream<ReelNode> reels(String id) {
 		String$[$] files = listReelFilesOf(id);
-		return Arrays.stream(files)
-			.map(f -> {
-				File file = new File(f);
-				String type = file.getParentFile().getName();
-				ReelNodeImpl node = reels.get(id + ":" + type);
-				if(node == null) {
-					node = new ReelNodeImpl(id, type, sourcesOfReel(type), file.exists() ? file : null);
-					reels.put(id + ":" + type, node);
+		return (Stream<ReelNode>) Arrays.stream(files)
+			.filter(f -> f != null && !f.isEmpty())
+			.<ReelNode>map(f -> {
+				try {
+					File file = new File(f);
+                	String type = file.getParentFile().getName();
+                	ReelNodeImpl node = reels.get(id + ":" + type);
+                	if(node == null) {
+                		node = new ReelNodeImpl(id, type, sourcesOfReel(type), file.exists() ? file : null);
+                		reels.put(id + ":" + type, node);
+                	}
+                	return node;
+				} catch(Exception ignored) {
+					return null;
 				}
-				return node;
-			});
+			}).filter(java.util.Objects::nonNull);
 	}
 
 	private String$[$] listReelFilesOf(String id) {
