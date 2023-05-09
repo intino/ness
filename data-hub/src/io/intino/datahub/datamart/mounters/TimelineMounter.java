@@ -92,7 +92,14 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	}
 
 	private static MeasurementEvent measurementEvent(Message message) {
-		return new MeasurementEvent(message.type(), message.get("ss").asString(), message.get("ts").asInstant(), message.get("measurements").as(String[].class), java.util.Arrays.stream(message.get("values").as(String[].class)).mapToDouble(Double::parseDouble).toArray());
+		// TODO: OR check nulls
+		String[] measurements = message.get("measurements").as(String[].class);
+		if(measurements == null) measurements = new String[0];
+
+		String[] values = message.get("values").as(String[].class);
+		if(values == null) values = new String[0];
+
+		return new MeasurementEvent(message.type(), message.get("ss").asString(), message.get("ts").asInstant(), measurements, java.util.Arrays.stream(values).mapToDouble(Double::parseDouble).toArray());
 	}
 
 	private TimelineFile createTimelineFile(MeasurementEvent event, String ss) throws IOException {
@@ -100,9 +107,9 @@ public final class TimelineMounter extends MasterDatamartMounter {
 		file.getParentFile().mkdirs();
 		TimelineFile timelineFile = TimelineFile.create(file, ss);
 		Timeline timeline = datamart.definition().timelineList().stream()
-				.filter(t -> t.tank().sensor().name$().equals(event.type()))
+				.filter(t -> t.tank().sensor().name$().equals(event.type())) // TODO: OR
 				.findFirst()
-				.orElseThrow(() -> new IOException("Tank not found"));
+				.orElseThrow(() -> new IOException("Tank not found: " + event.type()));
 		timelineFile.timeModel(event.ts(), new Period(timeline.tank().period(), timeline.tank().periodScale().chronoUnit()));
 		timelineFile.sensorModel(sensorModel(datamart.entityStore().get(ss), timeline));
 		return timelineFile;

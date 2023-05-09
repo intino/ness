@@ -26,6 +26,8 @@ import java.io.File;
 import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class DataHubBox extends AbstractBox {
@@ -149,7 +151,8 @@ public class DataHubBox extends AbstractBox {
 	}
 
 	private List<File> listFiles(File directory, String extension, String id) {
-		var files = FileUtils.listFiles(directory, new String[] {extension, extension.substring(extension.indexOf('.') + 1)}, true);
+		if(!directory.exists()) return Collections.emptyList();
+		Collection<File> files = FileUtils.listFiles(directory, new String[] {extension, extension.substring(extension.indexOf('.') + 1)}, true);
 		if(id != null) return files.stream().filter(f -> f.getName().equals(id + extension)).toList();
 		return files instanceof List<File> list ? list : new ArrayList<>(files);
 	}

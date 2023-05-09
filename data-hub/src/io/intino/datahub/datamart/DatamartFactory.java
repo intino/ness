@@ -69,17 +69,35 @@ public class DatamartFactory {
 
 		Iterator<Event> iterator = reflowTanksFrom(fromTimetag, entityTanks, timelineTanks, reelTanks);
 
+		reflow(
+				datamart,
+				scale, firstDayOfWeek,
+				eventsOf(entityTanks), eventsOf(timelineTanks), eventsOf(reelTanks),
+				entityMounter, timelineMounter, reelMounter,
+				iterator);
+
+		return datamart;
+	}
+
+	private void reflow(MasterDatamart datamart, SnapshotScale scale, DayOfWeek firstDayOfWeek, Set<String> entityTanks, Set<String> timelineTanks, Set<String> reelTanks, EntityMounter entityMounter, TimelineMounter timelineMounter, ReelMounter reelMounter, Iterator<Event> iterator) throws IOException {
 		while (iterator.hasNext()) {
 			Event event = iterator.next();
 
 			createSnapshotIfNecessary(datamart, scale, firstDayOfWeek, event);
 
-			if(entityTanks.contains(event.type())) entityMounter.mount(event);
-			if(timelineTanks.contains(event.type())) timelineMounter.mount(event);
-			if(reelTanks.contains(event.type())) reelMounter.mount(event);
-		}
+			if(entityTanks.contains(event.type()))
+				entityMounter.mount(event);
 
-		return datamart;
+			if(timelineTanks.contains(event.type()))
+				timelineMounter.mount(event);
+
+			if(reelTanks.contains(event.type()))
+				reelMounter.mount(event);
+		}
+	}
+
+	private Set<String> eventsOf(Set<String> tankNames) {
+		return tankNames.stream().map(name -> name.substring(name.lastIndexOf('.') + 1)).collect(Collectors.toSet());
 	}
 
 	private void createSnapshotIfNecessary(MasterDatamart datamart, SnapshotScale scale, DayOfWeek firstDayOfWeek, Event event) throws IOException {
@@ -127,7 +145,7 @@ public class DatamartFactory {
 	}
 
 	private static String tankName(Reel.Signal s) {
-		return s.core$().fullName().replace("$", ".");
+		return s.tank().message().core$().fullName().replace("$", ".");
 	}
 
 	private static String tankName(Sensor sensor) {
