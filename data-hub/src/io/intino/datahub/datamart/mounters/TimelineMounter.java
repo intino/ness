@@ -45,7 +45,9 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	}
 
 	private boolean isAssertion(Message message) {
-		return datamart.definition().timelineList().stream().anyMatch(t -> t.entity().name$().equals(message.type()));
+		return datamart.definition().timelineList().stream()
+				.filter(t -> t.entity().from() != null)
+				.anyMatch(t -> t.entity().from().message().name$().equals(message.type()));
 	}
 
 	public void mount(MeasurementEvent event) {
@@ -92,22 +94,15 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	}
 
 	private static MeasurementEvent measurementEvent(Message message) {
-		// TODO: OR check nulls
-		String[] measurements = message.get("measurements").as(String[].class);
-		if(measurements == null) measurements = new String[0];
-
-		String[] values = message.get("values").as(String[].class);
-		if(values == null) values = new String[0];
-
-		return new MeasurementEvent(message.type(), message.get("ss").asString(), message.get("ts").asInstant(), measurements, java.util.Arrays.stream(values).mapToDouble(Double::parseDouble).toArray());
+		return new MeasurementEvent(message.type(), message.get("ss").asString(), message.get("ts").asInstant(), message.get("measurements").as(String[].class), java.util.Arrays.stream(message.get("values").as(String[].class)).mapToDouble(Double::parseDouble).toArray());
 	}
 
 	private TimelineFile createTimelineFile(MeasurementEvent event, String ss) throws IOException {
 		File file = new File(box().datamartTimelinesDirectory(datamart.name()), event.type() + File.separator + ss + TIMELINE_EXTENSION);
 		file.getParentFile().mkdirs();
-		TimelineFile timelineFile = TimelineFile.create(file, ss);
+		TimelineFile timelineFile = file.exists() ? TimelineFile.open(file) : TimelineFile.create(file, ss);
 		Timeline timeline = datamart.definition().timelineList().stream()
-				.filter(t -> t.tank().sensor().name$().equals(event.type())) // TODO: OR
+				.filter(t -> t.tank().sensor().name$().equals(event.type()))
 				.findFirst()
 				.orElseThrow(() -> new IOException("Tank not found: " + event.type()));
 		timelineFile.timeModel(event.ts(), new Period(timeline.tank().period(), timeline.tank().periodScale().chronoUnit()));
@@ -137,6 +132,7 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	private Map<String, String> merge(Sensor.Magnitude m, Message message, List<Sensor.Magnitude.Attribute> magnitudeAttr, List<Timeline.Attribute> timelineAttr) {
 		Map<String, String> attrs = new HashMap<>();
 		for (Sensor.Magnitude.Attribute attribute : magnitudeAttr) attrs.put(attribute.name$(), attribute.value());
+		if(message == null) return attrs;
 		timelineAttr.stream().filter(a -> a.magnitude().equals(m)).forEach(a -> {
 			String value = valueOf(message, a.from());
 			if (value != null) attrs.put(a.name$(), value);
