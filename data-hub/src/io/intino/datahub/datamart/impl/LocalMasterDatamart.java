@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 
 import static io.intino.datahub.box.DataHubBox.REEL_EXTENSION;
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.synchronizedMap;
 
 public class LocalMasterDatamart implements MasterDatamart {
@@ -33,8 +32,8 @@ public class LocalMasterDatamart implements MasterDatamart {
 	private final Datamart definition;
 	private final File directory;
 	private final Store<Message> entities;
-	private final Store<TimelineFile> timelines;
-	private final Store<ReelFile> reels;
+	private final ChronosStore<TimelineFile> timelines;
+	private final ChronosStore<ReelFile> reels;
 
 	public LocalMasterDatamart(DataHubBox box, Datamart definition) {
 		this.box = box;
@@ -70,12 +69,12 @@ public class LocalMasterDatamart implements MasterDatamart {
 	}
 
 	@Override
-	public Store<TimelineFile> timelineStore() {
+	public ChronosStore<TimelineFile> timelineStore() {
 		return timelines;
 	}
 
 	@Override
-	public Store<ReelFile> reelStore() {
+	public ChronosStore<ReelFile> reelStore() {
 		return reels;
 	}
 
@@ -171,46 +170,6 @@ public class LocalMasterDatamart implements MasterDatamart {
 		}
 	}
 
-	private static abstract class ChronosStore<T> implements Store<T> {
-
-		private final File root;
-
-		public ChronosStore(File root) {
-			this.root = root;
-		}
-
-		protected abstract String extension();
-
-		@Override
-		public int size() {
-			return listFiles().size();
-		}
-
-		@Override
-		public boolean contains(String id) {
-			return fileOf(id).exists();
-		}
-
-		@Override
-		public void put(String id, T value) {
-
-		}
-
-		@Override
-		public void remove(String id) {
-			fileOf(id).delete();
-		}
-
-		protected File fileOf(String id) {
-			return new File(root, id + extension());
-		}
-
-		protected List<File> listFiles() {
-			File[] files = root.listFiles(f -> f.isFile() && f.getName().endsWith(extension()));
-			return files == null ? emptyList() : Arrays.asList(files);
-		}
-	}
-
 	private static class TimelineStore extends ChronosStore<TimelineFile> {
 
 		private final Set<String> subscribedEvents;
@@ -228,9 +187,9 @@ public class LocalMasterDatamart implements MasterDatamart {
 		}
 
 		@Override
-		public TimelineFile get(String id) {
+		public TimelineFile get(String type, String id) {
 			try {
-				return contains(id) ? TimelineFile.open(fileOf(id)) : null;
+				return contains(type, id) ? TimelineFile.open(fileOf(type, id)) : null;
 			} catch (IOException e) {
 				Logger.error(e);
 				return null;
@@ -246,11 +205,6 @@ public class LocalMasterDatamart implements MasterDatamart {
 					return null;
 				}
 			}).filter(Objects::nonNull);
-		}
-
-		@Override
-		public Map<String, TimelineFile> toMap() {
-			return stream().collect(Collectors.toMap(TimelineFile::id, Function.identity()));
 		}
 
 		@Override
@@ -283,9 +237,9 @@ public class LocalMasterDatamart implements MasterDatamart {
 		}
 
 		@Override
-		public ReelFile get(String id) {
+		public ReelFile get(String type, String id) {
 			try {
-				return contains(id) ? ReelFile.open(fileOf(id)) : null;
+				return contains(type, id) ? ReelFile.open(fileOf(type, id)) : null;
 			} catch (IOException e) {
 				Logger.error(e);
 				return null;
@@ -304,19 +258,6 @@ public class LocalMasterDatamart implements MasterDatamart {
 		}
 
 		@Override
-		public Map<String, ReelFile> toMap() {
-			return listFiles().stream().filter(this::isValidReelFile).collect(Collectors.toMap(
-					f -> f.getName().replace(extension(), ""),
-					f -> {
-						try {
-							return ReelFile.open(f);
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
-					}));
-		}
-
-		@Override
 		public Collection<String> subscribedEvents() {
 			return subscribedEvents;
 		}
@@ -325,15 +266,6 @@ public class LocalMasterDatamart implements MasterDatamart {
 		public boolean isSubscribedTo(Datalake.Tank tank) {
 			if (!tank.isMessage() || tank.asMessage() == null || tank.asMessage().message() == null) return false;
 			return subscribedEvents().contains(tank.asMessage().message().name$());
-		}
-
-		private boolean isValidReelFile(File file) {
-			try {
-				ReelFile.open(file);
-				return true;
-			} catch (IOException e) {
-				return false;
-			}
 		}
 	}
 }

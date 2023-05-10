@@ -9,10 +9,13 @@ import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.rules.SnapshotScale;
 import io.intino.sumus.chronos.ReelFile;
 import io.intino.sumus.chronos.TimelineFile;
+import org.apache.commons.io.FileUtils;
 
-import java.util.Collection;
-import java.util.Map;
+import java.io.File;
+import java.util.*;
 import java.util.stream.Stream;
+
+import static java.util.Collections.emptyList;
 
 public interface MasterDatamart {
 
@@ -24,9 +27,9 @@ public interface MasterDatamart {
 
 	Store<Message> entityStore();
 
-	Store<TimelineFile> timelineStore();
+	ChronosStore<TimelineFile> timelineStore();
 
-	Store<ReelFile> reelStore();
+	ChronosStore<ReelFile> reelStore();
 
 	Stream<MasterDatamartMounter> createMountersFor(Datalake.Tank tank);
 
@@ -40,6 +43,47 @@ public interface MasterDatamart {
 		Map<String, T> toMap();
 		Collection<String> subscribedEvents();
 		boolean isSubscribedTo(Datalake.Tank tank);
+	}
+
+	abstract class ChronosStore<T> {
+
+		private final File root;
+
+		public ChronosStore(File root) {
+			this.root = root;
+		}
+
+		protected abstract String extension();
+
+		public int size() {
+			return listFiles().size();
+		}
+
+		public abstract T get(String type, String id);
+
+		public boolean contains(String type, String id) {
+			return fileOf(type, id).exists();
+		}
+
+		public void remove(String type, String id) {
+			fileOf(type, id).delete();
+		}
+
+		public abstract Stream<T> stream();
+
+		public abstract Collection<String> subscribedEvents();
+
+		public abstract boolean isSubscribedTo(Datalake.Tank tank);
+
+		protected File fileOf(String type, String id) {
+			return new File(root, type + File.pathSeparator + id + extension());
+		}
+
+		protected List<File> listFiles() {
+			return root.exists()
+					? new ArrayList<>(FileUtils.listFiles(root, new String[]{extension(), extension().substring(1)}, true))
+					: emptyList();
+		}
 	}
 
 	record Snapshot(Timetag timetag, MasterDatamart datamart) {
