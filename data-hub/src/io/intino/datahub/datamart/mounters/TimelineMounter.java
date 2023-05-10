@@ -33,8 +33,8 @@ public final class TimelineMounter extends MasterDatamartMounter {
 
 	@Override
 	public void mount(Event event) {
-		if(event instanceof MeasurementEvent e) mount(e);
-		if(event instanceof MessageEvent e) mount(e.toMessage());
+		if (event instanceof MeasurementEvent e) mount(e);
+		if (event instanceof MessageEvent e) mount(e.toMessage());
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public final class TimelineMounter extends MasterDatamartMounter {
 		try {
 			if (event.ss() == null) return;
 			String ss = withOutParameters(event.ss());
-			TimelineFile timelineFile = datamart.timelineStore().get(ss);
+			TimelineFile timelineFile = datamart.timelineStore().get(event.type(), ss);
 			if (timelineFile == null) timelineFile = createTimelineFile(event, ss);
 			update(timelineFile, event);
 		} catch (Exception e) {
@@ -132,7 +132,7 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	private Map<String, String> merge(Sensor.Magnitude m, Message message, List<Sensor.Magnitude.Attribute> magnitudeAttr, List<Timeline.Attribute> timelineAttr) {
 		Map<String, String> attrs = new HashMap<>();
 		for (Sensor.Magnitude.Attribute attribute : magnitudeAttr) attrs.put(attribute.name$(), attribute.value());
-		if(message == null) return attrs;
+		if (message == null) return attrs;
 		timelineAttr.stream().filter(a -> a.magnitude().equals(m)).forEach(a -> {
 			String value = valueOf(message, a.from());
 			if (value != null) attrs.put(a.name$(), value);

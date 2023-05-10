@@ -37,7 +37,7 @@ public final class ReelMounter extends MasterDatamartMounter {
 		if (message == null) return;
 		MessageEvent event = new MessageEvent(message);
 		String ss = withoutParameters(event.ss());
-		ReelFile reelFile = datamart.reelStore().get(ss);
+		ReelFile reelFile = datamart.reelStore().get(ss, ss);
 		try {
 			if (reelFile == null) reelFile = reelFile(message.type(), ss);
 			update(reelFile, event);

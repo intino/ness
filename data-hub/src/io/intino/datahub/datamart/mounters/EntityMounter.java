@@ -14,7 +14,7 @@ public final class EntityMounter extends MasterDatamartMounter {
 
 	@Override
 	public void mount(Event event) {
-		if(event instanceof MessageEvent e) mount(e.toMessage());
+		if (event instanceof MessageEvent e) mount(e.toMessage());
 	}
 
 	@Override
@@ -23,14 +23,9 @@ public final class EntityMounter extends MasterDatamartMounter {
 		try {
 			String id = message.get("id").asString();
 			if (isInvalidId(id) || isDisabled(message)) return;
-
 			Message oldMessage = datamart.entityStore().get(id);
-
-			if (oldMessage != null)
-				update(message, id, oldMessage);
-			else
-				addNewEntity(message, id);
-
+			if (oldMessage != null) update(message, id, oldMessage);
+			else addNewEntity(message, id);
 		} catch (Throwable e) {
 			Logger.error("Failed to mount message of type " + message.type() + ": " + e.getMessage(), e);
 		}
@@ -47,9 +42,7 @@ public final class EntityMounter extends MasterDatamartMounter {
 	}
 
 	private void update(Message message, Message changes) {
-		for (String attribute : changes.attributes()) {
-			message.set(attribute, changes.get(attribute).data());
-		}
+		changes.attributes().forEach(attribute -> message.set(attribute, changes.get(attribute).data()));
 		removeAllComponents(message);
 		message.add(changes.components());
 	}
