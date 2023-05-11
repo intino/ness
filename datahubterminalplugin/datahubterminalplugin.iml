@@ -162,5 +162,16 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:rest-accessor:3.1.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.sumus:chronos:1.0.8" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-log4j12:1.7.20" level="project" />
+    <orderEntry type="library" name="Intino: io.intino:data-hub:9.3.4" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:jmx:1.0.5" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:7.0.2" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:5.0.3" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.25.6" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:jms:1.5.2" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.activemq:activemq-mqtt:5.18.1" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.activemq:activemq-kahadb-store:5.18.1" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.activemq:activemq-jaas:5.18.1" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.activemq:activemq-runtime-config:5.18.1" level="project" />
   </component>
 </module>

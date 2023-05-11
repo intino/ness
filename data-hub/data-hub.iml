@@ -162,5 +162,7 @@
     <orderEntry type="library" name="Intino: com.github.chen0040:java-reinforcement-learning:1.0.5" level="project" />
     <orderEntry type="library" name="Intino: com.alibaba:fastjson:1.2.41" level="project" />
     <orderEntry type="library" name="Intino: ro.hasna.ts:time-series-math:0.18" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
   </component>
 </module>
