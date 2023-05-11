@@ -67,7 +67,7 @@ public final class TimelineMounter extends MasterDatamartMounter {
 		try {
 			session = tlFile.add();
 			checkTs(event.ts(), tlFile, session);
-			if (tlFile.next().isBefore(event.ts()) || Math.abs(Duration.between(event.ts(), tlFile.next()).getSeconds()) / 60 <= 1)
+			if (tlFile.count() == 0 || tlFile.next().isBefore(event.ts()) || Math.abs(Duration.between(event.ts(), tlFile.next()).getSeconds()) / 60 <= 1)
 				update(event, session);
 		} catch (IOException e) {
 			Logger.error(e);
@@ -100,14 +100,14 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	private TimelineFile createTimelineFile(MeasurementEvent event, String ss) throws IOException {
 		File file = new File(box().datamartTimelinesDirectory(datamart.name()), event.type() + File.separator + ss + TIMELINE_EXTENSION);
 		file.getParentFile().mkdirs();
-		TimelineFile timelineFile = file.exists() ? TimelineFile.open(file) : TimelineFile.create(file, ss);
+		TimelineFile tlFile = file.exists() ? TimelineFile.open(file) : TimelineFile.create(file, ss);
 		Timeline timeline = datamart.definition().timelineList().stream()
 				.filter(t -> t.tank().sensor().name$().equals(event.type()))
 				.findFirst()
 				.orElseThrow(() -> new IOException("Tank not found: " + event.type()));
-		timelineFile.timeModel(event.ts(), new Period(timeline.tank().period(), timeline.tank().periodScale().chronoUnit()));
-		timelineFile.sensorModel(sensorModel(datamart.entityStore().get(ss), timeline));
-		return timelineFile;
+		tlFile.timeModel(event.ts(), new Period(timeline.tank().period(), timeline.tank().periodScale().chronoUnit()));
+		tlFile.sensorModel(sensorModel(datamart.entityStore().get(ss), timeline));
+		return tlFile;
 	}
 
 	private void mountAssertion(MessageEvent assertion) {
