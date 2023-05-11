@@ -100,13 +100,15 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	private TimelineFile createTimelineFile(MeasurementEvent event, String ss) throws IOException {
 		File file = new File(box().datamartTimelinesDirectory(datamart.name()), event.type() + File.separator + ss + TIMELINE_EXTENSION);
 		file.getParentFile().mkdirs();
-		TimelineFile tlFile = file.exists() ? TimelineFile.open(file) : TimelineFile.create(file, ss);
-		Timeline timeline = datamart.definition().timelineList().stream()
+		TimelineFile tlFile;
+		if (file.exists()) return TimelineFile.open(file);
+		tlFile = TimelineFile.create(file, ss);
+		Timeline tlDefinition = datamart.definition().timelineList().stream()
 				.filter(t -> t.tank().sensor().name$().equals(event.type()))
 				.findFirst()
 				.orElseThrow(() -> new IOException("Tank not found: " + event.type()));
-		tlFile.timeModel(event.ts(), new Period(timeline.tank().period(), timeline.tank().periodScale().chronoUnit()));
-		tlFile.sensorModel(sensorModel(datamart.entityStore().get(ss), timeline));
+		tlFile.timeModel(event.ts(), new Period(tlDefinition.tank().period(), tlDefinition.tank().periodScale().chronoUnit()));
+		tlFile.sensorModel(sensorModel(datamart.entityStore().get(ss), tlDefinition));
 		return tlFile;
 	}
 
