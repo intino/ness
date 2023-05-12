@@ -200,11 +200,11 @@ public class DataHubBox extends AbstractBox {
 
 	private void loadBrokerService() {
 		if (this.graph.broker() != null && graph.broker().implementation() == null)
-			graph.broker().implementation(() -> new JmsBrokerService(this, brokerStage(), configuration.keyStorePath() != null ? sslConfiguration() : null));
+			graph.broker().implementation(() -> new JmsBrokerService(this, brokerStage(), configuration.keystorePath() != null ? sslConfiguration() : null));
 	}
 
 	private SSLConfiguration sslConfiguration() {
-		return new SSLConfiguration(new File(configuration.keyStorePath()), new File(configuration.trustStorePath()), configuration.keyStorePassword().toCharArray(), configuration.trustStorePassword().toCharArray());
+		return new SSLConfiguration(new File(configuration.keystorePath()), new File(configuration.truststorePath()), configuration.keystorePassword().toCharArray(), configuration.truststorePassword().toCharArray());
 	}
 
 	private void configureBroker() {

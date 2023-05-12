@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino", "9.3.6") data-hub as Product
+Artifact("io.intino", "9.3.7") data-hub as Product
 	Model("Proteo", "3.4.7", "4.2.3") > outLanguage = "Ness"
 	Box("Konos", "10.3.1")
 	Imports
@@ -25,7 +25,7 @@ Artifact("io.intino", "9.3.6") data-hub as Product
 		Compile("org.apache.activemq", "activemq-jaas", "5.18.1")
 		Compile("org.apache.activemq", "activemq-runtime-config", "5.18.1")
 		Test("junit", "junit", "4.13.2")
-		Web("io.intino", "datalake-inspector", "9.3.5")
+		Web("io.intino", "datalake-inspector", "9.3.7")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
 	Distribution > Artifactory("intino-maven")
@@ -35,10 +35,10 @@ Artifact("io.intino", "9.3.6") data-hub as Product
 	Parameter("backup_directory")
 	Parameter("broker_port")
 	Parameter("broker_secondary_port")
-	Parameter("key_store_path")
-	Parameter("key_store_password")
-	Parameter("trust_store_path")
-	Parameter("trust_store_password")
+	Parameter("keystore_path")
+	Parameter("keystore_password")
+	Parameter("truststore_path")
+	Parameter("truststore_password")
 	Parameter("ui_port")
 
 Repository("intino-maven")
