@@ -149,6 +149,11 @@ public class LocalMasterDatamart implements MasterDatamart {
 		}
 
 		@Override
+		public void clear() {
+			entities.clear();
+		}
+
+		@Override
 		public Stream<Message> stream() {
 			return entities.values().stream();
 		}

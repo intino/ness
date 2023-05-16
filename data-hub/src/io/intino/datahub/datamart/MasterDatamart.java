@@ -1,6 +1,7 @@
 package io.intino.datahub.datamart;
 
 import io.intino.alexandria.Timetag;
+import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.mounters.MasterDatamartMounter;
@@ -33,12 +34,19 @@ public interface MasterDatamart {
 
 	Stream<MasterDatamartMounter> createMountersFor(Datalake.Tank tank);
 
+	default void clear() {
+		entityStore().clear();
+		timelineStore().clear();
+		reelStore().clear();
+	}
+
 	interface Store<T> {
 		int size();
 		boolean contains(String id);
 		T get(String id);
 		void put(String id, T value);
 		void remove(String id);
+		void clear();
 		Stream<T> stream();
 		Map<String, T> toMap();
 		Collection<String> subscribedEvents();
@@ -67,6 +75,17 @@ public interface MasterDatamart {
 
 		public void remove(String type, String id) {
 			fileOf(type, id).delete();
+		}
+
+		public void clear() {
+			for(File file : listFiles()) {
+				try {
+					file.delete();
+				} catch (Exception e) {
+					// TODO: ??
+					Logger.error(e);
+				}
+			}
 		}
 
 		public abstract Stream<T> stream();

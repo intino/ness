@@ -26,10 +26,16 @@ import static io.intino.datahub.datamart.MasterDatamart.Snapshot.shouldCreateSna
 public class DatamartFactory {
 	private final DataHubBox box;
 	private final Datalake datalake;
+	private boolean useSnapshots = true;
 
 	public DatamartFactory(DataHubBox box, Datalake datalake) {
 		this.box = box;
 		this.datalake = datalake;
+	}
+
+	public DatamartFactory useSnapshots(boolean useSnapshots) {
+		this.useSnapshots = useSnapshots;
+		return this;
 	}
 
 	public MasterDatamart create(Datamart definition) throws IOException {
@@ -46,6 +52,7 @@ public class DatamartFactory {
 	}
 
 	private boolean failedToLoadLastSnapshotOf(Datamart definition, Reference<MasterDatamart> datamart, Reference<Timetag> fromTimetag) {
+		if(!useSnapshots) return true;
 		Optional<MasterDatamart.Snapshot> snapshot = box.datamartSerializer().loadMostRecentSnapshot(definition.name$());
 		if (snapshot.isPresent()) {
 			datamart.value = snapshot.get().datamart();
@@ -55,7 +62,7 @@ public class DatamartFactory {
 		return true;
 	}
 
-	private MasterDatamart reflow(MasterDatamart datamart, Timetag fromTimetag, Datamart definition) throws IOException {
+	public MasterDatamart reflow(MasterDatamart datamart, Timetag fromTimetag, Datamart definition) throws IOException {
 		SnapshotScale scale = definition.snapshots() == null ? SnapshotScale.None : Optional.ofNullable(definition.snapshots().scale()).orElse(SnapshotScale.None);
 		DayOfWeek firstDayOfWeek = definition.snapshots() == null ? DayOfWeek.MONDAY : definition.snapshots().firstDayOfWeek();
 

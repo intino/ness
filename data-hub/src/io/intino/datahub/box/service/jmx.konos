@@ -11,6 +11,10 @@ Service service as JMX
 	Operation("Restore datalake to timetag parameter. Timetag is in scale of days") restoreDatalake
 		Parameter timetag as Text
 		Response as Text
+	Operation("Recreate datamart") recreateDatamart
+		Parameter datamartName as Text
+		Parameter fromTimetag as Text
+		Response as Text
 	Operation("Shows a list of available mappers") mappers
 		Response as Text
 	Operation("Review datalake using a defined mapper. Returns a file containing the efects of passing the mapper") review
