@@ -14,6 +14,15 @@ Namespace analysis
 			Attribute period as Text
 			Attribute trigger as Text
 
+	Message FooAssertion as Assertion
+       	Attribute host as Text
+       	Attribute observer as Text
+       	Attribute responsible as Text
+       	Attribute tags as Text List
+       	Component AvailableOperation
+       		Attribute activity as Text
+       		Attribute name as Text
+
 Namespace actuation
 	Message Notification
 		Attribute destination as Text

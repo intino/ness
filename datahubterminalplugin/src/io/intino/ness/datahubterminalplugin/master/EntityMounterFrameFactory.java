@@ -9,8 +9,7 @@ import io.intino.itrules.FrameBuilder;
 import io.intino.magritte.framework.Node;
 import io.intino.ness.datahubterminalplugin.Formatters;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
 import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
@@ -37,6 +36,8 @@ public class EntityMounterFrameFactory implements ConceptRenderer {
 	private FrameBuilder frameOf(Entity entity) {
 		String entityName = firstUpperCase().format(entity.name$()).toString();
 
+		List<Struct> structList = structListOf(entity);
+
 		FrameBuilder builder = new FrameBuilder("mounter")
 				.add("message")
 				.add("package", destinationPackage)
@@ -44,7 +45,7 @@ public class EntityMounterFrameFactory implements ConceptRenderer {
 				.add("datamart", datamart.name$())
 				.add("name", entity.core$().name())
 				.add("attribute", attributesOf(entity).stream().map(this::attrFrameOf).toArray(FrameBuilder[]::new))
-				.add("struct", entity.structList().stream().map(s -> structFrameOf(s, entityName)).toArray(FrameBuilder[]::new));
+				.add("struct", structList.stream().map(s -> structFrameOf(s, entity.name$(), entity.from().message().name$())).toArray(FrameBuilder[]::new));
 
 		if (!datamart.structList().isEmpty()) builder.add("hasStructs", new FrameBuilder().add("package", destinationPackage));
 
@@ -57,19 +58,31 @@ public class EntityMounterFrameFactory implements ConceptRenderer {
 		return builder;
 	}
 
-	private FrameBuilder structFrameOf(Struct struct, String ownerName) {
+	private static List<Struct> structListOf(Entity entity) {
+		List<Struct> structs = new ArrayList<>(entity.structList());
+		Entity parent = entity.isExtensionOf() ? entity.asExtensionOf().entity() : null;
+		while(parent != null) {
+			structs.addAll(parent.structList());
+			parent = parent.isExtensionOf() ? parent.asExtensionOf().entity() : null;
+		}
+		Collections.reverse(structs);
+		return structs.stream().distinct().toList();
+	}
+
+	private FrameBuilder structFrameOf(Struct struct, String ownerName, String messageEvent) {
 		FrameBuilder builder = new FrameBuilder("struct");
 		if(struct.multiple()) builder.add("multiple");
 
 		String fullName = ownerName + "." + firstUpperCase().format(struct.name$());
+		String type = ownerName.contains(".") ? ownerName + "." + firstUpperCase().format(struct.name$()) : messageEvent + "." + firstUpperCase().format(struct.name$());
 
 		builder.add("name", ownerName.replace(".", STRUCT_INTERNAL_CLASS_SEP) + STRUCT_INTERNAL_CLASS_SEP + struct.name$());
 		builder.add("attribName", struct.multiple() ? struct.name$() + "List" : struct.name$());
 		builder.add("fullName", fullName);
-		builder.add("type", fullName);
+		builder.add("type", type);
 		builder.add("package", ontologyPackage + ".entities");
 		builder.add("attribute", attributesOf(struct, (attribute, owner) -> attributeFromStruct(attribute, owner, fullName)).stream().map(this::attrFrameOf).toArray(FrameBuilder[]::new));
-		builder.add("struct", struct.structList().stream().map(s -> structFrameOf(s, fullName)).toArray(FrameBuilder[]::new));
+		builder.add("struct", struct.structList().stream().map(s -> structFrameOf(s, fullName, messageEvent)).toArray(FrameBuilder[]::new));
 
 		return builder;
 	}

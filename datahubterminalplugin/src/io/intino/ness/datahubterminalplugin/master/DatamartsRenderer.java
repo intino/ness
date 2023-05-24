@@ -96,7 +96,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	private Map<String, String> entityMounterClassesOf(Datamart datamart, TerminalInfo terminalInfo) {
 		Map<String, String> outputs = new HashMap<>();
 		outputs.put(destination(baseEntityMounterName(datamart, terminalInfo)), templates.entityMounter.render(entityMounterInterface(datamart, terminalInfo)));
-		datamart.entityList().forEach(e -> outputs.putAll(renderEntityMounter(e, datamart, terminalInfo)));
+		datamart.entityList().stream().filter(e -> e.from() != null).forEach(e -> outputs.putAll(renderEntityMounter(e, datamart, terminalInfo)));
 		return outputs;
 	}
 

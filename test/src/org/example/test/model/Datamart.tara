@@ -20,6 +20,19 @@ Datamart master
 		Attribute name as Text
 		Attribute language as Text
 
+	Entity Foo as Abstract
+		Attribute host as Entity(Observable)
+		Attribute observer as Entity(Observable)
+		Attribute employee as Entity(Person)
+		Attribute tags as Text List
+		Attribute timezone as Text
+		Struct AvailableOperation
+       		Attribute activity as Text
+       		Attribute name as Text
+
+    Entity(from = dl.fooAssertion) Bar as ExtensionOf(Foo)
+    	Attribute something as Text
+
 	Entity(from = dl.teamAssertion) Team
 		Attribute displayName as Text
 		Attribute users as Entity(User) List
@@ -30,11 +43,12 @@ Datamart master
 
 	Entity(from = dl.diagnosisAssertion) Analysis
 		Attribute observable as Text
-		Struct anomaly
+		Struct Anomaly
 			Attribute code as Text
 			Attribute level as Word("Error" "Warning")
 			Attribute period as Text
 			Attribute triggerValue as Text
+
 	Entity Observable as Abstract
 		Attribute host as Entity(Observable)
 		Attribute observer as Entity(Observable)

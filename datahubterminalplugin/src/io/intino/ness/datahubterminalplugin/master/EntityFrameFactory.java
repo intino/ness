@@ -33,16 +33,18 @@ public class EntityFrameFactory implements ConceptRenderer {
 	}
 
 	private FrameBuilder frameOf(Entity entity) {
+		List<Struct> structList = structListOf(entity);
+
 		FrameBuilder builder = new FrameBuilder("entity", "class")
 				.add("package", workingPackage)
 				.add("datamart", datamart.name$())
 				.add("name", entity.core$().name())
 				.add("expression", entity.methodList().stream().map(m -> ExpressionHelper.exprFrameOf(m, workingPackage)).toArray(Frame[]::new))
-				.add("struct", entity.structList().stream().map(s -> structFrame(s, entity)).toArray(Frame[]::new));
+				.add("struct", structList.stream().map(s -> structFrame(s, entity)).toArray(Frame[]::new));
 
 		List<Frame> attributes = attributesOf(entity).stream().map(this::attrFrameOf).map(FrameBuilder::toFrame).collect(Collectors.toList());
 
-		entity.structList().stream().map(struct -> attrFrameOf(attrOf(entity.core$(), struct)).toFrame()).forEach(attributes::add);
+		structList.stream().map(struct -> attrFrameOf(attrOf(entity.core$(), struct)).toFrame()).forEach(attributes::add);
 
 		builder.add("attribute", attributes.toArray(Frame[]::new));
 
@@ -54,6 +56,10 @@ public class EntityFrameFactory implements ConceptRenderer {
 		builder.add("isAbstract", entity.isAbstract() ? " abstract" : "");
 
 		return builder;
+	}
+
+	public static List<Struct> structListOf(Entity entity) {
+		return entity.structList();
 	}
 
 	private String withFullPackage(String parent) {
