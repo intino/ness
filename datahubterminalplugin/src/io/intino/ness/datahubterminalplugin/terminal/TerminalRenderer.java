@@ -74,9 +74,12 @@ class TerminalRenderer {
 	}
 
 	private void addSubscribeForThedevents(FrameBuilder builder) {
-		Set<String> tanksAlreadySubscribedTo = terminal.subscribe().messageTanks().stream().map(Layer::name$).collect(Collectors.toSet());
-		tanksAlreadySubscribedTo.addAll(terminal.subscribe().measurementTanks().stream().map(Layer::name$).toList());
-		tanksAlreadySubscribedTo.addAll(terminal.subscribe().resourceTanks().stream().map(Layer::name$).toList());
+		Set<String> tanksAlreadySubscribedTo = new HashSet<>();
+		if(terminal.subscribe() != null) {
+			terminal.subscribe().messageTanks().stream().map(Layer::name$).forEach(tanksAlreadySubscribedTo::add);
+			terminal.subscribe().measurementTanks().stream().map(Layer::name$).forEach(tanksAlreadySubscribedTo::add);
+			terminal.subscribe().resourceTanks().stream().map(Layer::name$).forEach(tanksAlreadySubscribedTo::add);
+		}
 
 		for (Datamart datamart : terminal.datamarts().list()) {
 			addSubscribersForEntityEvents(builder, tanksAlreadySubscribedTo, datamart);

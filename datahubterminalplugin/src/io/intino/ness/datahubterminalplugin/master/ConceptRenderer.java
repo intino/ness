@@ -90,9 +90,10 @@ public interface ConceptRenderer {
 
 		String type = attr.type();
 		builder.add("typename", type);
+
 		if(attr.isEntity() && attr.shouldAddPackageBeforeName()) type = entitiesPackage() + type;
 		else if(attr.isStruct() && attr.shouldAddPackageBeforeName()) type = structsPackage() + type;
-		else if(attr.isWord()) type = attr.ownerFullName() + "." + firstUpperCase(type);
+		else if(attr.isWord()) type = firstUpperCase(attr.ownerFullName()) + "." + type;
 
 		handleCollectionType(attr, builder, type);
 

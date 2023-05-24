@@ -30,7 +30,7 @@ Datamart master
 
 	Entity(from = dl.diagnosisAssertion) Analysis
 		Attribute observable as Text
-		Struct Anomaly
+		Struct anomaly
 			Attribute code as Text
 			Attribute level as Word("Error" "Warning")
 			Attribute period as Text

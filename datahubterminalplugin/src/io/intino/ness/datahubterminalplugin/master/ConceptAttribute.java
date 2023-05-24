@@ -143,8 +143,8 @@ public class ConceptAttribute {
 		if(isDateTime()) return "LocalDateTime";
 		if(isInstant()) return "Instant";
 		if(isWord()) return firstUpperCase(asWord().name$());
-		if(isStruct()) return asStruct().name$();
-		if(isEntity()) return asEntity().entity().name$();
+		if(isStruct()) return firstUpperCase(asStruct().name$());
+		if(isEntity()) return firstUpperCase(asEntity().entity().name$());
 		if(isMap()) return "Map";
 		throw new RuntimeException("Unknown type of " + name$());
 	}

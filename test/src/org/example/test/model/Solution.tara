@@ -16,8 +16,6 @@ Terminal trooper-terminal
 	Datamarts(master)
 
 Terminal wizard-terminal
-	Publish(dl.diagnosisAssertion)
-	Subscribe(dl.state dl.machineAssertion dl.diagnosisAssertion, dl.analysis dl.assetStatus dl.rdbmsStatement dl.applicationStatus)
 	Datamarts(master)
 
 Terminal connector-terminal

@@ -35,6 +35,8 @@ public class EntityMounterFrameFactory implements ConceptRenderer {
 	}
 
 	private FrameBuilder frameOf(Entity entity) {
+		String entityName = firstUpperCase().format(entity.name$()).toString();
+
 		FrameBuilder builder = new FrameBuilder("mounter")
 				.add("message")
 				.add("package", destinationPackage)
@@ -42,13 +44,13 @@ public class EntityMounterFrameFactory implements ConceptRenderer {
 				.add("datamart", datamart.name$())
 				.add("name", entity.core$().name())
 				.add("attribute", attributesOf(entity).stream().map(this::attrFrameOf).toArray(FrameBuilder[]::new))
-				.add("struct", entity.structList().stream().map(s -> structFrameOf(s, entity.name$())).toArray(FrameBuilder[]::new));
+				.add("struct", entity.structList().stream().map(s -> structFrameOf(s, entityName)).toArray(FrameBuilder[]::new));
 
 		if (!datamart.structList().isEmpty()) builder.add("hasStructs", new FrameBuilder().add("package", destinationPackage));
 
 		Parameter parent = parameter(entity.core$(), "entity");
 		builder.add("parent", parent != null ? ((Entity) parent.values().get(0)).name$() : "io.intino.ness.master.model.Entity");
-		builder.add("normalizeId", new FrameBuilder("normalizeId", (entity.isAbstract() || entity.isDecorable()) ? "abstract" : "").add("package", destinationPackage).add("name", entity.name$()).toFrame());
+		builder.add("normalizeId", new FrameBuilder("normalizeId", (entity.isAbstract() || entity.isDecorable()) ? "abstract" : "").add("package", destinationPackage).add("name", entityName).toFrame());
 		if (entity.isDecorable() || entity.isAbstract()) builder.add("isAbstract", "abstract");
 		if (entity.isDecorable()) builder.add("abstract", "abstract");
 
@@ -59,7 +61,7 @@ public class EntityMounterFrameFactory implements ConceptRenderer {
 		FrameBuilder builder = new FrameBuilder("struct");
 		if(struct.multiple()) builder.add("multiple");
 
-		String fullName = ownerName + "." + struct.name$();
+		String fullName = ownerName + "." + firstUpperCase().format(struct.name$());
 
 		builder.add("name", ownerName.replace(".", STRUCT_INTERNAL_CLASS_SEP) + STRUCT_INTERNAL_CLASS_SEP + struct.name$());
 		builder.add("attribName", struct.multiple() ? struct.name$() + "List" : struct.name$());
