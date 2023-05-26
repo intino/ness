@@ -7,6 +7,7 @@ def type(datamart & interface)
 	import java.util.stream.Stream;
 	import java.util.stream.Collectors;
 	import java.time.Instant;
+	import java.util.Optional;
 
 	import io.intino.ness.master.Datamart;
 	import io.intino.ness.master.model.Entity;
@@ -140,6 +141,14 @@ def type(datamart & interface)
 			public Query<EntityDefinition> entities() {return definition().entities();}
 			@Override
 			public Query<StructDefinition> structs() {return definition().structs();}
+			@Override
+			public Optional<EntityDefinition> entity(String fullName) {
+            	return definition().entity(fullName);
+            }
+            @Override
+            public Optional<StructDefinition> struct(String fullName) {
+            	return definition().struct(fullName);
+            }
 			private DatamartDefinition definition() {
 				if(definition == null) throw new IllegalStateException("$name+FirstUpperCase~Datamart is not initialized");
 				return definition;

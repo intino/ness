@@ -26,16 +26,16 @@ public interface DatamartDefinition {
 
 	Query<StructDefinition> structs();
 
-	default Optional<ConceptDefinition<?>> concept(String name) {
-		return concepts().stream().filter(e -> e.name().equals(name)).findFirst();
+	default Optional<ConceptDefinition<?>> concept(String fullName) {
+		return concepts().stream().filter(e -> e.fullName().equals(fullName)).findFirst();
 	}
 
-	default Optional<EntityDefinition> entity(String name) {
-		return entities().stream().filter(e -> e.name().equals(name)).findFirst();
+	default Optional<EntityDefinition> entity(String fullName) {
+		return entities().stream().filter(e -> e.fullName().equals(fullName)).findFirst();
 	}
 
-	default Optional<StructDefinition> struct(String name) {
-		return structs().stream().filter(e -> e.name().equals(name)).findFirst();
+	default Optional<StructDefinition> struct(String fullName) {
+		return structs().stream().filter(e -> e.fullName().equals(fullName)).findFirst();
 	}
 
 	class Query<T extends ConceptDefinition<T>> extends AbstractList<T> {

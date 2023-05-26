@@ -139,11 +139,11 @@ def type(struct) trigger(factory)
 end
 
 def type(multiple) trigger(setStructComponent)
-if(components.containsKey("$type")) update(owner, "$attribName+firstLowerCase", new $name~StructFactory().create(components.get("$type")));
+if(components.containsKey("$typename")) update(owner, "$attribName+firstLowerCase", new $name~StructFactory().create(components.get("$typename")));
 end
 
 def trigger(setStructComponent)
-if(components.containsKey("$type")) update(owner, "$attribName+firstLowerCase", new $name~StructFactory().create(components.get("$type").get(0)));
+if(components.containsKey("$typename")) update(owner, "$attribName+firstLowerCase", new $name~StructFactory().create(components.get("$typename").get(0)));
 end
 
 def trigger(parseSwitchCase)

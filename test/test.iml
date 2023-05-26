@@ -187,8 +187,6 @@
     <orderEntry type="library" name="Intino: com.epam:parso:2.0.14" level="project" />
     <orderEntry type="library" name="Intino: org.apache.commons:commons-csv:1.9.0" level="project" />
     <orderEntry type="library" name="Intino: org.apache.commons:commons-math3:3.6.1" level="project" />
-    <orderEntry type="library" name="Intino: com.github.chen0040:java-reinforcement-learning:1.0.5" level="project" />
-    <orderEntry type="library" name="Intino: com.alibaba:fastjson:1.2.41" level="project" />
     <orderEntry type="library" name="Intino: ro.hasna.ts:time-series-math:0.18" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.1.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:7.0.2" level="project" />
@@ -212,14 +210,17 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zim:5.1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:message:4.1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:primitives:1.1.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.cosmos.datahub:trooper-terminal:1.0.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.cosmos.datahub:ontology:1.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.ness:master:2.0.4" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.sumus:chronos:1.0.8" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.4.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.2.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.25.6" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:http:1.7.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:rest-accessor:3.1.2" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.sumus:chronos:1.0.9" level="project" />
+    <orderEntry type="module" module-name="datalake-inspector" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.cosmos.datahub:trooper-terminal:1.0.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.cosmos.datahub:ontology:1.0.0" level="project" />
   </component>
 </module>

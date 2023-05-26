@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "2.0.4") master
+Artifact("io.intino.ness", "2.0.5") master
 	Imports
 		Test("junit", "junit", "4.13.2")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, attachSources =true)

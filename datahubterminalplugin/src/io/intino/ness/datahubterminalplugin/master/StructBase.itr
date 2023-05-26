@@ -6,6 +6,7 @@ def type(struct & base)
 	import io.intino.ness.master.reflection.AttributeDefinition;
 	import io.intino.ness.master.reflection.StructDefinition;
 
+	import java.util.Collection;
 	import java.util.ArrayList;
 	import java.util.List;
 	import java.util.Map;
@@ -16,10 +17,9 @@ def type(struct & base)
 		private final $datamart+FirstUpperCase~Datamart datamart;
 		private final Map<String, Attribute> attributes;
 
-		public $datamart+FirstUpperCase~Struct($datamart+FirstUpperCase~Datamart datamart, Map<String, Object> attributes) {
+		public $datamart+FirstUpperCase~Struct($datamart+FirstUpperCase~Datamart datamart) {
 			this.datamart = datamart;
-			this.attributes = new java.util.LinkedHashMap<>(attributes.size());
-			attributes.forEach((k, v) -> this.attributes.put(k, new Attribute(k, v)));
+			this.attributes = createAllAttributes();
 		}
 
 		@Override
@@ -63,6 +63,17 @@ def type(struct & base)
 		@Override
 		public String toString() {
 			return getClass().getSimpleName() + ": " + attributes;
+		}
+
+		protected Collection<Attribute> initDeclaredAttributes() {
+			return new ArrayList<>();
+		}
+
+		private Map<String, Attribute> createAllAttributes() {
+			Collection<Attribute> declaredAttribs = initDeclaredAttributes();
+			Map<String, Attribute> attributes = new java.util.LinkedHashMap<>(2 + declaredAttribs.size());
+	        declaredAttribs.forEach(attr -> attributes.put(attr.name(), attr));
+	        return attributes;
 		}
 
 		protected final class Attribute implements Concept.Attribute {
@@ -172,7 +183,7 @@ def type(struct & base)
         	}
 
         	private StructDefinition definition() {
-        		return $datamart+FirstUpperCase~Datamart.definition.struct(structName).orElseThrow(() -> new IllegalStateException("$datamart+FirstUpperCase~Datamart is not initialized"));
+        		return $datamart+FirstUpperCase~Datamart.definition.struct(structName).orElseThrow(() -> new IllegalStateException("Cannot find definition of " + structName + " in $datamart+FirstUpperCase~Datamart"));
         	}
         }
 	}

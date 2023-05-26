@@ -25,7 +25,9 @@ public class Server {
 	}
 
 	private static void normalizeTimelineExtensions() {
-		var files = FileUtils.listFiles(new File("C:\\Users\\naits\\Desktop\\IntinoDev\\ness\\temp\\datahub\\datamarts\\master\\timelines"), new String[]{"tl"}, true);
+		File directory = new File("C:\\Users\\naits\\Desktop\\IntinoDev\\ness\\temp\\datahub\\datamarts\\master\\timelines");
+		if(!directory.exists()) return;
+		var files = FileUtils.listFiles(directory, new String[]{"tl"}, true);
 		for(File file : files) {
 			file.renameTo(new File(file.getAbsolutePath().replace(".tl", ".timeline")));
 		}

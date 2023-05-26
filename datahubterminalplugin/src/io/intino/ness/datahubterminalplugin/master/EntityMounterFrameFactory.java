@@ -80,6 +80,7 @@ public class EntityMounterFrameFactory implements ConceptRenderer {
 		builder.add("attribName", struct.multiple() ? struct.name$() + "List" : struct.name$());
 		builder.add("fullName", fullName);
 		builder.add("type", type);
+		builder.add("typename", firstUpperCase().format(struct.name$()));
 		builder.add("package", ontologyPackage + ".entities");
 		builder.add("attribute", attributesOf(struct, (attribute, owner) -> attributeFromStruct(attribute, owner, fullName)).stream().map(this::attrFrameOf).toArray(FrameBuilder[]::new));
 		builder.add("struct", struct.structList().stream().map(s -> structFrameOf(s, fullName, messageEvent)).toArray(FrameBuilder[]::new));

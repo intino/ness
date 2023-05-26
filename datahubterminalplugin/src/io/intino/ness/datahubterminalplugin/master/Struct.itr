@@ -9,11 +9,7 @@ def type(struct & class)
 		[$attribute+wordDeclaration...[$NL]]
 
 		public $name+FirstUpperCase($datamart+FirstUpperCase~Datamart datamart) {
-			super(datamart, java.util.Collections.emptyMap());
-		}
-
-		public $name+FirstUpperCase($datamart+FirstUpperCase~Datamart datamart, $attribute+parameter...[, ]) {
-			super(datamart, asMap([$attribute+name...[, ]]));
+			super(datamart);
 		}
 
 		[$attribute+getter...[$NL$NL]]
@@ -46,11 +42,12 @@ def type(struct & class)
 			return sb.toString();
 		}
 
-		private static java.util.Map<String, Object> asMap($attribute+parameter...[, ]) {
-    		return new java.util.LinkedHashMap<>() {{
-    			[$attribute+putIntoMap...[$NL]]
-    		}};
-    	}
+		@Override
+		protected Collection<Attribute> initDeclaredAttributes() {
+			Collection<Attribute> attributes = super.initDeclaredAttributes();
+			[$attribute+initAttribute...[$NL]]
+			return attributes;
+		}
     	[$struct+struct...[$NL$NL]]
 	}
 end
