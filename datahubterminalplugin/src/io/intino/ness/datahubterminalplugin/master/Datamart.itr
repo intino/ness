@@ -487,11 +487,10 @@ def type(entity) trigger(declareDefinition)
 		public List<EntityDefinition> descendants() {return java.util.List.of([$descendant+definition...[,]]);}
 		public Class<?> javaClass() {return $package.entities.$name+FirstUpperCase.class;}
 		private List<AttributeDefinition> initAttributeDefinitions() {
-			ArrayList<AttributeDefinition> list = new ArrayList<>();
+			List<AttributeDefinition> list = new ArrayList<>();
 			[$hasNoParents+addIdAndEnabledAttributes]
         	[$attribute+addDefinition...[$NL]]
-        	list.trimToSize();
-        	return list;
+        	return Collections.synchronizedList(list);
 		}
 		public boolean equals(Object other) {
 			if(other == null || other.getClass() != getClass()) return false;
@@ -515,7 +514,7 @@ def type(struct) trigger(declareDefinition)
 		private List<AttributeDefinition> initAttributeDefinitions() {
 			List<AttributeDefinition> list = new ArrayList<>($numAttributes);
         	[$attribute+addDefinition...[$NL]]
-        	return list;
+        	return Collections.synchronizedList(list);
 		}
 		public boolean equals(Object other) {
         	if(other == null || other.getClass() != getClass()) return false;

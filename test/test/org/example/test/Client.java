@@ -24,10 +24,6 @@ public class Client {
 
 //		MasterDatamart.TimelineNode timeline = timelines.findFirst().get();
 
-		JavaApplicationMounter m;
-
-		StructDefinition observable$Operation = MasterDatamart.definition.struct("Observable$Operation").get();
-
 		dm.mount(new ApplicationJavaAssertion(new MessageReader(message()).next()));
 
 		System.out.println();
@@ -39,6 +35,8 @@ public class Client {
 				ts: 2023-05-26T07:00:53.384336780Z
 				ss: 45-79-45-227-ip-linodeusercontent-com
 				id: 45-79-45-227-ip-linodeusercontent-com|outsourcing-1.4.10
+				player: cr7
+				a123: 456
 				    
 				[ApplicationJavaAssertion.Operation]
 				name: status

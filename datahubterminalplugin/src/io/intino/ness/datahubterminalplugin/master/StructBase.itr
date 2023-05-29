@@ -37,10 +37,21 @@ def type(struct & base)
 			return datamart;
 		}
 
-		void updateAttribute(String name, Object newValue) {
+		synchronized void addAttribute(String name, Object value) {
+			attributes.put(name, new Attribute(name, value));
+			var attributeDefinitions = getDefinition().declaredAttributes();
+			if(attributeDefinitions.stream().anyMatch(a -> a.name().equals(name))) return;
+			attributeDefinitions.add(new AttributeDefinition() {
+            	public String name() {return name;}
+            	public Class<?> type() {return String.class;}
+            	public String toString() {return name;}
+            });
+		}
+
+		synchronized void updateAttribute(String name, Object newValue) {
 			Attribute attribute = attribute(name);
-			if(attribute == null) return;
-			attribute.setValue(newValue);
+			if(attribute == null) addAttribute(name, newValue);
+			else attribute.setValue(newValue);
 		}
 
 		@Override

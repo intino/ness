@@ -95,7 +95,7 @@ def !type(abstract) type(mounter) type(message)
 			switch(attribute) {
 				[$attribute+parseSwitchCase...[$NL]]
 			}
-			return null;
+			return message.get(attribute).asString();
 		}
 
 		[$attribute+parseMethod...[$NL$NL]]
@@ -129,7 +129,7 @@ def type(struct) trigger(factory)
         	switch(attribute) {
         		[$attribute+parseSwitchCase...[$NL]]
         	}
-        	return null;
+        	return message.get(attribute).asString();
         }
 
         [$attribute+parseMethod...[$NL$NL]]
