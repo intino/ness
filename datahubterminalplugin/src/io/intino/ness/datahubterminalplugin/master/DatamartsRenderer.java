@@ -7,6 +7,7 @@ import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.RuleSet;
 import io.intino.itrules.Template;
+import io.intino.magritte.framework.Node;
 import io.intino.ness.datahubterminalplugin.Formatters;
 import io.intino.ness.datahubterminalplugin.util.ErrorUtils;
 import io.intino.plugin.PluginLauncher;
@@ -14,6 +15,7 @@ import io.intino.plugin.PluginLauncher;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -297,16 +299,16 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 	private Stream<Frame> framesOf(Struct struct, String thePackage, String owner) {
 		String fullname = owner == null ? fullNameOf(struct) : owner + STRUCT_INTERNAL_CLASS_SEP + fullNameOf(struct);
+		List<ConceptAttribute> attributes = attributesOf(struct);
+		attributes.forEach(a -> a.ownerFullName(fullname));
+
 		FrameBuilder b = new FrameBuilder("struct");
 		b.add("package", thePackage);
 		b.add("name", firstUpperCase(struct.name$()));
 		b.add("fullName", fullname);
-		b.add("attribute", attributeFrames(attributesOf(struct, (a, o) -> new ConceptAttribute(a, o) {
-			@Override
-			public String ownerFullName() {
-				return fullname.replace(STRUCT_INTERNAL_CLASS_SEP, ".");
-			}
-		})));
+
+
+		b.add("attribute", attributeFrames(attributes));
 
 		List<Frame> frames = new ArrayList<>(1);
 		frames.add(b.toFrame());
@@ -346,7 +348,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	@Override
 	public List<ConceptAttribute> attributesOf(Struct struct) {
 		List<ConceptAttribute> attributes = ConceptRenderer.super.attributesOf(struct);
-		struct.structList().stream().map(s -> attrOf(struct.core$(), s)).forEach(attributes::add);
+		struct.structList().stream().map(s -> attrOf(struct.core$(), s)).filter(a -> !attributes.contains(a)).forEach(attributes::add);
 		return attributes;
 	}
 
@@ -386,9 +388,9 @@ public class DatamartsRenderer implements ConceptRenderer {
 		} else if(attr.isEntity()) {
 			b.add("type", modelPackage + ".entities." + attr.asEntity().entity().name$());
 		}  else if(attr.isStruct()) {
-			b.add("type", modelPackage + ".entities." + attr.ownerFullName() + "." + attr.asStruct().name$());
+			b.add("type", modelPackage + ".entities." + attr.ownerFullName().replace(STRUCT_INTERNAL_CLASS_SEP, ".") + "." + attr.asStruct().name$());
 		} else if(attr.isWord()) {
-			b.add("type", modelPackage + ".entities." + attr.ownerFullName() + "." + attr.type());
+			b.add("type", modelPackage + ".entities." + attr.ownerFullName().replace(STRUCT_INTERNAL_CLASS_SEP, ".") + "." + attr.type());
 		} else {
 			b.add("type", attr.type());
 		}
@@ -414,7 +416,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 		} else if(attr.isWord()) {
 			parameterType = modelPackage + ".entities." + firstUpperCase(attr.owner().name()) + "." + parameterType;
 		}
-		b.add("parameterType", parameterType);
+		b.add("parameterType", parameterType.replace(STRUCT_INTERNAL_CLASS_SEP, "."));
 		b.add("parameterTypeName", parameterTypeName);
 
 		FrameBuilder param = new FrameBuilder("parameter");

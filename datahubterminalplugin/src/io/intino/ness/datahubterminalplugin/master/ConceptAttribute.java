@@ -8,6 +8,7 @@ import io.intino.magritte.framework.Node;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Objects;
 
 import static io.intino.ness.datahubterminalplugin.Formatters.firstUpperCase;
 
@@ -17,14 +18,21 @@ public class ConceptAttribute {
 	private final Object attribute;
 	private final Node owner;
 	private boolean inherited;
+	private String ownerFullName;
 
 	public ConceptAttribute(Object attribute, Node owner) {
 		this.attribute = attribute;
 		this.owner = owner;
+		this.ownerFullName = owner.name();
 	}
 
 	public String ownerFullName() {
-		return owner.name();
+		return ownerFullName;
+	}
+
+	public ConceptAttribute ownerFullName(String ownerFullName) {
+		this.ownerFullName = ownerFullName;
+		return this;
 	}
 
 	public boolean inherited() {
@@ -165,5 +173,22 @@ public class ConceptAttribute {
 		} catch (Exception e) {
 			return defValue;
 		}
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		ConceptAttribute that = (ConceptAttribute) o;
+		return inherited == that.inherited && Objects.equals(attribute, that.attribute) && Objects.equals(owner, that.owner);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(attribute, owner, inherited);
+	}
+
+	public String toString() {
+		return name$();
 	}
 }
