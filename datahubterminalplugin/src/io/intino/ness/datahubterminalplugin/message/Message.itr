@@ -39,9 +39,12 @@ def trigger(event)
 			return this;
 		}
 
+		[$assertionInfo+enabledGetterAndSetter]
+
 		public static $name+firstUpperCase fromString(String event) {
 			return new $name+firstUpperCase(new io.intino.alexandria.message.MessageReader(event).next());
 		}
+
 
 		[$attribute+getter...[$NL$NL]]
 
@@ -58,6 +61,17 @@ def trigger(event)
 			[$attribute+serializeTable...[$NL]]
 			return super.toMessage();
 		}
+	}
+end
+
+def trigger(enabledGetterAndSetter)
+	public boolean enabled() {
+		return message.get("enabled").asOptional(boolean.class).orElse(true);
+	}
+
+	public $name+firstUpperCase enabled(boolean enabled) {
+		message.set("enabled", enabled);
+		return this;
 	}
 end
 

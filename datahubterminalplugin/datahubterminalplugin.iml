@@ -165,9 +165,6 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.sumus:chronos:1.0.8" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: com.github.chen0040:java-reinforcement-learning:1.0.5" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: com.alibaba:fastjson:1.2.41" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.5.2" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.3" level="project" />
     <orderEntry type="library" name="Intino: io.intino:data-hub:9.3.9" level="project" />
   </component>
 </module>

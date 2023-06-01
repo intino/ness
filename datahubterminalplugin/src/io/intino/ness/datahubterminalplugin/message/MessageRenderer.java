@@ -39,7 +39,10 @@ public class MessageRenderer {
 		FrameBuilder eventFrame = new FrameBuilder("event").
 				add("name", event.name$()).add("package", packageName).
 				add("parent", parent(event));
-		if (isAssertion(event)) eventFrame.add("assertionId", "id");
+		if (isAssertion(event)) {
+			eventFrame.add("assertionId", "id")
+					.add("assertionInfo", new FrameBuilder("assertion").add("name", event.name$()));
+		}
 		eventFrame.add("attribute", processAttributesOf(attributesOf(event), event.name$()));
 		Map<Component, Boolean> components = collectComponents(event);
 		if (!components.isEmpty()) eventFrame.add("component", processComponents(components, event.name$()));

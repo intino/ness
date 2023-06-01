@@ -3,6 +3,7 @@ package io.intino.datahub.box.actions;
 import io.intino.alexandria.Scale;
 import io.intino.alexandria.Timetag;
 import io.intino.alexandria.logger.Logger;
+import io.intino.alexandria.message.Message;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.model.Datamart;
@@ -17,6 +18,13 @@ import static io.intino.datahub.datamart.MasterDatamart.Snapshot.shouldCreateSna
 public class DatamartsSnapshotAction {
 
 	public DataHubBox box;
+
+	public static void main(String[] args) {
+		Message message = new Message("t");
+		message.set("enabled", true);
+		System.out.println(message.get("enabled").asOptional(boolean.class).orElse(false));
+		System.out.println(message.get("enabled2").asOptional(boolean.class).orElse(false));
+	}
 
 	public DatamartsSnapshotAction() {}
 
