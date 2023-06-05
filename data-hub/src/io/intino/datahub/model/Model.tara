@@ -69,7 +69,7 @@ Concept Timeline is component
 Concept Reel is component
 	var Entity entity = empty
 	var Datalake.Tank.Message tank = empty
-	var Attribute signal
+	var Attribute signals
 	var Attribute entitySource
 
 Concept:Named Terminal

@@ -56,7 +56,7 @@ public final class ReelMounter extends MasterDatamartMounter {
 	}
 
 	private String[] mappingAttribute(Message message, Reel reel) {
-		return values(message, reel.signal()).toArray(String[]::new);
+		return values(message, reel.signals()).toArray(String[]::new);
 	}
 
 	private static Stream<String> values(Message message, Attribute from) {
