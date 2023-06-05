@@ -6,7 +6,6 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.model.Attribute;
-import io.intino.datahub.model.Component;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Reel;
 import io.intino.sumus.chronos.ReelFile;
@@ -17,6 +16,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static io.intino.datahub.box.DataHubBox.REEL_EXTENSION;
+import static java.io.File.separator;
 
 public final class ReelMounter extends MasterDatamartMounter {
 
@@ -36,11 +36,17 @@ public final class ReelMounter extends MasterDatamartMounter {
 		String ss = withoutParameters(event.ss());
 		ReelFile reelFile = datamart.reelStore().get(ss, ss);
 		try {
-			if (reelFile == null) reelFile = reelFile(message.type(), ss);
+			if (reelFile == null) reelFile = reelFile(message.type(), ss, subject(event));
 			update(reelFile, event);
 		} catch (IOException e) {
 			Logger.error(e);
 		}
+	}
+
+	private String subject(MessageEvent event) {
+		Datamart datamart = this.datamart.definition();
+		Reel reel = datamart.reel(r -> r.tank().name$().equals(event.type()));
+		return event.toMessage().get(reel.entitySource().name$()).asString();
 	}
 
 	private void update(ReelFile reelFile, MessageEvent event) throws IOException {
@@ -50,10 +56,7 @@ public final class ReelMounter extends MasterDatamartMounter {
 	}
 
 	private String[] mappingAttribute(Message message, Reel reel) {
-		Attribute signalSource = reel.signalSource();
-		if (signalSource.core$().owner().is(Component.class))
-			return message.components().stream().flatMap(m -> values(message, signalSource)).toArray(String[]::new);
-		else return values(message, signalSource).toArray(String[]::new);
+		return values(message, reel.signal()).toArray(String[]::new);
 	}
 
 	private static Stream<String> values(Message message, Attribute from) {
@@ -62,8 +65,8 @@ public final class ReelMounter extends MasterDatamartMounter {
 		return Stream.empty();
 	}
 
-	private ReelFile reelFile(String type, String ss) throws IOException {
-		File file = new File(box().datamartReelsDirectory(datamart.name()), type + File.separator + ss + REEL_EXTENSION);
+	private ReelFile reelFile(String type, String ss, String subject) throws IOException {
+		File file = new File(box().datamartReelsDirectory(datamart.name()), type + separator + subject + separator + ss + REEL_EXTENSION);
 		file.getParentFile().mkdirs();
 		return ReelFile.open(file);
 	}
