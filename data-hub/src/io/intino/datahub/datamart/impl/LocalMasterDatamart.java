@@ -232,7 +232,7 @@ public class LocalMasterDatamart implements MasterDatamart {
 		public ReelStore(Datamart definition, File root) {
 			super(root);
 			this.subscribedEvents = definition.reelList().stream()
-					.flatMap(r -> r.signalList().stream().map(s -> s.tank().message().name$()))
+					.map(r -> r.tank().message().name$())
 					.collect(Collectors.toSet());
 		}
 
