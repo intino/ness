@@ -5,13 +5,14 @@ import io.intino.alexandria.Timetag;
 import io.intino.alexandria.datalake.Datalake;
 import io.intino.alexandria.event.Event;
 import io.intino.alexandria.event.EventStream;
-import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.impl.LocalMasterDatamart;
 import io.intino.datahub.datamart.mounters.EntityMounter;
 import io.intino.datahub.datamart.mounters.ReelMounter;
 import io.intino.datahub.datamart.mounters.TimelineMounter;
-import io.intino.datahub.model.*;
+import io.intino.datahub.model.Datamart;
+import io.intino.datahub.model.Entity;
+import io.intino.datahub.model.Sensor;
 import io.intino.datahub.model.rules.DayOfWeek;
 import io.intino.datahub.model.rules.SnapshotScale;
 
@@ -52,7 +53,7 @@ public class DatamartFactory {
 	}
 
 	private boolean failedToLoadLastSnapshotOf(Datamart definition, Reference<MasterDatamart> datamart, Reference<Timetag> fromTimetag) {
-		if(!useSnapshots) return true;
+		if (!useSnapshots) return true;
 		Optional<MasterDatamart.Snapshot> snapshot = box.datamartSerializer().loadMostRecentSnapshot(definition.name$());
 		if (snapshot.isPresent()) {
 			datamart.value = snapshot.get().datamart();
@@ -92,13 +93,13 @@ public class DatamartFactory {
 
 			createSnapshotIfNecessary(datamart, scale, firstDayOfWeek, event);
 
-			if(entityTanks.contains(event.type()))
+			if (entityTanks.contains(event.type()))
 				entityMounter.mount(event);
 
-			if(timelineTanks.contains(event.type()))
+			if (timelineTanks.contains(event.type()))
 				timelineMounter.mount(event);
 
-			if(reelTanks.contains(event.type()))
+			if (reelTanks.contains(event.type()))
 				reelMounter.mount(event);
 		}
 	}
@@ -108,7 +109,7 @@ public class DatamartFactory {
 	}
 
 	private void createSnapshotIfNecessary(MasterDatamart datamart, SnapshotScale scale, DayOfWeek firstDayOfWeek, Event event) throws IOException {
-		if(scale == SnapshotScale.None) return;
+		if (scale == SnapshotScale.None) return;
 		Timetag timetag = Timetag.of(event.ts(), Scale.Day);
 		if (shouldCreateSnapshot(timetag, scale, firstDayOfWeek))
 			box.datamartSerializer().saveSnapshot(timetag, datamart);
@@ -137,9 +138,7 @@ public class DatamartFactory {
 	}
 
 	private static Set<String> reelTanks(Datamart definition) {
-		return definition.reelList().stream().flatMap(r -> Stream.concat(
-						r.signalList().stream().map(DatamartFactory::tankName),
-						r.entity().from() == null ? Stream.empty() : Stream.of(tankName(r.entity()))))
+		return definition.reelList().stream().map(r -> tankName(r.tank()))
 				.collect(Collectors.toSet());
 	}
 
@@ -151,8 +150,8 @@ public class DatamartFactory {
 		return definition.entityList().stream().filter(e -> e.from() != null).map(DatamartFactory::tankName).collect(Collectors.toSet());
 	}
 
-	private static String tankName(Reel.Signal s) {
-		return s.tank().message().core$().fullName().replace("$", ".");
+	private static String tankName(io.intino.datahub.model.Datalake.Tank.Message tank) {
+		return tank.message().core$().fullName().replace("$", ".");
 	}
 
 	private static String tankName(Sensor sensor) {

@@ -9,9 +9,6 @@ import io.intino.datahub.model.Attribute;
 import io.intino.datahub.model.Component;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Reel;
-import io.intino.datahub.model.Reel.Signal.Operation;
-import io.intino.sumus.chronos.Reel.Shot;
-import io.intino.sumus.chronos.Reel.State;
 import io.intino.sumus.chronos.ReelFile;
 
 import java.io.File;
@@ -48,21 +45,15 @@ public final class ReelMounter extends MasterDatamartMounter {
 
 	private void update(ReelFile reelFile, MessageEvent event) throws IOException {
 		Datamart datamart = this.datamart.definition();
-		List<Reel> reels = datamart.reelList(r -> r.signal(s -> s.tank().message().name$().equals(event.type())) != null);
-		for (Reel reel : reels) {
-			Reel.Signal signal = reel.signal(s -> s.tank().message().name$().equals(event.type()));
-			String[] values = mappingAttribute(event.toMessage(), signal.attribute());
-			if (signal.operation().equals(Operation.Set))
-				reelFile.set(event.ts(), values);
-			else if (values.length == 1)
-				reelFile.append(new Shot(event.ts(), values[0].equals(State.On.name()) ? State.On : State.Off, signal.attribute().name$()));
-		}
+		List<Reel> reels = datamart.reelList(r -> r.tank().name$().equals(event.type()));
+		for (Reel reel : reels) reelFile.set(event.ts(), mappingAttribute(event.toMessage(), reel));
 	}
 
-	private String[] mappingAttribute(Message message, Attribute from) {
-		if (from.core$().owner().is(Component.class))
-			return message.components().stream().flatMap(m -> values(message, from)).toArray(String[]::new);
-		else return values(message, from).toArray(String[]::new);
+	private String[] mappingAttribute(Message message, Reel reel) {
+		Attribute signalSource = reel.signalSource();
+		if (signalSource.core$().owner().is(Component.class))
+			return message.components().stream().flatMap(m -> values(message, signalSource)).toArray(String[]::new);
+		else return values(message, signalSource).toArray(String[]::new);
 	}
 
 	private static Stream<String> values(Message message, Attribute from) {
