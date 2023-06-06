@@ -309,7 +309,7 @@ def type(devent) trigger(addSubscribe)
 end
 
 def trigger(publishSwitchCase)
-	case "$typename+FirstUpperCase": publish((event instanceof $type $typename+firstLowerCase ? $typename+firstLowerCase : new $type(((io.intino.alexandria.event.message.MessageEvent) event).toMessage()))); break;
+	case "$typename+FirstUpperCase": publish((event instanceof $type e ? e : new $type(((io.intino.alexandria.event.message.MessageEvent) event).toMessage()))); break;
 end
 
 def trigger(channelOfSwitchCase)
@@ -321,20 +321,20 @@ def !type(bpm) trigger(tankOf)
 end
 
 def type(bpm) trigger(publish)
-	public void publish($type $typeName+firstLowerCase) {
-		connector.sendEvent("$channel", $typeName+firstLowerCase);
+	public void publish($type e) {
+		connector.sendEvent("$channel", e);
 	}
 end
 
 def !type(bpm) type(measurement) trigger(publish)
-	public void publish($type $message+firstLowerCase) {
-		connector.sendEvent("$channel", $message+firstLowerCase.toMessageEvent());
+	public void publish($type e) {
+		connector.sendEvent("$channel", e);
 	}
 end
 
 def !type(bpm) trigger(publish)
-	public void publish($type $message+firstLowerCase) {
-		connector.sendEvent("$channel", $message+firstLowerCase);
+	public void publish($type e) {
+		connector.sendEvent("$channel", e);
 	}
 
 	public void publish($type first, $type ...others) {

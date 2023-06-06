@@ -15,6 +15,7 @@
       <sourceFolder url="file://$MODULE_DIR$/temp/cosmos/trooper-terminal/src" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/temp/cosmos/master-terminal/src" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/temp/cosmos/ontology/src" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/temp/cosmos/observer-terminal/src" isTestSource="true" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
