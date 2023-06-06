@@ -15,9 +15,9 @@ import io.intino.plugin.PluginLauncher;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static io.intino.ness.datahubterminalplugin.Formatters.*;
+import static java.util.stream.Collectors.toMap;
 
 class TerminalRenderer {
 	private final Terminal terminal;
@@ -60,9 +60,9 @@ class TerminalRenderer {
 			addSubscribeForThedevents(builder);
 		}
 
-		if(!messageTanks.isEmpty()) builder.add("message", messageFrames());
-		if(!measurementTanks.isEmpty()) builder.add("measurement", measurementFrames());
-		if(!resourceTanks.isEmpty()) builder.add("resource", resourceFrames());
+		if (!messageTanks.isEmpty()) builder.add("message", messageFrames());
+		if (!measurementTanks.isEmpty()) builder.add("measurement", measurementFrames());
+		if (!resourceTanks.isEmpty()) builder.add("resource", resourceFrames());
 
 		return builder.toFrame();
 	}
@@ -75,7 +75,7 @@ class TerminalRenderer {
 
 	private void addSubscribeForThedevents(FrameBuilder builder) {
 		Set<String> tanksAlreadySubscribedTo = new HashSet<>();
-		if(terminal.subscribe() != null) {
+		if (terminal.subscribe() != null) {
 			terminal.subscribe().messageTanks().stream().map(Layer::name$).forEach(tanksAlreadySubscribedTo::add);
 			terminal.subscribe().measurementTanks().stream().map(Layer::name$).forEach(tanksAlreadySubscribedTo::add);
 			terminal.subscribe().resourceTanks().stream().map(Layer::name$).forEach(tanksAlreadySubscribedTo::add);
@@ -90,8 +90,7 @@ class TerminalRenderer {
 
 	private void addSubscriberForReelEvents(FrameBuilder builder, Set<String> tanksAlreadySubscribedTo, Datamart datamart) {
 		datamart.reelList().stream()
-				.flatMap(r -> r.signalList().stream())
-				.map(Reel.Signal::tank)
+				.map(Reel::tank)
 				.filter(Objects::nonNull).distinct()
 				.filter(tank -> tanksAlreadySubscribedTo.add(tank.name$()))
 				.forEach(tank -> builder.add("subscribe", frameOf(tank)));
@@ -100,7 +99,8 @@ class TerminalRenderer {
 	private void addSubscribersForTimelineEvents(FrameBuilder builder, Set<String> tanksAlreadySubscribedTo, Datamart datamart) {
 		datamart.timelineList().stream()
 				.map(Timeline::tank)
-				.filter(Objects::nonNull).distinct()
+				.filter(Objects::nonNull)
+				.distinct()
 				.filter(tank -> tanksAlreadySubscribedTo.add(tank.name$()))
 				.forEach(tank -> builder.add("subscribe", frameOf(tank)));
 	}
@@ -108,7 +108,8 @@ class TerminalRenderer {
 	private void addSubscribersForEntityEvents(FrameBuilder builder, Set<String> tanksAlreadySubscribedTo, Datamart datamart) {
 		datamart.entityList().stream()
 				.map(Entity::from)
-				.filter(Objects::nonNull).distinct()
+				.filter(Objects::nonNull)
+				.distinct()
 				.filter(tank -> tanksAlreadySubscribedTo.add(tank.name$()))
 				.forEach(tank -> builder.add("subscribe", frameOf(tank)));
 	}
@@ -120,9 +121,8 @@ class TerminalRenderer {
 	}
 
 	private void renderDatamarts(FrameBuilder builder) {
-		for (Datamart datamart : terminal.datamarts().list()) {
+		for (Datamart datamart : terminal.datamarts().list())
 			builder.add("datamart", frameOf(datamart));
-		}
 		new DatamartsRenderer(srcDir, terminal.graph(), conf, logger, notifier, ontologyPackage).render(terminal, rootPackage);
 	}
 
@@ -144,11 +144,10 @@ class TerminalRenderer {
 
 	private Map<String, FrameBuilder> reelEventsOf(Datamart datamart) {
 		return datamart.reelList().stream()
-				.flatMap(r -> r.signalList().stream())
 				.map(s -> s.tank().message())
 				.filter(Objects::nonNull)
 				.distinct()
-				.collect(Collectors.toMap(Layer::name$, tank -> frameOf(tank, datamart)));
+				.collect(toMap(Layer::name$, tank -> frameOf(tank, datamart)));
 	}
 
 	private Map<String, FrameBuilder> timelineEventsOf(Datamart datamart) {
@@ -157,7 +156,7 @@ class TerminalRenderer {
 				.filter(Objects::nonNull)
 				.map(Tank.Measurement::sensor)
 				.distinct()
-				.collect(Collectors.toMap(Layer::name$, tank -> frameOf(tank, datamart)));
+				.collect(toMap(Layer::name$, tank -> frameOf(tank, datamart)));
 	}
 
 	private Map<String, FrameBuilder> entityEventsOf(Datamart datamart) {
@@ -166,7 +165,7 @@ class TerminalRenderer {
 				.filter(Objects::nonNull)
 				.map(Tank.Message::message)
 				.distinct()
-				.collect(Collectors.toMap(Layer::name$, tank -> frameOf(tank, datamart)));
+				.collect(toMap(Layer::name$, tank -> frameOf(tank, datamart)));
 	}
 
 	private FrameBuilder frameOf(Sensor sensor, Datamart datamart) {

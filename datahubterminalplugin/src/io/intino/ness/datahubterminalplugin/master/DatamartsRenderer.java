@@ -7,7 +7,6 @@ import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.RuleSet;
 import io.intino.itrules.Template;
-import io.intino.magritte.framework.Node;
 import io.intino.ness.datahubterminalplugin.Formatters;
 import io.intino.ness.datahubterminalplugin.util.ErrorUtils;
 import io.intino.plugin.PluginLauncher;
@@ -15,7 +14,6 @@ import io.intino.plugin.PluginLauncher;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,7 +48,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	public void render(Terminal terminal, String terminalPackage) {
 		TerminalInfo terminalInfo = new TerminalInfo(terminal, terminalPackage);
 		String basePackage = modelPackage + ".datamarts";
-		for(Datamart datamart : terminal.datamarts().list()) {
+		for (Datamart datamart : terminal.datamarts().list()) {
 			this.modelPackage = basePackage + "." + datamart.name$().toLowerCase();
 			renderDatamart(datamart, terminalInfo);
 		}
@@ -68,7 +66,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 	public void render() {
 		String basePackage = modelPackage + ".datamarts";
-		for(Datamart datamart : model.datamartList()) {
+		for (Datamart datamart : model.datamartList()) {
 			this.modelPackage = basePackage + "." + datamart.name$().toLowerCase();
 			renderDatamart(datamart);
 			renderOntologyClassesOf(datamart);
@@ -176,11 +174,11 @@ public class DatamartsRenderer implements ConceptRenderer {
 		builder.add("package", modelPackage);
 		builder.add("name", firstUpperCase(datamart.name$()));
 		builder.add("entity", entitiesOf(datamart));
-		if(!datamart.timelineList().isEmpty()) {
+		if (!datamart.timelineList().isEmpty()) {
 			builder.add("hasTimelines", "");
 			builder.add("timeline", timelinesOf(datamart));
 		}
-		if(!datamart.reelList().isEmpty()) {
+		if (!datamart.reelList().isEmpty()) {
 			builder.add("hasReels", "");
 			builder.add("reel", reelsOf(datamart));
 		}
@@ -195,8 +193,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 	private String reelEvents(Datamart datamart) {
 		return datamart.reelList().stream()
-				.flatMap(r -> r.signalList().stream())
-				.map(s -> quoted().format(s.tank().message().name$()).toString())
+				.map(r -> quoted().format(r.tank().name$()).toString())
 				.distinct()
 				.collect(Collectors.joining(","));
 	}
@@ -215,10 +212,9 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private String sourcesOf(Reel reel) {
-		Set<String> sources = reel.signalList().stream().map(s -> quoted().format(s.tank().message().name$()).toString()).collect(Collectors.toSet());
-		if(reel.entity() != null && reel.entity().from() != null) {
+		ArrayList<String> sources = new ArrayList<>(List.of(quoted().format(reel.tank()).toString()));
+		if (reel.entity() != null && reel.entity().from() != null)
 			sources.add(quoted().format(reel.entity().from().message().name$()).toString());
-		}
 		return String.join(",", sources);
 	}
 
@@ -249,7 +245,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 	private String sourcesOf(Timeline timeline) {
 		String sensor = quoted().format(timeline.tank().sensor().name$()).toString();
-		if(timeline.entity() != null && timeline.entity().from() != null)
+		if (timeline.entity() != null && timeline.entity().from() != null)
 			return sensor + "," + quoted().format(timeline.entity().from().message().name$()).toString();
 		return sensor;
 	}
@@ -266,14 +262,14 @@ public class DatamartsRenderer implements ConceptRenderer {
 		builder.add("ontologypackage", modelPackage);
 		builder.add("terminal", String.format(terminalInfo.terminalPackage + "." + firstUpperCase(javaValidName().format(terminalInfo.terminal.name$()).toString())));
 
-		if(!datamart.timelineList().isEmpty()) {
+		if (!datamart.timelineList().isEmpty()) {
 			builder.add("hasTimelines", "");
 			builder.add("timelineEvents", timelineEvents(datamart));
 			builder.add("timeline", timelinesOf(datamart));
 			builder.add("timelineNode", timelineNode());
 		}
 
-		if(!datamart.reelList().isEmpty()) {
+		if (!datamart.reelList().isEmpty()) {
 			builder.add("hasReels", "");
 			builder.add("reelEvents", reelEvents(datamart));
 			builder.add("reel", reelsOf(datamart));
@@ -288,7 +284,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 				.flatMap(struct -> framesOf(struct, modelPackage + ".structs", null))
 				.collect(Collectors.toList());
 
-		for(Entity entity : datamart.entityList()) {
+		for (Entity entity : datamart.entityList()) {
 			entity.structList().stream()
 					.flatMap(struct -> framesOf(struct, modelPackage + ".entities." + entity.name$(), entity.name$()))
 					.forEach(structFrames::add);
@@ -313,7 +309,8 @@ public class DatamartsRenderer implements ConceptRenderer {
 		List<Frame> frames = new ArrayList<>(1);
 		frames.add(b.toFrame());
 
-		for(Struct s : struct.structList()) framesOf(s, thePackage + "." + struct.name$(), fullname).forEach(frames::add);
+		for (Struct s : struct.structList())
+			framesOf(s, thePackage + "." + struct.name$(), fullname).forEach(frames::add);
 
 		return frames.stream();
 	}
@@ -324,8 +321,8 @@ public class DatamartsRenderer implements ConceptRenderer {
 					final FrameBuilder b = new FrameBuilder("entity").add("package", modelPackage);
 					b.add("name", firstUpperCase(entity.name$())).add("fullName", fullNameOf(entity));
 					b.add("attribute", attributeFrames(attributesOf(entity)));
-					if(entity.from() != null) b.add("event", firstUpperCase(entity.from().message().name$()));
-					if(entity.isExtensionOf()) {
+					if (entity.from() != null) b.add("event", firstUpperCase(entity.from().message().name$()));
+					if (entity.isExtensionOf()) {
 						b.add("parent", entity.asExtensionOf().entity().name$());
 						b.add("ancestor", ancestorsOf(entity));
 					} else {
@@ -354,7 +351,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 	private void setDescendantsInfo(Datamart datamart, Entity entity, FrameBuilder b) {
 		Entity[] descendants = descendantsOf(entity, datamart);
-		if(descendants.length == 0) return;
+		if (descendants.length == 0) return;
 		b.add("superclass");
 		b.add("descendant", Arrays.stream(descendants).map(e -> new FrameBuilder("descendant").add("entity").add("name", e.name$()).toFrame()).toArray(Frame[]::new));
 		b.add("subclass", framesOfUpperLevelDescendants(entity, datamart));
@@ -363,7 +360,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	private Frame[] ancestorsOf(Entity entity) {
 		List<Frame> ancestors = new ArrayList<>();
 		Entity parent = entity.asExtensionOf().entity();
-		while(parent != null) {
+		while (parent != null) {
 			ancestors.add(new FrameBuilder("ancestor", "entity").add("name", parent.name$()).toFrame());
 			parent = parent.isExtensionOf() ? parent.asExtensionOf().entity() : null;
 		}
@@ -380,16 +377,16 @@ public class DatamartsRenderer implements ConceptRenderer {
 	private FrameBuilder attributeFrameBuilder(ConceptAttribute attr) {
 		FrameBuilder b = new FrameBuilder("attribute");
 
-		if(attr.isList() || attr.isSet()) {
+		if (attr.isList() || attr.isSet()) {
 			setAttribCollectionInfo(attr, b);
-		} else if(attr.isMap()) {
+		} else if (attr.isMap()) {
 			b.add("type", "java.util.Map").add("collection").add("parameterTypeName", "java.lang.String").add("parameterType", "java.lang.String");
 			b.add("parameter", new FrameBuilder("parameter"));
-		} else if(attr.isEntity()) {
+		} else if (attr.isEntity()) {
 			b.add("type", modelPackage + ".entities." + attr.asEntity().entity().name$());
-		}  else if(attr.isStruct()) {
+		} else if (attr.isStruct()) {
 			b.add("type", modelPackage + ".entities." + attr.ownerFullName().replace(STRUCT_INTERNAL_CLASS_SEP, ".") + "." + attr.asStruct().name$());
-		} else if(attr.isWord()) {
+		} else if (attr.isWord()) {
 			b.add("type", modelPackage + ".entities." + attr.ownerFullName().replace(STRUCT_INTERNAL_CLASS_SEP, ".") + "." + attr.type());
 		} else {
 			b.add("type", attr.type());
@@ -397,7 +394,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 		b.add("name", attr.name$());
 
-		if(attr.inherited()) b.add("inherited");
+		if (attr.inherited()) b.add("inherited");
 
 		return b;
 	}
@@ -407,24 +404,24 @@ public class DatamartsRenderer implements ConceptRenderer {
 		b.add("collection");
 		String parameterType = attr.type();
 		String parameterTypeName = parameterType;
-		if(attr.isEntity()) {
+		if (attr.isEntity()) {
 			parameterType = modelPackage + ".entities." + firstUpperCase(attr.asEntity().entity().name$());
 			parameterTypeName = firstUpperCase(attr.asEntity().entity().name$());
-		} else if(attr.isStruct()) {
+		} else if (attr.isStruct()) {
 			parameterType = modelPackage + ".entities." + attr.ownerFullName() + "." + firstUpperCase(attr.asStruct().name$());
 			parameterTypeName = firstUpperCase(attr.asStruct().name$());
-		} else if(attr.isWord()) {
+		} else if (attr.isWord()) {
 			parameterType = modelPackage + ".entities." + firstUpperCase(attr.owner().name()) + "." + parameterType;
 		}
 		b.add("parameterType", parameterType.replace(STRUCT_INTERNAL_CLASS_SEP, "."));
 		b.add("parameterTypeName", parameterTypeName);
 
 		FrameBuilder param = new FrameBuilder("parameter");
-		if(attr.isEntity()) param.add("entity");
-		else if(attr.isStruct()) param.add("struct");
-		else if(attr.isWord()) param.add("word");
+		if (attr.isEntity()) param.add("entity");
+		else if (attr.isStruct()) param.add("struct");
+		else if (attr.isWord()) param.add("word");
 
-		if(attr.isStruct()) {
+		if (attr.isStruct()) {
 			param.add("name", attr.ownerFullName() + STRUCT_INTERNAL_CLASS_SEP + firstUpperCase(attr.asStruct().name$()));
 		} else {
 			param.add("name", parameterTypeName);
@@ -438,10 +435,10 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private String fullNameOf(Entity e) {
-		if(!e.isExtensionOf()) return firstUpperCase(e.name$());
+		if (!e.isExtensionOf()) return firstUpperCase(e.name$());
 		List<String> names = new ArrayList<>(4);
 		Entity parent = e.asExtensionOf().entity();
-		while(parent != null) {
+		while (parent != null) {
 			names.add(firstUpperCase(parent.name$()));
 			parent = parent.isExtensionOf() ? parent.asExtensionOf().entity() : null;
 		}
@@ -483,7 +480,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 		List<Entity> upperLevelDescendants = new ArrayList<>();
 
 		for (Entity entity : datamart.entityList(e -> isDescendantOf(e, parent) && !e.isAbstract())) {
-			if(anAncestorOfThisEntityIsAlreadyPresent(entity, upperLevelDescendants)) continue;
+			if (anAncestorOfThisEntityIsAlreadyPresent(entity, upperLevelDescendants)) continue;
 			removeAnyDescendantOfThisEntityIfPresent(entity, upperLevelDescendants);
 			upperLevelDescendants.add(entity);
 		}
@@ -500,7 +497,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private static boolean isDescendantOf(Entity node, Entity expectedParent) {
-		if(!node.isExtensionOf()) return false;
+		if (!node.isExtensionOf()) return false;
 		Entity parent = node.asExtensionOf().entity();
 		return parent.equals(expectedParent) || isDescendantOf(parent, expectedParent);
 	}
@@ -572,7 +569,8 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return null;
 	}
 
-	public record TerminalInfo(Terminal terminal, String terminalPackage) { }
+	public record TerminalInfo(Terminal terminal, String terminalPackage) {
+	}
 
 	private static class Templates {
 		final Template datamart = append(customize(new DatamartTemplate()), customize(new NodeImplTemplate()));
@@ -585,7 +583,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 		private static Template append(Template t1, Template... others) {
 			RuleSet rules = new RuleSet();
 			addRulesOf(t1, rules);
-			for(Template t : others) addRulesOf(t, rules);
+			for (Template t : others) addRulesOf(t, rules);
 			return new Template() {
 				@Override
 				protected RuleSet ruleSet() {
