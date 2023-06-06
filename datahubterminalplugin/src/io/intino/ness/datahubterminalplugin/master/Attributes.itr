@@ -1,5 +1,5 @@
 def type(attribute) !type(inherited) trigger(initAttribute)
-	attributes.add(new Attribute("$name+firstLowerCase", null));
+	attributes.add(new Attribute("$name+firstLowerCase+javaValidName", null));
 end
 
 def type(word) !type(inherited) trigger(wordDeclaration)
@@ -17,45 +17,45 @@ def type(parameter) trigger(parameterDeclaration)
 end
 
 def type(list | set) type(entity) trigger(getter)
-	public $type $name+firstLowerCase() {
-		return attribute("$name+firstLowerCase").value().<Collection<String>>as().stream()
+	public $type $name+firstLowerCase+javaValidName() {
+		return attribute("$name+firstLowerCase+javaValidName").value().<Collection<String>>as().stream()
 			.map(datamart()::$typename+firstLowerCase)
 			.collect(Collectors.to$collectionType());
 	}
 end
 
 def type(entity) trigger(getter)
-	public $type $name+firstLowerCase() {
-		return datamart().$typename+firstLowerCase(attribute("$name+firstLowerCase").value().as(String.class));
+	public $type $name+firstLowerCase+javaValidName() {
+		return datamart().$typename+firstLowerCase(attribute("$name+firstLowerCase+javaValidName").value().as(String.class));
 	}
 end
 
 def trigger(getter)
-	public $type $name+firstLowerCase() {
-		return attribute("$name+firstLowerCase").value().<$type>as();
+	public $type $name+firstLowerCase+javaValidName() {
+		return attribute("$name+firstLowerCase+javaValidName").value().<$type>as();
 	}
 end
 
 def trigger(equals)
-	Objects.equals(this.$name+firstLowerCase(), other.$name+firstLowerCase())
+	Objects.equals(this.$name+firstLowerCase+javaValidName(), other.$name+firstLowerCase+javaValidName())
 end
 
 def trigger(toString)
-	sb.append(this.$name+firstLowerCase()).append(',');
+	sb.append(this.$name+firstLowerCase+javaValidName()).append(',');
 end
 
 def type(attribute) trigger(get)
-	this.$name+firstLowerCase()
+	this.$name+firstLowerCase+javaValidName()
 end
 
 def type(attribute) trigger(parameter)
-	$type $name+firstLowerCase
+	$type $name+firstLowerCase+javaValidName
 end
 
 def type(attribute) trigger(name)
-	$name+firstLowerCase
+	$name+firstLowerCase+javaValidName
 end
 
 def trigger(putIntoMap)
-	put("$name+firstLowerCase", $name+firstLowerCase);
+	put("$name+firstLowerCase+javaValidName", $name+firstLowerCase+javaValidName);
 end
