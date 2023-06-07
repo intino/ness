@@ -1,4 +1,4 @@
-package io.intino.ness.datahubterminalplugin.master;
+package io.intino.ness.datahubterminalplugin.datamarts;
 
 
 import io.intino.datahub.model.Datamart;
@@ -6,7 +6,6 @@ import io.intino.datahub.model.Struct;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

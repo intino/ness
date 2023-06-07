@@ -85,6 +85,7 @@ Concept:Named Terminal
 		var Datalake.Tank.Measurement[] measurementTanks = empty
 		var Datalake.Tank.Resource[] resourceTanks = empty
 	Concept:{0..1} Datamarts
+		var boolean autoLoad = true
 		var Datamart[] list
 
 Concept Namespace

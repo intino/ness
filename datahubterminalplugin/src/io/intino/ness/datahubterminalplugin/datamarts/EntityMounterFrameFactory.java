@@ -1,4 +1,4 @@
-package io.intino.ness.datahubterminalplugin.master;
+package io.intino.ness.datahubterminalplugin.datamarts;
 
 
 import io.intino.datahub.model.Datamart;
@@ -13,7 +13,7 @@ import java.util.*;
 
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
 import static io.intino.ness.datahubterminalplugin.Formatters.javaValidName;
-import static io.intino.ness.datahubterminalplugin.master.StructFrameFactory.STRUCT_INTERNAL_CLASS_SEP;
+import static io.intino.ness.datahubterminalplugin.datamarts.StructFrameFactory.STRUCT_INTERNAL_CLASS_SEP;
 
 public class EntityMounterFrameFactory implements ConceptRenderer {
 	private static final String DOT = ".";

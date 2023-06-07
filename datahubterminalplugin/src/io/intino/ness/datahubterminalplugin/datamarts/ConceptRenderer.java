@@ -1,9 +1,10 @@
-package io.intino.ness.datahubterminalplugin.master;
+package io.intino.ness.datahubterminalplugin.datamarts;
 
-import io.intino.datahub.model.*;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.magritte.framework.Node;
+import io.intino.ness.master.Datamart;
+import io.intino.ness.master.model.Entity;
 
 import java.util.*;
 import java.util.function.BiFunction;

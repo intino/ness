@@ -1,4 +1,4 @@
-package io.intino.ness.datahubterminalplugin.master;
+package io.intino.ness.datahubterminalplugin.datamarts;
 
 import io.intino.itrules.RuleSet;
 import io.intino.itrules.Template;

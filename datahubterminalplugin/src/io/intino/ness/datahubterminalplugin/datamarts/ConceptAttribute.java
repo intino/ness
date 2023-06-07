@@ -1,4 +1,4 @@
-package io.intino.ness.datahubterminalplugin.master;
+package io.intino.ness.datahubterminalplugin.datamarts;
 
 import io.intino.datahub.model.EntityData;
 import io.intino.datahub.model.Struct;
