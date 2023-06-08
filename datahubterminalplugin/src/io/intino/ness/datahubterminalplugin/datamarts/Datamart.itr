@@ -313,8 +313,8 @@ def type(datamart & message & impl)
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
 			message.setText("datamart=" + name() +
 				";operation=entities" +
-				(snapshotTimetag().isEmpty() ? "" : ";timetag=" + snapshotTimetag())
-				(datamartSourceSelector != null ? "" : ";ss=" + datamartSourceSelector)
+				(snapshotTimetag().isEmpty() ? "" : ";timetag=" + snapshotTimetag()) +
+				(datamartSourceSelector != null ? "" : ";sourceSelector=" + datamartSourceSelector)
 			);
 			return message;
 		}
