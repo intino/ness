@@ -153,8 +153,8 @@ public class DatamartsRequest {
 		Optional<String> timetag = Optional.ofNullable(args.get("timetag"));
 		return timetag.map(s -> box.datamartSerializer().loadMostRecentSnapshotTo(datamart.name(), asTimetag(s))
 				.map(MasterDatamart.Snapshot::datamart)
-				.map(d -> downloadEntities(d, args.get("ss")))
-				.orElse(Stream.empty())).orElseGet(() -> datamart == null ? Stream.empty() : downloadEntities(datamart, args.get("ss")));
+				.map(d -> downloadEntities(d, args.get("sourceSelector")))
+				.orElse(Stream.empty())).orElseGet(() -> datamart == null ? Stream.empty() : downloadEntities(datamart, args.get("sourceSelector")));
 	}
 
 	private Timetag asTimetag(String timetag) {
@@ -175,11 +175,11 @@ public class DatamartsRequest {
 		}
 	}
 
-	private Stream<Message> downloadEntities(MasterDatamart datamart, String ss) {
+	private Stream<Message> downloadEntities(MasterDatamart datamart, String sourceSelector) {
 		try {
 			ActiveMQBytesMessage message = new ActiveMQBytesMessage();
-			Predicate<String> ssPredicate = predicateOf(ss);
-			message.setIntProperty("count", ss != null ? datamart.entityStore().size() : filtered(datamart, ssPredicate));
+			Predicate<String> ssPredicate = predicateOf(sourceSelector);
+			message.setIntProperty("count", sourceSelector != null ? datamart.entityStore().size() : filtered(datamart, ssPredicate));
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream(16 * 1024);
 			box.datamartSerializer().serialize(datamart, ssPredicate, outputStream);
 			byte[] bytes = outputStream.toByteArray();
