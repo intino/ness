@@ -57,7 +57,6 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.3" level="project" />
     <orderEntry type="module" module-name="data-hub" />
-    <orderEntry type="library" name="Intino: io.intino:data-hub:9.5.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.2.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.1.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:7.0.2" level="project" />
@@ -172,5 +171,6 @@
     <orderEntry type="library" scope="TEST" name="Intino: org.apache.activemq:activemq-client:5.17.4" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.apache.geronimo.specs:geronimo-j2ee-management_1.1_spec:1.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino:data-hub:9.5.1" level="project" />
   </component>
 </module>
