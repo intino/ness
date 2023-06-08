@@ -42,7 +42,7 @@ def type(terminal)
 			initDatamarts(null);
 		}
 
-		public void initDatamarts(String messageSelector) {
+		public void initDatamarts(String sourceSelector) {
 			[$datamart+init...[$NL]]
 		}
 
@@ -277,8 +277,8 @@ end
 
 
 def trigger(init)
-	$name+firstLowerCase~Datamart.init();
-	addDatamartSubscribers(this.$name+firstLowerCase~Datamart, messageSelector);
+	$name+firstLowerCase~Datamart.init(sourceSelector);
+	addDatamartSubscribers(this.$name+firstLowerCase~Datamart, sourceSelector);
 end
 
 def trigger(retryConfigAssign)
@@ -304,13 +304,13 @@ def type(datamart) trigger(getter)
 end
 
 def type(datamart) trigger(addDatamartSubscribers)
-	private void addDatamartSubscribers($package.$name+FirstUpperCase~DatamartImpl datamart, String messageSelector) {
+	private void addDatamartSubscribers($package.$name+FirstUpperCase~DatamartImpl datamart, String sourceSelector) {
 		[$devent+addSubscribe...[$NL]]
 	}
 end
 
 def type(devent) trigger(addSubscribe)
-	subscribe(($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer) (event, topic) -> datamart.mount(event), connector.clientId() + "_$datamart_$message", messageSelector);
+	subscribe(($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer) (event, topic) -> datamart.mount(event), connector.clientId() + "_$datamart_$message", sourceSelector);
 end
 
 def trigger(publishSwitchCase)
@@ -381,9 +381,9 @@ def type(measurement) trigger(subscribe)
 		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0));
 	}
 
-	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId, String messageSelector) {
+	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId, String sourceSelector) {
 		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(($type) event, "$channel");} catch(Throwable e) { Logger.error(e); }}));
-		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), messageSelector);
+		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), sourceSelector);
 	}
 
 	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId, java.util.function.Predicate<Instant> filter) {
@@ -407,9 +407,9 @@ def type(message) trigger(subscribe)
 		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0));
 	}
 
-	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId, String messageSelector) {
+	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId, String sourceSelector) {
 		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type((MessageEvent) event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
-		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), messageSelector);
+		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), sourceSelector);
 	}
 
 	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId, java.util.function.Predicate<Instant> filter) {

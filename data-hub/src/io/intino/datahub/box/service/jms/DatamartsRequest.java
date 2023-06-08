@@ -18,6 +18,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,8 +35,7 @@ import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
  * <li>The entry 'datamart' must be present and must be the first in the request</li>
  * <li>The entry 'operation' must be present</li>
  * </ul>
- *
- * */
+ */
 public class DatamartsRequest {
 
 	private final DataHubBox box;
@@ -58,12 +59,12 @@ public class DatamartsRequest {
 
 		String datamartName = args.get("datamart");
 		MasterDatamart datamart = box.datamarts().get(datamartName);
-		if(datamart == null) {
+		if (datamart == null) {
 			Logger.error("Datamart " + datamartName + " not found");
 			return Stream.empty();
 		}
 
-		return switch(args.get("operation")) {
+		return switch (args.get("operation")) {
 			case "snapshots" -> listAvailableSnapshotsOf(datamart);
 			case "entities" -> downloadEntities(datamart, args);
 			case "list-timelines" -> listTimelineFiles(datamart, args);
@@ -84,19 +85,19 @@ public class DatamartsRequest {
 
 	private Stream<Message> getChronos(Map<String, String> args, File dir, String extension) {
 		String id = args.get("id");
-		if(id == null) {
+		if (id == null) {
 			Logger.error("Chronos object download requested but id argument not found");
 			return Stream.empty();
 		}
 
 		String type = args.get("type");
-		if(type == null) {
+		if (type == null) {
 			Logger.error("Chronos object download requested but type argument not found");
 			return Stream.empty();
 		}
 
 		File file = new File(dir, type + File.pathSeparator + id + extension);
-		if(!file.exists()) return Stream.empty();
+		if (!file.exists()) return Stream.empty();
 
 		String mode = args.getOrDefault("mode", "download");
 		return mode.equals("path") ? path(file) : download(file);
@@ -152,8 +153,8 @@ public class DatamartsRequest {
 		Optional<String> timetag = Optional.ofNullable(args.get("timetag"));
 		return timetag.map(s -> box.datamartSerializer().loadMostRecentSnapshotTo(datamart.name(), asTimetag(s))
 				.map(MasterDatamart.Snapshot::datamart)
-				.map(this::downloadEntities)
-				.orElse(Stream.empty())).orElseGet(() -> datamart == null ? Stream.empty() : downloadEntities(datamart));
+				.map(d -> downloadEntities(d, args.get("ss")))
+				.orElse(Stream.empty())).orElseGet(() -> datamart == null ? Stream.empty() : downloadEntities(datamart, args.get("ss")));
 	}
 
 	private Timetag asTimetag(String timetag) {
@@ -162,7 +163,7 @@ public class DatamartsRequest {
 
 	private Stream<Message> listAvailableSnapshotsOf(MasterDatamart datamart) {
 		List<Timetag> snapshots = box.datamartSerializer().listAvailableSnapshotsOf(datamart.name());
-		if(snapshots.isEmpty()) return Stream.empty();
+		if (snapshots.isEmpty()) return Stream.empty();
 		try {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
 			message.setIntProperty("count", snapshots.size());
@@ -174,12 +175,13 @@ public class DatamartsRequest {
 		}
 	}
 
-	private Stream<Message> downloadEntities(MasterDatamart datamart) {
+	private Stream<Message> downloadEntities(MasterDatamart datamart, String ss) {
 		try {
 			ActiveMQBytesMessage message = new ActiveMQBytesMessage();
-			message.setIntProperty("count", datamart.entityStore().size());
+			Predicate<String> ssPredicate = predicateOf(ss);
+			message.setIntProperty("count", ss != null ? datamart.entityStore().size() : filtered(datamart, ssPredicate));
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream(16 * 1024);
-			box.datamartSerializer().serialize(datamart, outputStream);
+			box.datamartSerializer().serialize(datamart, ssPredicate, outputStream);
 			byte[] bytes = outputStream.toByteArray();
 			message.writeBytes(bytes);
 			message.setIntProperty("size", bytes.length);
@@ -190,10 +192,37 @@ public class DatamartsRequest {
 		}
 	}
 
+	private static int filtered(MasterDatamart datamart, Predicate<String> ssPredicate) {
+		return (int) datamart.entityStore().stream().filter(e -> ssPredicate.test(e.get("ss").asString())).count();
+	}
+
+	private static Predicate<String> predicateOf(String ss) {
+		if (ss == null) return k -> true;
+		if (ss.contains("ss LIKE")) {
+			String ssLike = ss.replace("ss LIKE", "").trim();
+			ssLike = ssLike.substring(1, ssLike.length() - 1);
+			return convertToPredicate(ssLike);
+		} else if (ss.contains("ss = ") || ss.contains("ss=")) {
+			String ssLike = ss.replace("ss =", "").trim();
+			ssLike = ssLike.substring(1, ssLike.length() - 1);
+			return convertToPredicate(ssLike);
+		}
+		return s -> true;
+	}
+
+	public static Predicate<String> convertToPredicate(String sqlExpression) {
+		return input -> {
+			String escapedExpression = sqlExpression.replace("%", ".*");
+			if (!escapedExpression.contains(".*")) return input.equals(sqlExpression);
+			Pattern pattern = Pattern.compile(escapedExpression, Pattern.CASE_INSENSITIVE);
+			return pattern.matcher(input).find();
+		};
+	}
+
 	private Map<String, String> parseArgumentsFrom(String request) {
 		String[] command = request.split(";", -1);
 		Map<String, String> args = new LinkedHashMap<>(command.length - 1);
-		for(String argument : command) {
+		for (String argument : command) {
 			String[] entry = argument.split("=", 2);
 			if (entry.length < 2) continue;
 			args.put(entry[0].trim(), entry[1].trim());

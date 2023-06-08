@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,17 +34,10 @@ public class MasterDatamartSerializer {
 		this.box = box;
 	}
 
-	public void serialize(MasterDatamart datamart, File file) throws IOException {
-		file.getParentFile().mkdirs();
-		serialize(datamart, new FileOutputStream(file));
-	}
-
-	public void serialize(MasterDatamart datamart, OutputStream outputStream) throws IOException {
+	public void serialize(MasterDatamart datamart, Predicate<String> ssPredicate, OutputStream outputStream) throws IOException {
 		try (ZimWriter writer = new ZimWriter(outputStream)) {
-			Iterator<Message> messages = datamart.entityStore().stream().iterator();
-			while (messages.hasNext()) {
-				writer.write(messages.next());
-			}
+			Iterator<Message> messages = datamart.entityStore().stream().filter(m -> ssPredicate.test(m.get("ss").asString())).iterator();
+			while (messages.hasNext()) writer.write(messages.next());
 		}
 	}
 
@@ -60,7 +54,7 @@ public class MasterDatamartSerializer {
 	public void saveSnapshot(Timetag timetag, MasterDatamart datamart) throws IOException {
 		File file = snapshotDirOf(datamart.name() + "/" + timetag.value() + SNAPSHOT_EXTENSION);
 		file.getParentFile().mkdirs();
-		serialize(datamart, new FileOutputStream(file));
+		serialize(datamart, t -> true, new FileOutputStream(file));//TODO
 	}
 
 	public List<Timetag> listAvailableSnapshotsOf(String datamartName) {
