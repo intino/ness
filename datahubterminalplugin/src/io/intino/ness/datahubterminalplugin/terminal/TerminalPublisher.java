@@ -124,10 +124,10 @@ public class TerminalPublisher {
 	private void writeManifest(File srcDirectory) {
 		List<String> publish = terminal.publish() != null ? terminal.publish().messageTanks().stream().map(this::eventQn).collect(Collectors.toList()) : new ArrayList<>();
 		if (terminal.publish() != null)
-			publish.addAll(terminal.publish().measurementTanks().stream().map(this::eventQn).collect(Collectors.toList()));
+			publish.addAll(terminal.publish().measurementTanks().stream().map(this::eventQn).toList());
 		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().messageTanks().stream().map(this::eventQn).collect(Collectors.toList()) : new ArrayList<>();
 		if (terminal.subscribe() != null)
-			subscribe.addAll(terminal.subscribe().measurementTanks().stream().map(this::eventQn).collect(Collectors.toList()));
+			subscribe.addAll(terminal.subscribe().measurementTanks().stream().map(this::eventQn).toList());
 		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses(), terminal.datamarts().autoLoad());
 		try {
 			Files.write(new File(srcDirectory, "terminal.mf").toPath(), new Gson().toJson(manifest).getBytes());
@@ -166,6 +166,4 @@ public class TerminalPublisher {
 	private String namespace(Layer event) {
 		return event.core$().owner().is(Namespace.class) ? event.core$().ownerAs(Namespace.class).qn() + "." : "";
 	}
-
-
 }
