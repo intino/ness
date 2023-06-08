@@ -1,6 +1,7 @@
 package io.intino.ness.datahubterminalplugin.datamarts;
 
 import io.intino.Configuration;
+import io.intino.datahub.model.*;
 import io.intino.datahub.model.rules.SnapshotScale;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
@@ -8,8 +9,6 @@ import io.intino.itrules.RuleSet;
 import io.intino.itrules.Template;
 import io.intino.ness.datahubterminalplugin.Formatters;
 import io.intino.ness.datahubterminalplugin.util.ErrorUtils;
-import io.intino.ness.master.Datamart;
-import io.intino.ness.master.model.Entity;
 import io.intino.plugin.PluginLauncher;
 
 import java.io.*;

@@ -1,6 +1,7 @@
 package io.intino.ness.datahubterminalplugin.terminal;
 
 import io.intino.Configuration;
+import io.intino.datahub.model.*;
 import io.intino.datahub.model.Datalake.Tank;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
@@ -9,7 +10,6 @@ import io.intino.magritte.framework.Layer;
 import io.intino.ness.datahubterminalplugin.Commons;
 import io.intino.ness.datahubterminalplugin.Formatters;
 import io.intino.ness.datahubterminalplugin.datamarts.DatamartsRenderer;
-import io.intino.ness.master.Datamart;
 import io.intino.plugin.PluginLauncher;
 
 import java.io.File;

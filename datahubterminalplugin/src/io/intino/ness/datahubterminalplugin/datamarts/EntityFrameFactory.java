@@ -1,10 +1,12 @@
 package io.intino.ness.datahubterminalplugin.datamarts;
 
 
+import io.intino.datahub.model.Datamart;
+import io.intino.datahub.model.Entity;
+import io.intino.datahub.model.Struct;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.magritte.framework.Node;
-import io.intino.ness.master.Datamart;
 
 import java.util.HashMap;
 import java.util.List;

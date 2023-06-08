@@ -1,6 +1,7 @@
 package io.intino.ness.datahubterminalplugin.ontology;
 
 import io.intino.Configuration;
+import io.intino.datahub.model.*;
 import io.intino.ness.datahubterminalplugin.datamarts.DatamartsRenderer;
 import io.intino.ness.datahubterminalplugin.measurement.MeasurementRenderer;
 import io.intino.ness.datahubterminalplugin.message.MessageRenderer;
