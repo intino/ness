@@ -206,10 +206,10 @@ def type(datamart & message & impl)
     		initMounters();
     	}
 
-		public synchronized $name+FirstUpperCase~DatamartImpl init() {
+		public synchronized $name+FirstUpperCase~DatamartImpl init(String datamartSourceSelector) {
 			try {
 				if (!initialized.compareAndSet(false, true)) return this;
-				downloadDatamartFromDatahub();
+				downloadDatamartFromDatahub(datamartSourceSelector);
 				Logger.info("$name+FirstUpperCase~Datamart (" + (snapshotTimetag().isEmpty() ? "" : "snapshot " + snapshotTimetag() + ", ")  + connector.clientId() + ") initialized successfully.");
 			} catch(Exception e) {
 				throw new ExceptionInInitializerError("$name+FirstUpperCase~Datamart failed to start because a " + e.getClass().getName() + " occurred: " + e.getMessage());
@@ -288,7 +288,7 @@ def type(datamart & message & impl)
 		[$hasReels+reelsByIdMethod]
     	[$reel+getter...[$NL$NL]]
 
-		private void downloadDatamartFromDatahub() {
+		private void downloadDatamartFromDatahub(String datamartSourceSelector) {
 			if (connector instanceof io.intino.alexandria.terminal.StubConnector) return;
 			Logger.debug("Downloading datamart from datahub...");
     		long start = java.lang.System.currentTimeMillis();
@@ -298,9 +298,9 @@ def type(datamart & message & impl)
 			Logger.debug("Datamart downloaded from datahub after " + time + " ms");
 		}
 
-		private Stream<Event> downloadEntities(int$[$] eventCount) {
+		private Stream<Event> downloadEntities(int$[$] eventCount, String datamartSourceSelector) {
 			try {
-				javax.jms.Message message = requestResponseFromDatahub("downloadEvents", downloadEntitiesRequest());
+				javax.jms.Message message = requestResponseFromDatahub("downloadEvents", downloadEntitiesRequest(datamartSourceSelector));
 				return handleDownloadResponse(message, eventCount);
 			} catch (NullPointerException e) {
 				throw new NullPointerException("Could not download datamart: no response from datahub.");
@@ -309,9 +309,13 @@ def type(datamart & message & impl)
 			}
 		}
 
-		private javax.jms.Message downloadEntitiesRequest() throws Exception {
+		private javax.jms.Message downloadEntitiesRequest(String datamartSourceSelector) throws Exception {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
-			message.setText("datamart=" + name() + ";operation=entities" + (snapshotTimetag().isEmpty() ? "" : ";timetag=" + snapshotTimetag()));
+			message.setText("datamart=" + name() +
+				";operation=entities" +
+				(snapshotTimetag().isEmpty() ? "" : ";timetag=" + snapshotTimetag())
+				(datamartSourceSelector != null ? "" : ";ss=" + datamartSourceSelector)
+			);
 			return message;
 		}
 
