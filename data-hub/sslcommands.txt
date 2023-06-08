@@ -1,13 +1,13 @@
-keytool -genkey -alias datahub -keyalg RSA -keysize 2048 -dname "CN=localhost,OU=IT,O=Company,L=LPA,S=LPA,C=ES" -keystore datahub.jks -storepass {datahub_password};
+keytool -genkey -alias datahub -keyalg RSA -keysize 2048 -dname "CN={XXXX},OU=IT,O=Cinepolis,L=CDMX,S=MX,C=MX" -ext "SAN=ip:10.227.62.66" -keystore datahub.jks -validity 365000 -storepass {datahub_password};
 
-keytool -genkey -alias terminal -keyalg RSA -keysize 2048 -dname "CN=localhost,OU=IT,O=Company,L=LPA,S=LPA,C=ES" -keystore terminal.jks -storepass {terminal_password};
+keytool -genkey -alias terminal -keyalg RSA -keysize 2048 -validity 365000 -keystore terminal.jks -validity 365000 -storepass {terminal_password};
 
 
-keytool -export -alias datahub -keystore datahub.jks -file datahub.crt -storepass {datahub_password};
-keytool -export -alias terminal -keystore terminal.jks -file terminal.crt -storepass {terminal_password};
+keytool -exportcert -alias datahub -keystore datahub.jks -file datahub.crt -storepass {datahub_password};
+keytool -exportcert -alias terminal -keystore terminal.jks -file terminal.crt -storepass {terminal_password};
 
-keytool -import -alias datahub -keystore terminal.jts -file datahub.crt -storepass {datahub_password};
-keytool -import -alias terminal -keystore datahub.jts -file terminal.crt -storepass {terminal_password};
+keytool -importcert -alias terminal -keystore datahub.jts -file terminal.crt -storepass {datahub_password};
+keytool -importcert -alias datahub -keystore terminal.jts -file datahub.crt -storepass {terminal_password};
 
 
 

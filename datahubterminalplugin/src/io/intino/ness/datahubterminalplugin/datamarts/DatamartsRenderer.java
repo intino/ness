@@ -1,4 +1,4 @@
-package io.intino.ness.datahubterminalplugin.master;
+package io.intino.ness.datahubterminalplugin.datamarts;
 
 import io.intino.Configuration;
 import io.intino.datahub.model.*;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.intino.ness.datahubterminalplugin.Formatters.*;
-import static io.intino.ness.datahubterminalplugin.master.StructFrameFactory.STRUCT_INTERNAL_CLASS_SEP;
+import static io.intino.ness.datahubterminalplugin.datamarts.StructFrameFactory.STRUCT_INTERNAL_CLASS_SEP;
 import static java.io.File.separator;
 import static java.util.stream.Collectors.toMap;
 

@@ -1,4 +1,4 @@
-package io.intino.ness.datahubterminalplugin.master;
+package io.intino.ness.datahubterminalplugin.datamarts;
 
 import java.util.List;
 

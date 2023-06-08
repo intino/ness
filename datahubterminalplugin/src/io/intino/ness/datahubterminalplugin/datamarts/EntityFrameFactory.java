@@ -1,12 +1,16 @@
-package io.intino.ness.datahubterminalplugin.master;
+package io.intino.ness.datahubterminalplugin.datamarts;
 
 
-import io.intino.datahub.model.*;
+import io.intino.datahub.model.Datamart;
+import io.intino.datahub.model.Entity;
+import io.intino.datahub.model.Struct;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.magritte.framework.Node;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;

@@ -9,7 +9,7 @@ import io.intino.itrules.Template;
 import io.intino.magritte.framework.Layer;
 import io.intino.ness.datahubterminalplugin.Commons;
 import io.intino.ness.datahubterminalplugin.Formatters;
-import io.intino.ness.datahubterminalplugin.master.DatamartsRenderer;
+import io.intino.ness.datahubterminalplugin.datamarts.DatamartsRenderer;
 import io.intino.plugin.PluginLauncher;
 
 import java.io.File;
