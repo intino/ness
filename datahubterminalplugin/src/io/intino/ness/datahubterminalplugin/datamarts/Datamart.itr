@@ -314,7 +314,7 @@ def type(datamart & message & impl)
 			message.setText("datamart=" + name() +
 				";operation=entities" +
 				(snapshotTimetag().isEmpty() ? "" : ";timetag=" + snapshotTimetag()) +
-				(datamartSourceSelector != null ? "" : ";sourceSelector=" + datamartSourceSelector)
+				(datamartSourceSelector == null ? "" : ";sourceSelector=" + datamartSourceSelector)
 			);
 			return message;
 		}
