@@ -277,7 +277,7 @@ def type(datamart & message & impl)
         		public synchronized MasterDatamart snapshot(String timetag) {
         			throw new java.lang.UnsupportedOperationException("Cannot request snapshots to snapshot instances of a datamart");
         		}
-        	}.init();
+        	}.init(null);
         }
 
     	[$entity+getter...[$NL$NL]]
@@ -293,7 +293,7 @@ def type(datamart & message & impl)
 			Logger.debug("Downloading datamart from datahub...");
     		long start = java.lang.System.currentTimeMillis();
     		int$[$] eventCount = new int$[1$];
-    		loadEntitiesFromEvents(downloadEntities(eventCount), eventCount);
+    		loadEntitiesFromEvents(downloadEntities(eventCount, datamartSourceSelector), eventCount);
 			long time = java.lang.System.currentTimeMillis() - start;
 			Logger.debug("Datamart downloaded from datahub after " + time + " ms");
 		}
