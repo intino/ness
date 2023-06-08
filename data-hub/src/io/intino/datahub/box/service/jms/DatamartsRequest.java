@@ -215,7 +215,7 @@ public class DatamartsRequest {
 			String escapedExpression = sqlExpression.replace("%", ".*");
 			if (!escapedExpression.contains(".*")) return input.equals(sqlExpression);
 			Pattern pattern = Pattern.compile(escapedExpression, Pattern.CASE_INSENSITIVE);
-			return pattern.matcher(input).find();
+			return pattern.matcher(input).matches();
 		};
 	}
 
