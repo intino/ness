@@ -5,6 +5,7 @@ import io.intino.alexandria.Timetag;
 import io.intino.alexandria.datalake.Datalake;
 import io.intino.alexandria.event.Event;
 import io.intino.alexandria.event.EventStream;
+import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.impl.LocalMasterDatamart;
 import io.intino.datahub.datamart.mounters.EntityMounter;
@@ -15,55 +16,45 @@ import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.Sensor;
 import io.intino.datahub.model.rules.DayOfWeek;
 import io.intino.datahub.model.rules.SnapshotScale;
+import org.apache.commons.io.FileUtils;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.intino.datahub.datamart.MasterDatamart.Snapshot.shouldCreateSnapshot;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class DatamartFactory {
 	private final DataHubBox box;
 	private final Datalake datalake;
-	private boolean useSnapshots = true;
 
 	public DatamartFactory(DataHubBox box, Datalake datalake) {
 		this.box = box;
 		this.datalake = datalake;
 	}
 
-	public DatamartFactory useSnapshots(boolean useSnapshots) {
-		this.useSnapshots = useSnapshots;
-		return this;
-	}
-
 	public MasterDatamart create(Datamart definition) throws IOException {
-		Reference<MasterDatamart> datamart = new Reference<>();
-		Reference<Timetag> fromTimetag = new Reference<>();
+		File datamartDir = box.datamartDirectory(definition.name$());
+		File backup = new File(datamartDir.getAbsolutePath() + "_" + Timetag.today() + ".backup");
+		Files.move(datamartDir.toPath(), backup.toPath(), REPLACE_EXISTING);
 
-		if (failedToLoadLastSnapshotOf(definition, datamart, fromTimetag)) {
-			datamart.value = new LocalMasterDatamart(box, definition);
-			fromTimetag.value = null;
+		try {
+			MasterDatamart datamart = reflow(new LocalMasterDatamart(box, definition), definition);
+			deleteOldDirectory(backup);
+			return datamart;
+		} catch (Exception e) {
+			Logger.error("Error while performing complete reflow: " + e.getMessage() + ". Datamart directory will be rolled back.", e);
+			Files.move(backup.toPath(), datamartDir.toPath(), REPLACE_EXISTING);
+			return null;
 		}
-		// If loaded from snapshot, reflow events between the snapshot's timetag and the most recent timetag
-		// If no snapshot was loaded, reflow all events
-		return reflow(datamart.value, fromTimetag.value, definition);
 	}
 
-	private boolean failedToLoadLastSnapshotOf(Datamart definition, Reference<MasterDatamart> datamart, Reference<Timetag> fromTimetag) {
-		if (!useSnapshots) return true;
-		Optional<MasterDatamart.Snapshot> snapshot = box.datamartSerializer().loadMostRecentSnapshot(definition.name$());
-		if (snapshot.isPresent()) {
-			datamart.value = snapshot.get().datamart();
-			fromTimetag.value = snapshot.get().timetag();
-			return false;
-		}
-		return true;
-	}
-
-	public MasterDatamart reflow(MasterDatamart datamart, Timetag fromTimetag, Datamart definition) throws IOException {
+	public MasterDatamart reflow(MasterDatamart datamart, Datamart definition) throws IOException {
 		SnapshotScale scale = definition.snapshots() == null ? SnapshotScale.None : Optional.ofNullable(definition.snapshots().scale()).orElse(SnapshotScale.None);
 		DayOfWeek firstDayOfWeek = definition.snapshots() == null ? DayOfWeek.MONDAY : definition.snapshots().firstDayOfWeek();
 
@@ -75,7 +66,7 @@ public class DatamartFactory {
 		TimelineMounter timelineMounter = new TimelineMounter(datamart);
 		ReelMounter reelMounter = new ReelMounter(datamart);
 
-		Iterator<Event> iterator = reflowTanksFrom(fromTimetag, entityTanks, timelineTanks, reelTanks);
+		Iterator<Event> iterator = reflowTanks(entityTanks, timelineTanks, reelTanks);
 
 		reflow(
 				datamart,
@@ -116,17 +107,11 @@ public class DatamartFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Iterator<Event> reflowTanksFrom(Timetag fromTimetag, Set<String> entityTanks, Set<String> timelineTanks, Set<String> reelTanks) {
+	private Iterator<Event> reflowTanks(Set<String> entityTanks, Set<String> timelineTanks, Set<String> reelTanks) {
 		Set<String> tankNames = new HashSet<>(entityTanks);
 		tankNames.addAll(timelineTanks);
 		tankNames.addAll(reelTanks);
-		return EventStream.merge(tanks(tankNames)
-				.map(tank -> (Stream<Event>) (fromTimetag == null ? tank.content() : tankContentFrom(fromTimetag, tank)))).iterator();
-	}
-
-	private static Stream<? extends Event> tankContentFrom(Timetag fromTimetag, Datalake.Store.Tank<? extends Event> tank) {
-		// TODO: OR check if this needs to be changed for timeline/reel dependent tanks
-		return tank.content((ss, ts) -> !ts.isBefore(fromTimetag));
+		return EventStream.merge(tanks(tankNames).map(tank -> (Stream<Event>) tank.content())).iterator();
 	}
 
 	private Stream<Datalake.Store.Tank<? extends Event>> tanks(Set<String> tankNames) {
@@ -162,7 +147,11 @@ public class DatamartFactory {
 		return e.from() == null ? null : e.from().message().core$().fullName().replace("$", ".");
 	}
 
-	private static class Reference<T> {
-		public T value;
+	private void deleteOldDirectory(File backup) {
+		try {
+			FileUtils.deleteDirectory(backup);
+		} catch (Exception e) {
+			Logger.error(e);
+		}
 	}
 }

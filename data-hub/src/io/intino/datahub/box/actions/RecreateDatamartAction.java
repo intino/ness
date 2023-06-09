@@ -58,7 +58,7 @@ public class RecreateDatamartAction {
 					box.datamarts().put(definition.name$(), datamart);
 				}
 				datamart.clear();
-				new DatamartFactory(box, box.datalake()).reflow(datamart, getFromTimetag(), definition);
+				new DatamartFactory(box, box.datalake()).reflow(datamart, definition);
 				Logger.info("Datamart " + definition.name$() + " recreated!");
 			}
 		} catch (Throwable e) {

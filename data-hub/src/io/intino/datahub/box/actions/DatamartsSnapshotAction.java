@@ -19,13 +19,6 @@ public class DatamartsSnapshotAction {
 
 	public DataHubBox box;
 
-	public static void main(String[] args) {
-		Message message = new Message("t");
-		message.set("enabled", true);
-		System.out.println(message.get("enabled").asOptional(boolean.class).orElse(false));
-		System.out.println(message.get("enabled2").asOptional(boolean.class).orElse(false));
-	}
-
 	public DatamartsSnapshotAction() {}
 
 	public DatamartsSnapshotAction(DataHubBox box) {
