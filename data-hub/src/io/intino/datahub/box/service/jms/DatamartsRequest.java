@@ -96,7 +96,7 @@ public class DatamartsRequest {
 			return Stream.empty();
 		}
 
-		File file = new File(dir, type + File.pathSeparator + id + extension);
+		File file = new File(dir, type + File.separator + id + extension);
 		if (!file.exists()) return Stream.empty();
 
 		String mode = args.getOrDefault("mode", "download");
