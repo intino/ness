@@ -22,10 +22,20 @@ public final class EntityMounter extends MasterDatamartMounter {
 		if (message == null) return;
 		try {
 			String id = message.get("id").asString();
-			if (isInvalidId(id) || isDisabled(message)) return;
+			if (isInvalidId(id)) return;
+
 			Message oldMessage = datamart.entityStore().get(id);
-			if (oldMessage != null) update(message, id, oldMessage);
-			else addNewEntity(message, id);
+
+			if(isDisabled(message)) {
+				if(oldMessage != null) datamart.entityStore().remove(id);
+				return;
+			}
+
+			if (oldMessage != null) {
+				update(message, id, oldMessage);
+			} else {
+				addNewEntity(message, id);
+			}
 		} catch (Throwable e) {
 			Logger.error("Failed to mount message of type " + message.type() + ": " + e.getMessage(), e);
 		}

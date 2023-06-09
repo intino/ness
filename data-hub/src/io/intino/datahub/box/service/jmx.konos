@@ -13,7 +13,7 @@ Service service as JMX
 		Response as Text
 	Operation("Recreate datamart") recreateDatamart
 		Parameter datamartName as Text
-		Parameter fromTimetag as Text
+//		Parameter fromTimetag as Text
 		Response as Text
 	Operation("Shows a list of available mappers") mappers
 		Response as Text

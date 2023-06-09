@@ -9,6 +9,7 @@ import io.intino.cosmos.datahub.datamarts.master.MasterDatamartImpl;
 import io.intino.cosmos.datahub.datamarts.master.mounters.JavaApplicationMounter;
 import io.intino.cosmos.datahub.messages.universe.ApplicationJavaAssertion;
 import io.intino.ness.master.reflection.StructDefinition;
+import io.intino.sumus.chronos.Timeline;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +26,16 @@ public class Client {
 		TrooperTerminal terminal = new TrooperTerminal(connector("test", "test", "test"));
 		terminal.initDatamarts();
 
+		MasterDatamart.TimelineNode.AlwaysDownloadFromDatahub.set(true);
+
 		MasterDatamartImpl dm = (MasterDatamartImpl) terminal.masterDatamart();
+
+		var timelines = dm.timelines("45-79-45-227-ip-linodeusercontent-com").toList();
+
+		for(var t : timelines) {
+			Timeline timeline = t.get();
+			System.out.println(timeline);
+		}
 
 //		Stream<MasterDatamart.TimelineNode> timelines = dm.timelines("EC2AMAZ-D67CFU1_Code");
 

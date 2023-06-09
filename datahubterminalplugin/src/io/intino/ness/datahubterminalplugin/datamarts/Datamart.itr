@@ -103,6 +103,8 @@ def type(datamart & interface)
 
         interface TimelineNode extends ChronosNode {
 
+        	java.util.concurrent.atomic.AtomicBoolean AlwaysDownloadFromDatahub = new java.util.concurrent.atomic.AtomicBoolean();
+
 			io.intino.sumus.chronos.TimelineFile.TimeModel timeModel();
 			io.intino.sumus.chronos.TimelineFile.SensorModel sensorModel();
 			Instant first();
