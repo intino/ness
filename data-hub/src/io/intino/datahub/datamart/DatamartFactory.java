@@ -39,18 +39,12 @@ public class DatamartFactory {
 
 	public MasterDatamart create(Datamart definition) throws IOException {
 		File datamartDir = box.datamartDirectory(definition.name$());
-		File backup = new File(datamartDir.getAbsolutePath() + "_" + Timetag.today() + ".backup");
-		if(backup.exists()) deleteDirectorySafe(backup);
-		FileUtils.moveDirectory(datamartDir, backup);
+		FileUtils.deleteDirectory(datamartDir);
 
 		try {
-			MasterDatamart datamart = reflow(new LocalMasterDatamart(box, definition), definition);
-			deleteDirectorySafe(backup);
-			return datamart;
+			return reflow(new LocalMasterDatamart(box, definition), definition);
 		} catch (Exception e) {
 			Logger.error("Error while performing complete reflow: " + e.getMessage() + ". Datamart directory will be rolled back.", e);
-			deleteDirectorySafe(datamartDir);
-			FileUtils.moveDirectory(backup, datamartDir);
 			return null;
 		}
 	}
