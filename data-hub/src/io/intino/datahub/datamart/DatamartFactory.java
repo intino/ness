@@ -20,7 +20,6 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -41,15 +40,17 @@ public class DatamartFactory {
 	public MasterDatamart create(Datamart definition) throws IOException {
 		File datamartDir = box.datamartDirectory(definition.name$());
 		File backup = new File(datamartDir.getAbsolutePath() + "_" + Timetag.today() + ".backup");
-		Files.move(datamartDir.toPath(), backup.toPath(), REPLACE_EXISTING);
+		if(backup.exists()) deleteDirectorySafe(backup);
+		FileUtils.moveDirectory(datamartDir, backup);
 
 		try {
 			MasterDatamart datamart = reflow(new LocalMasterDatamart(box, definition), definition);
-			deleteOldDirectory(backup);
+			deleteDirectorySafe(backup);
 			return datamart;
 		} catch (Exception e) {
 			Logger.error("Error while performing complete reflow: " + e.getMessage() + ". Datamart directory will be rolled back.", e);
-			Files.move(backup.toPath(), datamartDir.toPath(), REPLACE_EXISTING);
+			deleteDirectorySafe(datamartDir);
+			FileUtils.moveDirectory(backup, datamartDir);
 			return null;
 		}
 	}
@@ -147,7 +148,7 @@ public class DatamartFactory {
 		return e.from() == null ? null : e.from().message().core$().fullName().replace("$", ".");
 	}
 
-	private void deleteOldDirectory(File backup) {
+	private void deleteDirectorySafe(File backup) {
 		try {
 			FileUtils.deleteDirectory(backup);
 		} catch (Exception e) {
