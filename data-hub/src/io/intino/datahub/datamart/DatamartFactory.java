@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.intino.datahub.datamart.MasterDatamart.Snapshot.shouldCreateSnapshot;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class DatamartFactory {
 	private final DataHubBox box;

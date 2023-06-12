@@ -151,9 +151,9 @@ public class DataHubBox extends AbstractBox {
 	}
 
 	private List<File> listFiles(File directory, String extension, String id) {
-		if(!directory.exists()) return Collections.emptyList();
-		Collection<File> files = FileUtils.listFiles(directory, new String[] {extension, extension.substring(extension.indexOf('.') + 1)}, true);
-		if(id != null) return files.stream().filter(f -> f.getName().equals(id + extension)).toList();
+		if (!directory.exists()) return Collections.emptyList();
+		Collection<File> files = FileUtils.listFiles(directory, new String[]{extension, extension.substring(extension.indexOf('.') + 1)}, true);
+		if (id != null) return files.stream().filter(f -> f.getName().equals(id + extension)).toList();
 		return files instanceof List<File> list ? list : new ArrayList<>(files);
 	}
 
@@ -164,12 +164,8 @@ public class DataHubBox extends AbstractBox {
 	public void beforeStart() {
 		stageDirectory().mkdirs();
 		loadBrokerService();
-		if (graph.datalake() != null) {
-			this.datalake = new FileDatalake(datalakeDirectory());
-		}
-		if (graph.datamartList() != null && !graph.datamartList().isEmpty()) {
-			initMasterDatamarts();
-		}
+		if (graph.datalake() != null) this.datalake = new FileDatalake(datalakeDirectory());
+		if (graph.datamartList() != null && !graph.datamartList().isEmpty()) initMasterDatamarts();
 		if (graph.broker() != null) {
 			configureBroker();
 			nessService = new NessService(this);
@@ -242,9 +238,7 @@ public class DataHubBox extends AbstractBox {
 	private void initDatamarts() {
 		DatamartFactory datamartFactory = new DatamartFactory(this, datalake);
 		long start = System.currentTimeMillis();
-		for (Datamart datamart : graph.datamartList()) {
-			initDatamart(datamartFactory, datamart);
-		}
+		for (Datamart datamart : graph.datamartList()) initDatamart(datamartFactory, datamart);
 		Logger.info("MasterDatamarts initialized (" + masterDatamarts.size() + ") after " + (System.currentTimeMillis() - start) + " ms");
 	}
 
