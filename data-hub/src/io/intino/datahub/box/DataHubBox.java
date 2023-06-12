@@ -5,7 +5,6 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.sealing.FileSessionSealer;
 import io.intino.alexandria.sealing.SessionSealer;
 import io.intino.alexandria.ui.services.AuthService;
-import io.intino.datahub.box.actions.RefreshSensorsAction;
 import io.intino.datahub.box.service.jms.NessService;
 import io.intino.datahub.box.service.scheduling.Sentinels;
 import io.intino.datahub.broker.BrokerService;
@@ -165,10 +164,7 @@ public class DataHubBox extends AbstractBox {
 	public void beforeStart() {
 		stageDirectory().mkdirs();
 		loadBrokerService();
-		if (graph.datalake() != null) {
-			this.datalake = new FileDatalake(datalakeDirectory());
-			new RefreshSensorsAction(graph, datalake).execute();
-		}
+		if (graph.datalake() != null) this.datalake = new FileDatalake(datalakeDirectory());
 		if (graph.datamartList() != null && !graph.datamartList().isEmpty()) initMasterDatamarts();
 		if (graph.broker() != null) {
 			configureBroker();
@@ -242,9 +238,7 @@ public class DataHubBox extends AbstractBox {
 	private void initDatamarts() {
 		DatamartFactory datamartFactory = new DatamartFactory(this, datalake);
 		long start = System.currentTimeMillis();
-		for (Datamart datamart : graph.datamartList()) {
-			initDatamart(datamartFactory, datamart);
-		}
+		for (Datamart datamart : graph.datamartList()) initDatamart(datamartFactory, datamart);
 		Logger.info("MasterDatamarts initialized (" + masterDatamarts.size() + ") after " + (System.currentTimeMillis() - start) + " ms");
 	}
 
