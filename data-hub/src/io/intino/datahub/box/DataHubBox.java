@@ -5,6 +5,7 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.sealing.FileSessionSealer;
 import io.intino.alexandria.sealing.SessionSealer;
 import io.intino.alexandria.ui.services.AuthService;
+import io.intino.datahub.box.actions.RefreshSensorsAction;
 import io.intino.datahub.box.service.jms.NessService;
 import io.intino.datahub.box.service.scheduling.Sentinels;
 import io.intino.datahub.broker.BrokerService;
@@ -151,9 +152,9 @@ public class DataHubBox extends AbstractBox {
 	}
 
 	private List<File> listFiles(File directory, String extension, String id) {
-		if(!directory.exists()) return Collections.emptyList();
-		Collection<File> files = FileUtils.listFiles(directory, new String[] {extension, extension.substring(extension.indexOf('.') + 1)}, true);
-		if(id != null) return files.stream().filter(f -> f.getName().equals(id + extension)).toList();
+		if (!directory.exists()) return Collections.emptyList();
+		Collection<File> files = FileUtils.listFiles(directory, new String[]{extension, extension.substring(extension.indexOf('.') + 1)}, true);
+		if (id != null) return files.stream().filter(f -> f.getName().equals(id + extension)).toList();
 		return files instanceof List<File> list ? list : new ArrayList<>(files);
 	}
 
@@ -166,10 +167,9 @@ public class DataHubBox extends AbstractBox {
 		loadBrokerService();
 		if (graph.datalake() != null) {
 			this.datalake = new FileDatalake(datalakeDirectory());
+			new RefreshSensorsAction(graph, datalake).execute();
 		}
-		if (graph.datamartList() != null && !graph.datamartList().isEmpty()) {
-			initMasterDatamarts();
-		}
+		if (graph.datamartList() != null && !graph.datamartList().isEmpty()) initMasterDatamarts();
 		if (graph.broker() != null) {
 			configureBroker();
 			nessService = new NessService(this);
