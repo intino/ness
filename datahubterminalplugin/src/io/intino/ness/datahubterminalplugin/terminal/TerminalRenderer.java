@@ -258,7 +258,7 @@ class TerminalRenderer {
 		return new FrameBuilder("message").
 				add("type", messagesPackage + "." + firstUpperCase(tank.message().name$())).
 				add("message", tank.message().name$()).
-				add("typeName", tank.name$()).
+				add("typeName", tank.message().name$()).
 				add("namespace", namespace).
 				add("namespaceQn", namespace.replace(".", "")).
 				add("typeWithNamespace", (namespace.isEmpty() ? "" : namespace + ".") + firstUpperCase(tank.name$())).
@@ -272,7 +272,7 @@ class TerminalRenderer {
 		return new FrameBuilder("measurement").
 				add("type", messagesPackage + "." + firstUpperCase(tank.resourceEvent().name$())).
 				add("message", tank.resourceEvent().name$()).
-				add("typeName", tank.name$()).
+				add("typeName", tank.resourceEvent().name$()).
 				add("namespace", namespace).
 				add("namespaceQn", namespace.replace(".", "")).
 				add("typeWithNamespace", (namespace.isEmpty() ? "" : namespace + ".") + firstUpperCase(tank.name$())).
@@ -286,7 +286,7 @@ class TerminalRenderer {
 		return new FrameBuilder("measurement").
 				add("type", messagesPackage + "." + firstUpperCase(tank.sensor().name$())).
 				add("message", tank.sensor().name$()).
-				add("typeName", tank.name$()).
+				add("typeName", tank.sensor().name$()).
 				add("namespace", namespace).
 				add("namespaceQn", namespace.replace(".", "")).
 				add("typeWithNamespace", (namespace.isEmpty() ? "" : namespace + ".") + firstUpperCase(tank.name$())).
