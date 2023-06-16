@@ -6,9 +6,15 @@ import io.intino.alexandria.jms.MessageReader;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
+import org.apache.activemq.broker.region.MessageReference;
 import org.apache.activemq.command.ActiveMQBytesMessage;
 import org.apache.activemq.command.ActiveMQTextMessage;
+import org.apache.activemq.filter.BooleanExpression;
+import org.apache.activemq.filter.MessageEvaluationContext;
+import org.apache.activemq.selector.SelectorParser;
 
+import javax.jms.InvalidSelectorException;
+import javax.jms.JMSException;
 import javax.jms.Message;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -19,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -178,10 +183,10 @@ public class DatamartsRequest {
 	private Stream<Message> downloadEntities(MasterDatamart datamart, String sourceSelector) {
 		try {
 			ActiveMQBytesMessage message = new ActiveMQBytesMessage();
-			Predicate<String> ssPredicate = predicateOf(sourceSelector);
-			message.setIntProperty("count", sourceSelector != null ? datamart.entityStore().size() : filtered(datamart, ssPredicate));
+			Predicate<io.intino.alexandria.message.Message> messagePredicate = predicateOf(sourceSelector);
+			message.setIntProperty("count", sourceSelector != null ? datamart.entityStore().size() : filtered(datamart, messagePredicate));
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream(16 * 1024);
-			box.datamartSerializer().serialize(datamart, ssPredicate, outputStream);
+			box.datamartSerializer().serialize(datamart, messagePredicate, outputStream);
 			byte[] bytes = outputStream.toByteArray();
 			message.writeBytes(bytes);
 			message.setIntProperty("size", bytes.length);
@@ -192,31 +197,41 @@ public class DatamartsRequest {
 		}
 	}
 
-	private static int filtered(MasterDatamart datamart, Predicate<String> ssPredicate) {
-		return (int) datamart.entityStore().stream().filter(e -> ssPredicate.test(e.get("ss").asString())).count();
+	private static int filtered(MasterDatamart datamart, Predicate<io.intino.alexandria.message.Message> messagePredicate) {
+		return (int) datamart.entityStore().stream().filter(messagePredicate).count();
 	}
 
-	private static Predicate<String> predicateOf(String ss) {
-		if (ss == null) return k -> true;
-		if (ss.contains("ss LIKE")) {
-			String ssLike = ss.replace("ss LIKE", "").trim();
-			ssLike = ssLike.substring(1, ssLike.length() - 1);
-			return convertToPredicate(ssLike);
-		} else if (ss.contains("ss = ") || ss.contains("ss=")) {
-			String ssLike = ss.replace("ss =", "").trim();
-			ssLike = ssLike.substring(1, ssLike.length() - 1);
-			return convertToPredicate(ssLike);
+	private static Predicate<io.intino.alexandria.message.Message> predicateOf(String sqlSelector) {
+		try {
+			BooleanExpression expression = SelectorParser.parse(sqlSelector);
+			return message -> {
+				try {
+					MessageEvaluationContext context = new MessageEvaluationContext();
+					context.setMessageReference(map(message));
+					return expression.matches(context);
+				} catch (JMSException e) {
+					Logger.error(e);
+					return false;
+				}
+			};
+		} catch (InvalidSelectorException e) {
+			Logger.error(e);
+			return m -> true;
 		}
-		return s -> true;
+
 	}
 
-	public static Predicate<String> convertToPredicate(String sqlExpression) {
-		return input -> {
-			String escapedExpression = sqlExpression.replace("%", ".*");
-			if (!escapedExpression.contains(".*")) return input.equals(sqlExpression);
-			Pattern pattern = Pattern.compile(escapedExpression, Pattern.CASE_INSENSITIVE);
-			return pattern.matcher(input).matches();
-		};
+	private static MessageReference map(io.intino.alexandria.message.Message message) {
+		try {
+			ActiveMQTextMessage amqMessage = new ActiveMQTextMessage();
+			amqMessage.setStringProperty("type", message.type());
+			String ss = message.get("ss").orElse(String.class, null);
+			if (ss != null) amqMessage.setStringProperty("ss", ss);
+			return amqMessage;
+		} catch (JMSException e) {
+			Logger.error(e);
+			return null;
+		}
 	}
 
 	private Map<String, String> parseArgumentsFrom(String request) {

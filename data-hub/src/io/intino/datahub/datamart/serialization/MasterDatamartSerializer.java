@@ -34,9 +34,9 @@ public class MasterDatamartSerializer {
 		this.box = box;
 	}
 
-	public void serialize(MasterDatamart datamart, Predicate<String> ssPredicate, OutputStream outputStream) throws IOException {
+	public void serialize(MasterDatamart datamart, Predicate<Message> messagePredicate, OutputStream outputStream) throws IOException {
 		try (ZimWriter writer = new ZimWriter(outputStream)) {
-			Iterator<Message> messages = datamart.entityStore().stream().filter(m -> ssPredicate.test(m.get("ss").asString())).iterator();
+			Iterator<Message> messages = datamart.entityStore().stream().filter(messagePredicate::test).iterator();
 			while (messages.hasNext()) writer.write(messages.next());
 		}
 	}
