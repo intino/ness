@@ -8,6 +8,7 @@ import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
 import org.apache.activemq.broker.region.MessageReference;
 import org.apache.activemq.command.ActiveMQBytesMessage;
+import org.apache.activemq.command.ActiveMQMessage;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.activemq.filter.BooleanExpression;
 import org.apache.activemq.filter.MessageEvaluationContext;
@@ -223,7 +224,7 @@ public class DatamartsRequest {
 
 	private static MessageReference map(io.intino.alexandria.message.Message message) {
 		try {
-			ActiveMQTextMessage amqMessage = new ActiveMQTextMessage();
+			ActiveMQMessage amqMessage = new ActiveMQMessage();
 			amqMessage.setStringProperty("type", message.type());
 			String ss = message.get("ss").orElse(String.class, null);
 			if (ss != null) amqMessage.setStringProperty("ss", ss);
