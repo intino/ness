@@ -732,6 +732,7 @@ def type(entity) trigger(getterSignature)
 	$package.entities.$name+FirstUpperCase $name+firstLowerCase(String id);
 	Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase();
 	default List<$package.entities.$name+FirstUpperCase> $name+firstLowerCase~List() {return $name+Plural+firstLowerCase().collect(Collectors.toList());}
+	default java.util.Optional<$package.entities.$name+FirstUpperCase> $name+firstLowerCase~(java.util.function.Predicate<$package.entities.$name+FirstUpperCase~> predicate) {return $name+Plural+firstLowerCase().filter(predicate).findFirst();}
 end
 
 def type(timeline) trigger(getterSignature)

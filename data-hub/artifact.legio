@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino", "9.5.8") data-hub as Product
+Artifact("io.intino", "9.5.9") data-hub as Product
 	Model("Proteo", "3.4.7", "4.2.3") > outLanguage = "Ness"
 	Box("Konos", "10.4.2")
 	Imports
@@ -17,7 +17,7 @@ Artifact("io.intino", "9.5.8") data-hub as Product
 		Compile("io.intino.alexandria", "zip", "1.0.4")
 		Compile("io.intino.alexandria", "logger4j", "1.0.1")
 		Compile("io.intino.alexandria", "scheduler-framework", "1.2.0") > Exclude("org.slf4j", "slf4j-api")
-		Compile("io.intino.sumus", "chronos", "1.0.10")
+		Compile("io.intino.sumus", "chronos", "1.1.0")
 		Compile("commons-io", "commons-io", "2.13.0")
 		Compile("org.apache.activemq", "activemq-broker", "5.18.1")
 		Compile("org.apache.activemq", "activemq-mqtt", "5.18.1")
@@ -25,7 +25,7 @@ Artifact("io.intino", "9.5.8") data-hub as Product
 		Compile("org.apache.activemq", "activemq-jaas", "5.18.1")
 		Compile("org.apache.activemq", "activemq-runtime-config", "5.18.1")
 		Test("junit", "junit", "4.13.2")
-		Web("io.intino", "datalake-inspector", "9.5.8")
+		Web("io.intino", "datalake-inspector", "9.5.9")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
 	Distribution > Artifactory("intino-maven")

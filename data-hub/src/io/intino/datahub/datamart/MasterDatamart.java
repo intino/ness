@@ -13,6 +13,7 @@ import io.intino.sumus.chronos.TimelineFile;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -33,6 +34,10 @@ public interface MasterDatamart {
 	ChronosStore<ReelFile> reelStore();
 
 	Stream<MasterDatamartMounter> createMountersFor(Datalake.Tank tank);
+
+	default Instant ts() {
+		return entityStore().stream().map(m -> m.get("ts").asInstant()).filter(Objects::nonNull).max(Comparator.naturalOrder()).orElse(null);
+	}
 
 	default void clear() {
 		entityStore().clear();

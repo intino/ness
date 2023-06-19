@@ -45,18 +45,23 @@ public final class ReelMounter extends MasterDatamartMounter {
 
 	private String subject(MessageEvent event) {
 		Datamart datamart = this.datamart.definition();
-		Reel reel = datamart.reel(r -> r.tank().message().name$().equals(event.type()));
-		return event.toMessage().get(reel.entitySource().name$()).asString();
+		Reel reel = datamart.reel(r -> r.groupList().stream().anyMatch(g -> g.tank().message().name$().equals(event.type())));
+		Reel.Group group = reel.group(g -> g.tank().message().name$().equals(event.type()));
+		return event.toMessage().get(group.entitySource().name$()).asString();
 	}
 
 	private void update(ReelFile reelFile, MessageEvent event) throws IOException {
 		Datamart datamart = this.datamart.definition();
-		List<Reel> reels = datamart.reelList(r -> r.tank().name$().equals(event.type()));
-		for (Reel reel : reels) reelFile.set(event.ts(), mappingAttribute(event.toMessage(), reel));
+		List<Reel> reels = datamart.reelList(r -> r.groupList().stream().anyMatch(g -> g.tank().name$().equals(event.type())));
+
+		for (Reel reel : reels) {
+			Reel.Group group = reel.group(g -> g.tank().message().name$().equals(event.type()));
+			reelFile.set(event.ts(), group.name$(), mappingAttribute(event.toMessage(), group));
+		}
 	}
 
-	private String[] mappingAttribute(Message message, Reel reel) {
-		return values(message, reel.signals()).toArray(String[]::new);
+	private String[] mappingAttribute(Message message, Reel.Group group) {
+		return values(message, group.signals()).toArray(String[]::new);
 	}
 
 	private static Stream<String> values(Message message, Attribute from) {
