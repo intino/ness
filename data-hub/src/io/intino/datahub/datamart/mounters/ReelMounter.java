@@ -45,29 +45,29 @@ public final class ReelMounter extends MasterDatamartMounter {
 
 	private String subject(MessageEvent event) {
 		Datamart datamart = this.datamart.definition();
-		Reel reel = datamart.reel(r -> r.groupList().stream().anyMatch(g -> g.tank().message().name$().equals(event.type())));
-		Reel.Group group = reel.group(g -> g.tank().message().name$().equals(event.type()));
-		return event.toMessage().get(group.entitySource().name$()).asString();
+		Reel reel = datamart.reel(r -> r.tank().message().name$().equals(event.type()));
+		return event.toMessage().get(reel.entitySource().name$()).asString();
 	}
 
 	private void update(ReelFile reelFile, MessageEvent event) throws IOException {
 		Datamart datamart = this.datamart.definition();
-		List<Reel> reels = datamart.reelList(r -> r.groupList().stream().anyMatch(g -> g.tank().name$().equals(event.type())));
-
-		for (Reel reel : reels) {
-			Reel.Group group = reel.group(g -> g.tank().message().name$().equals(event.type()));
-			reelFile.set(event.ts(), group.name$(), mappingAttribute(event.toMessage(), group));
-		}
+		List<Reel> reels = datamart.reelList(r -> r.tank().name$().equals(event.type()));
+		for (Reel reel : reels)
+			reelFile.set(event.ts(), group(event, reel.groupSource()), mappingAttribute(event.toMessage(), reel));
 	}
 
-	private String[] mappingAttribute(Message message, Reel.Group group) {
-		return values(message, group.signals()).toArray(String[]::new);
+	private String group(MessageEvent event, Attribute attribute) {
+		Message.Value value = event.toMessage().get(attribute.name$());
+		return !value.isNull() ? value.asString() : null;
+	}
+
+	private String[] mappingAttribute(Message message, Reel reel) {
+		return values(message, reel.signals()).toArray(String[]::new);
 	}
 
 	private static Stream<String> values(Message message, Attribute from) {
 		Message.Value value = message.get(from.name$());
-		if (!value.isNull()) return value.asList(String.class).stream();
-		return Stream.empty();
+		return !value.isNull() ? value.asList(String.class).stream() : Stream.empty();
 	}
 
 	private ReelFile reelFile(String type, String ss, String subject) throws IOException {
