@@ -21,7 +21,6 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -92,7 +91,7 @@ public class DatamartFactory {
 		while (iterator.hasNext()) {
 			Event event = iterator.next();
 
-			createSnapshotIfNecessary(datamart, scale, firstDayOfWeek, event, oldTimetag);
+//			createSnapshotIfNecessary(datamart, scale, firstDayOfWeek, event, oldTimetag);
 
 			if (entityTanks.contains(event.type()))
 				entityMounter.mount(event);
@@ -105,6 +104,8 @@ public class DatamartFactory {
 
 			oldTimetag = Timetag.of(event.ts(), Scale.Day);
 		}
+
+		box.datamartSerializer().saveSnapshot(Timetag.today(), datamart);
 	}
 
 	private Set<String> eventsOf(Set<String> tankNames) {

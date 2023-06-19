@@ -33,8 +33,10 @@ public final class TimelineMounter extends MasterDatamartMounter {
 
 	@Override
 	public void mount(Event event) {
-		if (event instanceof MeasurementEvent e) mount(e);
-		if (event instanceof MessageEvent e) mount(e.toMessage());
+		synchronized (datamart) {
+			if (event instanceof MeasurementEvent e) mount(e);
+			if (event instanceof MessageEvent e) mount(e.toMessage());
+		}
 	}
 
 	@Override

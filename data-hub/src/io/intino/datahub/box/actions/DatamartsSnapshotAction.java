@@ -9,7 +9,9 @@ import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.rules.DayOfWeek;
 import io.intino.datahub.model.rules.SnapshotScale;
 
+import java.io.File;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 import static io.intino.datahub.datamart.MasterDatamart.Snapshot.shouldCreateSnapshot;
@@ -26,25 +28,40 @@ public class DatamartsSnapshotAction {
 
 	public void execute() {
 		synchronized (DatamartsSnapshotAction.class) {
-			Timetag today = Timetag.of(LocalDate.now(), Scale.Day);
-			box.datamarts().datamarts().parallelStream().forEach(datamart -> createSnapshotIfNecessary(today, datamart));
+			Timetag timetag = Timetag.of(LocalDate.now(), Scale.Day).previous();
+			box.datamarts().datamarts().parallelStream().forEach(datamart -> createSnapshotIfNecessary(timetag, datamart));
+			removeOldSnapshots();
+		}
+	}
+
+	private void removeOldSnapshots() {
+		for (MasterDatamart datamart : box.datamarts().datamarts()) {
+			File snapshotsDir = box.datamartSerializer().snapshotDirOf(datamart.name());
+			File[] files = snapshotsDir.listFiles(f -> f.getName().endsWith(".zim") && Timetag.isTimetag(f.getName().replace(".zim", "")));
+			int maxCount = definitionOf(datamart).snapshots().maxCount();
+			if(files == null || maxCount < 0) continue;
+			if(files.length > maxCount) {
+				Arrays.stream(files).sorted().limit(maxCount - files.length).forEach(File::delete);
+			}
 		}
 	}
 
 	private void createSnapshotIfNecessary(Timetag today, MasterDatamart datamart) {
-		try {
-			Datamart definition = definitionOf(datamart);
-			if(definition.snapshots() == null) return;
-			SnapshotScale scale = definition.snapshots().scale();
-			if(scale == null) return;
-			DayOfWeek firstDayOfWeek = definition.snapshots().firstDayOfWeek();
-			if(firstDayOfWeek == null) firstDayOfWeek = DayOfWeek.MONDAY;
+		synchronized (datamart) {
+			try {
+				Datamart definition = definitionOf(datamart);
+				if(definition.snapshots() == null) return;
+				SnapshotScale scale = definition.snapshots().scale();
+				if(scale == null) return;
+				DayOfWeek firstDayOfWeek = definition.snapshots().firstDayOfWeek();
+				if(firstDayOfWeek == null) firstDayOfWeek = DayOfWeek.MONDAY;
 
-			if(shouldCreateSnapshot(today, scale, firstDayOfWeek)) {
-				box.datamartSerializer().saveSnapshot(today, datamart);
+				if(shouldCreateSnapshot(today, scale, firstDayOfWeek)) {
+					box.datamartSerializer().saveSnapshot(today, datamart);
+				}
+			} catch (Throwable e) {
+				Logger.error("Failed to handle snapshot of " + datamart.name() + ": " + e.getMessage(), e);
 			}
-		} catch (Throwable e) {
-			Logger.error("Failed to handle snapshot of " + datamart.name() + ": " + e.getMessage(), e);
 		}
 	}
 

@@ -35,9 +35,11 @@ public class MasterDatamartSerializer {
 	}
 
 	public void serialize(MasterDatamart datamart, Predicate<Message> messagePredicate, OutputStream outputStream) throws IOException {
-		try (ZimWriter writer = new ZimWriter(outputStream)) {
-			Iterator<Message> messages = datamart.entityStore().stream().filter(messagePredicate::test).iterator();
-			while (messages.hasNext()) writer.write(messages.next());
+		synchronized (datamart) {
+			try (ZimWriter writer = new ZimWriter(outputStream)) {
+				Iterator<Message> messages = datamart.entityStore().stream().filter(messagePredicate::test).iterator();
+				while (messages.hasNext()) writer.write(messages.next());
+			}
 		}
 	}
 
@@ -87,7 +89,7 @@ public class MasterDatamartSerializer {
 				.findFirst().orElseThrow(() -> new IllegalArgumentException("No datamart named " + name + " defined"));
 	}
 
-	private File snapshotDirOf(String datamartName) {
+	public File snapshotDirOf(String datamartName) {
 		return new File(box.datamartsDirectory(), datamartName);
 	}
 

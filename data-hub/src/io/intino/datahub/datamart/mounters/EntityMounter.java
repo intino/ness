@@ -14,7 +14,9 @@ public final class EntityMounter extends MasterDatamartMounter {
 
 	@Override
 	public void mount(Event event) {
-		if (event instanceof MessageEvent e) mount(e.toMessage());
+		synchronized (datamart) {
+			if (event instanceof MessageEvent e) mount(e.toMessage());
+		}
 	}
 
 	@Override

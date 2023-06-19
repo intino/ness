@@ -26,7 +26,9 @@ public final class ReelMounter extends MasterDatamartMounter {
 
 	@Override
 	public void mount(Event event) {
-		if (event instanceof MessageEvent e) mount(e.toMessage());
+		synchronized (datamart) {
+			if (event instanceof MessageEvent e) mount(e.toMessage());
+		}
 	}
 
 	@Override
@@ -73,7 +75,7 @@ public final class ReelMounter extends MasterDatamartMounter {
 	private ReelFile reelFile(String type, String ss, String subject) throws IOException {
 		File file = new File(box().datamartReelsDirectory(datamart.name()), type + separator + subject + separator + ss + REEL_EXTENSION);
 		file.getParentFile().mkdirs();
-		return ReelFile.open(file);
+		return file.exists() ? ReelFile.open(file) : ReelFile.create(file);
 	}
 
 	private String withoutParameters(String ss) {

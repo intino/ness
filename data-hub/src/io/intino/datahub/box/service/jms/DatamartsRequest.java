@@ -182,19 +182,21 @@ public class DatamartsRequest {
 	}
 
 	private Stream<Message> downloadEntities(MasterDatamart datamart, String sourceSelector) {
-		try {
-			ActiveMQBytesMessage message = new ActiveMQBytesMessage();
-			Predicate<io.intino.alexandria.message.Message> messagePredicate = predicateOf(sourceSelector);
-			message.setIntProperty("count", sourceSelector != null ? datamart.entityStore().size() : filtered(datamart, messagePredicate));
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream(16 * 1024);
-			box.datamartSerializer().serialize(datamart, messagePredicate, outputStream);
-			byte[] bytes = outputStream.toByteArray();
-			message.writeBytes(bytes);
-			message.setIntProperty("size", bytes.length);
-			return Stream.of(message);
-		} catch (Exception e) {
-			Logger.error(e);
-			return Stream.empty();
+		synchronized (datamart) {
+			try {
+				ActiveMQBytesMessage message = new ActiveMQBytesMessage();
+				Predicate<io.intino.alexandria.message.Message> messagePredicate = predicateOf(sourceSelector);
+				message.setIntProperty("count", sourceSelector != null ? datamart.entityStore().size() : filtered(datamart, messagePredicate));
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream(16 * 1024);
+				box.datamartSerializer().serialize(datamart, messagePredicate, outputStream);
+				byte[] bytes = outputStream.toByteArray();
+				message.writeBytes(bytes);
+				message.setIntProperty("size", bytes.length);
+				return Stream.of(message);
+			} catch (Exception e) {
+				Logger.error(e);
+				return Stream.empty();
+			}
 		}
 	}
 
