@@ -21,6 +21,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -86,10 +87,12 @@ public class DatamartFactory {
 	}
 
 	private void reflow(MasterDatamart datamart, SnapshotScale scale, DayOfWeek firstDayOfWeek, Set<String> entityTanks, Set<String> timelineTanks, Set<String> reelTanks, EntityMounter entityMounter, TimelineMounter timelineMounter, ReelMounter reelMounter, Iterator<Event> iterator) throws IOException {
+		Timetag oldTimetag = null;
+
 		while (iterator.hasNext()) {
 			Event event = iterator.next();
 
-			createSnapshotIfNecessary(datamart, scale, firstDayOfWeek, event);
+			createSnapshotIfNecessary(datamart, scale, firstDayOfWeek, event, oldTimetag);
 
 			if (entityTanks.contains(event.type()))
 				entityMounter.mount(event);
@@ -99,6 +102,8 @@ public class DatamartFactory {
 
 			if (reelTanks.contains(event.type()))
 				reelMounter.mount(event);
+
+			oldTimetag = Timetag.of(event.ts(), Scale.Day);
 		}
 	}
 
@@ -106,10 +111,10 @@ public class DatamartFactory {
 		return tankNames.stream().map(name -> name.substring(name.lastIndexOf('.') + 1)).collect(Collectors.toSet());
 	}
 
-	private void createSnapshotIfNecessary(MasterDatamart datamart, SnapshotScale scale, DayOfWeek firstDayOfWeek, Event event) throws IOException {
-		if (scale == SnapshotScale.None) return;
+	private void createSnapshotIfNecessary(MasterDatamart datamart, SnapshotScale scale, DayOfWeek firstDayOfWeek, Event event, Timetag oldTimetag) throws IOException {
+		if (scale == SnapshotScale.None || oldTimetag == null) return;
 		Timetag timetag = Timetag.of(event.ts(), Scale.Day);
-		if (shouldCreateSnapshot(timetag, scale, firstDayOfWeek))
+		if (shouldCreateSnapshot(oldTimetag, timetag, scale, firstDayOfWeek))
 			box.datamartSerializer().saveSnapshot(timetag, datamart);
 	}
 
