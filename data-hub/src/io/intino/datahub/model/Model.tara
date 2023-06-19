@@ -54,6 +54,7 @@ Concept:Named Datamart
 	Concept:{0..1} Snapshots
 		var word:SnapshotScale scale = None
 		var word:DayOfWeek firstDayOfWeek = MONDAY
+		var integer maxCount = -1
 	has Entity
 	has Struct
 	has Timeline
