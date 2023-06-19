@@ -18,9 +18,11 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
@@ -55,7 +57,8 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	public void mount(MeasurementEvent event) {
 		try {
 			if (event.ss() == null) return;
-			String ss = withOutParameters(event.ss());
+			Map<String, String> parameters = parameters(event.ss());
+			String ss = withOutParameters(event.ss()) + (parameters.isEmpty() ? "" : "." + parameters.get("sensor"));
 			TimelineFile timelineFile = datamart.timelineStore().get(event.type(), ss);
 			if (timelineFile == null) timelineFile = createTimelineFile(event, ss);
 			update(timelineFile, event);
@@ -150,5 +153,12 @@ public final class TimelineMounter extends MasterDatamartMounter {
 
 	private String withOutParameters(String ss) {
 		return ss.contains("?") ? ss.substring(0, ss.indexOf("?")) : ss;
+	}
+
+	private Map<String, String> parameters(String ss) {
+		int i = ss.indexOf("?");
+		if (i < 0 || i == ss.length() - 1) return Map.of();
+		String[] parameters = ss.substring(i + 1).split(";");
+		return Arrays.stream(parameters).map(p -> p.split("=")).collect(Collectors.toMap(p -> p[0], p -> p[1]));
 	}
 }
