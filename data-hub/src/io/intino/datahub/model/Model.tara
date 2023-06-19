@@ -68,9 +68,10 @@ Concept Timeline is component
 
 Concept Reel is component
 	var Entity entity = empty
-	var Datalake.Tank.Message tank = empty
-	var Attribute signals
-	var Attribute entitySource
+	Concept:Named group
+		var Datalake.Tank.Message tank = empty
+		var Attribute signals
+		var Attribute entitySource
 
 Concept:Named Terminal
 	Concept:{0..1} Bpm

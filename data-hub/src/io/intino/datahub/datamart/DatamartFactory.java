@@ -138,7 +138,8 @@ public class DatamartFactory {
 	}
 
 	private static Set<String> reelTanks(Datamart definition) {
-		return definition.reelList().stream().map(r -> tankName(r.tank()))
+		return definition.reelList().stream()
+				.flatMap(r -> r.groupList().stream().map(g -> tankName(g.tank())))
 				.collect(Collectors.toSet());
 	}
 
