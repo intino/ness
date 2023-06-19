@@ -20,6 +20,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -37,18 +38,30 @@ public class DatamartFactory {
 	}
 
 	public MasterDatamart create(Datamart definition) throws IOException {
-		File datamartDir = box.datamartDirectory(definition.name$());
-		FileUtils.deleteDirectory(datamartDir);
+		Reference<MasterDatamart> datamart = new Reference<>();
+		Reference<Instant> fromTs = new Reference<>();
 
-		try {
-			return reflow(new LocalMasterDatamart(box, definition), definition);
-		} catch (Exception e) {
-			Logger.error("Error while performing complete reflow: " + e.getMessage() + ". Datamart directory will be rolled back.", e);
-			return null;
+		if (failedToLoadLastSnapshotOf(definition, datamart, fromTs)) {
+			datamart.value = new LocalMasterDatamart(box, definition);
+			fromTs.value = null;
 		}
+		// If loaded from snapshot, reflow events between the snapshot's timetag and the most recent timetag
+		// If no snapshot was loaded, reflow all events
+		return reflow(datamart.value, fromTs.value, definition);
 	}
 
-	public MasterDatamart reflow(MasterDatamart datamart, Datamart definition) throws IOException {
+	private boolean failedToLoadLastSnapshotOf(Datamart definition, Reference<MasterDatamart> datamart, Reference<Instant> fromTs) {
+		Optional<MasterDatamart.Snapshot> snapshot = box.datamartSerializer().loadMostRecentSnapshot(definition.name$());
+		if (snapshot.isPresent()) {
+			datamart.value = snapshot.get().datamart();
+			fromTs.value = snapshot.get().datamart().ts();
+			return false;
+		}
+		return true;
+	}
+
+
+	public MasterDatamart reflow(MasterDatamart datamart, Instant fromTs, Datamart definition) throws IOException {
 		SnapshotScale scale = definition.snapshots() == null ? SnapshotScale.None : Optional.ofNullable(definition.snapshots().scale()).orElse(SnapshotScale.None);
 		DayOfWeek firstDayOfWeek = definition.snapshots() == null ? DayOfWeek.MONDAY : definition.snapshots().firstDayOfWeek();
 
@@ -60,7 +73,7 @@ public class DatamartFactory {
 		TimelineMounter timelineMounter = new TimelineMounter(datamart);
 		ReelMounter reelMounter = new ReelMounter(datamart);
 
-		Iterator<Event> iterator = reflowTanks(entityTanks, timelineTanks, reelTanks);
+		Iterator<Event> iterator = reflowTanks(entityTanks, timelineTanks, reelTanks, fromTs);
 
 		reflow(
 				datamart,
@@ -101,10 +114,18 @@ public class DatamartFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Iterator<Event> reflowTanks(Set<String> entityTanks, Set<String> timelineTanks, Set<String> reelTanks) {
+	private Iterator<Event> reflowTanks(Set<String> entityTanks, Set<String> timelineTanks, Set<String> reelTanks, Instant fromTs) {
 		Set<String> tankNames = new HashSet<>(entityTanks);
 		tankNames.addAll(timelineTanks);
 		tankNames.addAll(reelTanks);
+
+		if(fromTs != null) {
+			Timetag fromTimetag = Timetag.of(fromTs, Scale.Minute);
+			return EventStream.merge(tanks(tankNames).map(tank -> (Stream<Event>) tank.content((ss, tt) -> tt.isAfter(fromTimetag))))
+					.filter(e -> e.ts().isAfter(fromTs))
+					.iterator();
+		}
+
 		return EventStream.merge(tanks(tankNames).map(tank -> (Stream<Event>) tank.content())).iterator();
 	}
 
@@ -147,5 +168,9 @@ public class DatamartFactory {
 		} catch (Exception e) {
 			Logger.error(e);
 		}
+	}
+
+	private static class Reference<T> {
+		private T value;
 	}
 }
