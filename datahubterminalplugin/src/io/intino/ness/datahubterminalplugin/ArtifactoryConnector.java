@@ -28,7 +28,7 @@ public class ArtifactoryConnector {
 		}
 	}
 
-	public static List<String> chronosVersions() { // TODO: OR check
+	public static List<String> chronosVersions() {
 		try {
 			URL url = new URL(INTINO_RELEASES + "/io/intino/sumus/chronos/maven-metadata.xml");
 			return extractVersions(read(connect(url)).toString());

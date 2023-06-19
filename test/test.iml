@@ -205,8 +205,6 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.2.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:http:1.7.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:rest-accessor:3.1.2" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.sumus:chronos:1.0.9" level="project" />
-    <orderEntry type="module" module-name="datalake-inspector" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.cosmos.datahub:trooper-terminal:1.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.cosmos.datahub:ontology:1.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.25.9" level="project" />
