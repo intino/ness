@@ -14,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -111,6 +112,16 @@ public interface MasterDatamart {
 	}
 
 	record Snapshot(Timetag timetag, MasterDatamart datamart) {
+
+		public static boolean shouldCreateSnapshot(Timetag oldTimetag, Timetag newTimetag, SnapshotScale scale, io.intino.datahub.model.rules.DayOfWeek firstDayOfWeek) {
+			return switch (scale) { // TODO: check
+				case None -> false;
+				case Day -> ChronoUnit.DAYS.between(oldTimetag.date(), newTimetag.date()) >= 1;
+				case Month -> ChronoUnit.MONTHS.between(oldTimetag.date(), newTimetag.date()) >= 1;
+				case Year -> ChronoUnit.YEARS.between(oldTimetag.date(), newTimetag.date()) >= 1;
+				case Week -> ChronoUnit.WEEKS.between(oldTimetag.date(), newTimetag.date()) >= 1;
+			};
+		}
 
 		public static boolean shouldCreateSnapshot(Timetag timetag, SnapshotScale scale, io.intino.datahub.model.rules.DayOfWeek firstDayOfWeek) {
 			return switch (scale) {
