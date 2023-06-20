@@ -206,6 +206,7 @@ public class DatamartsRequest {
 
 	private static Predicate<io.intino.alexandria.message.Message> predicateOf(String sqlSelector) {
 		try {
+			if (sqlSelector == null) return m -> true;
 			BooleanExpression expression = SelectorParser.parse(sqlSelector);
 			return message -> {
 				try {
