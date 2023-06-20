@@ -99,10 +99,6 @@ class JmsMessageSerializer {
 			return new File(stage, fingerprint + Session.SessionExtension);
 		}
 
-		private String withOutParameters(String ss) {
-			return ss.contains("?") ? ss.substring(0, ss.indexOf("?")) : ss;
-		}
-
 		private void write(Path path, Message message) {
 			try {
 				Files.writeString(path, message.toString() + "\n\n", CREATE, APPEND);
@@ -110,24 +106,25 @@ class JmsMessageSerializer {
 				Logger.error(e);
 			}
 		}
+
 	}
 
 	private class MeasurementHandler extends MessageHandler {
+
 		@Override
 		protected File destination(Message message) {
 			MessageEvent event = new MessageEvent(message);
-			String fingerprint = Fingerprint.of(tank.qn(), event.ss(), timetag(event.ts()), Format.Measurement).name();
+			String fingerprint = Fingerprint.of(tank.qn(), withOutParameters(event.ss()), timetag(event.ts()), Format.Measurement).name();
 			return new File(stage, fingerprint + Session.SessionExtension);
 		}
 	}
 
 	private class ResourceHandler implements Handler {
-
 		@Override
 		public void accept(javax.jms.Message message) {
 			try {
 				ResourceEvent event = readResourceEventFrom((BytesMessage) message);
-				String fingerprint = Fingerprint.of(tank.qn(), event.ss(), timetag(event.ts()), Format.Resource).name();
+				String fingerprint = Fingerprint.of(tank.qn(), withOutParameters(event.ss()), timetag(event.ts()), Format.Resource).name();
 				File destination = new File(stage, fingerprint + Session.SessionExtension);
 				appendToDestinationFile(event, destination);
 			} catch (Exception e) {
@@ -158,4 +155,9 @@ class JmsMessageSerializer {
 			return new ResourceEvent(type, ss, resource).ts(ts);
 		}
 	}
+
+	private String withOutParameters(String ss) {
+		return ss.contains("?") ? ss.substring(0, ss.indexOf("?")) : ss;
+	}
+
 }
