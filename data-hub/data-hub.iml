@@ -159,7 +159,5 @@
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-client:5.18.1" level="project" />
     <orderEntry type="module" module-name="datalake-inspector" />
     <orderEntry type="library" name="Intino: io.intino.sumus:chronos:1.1.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
   </component>
 </module>
