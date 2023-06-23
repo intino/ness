@@ -1,6 +1,5 @@
 package io.intino.datahub.box.actions;
 
-import io.intino.alexandria.Timetag;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.DatamartFactory;
@@ -16,11 +15,9 @@ public class RecreateDatamartAction {
 	public DataHubBox box;
 	public io.intino.alexandria.Context context = new io.intino.alexandria.Context();
 	public String datamartName;
-	public String fromTimetag;
 
 	public String execute() {
 		try {
-			if(!fromTimetag.equalsIgnoreCase("null") && !Timetag.isTimetag(fromTimetag)) return fromTimetag + " is an invalid timetag.";
 			return datamartName.equalsIgnoreCase("all") ? launchAllDatamartsCreation() : launchDatamartCreation();
 		} catch (Throwable e) {
 			Logger.error(e);
@@ -58,16 +55,12 @@ public class RecreateDatamartAction {
 					box.datamarts().put(definition.name$(), datamart);
 				}
 				datamart.clear();
-				new DatamartFactory(box, box.datalake()).reflow(datamart, Timetag.of(fromTimetag).instant(), definition);
+				new DatamartFactory(box, box.datalake()).reflow(datamart, null, definition);
 				Logger.info("Datamart " + definition.name$() + " recreated!");
 			}
 		} catch (Throwable e) {
 			Logger.error(e);
 		}
-	}
-
-	private Timetag getFromTimetag() {
-		return fromTimetag.equalsIgnoreCase("null") ? null : Timetag.of(fromTimetag);
 	}
 
 	private void executeAsync(Runnable action) {
