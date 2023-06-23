@@ -38,7 +38,7 @@ public final class ReelMounter extends MasterDatamartMounter {
 		String ss = withoutParameters(event.ss());
 		ReelFile reelFile = datamart.reelStore().get(ss, ss);
 		try {
-			if (reelFile == null) reelFile = reelFile(message.type(), ss, subject(event));
+			if (reelFile == null) reelFile = reelFile(message.type(), subject(event));
 			update(reelFile, event);
 		} catch (IOException e) {
 			Logger.error(e);
@@ -72,8 +72,8 @@ public final class ReelMounter extends MasterDatamartMounter {
 		return !value.isNull() ? value.asList(String.class).stream() : Stream.empty();
 	}
 
-	private ReelFile reelFile(String type, String ss, String subject) throws IOException {
-		File file = new File(box().datamartReelsDirectory(datamart.name()), type + separator + subject + separator + ss + REEL_EXTENSION);
+	private ReelFile reelFile(String type, String subject) throws IOException {
+		File file = new File(box().datamartReelsDirectory(datamart.name()), type + separator + subject + REEL_EXTENSION);
 		file.getParentFile().mkdirs();
 		return file.exists() ? ReelFile.open(file) : ReelFile.create(file);
 	}
