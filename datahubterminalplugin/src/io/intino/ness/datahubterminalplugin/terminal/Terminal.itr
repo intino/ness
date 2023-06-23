@@ -6,7 +6,9 @@ def type(terminal)
 	import io.intino.alexandria.event.Event;
 	import io.intino.alexandria.event.message.MessageEvent;
 	import io.intino.alexandria.logger.Logger;
+	import io.intino.alexandria.Json;
 	import org.apache.activemq.command.ActiveMQTextMessage;
+	import com.google.gson.JsonObject;
 
 	import javax.jms.JMSException;
 	import javax.jms.Message;
@@ -14,6 +16,7 @@ def type(terminal)
 	import java.io.File;
 	import java.time.Instant;
 	import java.util.List;
+	import java.util.Set;
 	import java.util.Map;
 	import java.util.Collections;
 	import java.util.concurrent.TimeUnit;
@@ -26,6 +29,9 @@ def type(terminal)
 	public class $name+snakeCaseToCamelCase+firstUpperCase {
 		public static String$[] subscriptionChannels = new String$[]{$subscribe+channel};
 		private final io.intino.alexandria.terminal.Connector connector;
+		private final java.util.Set<java.util.function.BiConsumer> datamartConsumers = new java.util.HashSet<>();
+		private final DatamartsRetryConfig datamartsRetryConfig;
+		private String sourceSelector;
 		private final java.util.Map<java.util.function.BiConsumer<?, String>, List<java.util.function.Consumer<io.intino.alexandria.event.Event>>> consumers = new java.util.HashMap<>();
 		[$datamart+declaration...[$NL]]
 
@@ -47,7 +53,7 @@ def type(terminal)
 		}
 
 		public void publish(Event event) {
-			switch(event.type()) {
+			switch (event.type()) {
 				$publish+publishSwitchCase...[$NL]
 				default: Logger.warn(getClass().getSimpleName() + " is not configured to publish " + event.type() + " events.");
 			}
@@ -133,10 +139,10 @@ def type(terminal)
 		[$datamart+addDatamartSubscribers...[$NL$NL]]
 
 		private String channelOf(String type) {
-			switch(type) {
+			return switch(type) {
 				[$publish+channelOfSwitchCase...[$NL]]
-			}
-			return null;
+				default -> null;
+			};
 		}
 
 		public class BatchSession {
@@ -271,14 +277,16 @@ end
 def trigger(constructor)
 	public $terminal+snakeCaseToCamelCase+firstUpperCase(io.intino.alexandria.terminal.Connector connector, DatamartsRetryConfig datamartsRetryConfig) {
 		this.connector = connector;
-		this.$name+firstLowerCase~Datamart = new $package.$name+FirstUpperCase~DatamartImpl(connector, datamartsRetryConfig);
+		this.datamartsRetryConfig = datamartsRetryConfig;
+		this.datamart = new $package.$name+FirstUpperCase~DatamartImpl(connector, datamartsRetryConfig);
 	}
 end
 
 
 def trigger(init)
-	$name+firstLowerCase~Datamart.init(sourceSelector);
-	addDatamartSubscribers(this.$name+firstLowerCase~Datamart, sourceSelector);
+	this.sourceSelector = sourceSelector;
+	datamart.init(sourceSelector);
+	addDatamartSubscribers(sourceSelector);
 end
 
 def trigger(retryConfigAssign)
@@ -290,7 +298,7 @@ def trigger(retryConfigDefault)
 end
 
 def type(datamart) trigger(declaration)
-	private final $package.$name+FirstUpperCase~DatamartImpl $name+firstLowerCase~Datamart;
+	private volatile $package.$name+FirstUpperCase~DatamartImpl datamart;
 end
 
 def type(datamart) trigger(instantiate)
@@ -298,19 +306,40 @@ def type(datamart) trigger(instantiate)
 end
 
 def type(datamart) trigger(getter)
-	public $package.$name+FirstUpperCase~Datamart $name+firstLowerCase~Datamart() {
-		return $name+firstLowerCase~Datamart;
+	public $package.$name+FirstUpperCase~Datamart datamart() {
+		return datamart;
 	}
 end
 
 def type(datamart) trigger(addDatamartSubscribers)
-	private void addDatamartSubscribers($package.$name+FirstUpperCase~DatamartImpl datamart, String sourceSelector) {
+	private void addDatamartSubscribers(String sourceSelector) {
+		addDatamartEventSubscribers(sourceSelector,  ts -> ts.isAfter(datamart.ts()));
+		connector.attachListener("service.ness.datamarts", null, (m, c) -> manageDatamartMessage(m));
+	}
+
+	private void addDatamartEventSubscribers(String sourceSelector, java.util.function.Predicate<Instant> predicate) {
+		this.datamartConsumers.clear();
+		java.util.function.BiConsumer subscriber;
 		[$devent+addSubscribe...[$NL]]
+	}
+
+	private void manageDatamartMessage(String message) {
+		JsonObject jsonObject = Json.fromJson(message, JsonObject.class);
+		String operation = jsonObject.getAsJsonPrimitive("operation").getAsString();
+		if (operation.equals("reload")) {
+			this.datamartConsumers.forEach(c-> consumers.get(c).forEach(connector::detachListeners));
+			var temporal = new $package.$name+FirstUpperCase~DatamartImpl(connector, datamartsRetryConfig);
+			temporal.init(this.sourceSelector);
+			this.datamart = temporal;
+			addDatamartEventSubscribers(this.sourceSelector, ts -> ts.isAfter(temporal.ts()));
+		}
 	}
 end
 
 def type(devent) trigger(addSubscribe)
-	subscribe(($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer) (event, topic) -> datamart.mount(event), connector.clientId() + "_$datamart_$message", sourceSelector);
+	subscriber = ($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer) (event, topic) -> datamart.mount(event);
+	datamartConsumers.add(subscriber);
+	subscribe(($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer) subscriber, connector.clientId() + "_$datamart_$message", predicate, sourceSelector);
 end
 
 def trigger(publishSwitchCase)
@@ -318,7 +347,7 @@ def trigger(publishSwitchCase)
 end
 
 def trigger(channelOfSwitchCase)
-	case "$typename+FirstUpperCase": return "$channel";
+	case "$typename+FirstUpperCase" -> "$channel";
 end
 
 def !type(bpm) trigger(tankOf)
@@ -386,9 +415,9 @@ def type(measurement) trigger(subscribe)
 		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), sourceSelector);
 	}
 
-	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId, java.util.function.Predicate<Instant> filter) {
+	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId, java.util.function.Predicate<Instant> filter, String sourceSelector) {
 		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(event instanceof MessageEvent ? new $type(((MessageEvent) event).toMessage()) : ($type) event, "$channel");} catch(Throwable e) { Logger.error(e); }}));
-		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), filter);
+		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), filter, sourceSelector);
 	}
 
 	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived) {
@@ -412,9 +441,9 @@ def type(message) trigger(subscribe)
 		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), sourceSelector);
 	}
 
-	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId, java.util.function.Predicate<Instant> filter) {
+	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId, java.util.function.Predicate<Instant> filter, String sourceSelector) {
 		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type((MessageEvent) event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
-		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), filter);
+		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), filter, sourceSelector);
 	}
 
 	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived) {

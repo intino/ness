@@ -63,7 +63,6 @@ class TerminalRenderer {
 		if (!messageTanks.isEmpty()) builder.add("message", messageFrames());
 		if (!measurementTanks.isEmpty()) builder.add("measurement", measurementFrames());
 		if (!resourceTanks.isEmpty()) builder.add("resource", resourceFrames());
-
 		return builder.toFrame();
 	}
 

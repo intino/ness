@@ -113,6 +113,11 @@ public class ConfigurationBuilder {
 			}
 
 			@Override
+			public UpdatePolicy updatePolicy() {
+				return UpdatePolicy.Daily;
+			}
+
+			@Override
 			public Configuration root() {
 				return null;
 			}
@@ -140,6 +145,11 @@ public class ConfigurationBuilder {
 			@Override
 			public String password() {
 				return null;
+			}
+
+			@Override
+			public UpdatePolicy updatePolicy() {
+				return UpdatePolicy.Daily;
 			}
 
 			@Override

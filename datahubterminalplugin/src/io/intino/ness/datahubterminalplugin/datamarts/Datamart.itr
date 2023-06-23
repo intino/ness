@@ -198,6 +198,7 @@ def type(datamart & message & impl)
 		private final List<EntityListener> entityListeners = new ArrayList<>();
 		private final Map<String, List<MasterMounter>> mounters = new HashMap<>();
 		private final $name+FirstUpperCase~Datamart.Entities entities;
+		private Instant ts;
 		[$hasTimelines~private final Map<String, TimelineNodeImpl> timelines = new java.util.concurrent.ConcurrentHashMap<>();]
 		[$hasReels~private final Map<String, ReelNodeImpl> reels = new java.util.concurrent.ConcurrentHashMap<>();]
 
@@ -282,6 +283,10 @@ def type(datamart & message & impl)
         	}.init(null);
         }
 
+        public Instant ts() {
+        	return this.ts;
+        }
+
     	[$entity+getter...[$NL$NL]]
 
 		[$hasTimelines+timelinesByIdMethod]
@@ -343,6 +348,7 @@ def type(datamart & message & impl)
 
 		public void mount(Event event) {
 			if(event == null) return;
+			this.ts = event.ts();
 			mountEntities(event);
 			[$hasTimelines~mountTimelines(event);]
 			[$hasReels~mountReels(event);]
