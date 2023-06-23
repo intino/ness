@@ -1,5 +1,6 @@
 package io.intino.datahub.box.actions;
 
+import io.intino.alexandria.jms.TopicProducer;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.DatamartFactory;
@@ -8,6 +9,8 @@ import io.intino.datahub.datamart.impl.LocalMasterDatamart;
 import io.intino.datahub.model.Datamart;
 
 import java.util.List;
+
+import static io.intino.datahub.broker.jms.JmsMessageTranslator.toJmsMessage;
 
 
 public class RecreateDatamartAction {
@@ -32,17 +35,27 @@ public class RecreateDatamartAction {
 
 	private String launchDatamartCreation() {
 		Datamart datamart = box.graph().datamartList(d -> d.name$().equals(datamartName)).findFirst().orElse(null);
-		if(datamart == null) return "Datamart " + datamartName + " not found";
-		executeAsync(() -> recreate(datamart));
+		if (datamart == null) return "Datamart " + datamartName + " not found";
+		executeAsync(() -> {
+			recreate(datamart);
+			notifySubscribers(datamart.name$());
+		});
 		return "Recreation of datamart " + datamartName + " launched. Check log for more info.";
+	}
+
+	private void notifySubscribers(String dm) {
+		TopicProducer topicProducer = box.brokerService().manager().topicProducerOf("service.ness.datamarts");
+		topicProducer.produce(toJmsMessage("{\"operation\":\"reload\",datamart:\"" + dm + "\""));
+		topicProducer.close();
 	}
 
 	private void recreateAll() {
 		List<Datamart> datamartList = box.graph().datamartList();
 		for (int i = 0; i < datamartList.size(); i++) {
 			Datamart datamart = datamartList.get(i);
-			Logger.info("Creating " + datamart.name$() + " (" + (i+1) + "/" + datamartList.size() + ")...");
+			Logger.info("Creating " + datamart.name$() + " (" + (i + 1) + "/" + datamartList.size() + ")...");
 			recreate(datamart);
+			notifySubscribers(datamart.name$());
 		}
 	}
 
@@ -50,7 +63,7 @@ public class RecreateDatamartAction {
 		try {
 			synchronized (RecreateDatamartAction.class) {
 				MasterDatamart datamart = box.datamarts().get(datamartName);
-				if(datamart == null) {
+				if (datamart == null) {
 					datamart = new LocalMasterDatamart(box, definition);
 					box.datamarts().put(definition.name$(), datamart);
 				}
