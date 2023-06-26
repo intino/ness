@@ -90,7 +90,7 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	}
 
 	private static void checkTs(Instant ts, TimelineFile tlFile, DataSession session) throws IOException {
-		long lapse = Duration.between(ts, tlFile.next()).getSeconds();
+		long lapse = Duration.between(tlFile.next(), ts).getSeconds();
 		if (lapse > tlFile.period().duration() * 2) session.set(ts);
 	}
 

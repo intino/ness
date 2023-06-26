@@ -150,7 +150,6 @@
     <orderEntry type="library" name="Intino: io.intino.icod:standalone:1.1.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:jms:1.6.0" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-client:5.18.1" level="project" />
-    <orderEntry type="module" module-name="datalake-inspector" />
     <orderEntry type="library" name="Intino: io.intino.sumus:chronos:1.1.1" level="project" />
     <orderEntry type="library" name="Intino: com.tdunning:t-digest:3.3" level="project" />
     <orderEntry type="library" name="Intino: com.github.haifengl:smile-core:3.0.0" level="project" />
@@ -159,5 +158,6 @@
     <orderEntry type="library" name="Intino: org.apache.commons:commons-csv:1.9.0" level="project" />
     <orderEntry type="library" name="Intino: ro.hasna.ts:time-series-math:0.18" level="project" />
     <orderEntry type="library" name="Intino: org.apache.commons:commons-math3:3.6.1" level="project" />
+    <orderEntry type="module" module-name="datalake-inspector" />
   </component>
 </module>
