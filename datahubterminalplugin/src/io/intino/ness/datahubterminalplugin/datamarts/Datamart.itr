@@ -619,6 +619,15 @@ def type(reel) trigger(getter)
 	public ReelNode $name+FirstLowerCase~Reel(String id) {
 		return reels.computeIfAbsent(id + ":$name", theId -> new ReelNodeImpl(id, "$name", Set.of($sources)));
 	}
+
+	@Override
+	public Stream<ReelNode> $name+FirstLowerCase~Reels() {
+		String$[$] files = listReelFilesOf(null, "$name");
+		return Arrays.stream(files)
+			.filter(f -> f != null && !f.isEmpty())
+			.map(this::reelNodeOf)
+			.filter(java.util.Objects::nonNull);
+	}
 end
 
 def trigger(timelinesByIdMethod)
@@ -660,29 +669,33 @@ end
 def trigger(reelsByIdMethod)
 	@Override
 	public Stream<ReelNode> reels(String id) {
-		String$[$] files = listReelFilesOf(id);
+		String$[$] files = listReelFilesOf(id, null);
 		return (Stream<ReelNode>) Arrays.stream(files)
 			.filter(f -> f != null && !f.isEmpty())
-			.<ReelNode>map(f -> {
-				try {
-					File file = new File(f);
-                	String type = file.getParentFile().getName();
-                	ReelNodeImpl node = reels.get(id + ":" + type);
-                	if(node == null) {
-                		node = new ReelNodeImpl(id, type, sourcesOfReel(type), file.exists() ? file : null);
-                		reels.put(id + ":" + type, node);
-                	}
-                	return node;
-				} catch (Exception ignored) {
-					return null;
-				}
-			}).filter(java.util.Objects::nonNull);
+			.<ReelNode>map(this::reelNodeOf)
+			.filter(java.util.Objects::nonNull);
 	}
 
-	private String$[$] listReelFilesOf(String id) {
+	private ReelNode reelNodeOf(String f) {
+		try {
+			File file = new File(f);
+			String id = file.getName().replace(".reel", "");
+			String type = file.getParentFile().getName();
+			ReelNodeImpl node = reels.get(id + ":" + type);
+			if(node == null) {
+				node = new ReelNodeImpl(id, type, sourcesOfReel(type), file.exists() ? file : null);
+				reels.put(id + ":" + type, node);
+			}
+			return node;
+		} catch (Exception ignored) {
+			return null;
+		}
+	}
+
+	private String$[$] listReelFilesOf(String id, String type) {
 		try {
 			ActiveMQTextMessage request = new ActiveMQTextMessage();
-			request.setText("datamart=" + name() + ";operation=list-reels;" + (id == null ? "" : "id=" + id));
+			request.setText("datamart=" + name() + ";operation=list-reels;" + (id == null ? "" : "id=" + id)+(type == null ? "" : "type=" + type));
 			javax.jms.Message message = requestResponseFromDatahub("list-reels=" + id, request);
 			if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
 			return ((javax.jms.TextMessage)message).getText().split(",");
@@ -748,7 +761,6 @@ end
 def type(timeline) trigger(getterSignature)
 	default TimelineNode $name+firstLowerCase~Timeline($package.entities.$entity+firstUpperCase entity) {return $name+firstLowerCase~Timeline(entity.id());}
 	TimelineNode $name+firstLowerCase~Timeline(String id);
-	Stream<TimelineNode> $name+firstLowerCase~Timelines();
 end
 
 def type(reel) trigger(getterSignature)

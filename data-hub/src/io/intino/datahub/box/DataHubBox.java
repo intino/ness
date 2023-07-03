@@ -138,16 +138,17 @@ public class DataHubBox extends AbstractBox {
 		return new File(datamartDirectory(name), "timelines");
 	}
 
-	public File datamartReelsDirectory(String name) {
-		return new File(datamartDirectory(name), "reels");
+	public File datamartReelsDirectory(String name, String type) {
+		File dir = new File(datamartDirectory(name), "reels");
+		return type == null ? dir : new File(dir, type);
 	}
 
 	public List<File> datamartTimelineFiles(String datamartName, String id) {
 		return listFiles(datamartTimelinesDirectory(datamartName), TIMELINE_EXTENSION, id);
 	}
 
-	public List<File> datamartReelFiles(String datamartName, String id) {
-		return listFiles(datamartReelsDirectory(datamartName), REEL_EXTENSION, id);
+	public List<File> datamartReelFiles(String datamartName, String id, String type) {
+		return listFiles(datamartReelsDirectory(datamartName, type), REEL_EXTENSION, id);
 	}
 
 	private List<File> listFiles(File directory, String extension, String id) {

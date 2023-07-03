@@ -72,9 +72,7 @@ def type(timelineNode & default) trigger(nodeImpl)
 						io.intino.sumus.chronos.Timeline timeline = cache.get();
 						if (timeline != null) return timeline;
 					}
-
 					io.intino.sumus.chronos.Timeline timeline = timelineFile().timeline();
-
 					cache = new java.lang.ref.SoftReference<>(timeline);
 					return timeline;
 				} catch(RuntimeException e) {
