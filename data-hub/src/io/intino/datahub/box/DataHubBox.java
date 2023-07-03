@@ -138,22 +138,23 @@ public class DataHubBox extends AbstractBox {
 		return new File(datamartDirectory(name), "timelines");
 	}
 
-	public File datamartReelsDirectory(String name) {
-		return new File(datamartDirectory(name), "reels");
+	public File datamartReelsDirectory(String name, String type) {
+		File dir = new File(datamartDirectory(name), "reels");
+		return type == null ? dir : new File(dir, type);
 	}
 
 	public List<File> datamartTimelineFiles(String datamartName, String id) {
 		return listFiles(datamartTimelinesDirectory(datamartName), TIMELINE_EXTENSION, id);
 	}
 
-	public List<File> datamartReelFiles(String datamartName, String id) {
-		return listFiles(datamartReelsDirectory(datamartName), REEL_EXTENSION, id);
+	public List<File> datamartReelFiles(String datamartName, String id, String type) {
+		return listFiles(datamartReelsDirectory(datamartName, type), REEL_EXTENSION, id);
 	}
 
 	private List<File> listFiles(File directory, String extension, String id) {
 		if (!directory.exists()) return Collections.emptyList();
 		Collection<File> files = FileUtils.listFiles(directory, new String[]{extension, extension.substring(extension.indexOf('.') + 1)}, true);
-		if (id != null) return files.stream().filter(f -> f.getName().equals(id + extension)).toList();
+		if (id != null && !id.isEmpty()) return files.stream().filter(f -> f.getName().equals(id + extension)).toList();
 		return files instanceof List<File> list ? list : new ArrayList<>(files);
 	}
 

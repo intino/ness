@@ -35,7 +35,7 @@ def type(timelineNode & default) trigger(nodeImpl)
 		@Override
 		public void dispose() {
 			synchronized(this) {
-				if(disposed) return;
+				if (disposed) return;
 				clearCache();
 				listener = null;
 				timelines.remove(id + ":" + type);
@@ -66,15 +66,13 @@ def type(timelineNode & default) trigger(nodeImpl)
 		@Override
 		public io.intino.sumus.chronos.Timeline get() {
 			synchronized(this) {
-				if(disposed) throw new IllegalStateException("This " + getClass().getSimpleName() + " is disposed.");
+				if (disposed) throw new IllegalStateException("This " + getClass().getSimpleName() + " is disposed.");
 				try {
-					if(cache != null) {
+					if (cache != null) {
 						io.intino.sumus.chronos.Timeline timeline = cache.get();
-						if(timeline != null) return timeline;
+						if (timeline != null) return timeline;
 					}
-
 					io.intino.sumus.chronos.Timeline timeline = timelineFile().timeline();
-
 					cache = new java.lang.ref.SoftReference<>(timeline);
 					return timeline;
 				} catch(RuntimeException e) {
@@ -87,9 +85,9 @@ def type(timelineNode & default) trigger(nodeImpl)
 
 		private io.intino.sumus.chronos.TimelineFile timelineFile() {
 			synchronized(this) {
-				if(disposed) throw new IllegalStateException("This " + getClass().getSimpleName() + " is disposed.");
+				if (disposed) throw new IllegalStateException("This " + getClass().getSimpleName() + " is disposed.");
 				try {
-					if(timelineFile != null) return timelineFile;
+					if (timelineFile != null) return timelineFile;
 					return timelineFile = (!TimelineNode.AlwaysDownloadFromDatahub.get() && file != null && file.exists())
 						? loadFile()
 						: downloadFromDatahub();
@@ -106,11 +104,11 @@ def type(timelineNode & default) trigger(nodeImpl)
 
 		private void notifyEvent(io.intino.alexandria.event.Event event) {
 			synchronized(this) {
-				if(disposed) return;
+				if (disposed) return;
 				try {
-					if(!sources.contains(event.type())) return;
+					if (!sources.contains(event.type())) return;
 					clearCache();
-					if(listener != null) listener.onEventReceived(this, event);
+					if (listener != null) listener.onEventReceived(this, event);
 				} catch(Throwable e) {
 					Logger.error(e);
 				}
@@ -118,7 +116,7 @@ def type(timelineNode & default) trigger(nodeImpl)
 		}
 
 		private void clearCache() {
-			if(cache != null) {
+			if (cache != null) {
 				cache.enqueue();
 				cache = null;
 			}
@@ -134,10 +132,10 @@ def type(timelineNode & default) trigger(nodeImpl)
 			javax.jms.Message response = requestResponseFromDatahub(
 				"get-timeline=" + id(),
 			 	request(TimelineNode.AlwaysDownloadFromDatahub.get() ? "download" : "path"));
-
-			if(response instanceof javax.jms.TextMessage textResponse) {
+			if (!response.getBooleanProperty("success")) return null;
+			if (response instanceof javax.jms.TextMessage textResponse) {
 				file = getFile(textResponse);
-				if(file != null && file.exists()) return loadFile();
+				if (file != null && file.exists()) return loadFile();
 				file = null;
 				response = requestResponseFromDatahub("get-timeline=" + id(), request("download"));
 			}
@@ -210,7 +208,7 @@ def type(reelNode & default) trigger(nodeImpl)
 		@Override
 		public void dispose() {
 			synchronized(this) {
-				if(disposed) return;
+				if (disposed) return;
 				clearCache();
 				listener = null;
 				reels.remove(id + ":" + type);
@@ -241,13 +239,13 @@ def type(reelNode & default) trigger(nodeImpl)
 
 		private io.intino.sumus.chronos.ReelFile reelFile() {
 			synchronized(this) {
-				if(disposed) throw new IllegalStateException("This " + getClass().getSimpleName() + " is disposed.");
+				if (disposed) throw new IllegalStateException("This " + getClass().getSimpleName() + " is disposed.");
 				try {
-					if(reelFile != null) return reelFile;
+					if (reelFile != null) return reelFile;
 					return reelFile = (file != null && file.exists())
 						? loadFile()
 						: downloadFromDatahub();
-				} catch(Exception e) {
+				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
 			}
@@ -260,11 +258,11 @@ def type(reelNode & default) trigger(nodeImpl)
 
 		private void notifyEvent(io.intino.alexandria.event.Event event) {
 			synchronized(this) {
-				if(disposed) return;
+				if (disposed) return;
 				try {
-					if(!sources.contains(event.type())) return;
+					if (!sources.contains(event.type())) return;
 					clearCache();
-					if(listener != null) listener.onEventReceived(this, event);
+					if (listener != null) listener.onEventReceived(this, event);
 				} catch(Throwable e) {
 					Logger.error(e);
 				}
@@ -282,14 +280,13 @@ def type(reelNode & default) trigger(nodeImpl)
 
 		private io.intino.sumus.chronos.ReelFile downloadFromDatahub() throws Exception {
 			javax.jms.Message response = requestResponseFromDatahub("get-reel=" + id(), request("path"));
-
-			if(response instanceof javax.jms.TextMessage textResponse) {
+			if (!response.getBooleanProperty("success")) return null;
+			if (response instanceof javax.jms.TextMessage textResponse) {
 				file = getFile(textResponse);
-				if(file != null && file.exists()) return loadFile();
+				if (file != null && file.exists()) return loadFile();
 				file = null;
 				response = requestResponseFromDatahub("get-reel=" + id(), request("download"));
 			}
-
 			return readFromBytes((javax.jms.BytesMessage) response);
 		}
 
@@ -297,11 +294,9 @@ def type(reelNode & default) trigger(nodeImpl)
 			int size = m.getIntProperty("size");
 			byte$[$] bytes = new byte$[size$];
 			m.readBytes(bytes, size);
-
 			file = File.createTempFile(id(), ".reel");
 			java.nio.file.Files.write(file.toPath(), bytes, java.nio.file.StandardOpenOption.CREATE);
 			file.deleteOnExit();
-
 			return loadFile();
 		}
 
