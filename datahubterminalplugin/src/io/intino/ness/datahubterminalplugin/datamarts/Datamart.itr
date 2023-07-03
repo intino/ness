@@ -214,7 +214,7 @@ def type(datamart & message & impl)
 				if (!initialized.compareAndSet(false, true)) return this;
 				downloadDatamartFromDatahub(datamartSourceSelector);
 				Logger.info("$name+FirstUpperCase~Datamart (" + (snapshotTimetag().isEmpty() ? "" : "snapshot " + snapshotTimetag() + ", ")  + connector.clientId() + ") initialized successfully.");
-			} catch(Exception e) {
+			} catch (Exception e) {
 				throw new ExceptionInInitializerError("$name+FirstUpperCase~Datamart failed to start because a " + e.getClass().getName() + " occurred: " + e.getMessage());
 			}
 			return this;
@@ -251,6 +251,7 @@ def type(datamart & message & impl)
         public List<String> listSnapshots() {
         	try {
         		javax.jms.Message message = requestResponseFromDatahub("listSnapshots", listSnapshotsRequest());
+        		if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
         		return handleListSnapshotsResponse(message);
         	} catch (Exception e) {
         		Logger.error("Could not download list of available snapshots: " + e.getMessage(), e);
@@ -308,6 +309,7 @@ def type(datamart & message & impl)
 		private Stream<Event> downloadEntities(int$[$] eventCount, String datamartSourceSelector) {
 			try {
 				javax.jms.Message message = requestResponseFromDatahub("downloadEvents", downloadEntitiesRequest(datamartSourceSelector));
+				if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
 				return handleDownloadResponse(message, eventCount);
 			} catch (NullPointerException e) {
 				throw new NullPointerException("Could not download datamart: no response from datahub.");
@@ -367,7 +369,7 @@ def type(datamart & message & impl)
 		private void mountEntities(Event event) {
 			try {
 				java.util.Optional.ofNullable(this.mounters.get(event.type())).ifPresent(mounters -> mounters.forEach(mounter -> mounter.mount(event)));
-			} catch(Exception e) {
+			} catch (Exception e) {
 				Logger.error("Failed to mount event of type " + event.type() + ": " + e.getMessage(), e);
 			}
 		}
@@ -382,7 +384,7 @@ def type(datamart & message & impl)
 
 		private javax.jms.Message requestResponseFromDatahub(String requestName, javax.jms.Message request) throws Exception {
         	long timeout = retryConfig.initialTimeoutAmount;
-        	for(int i = 0;i < retryConfig.maxAttempts;i++) {
+        	for(int i = 0; i < retryConfig.maxAttempts; i++) {
         		javax.jms.Message message = connector.requestResponse(DATAHUB_MESSAGE_TOPIC, request, timeout, retryConfig.timeoutUnit);
         		if(message != null) return message;
         		if(i < retryConfig.maxAttempts - 1) Logger.warn("("+(i+1)+") Datahub did not respond after " + timeout + " " + retryConfig.timeoutUnit + " to the request '" + requestName + "'. Trying again...");
@@ -635,7 +637,7 @@ def trigger(timelinesByIdMethod)
                 		timelines.put(id + ":" + type, node);
                 	}
                 	return node;
-				} catch(Exception ignored) {
+				} catch (Exception ignored) {
 					return null;
 				}
 			}).filter(java.util.Objects::nonNull);
@@ -646,8 +648,9 @@ def trigger(timelinesByIdMethod)
 			ActiveMQTextMessage request = new ActiveMQTextMessage();
 			request.setText("datamart=" + name() + ";operation=list-timelines;id=" + id);
 			javax.jms.Message message = requestResponseFromDatahub("list-timelines=" + id, request);
+			if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
 			return ((javax.jms.TextMessage)message).getText().split(",");
-		} catch(Exception e) {
+		} catch (Exception e) {
 			Logger.error(e);
 			return new String$[0$];
 		}
@@ -670,7 +673,7 @@ def trigger(reelsByIdMethod)
                 		reels.put(id + ":" + type, node);
                 	}
                 	return node;
-				} catch(Exception ignored) {
+				} catch (Exception ignored) {
 					return null;
 				}
 			}).filter(java.util.Objects::nonNull);
@@ -681,8 +684,9 @@ def trigger(reelsByIdMethod)
 			ActiveMQTextMessage request = new ActiveMQTextMessage();
 			request.setText("datamart=" + name() + ";operation=list-reels;id=" + id);
 			javax.jms.Message message = requestResponseFromDatahub("list-reels=" + id, request);
+			if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
 			return ((javax.jms.TextMessage)message).getText().split(",");
-		} catch(Exception e) {
+		} catch (Exception e) {
 			Logger.error(e);
 			return new String$[0$];
 		}

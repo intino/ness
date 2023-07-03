@@ -134,8 +134,8 @@ def type(timelineNode & default) trigger(nodeImpl)
 			javax.jms.Message response = requestResponseFromDatahub(
 				"get-timeline=" + id(),
 			 	request(TimelineNode.AlwaysDownloadFromDatahub.get() ? "download" : "path"));
-
-			if(response instanceof javax.jms.TextMessage textResponse) {
+			if (!response.getBooleanProperty("success")) return null;
+			if (response instanceof javax.jms.TextMessage textResponse) {
 				file = getFile(textResponse);
 				if(file != null && file.exists()) return loadFile();
 				file = null;
@@ -282,14 +282,13 @@ def type(reelNode & default) trigger(nodeImpl)
 
 		private io.intino.sumus.chronos.ReelFile downloadFromDatahub() throws Exception {
 			javax.jms.Message response = requestResponseFromDatahub("get-reel=" + id(), request("path"));
-
-			if(response instanceof javax.jms.TextMessage textResponse) {
+			if (!response.getBooleanProperty("success")) return null;
+			if (response instanceof javax.jms.TextMessage textResponse) {
 				file = getFile(textResponse);
-				if(file != null && file.exists()) return loadFile();
+				if (file != null && file.exists()) return loadFile();
 				file = null;
 				response = requestResponseFromDatahub("get-reel=" + id(), request("download"));
 			}
-
 			return readFromBytes((javax.jms.BytesMessage) response);
 		}
 
@@ -297,11 +296,9 @@ def type(reelNode & default) trigger(nodeImpl)
 			int size = m.getIntProperty("size");
 			byte$[$] bytes = new byte$[size$];
 			m.readBytes(bytes, size);
-
 			file = File.createTempFile(id(), ".reel");
 			java.nio.file.Files.write(file.toPath(), bytes, java.nio.file.StandardOpenOption.CREATE);
 			file.deleteOnExit();
-
 			return loadFile();
 		}
 
