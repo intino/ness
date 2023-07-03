@@ -56,18 +56,18 @@ public class DatamartsRequest {
 			return handleDatamartDownload(content);
 		} catch (Throwable e) {
 			Logger.error(e);
-			return Stream.empty();
+			return errorMessage(e.getMessage());
 		}
 	}
 
 	private Stream<Message> handleDatamartDownload(String request) {
 		Map<String, String> args = parseArgumentsFrom(request);
-
 		String datamartName = args.get("datamart");
 		MasterDatamart datamart = box.datamarts().get(datamartName);
 		if (datamart == null) {
-			Logger.error("Datamart " + datamartName + " not found");
-			return Stream.empty();
+			String message = "Datamart " + datamartName + " not found";
+			Logger.error(message);
+			return errorMessage(message);
 		}
 
 		return switch (args.get("operation")) {
@@ -77,7 +77,7 @@ public class DatamartsRequest {
 			case "get-timeline" -> getTimeline(datamart, args);
 			case "list-reels" -> listReelFiles(datamart, args);
 			case "get-reel" -> getReel(datamart, args);
-			default -> Stream.empty();
+			default -> errorMessage("Operation " + args.get("operation") + " not found");
 		};
 	}
 
@@ -92,21 +92,32 @@ public class DatamartsRequest {
 	private Stream<Message> getChronos(Map<String, String> args, File dir, String extension) {
 		String id = args.get("id");
 		if (id == null) {
-			Logger.error("Chronos object download requested but id argument not found");
-			return Stream.empty();
+			String message = "Chronos object download requested but id argument not found";
+			Logger.error(message);
+			return errorMessage(message);
 		}
-
 		String type = args.get("type");
 		if (type == null) {
-			Logger.error("Chronos object download requested but type argument not found");
-			return Stream.empty();
+			String message = "Chronos object download requested but type argument not found";
+			Logger.error(message);
+			return errorMessage(message);
 		}
-
 		File file = new File(dir, type + File.separator + id + extension);
-		if (!file.exists()) return Stream.empty();
-
+		if (!file.exists()) return errorMessage("Reel File not found");
 		String mode = args.getOrDefault("mode", "download");
 		return mode.equals("path") ? path(file) : download(file);
+	}
+
+	private Stream<Message> errorMessage(String errorDescription) {
+		ActiveMQTextMessage message = new ActiveMQTextMessage();
+		try {
+			message.setBooleanProperty("success", false);
+			message.setText(errorDescription);
+			return Stream.of(message);
+		} catch (JMSException e) {
+			Logger.error(e);
+			return Stream.of(message);
+		}
 	}
 
 	private Stream<Message> download(File file) {
@@ -114,24 +125,26 @@ public class DatamartsRequest {
 			ActiveMQBytesMessage message = new ActiveMQBytesMessage();
 			byte[] bytes = Files.readAllBytes(file.toPath());
 			message.setProperty("name", file.getName());
+			message.setBooleanProperty("success", true);
 			message.setIntProperty("size", bytes.length);
 			message.writeBytes(bytes);
 			message.compress();
 			return Stream.of(message);
 		} catch (Exception e) {
-			Logger.error("Could not send file " + file.getAbsolutePath() + ": " + e.getMessage(), e);
-			return Stream.empty();
+			return errorMessage("Could not send file " + file.getAbsolutePath() + ": " + e.getMessage());
 		}
 	}
 
 	private Stream<Message> path(File file) {
 		try {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
+			message.setBooleanProperty("success", true);
 			message.setText(file.getAbsolutePath());
 			return Stream.of(message);
 		} catch (Exception e) {
-			Logger.error("Could not send file path " + file.getAbsolutePath() + ": " + e.getMessage(), e);
-			return Stream.empty();
+			String message = "Could not send file path " + file.getAbsolutePath() + ": " + e.getMessage();
+			Logger.error(message, e);
+			return errorMessage(message);
 		}
 	}
 
@@ -146,21 +159,24 @@ public class DatamartsRequest {
 	private Stream<Message> listFiles(String datamart, List<File> files) {
 		try {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
+			message.setBooleanProperty("success", true);
 			message.setText(files.stream().map(File::getAbsolutePath).collect(Collectors.joining(",")));
 			message.setIntProperty("count", files.size());
 			return Stream.of(message);
 		} catch (Exception e) {
-			Logger.error("Could not list chronos files of " + datamart + ": " + e.getMessage(), e);
-			return Stream.empty();
+			String message = "Could not list chronos files of " + datamart + ": " + e.getMessage();
+			Logger.error(message, e);
+			return errorMessage(message);
 		}
 	}
 
 	private Stream<Message> downloadEntities(MasterDatamart datamart, Map<String, String> args) {
 		Optional<String> timetag = Optional.ofNullable(args.get("timetag"));
 		return timetag.map(s -> box.datamartSerializer().loadMostRecentSnapshotTo(datamart.name(), asTimetag(s))
-				.map(MasterDatamart.Snapshot::datamart)
-				.map(d -> downloadEntities(d, args.get("sourceSelector")))
-				.orElse(Stream.empty())).orElseGet(() -> datamart == null ? Stream.empty() : downloadEntities(datamart, args.get("sourceSelector")));
+						.map(MasterDatamart.Snapshot::datamart)
+						.map(d -> downloadEntities(d, args.get("sourceSelector")))
+						.orElse(Stream.empty()))
+				.orElseGet(() -> datamart == null ? errorMessage("Datamart not found") : downloadEntities(datamart, args.get("sourceSelector")));
 	}
 
 	private Timetag asTimetag(String timetag) {
@@ -172,12 +188,13 @@ public class DatamartsRequest {
 		if (snapshots.isEmpty()) return Stream.empty();
 		try {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
+			message.setBooleanProperty("success", true);
 			message.setIntProperty("count", snapshots.size());
 			message.setText(snapshots.stream().map(Timetag::value).collect(Collectors.joining(",")));
 			return Stream.of(message);
 		} catch (Exception e) {
 			Logger.error(e);
-			return Stream.empty();
+			return errorMessage(e.getMessage());
 		}
 	}
 
@@ -185,6 +202,7 @@ public class DatamartsRequest {
 		synchronized (datamart) {
 			try {
 				ActiveMQBytesMessage message = new ActiveMQBytesMessage();
+				message.setBooleanProperty("success", true);
 				Predicate<io.intino.alexandria.message.Message> messagePredicate = predicateOf(sourceSelector);
 				message.setIntProperty("count", sourceSelector != null ? datamart.entityStore().size() : filtered(datamart, messagePredicate));
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream(16 * 1024);
@@ -195,7 +213,7 @@ public class DatamartsRequest {
 				return Stream.of(message);
 			} catch (Exception e) {
 				Logger.error(e);
-				return Stream.empty();
+				return errorMessage(e.getMessage());
 			}
 		}
 	}
@@ -228,6 +246,7 @@ public class DatamartsRequest {
 	private static MessageReference map(io.intino.alexandria.message.Message message) {
 		try {
 			ActiveMQMessage amqMessage = new ActiveMQMessage();
+			amqMessage.setBooleanProperty("success", true);
 			amqMessage.setStringProperty("type", message.type());
 			String ss = message.get("ss").orElse(String.class, null);
 			if (ss != null) amqMessage.setStringProperty("ss", ss);
