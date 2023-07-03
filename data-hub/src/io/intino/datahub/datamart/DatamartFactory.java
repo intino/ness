@@ -91,8 +91,6 @@ public class DatamartFactory {
 		while (iterator.hasNext()) {
 			Event event = iterator.next();
 
-//			createSnapshotIfNecessary(datamart, scale, firstDayOfWeek, event, oldTimetag);
-
 			if (entityTanks.contains(event.type()))
 				entityMounter.mount(event);
 

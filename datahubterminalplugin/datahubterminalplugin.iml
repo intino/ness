@@ -153,10 +153,6 @@
     <orderEntry type="library" name="Intino: io.intino:plugin-interface:2.4.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino:configuration:1.4.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:terminal-jms:5.4.3" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.6.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:2.0.4" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.sumus:chronos:1.1.1" level="project" />
   </component>
 </module>

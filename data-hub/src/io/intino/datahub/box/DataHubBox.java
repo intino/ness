@@ -153,7 +153,7 @@ public class DataHubBox extends AbstractBox {
 	private List<File> listFiles(File directory, String extension, String id) {
 		if (!directory.exists()) return Collections.emptyList();
 		Collection<File> files = FileUtils.listFiles(directory, new String[]{extension, extension.substring(extension.indexOf('.') + 1)}, true);
-		if (id != null) return files.stream().filter(f -> f.getName().equals(id + extension)).toList();
+		if (id != null && !id.isEmpty()) return files.stream().filter(f -> f.getName().equals(id + extension)).toList();
 		return files instanceof List<File> list ? list : new ArrayList<>(files);
 	}
 
