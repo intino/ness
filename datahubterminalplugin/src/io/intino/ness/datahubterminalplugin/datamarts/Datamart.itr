@@ -646,7 +646,7 @@ def trigger(timelinesByIdMethod)
 	private String$[$] listTimelineFilesOf(String id) {
 		try {
 			ActiveMQTextMessage request = new ActiveMQTextMessage();
-			request.setText("datamart=" + name() + ";operation=list-timelines;id=" + id);
+			request.setText("datamart=" + name() + ";operation=list-timelines;" + (id == null ? "" : "id=" + id));
 			javax.jms.Message message = requestResponseFromDatahub("list-timelines=" + id, request);
 			if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
 			return ((javax.jms.TextMessage)message).getText().split(",");
@@ -682,7 +682,7 @@ def trigger(reelsByIdMethod)
 	private String$[$] listReelFilesOf(String id) {
 		try {
 			ActiveMQTextMessage request = new ActiveMQTextMessage();
-			request.setText("datamart=" + name() + ";operation=list-reels;id=" + id);
+			request.setText("datamart=" + name() + ";operation=list-reels;" + (id == null ? "" : "id=" + id));
 			javax.jms.Message message = requestResponseFromDatahub("list-reels=" + id, request);
 			if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
 			return ((javax.jms.TextMessage)message).getText().split(",");
@@ -748,9 +748,12 @@ end
 def type(timeline) trigger(getterSignature)
 	default TimelineNode $name+firstLowerCase~Timeline($package.entities.$entity+firstUpperCase entity) {return $name+firstLowerCase~Timeline(entity.id());}
 	TimelineNode $name+firstLowerCase~Timeline(String id);
+	Stream<TimelineNode> $name+firstLowerCase~Timelines();
 end
 
 def type(reel) trigger(getterSignature)
 	default ReelNode $name+firstLowerCase~Reel($package.entities.$entity+firstUpperCase entity) {return $name+firstLowerCase~Reel(entity.id());}
 	ReelNode $name+firstLowerCase~Reel(String id);
+	Stream<ReelNode> $name+firstLowerCase~Reels();
 end
+
