@@ -128,7 +128,7 @@ public class TerminalPublisher {
 		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().messageTanks().stream().map(this::eventQn).collect(Collectors.toList()) : new ArrayList<>();
 		if (terminal.subscribe() != null)
 			subscribe.addAll(terminal.subscribe().measurementTanks().stream().map(this::eventQn).toList());
-		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses(), terminal.datamarts().autoLoad());
+		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses(), terminal.datamarts() != null && terminal.datamarts().autoLoad());
 		try {
 			Files.write(new File(srcDirectory, "terminal.mf").toPath(), new Gson().toJson(manifest).getBytes());
 		} catch (IOException e) {
