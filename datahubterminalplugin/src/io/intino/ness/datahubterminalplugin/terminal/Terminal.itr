@@ -30,7 +30,7 @@ def type(terminal)
 		public static String$[] subscriptionChannels = new String$[]{$subscribe+channel};
 		private final io.intino.alexandria.terminal.Connector connector;
 		private final java.util.Set<java.util.function.BiConsumer> datamartConsumers = new java.util.HashSet<>();
-		private final DatamartsRetryConfig datamartsRetryConfig;
+		[$datamart+retryconfigField]
 		private String sourceSelector;
 		private final java.util.Map<java.util.function.BiConsumer<?, String>, List<java.util.function.Consumer<io.intino.alexandria.event.Event>>> consumers = new java.util.HashMap<>();
 		[$datamart+declaration...[$NL]]
@@ -252,6 +252,10 @@ def type(terminal)
 
 		[$datamart+retryConfigClass]
 	}
+end
+
+def trigger(retryConfigField)
+	private final DatamartsRetryConfig datamartsRetryConfig;
 end
 
 def trigger(retryConfigClass)
