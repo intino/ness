@@ -168,12 +168,13 @@ public class DataHubBox extends AbstractBox {
 		loadBrokerService();
 		if (graph.datalake() != null) this.datalake = new FileDatalake(datalakeDirectory());
 		sentinels = new Sentinels(this);
+		if (graph.broker() != null) {
+			brokerService = graph.broker().implementation().get();
+			this.brokerSessions = new BrokerSessions(brokerStage(), stageDirectory());
+		}
 		new SealAction(this).execute();
 		if (graph.datamartList() != null && !graph.datamartList().isEmpty()) initMasterDatamarts();
-		if (graph.broker() != null) {
-			startBroker();
-			nessService = new NessService(this);
-		}
+		if (graph.broker() != null) startBroker();
 	}
 
 	private File datalakeDirectory() {
@@ -207,10 +208,9 @@ public class DataHubBox extends AbstractBox {
 	}
 
 	private void startBroker() {
-		brokerService = graph.broker().implementation().get();
-		this.brokerSessions = new BrokerSessions(brokerStage(), stageDirectory());
 		try {
 			brokerService.start();
+			nessService = new NessService(this);
 		} catch (Exception e) {
 			Logger.error(e);
 		}
