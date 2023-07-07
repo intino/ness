@@ -116,11 +116,11 @@ class JmsMessageSerializer {
 		@Override
 		protected File destination(Message message) {
 			MessageEvent event = new MessageEvent(message);
-			String fingerprint = Fingerprint.of(tank.qn(), sensorParameterOrElse(event.ss()), timetag(event.ts()), Format.Measurement).name();
+			String fingerprint = Fingerprint.of(tank.qn(), sensorParameter(event.ss()), timetag(event.ts()), Format.Measurement).name();
 			return new File(stage, fingerprint + Session.SessionExtension);
 		}
 
-		private String sensorParameterOrElse(String ss) {
+		private String sensorParameter(String ss) {
 			if (ss.contains("?")) {
 				try {
 					Map<String, String> map = Arrays.stream(ss.substring(ss.indexOf("?") + 1).split(";"))

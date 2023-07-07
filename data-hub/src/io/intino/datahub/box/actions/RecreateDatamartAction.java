@@ -38,7 +38,7 @@ public class RecreateDatamartAction {
 		if (datamart == null) return "Datamart " + datamartName + " not found";
 		executeAsync(() -> {
 			recreate(datamart);
-			notifySubscribers(datamart.name$());
+			new Thread(() -> notifySubscribers(datamart.name$())).start();
 		});
 		return "Recreation of datamart " + datamartName + " launched. Check log for more info.";
 	}
