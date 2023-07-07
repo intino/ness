@@ -25,7 +25,7 @@ public class SealAction {
 	public String execute() {
 		synchronized (monitor) {
 			try {
-				box.brokerSessions().push();
+				if (box.brokerSessions() != null) box.brokerSessions().push();
 				box.lastSeal(Instant.now());
 				cleanStage();
 				box.sessionSealer().seal();
