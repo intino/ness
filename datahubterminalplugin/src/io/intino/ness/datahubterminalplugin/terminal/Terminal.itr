@@ -335,7 +335,7 @@ def type(datamart) trigger(addDatamartSubscribers)
 			var temporal = new $package.$name+FirstUpperCase~DatamartImpl(connector, datamartsRetryConfig);
 			temporal.init(this.sourceSelector);
 			this.datamart = temporal;
-			addDatamartEventSubscribers(this.sourceSelector, ts -> ts.isAfter(temporal.ts()));
+			new Thread(() -> addDatamartEventSubscribers(this.sourceSelector, ts -> ts.isAfter(temporal.ts()))).start();
 		}
 	}
 end

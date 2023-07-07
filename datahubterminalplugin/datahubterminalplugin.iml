@@ -55,7 +55,6 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.3" level="project" />
     <orderEntry type="library" name="Intino: io.intino.sumus:chronos:1.1.1" level="project" />
-    <orderEntry type="module" module-name="data-hub" />
     <orderEntry type="library" name="Intino: com.sparkjava:spark-core:2.9.3" level="project" />
     <orderEntry type="library" name="Intino: commons-codec:commons-codec:1.10" level="project" />
     <orderEntry type="library" name="Intino: org.bouncycastle:bcmail-jdk15:1.45" level="project" />
@@ -140,7 +139,6 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:rest-accessor:3.1.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.icod:standalone:1.1.0" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-client:5.18.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino:data-hub:9.5.19" level="project" />
     <orderEntry type="library" name="Intino: commons-io:commons-io:2.13.0" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-broker:5.18.2" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-openwire-legacy:5.18.2" level="project" />
@@ -159,6 +157,5 @@
     <orderEntry type="library" name="Intino: org.springframework:spring-context:5.3.27" level="project" />
     <orderEntry type="library" name="Intino: org.springframework:spring-aop:5.3.27" level="project" />
     <orderEntry type="library" name="Intino: org.springframework:spring-expression:5.3.27" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:2.0.4" level="project" />
   </component>
 </module>
