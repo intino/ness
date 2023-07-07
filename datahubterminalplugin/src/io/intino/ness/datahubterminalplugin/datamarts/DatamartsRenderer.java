@@ -237,7 +237,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	private Frame timelineFrame(Timeline timeline) {
 		FrameBuilder b = new FrameBuilder("timeline");
 		b.add("package", modelPackage);
-		b.add("name", firstUpperCase(timeline.name$()));
+		b.add("name", timeline.tank().sensor().name$());
 		b.add("sources", sourcesOf(timeline));
 		b.add("entity", firstUpperCase(timeline.entity().name$()));
 		return b.toFrame();
