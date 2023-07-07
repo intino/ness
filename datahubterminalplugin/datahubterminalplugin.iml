@@ -157,5 +157,13 @@
     <orderEntry type="library" name="Intino: org.springframework:spring-context:5.3.27" level="project" />
     <orderEntry type="library" name="Intino: org.springframework:spring-aop:5.3.27" level="project" />
     <orderEntry type="library" name="Intino: org.springframework:spring-expression:5.3.27" level="project" />
+    <orderEntry type="library" name="Intino: io.intino:data-hub:9.5.21" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver:1.0.1" level="project" />
+    <orderEntry type="library" name="Intino: com.jcraft:jsch:0.1.55" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
+    <orderEntry type="library" name="Intino: net.rforge:Rserve:0.6-8.1" level="project" />
+    <orderEntry type="library" name="Intino: net.rforge:REngine:0.6-8.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:2.0.4" level="project" />
   </component>
 </module>
