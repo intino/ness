@@ -26,15 +26,11 @@ public class Sentinels {
 	public Sentinels(DataHubBox box) {
 		this.scheduler = new AlexandriaScheduler();
 		try {
-			if (box.graph().datalake() != null && box.graph().datalake().seal() != null) {
-				addSealingSentinel(box);
-			}
-			if (box.graph().datalake() != null && box.graph().datalake().backup() != null) {
+			if (box.graph().datalake() != null && box.graph().datalake().seal() != null) addSealingSentinel(box);
+			if (box.graph().datalake() != null && box.graph().datalake().backup() != null)
 				addDatalakeBackupSentinel(box);
-			}
-			if (box.graph().datamartList() != null && !box.graph().datamartList().isEmpty()) {
+			if (box.graph().datamartList() != null && !box.graph().datamartList().isEmpty())
 				addDatamartsSnapshotSentinel(box);
-			}
 			scheduler.startSchedules();
 		} catch (Exception e) {
 			Logger.error(e.getMessage());
@@ -60,7 +56,7 @@ public class Sentinels {
 		job.getJobDataMap().put("box", box);
 		Datalake.Seal.Cron cron = box.graph().datalake().seal().cron();
 		String zoneId = cron.timeZone();
-		scheduler.scheduleJob(job, newSet(newTrigger().withIdentity("DataHub#Sealing").withSchedule(cronSchedule(cron.pattern()).inTimeZone(zoneId == null ? TimeZone.getDefault() : TimeZone.getTimeZone(ZoneId.of(zoneId)))).build(), newTrigger().startNow().build()), true);
+		scheduler.scheduleJob(job, newSet(newTrigger().withIdentity("DataHub#Sealing").withSchedule(cronSchedule(cron.pattern()).inTimeZone(zoneId == null ? TimeZone.getDefault() : TimeZone.getTimeZone(ZoneId.of(zoneId)))).build()), true);
 	}
 
 	public void stop() {
