@@ -126,7 +126,7 @@ public class JmsMessageSerializer {
 					Map<String, String> map = Arrays.stream(ss.substring(ss.indexOf("?") + 1).split(";"))
 							.map(p -> p.split("="))
 							.collect(toMap(f -> f[0], f -> f[1]));
-					map.getOrDefault("sensor", withOutParameters(ss));
+					return map.getOrDefault("sensor", withOutParameters(ss));
 				} catch (Exception e) {
 					Logger.error(e);
 				}
