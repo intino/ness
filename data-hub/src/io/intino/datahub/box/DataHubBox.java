@@ -171,7 +171,7 @@ public class DataHubBox extends AbstractBox {
 		new SealAction(this).execute();
 		if (graph.datamartList() != null && !graph.datamartList().isEmpty()) initMasterDatamarts();
 		if (graph.broker() != null) {
-			configureBroker();
+			startBroker();
 			nessService = new NessService(this);
 		}
 	}
@@ -206,7 +206,7 @@ public class DataHubBox extends AbstractBox {
 		return new SSLConfiguration(new File(configuration.keystorePath()), new File(configuration.truststorePath()), configuration.keystorePassword().toCharArray(), configuration.truststorePassword().toCharArray());
 	}
 
-	private void configureBroker() {
+	private void startBroker() {
 		brokerService = graph.broker().implementation().get();
 		this.brokerSessions = new BrokerSessions(brokerStage(), stageDirectory());
 		try {
