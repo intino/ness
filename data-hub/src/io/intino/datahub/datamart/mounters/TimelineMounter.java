@@ -58,7 +58,9 @@ public final class TimelineMounter extends MasterDatamartMounter {
 		try {
 			if (event.ss() == null) return;
 			Map<String, String> parameters = parameters(event.ss());
-			String ss = withOutParameters(event.ss()) + (parameters.isEmpty() ? "" : "." + parameters.get("sensor"));
+			String sensor = parameters.get("sensor");
+			String cleanSS = withOutParameters(event.ss());
+			String ss = sensor == null ? cleanSS : sensor;
 			TimelineFile timelineFile = datamart.timelineStore().get(event.type(), ss);
 			if (timelineFile == null) timelineFile = createTimelineFile(event, ss);
 			update(timelineFile, event);
