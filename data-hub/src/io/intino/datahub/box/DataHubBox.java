@@ -5,6 +5,7 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.sealing.FileSessionSealer;
 import io.intino.alexandria.sealing.SessionSealer;
 import io.intino.alexandria.ui.services.AuthService;
+import io.intino.datahub.box.actions.SealAction;
 import io.intino.datahub.box.service.jms.NessService;
 import io.intino.datahub.box.service.scheduling.Sentinels;
 import io.intino.datahub.broker.BrokerService;
@@ -166,12 +167,13 @@ public class DataHubBox extends AbstractBox {
 		stageDirectory().mkdirs();
 		loadBrokerService();
 		if (graph.datalake() != null) this.datalake = new FileDatalake(datalakeDirectory());
+		sentinels = new Sentinels(this);
+		new SealAction(this).execute();
 		if (graph.datamartList() != null && !graph.datamartList().isEmpty()) initMasterDatamarts();
 		if (graph.broker() != null) {
-			configureBroker();
+			startBroker();
 			nessService = new NessService(this);
 		}
-		sentinels = new Sentinels(this);
 	}
 
 	private File datalakeDirectory() {
@@ -204,7 +206,7 @@ public class DataHubBox extends AbstractBox {
 		return new SSLConfiguration(new File(configuration.keystorePath()), new File(configuration.truststorePath()), configuration.keystorePassword().toCharArray(), configuration.truststorePassword().toCharArray());
 	}
 
-	private void configureBroker() {
+	private void startBroker() {
 		brokerService = graph.broker().implementation().get();
 		this.brokerSessions = new BrokerSessions(brokerStage(), stageDirectory());
 		try {
