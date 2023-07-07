@@ -45,7 +45,7 @@ public class RecreateDatamartAction {
 
 	private void notifySubscribers(String dm) {
 		TopicProducer topicProducer = box.brokerService().manager().topicProducerOf("service.ness.datamarts");
-		topicProducer.produce(toJmsMessage("{\"operation\":\"reload\",datamart:\"" + dm + "\""));
+		topicProducer.produce(toJmsMessage("{\"operation\":\"reload\", datamart:\"" + dm + "\"}"));
 		topicProducer.close();
 	}
 
