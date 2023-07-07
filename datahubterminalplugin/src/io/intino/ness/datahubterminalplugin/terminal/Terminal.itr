@@ -318,7 +318,7 @@ end
 def type(datamart) trigger(addDatamartSubscribers)
 	private void addDatamartSubscribers(String sourceSelector) {
 		addDatamartEventSubscribers(sourceSelector,  ts -> ts.isAfter(datamart.ts()));
-		connector.attachListener("service.ness.datamarts", null, (m, c) -> manageDatamartMessage(m));
+		connector.attachListener("service.ness.datamarts", null, (m, c) -> new Thread(() -> manageDatamartMessage(m)).start());
 	}
 
 	private void addDatamartEventSubscribers(String sourceSelector, java.util.function.Predicate<Instant> predicate) {
@@ -327,15 +327,19 @@ def type(datamart) trigger(addDatamartSubscribers)
 		[$devent+addSubscribe...[$NL]]
 	}
 
-	private void manageDatamartMessage(String message) {
-		JsonObject jsonObject = Json.fromJson(message, JsonObject.class);
-		String operation = jsonObject.getAsJsonPrimitive("operation").getAsString();
-		if (operation.equals("reload")) {
-			this.datamartConsumers.forEach(c-> consumers.get(c).forEach(connector::detachListeners));
-			var temporal = new $package.$name+FirstUpperCase~DatamartImpl(connector, datamartsRetryConfig);
-			temporal.init(this.sourceSelector);
-			this.datamart = temporal;
-			new Thread(() -> addDatamartEventSubscribers(this.sourceSelector, ts -> ts.isAfter(temporal.ts()))).start();
+	private final Object monitor = new Object();
+
+	private synchronized void manageDatamartMessage(String message) {
+		synchronized(monitor) {
+			JsonObject jsonObject = Json.fromJson(message, JsonObject.class);
+			String operation = jsonObject.getAsJsonPrimitive("operation").getAsString();
+			if (operation.equals("reload")) {
+				this.datamartConsumers.forEach(c-> consumers.get(c).forEach(connector::detachListeners));
+				var temporal = new $package.$name+FirstUpperCase~DatamartImpl(connector, datamartsRetryConfig);
+				temporal.init(this.sourceSelector);
+				this.datamart = temporal;
+				addDatamartEventSubscribers(this.sourceSelector, ts -> ts.isAfter(temporal.ts()));
+			}
 		}
 	}
 end
