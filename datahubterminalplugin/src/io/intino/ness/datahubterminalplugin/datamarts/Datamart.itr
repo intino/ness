@@ -363,8 +363,24 @@ def type(datamart & message & impl)
 
 		[$hasTimelines~private void mountTimelines(Event event) {
 			if(timelines.isEmpty() || !TIMELINE_EVENTS.contains(event.type())) return;
-			timelines.values().forEach(timeline -> timeline.notifyEvent(event));
+			TimelineNodeImpl node = timelines.get(sensorParameter(event.ss()) + ":" + event.type());
+			if (node != null) node.notifyEvent(event);
 		}]
+
+		private static String sensorParameter(String ss) {
+			if (ss.contains("?")) {
+				try {
+					Map<String, String> map = Arrays.stream(ss.substring(ss.indexOf("?") + 1).split(";"))
+							.map(p -> p.split("="))
+							.collect(Collectors.toMap(f -> f$[0], f -> f$[1]));
+					if (map.containsKey("sensor")) return map.get("sensor");
+					else ss.substring(0, ss.indexOf("?"));
+				} catch (Exception e) {
+					Logger.error(e);
+				}
+			}
+			return ss;
+		}
 
 		private void mountEntities(Event event) {
 			try {

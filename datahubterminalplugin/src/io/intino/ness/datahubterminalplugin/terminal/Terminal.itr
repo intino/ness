@@ -334,7 +334,7 @@ def type(datamart) trigger(addDatamartSubscribers)
 			JsonObject jsonObject = Json.fromJson(message, JsonObject.class);
 			String operation = jsonObject.getAsJsonPrimitive("operation").getAsString();
 			if (operation.equals("reload")) {
-				this.datamartConsumers.forEach(c-> consumers.get(c).forEach(connector::detachListeners));
+				this.datamartConsumers.forEach(c -> consumers.get(c).forEach(connector::detachListeners));
 				var temporal = new $package.$name+FirstUpperCase~DatamartImpl(connector, datamartsRetryConfig);
 				temporal.init(this.sourceSelector);
 				this.datamart = temporal;
