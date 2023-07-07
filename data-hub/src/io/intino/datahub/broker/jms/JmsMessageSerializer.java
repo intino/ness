@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -26,6 +27,7 @@ import java.util.function.Consumer;
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.time.ZoneOffset.UTC;
+import static java.util.stream.Collectors.toMap;
 
 @SuppressWarnings("unchecked")
 class JmsMessageSerializer {
@@ -114,8 +116,22 @@ class JmsMessageSerializer {
 		@Override
 		protected File destination(Message message) {
 			MessageEvent event = new MessageEvent(message);
-			String fingerprint = Fingerprint.of(tank.qn(), withOutParameters(event.ss()), timetag(event.ts()), Format.Measurement).name();
+			String fingerprint = Fingerprint.of(tank.qn(), sensorParameter(event.ss()), timetag(event.ts()), Format.Measurement).name();
 			return new File(stage, fingerprint + Session.SessionExtension);
+		}
+
+		private String sensorParameter(String ss) {
+			if (ss.contains("?")) {
+				try {
+					Map<String, String> map = Arrays.stream(ss.substring(ss.indexOf("?") + 1).split(";"))
+							.map(p -> p.split("="))
+							.collect(toMap(f -> f[1], f -> f[2]));
+					map.getOrDefault("sensor", withOutParameters(ss));
+				} catch (Exception e) {
+					Logger.error(e);
+				}
+			}
+			return withOutParameters(ss);
 		}
 	}
 
