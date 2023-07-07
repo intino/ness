@@ -30,7 +30,7 @@ import static java.time.ZoneOffset.UTC;
 import static java.util.stream.Collectors.toMap;
 
 @SuppressWarnings("unchecked")
-class JmsMessageSerializer {
+public class JmsMessageSerializer {
 	private final File stage;
 	private final Datalake.Tank tank;
 	private final Scale scale;
@@ -120,12 +120,12 @@ class JmsMessageSerializer {
 			return new File(stage, fingerprint + Session.SessionExtension);
 		}
 
-		private String sensorParameter(String ss) {
+		private static String sensorParameter(String ss) {
 			if (ss.contains("?")) {
 				try {
 					Map<String, String> map = Arrays.stream(ss.substring(ss.indexOf("?") + 1).split(";"))
 							.map(p -> p.split("="))
-							.collect(toMap(f -> f[1], f -> f[2]));
+							.collect(toMap(f -> f[0], f -> f[1]));
 					map.getOrDefault("sensor", withOutParameters(ss));
 				} catch (Exception e) {
 					Logger.error(e);
@@ -172,7 +172,7 @@ class JmsMessageSerializer {
 		}
 	}
 
-	private String withOutParameters(String ss) {
+	private static String withOutParameters(String ss) {
 		return ss.contains("?") ? ss.substring(0, ss.indexOf("?")) : ss;
 	}
 
