@@ -37,6 +37,7 @@ public class RecreateDatamartAction {
 		Datamart datamart = box.graph().datamartList(d -> d.name$().equals(datamartName)).findFirst().orElse(null);
 		if (datamart == null) return "Datamart " + datamartName + " not found";
 		executeAsync(() -> {
+			new SealAction(box).execute();
 			recreate(datamart);
 			new Thread(() -> notifySubscribers(datamart.name$())).start();
 		});
@@ -50,6 +51,7 @@ public class RecreateDatamartAction {
 	}
 
 	private void recreateAll() {
+		new SealAction(box).execute();
 		List<Datamart> datamartList = box.graph().datamartList();
 		for (int i = 0; i < datamartList.size(); i++) {
 			Datamart datamart = datamartList.get(i);
