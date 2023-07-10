@@ -57,10 +57,7 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	public void mount(MeasurementEvent event) {
 		try {
 			if (event.ss() == null) return;
-			Map<String, String> parameters = parameters(event.ss());
-			String sensor = parameters.get("sensor");
-			String cleanSS = withOutParameters(event.ss());
-			String ss = sensor == null ? cleanSS : sensor;
+			String ss = sourceSensor(event);
 			TimelineFile timelineFile = datamart.timelineStore().get(event.type(), ss);
 			if (timelineFile == null) timelineFile = createTimelineFile(event, ss);
 			update(timelineFile, event);
@@ -123,13 +120,13 @@ public final class TimelineMounter extends MasterDatamartMounter {
 		datamart.definition().timelineList().stream()
 				.filter(t -> t.entity().from().message().name$().equals(assertion.type()))
 				.findFirst()
-				.ifPresent(t -> updatedSensorModel(assertion, t));
+				.ifPresent(t -> updateSensorModel(assertion, t));
 	}
 
-	private void updatedSensorModel(MessageEvent assertion, Timeline t) {
+	private void updateSensorModel(MessageEvent assertion, Timeline t) {
 		try {
-			File file = new File(box().datamartTimelinesDirectory(datamart.name()) + TIMELINE_EXTENSION);
-			File tlFile = new File(file, assertion.ss());
+			File timelineDirectory = new File(box().datamartTimelinesDirectory(datamart.name()), t.tank().sensor().name$());
+			File tlFile = new File(timelineDirectory, assertion.toMessage().get("id").asString() + TIMELINE_EXTENSION);
 			if (!tlFile.exists()) return;
 			TimelineFile timelineFile = TimelineFile.open(tlFile);
 			timelineFile.sensorModel(sensorModel(assertion.toMessage(), t));
@@ -152,6 +149,13 @@ public final class TimelineMounter extends MasterDatamartMounter {
 			if (value != null) attrs.put(a.name$(), value);
 		});
 		return attrs;
+	}
+
+	private String sourceSensor(Event event) {
+		Map<String, String> parameters = parameters(event.ss());
+		String sensor = parameters.get("sensor");
+		String cleanSS = withOutParameters(event.ss());
+		return sensor == null ? cleanSS : sensor;
 	}
 
 	private String valueOf(Message message, Entity.Attribute source) {
