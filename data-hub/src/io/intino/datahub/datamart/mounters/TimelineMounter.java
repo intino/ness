@@ -120,17 +120,22 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	}
 
 	private void mountAssertion(MessageEvent assertion) {
-		datamart.definition().timelineList().stream().filter(t -> t.entity().name$().equals(assertion.type())).findFirst().ifPresent(t -> {
-			try {
-				File file = new File(box().datamartTimelinesDirectory(datamart.name()) + TIMELINE_EXTENSION);
-				File tlFile = new File(file, assertion.ss());
-				if (!tlFile.exists()) return;
-				TimelineFile timelineFile = TimelineFile.open(tlFile);
-				timelineFile.sensorModel(sensorModel(assertion.toMessage(), t));
-			} catch (IOException e) {
-				Logger.error(e);
-			}
-		});
+		datamart.definition().timelineList().stream()
+				.filter(t -> t.entity().from().message().name$().equals(assertion.type()))
+				.findFirst()
+				.ifPresent(t -> updatedSensorModel(assertion, t));
+	}
+
+	private void updatedSensorModel(MessageEvent assertion, Timeline t) {
+		try {
+			File file = new File(box().datamartTimelinesDirectory(datamart.name()) + TIMELINE_EXTENSION);
+			File tlFile = new File(file, assertion.ss());
+			if (!tlFile.exists()) return;
+			TimelineFile timelineFile = TimelineFile.open(tlFile);
+			timelineFile.sensorModel(sensorModel(assertion.toMessage(), t));
+		} catch (IOException e) {
+			Logger.error(e);
+		}
 	}
 
 	private Magnitude[] sensorModel(Message message, Timeline timeline) {
