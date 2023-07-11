@@ -34,7 +34,7 @@ def type(timelineNode & default) trigger(nodeImpl)
 
 
         public boolean exists() {
-        	return reelFile() != null;
+        	return timelineFile() != null;
         }
 
 		@Override
