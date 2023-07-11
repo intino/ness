@@ -102,8 +102,8 @@ public class DatamartsRequest {
 			Logger.error(message);
 			return errorMessage(message);
 		}
-		File file = new File(dir, id + extension);
-		if (!file.exists()) return errorMessage("Reel File not found");
+		File file = new File(dir, type + File.separator + id + extension);
+		if (!file.exists()) return errorMessage(extension + " file not found");
 		String mode = args.getOrDefault("mode", "download");
 		return mode.equals("path") ? path(file) : download(file);
 	}
