@@ -1,7 +1,6 @@
 package io.intino.ness.datahubterminalplugin.datamarts;
 
 import io.intino.Configuration;
-import io.intino.datahub.model.*;
 import io.intino.datahub.model.rules.SnapshotScale;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
@@ -9,6 +8,7 @@ import io.intino.itrules.RuleSet;
 import io.intino.itrules.Template;
 import io.intino.ness.datahubterminalplugin.Formatters;
 import io.intino.ness.datahubterminalplugin.util.ErrorUtils;
+import io.intino.ness.master.Datamart;
 import io.intino.plugin.PluginLauncher;
 
 import java.io.*;
@@ -205,7 +205,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	private Frame reelFrame(Reel reel) {
 		FrameBuilder b = new FrameBuilder("reel");
 		b.add("package", modelPackage);
-		b.add("name", firstUpperCase(reel.name$()));
+		b.add("name", reel.tank().message().name$());
 		b.add("sources", sourcesOf(reel));
 		b.add("entity", firstUpperCase(reel.entity().name$()));
 		return b.toFrame();
