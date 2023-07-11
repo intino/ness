@@ -32,6 +32,11 @@ def type(timelineNode & default) trigger(nodeImpl)
 			return type;
 		}
 
+
+        public boolean exists() {
+        	return reelFile() != null;
+        }
+
 		@Override
 		public void dispose() {
 			synchronized(this) {
