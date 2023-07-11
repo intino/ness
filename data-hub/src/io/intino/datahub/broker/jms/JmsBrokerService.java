@@ -6,6 +6,7 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.model.Broker;
+import io.intino.datahub.model.Broker.CompositeDestination.Type;
 import io.intino.datahub.model.Datalake;
 import io.intino.datahub.model.NessGraph;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -13,12 +14,19 @@ import org.apache.activemq.ActiveMQSession;
 import org.apache.activemq.broker.BrokerPlugin;
 import org.apache.activemq.broker.SslContext;
 import org.apache.activemq.broker.TransportConnector;
+import org.apache.activemq.broker.region.CompositeDestinationInterceptor;
+import org.apache.activemq.broker.region.DestinationInterceptor;
 import org.apache.activemq.broker.region.policy.ConstantPendingMessageLimitStrategy;
 import org.apache.activemq.broker.region.policy.PolicyEntry;
 import org.apache.activemq.broker.region.policy.PolicyMap;
+import org.apache.activemq.broker.region.virtual.CompositeDestination;
+import org.apache.activemq.broker.region.virtual.CompositeQueue;
+import org.apache.activemq.broker.region.virtual.CompositeTopic;
 import org.apache.activemq.broker.region.virtual.VirtualDestinationInterceptor;
 import org.apache.activemq.broker.util.TimeStampingBrokerPlugin;
+import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.activemq.command.ActiveMQTextMessage;
+import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.activemq.network.jms.InboundTopicBridge;
 import org.apache.activemq.network.jms.SimpleJmsTopicConnector;
 import org.apache.activemq.plugin.java.JavaRuntimeConfigurationPlugin;
@@ -123,6 +131,13 @@ public class JmsBrokerService implements BrokerService {
 			service.setUseShutdownHook(true);
 			service.setAdvisorySupport(true);
 			service.setPlugins(new BrokerPlugin[]{new SimpleAuthenticationPlugin(registerUsers()), new JavaRuntimeConfigurationPlugin(), new TimeStampingBrokerPlugin()});
+			List<CompositeDestinationInterceptor> destinationInterceptors = new ArrayList<>();
+			for (Broker.CompositeDestination o : box.graph().broker().compositeDestinationList()) {
+				CompositeDestination composite = o.type().equals(Type.Topic) ? new CompositeTopic() : new CompositeQueue();
+				composite.setForwardTo(o.forwardTo().stream().map(f -> o.type().equals(Type.Topic) ? new ActiveMQTopic(f) : new ActiveMQQueue(f)).toList());
+				destinationInterceptors.add(new CompositeDestinationInterceptor(new DestinationInterceptor[]{composite}));
+			}
+			service.setDestinationInterceptors(destinationInterceptors.toArray(DestinationInterceptor[]::new));
 			addPolicies();
 			if (sslConfiguration != null) addSSLConnector();
 			else {

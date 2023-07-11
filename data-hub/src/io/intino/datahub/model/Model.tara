@@ -7,6 +7,10 @@ Concept:{0..1} Broker
 	var integer port = empty
 	var integer secondaryPort = empty
 	var object:{BrokerImplementation} implementation = empty
+	Concept CompositeDestination
+		var word:{Topic Queue} type
+		var string name
+		var string[] forwardTo
 	Concept User
 		var string name
 		var string password
