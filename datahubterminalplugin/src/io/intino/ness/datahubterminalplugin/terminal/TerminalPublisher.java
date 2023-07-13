@@ -126,8 +126,11 @@ public class TerminalPublisher {
 		if (terminal.publish() != null)
 			publish.addAll(terminal.publish().measurementTanks().stream().map(this::eventQn).toList());
 		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().messageTanks().stream().map(this::eventQn).collect(Collectors.toList()) : new ArrayList<>();
-		if (terminal.subscribe() != null)
+		if (terminal.subscribe() != null) {
 			subscribe.addAll(terminal.subscribe().measurementTanks().stream().map(this::eventQn).toList());
+			subscribe.addAll(terminal.subscribe().resourceTanks().stream().map(this::eventQn).toList());
+
+		}
 		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses(), terminal.datamarts() != null && terminal.datamarts().autoLoad());
 		try {
 			Files.write(new File(srcDirectory, "terminal.mf").toPath(), new Gson().toJson(manifest).getBytes());
@@ -145,10 +148,12 @@ public class TerminalPublisher {
 		if (terminal.publish() != null) {
 			terminal.publish().messageTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".messages." + eventQn(t)));
 			terminal.publish().measurementTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".measurements." + eventQn(t)));
+			terminal.publish().resourceTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".resources." + eventQn(t)));
 		}
 		if (terminal.subscribe() != null) {
 			terminal.subscribe().messageTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".messages." + eventQn(t)));
 			terminal.subscribe().measurementTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".measurements." + eventQn(t)));
+			terminal.publish().resourceTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".resources." + eventQn(t)));
 		}
 		if (terminal.bpm() != null)
 			tankClasses.put(terminal.bpm().processStatusClass().substring(terminal.bpm().processStatusClass().lastIndexOf(".") + 1), terminal.bpm().processStatusClass());
@@ -157,6 +162,10 @@ public class TerminalPublisher {
 
 	private String eventQn(Tank.Message tank) {
 		return namespace(tank.message()) + tank.message().name$();
+	}
+
+	private String eventQn(Tank.Resource tank) {
+		return namespace(tank.resourceEvent()) + tank.resourceEvent().name$();
 	}
 
 	private String eventQn(Tank.Measurement tank) {
