@@ -268,7 +268,7 @@ class TerminalRenderer {
 		resourceTanks.add(tank);
 		String messagesPackage = resourcePackage(tank.resourceEvent());
 		String namespace = namespace(tank.resourceEvent());
-		return new FrameBuilder("measurement").
+		return new FrameBuilder("resource").
 				add("type", messagesPackage + "." + firstUpperCase(tank.resourceEvent().name$())).
 				add("message", tank.resourceEvent().name$()).
 				add("typeName", tank.resourceEvent().name$()).

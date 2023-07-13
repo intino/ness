@@ -248,6 +248,7 @@ def type(terminal)
 
 		$message+interface...[$NL$NL]
 		$measurement+interface...[$NL$NL]
+		$resource+interface...[$NL$NL]
 		$processstatus+interface...[$NL$NL]
 
 		[$datamart+retryConfigClass]
@@ -471,17 +472,17 @@ end
 
 def type(resource) trigger(subscribe)
 	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId) {
-		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type((ResourceEvent) event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
+		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type((io.intino.alexandria.event.resource.ResourceEvent) event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
 		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0));
 	}
 
 	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId, java.util.function.Predicate<Instant> filter) {
-		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type((ResourceEvent) event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
+		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type((io.intino.alexandria.event.resource.ResourceEvent) event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
 		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), filter);
 	}
 
 	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived) {
-		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type((ResourceEvent) event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
+		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type((io.intino.alexandria.event.resource.ResourceEvent) event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
 		connector.attachListener("$channel", consumers.get(onEventReceived).get(0));
 	}
 
