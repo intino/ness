@@ -69,7 +69,7 @@ class TerminalRenderer {
 	private void addSubscribe(FrameBuilder builder) {
 		terminal.subscribe().messageTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
 		terminal.subscribe().measurementTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
-//		terminal.subscribe().resourceTanks().forEach(tank -> builder.add("subscribe", frameOf(tank))); TODO
+		terminal.subscribe().resourceTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
 	}
 
 	private void addSubscribeForThedevents(FrameBuilder builder) {
@@ -116,7 +116,7 @@ class TerminalRenderer {
 	private void addPublish(FrameBuilder builder) {
 		terminal.publish().messageTanks().forEach(tank -> builder.add("publish", frameOf(tank)));
 		terminal.publish().measurementTanks().forEach(tank -> builder.add("publish", frameOf(tank)));
-//		terminal.publish().resourceTanks().forEach(tank -> builder.add("publish", frameOf(tank))); TODO
+		terminal.publish().resourceTanks().forEach(tank -> builder.add("publish", frameOf(tank))); // TODO resources
 	}
 
 	private void renderDatamarts(FrameBuilder builder) {
