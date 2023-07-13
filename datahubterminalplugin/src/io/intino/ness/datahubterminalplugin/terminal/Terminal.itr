@@ -350,6 +350,11 @@ def type(devent) trigger(addSubscribe)
 	subscribe(($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer) subscriber, connector.clientId() + "_$datamart_$message", predicate, sourceSelector);
 end
 
+def type(resource) trigger(publishSwitchCase)
+	case "$typename+FirstUpperCase": publish(($type) event); break;
+end
+
+
 def trigger(publishSwitchCase)
 	case "$typename+FirstUpperCase": publish((event instanceof $type e ? e : new $type(((io.intino.alexandria.event.message.MessageEvent) event).toMessage()))); break;
 end
