@@ -35,7 +35,7 @@ public class OntologyRenderer {
 	public boolean render() {
 		renderMessages();
 		renderMeasurements();
-		renderResources(); // TODO resources
+		renderResources();
 		renderDatamarts();
 		return true;
 	}
