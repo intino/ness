@@ -1,11 +1,13 @@
 package org.example.test;
 
 import io.intino.alexandria.core.Box;
+import io.intino.alexandria.event.measurement.MeasurementEvent;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.box.DataHubConfiguration;
 import io.intino.datahub.model.NessGraph;
 import io.intino.magritte.framework.Graph;
+import io.intino.magritte.framework.stores.FileSystemStore;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -16,7 +18,7 @@ public class Server {
 	private static final String[] stashes = {"Solution"};
 
 	public static void main(String[] args) throws IOException {
-		normalizeTimelineExtensions();
+//		normalizeTimelineExtensions();
 		DataHubConfiguration conf = new DataHubConfiguration(arguments());
 		NessGraph graph = new Graph().loadStashes(stashes).as(NessGraph.class);
 		loadUsers(conf.home(), graph);

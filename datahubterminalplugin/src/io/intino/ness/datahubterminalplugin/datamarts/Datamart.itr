@@ -299,11 +299,22 @@ def type(datamart & message & impl)
 			if (connector instanceof io.intino.alexandria.terminal.StubConnector) return;
 			Logger.debug("Downloading datamart from datahub...");
     		long start = java.lang.System.currentTimeMillis();
+
+    		Logger.debug("Downloading entities...");
     		int$[$] eventCount = new int$[1$];
     		loadEntitiesFromEvents(downloadEntities(eventCount, datamartSourceSelector), eventCount);
+
+    		[$hasTimelines~loadTimelinesFromDatahub();]
+
+    		[$hasReels~loadReelsFromDatahub();]
+
 			long time = java.lang.System.currentTimeMillis() - start;
 			Logger.debug("Datamart downloaded from datahub after " + time + " ms");
 		}
+
+		[$hasTimelines+loadTimelinesFromDatahubMethod]
+
+		[$hasReels+loadReelsFromDatahubMethod]
 
 		private Stream<Event> downloadEntities(int$[$] eventCount, String datamartSourceSelector) {
 			try {
@@ -341,13 +352,10 @@ def type(datamart & message & impl)
 		}
 
 		private void loadEntitiesFromEvents(Stream<Event> events, int$[$] eventCount) {
-			if(availableThreads() >= 4 && eventCount$[0$] > 1000)
-				events.parallel().forEach(this::mount);
-			else
-				events.forEach(this::mount);
+			events.forEach(this::mount);
 		}
 
-		public void mount(Event event) {
+		public synchronized void mount(Event event) {
 			if(event == null) return;
 			this.ts = event.ts();
 			mountEntities(event);
@@ -356,14 +364,23 @@ def type(datamart & message & impl)
 		}
 
 		[$hasReels~private void mountReels(Event event) {
-			if(reels.isEmpty() || !REEL_EVENTS.contains(event.type())) return;
+			if(!REEL_EVENTS.contains(event.type())) return;
+			String id = sensorParameter(event.ss());
+			String type = event.type();
+			String key = id + ":" + type;
+			if(!reels.containsKey(key)) {
+				ReelNodeImpl node = new ReelNodeImpl(id, type, sourcesOfReel(type), null);
+				reels.put(key, node);
+			}
 			reels.values().forEach(reel -> reel.notifyEvent(event));
 		}]
 
 		[$hasTimelines~private void mountTimelines(Event event) {
-			if(timelines.isEmpty() || !TIMELINE_EVENTS.contains(event.type())) return;
-			TimelineNodeImpl node = timelines.get(sensorParameter(event.ss()) + ":" + event.type());
-			if (node != null) node.notifyEvent(event);
+			if(!TIMELINE_EVENTS.contains(event.type())) return;
+			String id = sensorParameter(event.ss());
+			String type = event.type();
+			TimelineNodeImpl node = timelines.computeIfAbsent(id + ":" + type, k -> new TimelineNodeImpl(id, type, sourcesOfTimeline(type), null));
+			node.notifyEvent(event);
 		}]
 
 		private static String sensorParameter(String ss) {
@@ -637,87 +654,24 @@ def type(reel) trigger(getter)
 
 	@Override
 	public Stream<ReelNode> $name+FirstLowerCase~Reels() {
-		String$[$] files = listReelFilesOf(null, "$name");
-		return Arrays.stream(files)
-			.filter(f -> f != null && !f.isEmpty())
-			.map(this::reelNodeOf)
-			.filter(java.util.Objects::nonNull);
+		Stream stream = reels.values().stream().filter(r -> r.type.equals("$name")).toList().stream();
+		return stream;
 	}
 end
 
 def trigger(timelinesByIdMethod)
 	@Override
 	public Stream<TimelineNode> timelines(String id) {
-		String$[$] files = listTimelineFilesOf(id);
-		return (Stream<TimelineNode>) Arrays.stream(files)
-			.filter(f -> f != null && !f.isEmpty())
-			.<TimelineNode>map(f -> {
-				try {
-					File file = new File(f);
-                	String type = file.getParentFile().getName();
-                	TimelineNodeImpl node = timelines.get(id + ":" + type);
-                	if(node == null) {
-                		node = new TimelineNodeImpl(id, type, sourcesOfTimeline(type), file.exists() ? file : null);
-                		timelines.put(id + ":" + type, node);
-                	}
-                	return node;
-				} catch (Exception ignored) {
-					return null;
-				}
-			}).filter(java.util.Objects::nonNull);
-	}
-
-	private String$[$] listTimelineFilesOf(String id) {
-		try {
-			ActiveMQTextMessage request = new ActiveMQTextMessage();
-			request.setText("datamart=" + name() + ";operation=list-timelines;" + (id == null ? "" : "id=" + id));
-			javax.jms.Message message = requestResponseFromDatahub("list-timelines=" + id, request);
-			if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
-			return ((javax.jms.TextMessage)message).getText().split(",");
-		} catch (Exception e) {
-			Logger.error(e);
-			return new String$[0$];
-		}
+		Stream stream = timelines.values().stream().filter(t -> t.id.equals(id)).toList().stream();
+		return stream;
 	}
 end
 
 def trigger(reelsByIdMethod)
 	@Override
 	public Stream<ReelNode> reels(String id) {
-		String$[$] files = listReelFilesOf(id, null);
-		return (Stream<ReelNode>) Arrays.stream(files)
-			.filter(f -> f != null && !f.isEmpty())
-			.<ReelNode>map(this::reelNodeOf)
-			.filter(java.util.Objects::nonNull);
-	}
-
-	private ReelNode reelNodeOf(String f) {
-		try {
-			File file = new File(f);
-			String id = file.getName().replace(".reel", "");
-			String type = file.getParentFile().getName();
-			ReelNodeImpl node = reels.get(id + ":" + type);
-			if(node == null) {
-				node = new ReelNodeImpl(id, type, sourcesOfReel(type), file.exists() ? file : null);
-				reels.put(id + ":" + type, node);
-			}
-			return node;
-		} catch (Exception ignored) {
-			return null;
-		}
-	}
-
-	private String$[$] listReelFilesOf(String id, String type) {
-		try {
-			ActiveMQTextMessage request = new ActiveMQTextMessage();
-			request.setText("datamart=" + name() + ";operation=list-reels;" + (id == null ? "" : "id=" + id)+(type == null ? "" : "type=" + type));
-			javax.jms.Message message = requestResponseFromDatahub("list-reels=" + id, request);
-			if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
-			return ((javax.jms.TextMessage)message).getText().split(",");
-		} catch (Exception e) {
-			Logger.error(e);
-			return new String$[0$];
-		}
+		Stream stream = reels.values().stream().filter(r -> r.id.equals(id)).toList().stream();
+		return stream;
 	}
 end
 
@@ -784,3 +738,66 @@ def type(reel) trigger(getterSignature)
 	Stream<ReelNode> $name+firstLowerCase~Reels();
 end
 
+def trigger(loadTimelinesFromDatahubMethod)
+	private void loadTimelinesFromDatahub() {
+		Logger.debug("Downloading timelines...");
+        for(String filename : listTimelineFiles()) {
+        	if(filename == null || filename.isBlank()) continue;
+        	try {
+               	File file = new File(filename);
+               	String id = file.getName().replace(".timeline", "");
+               	String type = file.getParentFile().getName();
+               	TimelineNodeImpl node = new TimelineNodeImpl(id, type, sourcesOfTimeline(type), file.exists() ? file : null);
+               	timelines.put(id + ":" + type, node);
+            } catch (Exception e) {
+               	Logger.debug("Could not load timeline " + filename + " -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
+            }
+        }
+        Logger.debug("Loaded " + timelines.size() + " timelines");
+    }
+
+    private String$[$] listTimelineFiles() {
+    	try {
+    		ActiveMQTextMessage request = new ActiveMQTextMessage();
+    		request.setText("datamart=" + name() + ";operation=list-timelines;");
+    		javax.jms.Message message = requestResponseFromDatahub("list-timelines", request);
+    		if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
+    		return ((javax.jms.TextMessage)message).getText().split(",");
+    	} catch (Exception e) {
+    		Logger.error(e);
+    		return new String$[0$];
+    	}
+    }
+end
+
+def trigger(loadReelsFromDatahubMethod)
+	private void loadReelsFromDatahub() {
+		Logger.debug("Downloading reels...");
+    	for(String filename : listReelFiles()) {
+    		if(filename == null || filename.isBlank()) continue;
+    		try {
+    	    	File file = new File(filename);
+    	    	String id = file.getName().replace(".reel", "");
+    	    	String type = file.getParentFile().getName();
+    	    	ReelNodeImpl node = new ReelNodeImpl(id, type, sourcesOfReel(type), file.exists() ? file : null);
+    	    	reels.put(id + ":" + type, node);
+    	    } catch (Exception e) {
+    	    	Logger.debug("Could not load reel " + filename + " -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
+    	    }
+    	}
+    	Logger.debug("Loaded " + reels.size() + " reels");
+    }
+
+    private String$[$] listReelFiles() {
+    	try {
+    		ActiveMQTextMessage request = new ActiveMQTextMessage();
+    		request.setText("datamart=" + name() + ";operation=list-reels;");
+    		javax.jms.Message message = requestResponseFromDatahub("list-reels", request);
+    		if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
+    		return ((javax.jms.TextMessage)message).getText().split(",");
+    	} catch (Exception e) {
+    		Logger.error(e);
+    		return new String$[0$];
+    	}
+    }
+end

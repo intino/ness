@@ -9,7 +9,7 @@ public class Datamarts_ {
 
 		TrooperTerminal terminal = null;
 
-		MasterDatamart datamart = terminal.masterDatamart();
+		MasterDatamart datamart = terminal.datamart();
 //
 //		var timelines = datamart.timelines("12345");
 //
