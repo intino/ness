@@ -4,44 +4,19 @@ use Events
 use Datalake
 
 Datamart master
-	Timeline(tank = dl.assetStatus, entity = Machine) AssetStatus
-		Attribute(magnitude = monitoring.AssetStatus.usageRAM, from = Machine.memorySize) max
-		Attribute(magnitude = monitoring.AssetStatus.usageHDD, from = Machine.diskSize) max
-		Attribute(magnitude = monitoring.AssetStatus.usageFiles, from = Machine.maxOpenFiles) max
-	Timeline(tank = dl.applicationStatus, entity = Application) ApplicationStatus
-	Timeline(tank = dl.rdbmsStatement, entity = Query) RdbmsStatement
-	Reel(entity= Observable) Anomalies
-		Signal(tank = dl.state, attribute = monitoring.State.value, operation = Append)
-		Signal(tank = dl.diagnosisAssertion, attribute = analysis.DiagnosisAssertion.Anomaly.name, operation = Set)
+	Snapshots(scale = Day)
+	Timeline(tank = dl.computer, entity = Computer) AssetStatus
+		Attribute(magnitude = monitoring.Computer.usageRAM, from = Computer.memorySize) max
+		Attribute(magnitude = monitoring.Computer.usageHDD, from = Computer.diskSize) max
+		Attribute(magnitude = monitoring.Computer.usageFiles, from = Computer.maxOpenFiles) max
+	Timeline(tank = dl.switch, entity = Appliance) switchMeasurements
+	Timeline(tank = dl.cellularGateway, entity = Appliance) cellularMeasurements
+	Timeline(tank = dl.wireless, entity = Appliance) wirelessMeasurements
+	Timeline(tank = dl.camera, entity = Appliance) cameraMeasurements
+	Timeline(tank = dl.application, entity = Application) ApplicationStatus
+	Reel(entity = Observable, tank = dl.status, signals = monitoring.Status.signals, groupSource = monitoring.Status.group, entitySource = monitoring.Status.observable) ObservableReel
 
-	Entity(from = dl.userAssertion) User
-		Attribute email as Text
-		Attribute displayName as Text
-		Attribute name as Text
-		Attribute language as Text
-
-	Entity Foo as Abstract
-		Attribute host as Entity(Observable)
-		Attribute observer as Entity(Observable)
-		Attribute employee as Entity(Person)
-		Attribute tags as Text List
-		Attribute timezone as Text
-		Struct AvailableOperation
-       		Attribute activity as Text
-       		Attribute name as Text
-
-    Entity(from = dl.fooAssertion) Bar as ExtensionOf(Foo)
-    	Attribute something as Text
-
-	Entity(from = dl.teamAssertion) Team
-		Attribute displayName as Text
-		Attribute users as Entity(User) List
-		Attribute channels as Entity(Channel) List
-
-	Entity(from = dl.channelAssertion) Channel > Attribute displayName as Text
-	Entity(from = dl.areaAssertion) Area
-
-	Entity(from = dl.diagnosisAssertion) Analysis
+	Entity(dl.diagnosisAssertion) Analysis
 		Attribute observable as Text
 		Struct Anomaly
 			Attribute code as Text
@@ -49,23 +24,78 @@ Datamart master
 			Attribute period as Text
 			Attribute triggerValue as Text
 
+	Entity(dl.placeAssertion) Place
+		Attribute label as Text
+		Attribute coordinates as Text
+		Attribute timeOffset as Integer
+		Attribute region as Text
+		Attribute city as Text
+		Attribute address as Text
+		Attribute postalCode as Text
+
+	Entity(dl.areaAssertion) Area > Attribute label as Text
+
+	Entity(dl.modelAssertion) Model
+		Attribute type as Text
+		Attribute target as Entity(Observable)
+		Struct(multiple=false) Profile
+			Struct Variable
+				Attribute name as Text
+				Attribute className as Text
+				Attribute label as Text
+				Attribute type as Text
+				Attribute operator as Text
+				Attribute unit as Text
+				Attribute symbol as Text
+				Attribute values as Text List
+				Attribute min as Text
+				Attribute max as Text
+				Attribute description as Text
+				Attribute format as Text
+
+	Entity(dl.orderTypeAssertion) OrderType
+
 	Entity Observable as Abstract
-		Attribute host as Entity(Observable)
-		Attribute observer as Entity(Observable)
-		Attribute tags as Text List
-
-	Entity Administrable as Abstract ExtensionOf(Observable)
-		Attribute team as Entity(Team)
+		Attribute label as Text
+		Attribute place as Entity(Place)
 		Attribute area as Entity(Area)
+		Attribute team as Text
+		Attribute model as Entity(Model)
+		Attribute container as Entity(Observable)
+		Attribute observer as Entity(Observer)
+		Attribute responsible as Entity(Person)
+		Attribute tags as Text List
+		Struct Operation
+			Attribute activity as Text
+			Attribute name as Text
+			Struct Procedure
+				Attribute name as Text
+				Attribute returnType as Text
+				Attribute description as Text
+				Struct Parameter
+					Attribute type as Text
+					Attribute name as Text
 
-	Entity(from = dl.assetAssertion) Asset as ExtensionOf(Administrable)
-	Entity(from = dl.hardwareAssertion) Hardware as ExtensionOf(Administrable)
-	Entity(from = dl.peripheralDeviceAssertion) PeripheralDevice as ExtensionOf(Hardware)
-	Entity(from = dl.networkDeviceAssertion) NetworkDevice as ExtensionOf(Hardware)
+	Entity(dl.personAssertion) Person as ExtensionOf(Observable)
+		Attribute area as Entity(Area)
+		Attribute role as Text
+		Attribute supervisor as Entity(Person)
+		Attribute email as Text
+		Attribute phone as Text
+
+	Entity(dl.processAssertion) Process as ExtensionOf(Observable)
+
+	Entity(dl.assetAssertion) Asset as ExtensionOf(Observable)
+	Entity(dl.partAssertion) Part as ExtensionOf(Observable)
+
+	Entity(dl.hardwareAssertion) Hardware as ExtensionOf(Observable)
+		Attribute sn as Text
 		Attribute ip as Text
 		Attribute publicIp as Text
 
-	Entity(from = dl.machineAssertion) Machine as ExtensionOf(Hardware)
+	Entity(dl.applianceAssertion) Appliance as ExtensionOf(Hardware)
+
+	Entity(dl.computerAssertion) Computer as ExtensionOf(Hardware)
 		Attribute architecture as Text
 		Attribute os as Text
 		Attribute cores as Integer
@@ -75,23 +105,17 @@ Datamart master
 		Attribute maxOpenFiles as Long
 		Attribute jvm as Text
 		Attribute isp as Text
-		Attribute ip as Text
-		Attribute publicIp as Text
 
-	Entity(from = dl.softwareAssertion) Software as ExtensionOf(Administrable)
-	Entity(from = dl.consulAssertion) Consul as ExtensionOf(Software)
+	Entity(dl.softwareAssertion) Software as ExtensionOf(Observable)
+	Entity(dl.observerAssertion) Observer as ExtensionOf(Software)
 		Attribute version as Text
 		Attribute installedActivities as Text List
 		Attribute enabledActivities as Text List
 
-	Entity(from = dl.serviceAssertion) Service as ExtensionOf(Software)
+	Entity(dl.serviceAssertion) Service as ExtensionOf(Software)
 		Attribute url as Text
-	Entity(from = dl.rdbmsServiceAssertion) RdbmsService as ExtensionOf(Service)
-	Entity(from = dl.queryAssertion) Query as ExtensionOf(Observable)
-		Attribute query as Text
-		Attribute hash as Text
 
-	Entity(from = dl.applicationAssertion) Application as ExtensionOf(Software)
+	Entity(dl.applicationAssertion) Application as ExtensionOf(Software)
 		Attribute name as Text
 		Attribute user as Text
 		Attribute startingTime as DateTime
@@ -99,7 +123,7 @@ Datamart master
 		Attribute commandLine as Text
 		Attribute state as Word("NEW" "RUNNING" "SLEEPING" "WAITING" "ZOMBIE" "STOPPED" "OTHER" "INVALID" "SUSPENDED")
 
-	Entity(from = dl.javaApplicationAssertion) JavaApplication as ExtensionOf(Application)
+	Entity(dl.applicationJavaAssertion) JavaApplication as ExtensionOf(Application)
 		Attribute classpathPrefix as Text
 		Attribute mainArtifact as Text
 		Attribute debugPort as Integer
@@ -110,6 +134,3 @@ Datamart master
 		Attribute inputArguments as Text List
 		Attribute jvmParameter as Text List
 		Attribute jvmVersion as Text
-
-	Entity(from = dl.personAssertion) Person as ExtensionOf(Observable)
-	Entity(from = dl.businessUnitAssertion) BusinessUnit as ExtensionOf(Observable)

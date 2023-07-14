@@ -1,34 +1,24 @@
 package org.example.test;
 
-import io.intino.alexandria.message.MessageReader;
 import io.intino.alexandria.terminal.JmsConnector;
-import io.intino.alexandria.zim.ZimWriter;
 import io.intino.cosmos.datahub.TrooperTerminal;
 import io.intino.cosmos.datahub.datamarts.master.MasterDatamart;
 import io.intino.cosmos.datahub.datamarts.master.MasterDatamartImpl;
-import io.intino.cosmos.datahub.datamarts.master.mounters.JavaApplicationMounter;
-import io.intino.cosmos.datahub.messages.universe.ApplicationJavaAssertion;
-import io.intino.ness.master.reflection.StructDefinition;
 import io.intino.sumus.chronos.Timeline;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.stream.Stream;
 
 public class Client {
 
 	public static void main(String[] args) throws IOException {
-
-//		try(ZimWriter writer = new ZimWriter(new File("temp/20230521.zim"))) {
-//			writer.write(new MessageReader(message()).next());
-//		}
 
 		TrooperTerminal terminal = new TrooperTerminal(connector("test", "test", "test"));
 		terminal.initDatamarts();
 
 		MasterDatamart.TimelineNode.AlwaysDownloadFromDatahub.set(true);
 
-		MasterDatamartImpl dm = (MasterDatamartImpl) terminal.masterDatamart();
+		MasterDatamartImpl dm = (MasterDatamartImpl) terminal.datamart();
 
 		var timelines = dm.timelines("45-79-45-227-ip-linodeusercontent-com").toList();
 
