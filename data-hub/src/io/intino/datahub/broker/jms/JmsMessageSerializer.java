@@ -1,6 +1,5 @@
 package io.intino.datahub.broker.jms;
 
-import com.google.gson.reflect.TypeToken;
 import io.intino.alexandria.*;
 import io.intino.alexandria.event.Event.Format;
 import io.intino.alexandria.event.EventWriter;
@@ -16,7 +15,6 @@ import io.intino.datahub.model.Datalake;
 import javax.jms.BytesMessage;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -151,7 +149,7 @@ public class JmsMessageSerializer {
 		}
 
 		private void appendToDestinationFile(ResourceEvent event, File destination) throws IOException {
-			try (EventWriter<ResourceEvent> writer = new ResourceEventWriter(destination, true)) {
+			try (EventWriter<ResourceEvent> writer = new ResourceEventWriter(destination)) {
 				writer.write(event);
 			}
 		}
@@ -170,9 +168,6 @@ public class JmsMessageSerializer {
 			return new ResourceEvent(type, ss, resource).ts(ts);
 		}
 	}
-
-	public static final Type asMap = new TypeToken<Map<String, String>>() {
-	}.getType();
 
 	private static String withOutParameters(String ss) {
 		return ss.contains("?") ? ss.substring(0, ss.indexOf("?")) : ss;

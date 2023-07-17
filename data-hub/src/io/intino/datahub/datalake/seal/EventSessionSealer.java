@@ -51,7 +51,7 @@ public class EventSessionSealer {
 
 	private void seal(Map.Entry<Fingerprint, List<File>> e) {
 		try {
-			switch(formatOf(e.getKey().tank())) {
+			switch (formatOf(e.getKey().tank())) {
 				case Message, Resource -> eventSealer.seal(e.getKey(), e.getValue());
 				case Measurement -> measurementSealer.seal(e.getKey(), e.getValue());
 			}
@@ -69,15 +69,16 @@ public class EventSessionSealer {
 	}
 
 	private Format formatOf(io.intino.datahub.model.Datalake.Tank tank) {
-		if(tank.isMessage()) return Message;
-		if(tank.isMeasurement()) return Measurement;
-		if(tank.isResource()) return Resource;
+		if (tank.isMessage()) return Message;
+		if (tank.isMeasurement()) return Measurement;
+		if (tank.isResource()) return Resource;
 		return Unknown;
 	}
 
 	private static boolean matches(String tankName, io.intino.datahub.model.Datalake.Tank tank) {
 		if (tank.isMessage() && tank.asMessage().qn().equals(tankName)) return true;
-		return tank.isMeasurement() && tank.asMeasurement().qn().equals(tankName);
+		if (tank.isMeasurement() && tank.asMeasurement().qn().equals(tankName)) return true;
+		return tank.isResource() && tank.asResource().qn().equals(tankName);
 	}
 
 	private void moveTreated(Map.Entry<Fingerprint, List<File>> e) {
