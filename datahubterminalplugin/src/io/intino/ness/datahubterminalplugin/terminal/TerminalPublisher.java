@@ -123,13 +123,14 @@ public class TerminalPublisher {
 
 	private void writeManifest(File srcDirectory) {
 		List<String> publish = terminal.publish() != null ? terminal.publish().messageTanks().stream().map(this::eventQn).collect(Collectors.toList()) : new ArrayList<>();
-		if (terminal.publish() != null)
+		if (terminal.publish() != null) {
 			publish.addAll(terminal.publish().measurementTanks().stream().map(this::eventQn).toList());
+			publish.addAll(terminal.publish().resourceTanks().stream().map(this::eventQn).toList());
+		}
 		List<String> subscribe = terminal.subscribe() != null ? terminal.subscribe().messageTanks().stream().map(this::eventQn).collect(Collectors.toList()) : new ArrayList<>();
 		if (terminal.subscribe() != null) {
 			subscribe.addAll(terminal.subscribe().measurementTanks().stream().map(this::eventQn).toList());
 			subscribe.addAll(terminal.subscribe().resourceTanks().stream().map(this::eventQn).toList());
-
 		}
 		Manifest manifest = new Manifest(terminal.name$(), basePackage + "." + Formatters.firstUpperCase(Formatters.snakeCaseToCamelCase().format(terminal.name$()).toString()), publish, subscribe, tankClasses(), terminal.datamarts() != null && terminal.datamarts().autoLoad());
 		try {
@@ -153,7 +154,7 @@ public class TerminalPublisher {
 		if (terminal.subscribe() != null) {
 			terminal.subscribe().messageTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".messages." + eventQn(t)));
 			terminal.subscribe().measurementTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".measurements." + eventQn(t)));
-			terminal.publish().resourceTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".resources." + eventQn(t)));
+			terminal.subscribe().resourceTanks().forEach(t -> tankClasses.putIfAbsent(eventQn(t), basePackage + ".resources." + eventQn(t)));
 		}
 		if (terminal.bpm() != null)
 			tankClasses.put(terminal.bpm().processStatusClass().substring(terminal.bpm().processStatusClass().lastIndexOf(".") + 1), terminal.bpm().processStatusClass());
