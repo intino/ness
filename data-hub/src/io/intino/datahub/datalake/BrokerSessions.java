@@ -1,9 +1,9 @@
 package io.intino.datahub.datalake;
 
 import io.intino.alexandria.Fingerprint;
-import io.intino.alexandria.Session;
-import io.intino.alexandria.event.Event;
+import io.intino.alexandria.event.Event.Format;
 import io.intino.alexandria.event.message.MessageEvent;
+import io.intino.alexandria.event.resource.ResourceEventReader;
 import io.intino.alexandria.ingestion.EventSession;
 import io.intino.alexandria.ingestion.SessionHandler;
 import io.intino.alexandria.logger.Logger;
@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import static io.intino.alexandria.Session.SessionExtension;
 import static java.util.Objects.requireNonNull;
 
 public class BrokerSessions {
@@ -37,29 +38,53 @@ public class BrokerSessions {
 			SessionHandler handler = new SessionHandler(stageDirectory);
 			File tmp = new File(stageDirectory, "tmp");
 			tmp.mkdirs();
-			moveToTmp(tmp);
-			for (File file : requireNonNull(tmp.listFiles(f -> f.getName().endsWith(Session.SessionExtension)))) {
-				EventSession eventSession = handler.createEventSession();
-				try(MessageReader messages = new MessageReader(new FileInputStream(file))) {
-					Fingerprint fingerprint = Fingerprint.of(file);
-					for (Message message : messages)
-						eventSession.put(fingerprint.tank(), fingerprint.source(), fingerprint.timetag(), Event.Format.Message, new MessageEvent(message));
-				} finally {
-					eventSession.close();
-				}
-				file.delete();
-			}
+			moveTo(tmp);
+			for (File file : requireNonNull(tmp.listFiles(f -> f.getName().endsWith(Format.Message + SessionExtension) || f.getName().endsWith(Format.Measurement + SessionExtension))))
+				processMessageAndMeasurements(handler, file);
+			for (File file : requireNonNull(tmp.listFiles(f -> f.getName().endsWith(Format.Resource + SessionExtension))))
+				processResources(handler, file);
 		} catch (Exception e) {
 			Logger.error(e);
 		}
 	}
 
-	private void moveToTmp(File tmp) {
-		for (File file : requireNonNull(brokerStageDirectory.listFiles(f -> f.getName().endsWith(Session.SessionExtension))))
-			moveToTmp(file, tmp);
+	private void processResources(SessionHandler handler, File file) {
+		EventSession eventSession = handler.createEventSession();
+		try (ResourceEventReader resources = new ResourceEventReader(file)) {
+			Fingerprint fingerprint = Fingerprint.of(file);
+			resources.forEachRemaining(e -> {
+				try {
+					eventSession.put(fingerprint.tank(), fingerprint.source(), fingerprint.timetag(), Format.Resource, e);
+				} catch (IOException ex) {
+					Logger.error(ex);
+				}
+			});
+		} catch (Exception e) {
+			Logger.error(e);
+		} finally {
+			eventSession.close();
+		}
+		file.delete();
 	}
 
-	private void moveToTmp(File file, File tmp) {
+	private static void processMessageAndMeasurements(SessionHandler handler, File file) throws Exception {
+		EventSession eventSession = handler.createEventSession();
+		try (MessageReader messages = new MessageReader(new FileInputStream(file))) {
+			Fingerprint fingerprint = Fingerprint.of(file);
+			for (Message message : messages)
+				eventSession.put(fingerprint.tank(), fingerprint.source(), fingerprint.timetag(), Format.Message, new MessageEvent(message));
+		} finally {
+			eventSession.close();
+		}
+		file.delete();
+	}
+
+	private void moveTo(File tmp) {
+		for (File file : requireNonNull(brokerStageDirectory.listFiles(f -> f.getName().endsWith(SessionExtension))))
+			moveTo(file, tmp);
+	}
+
+	private void moveTo(File file, File tmp) {
 		try {
 			Files.move(file.toPath(), new File(tmp, file.getName()).toPath());
 		} catch (IOException e) {

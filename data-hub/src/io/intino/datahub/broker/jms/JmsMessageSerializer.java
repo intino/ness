@@ -149,22 +149,19 @@ public class JmsMessageSerializer {
 		}
 
 		private void appendToDestinationFile(ResourceEvent event, File destination) throws IOException {
-			try (EventWriter<ResourceEvent> writer = new ResourceEventWriter(destination, true)) {
+			try (EventWriter<ResourceEvent> writer = new ResourceEventWriter(destination)) {
 				writer.write(event);
 			}
 		}
 
 		private ResourceEvent readResourceEventFrom(BytesMessage m) throws Exception {
 			String resourceName = m.getStringProperty("resource.name");
-			Map<String, String> metadata = Json.fromJson(m.getStringProperty("resource.metadata"), Map.class);
-
+			Resource.Metadata metadata = Json.fromJson(m.getStringProperty("resource.metadata"), Resource.Metadata.class);
 			int dataLength = m.getIntProperty("resource.data.length");
 			byte[] data = new byte[dataLength];
 			m.readBytes(data);
-
 			Resource resource = new Resource(resourceName, data);
-			resource.metadata().putAll(metadata);
-
+			resource.metadata().putAll(metadata.properties());
 			String type = m.getStringProperty("type");
 			String ss = m.getStringProperty("ss");
 			Instant ts = Instant.ofEpochMilli(m.getLongProperty("ts"));
