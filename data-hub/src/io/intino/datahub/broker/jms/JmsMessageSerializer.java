@@ -1,5 +1,6 @@
 package io.intino.datahub.broker.jms;
 
+import com.google.gson.reflect.TypeToken;
 import io.intino.alexandria.*;
 import io.intino.alexandria.event.Event.Format;
 import io.intino.alexandria.event.EventWriter;
@@ -15,6 +16,7 @@ import io.intino.datahub.model.Datalake;
 import javax.jms.BytesMessage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -156,21 +158,21 @@ public class JmsMessageSerializer {
 
 		private ResourceEvent readResourceEventFrom(BytesMessage m) throws Exception {
 			String resourceName = m.getStringProperty("resource.name");
-			Map<String, String> metadata = Json.fromJson(m.getStringProperty("resource.metadata"), Map.class);
-
+			Resource.Metadata metadata = Json.fromJson(m.getStringProperty("resource.metadata"), Resource.Metadata.class);
 			int dataLength = m.getIntProperty("resource.data.length");
 			byte[] data = new byte[dataLength];
 			m.readBytes(data);
-
 			Resource resource = new Resource(resourceName, data);
-			resource.metadata().putAll(metadata);
-
+			resource.metadata().putAll(metadata.properties());
 			String type = m.getStringProperty("type");
 			String ss = m.getStringProperty("ss");
 			Instant ts = Instant.ofEpochMilli(m.getLongProperty("ts"));
 			return new ResourceEvent(type, ss, resource).ts(ts);
 		}
 	}
+
+	public static final Type asMap = new TypeToken<Map<String, String>>() {
+	}.getType();
 
 	private static String withOutParameters(String ss) {
 		return ss.contains("?") ? ss.substring(0, ss.indexOf("?")) : ss;
