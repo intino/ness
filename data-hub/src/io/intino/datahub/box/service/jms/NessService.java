@@ -15,9 +15,10 @@ import javax.jms.Message;
 import java.util.stream.Stream;
 
 public class NessService {
+	private final BrokerManager manager;
 
 	public NessService(DataHubBox box) {
-		BrokerManager manager = box.brokerService().manager();
+		manager = box.brokerService().manager();
 		manager.registerQueueConsumer("service.ness.seal", m -> response(manager, m, new SealRequest(box).accept(MessageReader.textFrom(m))));
 		manager.registerQueueConsumer("service.ness.seal.last", m -> response(manager, m, new LastSealRequest(box).accept(MessageReader.textFrom(m))));
 		manager.registerQueueConsumer("service.ness.backup", m -> response(manager, m, new BackupRequest(box).accept(MessageReader.textFrom(m))));
@@ -59,15 +60,25 @@ public class NessService {
 				Logger.error("Error while handling response: " + e.getMessage(), e);
 			}
 		});
+		try {
+			manager.unregisterQueueProducer(replyQueue(request));
+		} catch (JMSException e) {
+			Logger.error(e);
+		}
 	}
 
 	private static QueueProducer producer(BrokerManager manager, Message request) {
 		try {
-			Destination reply = request.getJMSReplyTo();
-			return manager.queueProducerOf(reply instanceof ActiveMQTempQueue ? ((ActiveMQTempQueue) reply).getQueueName() : reply.toString());
+			String queue = replyQueue(request);
+			return manager.queueProducerOf(queue);
 		} catch (JMSException e) {
 			Logger.error(e);
 			return null;
 		}
+	}
+
+	private static String replyQueue(Message request) throws JMSException {
+		Destination reply = request.getJMSReplyTo();
+		return reply instanceof ActiveMQTempQueue r ? r.getQueueName() : reply.toString();
 	}
 }
