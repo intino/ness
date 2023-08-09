@@ -17,6 +17,8 @@ public interface BrokerManager {
 
 	void unregisterConsumer(TopicConsumer consumer);
 
+	void unregisterQueueProducer(String destination);
+
 	TopicProducer topicProducerOf(String topic);
 
 	QueueProducer queueProducerOf(String queue);

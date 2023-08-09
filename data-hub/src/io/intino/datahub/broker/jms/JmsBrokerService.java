@@ -339,6 +339,13 @@ public class JmsBrokerService implements BrokerService {
 			consumers.values().forEach(list -> list.remove(consumer));
 		}
 
+		@Override
+		public void unregisterQueueProducer(String destination) {
+			JmsProducer producer = producers.get(destination);
+			if (producer != null && !producer.isClosed()) producer.close();
+			producers.remove(destination);
+		}
+
 		public QueueProducer queueProducerOf(String queue) {
 			try {
 				if (!this.producers.containsKey(queue))
