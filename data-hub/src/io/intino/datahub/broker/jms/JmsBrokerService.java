@@ -217,6 +217,7 @@ public class JmsBrokerService implements BrokerService {
 		final PolicyEntry entry = new PolicyEntry();
 		entry.setAdvisoryForDiscardingMessages(true);
 		entry.setTopicPrefetch(1);
+		entry.setTopic(">");
 		ConstantPendingMessageLimitStrategy pendingMessageLimitStrategy = new ConstantPendingMessageLimitStrategy();
 		pendingMessageLimitStrategy.setLimit(1000000);
 		entry.setPendingMessageLimitStrategy(pendingMessageLimitStrategy);
