@@ -130,6 +130,7 @@ public class JmsBrokerService implements BrokerService {
 			service.setUseJmx(true);
 			service.setUseShutdownHook(true);
 			service.setAdvisorySupport(true);
+			service.setSchedulePeriodForDestinationPurge(86400000);
 			service.setPlugins(new BrokerPlugin[]{new SimpleAuthenticationPlugin(registerUsers()), new JavaRuntimeConfigurationPlugin(), new TimeStampingBrokerPlugin()});
 			List<CompositeDestinationInterceptor> destinationInterceptors = new ArrayList<>();
 			for (Broker.CompositeDestination o : box.graph().broker().compositeDestinationList()) {
@@ -197,15 +198,29 @@ public class JmsBrokerService implements BrokerService {
 
 	private void addPolicies() {
 		final List<PolicyEntry> policyEntries = new ArrayList<>();
+		policyEntries.add(pendingMessagesPolicy());
+		policyEntries.add(gcOldQueues());
+		final PolicyMap policyMap = new PolicyMap();
+		policyMap.setPolicyEntries(policyEntries);
+		service.setDestinationPolicy(policyMap);
+	}
+
+	private PolicyEntry gcOldQueues() {
+		final PolicyEntry entry = new PolicyEntry();
+		entry.setQueue(">");
+		entry.setGcInactiveDestinations(true);
+		entry.setInactiveTimeoutBeforeGC(86400000 / 2);
+		return entry;
+	}
+
+	private static PolicyEntry pendingMessagesPolicy() {
 		final PolicyEntry entry = new PolicyEntry();
 		entry.setAdvisoryForDiscardingMessages(true);
 		entry.setTopicPrefetch(1);
 		ConstantPendingMessageLimitStrategy pendingMessageLimitStrategy = new ConstantPendingMessageLimitStrategy();
 		pendingMessageLimitStrategy.setLimit(1000000);
 		entry.setPendingMessageLimitStrategy(pendingMessageLimitStrategy);
-		final PolicyMap policyMap = new PolicyMap();
-		policyMap.setPolicyEntries(policyEntries);
-		service.setDestinationPolicy(policyMap);
+		return entry;
 	}
 
 	private void addTCPConnector() throws Exception {
