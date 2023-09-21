@@ -137,7 +137,9 @@ public final class TimelineMounter extends MasterDatamartMounter {
 
 	private Magnitude[] sensorModel(Message message, Timeline timeline) {
 		Sensor sensor = timeline.tank().sensor();
-		return sensor.magnitudeList().stream().map(m -> new Magnitude(m.id(), new Magnitude.Model(merge(m, message, m.attributeList(), timeline.attributeList())))).toArray(Magnitude[]::new);
+		return sensor.magnitudeList().stream()
+				.map(m -> new Magnitude(m.id(), new Magnitude.Model(merge(m, message, m.attributeList(), timeline.attributeList()))))
+				.toArray(Magnitude[]::new);
 	}
 
 	private Map<String, String> merge(Sensor.Magnitude m, Message message, List<Sensor.Magnitude.Attribute> magnitudeAttr, List<Timeline.Attribute> timelineAttr) {

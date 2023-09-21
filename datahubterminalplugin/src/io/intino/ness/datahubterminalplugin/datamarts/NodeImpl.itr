@@ -221,6 +221,13 @@ def type(reelNode & default) trigger(nodeImpl)
 		}
 
 		@Override
+		public io.intino.sumus.chronos.Reel.State groupOf(String signal) {
+			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
+			if (reelFile == null) throw new IllegalArgumentException("Reel file not found");
+			return reelFile.groupOf(signal);
+		}
+
+		@Override
 		public io.intino.sumus.chronos.Reel.State stateOf(String signal) {
 			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
 			if (reelFile == null) throw new IllegalArgumentException("Reel file not found");
