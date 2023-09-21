@@ -119,6 +119,7 @@ def type(datamart & interface)
 
         interface ReelNode extends ChronosNode {
 			boolean exists();
+        	io.intino.sumus.chronos.ReelFile.Group groupOf(String signal);
         	io.intino.sumus.chronos.Reel.State stateOf(String signal);
 			default List<io.intino.sumus.chronos.Reel.State> stateOf(List<String> signals) {return signals.isEmpty() ? java.util.Collections.emptyList() : stateOf(signals.stream());}
 			List<io.intino.sumus.chronos.Reel.State> stateOf(Stream<String> signals);

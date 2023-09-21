@@ -43,9 +43,6 @@
     <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.4.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino:plugin-interface:2.4.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino:configuration:1.4.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:terminal-jms:5.4.3" level="project" />
-    <orderEntry type="module" module-name="data-hub" />
-    <orderEntry type="library" name="Intino: io.intino:data-hub:9.6.0" level="project" />
     <orderEntry type="library" name="Intino: com.sparkjava:spark-core:2.9.3" level="project" />
     <orderEntry type="library" name="Intino: commons-codec:commons-codec:1.10" level="project" />
     <orderEntry type="library" name="Intino: org.bouncycastle:bcmail-jdk15:1.45" level="project" />
@@ -121,11 +118,8 @@
     <orderEntry type="library" name="Intino: com.auth0:java-jwt:4.3.0" level="project" />
     <orderEntry type="library" name="Intino: jakarta.jms:jakarta.jms-api:2.0.3" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.1.2" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:7.0.2" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:event:5.0.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zim:5.1.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:message:4.1.2" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:session:2.0.3" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.2.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:http:1.7.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:rest-accessor:3.1.2" level="project" />
@@ -157,9 +151,20 @@
     <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-core:2.15.2" level="project" />
     <orderEntry type="library" name="Intino: org.slf4j:slf4j-api:2.0.6" level="project" />
     <orderEntry type="library" name="Intino: commons-logging:commons-logging:1.0.3" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:2.0.4" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.6.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.3" level="project" />
+    <orderEntry type="library" name="Intino: io.intino:data-hub:9.7.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:7.0.3" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:event:5.0.3" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:session:2.0.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:terminal-jms:5.5.9" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:event:5.0.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.sumus:chronos:1.1.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: com.github.luben:zstd-jni:1.5.5-5" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: com.github.haifengl:smile-core:3.0.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: com.github.haifengl:smile-base:3.0.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.apache.commons:commons-csv:1.10.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:2.0.7" level="project" />
   </component>
 </module>
