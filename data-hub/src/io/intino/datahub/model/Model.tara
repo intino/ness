@@ -64,12 +64,28 @@ Concept:Named Datamart
 	has Timeline
 	has:Named Reel
 
-Concept Timeline is component
-	var Datalake.Tank.Measurement tank
+Concept:Named Timeline is component
 	var Entity entity
-	Concept:Named Attribute
-		var Sensor.Magnitude magnitude
-		var Entity.Attribute from
+	Aspect Raw
+		var Datalake.Tank.Measurement tank
+		Concept:Named Attribute
+			var Sensor.Magnitude magnitude
+			var Entity.Attribute from
+	Aspect Cooked
+		Concept TimeSeries
+			var Datalake.Tank.Message tank
+			var Attribute entityId = empty
+			Concept:Named Attribute > var string value
+			Aspect Count
+				Concept Operation
+					var Datalake.Tank.Message tank
+					var Attribute entityId
+					sub Difference
+					sub Join
+			Aspect TimeShift
+				var Datalake.Tank.Message withTank
+				var Attribute withEntityId
+
 
 Concept Reel is component
 	var Entity entity = empty
@@ -154,10 +170,8 @@ Concept Data is abstract component
 			var integer:{bits} size = 64 bits
 			var integer:{bits} maxSize = 64 bits is final private
 		sub Id
-			var long defaultValue = 0
-			var string type = "Long" is reactive private
-			var string primitive = "long" is reactive private
-			var integer:{bits} size = 64 bits
+			var string defaultValue = empty
+			var string type = "String" is reactive private
 		sub Bool
 			var boolean defaultValue = false
 			var string type = "Boolean" is reactive private

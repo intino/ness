@@ -159,5 +159,13 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:event:5.0.3" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:5.0.4" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:session:2.0.4" level="project" />
+    <orderEntry type="library" name="Intino: org.xerial:sqlite-jdbc:3.43.0.0" level="project" />
+    <orderEntry type="library" name="Intino: com.zaxxer:HikariCP:5.0.1" level="project" />
+    <orderEntry type="library" name="Intino: org.javassist:javassist:3.27.0-GA" level="project" />
+    <orderEntry type="library" name="Intino: io.micrometer:micrometer-core:1.5.10" level="project" />
+    <orderEntry type="library" name="Intino: org.hdrhistogram:HdrHistogram:2.1.12" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Intino: org.latencyutils:LatencyUtils:2.0.3" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
   </component>
 </module>

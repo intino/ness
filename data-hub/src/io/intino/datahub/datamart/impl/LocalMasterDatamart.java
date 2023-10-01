@@ -3,6 +3,7 @@ package io.intino.datahub.datamart.impl;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.datahub.box.DataHubBox;
+import io.intino.datahub.datamart.DatamartFactory;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.datamart.mounters.EntityMounter;
 import io.intino.datahub.datamart.mounters.MasterDatamartMounter;
@@ -182,7 +183,7 @@ public class LocalMasterDatamart implements MasterDatamart {
 		public TimelineStore(Datamart definition, File root) {
 			super(root);
 			this.subscribedEvents = definition.timelineList().stream()
-					.flatMap(t -> Stream.of(t.entity().name$(), t.tank().sensor().name$()))
+					.flatMap(DatamartFactory::tanksOf)
 					.collect(Collectors.toSet());
 		}
 
