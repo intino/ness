@@ -79,12 +79,12 @@ Concept:Named Timeline is component
 			Aspect Count
 				Concept Operation
 					var Datalake.Tank.Message tank
-					var Attribute entityId
+					var Model.Attribute entityId
 					sub Difference
 					sub Join
 			Aspect TimeShift
 				var Datalake.Tank.Message withTank
-				var Attribute withEntityId
+				var Model.Attribute withEntityId
 
 
 Concept Reel is component

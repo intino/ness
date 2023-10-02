@@ -6,24 +6,33 @@ import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.message.Message;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.model.Timeline;
+import io.intino.magritte.framework.Layer;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static io.intino.datahub.datamart.mounters.TimelineUtils.types;
 
 public final class TimelineMounter extends MasterDatamartMounter {
 
-	private final TimelineRawMounter fromMeasurementMounter;
+	private final TimelineRawMounter rawMounter;
 	private final TimelineAssertionMounter assertionMounter;
-	private final TimelineCookedMounter summaryMounter;
+	private final TimelineCookedMounter cookedMounter;
+	private final Map<String, List<String>> timelineTypes;
 
 	public TimelineMounter(MasterDatamart datamart) {
 		super(datamart);
-		fromMeasurementMounter = new TimelineRawMounter(box(), datamart);
+		rawMounter = new TimelineRawMounter(box(), datamart);
 		assertionMounter = new TimelineAssertionMounter(box(), datamart);
-		summaryMounter = new TimelineCookedMounter(box(), datamart);
+		timelineTypes = datamart.definition().timelineList().stream().collect(Collectors.toMap(Layer::name$, t -> types(t).toList()));
+		cookedMounter = new TimelineCookedMounter(box(), datamart, timelineTypes);
 	}
 
 	@Override
 	public void mount(Event event) {
 		synchronized (datamart) {
-			if (event instanceof MeasurementEvent e) fromMeasurementMounter.mount(e);
+			if (event instanceof MeasurementEvent e) rawMounter.mount(e);
 			if (event instanceof MessageEvent e) mount(e.toMessage());
 		}
 	}
@@ -32,8 +41,8 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	public void mount(Message message) {
 		if (message == null) return;
 		if (isAssertion(message)) assertionMounter.mount(new MessageEvent(message));
-		if (isCooked(message)) summaryMounter.mount(new MessageEvent(message));
-		else fromMeasurementMounter.mount((measurementEvent(message)));
+		else if (isCooked(message)) cookedMounter.mount(new MessageEvent(message));
+		else rawMounter.mount((measurementEvent(message)));
 	}
 
 	private boolean isAssertion(Message message) {
@@ -45,7 +54,7 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	private boolean isCooked(Message message) {
 		return datamart.definition().timelineList().stream()
 				.filter(Timeline::isCooked)
-				.anyMatch(t -> t.asCooked().timeSeriesList().stream().anyMatch(ts -> ts.tank().message().name$().equals(message.type())));
+				.anyMatch(t -> timelineTypes.get(t.name$()).contains(message.type()));
 	}
 
 	private static MeasurementEvent measurementEvent(Message message) {

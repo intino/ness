@@ -9,6 +9,7 @@ import io.intino.datahub.model.Timeline;
 import io.intino.datahub.model.Timeline.Cooked;
 import io.intino.datahub.model.Timeline.Cooked.TimeSeries;
 import io.intino.datahub.model.Timeline.Cooked.TimeSeries.Count.Difference;
+import io.intino.datahub.model.Timeline.Cooked.TimeSeries.Count.Operation;
 import io.intino.datahub.model.Timeline.Cooked.TimeSeries.TimeShift;
 import io.intino.magritte.framework.Layer;
 import io.intino.sumus.chronos.Magnitude;
@@ -22,30 +23,31 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.Map;
 
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
-import static io.intino.datahub.datamart.DatamartFactory.tanksOf;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.stream.Collectors.toMap;
 
 public class TimelineCookedMounter {
 	private final MasterDatamart datamart;
+	private final Map<String, List<String>> timelineTypes;
 	private final File directory;
 	private final File mounterCacheDirectory;
 
-	public TimelineCookedMounter(DataHubBox box, MasterDatamart datamart) {
+	public TimelineCookedMounter(DataHubBox box, MasterDatamart datamart, Map<String, List<String>> timelineTypes) {
 		this.datamart = datamart;
+		this.timelineTypes = timelineTypes;
 		this.directory = box.datamartDirectory(datamart.name());
-		this.mounterCacheDirectory = new File(directory, "cache");
+		this.mounterCacheDirectory = new File(directory, ".cache");
 	}
 
 	public void mount(MessageEvent event) {
 		datamart.definition().timelineList().stream()
 				.filter(Timeline::isCooked)
 				.map(Timeline::asCooked)
-				.filter(t -> types(t).anyMatch(tank -> tank.equals(event.type())))
+				.filter(t -> timelineTypes.getOrDefault(t.name$(), List.of()).contains(event.type()))
 				.forEach(t -> process(event, t));
 	}
 
@@ -70,28 +72,28 @@ public class TimelineCookedMounter {
 
 	private String entityOf(MessageEvent event, Cooked definition) {
 		TimeSeries timeSeries = definition.timeSeries(ts -> ts.tank().message().name$().equals(event.type()));
-		if (timeSeries != null) event.toMessage().get(timeSeries.entityId().name$()).asString();
+		if (timeSeries != null) return event.toMessage().get(timeSeries.entityId().name$()).asString();
 		else {
 			for (TimeSeries series : definition.timeSeriesList())
 				if (series.isCount()) {
-					TimeSeries.Count.Operation operation = series.asCount().operation(o -> o.tank().message().name$().equals(event.type()));
+					Operation operation = series.asCount().operation(o -> o.tank().message().name$().equals(event.type()));
 					if (operation != null) return event.toMessage().get(operation.entityId().name$()).asString();
 				} else if (series.asTimeShift().withTank().message().name$().equals(event.type()))
 					return event.toMessage().get(series.asTimeShift().withEntityId().name$()).asString();
+			return null;
 		}
-		return null;
 	}
 
 	private void update(TimelineFile tlFile, Cooked definition, MessageEvent event) {
 		DataSession session = null;
 		try {
 			session = tlFile.add().set(event.ts());
-			List<TimeSeries> timeSeries = timeSeries(definition, event.type());
-			for (TimeSeries ts : timeSeries) {
+			for (TimeSeries ts : timeSeries(definition, event.type())) {
 				if (ts.isCount())
 					processCount(session, ts.asCount(), lastValue(tlFile, ts), operationOf(ts.asCount().operationList(), event.type()));
 				else processTimeShift(session, ts.asTimeShift(), event);
 			}
+			session.close();
 		} catch (IOException e) {
 			Logger.error(e);
 		} finally {
@@ -99,11 +101,11 @@ public class TimelineCookedMounter {
 		}
 	}
 
-	private TimeSeries.Count.Operation operationOf(List<TimeSeries.Count.Operation> operations, String type) {
+	private Operation operationOf(List<Operation> operations, String type) {
 		return operations.stream().filter(o -> o.tank().message().name$().equals(type)).findFirst().orElse(null);
 	}
 
-	private void processCount(DataSession session, TimeSeries.Count ts, Point last, TimeSeries.Count.Operation operation) {
+	private void processCount(DataSession session, TimeSeries.Count ts, Point last, Operation operation) {
 		double value = last == null ? 0 : last.value();
 		if (operation instanceof Difference) session.set(ts.name$(), value - 1);
 		else session.set(ts.name$(), value + 1);
@@ -140,7 +142,7 @@ public class TimelineCookedMounter {
 
 	private TimeShiftCache cache(TimeShift timeseries) {
 		String timeline = timeseries.core$().ownerAs(Timeline.class).name$();
-		return new TimeShiftCache(new File(mounterCacheDirectory, timeline + "db"));
+		return new TimeShiftCache(new File(mounterCacheDirectory, timeline + ".db"));
 	}
 
 	private static Point lastValue(TimelineFile tlFile, TimeSeries ts) throws IOException {
@@ -150,15 +152,7 @@ public class TimelineCookedMounter {
 	}
 
 	private List<TimeSeries> timeSeries(Cooked definition, String type) {
-		return definition.timeSeriesList(ts -> ts.isCount() ? asTypes(tanksOf(ts.asCount())).anyMatch(t -> t.equals(type)) : ts.asTimeShift().tank().message().name$().equals(type));
-	}
-
-	private Stream<String> types(Cooked t) {
-		return asTypes(tanksOf(t.asTimeline()));
-	}
-
-	private Stream<String> asTypes(Stream<String> tanks) {
-		return tanks.map(t -> t.contains(".") ? t.substring(t.lastIndexOf(".") + 1) : t);
+		return definition.timeSeriesList(ts -> timelineTypes.get(definition.name$()).contains(type));
 	}
 
 	private void close(DataSession session) {

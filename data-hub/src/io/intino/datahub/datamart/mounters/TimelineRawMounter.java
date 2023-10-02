@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static io.intino.datahub.datamart.mounters.TimelineMounterUtils.createTimelineFile;
+import static io.intino.datahub.datamart.mounters.TimelineUtils.createTimelineFile;
 
 public class TimelineRawMounter {
 	private final DataHubBox box;

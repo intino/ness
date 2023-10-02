@@ -11,9 +11,9 @@ import io.intino.datahub.datamart.impl.LocalMasterDatamart;
 import io.intino.datahub.datamart.mounters.EntityMounter;
 import io.intino.datahub.datamart.mounters.ReelMounter;
 import io.intino.datahub.datamart.mounters.TimelineMounter;
+import io.intino.datahub.datamart.mounters.TimelineUtils;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Entity;
-import io.intino.datahub.model.Sensor;
 import io.intino.datahub.model.Timeline;
 import io.intino.datahub.model.rules.DayOfWeek;
 import io.intino.datahub.model.rules.SnapshotScale;
@@ -149,20 +149,9 @@ public class DatamartFactory {
 
 	private static Set<String> timelineTanks(Datamart definition) {
 		return definition.timelineList().stream()
-				.flatMap(DatamartFactory::tanksOf)
+				.flatMap(TimelineUtils::tanksOf)
 				.filter(Objects::nonNull)
 				.collect(Collectors.toSet());
-	}
-
-	public static Stream<String> tanksOf(Timeline t) {
-		Set<String> tanks = new HashSet<>();
-		tanks.add(tankName(t.entity()));
-		if (t.isRaw()) tanks.add(tankName(t.asRaw().tank().sensor()));
-		else {
-			tanks.addAll(t.asCooked().timeSeriesList().stream().map(ts -> tankName(ts.tank())).toList());
-			tanks.addAll(t.asCooked().timeSeriesList().stream().filter(Timeline.Cooked.TimeSeries::isCount).flatMap(ts -> tanksOf(ts.asCount())).toList());
-		}
-		return tanks.stream();
 	}
 
 	public static Stream<String> tanksOf(Timeline.Cooked.TimeSeries.Count ts) {
@@ -177,9 +166,6 @@ public class DatamartFactory {
 		return tank.message().core$().fullName().replace("$", ".");
 	}
 
-	private static String tankName(Sensor sensor) {
-		return sensor.core$().fullName().replace("$", ".");
-	}
 
 	private static String tankName(Entity e) {
 		return e.from() == null ? null : e.from().message().core$().fullName().replace("$", ".");

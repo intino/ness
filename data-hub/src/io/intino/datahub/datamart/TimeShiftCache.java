@@ -31,7 +31,7 @@ public class TimeShiftCache implements AutoCloseable {
 			this.connection.createStatement().execute("CREATE TABLE IF NOT EXISTS events (id text NOT NULL PRIMARY KEY, ts bigint);");
 			this.insert = connection.prepareStatement("INSERT OR REPLACE INTO events (id, ts) VALUES(?,?);");
 			this.delete = connection.prepareStatement("DELETE FROM events WHERE id=?;");
-			this.query = connection.prepareStatement("SELECT * FROM event WHERE id=?");
+			this.query = connection.prepareStatement("SELECT * FROM events WHERE id=?");
 		} catch (SQLException e) {
 			Logger.error(e);
 		}
@@ -41,6 +41,7 @@ public class TimeShiftCache implements AutoCloseable {
 		try {
 			insert.setString(1, id);
 			insert.setLong(2, ts.toEpochMilli() / 1000);
+			insert.execute();
 		} catch (SQLException e) {
 			Logger.error(e);
 		}

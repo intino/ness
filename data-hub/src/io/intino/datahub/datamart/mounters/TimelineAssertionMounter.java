@@ -11,7 +11,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
-import static io.intino.datahub.datamart.mounters.TimelineMounterUtils.sensorModel;
+import static io.intino.datahub.datamart.mounters.TimelineUtils.sensorModel;
 
 public class TimelineAssertionMounter {
 	private final DataHubBox box;
@@ -24,7 +24,7 @@ public class TimelineAssertionMounter {
 
 	void mount(MessageEvent assertion) {
 		datamart.definition().timelineList().stream()
-				.filter(t -> t.entity().from().message().name$().equals(assertion.type()))
+				.filter(t -> t.entity().from() != null && t.entity().from().message().name$().equals(assertion.type()))
 				.findFirst()
 				.ifPresent(t -> updateSensorModel(assertion, t));
 	}
