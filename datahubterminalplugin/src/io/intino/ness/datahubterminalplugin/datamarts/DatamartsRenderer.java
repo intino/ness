@@ -19,7 +19,9 @@ import java.util.stream.Stream;
 
 import static io.intino.ness.datahubterminalplugin.Formatters.*;
 import static io.intino.ness.datahubterminalplugin.datamarts.StructFrameFactory.STRUCT_INTERNAL_CLASS_SEP;
+import static io.intino.ness.datahubterminalplugin.datamarts.TimelineUtils.types;
 import static java.io.File.separator;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 
 public class DatamartsRenderer implements ConceptRenderer {
@@ -195,7 +197,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return datamart.reelList().stream()
 				.map(r -> quoted().format(r.tank().name$()).toString())
 				.distinct()
-				.collect(Collectors.joining(","));
+				.collect(joining(","));
 	}
 
 	private Frame[] reelsOf(Datamart datamart) {
@@ -226,16 +228,21 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 	private String timelineEvents(Datamart datamart) {
 		return datamart.timelineList().stream()
-				.map(t -> quoted().format(t.tank().sensor().name$()).toString())
-				.collect(Collectors.joining(","));
+				.flatMap(TimelineUtils::types)
+				.distinct()
+				.map(t -> quoted().format(t).toString())
+				.collect(joining(","));
 	}
 
 	private Frame[] timelinesOf(Datamart datamart) {
-		return datamart.timelineList().stream().map(this::timelineFrame).toArray(Frame[]::new);
+		List<Frame> frames = new ArrayList<>();
+		frames.addAll(datamart.timelineList().stream().filter(Timeline::isRaw).map(Timeline::asRaw).map(this::timelineFrame).toList());
+		frames.addAll(datamart.timelineList().stream().filter(Timeline::isCooked).map(Timeline::asCooked).map(this::timelineFrame).toList());
+		return frames.toArray(new Frame[0]);
 	}
 
-	private Frame timelineFrame(Timeline timeline) {
-		FrameBuilder b = new FrameBuilder("timeline");
+	private Frame timelineFrame(Timeline.Raw timeline) {
+		FrameBuilder b = new FrameBuilder("timeline", "raw");
 		b.add("package", modelPackage);
 		b.add("name", timeline.tank().sensor().name$());
 		b.add("sources", sourcesOf(timeline));
@@ -243,7 +250,16 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return b.toFrame();
 	}
 
-	private String sourcesOf(Timeline timeline) {
+	private Frame timelineFrame(Timeline.Cooked timeline) {
+		FrameBuilder b = new FrameBuilder("timeline", "cooked");
+		b.add("package", modelPackage);
+		b.add("name", timeline.name$());
+		b.add("sources", types(timeline.asTimeline()).map(t -> quoted().format(t).toString()).collect(joining(",")));
+		b.add("entity", firstUpperCase(timeline.entity().name$()));
+		return b.toFrame();
+	}
+
+	private String sourcesOf(Timeline.Raw timeline) {
 		String sensor = quoted().format(timeline.tank().sensor().name$()).toString();
 		if (timeline.entity() != null && timeline.entity().from() != null)
 			return sensor + "," + quoted().format(timeline.entity().from().message().name$()).toString();

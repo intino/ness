@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino", "9.7.0-SNAPSHOT") data-hub as Product
+Artifact("io.intino", "9.8.0-SNAPSHOT") data-hub as Product
 	Model("Proteo", "3.4.7", "4.2.3") > outLanguage = "Ness"
 	Box("Konos", "10.6.7")
 	Imports
@@ -27,7 +27,7 @@ Artifact("io.intino", "9.7.0-SNAPSHOT") data-hub as Product
 		Compile("com.zaxxer", "HikariCP", "5.0.1")
 		Compile("org.xerial", "sqlite-jdbc", "3.43.0.0")
 		Test("junit", "junit", "4.13.2")
-		Web("io.intino", "datalake-inspector", "9.7.0-SNAPSHOT")
+		Web("io.intino", "datalake-inspector", "9.8.0-SNAPSHOT")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
 	Distribution > Artifactory("intino-maven")

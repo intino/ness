@@ -30,13 +30,18 @@ public class TimelineRawMounter {
 		try {
 			if (event.ss() == null) return;
 			String ss = sourceSensor(event);
-			TimelineFile timelineFile = datamart.timelineStore().get(event.type(), ss);
-			if (timelineFile == null)
-				timelineFile = createTimelineFile(box.datamartTimelinesDirectory(datamart.name()), datamart, event.ts(), event.type(), ss);
+			TimelineFile timelineFile = getOrCreate(event, ss);
 			update(timelineFile, event);
 		} catch (Exception e) {
 			Logger.error("Could not mount event " + event.type() + ", ss = " + event.ss() + ": " + e.getMessage(), e);
 		}
+	}
+
+	private TimelineFile getOrCreate(MeasurementEvent event, String ss) throws IOException {
+		TimelineFile timelineFile = datamart.timelineStore().get(event.type(), ss);
+		if (timelineFile == null)
+			timelineFile = createTimelineFile(box.datamartTimelinesDirectory(datamart.name()), datamart, event.ts(), event.type(), ss);
+		return timelineFile;
 	}
 
 	private void update(TimelineFile tlFile, MeasurementEvent event) {

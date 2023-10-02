@@ -39,7 +39,7 @@ public class TimelineCookedMounter {
 	public TimelineCookedMounter(DataHubBox box, MasterDatamart datamart, Map<String, List<String>> timelineTypes) {
 		this.datamart = datamart;
 		this.timelineTypes = timelineTypes;
-		this.directory = box.datamartDirectory(datamart.name());
+		this.directory = box.datamartTimelinesDirectory(datamart.name());
 		this.mounterCacheDirectory = new File(directory, ".cache");
 	}
 

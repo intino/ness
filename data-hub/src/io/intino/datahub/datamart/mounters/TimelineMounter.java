@@ -23,9 +23,9 @@ public final class TimelineMounter extends MasterDatamartMounter {
 
 	public TimelineMounter(MasterDatamart datamart) {
 		super(datamart);
+		timelineTypes = datamart.definition().timelineList().stream().collect(Collectors.toMap(Layer::name$, t -> types(t).toList()));
 		rawMounter = new TimelineRawMounter(box(), datamart);
 		assertionMounter = new TimelineAssertionMounter(box(), datamart);
-		timelineTypes = datamart.definition().timelineList().stream().collect(Collectors.toMap(Layer::name$, t -> types(t).toList()));
 		cookedMounter = new TimelineCookedMounter(box(), datamart, timelineTypes);
 	}
 
