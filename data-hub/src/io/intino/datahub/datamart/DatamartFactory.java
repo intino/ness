@@ -11,9 +11,10 @@ import io.intino.datahub.datamart.impl.LocalMasterDatamart;
 import io.intino.datahub.datamart.mounters.EntityMounter;
 import io.intino.datahub.datamart.mounters.ReelMounter;
 import io.intino.datahub.datamart.mounters.TimelineMounter;
+import io.intino.datahub.datamart.mounters.TimelineUtils;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Entity;
-import io.intino.datahub.model.Sensor;
+import io.intino.datahub.model.Timeline;
 import io.intino.datahub.model.rules.DayOfWeek;
 import io.intino.datahub.model.rules.SnapshotScale;
 import org.apache.commons.io.FileUtils;
@@ -123,7 +124,7 @@ public class DatamartFactory {
 		tankNames.addAll(timelineTanks);
 		tankNames.addAll(reelTanks);
 
-		if(fromTs != null) {
+		if (fromTs != null) {
 			Timetag fromTimetag = Timetag.of(fromTs, Scale.Minute);
 			return EventStream.merge(tanks(tankNames).map(tank -> (Stream<Event>) tank.content((ss, tt) -> tt.isAfter(fromTimetag))))
 					.filter(e -> e.ts().isAfter(fromTs))
@@ -147,7 +148,14 @@ public class DatamartFactory {
 	}
 
 	private static Set<String> timelineTanks(Datamart definition) {
-		return definition.timelineList().stream().flatMap(t -> Stream.of(tankName(t.tank().sensor()), tankName(t.entity()))).filter(Objects::nonNull).collect(Collectors.toSet());
+		return definition.timelineList().stream()
+				.flatMap(TimelineUtils::tanksOf)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toSet());
+	}
+
+	public static Stream<String> tanksOf(Timeline.Cooked.TimeSeries.Count ts) {
+		return ts.operationList().stream().map(d -> tankName(d.tank()));
 	}
 
 	private static Set<String> entityTanks(Datamart definition) {
@@ -158,9 +166,6 @@ public class DatamartFactory {
 		return tank.message().core$().fullName().replace("$", ".");
 	}
 
-	private static String tankName(Sensor sensor) {
-		return sensor.core$().fullName().replace("$", ".");
-	}
 
 	private static String tankName(Entity e) {
 		return e.from() == null ? null : e.from().message().core$().fullName().replace("$", ".");

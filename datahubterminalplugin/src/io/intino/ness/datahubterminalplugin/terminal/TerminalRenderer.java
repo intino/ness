@@ -10,6 +10,7 @@ import io.intino.magritte.framework.Layer;
 import io.intino.ness.datahubterminalplugin.Commons;
 import io.intino.ness.datahubterminalplugin.Formatters;
 import io.intino.ness.datahubterminalplugin.datamarts.DatamartsRenderer;
+import io.intino.ness.datahubterminalplugin.datamarts.TimelineUtils;
 import io.intino.plugin.PluginLauncher;
 
 import java.io.File;
@@ -17,6 +18,7 @@ import java.io.PrintStream;
 import java.util.*;
 
 import static io.intino.ness.datahubterminalplugin.Formatters.*;
+import static io.intino.ness.datahubterminalplugin.datamarts.TimelineUtils.tanksOf;
 import static java.util.stream.Collectors.toMap;
 
 class TerminalRenderer {
@@ -30,9 +32,11 @@ class TerminalRenderer {
 	private final Set<Tank.Message> messageTanks = new HashSet<>();
 	private final Set<Tank.Measurement> measurementTanks = new HashSet<>();
 	private final Set<Tank.Resource> resourceTanks = new HashSet<>();
+	private final Datalake datalake;
 
 	TerminalRenderer(Terminal terminal, File srcDir, String rootPackage, Configuration conf, PrintStream logger, PluginLauncher.Notifier notifier, String ontologyPackage) {
 		this.terminal = terminal;
+		this.datalake = terminal.graph().datalake();
 		this.srcDir = srcDir;
 		this.rootPackage = rootPackage;
 		this.conf = conf;
@@ -57,7 +61,7 @@ class TerminalRenderer {
 
 		if (terminal.datamarts() != null) {
 			renderDatamarts(builder);
-			addSubscribeForThedevents(builder);
+			addSubscribeForTheEvents(builder);
 		}
 
 		if (!messageTanks.isEmpty()) builder.add("message", messageFrames());
@@ -72,12 +76,12 @@ class TerminalRenderer {
 		terminal.subscribe().resourceTanks().forEach(tank -> builder.add("subscribe", frameOf(tank)));
 	}
 
-	private void addSubscribeForThedevents(FrameBuilder builder) {
+	private void addSubscribeForTheEvents(FrameBuilder builder) {
 		Set<String> tanksAlreadySubscribedTo = new HashSet<>();
 		if (terminal.subscribe() != null) {
-			terminal.subscribe().messageTanks().stream().map(Layer::name$).forEach(tanksAlreadySubscribedTo::add);
-			terminal.subscribe().measurementTanks().stream().map(Layer::name$).forEach(tanksAlreadySubscribedTo::add);
-			terminal.subscribe().resourceTanks().stream().map(Layer::name$).forEach(tanksAlreadySubscribedTo::add);
+			terminal.subscribe().messageTanks().stream().map(Tank.Message::qn).forEach(tanksAlreadySubscribedTo::add);
+			terminal.subscribe().measurementTanks().stream().map(Tank.Measurement::qn).forEach(tanksAlreadySubscribedTo::add);
+			terminal.subscribe().resourceTanks().stream().map(Tank.Resource::qn).forEach(tanksAlreadySubscribedTo::add);
 		}
 
 		for (Datamart datamart : terminal.datamarts().list()) {
@@ -90,27 +94,36 @@ class TerminalRenderer {
 	private void addSubscriberForReelEvents(FrameBuilder builder, Set<String> tanksAlreadySubscribedTo, Datamart datamart) {
 		datamart.reelList().stream()
 				.map(Reel::tank)
-				.filter(Objects::nonNull).distinct()
-				.filter(tank -> tanksAlreadySubscribedTo.add(tank.name$()))
+				.filter(Objects::nonNull)
+				.distinct()
+				.filter(tank -> tanksAlreadySubscribedTo.add(tank.qn()))
 				.forEach(tank -> builder.add("subscribe", frameOf(tank)));
 	}
 
 	private void addSubscribersForTimelineEvents(FrameBuilder builder, Set<String> tanksAlreadySubscribedTo, Datamart datamart) {
-		datamart.timelineList().stream()
-				.map(Timeline::tank)
-				.filter(Objects::nonNull)
+		datamart.timelineList().stream().collect(toMap(t -> t, t -> tanksOf(t).toList())).values().stream()
+				.flatMap(Collection::stream)
 				.distinct()
-				.filter(tank -> tanksAlreadySubscribedTo.add(tank.name$()))
-				.forEach(tank -> builder.add("subscribe", frameOf(tank)));
+				.filter(tanksAlreadySubscribedTo::add)
+				.forEach(tank -> builder.add("subscribe", frameOf(findTankByQn(tank))));
 	}
+
 
 	private void addSubscribersForEntityEvents(FrameBuilder builder, Set<String> tanksAlreadySubscribedTo, Datamart datamart) {
 		datamart.entityList().stream()
 				.map(Entity::from)
 				.filter(Objects::nonNull)
 				.distinct()
-				.filter(tank -> tanksAlreadySubscribedTo.add(tank.name$()))
+				.filter(tank -> tanksAlreadySubscribedTo.add(tank.qn()))
 				.forEach(tank -> builder.add("subscribe", frameOf(tank)));
+	}
+
+	private Frame frameOf(Tank tank) {
+		return tank.isMessage() ? frameOf(tank.asMessage()) : frameOf(tank.asMeasurement());
+	}
+
+	private Tank findTankByQn(String tank) {
+		return datalake.tank(t -> t.qn().equals(tank));
 	}
 
 	private void addPublish(FrameBuilder builder) {
@@ -151,11 +164,15 @@ class TerminalRenderer {
 
 	private Map<String, FrameBuilder> timelineEventsOf(Datamart datamart) {
 		return datamart.timelineList().stream()
-				.map(Timeline::tank)
-				.filter(Objects::nonNull)
-				.map(Tank.Measurement::sensor)
+				.flatMap(TimelineUtils::tanksOf)
 				.distinct()
+				.map(this::findTankByQn)
+				.filter(Objects::nonNull)
 				.collect(toMap(Layer::name$, tank -> frameOf(tank, datamart)));
+	}
+
+	private FrameBuilder frameOf(Tank tank, Datamart datamart) {
+		return tank.isMessage() ? frameOf(tank.asMessage().message(), datamart) : frameOf(tank.asMeasurement().sensor(), datamart);
 	}
 
 	private Map<String, FrameBuilder> entityEventsOf(Datamart datamart) {
