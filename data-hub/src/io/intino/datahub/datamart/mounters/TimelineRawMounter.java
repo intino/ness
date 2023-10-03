@@ -64,7 +64,13 @@ public class TimelineRawMounter {
 	}
 
 	private void update(MeasurementEvent event, TimelineFile.DataSession session) {
-		IntStream.range(0, event.measurements().length).forEach(i -> session.set(event.measurements()[i].name(), event.values()[i]));
+		IntStream.range(0, event.measurements().length).forEach(i -> session.set(name(event, i), event.values()[i]));
+	}
+
+	private static String name(MeasurementEvent event, int i) {
+		//FIXME remove when all measurement events removed
+		String name = event.measurements()[i].name();
+		return name.contains("=") ? name.substring(0, name.indexOf(":")) : name;
 	}
 
 	private void close(TimelineFile.DataSession session) {
