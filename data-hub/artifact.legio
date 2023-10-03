@@ -8,7 +8,7 @@ Artifact("io.intino", "9.8.0") data-hub as Product
 		Compile("io.intino.alexandria", "core-framework", "2.2.0")
 		Compile("io.intino.alexandria", "jmx", "1.0.5")
 		Compile("io.intino.alexandria", "primitives", "1.1.2")
-		Compile("io.intino.alexandria", "sealing", "7.0.4")
+		Compile("io.intino.alexandria", "sealing", "7.0.5")
 		Compile("io.intino.alexandria", "ui-framework", "4.28.3")
 			Exclude("io.intino.alexandria", "driver-r")
 			Exclude("io.intino.alexandria", "driver-shiny")
