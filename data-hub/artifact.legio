@@ -27,7 +27,7 @@ Artifact("io.intino", "9.8.0") data-hub as Product
 		Compile("com.zaxxer", "HikariCP", "5.0.1")
 		Compile("org.xerial", "sqlite-jdbc", "3.43.0.0")
 		Test("junit", "junit", "4.13.2")
-		Web("io.intino", "datalake-inspector", "9.8.0-SNAPSHOT")
+		Web("io.intino", "datalake-inspector", "9.8.0")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
 	Distribution > Artifactory("intino-maven")
