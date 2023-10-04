@@ -2,17 +2,23 @@ package io.intino.datahub.datamart.mounters;
 
 import io.intino.alexandria.event.Event;
 import io.intino.alexandria.event.measurement.MeasurementEvent;
+import io.intino.alexandria.event.measurement.MeasurementEvent.Magnitude;
+import io.intino.alexandria.event.measurement.MeasurementEvent.Magnitude.Attribute;
 import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.message.Message;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.model.Timeline;
 import io.intino.magritte.framework.Layer;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static io.intino.alexandria.event.measurement.MeasurementEvent.ATTRIBUTE_SEP;
+import static io.intino.alexandria.event.measurement.MeasurementEvent.NAME_VALUE_SEP;
 import static io.intino.datahub.datamart.mounters.TimelineUtils.types;
+import static java.util.Arrays.stream;
 
 public final class TimelineMounter extends MasterDatamartMounter {
 
@@ -58,6 +64,33 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	}
 
 	private static MeasurementEvent measurementEvent(Message message) {
-		return new MeasurementEvent(message.type(), message.get("ss").asString(), message.get("ts").asInstant(), message.get("measurements").as(String[].class), java.util.Arrays.stream(message.get("values").as(String[].class)).mapToDouble(Double::parseDouble).toArray());
+		return new MeasurementEvent(message.type(),
+				message.get("ss").asString(),
+				message.get("ts").asInstant(),
+				measurements(message),
+				values(message));
+	}
+
+	private static Magnitude[] measurements(Message message) {
+		List<String> measurements = message.get("measurements").asList(String.class);
+		return measurements.stream()
+				.map(TimelineMounter::magnitude)
+				.toArray(Magnitude[]::new);
+	}
+
+	private static Magnitude magnitude(String m) {
+		String[] fields = m.split(ATTRIBUTE_SEP);
+		return new Magnitude(fields[0], attributes(fields));
+	}
+
+	private static Attribute[] attributes(String[] m) {
+		return Arrays.stream(m)
+				.skip(1)
+				.map(a -> new Attribute(a.split(NAME_VALUE_SEP)))
+				.toArray(Attribute[]::new);
+	}
+
+	private static double[] values(Message message) {
+		return stream(message.get("values").as(String[].class)).mapToDouble(Double::parseDouble).toArray();
 	}
 }
