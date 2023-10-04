@@ -21,7 +21,6 @@ import static io.intino.datahub.datamart.mounters.TimelineUtils.types;
 import static java.util.Arrays.stream;
 
 public final class TimelineMounter extends MasterDatamartMounter {
-
 	private final TimelineRawMounter rawMounter;
 	private final TimelineAssertionMounter assertionMounter;
 	private final TimelineCookedMounter cookedMounter;
@@ -72,7 +71,7 @@ public final class TimelineMounter extends MasterDatamartMounter {
 	}
 
 	private static Magnitude[] measurements(Message message) {
-		List<String> measurements = message.get("measurements").asList(String.class);
+		List<String> measurements = message.get("magnitudes").asList(String.class);
 		return measurements.stream()
 				.map(TimelineMounter::magnitude)
 				.toArray(Magnitude[]::new);
