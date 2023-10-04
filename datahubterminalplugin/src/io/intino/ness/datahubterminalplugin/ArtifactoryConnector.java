@@ -1,6 +1,7 @@
 package io.intino.ness.datahubterminalplugin;
 
 import io.intino.Configuration;
+import io.intino.alexandria.logger.Logger;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.ByteArrayOutputStream;
@@ -11,7 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
+import java.util.function.Function;
 
 public class ArtifactoryConnector {
 	public static final String MAVEN_URL = "https://repo1.maven.org/maven2/";
@@ -28,7 +30,7 @@ public class ArtifactoryConnector {
 		}
 	}
 
-	public static List<String> chronosVersions() {
+	public static List<Version> chronosVersions() {
 		try {
 			URL url = new URL(INTINO_RELEASES + "/io/intino/sumus/chronos/maven-metadata.xml");
 			return extractVersions(read(connect(url)).toString());
@@ -37,7 +39,7 @@ public class ArtifactoryConnector {
 		}
 	}
 
-	public static List<String> terminalVersions() {
+	public static List<Version> terminalVersions() {
 		try {
 			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/terminal-jms/maven-metadata.xml");
 			return extractVersions(read(connect(url)).toString());
@@ -46,7 +48,7 @@ public class ArtifactoryConnector {
 		}
 	}
 
-	public static List<String> ingestionVersions() {
+	public static List<Version> ingestionVersions() {
 		try {
 			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/ingestion/maven-metadata.xml");
 			return extractVersions(read(connect(url)).toString());
@@ -55,7 +57,7 @@ public class ArtifactoryConnector {
 		}
 	}
 
-	public static List<String> masterVersions() {
+	public static List<Version> masterVersions() {
 		try {
 			URL url = new URL(INTINO_RELEASES + "/io/intino/ness/master/maven-metadata.xml");
 			return extractVersions(read(connect(url)).toString());
@@ -64,7 +66,7 @@ public class ArtifactoryConnector {
 		}
 	}
 
-	public static List<String> eventVersions() {
+	public static List<Version> eventVersions() {
 		try {
 			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/event/maven-metadata.xml");
 			return extractVersions(read(connect(url)).toString());
@@ -73,7 +75,7 @@ public class ArtifactoryConnector {
 		}
 	}
 
-	public static List<String> datalakeVersions() {
+	public static List<Version> datalakeVersions() {
 		try {
 			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/datalake/maven-metadata.xml");
 			return extractVersions(read(connect(url)).toString());
@@ -82,7 +84,7 @@ public class ArtifactoryConnector {
 		}
 	}
 
-	public static List<String> bpmVersions() {
+	public static List<Version> bpmVersions() {
 		try {
 			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/bpm-framework/maven-metadata.xml");
 			return extractVersions(read(connect(url)).toString());
@@ -92,16 +94,7 @@ public class ArtifactoryConnector {
 	}
 
 
-	public static List<String> ledVersions() {
-		try {
-			URL url = new URL(INTINO_RELEASES + "/io/intino/alexandria/led/maven-metadata.xml");
-			return extractVersions(read(connect(url)).toString());
-		} catch (Throwable e) {
-			return Collections.emptyList();
-		}
-	}
-
-	public static List<String> versions(Configuration.Repository repo, String artifact) {
+	public static List<Version> versions(Configuration.Repository repo, String artifact) {
 		try {
 			String spec = repo.url() + (repo.url().endsWith("/") ? "" : "/") + artifact.replace(":", "/").replace(".", "/") + "/maven-metadata.xml";
 			URL url = new URL(spec);
@@ -131,12 +124,23 @@ public class ArtifactoryConnector {
 		}
 	}
 
-	private static List<String> extractVersions(String metadata) {
+	private static List<Version> extractVersions(String metadata) {
 		if (!metadata.contains("<versions>")) return Collections.emptyList();
 		metadata = metadata.substring(metadata.indexOf("<versions>")).substring("<versions>".length() + 1);
 		metadata = metadata.substring(0, metadata.indexOf("</versions>"));
 		metadata = metadata.replace("<version>", "").replace("</version>", "");
-		return Arrays.stream(metadata.trim().split("\n")).map(String::trim).collect(Collectors.toList());
+		return Arrays.stream(metadata.trim().split("\n")).map(version()).filter(Objects::nonNull).toList();
+	}
+
+	private static Function<String, Version> version() {
+		return s -> {
+			try {
+				return new Version(s.trim());
+			} catch (IntinoException e) {
+				Logger.error(e);
+				return null;
+			}
+		};
 	}
 
 	private static ByteArrayOutputStream read(InputStream stream) throws Throwable {

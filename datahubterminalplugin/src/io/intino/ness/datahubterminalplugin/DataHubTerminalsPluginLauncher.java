@@ -163,8 +163,15 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		return suitableVersion(ArtifactoryConnector.bpmVersions(), MINIMUM_BPM_VERSION, MAX_BPM_VERSION);
 	}
 
-	private String suitableVersion(List<String> versions, String min, String max) {
-		return versions.stream().sorted(Comparator.reverseOrder()).filter(v -> v.compareTo(max) < 0).findFirst().orElse(min);
+	private String suitableVersion(List<Version> versions, String min, String max) {
+		try {
+			Version maxVersion = new Version(max);
+			Version minVersion = new Version(min);
+			return versions.stream().sorted(Comparator.reverseOrder()).filter(v -> v.compareTo(maxVersion) < 0).findFirst().orElse(minVersion).get();
+		} catch (IntinoException e) {
+			Logger.error(e);
+			return min;
+		}
 	}
 
 	private boolean isSnapshotVersion() {
