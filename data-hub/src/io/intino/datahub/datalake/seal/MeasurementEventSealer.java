@@ -36,9 +36,13 @@ class MeasurementEventSealer {
 		try (ZitWriter writer = file.exists() && file.length() > 0 ? new ZitWriter(file) : initFile(fingerprint, file)) {
 			if (writer == null) return;
 			streamOf(sessions)
-					.map(e -> new MeasurementEvent(e.type(), e.ss(), e.ts(), e.toMessage().get("measurements").as(String[].class), values(e.toMessage())))
+					.map(e -> new MeasurementEvent(e.type(), e.ss(), e.ts(), magnitudes(e), values(e.toMessage())))
 					.forEach(m -> writer.put(m.ts(), m.values()));
 		}
+	}
+
+	private static String[] magnitudes(MessageEvent e) {
+		return e.toMessage().contains("magnitudes") ? e.toMessage().get("magnitudes").as(String[].class) : e.toMessage().get("measurements").as(String[].class);
 	}
 
 	private ZitWriter initFile(Fingerprint fingerprint, File datalakeFile) {
