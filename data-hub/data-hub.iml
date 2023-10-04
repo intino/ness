@@ -165,5 +165,7 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:7.0.5" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:event:5.0.5" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zit:1.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
   </component>
 </module>
