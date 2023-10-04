@@ -1,20 +1,24 @@
 def type(measurement)
 	package $package+ValidPackage;
 
+	import static io.intino.alexandria.zit.Zit.ATTRIBUTE_DELIMITER;
+	import static io.intino.alexandria.zit.Zit.NAME_VALUE_SEP;
+
+
 	public class $name+firstUpperCase extends io.intino.alexandria.event.measurement.MeasurementEvent implements java.io.Serializable {
 
-		private static final String$[] declaredMeasurements = new String$[]{$value+nameQuoted...[, ]};
+		private static final String$[] declaredMagnitudes = new String$[]{$value+nameQuoted...[, ]};
 
 		public $name+firstUpperCase(String ss) {
-			super("$name+firstUpperCase", ss, java.time.Instant.now(), declaredMeasurements, new double$[$size]);
+			super("$name+firstUpperCase", ss, java.time.Instant.now(), declaredMagnitudes, new double$[$size]);
 		}
 
 		public $name+firstUpperCase(String ss, String sensor) {
-			super("$name+firstUpperCase", ss + "?sensor=" + sensor, java.time.Instant.now(), declaredMeasurements, new double$[$size]);
+			super("$name+firstUpperCase", ss + "?sensor=" + sensor, java.time.Instant.now(), declaredMagnitudes, new double$[$size]);
 		}
 
 		public $name+firstUpperCase(String ss, String sensor, java.time.Instant ts) {
-			super("$name+firstUpperCase", ss + "?sensor=" + sensor, ts, declaredMeasurements, new double$[$size]);
+			super("$name+firstUpperCase", ss + "?sensor=" + sensor, ts, declaredMagnitudes, new double$[$size]);
 		}
 
 		public $name+firstUpperCase(io.intino.alexandria.event.measurement.MeasurementEvent event) {
@@ -41,7 +45,10 @@ def type(measurement)
 end
 
 def trigger(nameQuoted)
-	"$id[:$attribute...[:]]"
+	"$id"[+ ATTRIBUTE_DELIMITER + String.join(ATTRIBUTE_DELIMITER, $attribute+nameValue...[, ])]
+end
+def trigger(nameValue)
+	"$name" +NAME_VALUE_SEP + "$value"
 end
 
 def trigger(getter)

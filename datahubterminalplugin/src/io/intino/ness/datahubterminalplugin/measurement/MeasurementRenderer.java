@@ -50,14 +50,14 @@ public class MeasurementRenderer {
 				.add("id", magnitude.id())
 				.add("name", magnitude.name$())
 				.add("owner", measurement);
-		if (!magnitude.attributeList().isEmpty()) fb.add("attribute", toString(magnitude.attributeList()));
+		if (!magnitude.attributeList().isEmpty()) fb.add("attribute", serialize(magnitude.attributeList()));
 		return fb.toFrame();
 	}
 
-	private static String[] toString(List<Magnitude.Attribute> attributes) {
+	private static Frame[] serialize(List<Magnitude.Attribute> attributes) {
 		return attributes.stream()
-				.map(a -> a.name$() + "=" + a.value())
-				.toArray(String[]::new);
+				.map(a -> new FrameBuilder().add("name", a.name$()).add("value", a.value()).toFrame())
+				.toArray(Frame[]::new);
 	}
 
 	private String rootPackage() {
