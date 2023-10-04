@@ -3,10 +3,7 @@ package io.intino.ness.datahubterminalplugin.ontology;
 import io.intino.Configuration;
 import io.intino.datahub.model.NessGraph;
 import io.intino.itrules.FrameBuilder;
-import io.intino.ness.datahubterminalplugin.ArtifactoryConnector;
-import io.intino.ness.datahubterminalplugin.Commons;
-import io.intino.ness.datahubterminalplugin.Formatters;
-import io.intino.ness.datahubterminalplugin.PomTemplate;
+import io.intino.ness.datahubterminalplugin.*;
 import io.intino.plugin.PluginLauncher;
 import org.apache.maven.shared.invoker.*;
 
@@ -70,8 +67,8 @@ public class OntologyPublisher {
 	private boolean isDistributed(Configuration.Artifact artifact) {
 		String identifier = basePackage + ":ontology";
 		if (artifact.distribution() == null) return false;
-		List<String> versions = ArtifactoryConnector.versions(artifact.distribution().release(), identifier);
-		return versions.contains(artifact.version());
+		List<Version> versions = ArtifactoryConnector.versions(artifact.distribution().release(), identifier);
+		return versions.stream().anyMatch(v -> v.get().equals(artifact.version()));
 	}
 
 	private File sourceDirectory() {
