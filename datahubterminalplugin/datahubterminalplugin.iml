@@ -150,9 +150,6 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.legio:model:3.2.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:terminal-jms:5.5.9" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: com.github.luben:zstd-jni:1.5.4-1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.6.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.4" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:bpm-framework:3.1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:2.0.7" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: junit:junit:4.13.2" level="project" />
@@ -167,5 +164,8 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:event:5.0.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zit:1.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.sumus:chronos:1.1.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.6.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.4" level="project" />
   </component>
 </module>

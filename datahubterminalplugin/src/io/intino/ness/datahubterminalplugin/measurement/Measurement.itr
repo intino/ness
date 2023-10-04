@@ -22,11 +22,11 @@ def type(measurement)
 		}
 
 		public $name+firstUpperCase(io.intino.alexandria.event.measurement.MeasurementEvent event) {
-			super("$name+firstUpperCase", event.ss(), event.ts(), event.measurements(), event.values());
+			super("$name+firstUpperCase", event.ss(), event.ts(), event.magnitudes(), event.values());
 		}
 
 		public $name+firstUpperCase(io.intino.alexandria.message.Message message) {
-			super("$name+firstUpperCase", message.get("ss").asString(), message.get("ts").asInstant(), message.get("measurements").as(String$[].class), java.util.Arrays.stream(message.get("values").as(String$[].class)).mapToDouble(Double::parseDouble).toArray());
+			super("$name+firstUpperCase", message.get("ss").asString(), message.get("ts").asInstant(), message.get("magnitudes").as(String$[].class), java.util.Arrays.stream(message.get("values").as(String$[].class)).mapToDouble(Double::parseDouble).toArray());
 		}
 
 		[$value+getter...[$NL$NL]]
@@ -37,7 +37,7 @@ def type(measurement)
 			io.intino.alexandria.message.Message message = new io.intino.alexandria.message.Message(this.getClass().getSimpleName());
 			message.set("ts", this.ts);
 			message.set("ss", this.source);
-			java.util.Arrays.stream(measurements).forEach(m -> message.append("measurements", m.toString()));
+			java.util.Arrays.stream(magnitudes).forEach(m -> message.append("magnitudes", m.toString()));
 			java.util.Arrays.stream(values).forEach(m -> message.append("values", m));
 			return new io.intino.alexandria.event.message.MessageEvent(message);
 		}
@@ -48,7 +48,7 @@ def trigger(nameQuoted)
 	"$id"[+ ATTRIBUTE_DELIMITER + String.join(ATTRIBUTE_DELIMITER, $attribute+nameValue...[, ])]
 end
 def trigger(nameValue)
-	"$name" +NAME_VALUE_SEP + "$value"
+	"$name" + NAME_VALUE_SEP + "$value"
 end
 
 def trigger(getter)
