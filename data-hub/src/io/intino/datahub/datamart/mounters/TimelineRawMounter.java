@@ -12,10 +12,11 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static io.intino.datahub.datamart.mounters.TimelineUtils.createTimelineFile;
+import static io.intino.datahub.datamart.mounters.TimelineUtils.createTimelineFileOfRawTimeline;
 
 public class TimelineRawMounter {
 	private final DataHubBox box;
@@ -39,11 +40,11 @@ public class TimelineRawMounter {
 	private TimelineFile getOrCreate(MeasurementEvent event, String ss) throws IOException {
 		TimelineFile timelineFile = datamart.timelineStore().get(event.type(), ss);
 		if (timelineFile == null)
-			timelineFile = createTimelineFile(box.datamartTimelinesDirectory(datamart.name()), datamart, event.ts(), event.type(), ss);
+			timelineFile = createTimelineFileOfRawTimeline(box.datamartTimelinesDirectory(datamart.name()), datamart, event.ts(), event.type(), ss);
 		return timelineFile;
 	}
 
-	private void update(TimelineFile tlFile, MeasurementEvent event) {
+	protected void update(TimelineFile tlFile, MeasurementEvent event) {
 		TimelineFile.DataSession session = null;
 		try {
 			session = tlFile.add();
@@ -72,7 +73,7 @@ public class TimelineRawMounter {
 		return name.contains("=") ? name.substring(0, name.indexOf(":")) : name;
 	}
 
-	private void close(TimelineFile.DataSession session) {
+	protected void close(TimelineFile.DataSession session) {
 		try {
 			if (session != null) session.close();
 		} catch (IOException ignored) {
@@ -80,7 +81,7 @@ public class TimelineRawMounter {
 	}
 
 
-	private String sourceSensor(Event event) {
+	protected String sourceSensor(Event event) {
 		Map<String, String> parameters = parameters(event.ss());
 		String sensor = parameters.get("sensor");
 		String cleanSS = withOutParameters(event.ss());
@@ -96,5 +97,43 @@ public class TimelineRawMounter {
 		if (i < 0 || i == ss.length() - 1) return Map.of();
 		String[] parameters = ss.substring(i + 1).split(";");
 		return Arrays.stream(parameters).map(p -> p.split("=")).collect(Collectors.toMap(p -> p[0], p -> p[1]));
+	}
+
+	public static class OfSingleTimeline extends TimelineRawMounter implements AutoCloseable {
+
+		private final Supplier<TimelineFile> tlFile;
+		private TimelineFile.DataSession session;
+
+		public OfSingleTimeline(DataHubBox box, MasterDatamart datamart, Supplier<TimelineFile> tlFile) {
+			super(box, datamart);
+			this.tlFile = tlFile;
+		}
+
+		@Override
+		public void close() {
+			close(session);
+			session = null;
+		}
+
+		@Override
+		public void mount(MeasurementEvent event) {
+			try {
+				update(tlFile.get(), event);
+			} catch (Exception e) {
+				Logger.error("Could not mount event " + event.type() + ", ss = " + event.ss() + ": " + e.getMessage(), e);
+			}
+		}
+
+		@Override
+		protected void update(TimelineFile tlFile, MeasurementEvent event) {
+			try {
+				if(session == null) session = tlFile.add();
+				checkTs(event.ts(), tlFile, session);
+				if (tlFile.count() == 0 || tlFile.next().isBefore(event.ts()) || Math.abs(Duration.between(event.ts(), tlFile.next()).getSeconds()) / 60 <= 1)
+					super.update(event, session);
+			} catch (IOException e) {
+				Logger.error(e);
+			}
+		}
 	}
 }

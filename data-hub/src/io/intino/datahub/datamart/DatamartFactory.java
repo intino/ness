@@ -15,14 +15,15 @@ import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.Sensor;
 import io.intino.datahub.model.Timeline;
-import io.intino.datahub.model.rules.DayOfWeek;
 import io.intino.datahub.model.rules.SnapshotScale;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,7 +37,7 @@ public class DatamartFactory {
 		this.datalake = datalake;
 	}
 
-	public MasterDatamart create(Datamart definition) throws IOException {
+	public MasterDatamart create(Datamart definition) throws Exception {
 		Reference<MasterDatamart> datamart = new Reference<>();
 		Reference<Instant> fromTs = new Reference<>();
 
@@ -59,21 +60,41 @@ public class DatamartFactory {
 		return true;
 	}
 
-	public MasterDatamart reflow(MasterDatamart datamart, Instant fromTs, Datamart definition) throws IOException {
+	public MasterDatamart reflow(MasterDatamart datamart, Instant fromTs, Datamart definition) throws Exception {
 		SnapshotScale scale = definition.snapshots() == null ? SnapshotScale.None : Optional.ofNullable(definition.snapshots().scale()).orElse(SnapshotScale.None);
-		DayOfWeek firstDayOfWeek = definition.snapshots() == null ? DayOfWeek.MONDAY : definition.snapshots().firstDayOfWeek();
 
-		EntityMounter entityMounter = new EntityMounter(datamart);
-		TimelineMounter timelineMounter = new TimelineMounter(datamart);
-		ReelMounter reelMounter = new ReelMounter(datamart);
+		Set<String> entityTanks = entityTanks(definition);
+		Set<String> cookedTimelineTanks = cookedTimelinesTanks(definition);
+		Set<String> reelTanks = reelTanks(definition);
 
-		reflow(List.of(entityMounter, timelineMounter), reflowTanks(fromTs, entityTanks(definition), cookedTimelinesTanks(definition)));
-		reflow(List.of(reelMounter), reflowTanks(fromTs, reelTanks(definition)));
-		reflowTimelines(definition, timelineMounter, fromTs, scale);
+		Logger.info("Reflowing entities and cooked timelines...");
+		reflow(new EntityMounter(datamart), new TimelineMounter(datamart), entityTanks, cookedTimelineTanks, reflowTanks(fromTs, entityTanks, cookedTimelineTanks));
+
+		Logger.info("Reflowing raw timelines...");
+		reflowTimelines(datamart, definition, fromTs, scale);
+
+		Logger.info("Reflowing reels...");
+		reflow(new ReelMounter(datamart), reflowTanks(fromTs, reelTanks));
+
+		Logger.info("Reflow complete");
 
 		box.datamartSerializer().saveSnapshot(Timetag.today(), datamart);
 
 		return datamart;
+	}
+
+	private void reflow(MasterDatamartMounter mounters, Iterator<Event> events) {
+		while(events.hasNext()) {
+			mounters.mount(events.next());
+		}
+	}
+
+	private void reflow(EntityMounter entityMounter, TimelineMounter timelineMounter, Set<String> entityTanks, Set<String> cookedTimelineTanks, Iterator<Event> events) {
+		while(events.hasNext()) {
+			Event event = events.next();
+			if(entityTanks.contains(event.type())) entityMounter.mount(event);
+			if(cookedTimelineTanks.contains(event.type())) timelineMounter.mount(event);
+		}
 	}
 
 	private Set<String> cookedTimelinesTanks(Datamart definition) {
@@ -84,27 +105,41 @@ public class DatamartFactory {
 				.collect(Collectors.toSet());
 	}
 
-	private void reflowTimelines(Datamart definition, TimelineMounter mounter, Instant fromTs, SnapshotScale scale) {
-		for(var rawTimeline : definition.timelineList(Timeline::isRaw)) {
-			Datalake.Store.Tank<MessageEvent> messageTank = datalake.messageStore().tank(tankName(rawTimeline.entity()));
+	// Reflow each ss independently to avoid too many files open error
+	private void reflowTimelines(MasterDatamart datamart, Datamart definition, Instant fromTs, SnapshotScale scale) throws InterruptedException {
+		ExecutorService threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()-1);
+		for(var rawTimeline : definition.timelineList(t -> t.isRaw() && tankName(t.entity()) != null)) {
+			String entityTankName = tankName(rawTimeline.entity());
+			Datalake.Store.Tank<MessageEvent> messageTank = datalake.messageStore().tank(entityTankName);
 			Datalake.Store.Tank<MeasurementEvent> measurementTank = datalake.measurementStore().tank(tankName(rawTimeline.asRaw().tank().sensor()));
-			measurementTank.sources().forEach(ss -> reflowTimelinesOf(ss, messageTank, mounter, fromTs, scale));
+			threadPool.execute(() -> measurementTank.sources().forEach(ss -> reflowTimelinesOf(
+					datamart,
+					getSimpleName(measurementTank.name()),
+					ss,
+					messageTank,
+					fromTs,
+					scale)
+			));
 		}
+		threadPool.shutdown();
+		threadPool.awaitTermination(1, TimeUnit.DAYS);// TODO:check
 	}
 
-	private void reflowTimelinesOf(Datalake.Store.Source<MeasurementEvent> ss, Datalake.Store.Tank<MessageEvent> messageTank, TimelineMounter mounter, Instant fromTs, SnapshotScale scale) {
-		Stream content = messageTank.content();
-		Stream measurements = EventStream.sequence(ss.tubs().map(Datalake.Store.Tub::eventSupplier).toList());
-		Iterator<Event> events = EventStream.merge(Stream.of(content, measurements)).iterator();
-		while(events.hasNext()) {
-			mounter.mount(events.next());
-		}
+	private String getSimpleName(String name) {
+		return name.substring(name.lastIndexOf('.') + 1);
 	}
 
-	private void reflow(List<MasterDatamartMounter> mounters, Iterator<Event> events) {
-		while(events.hasNext()) {
-			Event event = events.next();
-			mounters.forEach(mounter -> mounter.mount(event));
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	private void reflowTimelinesOf(MasterDatamart datamart, String measurementTank, Datalake.Store.Source<MeasurementEvent> ss, Datalake.Store.Tank<MessageEvent> messageTank, Instant fromTs, SnapshotScale scale) {
+		try(TimelineMounter.OfSingleTimeline mounter = new TimelineMounter.OfSingleTimeline(datamart, measurementTank, ss.name())) {
+			Stream content = messageTank.content();
+			Stream measurements = EventStream.sequence(ss.tubs().map(Datalake.Store.Tub::eventSupplier).toList());
+			Iterator<Event> events = EventStream.merge(Stream.of(content, measurements)).iterator();
+			while(events.hasNext()) {
+				mounter.mount(events.next());
+			}
+		} catch (Exception e) {
+			Logger.error(e);
 		}
 	}
 

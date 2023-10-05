@@ -32,8 +32,12 @@ public class TimelineUtils {
 		Map<String, String> attrs = new HashMap<>();
 		for (Sensor.Magnitude.Attribute attribute : magnitudeAttr) attrs.put(attribute.name$(), attribute.value());
 		if (current != null) {
-			Magnitude.Model model = current.get(m.id()).model;
-			model.attributes().forEach(a -> attrs.put(a, model.attribute(a)));
+			Magnitude magnitude = current.get(m.id());
+			// TODO: OR check when magnitude == null
+			if(magnitude != null) {
+				Magnitude.Model model = magnitude.model;
+				model.attributes().forEach(a -> attrs.put(a, model.attribute(a)));
+			}
 		}
 		if (message == null) return attrs;
 		addMessageAttributes(m, message, timelineAttr, attrs);
@@ -89,19 +93,24 @@ public class TimelineUtils {
 		return e.from() == null ? null : e.from().message().core$().fullName().replace("$", ".");
 	}
 
-	static TimelineFile createTimelineFile(File datamartDir, MasterDatamart datamart, Instant start, String name, String entity) throws IOException {
-		File file = new File(datamartDir, name + File.separator + entity + TIMELINE_EXTENSION);
+	public static TimelineFile createTimelineFileOfRawTimeline(File datamartDir, MasterDatamart datamart, Instant start, String name, String entity) throws IOException {
+		File file = timelineFileOf(datamartDir, name, entity);
 		file.getParentFile().mkdirs();
 		TimelineFile tlFile;
 		if (file.exists()) return TimelineFile.open(file);
 		tlFile = TimelineFile.create(file, entity);
 		Timeline tlDefinition = datamart.definition().timelineList().stream()
+				.filter(Timeline::isRaw)
 				.filter(t -> t.asRaw().tank().sensor().name$().equals(name))
 				.findFirst()
 				.orElseThrow(() -> new IOException("Tank not found: " + name));
 		tlFile.timeModel(start, new Period(tlDefinition.asRaw().tank().period(), tlDefinition.asRaw().tank().periodScale().chronoUnit()));
 		tlFile.sensorModel(sensorModel(null, datamart.entityStore().get(entity), tlDefinition));
 		return tlFile;
+	}
+
+	public static File timelineFileOf(File datamartDir, String name, String entity) {
+		return new File(datamartDir, name + File.separator + entity + TIMELINE_EXTENSION);
 	}
 
 

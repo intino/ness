@@ -9,6 +9,7 @@ import io.intino.sumus.chronos.TimelineFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.function.Supplier;
 
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
 import static io.intino.datahub.datamart.mounters.TimelineUtils.sensorModel;
@@ -29,7 +30,7 @@ public class TimelineAssertionMounter {
 				.ifPresent(t -> updateSensorModel(assertion, t));
 	}
 
-	private void updateSensorModel(MessageEvent assertion, Timeline t) {
+	void updateSensorModel(MessageEvent assertion, Timeline t) {
 		try {
 			File timelineDirectory = new File(box.datamartTimelinesDirectory(datamart.name()), t.asRaw().tank().sensor().name$());
 			File tlFile = new File(timelineDirectory, assertion.toMessage().get("id").asString() + TIMELINE_EXTENSION);
@@ -38,6 +39,26 @@ public class TimelineAssertionMounter {
 			timelineFile.sensorModel(sensorModel(timelineFile.sensorModel(), assertion.toMessage(), t));
 		} catch (IOException e) {
 			Logger.error(e);
+		}
+	}
+
+	public static class OfSingleTimeline extends TimelineAssertionMounter {
+
+		private final Supplier<TimelineFile> tlFile;
+
+		public OfSingleTimeline(DataHubBox box, MasterDatamart datamart, Supplier<TimelineFile> tlFile) {
+			super(box, datamart);
+			this.tlFile = tlFile;
+		}
+
+		@Override
+		void updateSensorModel(MessageEvent assertion, Timeline t) {
+			try {
+				TimelineFile timelineFile = tlFile.get();
+				timelineFile.sensorModel(sensorModel(timelineFile.sensorModel(), assertion.toMessage(), t));
+			} catch (IOException e) {
+				Logger.error(e);
+			}
 		}
 	}
 }

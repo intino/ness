@@ -101,7 +101,14 @@ public interface MasterDatamart {
 		public abstract boolean isSubscribedTo(Datalake.Tank tank);
 
 		protected File fileOf(String type, String id) {
-			return new File(root, type + File.pathSeparator + id + extension());
+			return new File(root, normalizePath(type + File.pathSeparator + id + extension()));
+		}
+
+		public static String normalizePath(String path) {
+			String os = System.getProperty("os.name");
+			if(os == null) return path;
+			if(os.toLowerCase().startsWith("win")) return path.replace(":", "-");
+			return path;
 		}
 
 		protected List<File> listFiles() {

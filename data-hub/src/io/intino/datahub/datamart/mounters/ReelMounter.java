@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static io.intino.datahub.box.DataHubBox.REEL_EXTENSION;
+import static io.intino.datahub.datamart.MasterDatamart.ChronosStore.normalizePath;
 
 public final class ReelMounter extends MasterDatamartMounter {
 
@@ -72,7 +73,7 @@ public final class ReelMounter extends MasterDatamartMounter {
 	}
 
 	private ReelFile reelFile(String type, String subject) throws IOException {
-		File file = new File(box().datamartReelsDirectory(datamart.name(), type), subject + REEL_EXTENSION);
+		File file = new File(box().datamartReelsDirectory(datamart.name(), type), normalizePath(subject + REEL_EXTENSION));
 		file.getParentFile().mkdirs();
 		return file.exists() ? ReelFile.open(file) : ReelFile.create(file);
 	}
