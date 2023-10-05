@@ -49,11 +49,15 @@ public class TimelineUtils {
 		String entityTank = tankName(t.entity());
 		if (entityTank != null) tanks.add(entityTank);
 		if (t.isRaw()) tanks.add(tankName(t.asRaw().tank().sensor()));
-		else {
-			tanks.addAll(t.asCooked().timeSeriesList().stream().map(ts -> tankName(ts.tank())).toList());
-			tanks.addAll(t.asCooked().timeSeriesList().stream().filter(Timeline.Cooked.TimeSeries::isCount).flatMap(ts -> tanksOf(ts.asCount())).toList());
-		}
+		else tanks.addAll(getCookedTanks(t));
 		return tanks.stream();
+	}
+
+	public static Set<String> getCookedTanks(Timeline t) {
+		Set<String> tanks = new HashSet<>();
+		t.asCooked().timeSeriesList().stream().map(ts -> tankName(ts.tank())).forEach(tanks::add);
+		t.asCooked().timeSeriesList().stream().filter(Timeline.Cooked.TimeSeries::isCount).flatMap(ts -> tanksOf(ts.asCount())).forEach(tanks::add);
+		return tanks;
 	}
 
 	private static Stream<String> asTypes(Stream<String> tanks) {
@@ -73,7 +77,7 @@ public class TimelineUtils {
 	}
 
 
-	private static String tankName(Entity e) {
+	public static String tankName(Entity e) {
 		return e.from() == null ? null : e.from().message().core$().fullName().replace("$", ".");
 	}
 
