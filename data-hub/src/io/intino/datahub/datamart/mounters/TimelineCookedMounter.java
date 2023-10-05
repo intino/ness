@@ -93,7 +93,6 @@ public class TimelineCookedMounter {
 					processCount(session, ts.asCount(), lastValue(tlFile, ts), operationOf(ts.asCount().operationList(), event.type()));
 				else processTimeShift(session, ts.asTimeShift(), event);
 			}
-			session.close();
 		} catch (IOException e) {
 			Logger.error(e);
 		} finally {

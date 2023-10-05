@@ -21,22 +21,30 @@ import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
 public class TimelineUtils {
 
 
-	static Magnitude[] sensorModel(Message entity, Timeline timeline) {
+	static Magnitude[] sensorModel(TimelineFile.SensorModel current, Message assertion, Timeline timeline) {
 		Sensor sensor = timeline.asRaw().tank().sensor();
 		return sensor.magnitudeList().stream()
-				.map(m -> new Magnitude(m.id(), new Magnitude.Model(merge(m, entity, m.attributeList(), timeline.asRaw().attributeList()))))
+				.map(m -> new Magnitude(m.id(), new Magnitude.Model(merge(m, current, assertion, m.attributeList(), timeline.asRaw().attributeList()))))
 				.toArray(Magnitude[]::new);
 	}
 
-	private static Map<String, String> merge(Sensor.Magnitude m, Message message, List<Sensor.Magnitude.Attribute> magnitudeAttr, List<Attribute> timelineAttr) {
+	private static Map<String, String> merge(Sensor.Magnitude m, TimelineFile.SensorModel current, Message message, List<Sensor.Magnitude.Attribute> magnitudeAttr, List<Attribute> timelineAttr) {
 		Map<String, String> attrs = new HashMap<>();
 		for (Sensor.Magnitude.Attribute attribute : magnitudeAttr) attrs.put(attribute.name$(), attribute.value());
+		if (current != null) {
+			Magnitude.Model model = current.get(m.id()).model;
+			model.attributes().forEach(a -> attrs.put(a, model.attribute(a)));
+		}
 		if (message == null) return attrs;
+		addMessageAttributes(m, message, timelineAttr, attrs);
+		return attrs;
+	}
+
+	private static void addMessageAttributes(Sensor.Magnitude m, Message message, List<Attribute> timelineAttr, Map<String, String> attrs) {
 		timelineAttr.stream().filter(a -> a.magnitude().equals(m)).forEach(a -> {
 			String value = valueOf(message, a.from());
 			if (value != null) attrs.put(a.name$(), value);
 		});
-		return attrs;
 	}
 
 
@@ -92,7 +100,7 @@ public class TimelineUtils {
 				.findFirst()
 				.orElseThrow(() -> new IOException("Tank not found: " + name));
 		tlFile.timeModel(start, new Period(tlDefinition.asRaw().tank().period(), tlDefinition.asRaw().tank().periodScale().chronoUnit()));
-		tlFile.sensorModel(sensorModel(datamart.entityStore().get(entity), tlDefinition));
+		tlFile.sensorModel(sensorModel(null, datamart.entityStore().get(entity), tlDefinition));
 		return tlFile;
 	}
 

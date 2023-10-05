@@ -29,8 +29,7 @@ public class TimelineRawMounter {
 	public void mount(MeasurementEvent event) {
 		try {
 			if (event.ss() == null) return;
-			String ss = sourceSensor(event);
-			TimelineFile timelineFile = getOrCreate(event, ss);
+			TimelineFile timelineFile = getOrCreate(event, sourceSensor(event));
 			update(timelineFile, event);
 		} catch (Exception e) {
 			Logger.error("Could not mount event " + event.type() + ", ss = " + event.ss() + ": " + e.getMessage(), e);
@@ -75,8 +74,7 @@ public class TimelineRawMounter {
 
 	private void close(TimelineFile.DataSession session) {
 		try {
-			if (session == null) return;
-			session.close();
+			if (session != null) session.close();
 		} catch (IOException ignored) {
 		}
 	}

@@ -35,7 +35,7 @@ public class TimelineAssertionMounter {
 			File tlFile = new File(timelineDirectory, assertion.toMessage().get("id").asString() + TIMELINE_EXTENSION);
 			if (!tlFile.exists()) return;
 			TimelineFile timelineFile = TimelineFile.open(tlFile);
-			timelineFile.sensorModel(sensorModel(assertion.toMessage(), t));
+			timelineFile.sensorModel(sensorModel(timelineFile.sensorModel(), assertion.toMessage(), t));
 		} catch (IOException e) {
 			Logger.error(e);
 		}
