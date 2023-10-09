@@ -125,8 +125,7 @@ public class TimelineCookedMounter {
 
 	private void save(TimeShift timeSeries, MessageEvent event) {
 		String entity = event.toMessage().get(timeSeries.entityId().name$()).asString();
-		try (TimeShiftCache cache = cache(timeSeries)) {
-			cache.open();
+		try (TimeShiftCache cache = cache(timeSeries).open()) {
 			cache.put(entity, event.ts());
 		} catch (Exception e) {
 			Logger.error(e);

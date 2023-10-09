@@ -23,7 +23,7 @@ public class TimeShiftCache implements AutoCloseable {
 		this.file = file;
 	}
 
-	public void open() {
+	public TimeShiftCache open() {
 		try {
 			file.getParentFile().mkdirs();
 			DataSource dataSource = dataSource();
@@ -35,6 +35,7 @@ public class TimeShiftCache implements AutoCloseable {
 		} catch (SQLException e) {
 			Logger.error(e);
 		}
+		return this;
 	}
 
 	public synchronized void put(String id, Instant ts) {
