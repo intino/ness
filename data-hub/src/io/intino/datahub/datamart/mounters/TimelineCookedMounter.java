@@ -134,8 +134,7 @@ public class TimelineCookedMounter {
 
 	private Instant load(TimeShift timeSeries, MessageEvent event) {
 		String entity = event.toMessage().get(timeSeries.entityId().name$()).asString();
-		try (TimeShiftCache cache = cache(timeSeries)) {
-			cache.open();
+		try (TimeShiftCache cache = cache(timeSeries).open()) {
 			return cache.get(entity);
 		} catch (Exception e) {
 			Logger.error(e);
