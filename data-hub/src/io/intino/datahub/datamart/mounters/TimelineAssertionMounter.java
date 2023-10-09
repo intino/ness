@@ -5,7 +5,8 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.model.Timeline;
-import io.intino.sumus.chronos.TimelineFile;
+import io.intino.sumus.chronos.TimelineStore;
+import io.intino.sumus.chronos.timelines.TimelineWriter;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,10 +34,11 @@ public class TimelineAssertionMounter {
 	void updateSensorModel(MessageEvent assertion, Timeline t) {
 		try {
 			File timelineDirectory = new File(box.datamartTimelinesDirectory(datamart.name()), t.asRaw().tank().sensor().name$());
-			File tlFile = new File(timelineDirectory, assertion.toMessage().get("id").asString() + TIMELINE_EXTENSION);
-			if (!tlFile.exists()) return;
-			TimelineFile timelineFile = TimelineFile.open(tlFile);
-			timelineFile.sensorModel(sensorModel(timelineFile.sensorModel(), assertion.toMessage(), t));
+			File file = new File(timelineDirectory, assertion.toMessage().get("id").asString() + TIMELINE_EXTENSION);
+			if (!file.exists()) return;
+			try(TimelineWriter writer = TimelineStore.of(file).writer()) {
+				writer.sensorModel(sensorModel(TimelineStore.of(file).sensorModel(), assertion.toMessage(), t));
+			}
 		} catch (IOException e) {
 			Logger.error(e);
 		}
@@ -44,18 +46,19 @@ public class TimelineAssertionMounter {
 
 	public static class OfSingleTimeline extends TimelineAssertionMounter {
 
-		private final Supplier<TimelineFile> tlFile;
+		private final Timeline timeline;
+		private final Supplier<TimelineWriter> writer;
 
-		public OfSingleTimeline(DataHubBox box, MasterDatamart datamart, Supplier<TimelineFile> tlFile) {
-			super(box, datamart);
-			this.tlFile = tlFile;
+		public OfSingleTimeline(MasterDatamart datamart, Timeline timeline, Supplier<TimelineWriter> writer) {
+			super(datamart.box(), datamart);
+			this.timeline = timeline;
+			this.writer = writer;
 		}
 
 		@Override
-		void updateSensorModel(MessageEvent assertion, Timeline t) {
+		void mount(MessageEvent assertion) {
 			try {
-				TimelineFile timelineFile = tlFile.get();
-				timelineFile.sensorModel(sensorModel(timelineFile.sensorModel(), assertion.toMessage(), t));
+				writer.get().sensorModel(sensorModel(writer.get().sensorModel(), assertion.toMessage(), timeline));
 			} catch (IOException e) {
 				Logger.error(e);
 			}

@@ -9,9 +9,10 @@ import io.intino.alexandria.message.Message;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.model.Timeline;
 import io.intino.magritte.framework.Layer;
-import io.intino.sumus.chronos.TimelineFile;
+import io.intino.sumus.chronos.TimelineStore;
+import io.intino.sumus.chronos.timelines.TimelineWriter;
 
-import java.io.File;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 
 import static io.intino.alexandria.event.measurement.MeasurementEvent.ATTRIBUTE_SEP;
 import static io.intino.alexandria.event.measurement.MeasurementEvent.NAME_VALUE_SEP;
-import static io.intino.datahub.datamart.mounters.TimelineUtils.timelineFileOf;
+import static io.intino.datahub.datamart.mounters.TimelineUtils.sourceSensor;
 import static io.intino.datahub.datamart.mounters.TimelineUtils.types;
 import static java.util.Arrays.stream;
 
@@ -107,32 +108,32 @@ public class TimelineMounter extends MasterDatamartMounter {
 	public static class OfSingleTimeline implements AutoCloseable {
 
 		private final TimelineRawMounter.OfSingleTimeline rawMounter;
-		private final TimelineAssertionMounter assertionMounter;
+		private final TimelineAssertionMounter.OfSingleTimeline assertionMounter;
+		private final String ss;
 
-		private TimelineFile tlFile;
+		private TimelineWriter writer;
 		private final TimelineFileFactory timelineFactory;
 
-		public OfSingleTimeline(MasterDatamart datamart, String tank, String ss) {
-			File file = timelineFileOf(datamart.box().datamartTimelinesDirectory(datamart.name()), tank, ss);
-			if(file.exists()) file.delete();
-			else file.getParentFile().mkdirs();
-			this.timelineFactory = e -> TimelineUtils.createTimelineFileOfRawTimeline(datamart.box().datamartTimelinesDirectory(datamart.name()), datamart, e.ts(), tank, ss);
-			this.rawMounter = new TimelineRawMounter.OfSingleTimeline(datamart.box(), datamart, this::getTimelineFile);
-			this.assertionMounter = new TimelineAssertionMounter.OfSingleTimeline(datamart.box(), datamart, this::getTimelineFile);
+		public OfSingleTimeline(MasterDatamart datamart, Timeline timeline, String tank, String ss) {
+			this.ss = ss;
+			this.timelineFactory = ts -> TimelineUtils.getOrCreateTimelineStoreOfRawTimeline(datamart.box().datamartTimelinesDirectory(datamart.name()), datamart, ts, tank, ss);
+			this.rawMounter = new TimelineRawMounter.OfSingleTimeline(datamart, this::getTimelineWriter);
+			this.assertionMounter = new TimelineAssertionMounter.OfSingleTimeline(datamart, timeline, this::getTimelineWriter);
 		}
 
 		public void mount(Event event) {
-			if(tlFile == null) createTimelineFile(event);
-			if (event instanceof MeasurementEvent e) rawMounter.mount(e);
-			else if (event instanceof MessageEvent e)  {
-				rawMounter.close();
+			createTimelineFileIfNotExists(event.ts());
+			if (event instanceof MeasurementEvent e) {
+				rawMounter.mount(e);
+			} else if (event instanceof MessageEvent e && ss.equals(sourceSensor(event)))  {
 				assertionMounter.mount(new MessageEvent(e.toMessage()));
 			}
 		}
 
-		private void createTimelineFile(Event event) {
+		private void createTimelineFileIfNotExists(Instant ts) {
+			if(writer != null) return;
 			try {
-				this.tlFile = timelineFactory.createFromFirstEvent(event);
+				writer = timelineFactory.create(ts).writer();
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -140,15 +141,15 @@ public class TimelineMounter extends MasterDatamartMounter {
 
 		@Override
 		public void close() throws Exception {
-			rawMounter.close();
+			if(writer != null) writer.close();
 		}
 
-		private TimelineFile getTimelineFile() {
-			return tlFile;
+		private TimelineWriter getTimelineWriter() {
+			return writer;
 		}
 
 		private interface TimelineFileFactory {
-			TimelineFile createFromFirstEvent(Event event) throws Exception;
+			TimelineStore create(Instant firstTS) throws Exception;
 		}
 	}
 }

@@ -1,5 +1,6 @@
 package io.intino.datahub.datamart.mounters;
 
+import io.intino.alexandria.event.Event;
 import io.intino.alexandria.message.Message;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.model.Entity;
@@ -8,27 +9,46 @@ import io.intino.datahub.model.Timeline;
 import io.intino.datahub.model.Timeline.Raw.Attribute;
 import io.intino.sumus.chronos.Magnitude;
 import io.intino.sumus.chronos.Period;
-import io.intino.sumus.chronos.TimelineFile;
+import io.intino.sumus.chronos.TimelineStore;
+import io.intino.sumus.chronos.TimelineStore.SensorModel;
 
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
 
 public class TimelineUtils {
 
+	public static String sourceSensor(Event event) {
+		Map<String, String> parameters = parameters(event.ss());
+		String sensor = parameters.get("sensor");
+		String cleanSS = withOutParameters(event.ss());
+		return sensor == null ? cleanSS : sensor;
+	}
 
-	static Magnitude[] sensorModel(TimelineFile.SensorModel current, Message assertion, Timeline timeline) {
+	private static String withOutParameters(String ss) {
+		return ss.contains("?") ? ss.substring(0, ss.indexOf("?")) : ss;
+	}
+
+	private static Map<String, String> parameters(String ss) {
+		int i = ss.indexOf("?");
+		if (i < 0 || i == ss.length() - 1) return Map.of();
+		String[] parameters = ss.substring(i + 1).split(";");
+		return Arrays.stream(parameters).map(p -> p.split("=")).collect(Collectors.toMap(p -> p[0], p -> p[1]));
+	}
+
+	static Magnitude[] sensorModel(SensorModel current, Message assertion, Timeline timeline) {
 		Sensor sensor = timeline.asRaw().tank().sensor();
 		return sensor.magnitudeList().stream()
 				.map(m -> new Magnitude(m.id(), new Magnitude.Model(merge(m, current, assertion, m.attributeList(), timeline.asRaw().attributeList()))))
 				.toArray(Magnitude[]::new);
 	}
 
-	private static Map<String, String> merge(Sensor.Magnitude m, TimelineFile.SensorModel current, Message message, List<Sensor.Magnitude.Attribute> magnitudeAttr, List<Attribute> timelineAttr) {
+	private static Map<String, String> merge(Sensor.Magnitude m, SensorModel current, Message message, List<Sensor.Magnitude.Attribute> magnitudeAttr, List<Attribute> timelineAttr) {
 		Map<String, String> attrs = new HashMap<>();
 		for (Sensor.Magnitude.Attribute attribute : magnitudeAttr) attrs.put(attribute.name$(), attribute.value());
 		if (current != null) {
@@ -93,20 +113,21 @@ public class TimelineUtils {
 		return e.from() == null ? null : e.from().message().core$().fullName().replace("$", ".");
 	}
 
-	public static TimelineFile createTimelineFileOfRawTimeline(File datamartDir, MasterDatamart datamart, Instant start, String name, String entity) throws IOException {
+	public static TimelineStore getOrCreateTimelineStoreOfRawTimeline(File datamartDir, MasterDatamart datamart, Instant start, String name, String entity) throws IOException {
 		File file = timelineFileOf(datamartDir, name, entity);
 		file.getParentFile().mkdirs();
-		TimelineFile tlFile;
-		if (file.exists()) return TimelineFile.open(file);
-		tlFile = TimelineFile.create(file, entity);
+		if(file.exists()) return TimelineStore.of(file);
+
 		Timeline tlDefinition = datamart.definition().timelineList().stream()
 				.filter(Timeline::isRaw)
 				.filter(t -> t.asRaw().tank().sensor().name$().equals(name))
 				.findFirst()
 				.orElseThrow(() -> new IOException("Tank not found: " + name));
-		tlFile.timeModel(start, new Period(tlDefinition.asRaw().tank().period(), tlDefinition.asRaw().tank().periodScale().chronoUnit()));
-		tlFile.sensorModel(sensorModel(null, datamart.entityStore().get(entity), tlDefinition));
-		return tlFile;
+
+		return TimelineStore.createIfNotExists(entity, file)
+				.withSensorModel(sensorModel(null, datamart.entityStore().get(entity), tlDefinition))
+				.withTimeModel(start, new Period(tlDefinition.asRaw().tank().period(), tlDefinition.asRaw().tank().periodScale().chronoUnit()))
+				.build();
 	}
 
 	public static File timelineFileOf(File datamartDir, String name, String entity) {

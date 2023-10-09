@@ -9,7 +9,7 @@ import io.intino.datahub.model.Datalake;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.rules.SnapshotScale;
 import io.intino.sumus.chronos.ReelFile;
-import io.intino.sumus.chronos.TimelineFile;
+import io.intino.sumus.chronos.TimelineStore;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -30,9 +30,9 @@ public interface MasterDatamart {
 
 	Store<Message> entityStore();
 
-	ChronosStore<TimelineFile> timelineStore();
+	ChronosDirectory<TimelineStore> timelineStore();
 
-	ChronosStore<ReelFile> reelStore();
+	ChronosDirectory<ReelFile> reelStore();
 
 	Stream<MasterDatamartMounter> createMountersFor(Datalake.Tank tank);
 
@@ -59,11 +59,11 @@ public interface MasterDatamart {
 		boolean isSubscribedTo(Datalake.Tank tank);
 	}
 
-	abstract class ChronosStore<T> {
+	abstract class ChronosDirectory<T> {
 
 		private final File root;
 
-		public ChronosStore(File root) {
+		public ChronosDirectory(File root) {
 			this.root = root;
 		}
 

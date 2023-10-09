@@ -1,22 +1,20 @@
 package io.intino.datahub.datamart.mounters;
 
-import io.intino.alexandria.event.Event;
 import io.intino.alexandria.event.measurement.MeasurementEvent;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
-import io.intino.sumus.chronos.TimelineFile;
+import io.intino.sumus.chronos.TimelineStore;
+import io.intino.sumus.chronos.timelines.TimelineWriter;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import static io.intino.datahub.datamart.mounters.TimelineUtils.createTimelineFileOfRawTimeline;
+import static io.intino.datahub.datamart.mounters.TimelineUtils.getOrCreateTimelineStoreOfRawTimeline;
+import static io.intino.datahub.datamart.mounters.TimelineUtils.sourceSensor;
 
 public class TimelineRawMounter {
 	private final DataHubBox box;
@@ -30,41 +28,44 @@ public class TimelineRawMounter {
 	public void mount(MeasurementEvent event) {
 		try {
 			if (event.ss() == null) return;
-			TimelineFile timelineFile = getOrCreate(event, sourceSensor(event));
-			update(timelineFile, event);
+			TimelineStore store = getOrCreate(event, sourceSensor(event));
+			update(store, event);
 		} catch (Exception e) {
 			Logger.error("Could not mount event " + event.type() + ", ss = " + event.ss() + ": " + e.getMessage(), e);
 		}
 	}
 
-	private TimelineFile getOrCreate(MeasurementEvent event, String ss) throws IOException {
-		TimelineFile timelineFile = datamart.timelineStore().get(event.type(), ss);
-		if (timelineFile == null)
-			timelineFile = createTimelineFileOfRawTimeline(box.datamartTimelinesDirectory(datamart.name()), datamart, event.ts(), event.type(), ss);
-		return timelineFile;
+	private TimelineStore getOrCreate(MeasurementEvent event, String sensor) throws IOException {
+		TimelineStore store = datamart.timelineStore().get(event.type(), sensor);
+		if (store == null)
+			store = getOrCreateTimelineStoreOfRawTimeline(box.datamartTimelinesDirectory(datamart.name()), datamart, event.ts(), event.type(), sensor);
+		return store;
 	}
 
-	protected void update(TimelineFile tlFile, MeasurementEvent event) {
-		TimelineFile.DataSession session = null;
-		try {
-			session = tlFile.add();
-			checkTs(event.ts(), tlFile, session);
-			if (tlFile.count() == 0 || tlFile.next().isBefore(event.ts()) || Math.abs(Duration.between(event.ts(), tlFile.next()).getSeconds()) / 60 <= 1)
-				update(event, session);
+	protected void update(TimelineStore tlStore, MeasurementEvent event) throws IOException {
+		try(TimelineWriter writer = tlStore.writer()) {
+			checkTs(event.ts(), writer);
+			writer.set(event.values()); // TODO: measurements must be present in sensorModel and in the order defined by the sensorModel
 		} catch (IOException e) {
 			Logger.error(e);
-		} finally {
-			close(session);
 		}
 	}
 
-	private static void checkTs(Instant ts, TimelineFile tlFile, TimelineFile.DataSession session) throws IOException {
-		long lapse = Duration.between(tlFile.next(), ts).getSeconds();
-		if (lapse > tlFile.period().duration() * 2) session.set(ts);
+	private static double[] measurementsOf(MeasurementEvent event, TimelineStore tlStore) {
+		TimelineStore.SensorModel sensorModel = tlStore.sensorModel();
+		double[] measurements = new double[sensorModel.size()];
+		Arrays.fill(measurements, Double.NaN);
+		for(int i = 0; i < event.magnitudes().length;i++) {
+			int index = sensorModel.indexOf(name(event, i));
+			double value = index >= 0 ? event.values()[i] : Double.NaN;
+			measurements[index] = value;
+		}
+		return measurements;
 	}
 
-	private void update(MeasurementEvent event, TimelineFile.DataSession session) {
-		IntStream.range(0, event.magnitudes().length).forEach(i -> session.set(name(event, i), event.values()[i]));
+	private static void checkTs(Instant ts, TimelineWriter writer) throws IOException {
+		long lapse = Duration.between(writer.header().next(), ts).getSeconds();
+		if (lapse > writer.timeModel().period().duration() * 2) writer.set(ts);
 	}
 
 	private static String name(MeasurementEvent event, int i) {
@@ -73,66 +74,23 @@ public class TimelineRawMounter {
 		return name.contains("=") ? name.substring(0, name.indexOf(":")) : name;
 	}
 
-	protected void close(TimelineFile.DataSession session) {
-		try {
-			if (session != null) session.close();
-		} catch (IOException ignored) {
-		}
-	}
+	public static class OfSingleTimeline extends TimelineRawMounter {
 
+		private final Supplier<TimelineWriter> writer;
 
-	protected String sourceSensor(Event event) {
-		Map<String, String> parameters = parameters(event.ss());
-		String sensor = parameters.get("sensor");
-		String cleanSS = withOutParameters(event.ss());
-		return sensor == null ? cleanSS : sensor;
-	}
-
-	private String withOutParameters(String ss) {
-		return ss.contains("?") ? ss.substring(0, ss.indexOf("?")) : ss;
-	}
-
-	private Map<String, String> parameters(String ss) {
-		int i = ss.indexOf("?");
-		if (i < 0 || i == ss.length() - 1) return Map.of();
-		String[] parameters = ss.substring(i + 1).split(";");
-		return Arrays.stream(parameters).map(p -> p.split("=")).collect(Collectors.toMap(p -> p[0], p -> p[1]));
-	}
-
-	public static class OfSingleTimeline extends TimelineRawMounter implements AutoCloseable {
-
-		private final Supplier<TimelineFile> tlFile;
-		private TimelineFile.DataSession session;
-
-		public OfSingleTimeline(DataHubBox box, MasterDatamart datamart, Supplier<TimelineFile> tlFile) {
-			super(box, datamart);
-			this.tlFile = tlFile;
-		}
-
-		@Override
-		public void close() {
-			close(session);
-			session = null;
+		public OfSingleTimeline(MasterDatamart datamart, Supplier<TimelineWriter> writer) {
+			super(datamart.box(), datamart);
+			this.writer = writer;
 		}
 
 		@Override
 		public void mount(MeasurementEvent event) {
 			try {
-				update(tlFile.get(), event);
+				TimelineWriter writer = this.writer.get();
+				checkTs(event.ts(), writer);
+				writer.set(event.values()); // TODO: measurements must be present in sensorModel and in the order defined by the sensorModel
 			} catch (Exception e) {
 				Logger.error("Could not mount event " + event.type() + ", ss = " + event.ss() + ": " + e.getMessage(), e);
-			}
-		}
-
-		@Override
-		protected void update(TimelineFile tlFile, MeasurementEvent event) {
-			try {
-				if(session == null) session = tlFile.add();
-				checkTs(event.ts(), tlFile, session);
-				if (tlFile.count() == 0 || tlFile.next().isBefore(event.ts()) || Math.abs(Duration.between(event.ts(), tlFile.next()).getSeconds()) / 60 <= 1)
-					super.update(event, session);
-			} catch (IOException e) {
-				Logger.error(e);
 			}
 		}
 	}

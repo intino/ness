@@ -8,9 +8,14 @@ import io.intino.alexandria.event.EventStream;
 import io.intino.alexandria.event.measurement.MeasurementEvent;
 import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.logger.Logger;
+import io.intino.alexandria.zim.ZimStream;
+import io.intino.alexandria.zim.ZimWriter;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.impl.LocalMasterDatamart;
-import io.intino.datahub.datamart.mounters.*;
+import io.intino.datahub.datamart.mounters.EntityMounter;
+import io.intino.datahub.datamart.mounters.ReelMounter;
+import io.intino.datahub.datamart.mounters.TimelineMounter;
+import io.intino.datahub.datamart.mounters.TimelineUtils;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.Sensor;
@@ -19,14 +24,14 @@ import io.intino.datahub.model.rules.SnapshotScale;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class DatamartFactory {
 	private final DataHubBox box;
@@ -71,10 +76,10 @@ public class DatamartFactory {
 		reflow(new EntityMounter(datamart), new TimelineMounter(datamart), entityTanks, cookedTimelineTanks, reflowTanks(fromTs, entityTanks, cookedTimelineTanks));
 
 		Logger.info("Reflowing raw timelines...");
-		reflowTimelines(datamart, definition, fromTs, scale);
+		reflowTimelines(datamart, definition);
 
 		Logger.info("Reflowing reels...");
-		reflow(new ReelMounter(datamart), reflowTanks(fromTs, reelTanks));
+		reflowReels(datamart, reelTanks);
 
 		Logger.info("Reflow complete");
 
@@ -83,9 +88,12 @@ public class DatamartFactory {
 		return datamart;
 	}
 
-	private void reflow(MasterDatamartMounter mounters, Iterator<Event> events) {
-		while(events.hasNext()) {
-			mounters.mount(events.next());
+	private void reflowReels(MasterDatamart datamart, Set<String> tanks) {
+		for(String tankName : tanks) {
+			Datalake.Store.Tank<MessageEvent> tank = datalake.messageStore().tank(tankName);
+			try(ReelMounter.Reflow mounter = new ReelMounter.Reflow(datamart)) {
+				tank.content().forEach(mounter::mount);
+			}
 		}
 	}
 
@@ -106,23 +114,66 @@ public class DatamartFactory {
 	}
 
 	// Reflow each ss independently to avoid too many files open error
-	private void reflowTimelines(MasterDatamart datamart, Datamart definition, Instant fromTs, SnapshotScale scale) throws InterruptedException {
-		ExecutorService threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()-1);
-		for(var rawTimeline : definition.timelineList(t -> t.isRaw() && tankName(t.entity()) != null)) {
-			String entityTankName = tankName(rawTimeline.entity());
-			Datalake.Store.Tank<MessageEvent> messageTank = datalake.messageStore().tank(entityTankName);
-			Datalake.Store.Tank<MeasurementEvent> measurementTank = datalake.measurementStore().tank(tankName(rawTimeline.asRaw().tank().sensor()));
-			threadPool.execute(() -> measurementTank.sources().forEach(ss -> reflowTimelinesOf(
-					datamart,
-					getSimpleName(measurementTank.name()),
-					ss,
-					messageTank,
-					fromTs,
-					scale)
-			));
+	private void reflowTimelines(MasterDatamart datamart, Datamart definition) {
+		for(Timeline timeline : definition.timelineList(Timeline::isRaw)) {
+			Supplier<MessageEventStream> messageEvents = bake(messageTanksOf(definition, timeline));
+			Datalake.Store.Tank<MeasurementEvent> measurementTank = datalake.measurementStore().tank(tankName(timeline.asRaw().tank().sensor()));
+			measurementTank.sources().forEach(ss ->
+				reflowTimelinesOf(
+						datamart,
+						timeline,
+						getSimpleName(measurementTank.name()),
+						ss,
+						messageEvents.get())
+			);
 		}
-		threadPool.shutdown();
-		threadPool.awaitTermination(1, TimeUnit.DAYS);// TODO:check
+	}
+
+	private Supplier<MessageEventStream> bake(List<Datalake.Store.Tank<MessageEvent>> tanks) {
+		File file = bakeEventsInCacheFile(tanks);
+		if(file.length() < Runtime.getRuntime().freeMemory() * 0.8) {
+			return () -> {
+				var events = new MessageEventStream.InMemory(file);
+				file.delete();
+				return events;
+			};
+		}
+		return () -> new MessageEventStream.Reading(file);
+	}
+
+	private File bakeEventsInCacheFile(List<Datalake.Store.Tank<MessageEvent>> tanks) {
+		File file = new File(box.datamartsDirectory(), ".tmp" + File.separator + System.nanoTime() + ".tmp");
+		file.getParentFile().mkdirs();
+		file.deleteOnExit();
+		try(ZimWriter writer = new ZimWriter(file)) {
+			EventStream.merge(tanks.stream().map(Datalake.Store.Tank::content)).forEach(e -> {
+				try {
+					writer.write(e.toMessage());
+				} catch (IOException ex) {
+					throw new RuntimeException(ex);
+				}
+			});
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return file;
+	}
+
+	private List<Datalake.Store.Tank<MessageEvent>> messageTanksOf(Datamart definition, Timeline timeline) {
+		Entity entity = timeline.entity();
+		List<Datalake.Store.Tank<MessageEvent>> tanks = new ArrayList<>();
+		if(tankName(entity) != null) tanks.add(datalake.messageStore().tank(tankName(entity)));
+		definition.entityList(e -> isDescendantOf(e, entity)).stream()
+				.map(DatamartFactory::tankName)
+				.map(tank -> datalake.messageStore().tank(tank))
+				.forEach(tanks::add);
+		return tanks;
+	}
+
+	private static boolean isDescendantOf(Entity node, Entity expectedParent) {
+		if (!node.isExtensionOf()) return false;
+		Entity parent = node.asExtensionOf().entity();
+		return parent.equals(expectedParent) || isDescendantOf(parent, expectedParent);
 	}
 
 	private String getSimpleName(String name) {
@@ -130,21 +181,18 @@ public class DatamartFactory {
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private void reflowTimelinesOf(MasterDatamart datamart, String measurementTank, Datalake.Store.Source<MeasurementEvent> ss, Datalake.Store.Tank<MessageEvent> messageTank, Instant fromTs, SnapshotScale scale) {
-		try(TimelineMounter.OfSingleTimeline mounter = new TimelineMounter.OfSingleTimeline(datamart, measurementTank, ss.name())) {
-			Stream content = messageTank.content();
-			Stream measurements = EventStream.sequence(ss.tubs().map(Datalake.Store.Tub::eventSupplier).toList());
-			Iterator<Event> events = EventStream.merge(Stream.of(content, measurements)).iterator();
+	private void reflowTimelinesOf(MasterDatamart datamart, Timeline timeline, String measurementTank,
+								   Datalake.Store.Source<MeasurementEvent> ss, MessageEventStream messageEvents) {
+		try(TimelineMounter.OfSingleTimeline mounter = new TimelineMounter.OfSingleTimeline(datamart, timeline, measurementTank, ss.name()); messageEvents) {
+			Stream messages = messageEvents.stream();
+			List<MeasurementEvent> measurements = ss.tubs().flatMap(Datalake.Store.Tub::events).toList();
+			Iterator<Event> events = EventStream.merge(Stream.of(messages, measurements.stream())).iterator();
 			while(events.hasNext()) {
 				mounter.mount(events.next());
 			}
 		} catch (Exception e) {
 			Logger.error(e);
 		}
-	}
-
-	private Set<String> eventsOf(Set<String> tankNames) {
-		return tankNames.stream().map(name -> name.substring(name.lastIndexOf('.') + 1)).collect(Collectors.toSet());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -227,5 +275,70 @@ public class DatamartFactory {
 
 	private static class Reference<T> {
 		private T value;
+	}
+
+	private interface MessageEventStream extends Iterator<MessageEvent>, AutoCloseable {
+
+		default Stream<MessageEvent> stream() {
+			return StreamSupport.stream(Spliterators.spliteratorUnknownSize(this, Spliterator.SORTED), false);
+		}
+
+		class Reading implements MessageEventStream {
+
+			private final ZimStream events;
+
+			public Reading(File file) {
+				try {
+					this.events = ZimStream.of(file);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+			@Override
+			public void close() throws Exception {
+				events.close();
+			}
+
+			@Override
+			public boolean hasNext() {
+				return events.hasNext();
+			}
+
+			@Override
+			public MessageEvent next() {
+				return new MessageEvent(events.next());
+			}
+		}
+
+		class InMemory implements MessageEventStream {
+
+			private final MessageEvent[] events;
+			private int index;
+
+			public InMemory(File file) {
+				try {
+					this.events = ZimStream.of(file).map(MessageEvent::new).toArray(MessageEvent[]::new);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+			@Override
+			public void close() throws Exception {
+				index = 0;
+			}
+
+			@Override
+			public boolean hasNext() {
+				return index < events.length;
+			}
+
+			@Override
+			public MessageEvent next() {
+				return events[index++];
+			}
+		}
+
 	}
 }
