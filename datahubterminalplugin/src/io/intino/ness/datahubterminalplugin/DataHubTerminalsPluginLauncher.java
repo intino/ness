@@ -17,8 +17,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DataHubTerminalsPluginLauncher extends PluginLauncher {
-	private static final String MINIMUM_CHRONOS_VERSION = "1.1.3";
-	private static final String MAX_CHRONOS_VERSION = "2.0.0";
+	private static final String MINIMUM_CHRONOS_VERSION = "2.0.0";
+	private static final String MAX_CHRONOS_VERSION = "3.0.0";
 	private static final String MINIMUM_BPM_VERSION = "3.1.1";
 	private static final String MAX_BPM_VERSION = "4.0.0";
 	private static final String MINIMUM_TERMINAL_JMS_VERSION = "5.4.0";
