@@ -67,28 +67,28 @@ public class DatamartFactory {
 
 	public MasterDatamart reflow(MasterDatamart datamart, Instant fromTs, Datamart definition) throws Exception {
 		SnapshotScale scale = definition.snapshots() == null ? SnapshotScale.None : Optional.ofNullable(definition.snapshots().scale()).orElse(SnapshotScale.None);
-
 		Set<String> entityTanks = entityTanks(definition);
-		Set<String> cookedTimelineTanks = cookedTimelinesTanks(definition);
-		Set<String> reelTanks = reelTanks(definition);
 
-		Logger.info("Reflowing entities and cooked timelines...");
-		reflow(new EntityMounter(datamart), new TimelineMounter(datamart), entityTanks, cookedTimelineTanks, reflowTanks(fromTs, entityTanks, cookedTimelineTanks));
-
-		Logger.info("Reflowing raw timelines...");
-		reflowTimelines(datamart, definition);
-
-		Logger.info("Reflowing reels...");
-		reflowReels(datamart, reelTanks);
-
-		Logger.info("Reflow complete");
-
+		reflowCookedTimelines(datamart, fromTs, entityTanks, cookedTimelinesTanks(definition));
+		reflowRawTimelines(datamart, definition);
+		reflowReels(datamart, reelTanks(definition));
+		Logger.debug("Reflow complete");
 		box.datamartSerializer().saveSnapshot(Timetag.today(), datamart);
-
 		return datamart;
 	}
 
+	private void reflowRawTimelines(MasterDatamart datamart, Datamart definition) {
+		Logger.debug("Reflowing raw timelines...");
+		reflowTimelines(datamart, definition);
+	}
+
+	private void reflowCookedTimelines(MasterDatamart datamart, Instant fromTs, Set<String> entityTanks, Set<String> cookedTimelineTanks) {
+		Logger.debug("Reflowing entities and cooked timelines...");
+		reflow(new EntityMounter(datamart), new TimelineMounter(datamart), entityTanks, cookedTimelineTanks, reflowTanks(fromTs, entityTanks, cookedTimelineTanks));
+	}
+
 	private void reflowReels(MasterDatamart datamart, Set<String> tanks) {
+		Logger.debug("Reflowing reels...");
 		for(String tankName : tanks) {
 			Datalake.Store.Tank<MessageEvent> tank = datalake.messageStore().tank(tankName);
 			try(ReelMounter.Reflow mounter = new ReelMounter.Reflow(datamart)) {
