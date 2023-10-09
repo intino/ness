@@ -67,9 +67,7 @@ public class DatamartFactory {
 
 	public MasterDatamart reflow(MasterDatamart datamart, Instant fromTs, Datamart definition) throws Exception {
 		SnapshotScale scale = definition.snapshots() == null ? SnapshotScale.None : Optional.ofNullable(definition.snapshots().scale()).orElse(SnapshotScale.None);
-		Set<String> entityTanks = entityTanks(definition);
-
-		reflowCookedTimelines(datamart, fromTs, entityTanks, cookedTimelinesTanks(definition));
+		reflowCookedTimelines(datamart, fromTs, entityTanks(definition), cookedTimelinesTanks(definition));
 		reflowRawTimelines(datamart, definition);
 		reflowReels(datamart, reelTanks(definition));
 		Logger.debug("Reflow complete");
