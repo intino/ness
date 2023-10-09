@@ -1,9 +1,9 @@
 dsl Legio
 
-Artifact("io.intino.ness", "6.12.2") data-hub-terminal-plugin
+Artifact("io.intino.ness", "6.12.3") data-hub-terminal-plugin
 	Imports
 		Compile("io.intino.ness", "master", "2.0.4")
-		Compile("io.intino", "data-hub", "9.8.0")
+		Compile("io.intino", "data-hub", "9.9.0")
 			Exclude("io.intino.alexandria", "exceptions")
 			Exclude("io.intino.alexandria", "jms")
 			Exclude("io.intino.alexandria", "jmx")
@@ -17,7 +17,7 @@ Artifact("io.intino.ness", "6.12.2") data-hub-terminal-plugin
 			Exclude("org.apache.activemq", "activemq-runtime-config")
 			Exclude("io.intino", "datalake-inspector")
 		Compile("io.intino", "plugin-interface", "2.4.0")
-		Compile("io.intino.alexandria", "json", "1.2.2")
+		Compile("io.intino.alexandria", "json", "1.2.3")
 		Compile("io.intino.magritte", "framework", "3.4.8")
 		Compile("io.intino.alexandria", "logger", "2.1.0")
 		Compile("io.intino.itrules", "engine", "1.0.1")
@@ -29,7 +29,7 @@ Artifact("io.intino.ness", "6.12.2") data-hub-terminal-plugin
 		Test("io.intino.alexandria", "terminal-jms", "5.5.9")
 		Test("io.intino.alexandria", "ingestion", "5.0.4")
 		Test("io.intino.alexandria", "bpm-framework", "3.1.1")
-		Test("io.intino.sumus", "chronos", "1.1.4")
+		Test("io.intino.sumus", "chronos", "2.0.0")
 
 		Test("junit", "junit", "4.13.2")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, attachSources = true)
