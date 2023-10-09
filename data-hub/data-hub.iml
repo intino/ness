@@ -113,7 +113,6 @@
     <orderEntry type="library" name="Intino: com.mchange:mchange-commons-java:0.2.15" level="project" />
     <orderEntry type="library" name="Intino: com.zaxxer:HikariCP-java7:2.4.13" level="project" />
     <orderEntry type="library" name="Intino: org.quartz-scheduler:quartz-jobs:2.3.2" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.sumus:chronos:1.2.0" level="project" />
     <orderEntry type="library" name="Intino: com.tdunning:t-digest:3.3" level="project" />
     <orderEntry type="library" name="Intino: com.github.haifengl:smile-core:3.0.2" level="project" />
     <orderEntry type="library" name="Intino: com.github.haifengl:smile-base:3.0.2" level="project" />

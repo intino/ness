@@ -247,7 +247,7 @@ public class DataHubBox extends AbstractBox {
 
 	private void initDatamart(DatamartFactory datamartFactory, Datamart datamart) {
 		try {
-			Logger.debug("Initializing MasterDatamart " + datamart.name$() + "...");
+			Logger.info("Initializing MasterDatamart " + datamart.name$() + "...");
 			masterDatamarts.put(datamart.name$(), datamartFactory.create(datamart));
 			Logger.debug("MasterDatamart " + datamart.name$() + " initialized!");
 		} catch (Throwable e) {

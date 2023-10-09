@@ -4,7 +4,7 @@ import io.intino.alexandria.message.Message;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
 
-public abstract sealed class MasterDatamartMounter permits EntityMounter, ReelMounter, TimelineMounter {
+public abstract class MasterDatamartMounter {
 
 	protected final MasterDatamart datamart;
 

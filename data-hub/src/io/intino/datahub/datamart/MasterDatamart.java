@@ -9,7 +9,7 @@ import io.intino.datahub.model.Datalake;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.rules.SnapshotScale;
 import io.intino.sumus.chronos.ReelFile;
-import io.intino.sumus.chronos.TimelineFile;
+import io.intino.sumus.chronos.TimelineStore;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -30,9 +30,9 @@ public interface MasterDatamart {
 
 	Store<Message> entityStore();
 
-	ChronosStore<TimelineFile> timelineStore();
+	ChronosDirectory<TimelineStore> timelineStore();
 
-	ChronosStore<ReelFile> reelStore();
+	ChronosDirectory<ReelFile> reelStore();
 
 	Stream<MasterDatamartMounter> createMountersFor(Datalake.Tank tank);
 
@@ -59,11 +59,11 @@ public interface MasterDatamart {
 		boolean isSubscribedTo(Datalake.Tank tank);
 	}
 
-	abstract class ChronosStore<T> {
+	abstract class ChronosDirectory<T> {
 
 		private final File root;
 
-		public ChronosStore(File root) {
+		public ChronosDirectory(File root) {
 			this.root = root;
 		}
 
@@ -101,7 +101,14 @@ public interface MasterDatamart {
 		public abstract boolean isSubscribedTo(Datalake.Tank tank);
 
 		protected File fileOf(String type, String id) {
-			return new File(root, type + File.pathSeparator + id + extension());
+			return new File(root, normalizePath(type + File.pathSeparator + id + extension()));
+		}
+
+		public static String normalizePath(String path) {
+			String os = System.getProperty("os.name");
+			if(os == null) return path;
+			if(os.toLowerCase().startsWith("win")) return path.replace(":", "-");
+			return path;
 		}
 
 		protected List<File> listFiles() {

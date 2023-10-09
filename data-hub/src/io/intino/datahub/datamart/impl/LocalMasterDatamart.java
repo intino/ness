@@ -9,7 +9,7 @@ import io.intino.datahub.model.Datalake;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Entity;
 import io.intino.sumus.chronos.ReelFile;
-import io.intino.sumus.chronos.TimelineFile;
+import io.intino.sumus.chronos.TimelineStore;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,16 +29,16 @@ public class LocalMasterDatamart implements MasterDatamart {
 	private final Datamart definition;
 	private final File directory;
 	private final Store<Message> entities;
-	private final ChronosStore<TimelineFile> timelines;
-	private final ChronosStore<ReelFile> reels;
+	private final ChronosDirectory<TimelineStore> timelines;
+	private final ChronosDirectory<ReelFile> reels;
 
 	public LocalMasterDatamart(DataHubBox box, Datamart definition) {
 		this.box = box;
 		this.definition = definition;
 		this.directory = box.datamartDirectory(definition.name$());
 		this.entities = new EntityStore(definition);
-		this.timelines = new TimelineStore(definition, new File(directory, "timelines"));
-		this.reels = new ReelStore(definition, new File(directory, "reels"));
+		this.timelines = new TimelineDirectory(definition, new File(directory, "timelines"));
+		this.reels = new ReelDirectory(definition, new File(directory, "reels"));
 	}
 
 	@Override
@@ -66,12 +66,12 @@ public class LocalMasterDatamart implements MasterDatamart {
 	}
 
 	@Override
-	public ChronosStore<TimelineFile> timelineStore() {
+	public ChronosDirectory<TimelineStore> timelineStore() {
 		return timelines;
 	}
 
 	@Override
-	public ChronosStore<ReelFile> reelStore() {
+	public ChronosDirectory<ReelFile> reelStore() {
 		return reels;
 	}
 
@@ -172,11 +172,11 @@ public class LocalMasterDatamart implements MasterDatamart {
 		}
 	}
 
-	private static class TimelineStore extends ChronosStore<TimelineFile> {
+	private static class TimelineDirectory extends ChronosDirectory<TimelineStore> {
 
 		private final Set<String> subscribedEvents;
 
-		public TimelineStore(Datamart definition, File root) {
+		public TimelineDirectory(Datamart definition, File root) {
 			super(root);
 			this.subscribedEvents = definition.timelineList().stream()
 					.flatMap(TimelineUtils::tanksOf)
@@ -189,9 +189,9 @@ public class LocalMasterDatamart implements MasterDatamart {
 		}
 
 		@Override
-		public TimelineFile get(String type, String id) {
+		public TimelineStore get(String type, String id) {
 			try {
-				return contains(type, id) ? TimelineFile.open(fileOf(type, id)) : null;
+				return contains(type, id) ? TimelineStore.of(fileOf(type, id)) : null;
 			} catch (IOException e) {
 				Logger.error(e);
 				return null;
@@ -199,10 +199,10 @@ public class LocalMasterDatamart implements MasterDatamart {
 		}
 
 		@Override
-		public Stream<TimelineFile> stream() {
+		public Stream<TimelineStore> stream() {
 			return listFiles().stream().map(f -> {
 				try {
-					return TimelineFile.open(f);
+					return TimelineStore.of(f);
 				} catch (IOException e) {
 					return null;
 				}
@@ -222,11 +222,11 @@ public class LocalMasterDatamart implements MasterDatamart {
 		}
 	}
 
-	private static class ReelStore extends ChronosStore<ReelFile> {
+	private static class ReelDirectory extends ChronosDirectory<ReelFile> {
 
 		private final Set<String> subscribedEvents;
 
-		public ReelStore(Datamart definition, File root) {
+		public ReelDirectory(Datamart definition, File root) {
 			super(root);
 			this.subscribedEvents = definition.reelList().stream()
 					.map(r -> r.tank().message().name$())

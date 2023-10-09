@@ -14,10 +14,11 @@ import io.intino.datahub.model.Timeline.Cooked.TimeSeries.TimeShift;
 import io.intino.magritte.framework.Layer;
 import io.intino.sumus.chronos.Magnitude;
 import io.intino.sumus.chronos.Magnitude.Model;
+import io.intino.sumus.chronos.MeasurementsVector;
 import io.intino.sumus.chronos.Period;
 import io.intino.sumus.chronos.TimeSeries.Point;
-import io.intino.sumus.chronos.TimelineFile;
-import io.intino.sumus.chronos.TimelineFile.DataSession;
+import io.intino.sumus.chronos.TimelineStore;
+import io.intino.sumus.chronos.timelines.TimelineWriter;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,7 +54,7 @@ public class TimelineCookedMounter {
 
 	private void process(MessageEvent event, Cooked definition) {
 		try {
-			TimelineFile timelineFile = getOrCreateTimelineFile(event, definition);
+			TimelineStore timelineFile = getOrCreateTimelineStore(event, definition);
 			if (timelineFile == null) return;
 			update(timelineFile, definition, event);
 		} catch (IOException e) {
@@ -61,12 +62,12 @@ public class TimelineCookedMounter {
 		}
 	}
 
-	private TimelineFile getOrCreateTimelineFile(MessageEvent event, Cooked timelineDef) throws IOException {
+	private TimelineStore getOrCreateTimelineStore(MessageEvent event, Cooked timelineDef) throws IOException {
 		String entityId = entityOf(event, timelineDef);
 		if (entityId == null) return null;
-		TimelineFile timelineFile = datamart.timelineStore().get(timelineDef.name$(), entityId);
+		TimelineStore timelineFile = datamart.timelineStore().get(timelineDef.name$(), entityId);
 		if (timelineFile == null)
-			timelineFile = createTimelineFile(timelineDef, event.ts(), entityId);
+			timelineFile = createTimelineStore(timelineDef, event.ts(), entityId);
 		return timelineFile;
 	}
 
@@ -84,45 +85,47 @@ public class TimelineCookedMounter {
 		}
 	}
 
-	private void update(TimelineFile tlFile, Cooked definition, MessageEvent event) {
-		DataSession session = null;
-		try {
-			session = tlFile.add().set(event.ts());
+	private void update(TimelineStore tlFile, Cooked definition, MessageEvent event) {
+		try(TimelineWriter writer = tlFile.writer()) {
+			writer.set(event.ts());
 			for (TimeSeries ts : timeSeries(definition, event.type())) {
-				if (ts.isCount())
-					processCount(session, ts.asCount(), lastValue(tlFile, ts), operationOf(ts.asCount().operationList(), event.type()));
-				else processTimeShift(session, ts.asTimeShift(), event);
+				writer.set(measurementsIn(tlFile, event, ts));
 			}
-			session.close();
 		} catch (IOException e) {
 			Logger.error(e);
-		} finally {
-			close(session);
 		}
+	}
+
+	private MeasurementsVector measurementsIn(TimelineStore tlFile, MessageEvent event, TimeSeries ts) throws IOException {
+		MeasurementsVector measurements = new MeasurementsVector(tlFile.sensorModel());
+		if (ts.isCount())
+			processCount(measurements, ts.asCount(), lastValue(tlFile, ts), operationOf(ts.asCount().operationList(), event.type()));
+		else
+			processTimeShift(measurements, ts.asTimeShift(), event);
+		return measurements;
 	}
 
 	private Operation operationOf(List<Operation> operations, String type) {
 		return operations.stream().filter(o -> o.tank().message().name$().equals(type)).findFirst().orElse(null);
 	}
 
-	private void processCount(DataSession session, TimeSeries.Count ts, Point last, Operation operation) {
+	private void processCount(MeasurementsVector measurements, TimeSeries.Count ts, Point last, Operation operation) {
 		double value = last == null ? 0 : last.value();
-		if (operation instanceof Difference) session.set(ts.name$(), value - 1);
-		else session.set(ts.name$(), value + 1);
+		if (operation instanceof Difference) measurements.set(ts.name$(), value - 1);
+		else measurements.set(ts.name$(), value + 1);
 	}
 
-	private void processTimeShift(DataSession session, TimeShift timeSeries, MessageEvent event) {
+	private void processTimeShift(MeasurementsVector measurements, TimeShift timeSeries, MessageEvent event) {
 		if (event.type().equals(timeSeries.tank().message().name$())) save(timeSeries, event);
 		else {
 			Instant last = load(timeSeries, event);
-			if (last != null) session.set(timeSeries.name$(), last.until(event.ts(), SECONDS));
+			if (last != null) measurements.set(timeSeries.name$(), last.until(event.ts(), SECONDS));
 		}
 	}
 
 	private void save(TimeShift timeSeries, MessageEvent event) {
 		String entity = event.toMessage().get(timeSeries.entityId().name$()).asString();
-		try (TimeShiftCache cache = cache(timeSeries)) {
-			cache.open();
+		try (TimeShiftCache cache = cache(timeSeries).open()) {
 			cache.put(entity, event.ts());
 		} catch (Exception e) {
 			Logger.error(e);
@@ -131,8 +134,7 @@ public class TimelineCookedMounter {
 
 	private Instant load(TimeShift timeSeries, MessageEvent event) {
 		String entity = event.toMessage().get(timeSeries.entityId().name$()).asString();
-		try (TimeShiftCache cache = cache(timeSeries)) {
-			cache.open();
+		try (TimeShiftCache cache = cache(timeSeries).open()) {
 			return cache.get(entity);
 		} catch (Exception e) {
 			Logger.error(e);
@@ -145,7 +147,7 @@ public class TimelineCookedMounter {
 		return new TimeShiftCache(new File(mounterCacheDirectory, timeline + ".db"));
 	}
 
-	private static Point lastValue(TimelineFile tlFile, TimeSeries ts) throws IOException {
+	private static Point lastValue(TimelineStore tlFile, TimeSeries ts) throws IOException {
 		Point point = tlFile.timeline().get(ts.name$()).last();
 		while (point != null && Double.isNaN(point.value())) point = point.prev();
 		return point;
@@ -155,20 +157,13 @@ public class TimelineCookedMounter {
 		return definition.timeSeriesList(ts -> timelineTypes.get(definition.name$()).contains(type));
 	}
 
-	private void close(DataSession session) {
-		try {
-			if (session != null) session.close();
-		} catch (IOException ignored) {
-		}
-	}
-
-	private TimelineFile createTimelineFile(Cooked timeline, Instant start, String entity) throws IOException {
+	private TimelineStore createTimelineStore(Cooked timeline, Instant start, String entity) throws IOException {
 		File file = new File(directory, timeline.name$() + File.separator + entity + TIMELINE_EXTENSION);
 		file.getParentFile().mkdirs();
-		TimelineFile tlFile;
-		if (file.exists()) return TimelineFile.open(file);
-		tlFile = TimelineFile.create(file, entity).timeModel(start, new Period(1, HOURS)).sensorModel(sensorModel(timeline));
-		return tlFile;
+		return TimelineStore.createIfNotExists(entity, file)
+				.withTimeModel(start, new Period(1, HOURS))
+				.withSensorModel(sensorModel(timeline))
+				.build();
 	}
 
 	static Magnitude[] sensorModel(Cooked timeline) {
