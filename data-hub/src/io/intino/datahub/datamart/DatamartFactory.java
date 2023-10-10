@@ -67,7 +67,7 @@ public class DatamartFactory {
 
 	public MasterDatamart reflow(MasterDatamart datamart, Instant fromTs, Datamart definition) throws Exception {
 		SnapshotScale scale = definition.snapshots() == null ? SnapshotScale.None : Optional.ofNullable(definition.snapshots().scale()).orElse(SnapshotScale.None);
-		reflowCookedTimelines(datamart, fromTs, entityTanks(definition), cookedTimelinesTanks(definition));
+		reflowEntitiesAndCookedTimelines(datamart, fromTs, entityTanks(definition), cookedTimelinesTanks(definition));
 		reflowRawTimelines(datamart, definition);
 		reflowReels(datamart, reelTanks(definition));
 		Logger.debug("Reflow complete");
@@ -80,7 +80,7 @@ public class DatamartFactory {
 		reflowTimelines(datamart, definition);
 	}
 
-	private void reflowCookedTimelines(MasterDatamart datamart, Instant fromTs, Set<String> entityTanks, Set<String> cookedTimelineTanks) {
+	private void reflowEntitiesAndCookedTimelines(MasterDatamart datamart, Instant fromTs, Set<String> entityTanks, Set<String> cookedTimelineTanks) {
 		Logger.debug("Reflowing entities and cooked timelines...");
 		reflow(new EntityMounter(datamart), new TimelineMounter(datamart), entityTanks, cookedTimelineTanks, reflowTanks(fromTs, entityTanks, cookedTimelineTanks));
 	}
@@ -96,6 +96,8 @@ public class DatamartFactory {
 	}
 
 	private void reflow(EntityMounter entityMounter, TimelineMounter timelineMounter, Set<String> entityTanks, Set<String> cookedTimelineTanks, Iterator<Event> events) {
+		entityTanks = entityTanks.stream().map(this::getTankEventName).collect(Collectors.toSet());
+		cookedTimelineTanks = cookedTimelineTanks.stream().map(this::getTankEventName).collect(Collectors.toSet());
 		while(events.hasNext()) {
 			Event event = events.next();
 			if(entityTanks.contains(event.type())) entityMounter.mount(event);
@@ -120,7 +122,7 @@ public class DatamartFactory {
 				reflowTimelinesOf(
 						datamart,
 						timeline,
-						getSimpleName(measurementTank.name()),
+						getTankEventName(measurementTank.name()),
 						ss,
 						messageEvents.get())
 			);
@@ -174,7 +176,7 @@ public class DatamartFactory {
 		return parent.equals(expectedParent) || isDescendantOf(parent, expectedParent);
 	}
 
-	private String getSimpleName(String name) {
+	private String getTankEventName(String name) {
 		return name.substring(name.lastIndexOf('.') + 1);
 	}
 
