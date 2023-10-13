@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
+import static io.intino.datahub.datamart.MasterDatamart.ChronosDirectory.normalizePath;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.stream.Collectors.toMap;
@@ -144,7 +145,7 @@ public class TimelineCookedMounter {
 
 	private TimeShiftCache cache(TimeShift timeseries) {
 		String timeline = timeseries.core$().ownerAs(Timeline.class).name$();
-		return new TimeShiftCache(new File(mounterCacheDirectory, timeline + ".db"));
+		return new TimeShiftCache(new File(mounterCacheDirectory, normalizePath(timeline + ".db")));
 	}
 
 	private static Point lastValue(TimelineStore tlFile, TimeSeries ts) throws IOException {
@@ -158,7 +159,7 @@ public class TimelineCookedMounter {
 	}
 
 	private TimelineStore createTimelineStore(Cooked timeline, Instant start, String entity) throws IOException {
-		File file = new File(directory, timeline.name$() + File.separator + entity + TIMELINE_EXTENSION);
+		File file = new File(directory, normalizePath(timeline.name$() + File.separator + entity + TIMELINE_EXTENSION));
 		file.getParentFile().mkdirs();
 		return TimelineStore.createIfNotExists(entity, file)
 				.withTimeModel(start, new Period(1, HOURS))
