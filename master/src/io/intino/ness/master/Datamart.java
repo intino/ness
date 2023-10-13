@@ -3,7 +3,10 @@ package io.intino.ness.master;
 import io.intino.ness.master.model.Entity;
 import io.intino.ness.master.reflection.DatamartDefinition;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,6 +30,8 @@ public interface Datamart {
 	void addEntityListener(EntityListener listener);
 
 	DatamartDefinition getDefinition();
+
+	Dictionary dictionary();
 
 	interface EntityListener {
 
@@ -58,5 +63,37 @@ public interface Datamart {
 
 	enum Scale {
 		Year, Month, Week, Day, None
+	}
+
+	interface Dictionary {
+
+		Word get(String word);
+		Stream<Word> words();
+		Set<String> languages();
+
+		interface Word {
+			String get();
+			Set<String> languages();
+			Optional<String> in(String language);
+
+			static Word wrap(String word) {
+				return new Word() {
+					@Override
+					public String get() {
+						return word;
+					}
+
+					@Override
+					public Set<String> languages() {
+						return Collections.emptySet();
+					}
+
+					@Override
+					public Optional<String> in(String language) {
+						return Optional.empty();
+					}
+				};
+			}
+		}
 	}
 }
