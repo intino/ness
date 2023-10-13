@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
 import static io.intino.datahub.datamart.MasterDatamart.ChronosDirectory.normalizePath;
@@ -34,22 +35,20 @@ import static java.util.stream.Collectors.toMap;
 
 public class TimelineCookedMounter {
 	private final MasterDatamart datamart;
-	private final Map<String, List<String>> timelineTypes;
+	private final Map<String, Set<String>> timelineTypes;
 	private final File directory;
-	private final File mounterCacheDirectory;
 
-	public TimelineCookedMounter(DataHubBox box, MasterDatamart datamart, Map<String, List<String>> timelineTypes) {
+	public TimelineCookedMounter(DataHubBox box, MasterDatamart datamart, Map<String, Set<String>> timelineTypes) {
 		this.datamart = datamart;
 		this.timelineTypes = timelineTypes;
 		this.directory = box.datamartTimelinesDirectory(datamart.name());
-		this.mounterCacheDirectory = new File(directory, ".cache");
 	}
 
 	public void mount(MessageEvent event) {
 		datamart.definition().timelineList().stream()
 				.filter(Timeline::isCooked)
 				.map(Timeline::asCooked)
-				.filter(t -> timelineTypes.getOrDefault(t.name$(), List.of()).contains(event.type()))
+				.filter(t -> timelineTypes.getOrDefault(t.name$(), Set.of()).contains(event.type()))
 				.forEach(t -> process(event, t));
 	}
 
@@ -87,7 +86,7 @@ public class TimelineCookedMounter {
 	}
 
 	private void update(TimelineStore tlFile, Cooked definition, MessageEvent event) {
-		try(TimelineWriter writer = tlFile.writer()) {
+		try (TimelineWriter writer = tlFile.writer()) {
 			writer.set(event.ts());
 			for (TimeSeries ts : timeSeries(definition, event.type())) {
 				writer.set(measurementsIn(tlFile, event, ts));
@@ -125,27 +124,15 @@ public class TimelineCookedMounter {
 	}
 
 	private void save(TimeShift timeSeries, MessageEvent event) {
-		String entity = event.toMessage().get(timeSeries.entityId().name$()).asString();
-		try (TimeShiftCache cache = cache(timeSeries).open()) {
-			cache.put(entity, event.ts());
-		} catch (Exception e) {
-			Logger.error(e);
-		}
+		cache(timeSeries).put(event.toMessage().get(timeSeries.entityId().name$()).asString(), event.ts());
 	}
 
 	private Instant load(TimeShift timeSeries, MessageEvent event) {
-		String entity = event.toMessage().get(timeSeries.entityId().name$()).asString();
-		try (TimeShiftCache cache = cache(timeSeries).open()) {
-			return cache.get(entity);
-		} catch (Exception e) {
-			Logger.error(e);
-			return null;
-		}
+		return cache(timeSeries).get(event.toMessage().get(timeSeries.entityId().name$()).asString());
 	}
 
 	private TimeShiftCache cache(TimeShift timeseries) {
-		String timeline = timeseries.core$().ownerAs(Timeline.class).name$();
-		return new TimeShiftCache(new File(mounterCacheDirectory, normalizePath(timeline + ".db")));
+		return datamart.cacheOf(timeseries.core$().ownerAs(Timeline.class).name$());
 	}
 
 	private static Point lastValue(TimelineStore tlFile, TimeSeries ts) throws IOException {

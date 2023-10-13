@@ -12,6 +12,7 @@ import io.intino.sumus.chronos.ReelFile;
 import io.intino.sumus.chronos.TimelineStore;
 import org.apache.commons.io.FileUtils;
 
+import java.io.Closeable;
 import java.io.File;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -20,7 +21,7 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
 
-public interface MasterDatamart {
+public interface MasterDatamart extends Closeable {
 
 	Datamart definition();
 
@@ -36,6 +37,8 @@ public interface MasterDatamart {
 
 	Stream<MasterDatamartMounter> createMountersFor(Datalake.Tank tank);
 
+	TimeShiftCache cacheOf(String timeline);
+
 	default Instant ts() {
 		return entityStore().stream().map(m -> m.get("ts").asInstant()).filter(Objects::nonNull).max(Comparator.naturalOrder()).orElse(null);
 	}
@@ -45,6 +48,8 @@ public interface MasterDatamart {
 		timelineStore().clear();
 		reelStore().clear();
 	}
+
+	void close();
 
 	interface Store<T> {
 		int size();
