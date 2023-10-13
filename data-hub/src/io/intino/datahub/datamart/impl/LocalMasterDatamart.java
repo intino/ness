@@ -4,6 +4,7 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
+import io.intino.datahub.datamart.TimeShiftCache;
 import io.intino.datahub.datamart.mounters.*;
 import io.intino.datahub.model.Datalake;
 import io.intino.datahub.model.Datamart;
@@ -21,6 +22,7 @@ import java.util.stream.Stream;
 
 import static io.intino.datahub.box.DataHubBox.REEL_EXTENSION;
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
+import static io.intino.datahub.datamart.MasterDatamart.ChronosDirectory.normalizePath;
 import static java.util.Collections.synchronizedMap;
 
 public class LocalMasterDatamart implements MasterDatamart {
@@ -31,6 +33,7 @@ public class LocalMasterDatamart implements MasterDatamart {
 	private final Store<Message> entities;
 	private final ChronosDirectory<TimelineStore> timelines;
 	private final ChronosDirectory<ReelFile> reels;
+	private final Map<String, TimeShiftCache> caches;
 
 	public LocalMasterDatamart(DataHubBox box, Datamart definition) {
 		this.box = box;
@@ -39,6 +42,7 @@ public class LocalMasterDatamart implements MasterDatamart {
 		this.entities = new EntityStore(definition);
 		this.timelines = new TimelineDirectory(definition, new File(directory, "timelines"));
 		this.reels = new ReelDirectory(definition, new File(directory, "reels"));
+		this.caches = new HashMap<>();
 	}
 
 	@Override
@@ -73,6 +77,28 @@ public class LocalMasterDatamart implements MasterDatamart {
 	@Override
 	public ChronosDirectory<ReelFile> reelStore() {
 		return reels;
+	}
+
+	public TimeShiftCache cacheOf(String timeline) {
+		if (!caches.containsKey(timeline)) {
+			File dir = new File(box.datamartsDirectory(), ".cache");
+			dir.mkdirs();
+			caches.put(timeline, new TimeShiftCache(new File(dir, normalizePath(timeline) + ".db")));
+		}
+		TimeShiftCache cache = caches.get(timeline);
+		cache.open();
+		return cache;
+	}
+
+	@Override
+	public void close() {
+		caches.values().forEach(c -> {
+			try {
+				c.close();
+			} catch (Exception e) {
+				Logger.error(e);
+			}
+		});
 	}
 
 	@Override

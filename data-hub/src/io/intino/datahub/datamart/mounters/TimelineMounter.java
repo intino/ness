@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.intino.alexandria.event.measurement.MeasurementEvent.ATTRIBUTE_SEP;
@@ -28,11 +29,11 @@ public class TimelineMounter extends MasterDatamartMounter {
 	private final TimelineRawMounter rawMounter;
 	private final TimelineAssertionMounter assertionMounter;
 	private final TimelineCookedMounter cookedMounter;
-	private final Map<String, List<String>> timelineTypes;
+	private final Map<String, Set<String>> timelineTypes;
 
 	public TimelineMounter(MasterDatamart datamart) {
 		super(datamart);
-		timelineTypes = datamart.definition().timelineList().stream().collect(Collectors.toMap(Layer::name$, t -> types(t).toList()));
+		timelineTypes = datamart.definition().timelineList().stream().collect(Collectors.toMap(Layer::name$, t -> types(t).collect(Collectors.toSet())));
 		rawMounter = rawMounter(datamart);
 		assertionMounter = new TimelineAssertionMounter(box(), datamart);
 		cookedMounter = new TimelineCookedMounter(box(), datamart, timelineTypes);
@@ -57,6 +58,7 @@ public class TimelineMounter extends MasterDatamartMounter {
 		else if (isCooked(message)) cookedMounter.mount(new MessageEvent(message));
 		else if (hasValues(message)) rawMounter.mount((measurementEvent(message)));
 	}
+
 
 	private boolean hasValues(Message message) {
 		return message.contains("values");
@@ -125,13 +127,13 @@ public class TimelineMounter extends MasterDatamartMounter {
 			createTimelineFileIfNotExists(event.ts());
 			if (event instanceof MeasurementEvent e) {
 				rawMounter.mount(e);
-			} else if (event instanceof MessageEvent e && ss.equals(sourceSensor(event)))  {
+			} else if (event instanceof MessageEvent e && ss.equals(sourceSensor(event))) {
 				assertionMounter.mount(new MessageEvent(e.toMessage()));
 			}
 		}
 
 		private void createTimelineFileIfNotExists(Instant ts) {
-			if(writer != null) return;
+			if (writer != null) return;
 			try {
 				writer = timelineFactory.create(ts).writer();
 			} catch (Exception e) {
@@ -141,7 +143,7 @@ public class TimelineMounter extends MasterDatamartMounter {
 
 		@Override
 		public void close() throws Exception {
-			if(writer != null) writer.close();
+			if (writer != null) writer.close();
 		}
 
 		private TimelineWriter getTimelineWriter() {

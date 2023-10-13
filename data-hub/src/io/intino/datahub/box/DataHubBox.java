@@ -14,6 +14,7 @@ import io.intino.datahub.broker.jms.SSLConfiguration;
 import io.intino.datahub.datalake.BrokerSessions;
 import io.intino.datahub.datalake.seal.DatahubSessionSealer;
 import io.intino.datahub.datamart.DatamartFactory;
+import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.datamart.MasterDatamartRepository;
 import io.intino.datahub.datamart.impl.LocalMasterDatamart;
 import io.intino.datahub.datamart.serialization.MasterDatamartSerializer;
@@ -190,7 +191,7 @@ public class DataHubBox extends AbstractBox {
 	}
 
 	public void afterStop() {
-
+		datamarts().datamarts().forEach(MasterDatamart::close);
 	}
 
 	@Override

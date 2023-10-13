@@ -45,7 +45,6 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:datalake:7.0.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:event:5.0.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zit:1.0.0" level="project" />
-    <orderEntry type="module" module-name="data-hub" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.2.3" level="project" />
     <orderEntry type="library" name="Intino: com.tdunning:t-digest:3.3" level="project" />
     <orderEntry type="library" name="Intino: com.github.haifengl:smile-core:3.0.2" level="project" />

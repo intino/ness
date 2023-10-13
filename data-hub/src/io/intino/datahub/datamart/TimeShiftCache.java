@@ -12,7 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
 
-public class TimeShiftCache implements AutoCloseable {
+public class TimeShiftCache {
 	private final File file;
 	private Connection connection;
 	private PreparedStatement query;
@@ -25,6 +25,7 @@ public class TimeShiftCache implements AutoCloseable {
 
 	public TimeShiftCache open() {
 		try {
+			if (connection != null) return this;
 			file.getParentFile().mkdirs();
 			DataSource dataSource = dataSource();
 			this.connection = dataSource.getConnection();
@@ -74,9 +75,11 @@ public class TimeShiftCache implements AutoCloseable {
 	}
 
 
-	@Override
 	public void close() throws Exception {
 		try {
+			insert.close();
+			delete.close();
+			query.close();
 			if (connection != null) connection.close();
 		} catch (SQLException ex) {
 			System.out.println(ex.getMessage());
@@ -87,8 +90,8 @@ public class TimeShiftCache implements AutoCloseable {
 		HikariConfig config = new HikariConfig();
 		config.setPoolName("HikariSQLiteConnectionPool");
 		config.addDataSourceProperty("cachePrepStmts", "false");
-		config.addDataSourceProperty("prepStmtCacheSize", "25");
-		config.addDataSourceProperty("prepStmtCacheSqlLimit", "48");
+		config.addDataSourceProperty("prepStmtCacheSize", "4");
+		config.addDataSourceProperty("prepStmtCacheSqlLimit", "4");
 		config.addDataSourceProperty("useServerPrepStmts", "true");
 		config.addDataSourceProperty("implicitCachingEnabled", "true");
 		config.setDriverClassName("org.sqlite.JDBC");
