@@ -248,6 +248,11 @@ def type(datamart & message & impl)
 			return definition;
 		}
 
+		public Dictionary dictionary() {
+			//TODO
+			return null;
+		}
+
 		@Override
         public List<String> listSnapshots() {
         	try {
