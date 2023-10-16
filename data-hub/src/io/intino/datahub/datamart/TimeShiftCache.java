@@ -1,15 +1,9 @@
 package io.intino.datahub.datamart;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import io.intino.alexandria.logger.Logger;
 
-import javax.sql.DataSource;
 import java.io.File;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.Instant;
 
 public class TimeShiftCache {
@@ -25,15 +19,15 @@ public class TimeShiftCache {
 
 	public TimeShiftCache open() {
 		try {
-			if (connection != null) return this;
+			if (connection != null && !connection.isClosed()) return this;
 			file.getParentFile().mkdirs();
-			DataSource dataSource = dataSource();
-			this.connection = dataSource.getConnection();
+			Class.forName("org.sqlite.JDBC");
+			this.connection = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
 			this.connection.createStatement().execute("CREATE TABLE IF NOT EXISTS events (id text NOT NULL PRIMARY KEY, ts bigint);");
 			this.insert = connection.prepareStatement("INSERT OR REPLACE INTO events (id, ts) VALUES(?,?);");
 			this.delete = connection.prepareStatement("DELETE FROM events WHERE id=?;");
 			this.query = connection.prepareStatement("SELECT * FROM events WHERE id=?");
-		} catch (SQLException e) {
+		} catch (SQLException | ClassNotFoundException e) {
 			Logger.error(e);
 		}
 		return this;
@@ -84,18 +78,5 @@ public class TimeShiftCache {
 		} catch (SQLException ex) {
 			System.out.println(ex.getMessage());
 		}
-	}
-
-	private DataSource dataSource() {
-		HikariConfig config = new HikariConfig();
-		config.setPoolName("HikariSQLiteConnectionPool");
-		config.addDataSourceProperty("cachePrepStmts", "false");
-		config.addDataSourceProperty("prepStmtCacheSize", "4");
-		config.addDataSourceProperty("prepStmtCacheSqlLimit", "4");
-		config.addDataSourceProperty("useServerPrepStmts", "true");
-		config.addDataSourceProperty("implicitCachingEnabled", "true");
-		config.setDriverClassName("org.sqlite.JDBC");
-		config.setJdbcUrl("jdbc:sqlite:" + file.getAbsolutePath());
-		return new HikariDataSource(config);
 	}
 }
