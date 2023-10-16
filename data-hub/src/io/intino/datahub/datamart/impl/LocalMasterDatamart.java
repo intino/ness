@@ -79,15 +79,14 @@ public class LocalMasterDatamart implements MasterDatamart {
 		return reels;
 	}
 
-	public TimeShiftCache cacheOf(String timeline) {
+	public synchronized TimeShiftCache cacheOf(String timeline) {
 		if (!caches.containsKey(timeline)) {
 			File dir = new File(box.datamartsDirectory(), ".cache");
 			dir.mkdirs();
-			caches.put(timeline, new TimeShiftCache(new File(dir, normalizePath(timeline) + ".db")));
+			Logger.info("Creating cache for " + timeline);
+			caches.put(timeline, new TimeShiftCache(new File(dir, normalizePath(timeline) + ".db")).open());
 		}
-		TimeShiftCache cache = caches.get(timeline);
-		cache.open();
-		return cache;
+		return caches.get(timeline);
 	}
 
 	@Override
