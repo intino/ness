@@ -27,6 +27,8 @@ def type(entity & class)
 
 		[$attribute+getter...[$NL$NL]]
 
+		[$attribute+translation...[$NL$NL]]
+
 		[$expression+expressionDeclaration...[$NL$NL]]
 
 		@Override

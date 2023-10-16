@@ -202,6 +202,7 @@ def type(datamart & message & impl)
 		private Instant ts;
 		[$hasTimelines~private final Map<String, TimelineNodeImpl> timelines = new java.util.concurrent.ConcurrentHashMap<>();]
 		[$hasReels~private final Map<String, ReelNodeImpl> reels = new java.util.concurrent.ConcurrentHashMap<>();]
+		private volatile DictionaryImpl dictionary = new DictionaryImpl();
 
     	public $name+FirstUpperCase~DatamartImpl(Connector connector, $terminal~.DatamartsRetryConfig retryConfig) {
     		this.connector = requireNonNull(connector);
@@ -297,6 +298,11 @@ def type(datamart & message & impl)
 		[$hasReels+reelsByIdMethod]
     	[$reel+getter...[$NL$NL]]
 
+    	@Override
+    	public Dictionary dictionary() {
+    		return dictionary;
+    	}
+
 		private void downloadDatamartFromDatahub(String datamartSourceSelector) {
 			if (connector instanceof io.intino.alexandria.terminal.StubConnector) return;
 			Logger.debug("Downloading datamart from datahub...");
@@ -310,6 +316,8 @@ def type(datamart & message & impl)
 
     		[$hasReels~loadReelsFromDatahub();]
 
+    		[$hasDictionary~loadDictionaryFromDatahub();]
+
 			long time = java.lang.System.currentTimeMillis() - start;
 			Logger.debug("Datamart downloaded from datahub after " + time + " ms");
 		}
@@ -317,6 +325,8 @@ def type(datamart & message & impl)
 		[$hasTimelines+loadTimelinesFromDatahubMethod]
 
 		[$hasReels+loadReelsFromDatahubMethod]
+
+		[$hasDictionary+loadDictionaryFromDatahubMethod]
 
 		private Stream<Event> downloadEntities(int$[$] eventCount, String datamartSourceSelector) {
 			try {
@@ -363,6 +373,7 @@ def type(datamart & message & impl)
 			mountEntities(event);
 			[$hasTimelines~mountTimelines(event);]
 			[$hasReels~mountReels(event);]
+			// TODO: update dictionary when resource event arrives
 		}
 
 		[$hasReels~private void mountReels(Event event) {
@@ -430,6 +441,8 @@ def type(datamart & message & impl)
 		[$timelineNode+nodeImpl]
 
 		[$reelNode+nodeImpl]
+
+		[$dictionary+dictionaryImpl]
 
 		private static Set<String> sourcesOfTimeline(String type) {
         	return switch(type) {
@@ -803,3 +816,33 @@ def trigger(loadReelsFromDatahubMethod)
     	}
     }
 end
+
+def trigger(loadDictionaryFromDatahubMethod)
+	private void loadDictionaryFromDatahub() {
+		Logger.debug("Downloading dictionary...");
+		Map<String, Map<String, String>> words = new HashMap<>();
+    	for(var triplet : dictionaryEntries()) {
+    		words.computeIfAbsent(triplet$[0$], k -> new HashMap<>(4)).put(triplet$[1$], triplet$[2$]);
+    	}
+    	this.dictionary = new DictionaryImpl(words);
+    	Logger.debug("Loaded dictionary with " + words.size() + " words");
+    }
+
+    private String$[$]$[$] dictionaryEntries() {
+    	try {
+    		ActiveMQTextMessage request = new ActiveMQTextMessage();
+    		request.setText("datamart=" + name() + ";operation=get-dictionary;");
+    		javax.jms.Message message = requestResponseFromDatahub("get-dictionary", request);
+    		if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
+    		return java.util.Arrays.stream(((javax.jms.TextMessage)message).getText().split("\\n"))
+    			.filter(l -> !l.isBlank())
+    			.map(l -> l.trim().split("\\t", -1))
+    			.filter(t -> t.length >= 3)
+    			.toArray(String$[$]$[$]::new);
+    	} catch (Exception e) {
+    		Logger.error(e);
+    		return new String$[0$]$[0$];
+    	}
+    }
+end
+

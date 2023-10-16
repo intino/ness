@@ -19,6 +19,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
@@ -77,8 +78,25 @@ public class DatamartsRequest {
 			case "get-timeline" -> getTimeline(datamart, args);
 			case "list-reels" -> listReelFiles(datamart, args);
 			case "get-reel" -> getReel(datamart, args);
+			case "get-dictionary" -> getDictionary(datamart, args);
 			default -> errorMessage("Operation " + args.get("operation") + " not found");
 		};
+	}
+
+	private Stream<Message> getDictionary(MasterDatamart datamart, Map<String, String> args) {
+		// hay que saber el ss (domain) para retornar el diccionario correspondiente
+		var event = box.datalake().resourceStore().find("Dictionary/%ss/00000001/" + datamart.name() + ".triplets").orElse(null);
+		if(event == null) return Stream.empty();
+		try {
+			ActiveMQTextMessage message = new ActiveMQTextMessage();
+			message.setBooleanProperty("success", true);
+			message.setText(event.resource().readAsString(StandardCharsets.UTF_8));
+			return Stream.of(message);
+		} catch (Exception e) {
+			String message = "Could not send dictionary " + event.resource().name() + ": " + e.getMessage();
+			Logger.error(message, e);
+			return errorMessage(message);
+		}
 	}
 
 	private Stream<Message> getReel(MasterDatamart datamart, Map<String, String> args) {

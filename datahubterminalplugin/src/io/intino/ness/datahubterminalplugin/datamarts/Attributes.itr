@@ -59,3 +59,9 @@ end
 def trigger(putIntoMap)
 	put("$name+firstLowerCase+javaValidName", $name+firstLowerCase+javaValidName);
 end
+
+def trigger(translation)
+	public Optional<String> $name+firstLowerCase+javaValidName(String language) {
+		return datamart().dictionary().get(String.valueOf($name+firstLowerCase+javaValidName())).in(language);
+	}
+end

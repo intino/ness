@@ -187,8 +187,13 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return builder;
 	}
 
+	private Frame dictionaryImpl() {
+		FrameBuilder b = new FrameBuilder("dictionary", "default");
+		return b.toFrame();
+	}
+
 	private Frame reelNode() {
-		FrameBuilder b = new FrameBuilder("reelNode", "default"); // TODO: Node implementation specified in Model?
+		FrameBuilder b = new FrameBuilder("reelNode", "default");
 		b.add("chronosObject", "Reel");
 		return b.toFrame();
 	}
@@ -221,7 +226,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private Frame timelineNode() {
-		FrameBuilder b = new FrameBuilder("timelineNode", "default"); // TODO: Node implementation specified in Model?
+		FrameBuilder b = new FrameBuilder("timelineNode", "default");
 		b.add("chronosObject", "Timeline");
 		return b.toFrame();
 	}
@@ -277,6 +282,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 		builder.add("numStructs", datamart.structList().size());
 		builder.add("ontologypackage", modelPackage);
 		builder.add("terminal", String.format(terminalInfo.terminalPackage + "." + firstUpperCase(javaValidName().format(terminalInfo.terminal.name$()).toString())));
+		builder.add("lineSeparator", "\n");
 
 		if (!datamart.timelineList().isEmpty()) {
 			builder.add("hasTimelines", "");
@@ -291,6 +297,8 @@ public class DatamartsRenderer implements ConceptRenderer {
 			builder.add("reel", reelsOf(datamart));
 			builder.add("reelNode", reelNode());
 		}
+
+		builder.add("hasDictionary", "").add("dictionary", dictionaryImpl());
 
 		return builder;
 	}
@@ -589,7 +597,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private static class Templates {
-		final Template datamart = append(customize(new DatamartTemplate()), customize(new NodeImplTemplate()));
+		final Template datamart = append(customize(new DatamartTemplate()), customize(new NodeImplTemplate()), customize(new DictionaryImplTemplate()));
 		final Template entityBase = customize(new EntityBaseTemplate());
 		final Template entity = append(customize(new EntityTemplate()), customize(new StructTemplate()), customize(new AttributesTemplate()));
 		final Template entityMounter = customize(new EntityMounterTemplate());
