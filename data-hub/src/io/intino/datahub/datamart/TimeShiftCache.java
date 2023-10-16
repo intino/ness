@@ -25,7 +25,7 @@ public class TimeShiftCache {
 
 	public TimeShiftCache open() {
 		try {
-			if (connection != null) return this;
+			if (connection != null && !connection.isClosed()) return this;
 			file.getParentFile().mkdirs();
 			DataSource dataSource = dataSource();
 			this.connection = dataSource.getConnection();
