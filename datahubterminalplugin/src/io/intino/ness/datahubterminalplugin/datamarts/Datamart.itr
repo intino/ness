@@ -30,6 +30,8 @@ def type(datamart & interface)
 
 		[$reel+getterSignature...[$NL$NL]]
 
+		Dictionary dictionary(String name);
+
 		class Entities {
 
 			private final $name+FirstUpperCase~Datamart datamart;
@@ -249,11 +251,6 @@ def type(datamart & message & impl)
 			return definition;
 		}
 
-		public Dictionary dictionary() {
-			//TODO
-			return null;
-		}
-
 		@Override
         public List<String> listSnapshots() {
         	try {
@@ -308,6 +305,14 @@ def type(datamart & message & impl)
     		return dictionary;
     	}
 
+    	@Override
+        public Dictionary dictionary(String name) {
+        	if(name == null) name = "";
+        	if(dictionary.name.equals(name)) return dictionary;
+        	loadDictionaryFromDatahub(name);
+        	return dictionary;
+        }
+
 		private void downloadDatamartFromDatahub(String datamartSourceSelector) {
 			if (connector instanceof io.intino.alexandria.terminal.StubConnector) return;
 			Logger.debug("Downloading datamart from datahub...");
@@ -321,7 +326,7 @@ def type(datamart & message & impl)
 
     		[$hasReels~loadReelsFromDatahub();]
 
-    		[$hasDictionary~loadDictionaryFromDatahub();]
+    		[$hasDictionary~loadDictionaryFromDatahub("");]
 
 			long time = java.lang.System.currentTimeMillis() - start;
 			Logger.debug("Datamart downloaded from datahub after " + time + " ms");
@@ -823,21 +828,23 @@ def trigger(loadReelsFromDatahubMethod)
 end
 
 def trigger(loadDictionaryFromDatahubMethod)
-	private void loadDictionaryFromDatahub() {
+	private void loadDictionaryFromDatahub(String name) {
 		Logger.debug("Downloading dictionary...");
 		Map<String, Map<String, String>> words = new HashMap<>();
-    	for(var triplet : dictionaryEntries()) {
+		var entries = dictionaryEntries(name);
+    	for(var triplet : entries) {
     		words.computeIfAbsent(triplet$[0$], k -> new HashMap<>(4)).put(triplet$[1$], triplet$[2$]);
     	}
-    	this.dictionary = new DictionaryImpl(words);
+    	this.dictionary = new DictionaryImpl(name, words);
     	Logger.debug("Loaded dictionary with " + words.size() + " words");
     }
 
-    private String$[$]$[$] dictionaryEntries() {
+    private String$[$]$[$] dictionaryEntries(String name) {
     	try {
     		ActiveMQTextMessage request = new ActiveMQTextMessage();
-    		request.setText("datamart=" + name() + ";operation=get-dictionary;");
+    		request.setText("datamart=" + name() + ";operation=get-dictionary;name="+name);
     		javax.jms.Message message = requestResponseFromDatahub("get-dictionary", request);
+    		if(message == null) return new String$[0$]$[0$];
     		if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
     		return java.util.Arrays.stream(((javax.jms.TextMessage)message).getText().split("\\n"))
     			.filter(l -> !l.isBlank())

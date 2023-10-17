@@ -2,13 +2,15 @@ def type(dictionary & default) trigger(dictionaryImpl)
 
 	private class DictionaryImpl implements Dictionary {
 
+		private final String name;
 		private final Map<String, WordImpl> words;
 
 		private DictionaryImpl() {
-			this(new HashMap<>(0));
+			this("", new HashMap<>(0));
 		}
 
-		private DictionaryImpl(Map<String, Map<String, String>> words) {
+		private DictionaryImpl(String name, Map<String, Map<String, String>> words) {
+			this.name = name;
         	this.words = words.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new WordImpl(e.getKey(), e.getValue())));
         }
 

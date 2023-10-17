@@ -4,10 +4,12 @@ import io.intino.alexandria.terminal.JmsConnector;
 import io.intino.cosmos.datahub.TrooperTerminal;
 import io.intino.cosmos.datahub.datamarts.master.MasterDatamart;
 import io.intino.cosmos.datahub.datamarts.master.MasterDatamartImpl;
+import io.intino.ness.master.Datamart;
 import io.intino.sumus.chronos.Timeline;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 public class Client {
 
@@ -19,6 +21,13 @@ public class Client {
 		MasterDatamart.TimelineNode.AlwaysDownloadFromDatahub.set(true);
 
 		MasterDatamartImpl dm = (MasterDatamartImpl) terminal.datamart();
+
+		Datamart.Dictionary.Word word = dm.dictionary().get("Brasil");
+
+		Optional<String> valueInEnglish = dm.dictionary("tc").get("Brasil").in("en");
+
+		Optional<String> label = dm.area("Mexico").label("en");
+
 
 		var timelines = dm.timelines("45-79-45-227-ip-linodeusercontent-com").toList();
 

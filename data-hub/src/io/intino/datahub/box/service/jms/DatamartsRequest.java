@@ -83,17 +83,20 @@ public class DatamartsRequest {
 		};
 	}
 
+	private static final long DICTIONARY_TS = Timetag.of("00000101").instant().toEpochMilli();
 	private Stream<Message> getDictionary(MasterDatamart datamart, Map<String, String> args) {
-		// hay que saber el ss (domain) para retornar el diccionario correspondiente
-		var event = box.datalake().resourceStore().find("Dictionary/%ss/00000001/" + datamart.name() + ".triplets").orElse(null);
-		if(event == null) return Stream.empty();
+		String name = args.get("name");
+		if(name == null || name.isEmpty()) name = "default";
+		// Peta al intentar leer el metadata del evento. Hay que hacer el fix en alexandria
 		try {
+			var event = box.datalake().resourceStore().find("Dictionary/" + name + "/" + DICTIONARY_TS + "/" + name + ".dictionary.triplets").orElse(null);
+			if(event == null) return Stream.empty();
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
 			message.setBooleanProperty("success", true);
 			message.setText(event.resource().readAsString(StandardCharsets.UTF_8));
 			return Stream.of(message);
 		} catch (Exception e) {
-			String message = "Could not send dictionary " + event.resource().name() + ": " + e.getMessage();
+			String message = "Could not send dictionary " + name + ": " + e.getMessage();
 			Logger.error(message, e);
 			return errorMessage(message);
 		}
