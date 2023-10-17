@@ -24,7 +24,6 @@ Artifact("io.intino", "9.10.0-SNAPSHOT") data-hub as Product
 		Compile("org.apache.activemq", "activemq-kahadb-store", "5.18.2")
 		Compile("org.apache.activemq", "activemq-jaas", "5.18.2")
 		Compile("org.apache.activemq", "activemq-runtime-config", "5.18.2")
-		Compile("com.zaxxer", "HikariCP", "5.0.1")
 		Compile("org.xerial", "sqlite-jdbc", "3.43.0.0")
 		Test("junit", "junit", "4.13.2")
 		Web("io.intino", "datalake-inspector", "9.10.0-SNAPSHOT")
