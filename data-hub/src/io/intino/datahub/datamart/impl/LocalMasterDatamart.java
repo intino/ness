@@ -204,7 +204,7 @@ public class LocalMasterDatamart implements MasterDatamart {
 		public TimelineDirectory(Datamart definition, File root) {
 			super(root);
 			this.subscribedEvents = definition.timelineList().stream()
-					.flatMap(TimelineUtils::tanksOf)
+					.flatMap(TimelineUtils::types)
 					.collect(Collectors.toSet());
 		}
 
