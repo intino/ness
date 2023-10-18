@@ -88,9 +88,8 @@ public class TimelineCookedMounter {
 	private void update(TimelineStore tlFile, Cooked definition, MessageEvent event) {
 		try (TimelineWriter writer = tlFile.writer()) {
 			writer.set(event.ts());
-			for (TimeSeries ts : timeSeries(definition, event.type())) {
+			for (TimeSeries ts : timeSeries(definition, event.type()))
 				writer.set(measurementsIn(tlFile, event, ts));
-			}
 		} catch (IOException e) {
 			Logger.error(e);
 		}
@@ -124,7 +123,8 @@ public class TimelineCookedMounter {
 	}
 
 	private void save(TimeShift timeSeries, MessageEvent event) {
-		cache(timeSeries).put(event.toMessage().get(timeSeries.entityId().name$()).asString(), event.ts());
+		TimeShiftCache cache = cache(timeSeries);
+		cache.put(event.toMessage().get(timeSeries.entityId().name$()).asString(), event.ts());
 	}
 
 	private Instant load(TimeShift timeSeries, MessageEvent event) {

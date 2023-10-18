@@ -164,7 +164,6 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:jms:1.6.0" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-client:5.18.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1" level="project" />
-    <orderEntry type="module" module-name="data-hub" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-broker:5.18.2" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-openwire-legacy:5.18.2" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-jaas:5.18.2" level="project" />
@@ -182,7 +181,6 @@
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-spring:5.18.2" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-pool:5.18.2" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-jms-pool:5.18.2" level="project" />
-    <orderEntry type="module" module-name="datalake-inspector" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.2.3" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:7.0.5" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:7.0.5" level="project" />
@@ -210,13 +208,7 @@
     <orderEntry type="library" name="Intino: com.github.haifengl:smile-base:3.0.2" level="project" />
     <orderEntry type="library" name="Intino: org.apache.commons:commons-csv:1.10.0" level="project" />
     <orderEntry type="library" name="Intino: org.xerial:sqlite-jdbc:3.43.0.0" level="project" />
-    <orderEntry type="library" name="Intino: com.zaxxer:HikariCP:5.0.1" level="project" />
-    <orderEntry type="library" name="Intino: org.javassist:javassist:3.27.0-GA" level="project" />
-    <orderEntry type="library" name="Intino: io.micrometer:micrometer-core:1.5.10" level="project" />
-    <orderEntry type="library" name="Intino: org.hdrhistogram:HdrHistogram:2.1.12" level="project" />
     <orderEntry type="library" name="Intino: io.intino.sumus:chronos:2.0.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-shiny:1.0.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:driver-r:1.0.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:terminal-jms:5.5.12" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.6.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.ness:master:2.1.0" level="project" />

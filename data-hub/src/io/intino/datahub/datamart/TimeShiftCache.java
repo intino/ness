@@ -5,6 +5,9 @@ import io.intino.alexandria.logger.Logger;
 import java.io.File;
 import java.sql.*;
 import java.time.Instant;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class TimeShiftCache {
 	private final File file;
@@ -12,6 +15,7 @@ public class TimeShiftCache {
 	private PreparedStatement query;
 	private PreparedStatement insert;
 	private PreparedStatement delete;
+	private ExecutorService executorService;
 
 	public TimeShiftCache(File file) {
 		this.file = file;
@@ -27,6 +31,7 @@ public class TimeShiftCache {
 			this.insert = connection.prepareStatement("INSERT OR REPLACE INTO events (id, ts) VALUES(?,?);");
 			this.delete = connection.prepareStatement("DELETE FROM events WHERE id=?;");
 			this.query = connection.prepareStatement("SELECT * FROM events WHERE id=?");
+			this.executorService = Executors.newSingleThreadExecutor(r -> new Thread(r, "TimeShift-" + file.getName()));
 		} catch (SQLException | ClassNotFoundException e) {
 			Logger.error(e);
 		}
@@ -34,13 +39,15 @@ public class TimeShiftCache {
 	}
 
 	public synchronized void put(String id, Instant ts) {
-		try {
-			insert.setString(1, id);
-			insert.setLong(2, ts.toEpochMilli() / 1000);
-			insert.executeUpdate();
-		} catch (SQLException e) {
-			Logger.error(e);
-		}
+		executorService.execute(() -> {
+			try {
+				insert.setString(1, id);
+				insert.setLong(2, ts.toEpochMilli() / 1000);
+				insert.executeUpdate();
+			} catch (SQLException e) {
+				Logger.error(e);
+			}
+		});
 	}
 
 	public synchronized Instant get(String id) {
@@ -68,15 +75,24 @@ public class TimeShiftCache {
 		}
 	}
 
-
 	public void close() throws Exception {
 		try {
+			closeExecutor();
 			insert.close();
 			delete.close();
 			query.close();
 			if (connection != null) connection.close();
 		} catch (SQLException ex) {
 			System.out.println(ex.getMessage());
+		}
+	}
+
+	private void closeExecutor() {
+		try {
+			executorService.shutdown();
+			executorService.awaitTermination(1, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			Logger.error(e);
 		}
 	}
 }
