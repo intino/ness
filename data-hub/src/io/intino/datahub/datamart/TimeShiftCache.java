@@ -37,7 +37,7 @@ public class TimeShiftCache {
 		try {
 			insert.setString(1, id);
 			insert.setLong(2, ts.toEpochMilli() / 1000);
-			insert.execute();
+			insert.executeUpdate();
 		} catch (SQLException e) {
 			Logger.error(e);
 		}
@@ -62,7 +62,7 @@ public class TimeShiftCache {
 	public synchronized void remove(String id) {
 		try {
 			delete.setString(1, id);
-			delete.execute();
+			delete.executeUpdate();
 		} catch (SQLException e) {
 			Logger.error(e);
 		}
