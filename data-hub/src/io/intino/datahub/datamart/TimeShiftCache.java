@@ -106,7 +106,7 @@ public class TimeShiftCache {
 			executorService.shutdown();
 			executorService.awaitTermination(1, TimeUnit.MINUTES);
 			commitService.shutdown();
-			executorService.awaitTermination(1, TimeUnit.MINUTES);
+			commitService.awaitTermination(1, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
 			Logger.error(e);
 		}

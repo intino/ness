@@ -212,5 +212,7 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:terminal-jms:5.5.12" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.6.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.ness:master:2.1.0" level="project" />
+    <orderEntry type="module" module-name="data-hub" />
+    <orderEntry type="module" module-name="datalake-inspector" />
   </component>
 </module>
