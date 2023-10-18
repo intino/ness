@@ -83,7 +83,6 @@ public class LocalMasterDatamart implements MasterDatamart {
 		if (!caches.containsKey(timeline)) {
 			File dir = new File(box.datamartsDirectory(), ".cache");
 			dir.mkdirs();
-			Logger.info("Creating cache for " + timeline);
 			caches.put(timeline, new TimeShiftCache(new File(dir, normalizePath(timeline) + ".db")).open());
 		}
 		return caches.get(timeline);

@@ -7,6 +7,7 @@ import java.sql.*;
 import java.time.Instant;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class TimeShiftCache {
@@ -16,6 +17,7 @@ public class TimeShiftCache {
 	private PreparedStatement insert;
 	private PreparedStatement delete;
 	private ExecutorService executorService;
+	private ScheduledExecutorService commitService;
 
 	public TimeShiftCache(File file) {
 		this.file = file;
@@ -31,7 +33,10 @@ public class TimeShiftCache {
 			this.insert = connection.prepareStatement("INSERT OR REPLACE INTO events (id, ts) VALUES(?,?);");
 			this.delete = connection.prepareStatement("DELETE FROM events WHERE id=?;");
 			this.query = connection.prepareStatement("SELECT * FROM events WHERE id=?");
+			connection.setAutoCommit(false);
 			this.executorService = Executors.newSingleThreadExecutor(r -> new Thread(r, "TimeShift-" + file.getName()));
+			this.commitService = Executors.newScheduledThreadPool(1, r -> new Thread(r, "TimeShift-commit-" + file.getName()));
+			commitService.scheduleAtFixedRate(this::commit, 1, 1, TimeUnit.MINUTES);
 		} catch (SQLException | ClassNotFoundException e) {
 			Logger.error(e);
 		}
@@ -51,6 +56,7 @@ public class TimeShiftCache {
 	}
 
 	public synchronized Instant get(String id) {
+		commit();
 		try (ResultSet rs = query(id)) {
 			boolean next = rs.next();
 			if (!next) return null;
@@ -61,11 +67,6 @@ public class TimeShiftCache {
 		}
 	}
 
-	private ResultSet query(String id) throws SQLException {
-		query.setString(1, id);
-		return query.executeQuery();
-	}
-
 	public synchronized void remove(String id) {
 		try {
 			delete.setString(1, id);
@@ -73,6 +74,19 @@ public class TimeShiftCache {
 		} catch (SQLException e) {
 			Logger.error(e);
 		}
+	}
+
+	private void commit() {
+		try {
+			connection.commit();
+		} catch (SQLException e) {
+			Logger.error(e);
+		}
+	}
+
+	private ResultSet query(String id) throws SQLException {
+		query.setString(1, id);
+		return query.executeQuery();
 	}
 
 	public void close() throws Exception {
