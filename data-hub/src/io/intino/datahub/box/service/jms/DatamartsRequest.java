@@ -104,7 +104,7 @@ public class DatamartsRequest {
 	}
 
 	private Stream<Message> getReel(MasterDatamart datamart, Map<String, String> args) {
-		return getChronos(args, box.datamartReelsDirectory(datamart.name(), args.get("type")), REEL_EXTENSION);
+		return getChronos(args, box.datamartReelsDirectory(datamart.name()), REEL_EXTENSION);
 	}
 
 	private Stream<Message> getTimeline(MasterDatamart datamart, Map<String, String> args) {
