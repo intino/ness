@@ -6,6 +6,7 @@ import io.intino.alexandria.jms.MessageReader;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
+import io.intino.datahub.datamart.MasterDatamart.ChronosDirectory;
 import org.apache.activemq.broker.region.MessageReference;
 import org.apache.activemq.command.ActiveMQBytesMessage;
 import org.apache.activemq.command.ActiveMQMessage;
@@ -123,7 +124,7 @@ public class DatamartsRequest {
 			Logger.error(message);
 			return errorMessage(message);
 		}
-		File file = new File(dir, type + File.separator + id + extension);
+		File file = new File(dir, ChronosDirectory.normalizePath(type + File.separator + id + extension));
 		if (!file.exists()) return errorMessage(extension + " file not found");
 		String mode = args.getOrDefault("mode", "download");
 		return mode.equals("path") ? path(file) : download(file);
