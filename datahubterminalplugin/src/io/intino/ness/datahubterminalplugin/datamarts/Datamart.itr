@@ -840,6 +840,7 @@ def trigger(loadDictionaryFromDatahubMethod)
     }
 
     private String$[$]$[$] dictionaryEntries(String name) {
+    	if(true) return new String$[0$]$[0$]; // TODO
     	try {
     		ActiveMQTextMessage request = new ActiveMQTextMessage();
     		request.setText("datamart=" + name() + ";operation=get-dictionary;name="+name);
