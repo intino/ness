@@ -12,12 +12,16 @@ import org.apache.activemq.command.ActiveMQTempQueue;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 public class NessService {
 	private final BrokerManager manager;
+	private final ExecutorService dispatcherService;
 
 	public NessService(DataHubBox box) {
+		dispatcherService = Executors.newFixedThreadPool(16, r -> new Thread(r, "Ness Datamarts Service"));
 		manager = box.brokerService().manager();
 		manager.registerQueueConsumer("service.ness.seal", m -> response(manager, m, new SealRequest(box).accept(MessageReader.textFrom(m))));
 		manager.registerQueueConsumer("service.ness.seal.last", m -> response(manager, m, new LastSealRequest(box).accept(MessageReader.textFrom(m))));
@@ -45,13 +49,15 @@ public class NessService {
 	}
 
 	private void response(BrokerManager manager, Message request, Stream<Message> response) {
-		if (response == null) return;
-		QueueProducer producer = producer(manager, request);
-		if (producer == null) return;
-		new Thread(() -> handleResponse(request, response, producer), "Ness Service").start();
+		dispatcherService.execute(() -> {
+			if (response == null) return;
+			QueueProducer producer = producer(manager, request);
+			if (producer == null) return;
+			publishResponse(request, response, producer);
+		});
 	}
 
-	private void handleResponse(Message request, Stream<Message> response, QueueProducer producer) {
+	private void publishResponse(Message request, Stream<Message> response, QueueProducer producer) {
 		response.forEach(m -> {
 			try {
 				m.setJMSCorrelationID(request.getJMSCorrelationID());
