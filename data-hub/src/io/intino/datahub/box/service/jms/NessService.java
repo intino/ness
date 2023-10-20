@@ -14,6 +14,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 public class NessService {
@@ -28,6 +29,14 @@ public class NessService {
 		manager.registerQueueConsumer("service.ness.backup", m -> response(manager, m, new BackupRequest(box).accept(MessageReader.textFrom(m))));
 		manager.registerQueueConsumer("service.ness.datalake", m -> response(manager, m, new DatalakeRequest(box).accept(m)));
 		manager.registerQueueConsumer("service.ness.datamarts", m -> response(manager, m, new DatamartsRequest(box).accept(m)));
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			try {
+				dispatcherService.shutdown();
+				dispatcherService.awaitTermination(1, TimeUnit.MINUTES);
+			} catch (InterruptedException e) {
+				Logger.error(e);
+			}
+		}));
 	}
 
 	private void response(BrokerManager manager, Message requestMessage, String response) {
