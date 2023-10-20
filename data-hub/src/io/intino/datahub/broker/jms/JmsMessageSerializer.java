@@ -22,6 +22,9 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static java.nio.file.StandardOpenOption.APPEND;
@@ -35,12 +38,25 @@ public class JmsMessageSerializer {
 	private final Datalake.Tank tank;
 	private final Scale scale;
 	private final MasterDatamartMounter[] mounters;
+	private static final ExecutorService executorService = Executors.newSingleThreadExecutor(r -> new Thread(r, "JmsSerializer"));
+
+	static {
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			try {
+				executorService.shutdown();
+				executorService.awaitTermination(1, TimeUnit.MINUTES);
+			} catch (InterruptedException e) {
+				Logger.error(e);
+			}
+		}));
+	}
 
 	JmsMessageSerializer(File stage, Datalake.Tank tank, Scale scale, MasterDatamartRepository datamarts) {
 		this.stage = stage;
 		this.tank = tank;
 		this.scale = scale;
 		this.mounters = createMountersFor(tank, datamarts);
+
 	}
 
 	Consumer<javax.jms.Message> create() {
@@ -72,7 +88,7 @@ public class JmsMessageSerializer {
 
 		@Override
 		public void accept(javax.jms.Message message) {
-			consume(JmsMessageTranslator.toInlMessages(message));
+			executorService.execute(() -> consume(JmsMessageTranslator.toInlMessages(message)));
 		}
 
 		private void consume(Iterator<Message> messages) {
