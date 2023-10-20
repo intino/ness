@@ -152,5 +152,19 @@
     <orderEntry type="library" name="Intino: javax.activation:javax.activation-api:1.2.0" level="project" />
     <orderEntry type="library" name="Intino: org.jvnet.jaxb2_commons:jaxb2-basics-runtime:0.12.0" level="project" />
     <orderEntry type="library" name="Intino: org.xerial:sqlite-jdbc:3.43.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.ness:master:2.1.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino:data-hub:9.10.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.sumus:chronos:2.0.1" level="project" />
+    <orderEntry type="library" name="Intino: commons-io:commons-io:2.14.0" level="project" />
+    <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-databind:2.15.2" level="project" />
+    <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-annotations:2.15.2" level="project" />
+    <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-core:2.15.2" level="project" />
+    <orderEntry type="library" name="Intino: org.slf4j:slf4j-api:2.0.6" level="project" />
+    <orderEntry type="library" name="Intino: commons-logging:commons-logging:1.0.3" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.6.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.sumus:chronos:2.0.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:2.0.7" level="project" />
   </component>
 </module>

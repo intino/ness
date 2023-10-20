@@ -35,7 +35,7 @@ public class NessService {
 			try {
 				if (response == null) return;
 				QueueProducer queueProducer = producer(manager, request);
-				if(queueProducer == null) return;
+				if (queueProducer == null) return;
 				response.setJMSCorrelationID(request.getJMSCorrelationID());
 				queueProducer.produce(response);
 			} catch (Throwable e) {
@@ -45,10 +45,10 @@ public class NessService {
 	}
 
 	private void response(BrokerManager manager, Message request, Stream<Message> response) {
-		if(response == null) return;
+		if (response == null) return;
 		QueueProducer producer = producer(manager, request);
 		if (producer == null) return;
-		new Thread(() -> handleResponse(request, response, producer)).start();
+		new Thread(() -> handleResponse(request, response, producer), "Ness Service").start();
 	}
 
 	private void handleResponse(Message request, Stream<Message> response, QueueProducer producer) {
