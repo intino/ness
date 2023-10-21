@@ -845,9 +845,11 @@ def trigger(loadDictionaryFromDatahubMethod)
     		ActiveMQTextMessage request = new ActiveMQTextMessage();
     		request.setText("datamart=" + name() + ";operation=get-dictionary;name="+name);
     		javax.jms.Message message = requestResponseFromDatahub("get-dictionary", request);
-    		if(message == null) return new String$[0$]$[0$];
+    		if (message == null) return new String$[0$]$[0$];
     		if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
-    		return java.util.Arrays.stream(((javax.jms.TextMessage)message).getText().split("\\n"))
+    		String text = ((javax.jms.TextMessage) message).getText();
+    		if (text == null) return new String$[0$]$[0$];
+    		return java.util.Arrays.stream(text.split("\\n"))
     			.filter(l -> !l.isBlank())
     			.map(l -> l.trim().split("\\t", -1))
     			.filter(t -> t.length >= 3)
