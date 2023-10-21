@@ -91,7 +91,7 @@ public class DatamartsRequest {
 		// Peta al intentar leer el metadata del evento. Hay que hacer el fix en alexandria
 		try {
 			var event = box.datalake().resourceStore().find("Dictionary/" + name + "/" + DICTIONARY_TS + "/" + name + ".dictionary.triplets").orElse(null);
-			if(event == null) return Stream.empty();
+			if (event == null) return successEmptyResponse();
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
 			message.setBooleanProperty("success", true);
 			message.setText(event.resource().readAsString(StandardCharsets.UTF_8));
@@ -135,6 +135,17 @@ public class DatamartsRequest {
 		try {
 			message.setBooleanProperty("success", false);
 			message.setText(errorDescription);
+			return Stream.of(message);
+		} catch (JMSException e) {
+			Logger.error(e);
+			return Stream.of(message);
+		}
+	}
+
+	private Stream<Message> successEmptyResponse() {
+		ActiveMQTextMessage message = new ActiveMQTextMessage();
+		try {
+			message.setBooleanProperty("success", true);
 			return Stream.of(message);
 		} catch (JMSException e) {
 			Logger.error(e);
@@ -197,7 +208,7 @@ public class DatamartsRequest {
 		return timetag.map(s -> box.datamartSerializer().loadMostRecentSnapshotTo(datamart.name(), asTimetag(s))
 						.map(MasterDatamart.Snapshot::datamart)
 						.map(d -> downloadEntities(d, args.get("sourceSelector")))
-						.orElse(Stream.empty()))
+						.orElse(successEmptyResponse()))
 				.orElseGet(() -> datamart == null ? errorMessage("Datamart not found") : downloadEntities(datamart, args.get("sourceSelector")));
 	}
 
@@ -207,7 +218,7 @@ public class DatamartsRequest {
 
 	private Stream<Message> listAvailableSnapshotsOf(MasterDatamart datamart) {
 		List<Timetag> snapshots = box.datamartSerializer().listAvailableSnapshotsOf(datamart.name());
-		if (snapshots.isEmpty()) return Stream.empty();
+		if (snapshots.isEmpty()) return successEmptyResponse();
 		try {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
 			message.setBooleanProperty("success", true);
