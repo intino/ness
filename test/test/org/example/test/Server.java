@@ -1,7 +1,11 @@
 package org.example.test;
 
+import io.intino.alexandria.Resource;
+import io.intino.alexandria.Timetag;
 import io.intino.alexandria.core.Box;
 import io.intino.alexandria.event.measurement.MeasurementEvent;
+import io.intino.alexandria.event.resource.ResourceEvent;
+import io.intino.alexandria.event.resource.ResourceEventWriter;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.box.DataHubConfiguration;
@@ -12,6 +16,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class Server {
 
@@ -19,6 +24,23 @@ public class Server {
 
 	public static void main(String[] args) throws IOException {
 //		normalizeTimelineExtensions();
+
+		File file = new File("temp/datalake/resources/Dictionary/default/00000101.zip");
+		file.getParentFile().mkdirs();
+		try(ResourceEventWriter writer = new ResourceEventWriter(file)) {
+			ResourceEvent e = new ResourceEvent("Dictionary", "default", new Resource("default.dictionary.triplets", "Brasil\ten\tBrazil".getBytes(StandardCharsets.UTF_8)));
+			e.ts(Timetag.of("00000101").instant());
+			writer.write(e);
+		}
+
+		File file1 = new File("temp/datalake/resources/Dictionary/tc/00000101.zip");
+		file1.getParentFile().mkdirs();
+		try(ResourceEventWriter writer = new ResourceEventWriter(file1)) {
+			ResourceEvent e = new ResourceEvent("Dictionary", "tc", new Resource("tc.dictionary.triplets", "Brasil\ten\tBrazil_1234\nSpain\tes\tEspaña".getBytes(StandardCharsets.UTF_8)));
+			e.ts(Timetag.of("00000101").instant());
+			writer.write(e);
+		}
+
 		DataHubConfiguration conf = new DataHubConfiguration(arguments());
 		NessGraph graph = new Graph().loadStashes(stashes).as(NessGraph.class);
 		loadUsers(conf.home(), graph);

@@ -344,9 +344,11 @@ def type(datamart & message & impl)
 				if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
 				return handleDownloadResponse(message, eventCount);
 			} catch (NullPointerException e) {
-				throw new NullPointerException("Could not download datamart: no response from datahub.");
+				throw new DatahubRequestException("Could not download datamart: no response from datahub.");
+			} catch(DatahubRequestException e) {
+				throw e;
 			} catch (Exception e) {
-				throw new RuntimeException("Could not download datamart: " + e.getMessage());
+				throw new DatahubRequestException("Could not download datamart: " + e.getMessage());
 			}
 		}
 
@@ -437,7 +439,7 @@ def type(datamart & message & impl)
 			return Runtime.getRuntime().availableProcessors();
 		}
 
-		private javax.jms.Message requestResponseFromDatahub(String requestName, javax.jms.Message request) throws Exception {
+		private javax.jms.Message requestResponseFromDatahub(String requestName, javax.jms.Message request) {
         	long timeout = retryConfig.initialTimeoutAmount;
         	for(int i = 0; i < retryConfig.maxAttempts; i++) {
         		javax.jms.Message message = connector.requestResponse(DATAHUB_MESSAGE_TOPIC, request, timeout, retryConfig.timeoutUnit);
@@ -445,7 +447,7 @@ def type(datamart & message & impl)
         		if(i < retryConfig.maxAttempts - 1) Logger.warn("("+(i+1)+") Datahub did not respond after " + timeout + " " + retryConfig.timeoutUnit + " to the request '" + requestName + "'. Trying again...");
         		timeout *= retryConfig.timeoutMultiplier;
         	}
-        	throw new RuntimeException("Datahub did not respond to the request '" + requestName + "' after " + retryConfig.maxAttempts);
+        	throw new DatahubRequestException("Datahub did not respond to the request '" + requestName + "' after " + retryConfig.maxAttempts);
         }
 
 		[$timelineNode+nodeImpl]
@@ -526,6 +528,12 @@ def type(datamart & message & impl)
 			} catch (Exception e) {
 				throw new ExceptionInInitializerError("Could not set $name+firstUpperCase~Datamart.definition field");
 			}
+		}
+
+		public static class DatahubRequestException extends RuntimeException {
+			public DatahubRequestException() {}
+			public DatahubRequestException(String message) {super(message);}
+			public DatahubRequestException(String message, Throwable cause) {super(message, cause);}
 		}
     }
 end
@@ -836,11 +844,10 @@ def trigger(loadDictionaryFromDatahubMethod)
     		words.computeIfAbsent(triplet$[0$], k -> new HashMap<>(4)).put(triplet$[1$], triplet$[2$]);
     	}
     	this.dictionary = new DictionaryImpl(name, words);
-    	Logger.debug("Loaded dictionary with " + words.size() + " words");
+    	Logger.debug("Loaded dictionary " + name + " with " + words.size() + " words");
     }
 
     private String$[$]$[$] dictionaryEntries(String name) {
-    	if(true) return new String$[0$]$[0$]; // TODO
     	try {
     		ActiveMQTextMessage request = new ActiveMQTextMessage();
     		request.setText("datamart=" + name() + ";operation=get-dictionary;name="+name);

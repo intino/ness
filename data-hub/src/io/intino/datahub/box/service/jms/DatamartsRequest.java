@@ -88,7 +88,6 @@ public class DatamartsRequest {
 	private Stream<Message> getDictionary(MasterDatamart datamart, Map<String, String> args) {
 		String name = args.get("name");
 		if(name == null || name.isEmpty()) name = "default";
-		// Peta al intentar leer el metadata del evento. Hay que hacer el fix en alexandria
 		try {
 			var event = box.datalake().resourceStore().find("Dictionary/" + name + "/" + DICTIONARY_TS + "/" + name + ".dictionary.triplets").orElse(null);
 			if (event == null) return successEmptyResponse();
