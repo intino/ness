@@ -37,15 +37,16 @@
     <orderEntry type="library" name="Intino: org.apache.maven.shared:maven-shared-utils:3.3.4" level="project" />
     <orderEntry type="library" name="Intino: javax.inject:javax.inject:1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.legio:model:3.2.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:terminal-jms:5.5.9" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:bpm-framework:3.1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: junit:junit:4.13.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.hamcrest:hamcrest-core:1.3" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:datalake:7.0.3" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:event:5.0.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zit:1.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.2.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:json:1.2.2" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.ness:master:2.1.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.4" level="project" />
+    <orderEntry type="module" module-name="data-hub" />
     <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.4.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.2.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.1.2" level="project" />
@@ -60,6 +61,7 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:session:2.0.4" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:http:1.7.7" level="project" />
     <orderEntry type="library" name="Intino: com.sparkjava:spark-core:2.9.4" level="project" />
+    <orderEntry type="library" name="Intino: org.slf4j:slf4j-api:1.7.25" level="project" />
     <orderEntry type="library" name="Intino: org.bouncycastle:bcmail-jdk15:1.46" level="project" />
     <orderEntry type="library" name="Intino: org.bouncycastle:bcprov-jdk15:1.46" level="project" />
     <orderEntry type="library" name="Intino: org.apache.httpcomponents:httpmime:4.5.9" level="project" />
@@ -67,7 +69,9 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:rest-accessor:3.1.3" level="project" />
     <orderEntry type="library" name="Intino: org.apache.httpcomponents:httpcore:4.4.16" level="project" />
     <orderEntry type="library" name="Intino: org.apache.httpcomponents:httpclient:4.5.14" level="project" />
+    <orderEntry type="library" name="Intino: commons-logging:commons-logging:1.2" level="project" />
     <orderEntry type="library" name="Intino: org.apache.commons:commons-lang3:3.12.0" level="project" />
+    <orderEntry type="library" name="Intino: commons-io:commons-io:2.11.0" level="project" />
     <orderEntry type="library" name="Intino: org.glassfish.tyrus:tyrus-client:2.1.3" level="project" />
     <orderEntry type="library" name="Intino: org.glassfish.tyrus:tyrus-core:2.1.3" level="project" />
     <orderEntry type="library" name="Intino: org.glassfish.tyrus:tyrus-spi:2.1.3" level="project" />
@@ -81,6 +85,10 @@
     <orderEntry type="library" name="Intino: org.slf4j:slf4j-log4j12:1.7.25" level="project" />
     <orderEntry type="library" name="Intino: log4j:log4j:1.2.17" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zip:1.0.5" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:driver:1.0.1" level="project" />
+    <orderEntry type="library" name="Intino: com.jcraft:jsch:0.1.55" level="project" />
+    <orderEntry type="library" name="Intino: net.rforge:Rserve:0.6-8.1" level="project" />
+    <orderEntry type="library" name="Intino: net.rforge:REngine:0.6-8.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:proxy:1.1.14" level="project" />
     <orderEntry type="library" name="Intino: org.apache.httpcomponents:fluent-hc:4.5.7" level="project" />
     <orderEntry type="library" name="Intino: org.eclipse.jetty:jetty-server:9.4.42.v20210604" level="project" />
@@ -111,9 +119,11 @@
     <orderEntry type="library" name="Intino: org.apache.commons:commons-collections4:4.4" level="project" />
     <orderEntry type="library" name="Intino: org.hashids:hashids:1.0.3" level="project" />
     <orderEntry type="library" name="Intino: com.auth0:java-jwt:4.4.0" level="project" />
+    <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-databind:2.14.2" level="project" />
+    <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-annotations:2.14.2" level="project" />
+    <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-core:2.14.2" level="project" />
     <orderEntry type="library" name="Intino: org.locationtech.jts:jts-core:1.19.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.icod:standalone:1.1.2" level="project" />
-    <orderEntry type="library" name="Intino: org.apache.activemq:activemq-client:5.18.1" level="project" />
     <orderEntry type="library" name="Intino: jakarta.jms:jakarta.jms-api:2.0.3" level="project" />
     <orderEntry type="library" name="Intino: org.fusesource.hawtbuf:hawtbuf:1.11" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:scheduler-framework:1.2.0" level="project" />
@@ -132,11 +142,19 @@
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-broker:5.18.2" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-openwire-legacy:5.18.2" level="project" />
     <orderEntry type="library" name="Intino: javax.annotation:javax.annotation-api:1.3.2" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.activemq:activeio-core:3.1.4" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.geronimo.specs:geronimo-j2ee-management_1.1_spec:1.0.1" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq.protobuf:activemq-protobuf:1.1" level="project" />
     <orderEntry type="library" name="Intino: org.fusesource.mqtt-client:mqtt-client:1.16" level="project" />
     <orderEntry type="library" name="Intino: org.fusesource.hawtdispatch:hawtdispatch-transport:1.22" level="project" />
     <orderEntry type="library" name="Intino: org.fusesource.hawtdispatch:hawtdispatch:1.22" level="project" />
     <orderEntry type="library" name="Intino: org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.geronimo.specs:geronimo-annotation_1.3_spec:1.3" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.geronimo.specs:geronimo-jacc_1.1_spec:1.0.2" level="project" />
+    <orderEntry type="library" name="Intino: com.thoughtworks.xstream:xstream:1.4.20" level="project" />
+    <orderEntry type="library" name="Intino: io.github.x-stream:mxparser:1.2.2" level="project" />
+    <orderEntry type="library" name="Intino: xmlpull:xmlpull:1.1.3.1" level="project" />
+    <orderEntry type="library" name="Intino: org.codehaus.jettison:jettison:1.5.4" level="project" />
     <orderEntry type="library" name="Intino: org.apache.xbean:xbean-spring:4.23" level="project" />
     <orderEntry type="library" name="Intino: org.springframework:spring-context:5.3.27" level="project" />
     <orderEntry type="library" name="Intino: org.springframework:spring-aop:5.3.27" level="project" />
@@ -144,6 +162,7 @@
     <orderEntry type="library" name="Intino: org.springframework:spring-core:5.3.27" level="project" />
     <orderEntry type="library" name="Intino: org.springframework:spring-jcl:5.3.27" level="project" />
     <orderEntry type="library" name="Intino: org.springframework:spring-expression:5.3.27" level="project" />
+    <orderEntry type="library" name="Intino: org.jasypt:jasypt:1.9.3" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-spring:5.18.2" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-pool:5.18.2" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-jms-pool:5.18.2" level="project" />
@@ -151,17 +170,16 @@
     <orderEntry type="library" name="Intino: javax.xml.bind:jaxb-api:2.3.1" level="project" />
     <orderEntry type="library" name="Intino: javax.activation:javax.activation-api:1.2.0" level="project" />
     <orderEntry type="library" name="Intino: org.jvnet.jaxb2_commons:jaxb2-basics-runtime:0.12.0" level="project" />
-    <orderEntry type="library" name="Intino: org.xerial:sqlite-jdbc:3.43.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.ness:master:2.1.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino:data-hub:9.10.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Intino: io.intino.sumus:chronos:2.0.1" level="project" />
-    <orderEntry type="library" name="Intino: commons-io:commons-io:2.14.0" level="project" />
-    <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-databind:2.15.2" level="project" />
-    <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-annotations:2.15.2" level="project" />
-    <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-core:2.15.2" level="project" />
-    <orderEntry type="library" name="Intino: org.slf4j:slf4j-api:2.0.6" level="project" />
-    <orderEntry type="library" name="Intino: commons-logging:commons-logging:1.0.3" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.sumus:chronos:2.0.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:2.0.7" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.activemq:activemq-client:5.18.2" level="project" />
+    <orderEntry type="library" name="Intino: org.xerial:sqlite-jdbc:3.43.2.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.4.8" level="project" />
+    <orderEntry type="library" name="Intino: commons-io:commons-io:2.6" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.commons:commons-lang3:3.13.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:terminal-jms:5.6.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:datalake:7.0.6" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:event:5.0.6" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.6.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:2.0.6" level="project" />
   </component>
 </module>

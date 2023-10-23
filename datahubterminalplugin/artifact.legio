@@ -1,9 +1,9 @@
 dsl Legio
 
-Artifact("io.intino.ness", "6.13.0-SNAPSHOT") data-hub-terminal-plugin
+Artifact("io.intino.ness", "6.13.0") data-hub-terminal-plugin
 	Imports
 		Compile("io.intino.ness", "master", "2.1.0")
-		Compile("io.intino", "data-hub", "9.10.0-SNAPSHOT")
+		Compile("io.intino", "data-hub", "9.10.0")
 			Exclude("io.intino.alexandria", "exceptions")
 			Exclude("io.intino.alexandria", "jms")
 			Exclude("io.intino.alexandria", "jmx")
@@ -26,10 +26,10 @@ Artifact("io.intino.ness", "6.13.0-SNAPSHOT") data-hub-terminal-plugin
 		Compile("org.apache.commons", "commons-lang3", "3.13.0")
 
 		Test("io.intino.legio", "model", "3.2.0")
-		Test("io.intino.alexandria", "terminal-jms", "5.5.9")
+		Test("io.intino.alexandria", "terminal-jms", "5.6.0")
 		Test("io.intino.alexandria", "ingestion", "5.0.4")
 		Test("io.intino.alexandria", "bpm-framework", "3.1.1")
-		Test("io.intino.sumus", "chronos", "2.0.0")
+		Test("io.intino.sumus", "chronos", "2.0.1")
 
 		Test("junit", "junit", "4.13.2")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, attachSources = true)
