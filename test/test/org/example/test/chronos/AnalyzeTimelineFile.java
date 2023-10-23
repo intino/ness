@@ -2,7 +2,6 @@ package org.example.test.chronos;
 
 import io.intino.alexandria.Json;
 import io.intino.alexandria.zit.model.Period;
-import io.intino.sumus.chronos.TimelineFile;
 
 import java.io.*;
 import java.nio.ByteBuffer;

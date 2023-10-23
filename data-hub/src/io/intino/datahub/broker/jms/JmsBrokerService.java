@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import static io.intino.alexandria.jms.MessageReader.textFrom;
@@ -209,7 +210,7 @@ public class JmsBrokerService implements BrokerService {
 		final PolicyEntry entry = new PolicyEntry();
 		entry.setQueue(">");
 		entry.setGcInactiveDestinations(true);
-		entry.setInactiveTimeoutBeforeGC(86400000 / 2);
+		entry.setInactiveTimeoutBeforeGC(300_000);
 		return entry;
 	}
 
@@ -279,7 +280,7 @@ public class JmsBrokerService implements BrokerService {
 	}
 
 	final class BrokerManager implements io.intino.datahub.broker.BrokerManager {
-		private final Map<String, JmsProducer> producers = new HashMap<>();
+		private final Map<String, JmsProducer> producers = new ConcurrentHashMap<>();
 		private final Map<String, List<JmsConsumer>> consumers = new HashMap<>();
 		private final NessGraph graph;
 		private final AdvisoryManager advisoryManager;

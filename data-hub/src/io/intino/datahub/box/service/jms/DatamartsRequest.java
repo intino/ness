@@ -6,6 +6,7 @@ import io.intino.alexandria.jms.MessageReader;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
+import io.intino.datahub.datamart.MasterDatamart.ChronosDirectory;
 import org.apache.activemq.broker.region.MessageReference;
 import org.apache.activemq.command.ActiveMQBytesMessage;
 import org.apache.activemq.command.ActiveMQMessage;
@@ -19,6 +20,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
@@ -77,12 +79,32 @@ public class DatamartsRequest {
 			case "get-timeline" -> getTimeline(datamart, args);
 			case "list-reels" -> listReelFiles(datamart, args);
 			case "get-reel" -> getReel(datamart, args);
+			case "get-dictionary" -> getDictionary(datamart, args);
 			default -> errorMessage("Operation " + args.get("operation") + " not found");
 		};
 	}
 
+	private static final long DICTIONARY_TS = Timetag.of("00000101").instant().toEpochMilli();
+	private Stream<Message> getDictionary(MasterDatamart datamart, Map<String, String> args) {
+		String name = args.get("name");
+		if(name == null || name.isEmpty()) name = "default";
+		// Peta al intentar leer el metadata del evento. Hay que hacer el fix en alexandria
+		try {
+			var event = box.datalake().resourceStore().find("Dictionary/" + name + "/" + DICTIONARY_TS + "/" + name + ".dictionary.triplets").orElse(null);
+			if (event == null) return successEmptyResponse();
+			ActiveMQTextMessage message = new ActiveMQTextMessage();
+			message.setBooleanProperty("success", true);
+			message.setText(event.resource().readAsString(StandardCharsets.UTF_8));
+			return Stream.of(message);
+		} catch (Exception e) {
+			String message = "Could not send dictionary " + name + ": " + e.getMessage();
+			Logger.error(message, e);
+			return errorMessage(message);
+		}
+	}
+
 	private Stream<Message> getReel(MasterDatamart datamart, Map<String, String> args) {
-		return getChronos(args, box.datamartReelsDirectory(datamart.name(), args.get("type")), REEL_EXTENSION);
+		return getChronos(args, box.datamartReelsDirectory(datamart.name()), REEL_EXTENSION);
 	}
 
 	private Stream<Message> getTimeline(MasterDatamart datamart, Map<String, String> args) {
@@ -102,7 +124,7 @@ public class DatamartsRequest {
 			Logger.error(message);
 			return errorMessage(message);
 		}
-		File file = new File(dir, type + File.separator + id + extension);
+		File file = new File(dir, ChronosDirectory.normalizePath(type + File.separator + id + extension));
 		if (!file.exists()) return errorMessage(extension + " file not found");
 		String mode = args.getOrDefault("mode", "download");
 		return mode.equals("path") ? path(file) : download(file);
@@ -113,6 +135,17 @@ public class DatamartsRequest {
 		try {
 			message.setBooleanProperty("success", false);
 			message.setText(errorDescription);
+			return Stream.of(message);
+		} catch (JMSException e) {
+			Logger.error(e);
+			return Stream.of(message);
+		}
+	}
+
+	private Stream<Message> successEmptyResponse() {
+		ActiveMQTextMessage message = new ActiveMQTextMessage();
+		try {
+			message.setBooleanProperty("success", true);
 			return Stream.of(message);
 		} catch (JMSException e) {
 			Logger.error(e);
@@ -175,7 +208,7 @@ public class DatamartsRequest {
 		return timetag.map(s -> box.datamartSerializer().loadMostRecentSnapshotTo(datamart.name(), asTimetag(s))
 						.map(MasterDatamart.Snapshot::datamart)
 						.map(d -> downloadEntities(d, args.get("sourceSelector")))
-						.orElse(Stream.empty()))
+						.orElse(successEmptyResponse()))
 				.orElseGet(() -> datamart == null ? errorMessage("Datamart not found") : downloadEntities(datamart, args.get("sourceSelector")));
 	}
 
@@ -185,7 +218,7 @@ public class DatamartsRequest {
 
 	private Stream<Message> listAvailableSnapshotsOf(MasterDatamart datamart) {
 		List<Timetag> snapshots = box.datamartSerializer().listAvailableSnapshotsOf(datamart.name());
-		if (snapshots.isEmpty()) return Stream.empty();
+		if (snapshots.isEmpty()) return successEmptyResponse();
 		try {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
 			message.setBooleanProperty("success", true);

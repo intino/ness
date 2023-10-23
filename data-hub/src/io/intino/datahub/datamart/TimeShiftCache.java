@@ -5,6 +5,10 @@ import io.intino.alexandria.logger.Logger;
 import java.io.File;
 import java.sql.*;
 import java.time.Instant;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class TimeShiftCache {
 	private final File file;
@@ -12,6 +16,8 @@ public class TimeShiftCache {
 	private PreparedStatement query;
 	private PreparedStatement insert;
 	private PreparedStatement delete;
+	private ExecutorService executorService;
+	private ScheduledExecutorService commitService;
 
 	public TimeShiftCache(File file) {
 		this.file = file;
@@ -27,6 +33,10 @@ public class TimeShiftCache {
 			this.insert = connection.prepareStatement("INSERT OR REPLACE INTO events (id, ts) VALUES(?,?);");
 			this.delete = connection.prepareStatement("DELETE FROM events WHERE id=?;");
 			this.query = connection.prepareStatement("SELECT * FROM events WHERE id=?");
+			connection.setAutoCommit(false);
+			this.executorService = Executors.newSingleThreadExecutor(r -> new Thread(r, "TimeShift-" + file.getName()));
+			this.commitService = Executors.newScheduledThreadPool(1, r -> new Thread(r, "TimeShift-commit-" + file.getName()));
+			commitService.scheduleAtFixedRate(this::commit, 1, 1, TimeUnit.MINUTES);
 		} catch (SQLException | ClassNotFoundException e) {
 			Logger.error(e);
 		}
@@ -34,16 +44,19 @@ public class TimeShiftCache {
 	}
 
 	public synchronized void put(String id, Instant ts) {
-		try {
-			insert.setString(1, id);
-			insert.setLong(2, ts.toEpochMilli() / 1000);
-			insert.execute();
-		} catch (SQLException e) {
-			Logger.error(e);
-		}
+		executorService.execute(() -> {
+			try {
+				insert.setString(1, id);
+				insert.setLong(2, ts.toEpochMilli() / 1000);
+				insert.executeUpdate();
+			} catch (SQLException e) {
+				Logger.error(e);
+			}
+		});
 	}
 
 	public synchronized Instant get(String id) {
+		commit();
 		try (ResultSet rs = query(id)) {
 			boolean next = rs.next();
 			if (!next) return null;
@@ -54,29 +67,48 @@ public class TimeShiftCache {
 		}
 	}
 
-	private ResultSet query(String id) throws SQLException {
-		query.setString(1, id);
-		return query.executeQuery();
-	}
-
 	public synchronized void remove(String id) {
 		try {
 			delete.setString(1, id);
-			delete.execute();
+			delete.executeUpdate();
 		} catch (SQLException e) {
 			Logger.error(e);
 		}
 	}
 
+	private void commit() {
+		try {
+			connection.commit();
+		} catch (SQLException e) {
+			Logger.error(e);
+		}
+	}
+
+	private ResultSet query(String id) throws SQLException {
+		query.setString(1, id);
+		return query.executeQuery();
+	}
 
 	public void close() throws Exception {
 		try {
+			closeExecutor();
 			insert.close();
 			delete.close();
 			query.close();
 			if (connection != null) connection.close();
 		} catch (SQLException ex) {
 			System.out.println(ex.getMessage());
+		}
+	}
+
+	private void closeExecutor() {
+		try {
+			executorService.shutdown();
+			executorService.awaitTermination(1, TimeUnit.MINUTES);
+			commitService.shutdown();
+			commitService.awaitTermination(1, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			Logger.error(e);
 		}
 	}
 }

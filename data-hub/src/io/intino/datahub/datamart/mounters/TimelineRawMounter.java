@@ -42,8 +42,8 @@ public class TimelineRawMounter {
 		return store;
 	}
 
-	protected void update(TimelineStore tlStore, MeasurementEvent event) throws IOException {
-		try(TimelineWriter writer = tlStore.writer()) {
+	protected void update(TimelineStore tlStore, MeasurementEvent event) {
+		try (TimelineWriter writer = tlStore.writer()) {
 			checkTs(event.ts(), writer);
 			writer.set(event.values()); // TODO: measurements must be present in sensorModel and in the order defined by the sensorModel
 		} catch (IOException e) {
@@ -55,7 +55,7 @@ public class TimelineRawMounter {
 		TimelineStore.SensorModel sensorModel = tlStore.sensorModel();
 		double[] measurements = new double[sensorModel.size()];
 		Arrays.fill(measurements, Double.NaN);
-		for(int i = 0; i < event.magnitudes().length;i++) {
+		for (int i = 0; i < event.magnitudes().length; i++) {
 			int index = sensorModel.indexOf(name(event, i));
 			double value = index >= 0 ? event.values()[i] : Double.NaN;
 			measurements[index] = value;

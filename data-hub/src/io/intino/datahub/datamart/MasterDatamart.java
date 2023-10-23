@@ -53,14 +53,23 @@ public interface MasterDatamart extends Closeable {
 
 	interface Store<T> {
 		int size();
+
 		boolean contains(String id);
+
 		T get(String id);
+
 		void put(String id, T value);
+
 		void remove(String id);
+
 		void clear();
+
 		Stream<T> stream();
+
 		Map<String, T> toMap();
+
 		Collection<String> subscribedEvents();
+
 		boolean isSubscribedTo(Datalake.Tank tank);
 	}
 
@@ -89,7 +98,7 @@ public interface MasterDatamart extends Closeable {
 		}
 
 		public void clear() {
-			for(File file : listFiles()) {
+			for (File file : listFiles()) {
 				try {
 					file.delete();
 				} catch (Exception e) {
@@ -110,10 +119,7 @@ public interface MasterDatamart extends Closeable {
 		}
 
 		public static String normalizePath(String path) {
-			String os = System.getProperty("os.name");
-			if(os == null) return path;
-			if(os.toLowerCase().startsWith("win")) return path.replace(":", "-");
-			return path;
+			return path.replace(":", "-");
 		}
 
 		protected List<File> listFiles() {
