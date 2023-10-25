@@ -106,11 +106,11 @@ def type(datamart & interface)
         interface TimelineNode extends ChronosNode {
         	java.util.concurrent.atomic.AtomicBoolean AlwaysDownloadFromDatahub = new java.util.concurrent.atomic.AtomicBoolean();
 			boolean exists();
-			io.intino.sumus.chronos.TimelineStore.TimeModel timeModel();
-			io.intino.sumus.chronos.TimelineStore.SensorModel sensorModel();
-			Instant first();
-			Instant last();
-        	io.intino.sumus.chronos.Timeline get();
+			io.intino.sumus.chronos.TimelineStore.TimeModel timeModel() throws TimelineNotAvailableException;
+			io.intino.sumus.chronos.TimelineStore.SensorModel sensorModel() throws TimelineNotAvailableException;
+			Instant first() throws TimelineNotAvailableException;
+			Instant last() throws TimelineNotAvailableException;
+        	io.intino.sumus.chronos.Timeline get() throws TimelineNotAvailableException;
 
         	void setEventListener(EventListener listener);
 
@@ -121,12 +121,12 @@ def type(datamart & interface)
 
         interface ReelNode extends ChronosNode {
 			boolean exists();
-        	java.time.Instant start();
-        	io.intino.sumus.chronos.Reel.State stateOf(String signal);
-			default List<io.intino.sumus.chronos.Reel.State> stateOf(List<String> signals) {return signals.isEmpty() ? java.util.Collections.emptyList() : stateOf(signals.stream());}
-			List<io.intino.sumus.chronos.Reel.State> stateOf(Stream<String> signals);
-        	io.intino.sumus.chronos.Reel get(io.intino.sumus.chronos.Period period);
-        	io.intino.sumus.chronos.Reel get(java.time.Instant from, java.time.Instant to, io.intino.sumus.chronos.Period period);
+        	java.time.Instant start() throws ReelNotAvailableException;
+        	io.intino.sumus.chronos.Reel.State stateOf(String signal) throws ReelNotAvailableException;
+			default List<io.intino.sumus.chronos.Reel.State> stateOf(List<String> signals) throws ReelNotAvailableException {return signals.isEmpty() ? java.util.Collections.emptyList() : stateOf(signals.stream());}
+			List<io.intino.sumus.chronos.Reel.State> stateOf(Stream<String> signals) throws ReelNotAvailableException;
+        	io.intino.sumus.chronos.Reel get(io.intino.sumus.chronos.Period period) throws ReelNotAvailableException;
+        	io.intino.sumus.chronos.Reel get(java.time.Instant from, java.time.Instant to, io.intino.sumus.chronos.Period period) throws ReelNotAvailableException;
         	void setEventListener(EventListener listener);
 
      		interface EventListener {
@@ -158,6 +158,22 @@ def type(datamart & interface)
 				return definition;
 			}
 		}
+
+		public static class DatahubRequestException extends Exception {
+			public DatahubRequestException() {}
+			public DatahubRequestException(String message) {super(message);}
+			public DatahubRequestException(String message, Throwable cause) {super(message, cause);}
+		}
+
+		public static class TimelineNotAvailableException extends Exception {
+        	public TimelineNotAvailableException(String message) {super(message);}
+        	public TimelineNotAvailableException(Throwable e) {super(e);}
+        }
+
+		public static class ReelNotAvailableException extends Exception {
+        	public ReelNotAvailableException(String message) {super(message);}
+        	public ReelNotAvailableException(Throwable e) {super(e);}
+        }
 	}
 end
 
@@ -312,7 +328,7 @@ def type(datamart & message & impl)
         	return dictionary;
         }
 
-		private void downloadDatamartFromDatahub(String datamartSourceSelector) {
+		private void downloadDatamartFromDatahub(String datamartSourceSelector) throws DatahubRequestException {
 			if (connector instanceof io.intino.alexandria.terminal.StubConnector) return;
 			Logger.debug("Downloading datamart from datahub...");
     		long start = java.lang.System.currentTimeMillis();
@@ -337,7 +353,7 @@ def type(datamart & message & impl)
 
 		[$hasDictionary+loadDictionaryFromDatahubMethod]
 
-		private Stream<Event> downloadEntities(int$[$] eventCount, String datamartSourceSelector) {
+		private Stream<Event> downloadEntities(int$[$] eventCount, String datamartSourceSelector) throws DatahubRequestException {
 			try {
 				javax.jms.Message message = requestResponseFromDatahub("downloadEvents", downloadEntitiesRequest(datamartSourceSelector));
 				if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
@@ -438,7 +454,7 @@ def type(datamart & message & impl)
 			return Runtime.getRuntime().availableProcessors();
 		}
 
-		private javax.jms.Message requestResponseFromDatahub(String requestName, javax.jms.Message request) {
+		private javax.jms.Message requestResponseFromDatahub(String requestName, javax.jms.Message request) throws DatahubRequestException {
         	long timeout = retryConfig.initialTimeoutAmount;
         	for(int i = 0; i < retryConfig.maxAttempts; i++) {
         		javax.jms.Message message = connector.requestResponse(DATAHUB_MESSAGE_TOPIC, request, timeout, retryConfig.timeoutUnit);
@@ -527,12 +543,6 @@ def type(datamart & message & impl)
 			} catch (Exception e) {
 				throw new ExceptionInInitializerError("Could not set $name+firstUpperCase~Datamart.definition field");
 			}
-		}
-
-		public static class DatahubRequestException extends RuntimeException {
-			public DatahubRequestException() {}
-			public DatahubRequestException(String message) {super(message);}
-			public DatahubRequestException(String message, Throwable cause) {super(message, cause);}
 		}
     }
 end
