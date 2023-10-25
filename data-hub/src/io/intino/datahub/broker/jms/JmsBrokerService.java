@@ -210,7 +210,7 @@ public class JmsBrokerService implements BrokerService {
 		final PolicyEntry entry = new PolicyEntry();
 		entry.setQueue(">");
 		entry.setGcInactiveDestinations(true);
-		entry.setInactiveTimeoutBeforeGC(300_000);
+		entry.setInactiveTimeoutBeforeGC(1000 * 60 * 60);
 		return entry;
 	}
 
