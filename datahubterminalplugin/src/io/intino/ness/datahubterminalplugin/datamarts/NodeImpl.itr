@@ -233,13 +233,6 @@ def type(reelNode & default) trigger(nodeImpl)
 		}
 
 		@Override
-		public io.intino.sumus.chronos.ReelFile.Group groupOf(String signal) {
-			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
-			if (reelFile == null) return null;
-			return reelFile.groupOf(signal);
-		}
-
-		@Override
 		public java.time.Instant start() {
 			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
 			if (reelFile == null) return null;
