@@ -34,9 +34,13 @@ def type(timelineNode & default) trigger(nodeImpl)
 			return type;
 		}
 
-
+		@Override
         public boolean exists() {
-        	return timelineFile() != null;
+        	try {
+        		return timelineFile() != null;
+        	} catch(TimelineNotAvailableException e) {
+        		return false;
+        	}
         }
 
 		@Override
@@ -51,29 +55,29 @@ def type(timelineNode & default) trigger(nodeImpl)
 		}
 
 		@Override
-		public io.intino.sumus.chronos.TimelineStore.TimeModel timeModel() {
+		public io.intino.sumus.chronos.TimelineStore.TimeModel timeModel() throws TimelineNotAvailableException {
 			return timelineFile().timeModel();
 		}
 
 		@Override
-		public io.intino.sumus.chronos.TimelineStore.SensorModel sensorModel() {
+		public io.intino.sumus.chronos.TimelineStore.SensorModel sensorModel() throws TimelineNotAvailableException {
 			return timelineFile().sensorModel();
 		}
 
 		@Override
-		public Instant first() {
+		public Instant first() throws TimelineNotAvailableException {
 			return timelineFile().first();
 		}
 
 		@Override
-		public Instant last() {
+		public Instant last() throws TimelineNotAvailableException {
 			return timelineFile().last();
 		}
 
 		@Override
-		public io.intino.sumus.chronos.Timeline get() {
+		public io.intino.sumus.chronos.Timeline get() throws TimelineNotAvailableException {
 			synchronized(this) {
-				if (disposed) throw new IllegalStateException("This " + getClass().getSimpleName() + " is disposed.");
+				if (disposed) throw new TimelineNotAvailableException("This " + getClass().getSimpleName() + " is disposed.");
 				try {
 					if (cache != null) {
 						io.intino.sumus.chronos.Timeline timeline = cache.get();
@@ -82,24 +86,20 @@ def type(timelineNode & default) trigger(nodeImpl)
 					io.intino.sumus.chronos.Timeline timeline = timelineFile().timeline();
 					cache = new java.lang.ref.SoftReference<>(timeline);
 					return timeline;
-				} catch(RuntimeException e) {
-					throw e;
 				} catch(Exception e) {
-					throw new RuntimeException(e);
+					throw new TimelineNotAvailableException(e);
 				}
 			}
 		}
 
-		private io.intino.sumus.chronos.TimelineStore timelineFile() {
+		private io.intino.sumus.chronos.TimelineStore timelineFile() throws TimelineNotAvailableException {
 			synchronized(this) {
-				if (disposed) throw new IllegalStateException("This " + getClass().getSimpleName() + " is disposed.");
+				if (disposed) throw new TimelineNotAvailableException("This " + getClass().getSimpleName() + " is disposed.");
 				try {
 					if (timelineFile != null) return timelineFile;
 					return timelineFile = (!TimelineNode.AlwaysDownloadFromDatahub.get() && file != null && file.exists())
 						? loadFile()
 						: downloadFromDatahub();
-				} catch(RuntimeException e) {
-					throw e;
 				} catch(Exception e) {
 					throw new TimelineNotAvailableException(e);
 				}
@@ -179,11 +179,6 @@ def type(timelineNode & default) trigger(nodeImpl)
 			message.setText(command);
 			return message;
 		}
-
-		public static class TimelineNotAvailableException extends RuntimeException {
-			public TimelineNotAvailableException(String message) {super(message);}
-			public TimelineNotAvailableException(Throwable e) {super(e);}
-		}
 	}
 end
 
@@ -233,50 +228,53 @@ def type(reelNode & default) trigger(nodeImpl)
 		}
 
 		@Override
-		public java.time.Instant start() {
+		public java.time.Instant start() throws ReelNotAvailableException {
 			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
 			if (reelFile == null) return null;
 			return reelFile.start();
 		}
 
 		@Override
-		public io.intino.sumus.chronos.Reel.State stateOf(String signal) {
+		public io.intino.sumus.chronos.Reel.State stateOf(String signal) throws ReelNotAvailableException {
 			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
 			return reelFile.stateOf(signal);
 		}
 
 		@Override
-		public List<io.intino.sumus.chronos.Reel.State> stateOf(Stream<String> signals) {
+		public List<io.intino.sumus.chronos.Reel.State> stateOf(Stream<String> signals) throws ReelNotAvailableException {
 			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
 			return signals.map(reelFile::stateOf).toList();
 		}
 
 		@Override
-        public io.intino.sumus.chronos.Reel get(io.intino.sumus.chronos.Period period) {
+        public io.intino.sumus.chronos.Reel get(io.intino.sumus.chronos.Period period) throws ReelNotAvailableException {
         	io.intino.sumus.chronos.ReelFile reelFile = reelFile();
         	return reelFile().reel().by(period);
         }
 
 		@Override
-        public io.intino.sumus.chronos.Reel get(Instant from, Instant to, io.intino.sumus.chronos.Period period) {
+        public io.intino.sumus.chronos.Reel get(Instant from, Instant to, io.intino.sumus.chronos.Period period) throws ReelNotAvailableException {
         	io.intino.sumus.chronos.ReelFile reelFile = reelFile();
         	return reelFile.reel(from, to).by(period);
         }
 
+		@Override
         public boolean exists() {
-        	return reelFile() != null;
+        	try {
+        		return reelFile() != null;
+        	} catch(ReelNotAvailableException e) {
+        		return false;
+        	}
         }
 
-		private io.intino.sumus.chronos.ReelFile reelFile() {
+		private io.intino.sumus.chronos.ReelFile reelFile() throws ReelNotAvailableException {
 			synchronized(this) {
-				if (disposed) throw new IllegalStateException("This " + getClass().getSimpleName() + " is disposed.");
+				if (disposed) throw new ReelNotAvailableException("This " + getClass().getSimpleName() + " is disposed.");
 				try {
 					if (reelFile != null) return reelFile;
 					return reelFile = (file != null && file.exists())
 						? loadFile()
 						: downloadFromDatahub();
-				} catch(RuntimeException e) {
-					throw e;
 				} catch (Exception e) {
 					throw new ReelNotAvailableException(e);
 				}
@@ -347,11 +345,6 @@ def type(reelNode & default) trigger(nodeImpl)
 			String command = "datamart=" + name() + ";operation=get-reel;id=" + id() + ";mode=" + mode + ";type=" + type;
 			message.setText(command);
 			return message;
-		}
-
-		public static class ReelNotAvailableException extends RuntimeException {
-			public ReelNotAvailableException(String message) {super(message);}
-			public ReelNotAvailableException(Throwable e) {super(e);}
 		}
 	}
 end

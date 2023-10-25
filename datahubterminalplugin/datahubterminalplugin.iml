@@ -44,9 +44,6 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.2.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:json:1.2.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.ness:master:2.1.0" level="project" />
-    <orderEntry type="module" module-name="data-hub" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.6.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.4.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.2.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.1.2" level="project" />
@@ -146,7 +143,6 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:7.0.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:event:5.0.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:session:2.0.5" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.sumus:chronos:2.2.0" level="project" />
     <orderEntry type="library" name="Intino: com.tdunning:t-digest:3.3" level="project" />
     <orderEntry type="library" name="Intino: com.github.haifengl:smile-core:3.0.2" level="project" />
     <orderEntry type="library" name="Intino: com.github.haifengl:smile-base:3.0.2" level="project" />
@@ -154,7 +150,6 @@
     <orderEntry type="library" name="Intino: org.apache.commons:commons-csv:1.10.0" level="project" />
     <orderEntry type="library" name="Intino: ro.hasna.ts:time-series-math:0.18" level="project" />
     <orderEntry type="library" name="Intino: org.apache.commons:commons-math3:3.6.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino:data-hub:9.11.0" level="project" />
     <orderEntry type="library" name="Intino: commons-io:commons-io:2.14.0" level="project" />
     <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-databind:2.15.2" level="project" />
     <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-annotations:2.15.2" level="project" />
@@ -162,7 +157,6 @@
     <orderEntry type="library" name="Intino: org.slf4j:slf4j-api:2.0.6" level="project" />
     <orderEntry type="library" name="Intino: commons-logging:commons-logging:1.0.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:terminal-jms:5.6.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.5" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:event:5.0.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:2.0.7" level="project" />
   </component>
