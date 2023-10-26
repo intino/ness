@@ -8,7 +8,6 @@ def type(timelineNode & default) trigger(nodeImpl)
 		private volatile File file;
 		private volatile boolean hasDirectAccessToFile;
 		private volatile io.intino.sumus.chronos.TimelineStore timelineFile;
-		private volatile java.lang.ref.SoftReference<io.intino.sumus.chronos.Timeline> cache;
 		private volatile EventListener listener;
 		private volatile boolean disposed;
 
@@ -79,13 +78,7 @@ def type(timelineNode & default) trigger(nodeImpl)
 			synchronized(this) {
 				if (disposed) throw new TimelineNotAvailableException("This " + getClass().getSimpleName() + " is disposed.");
 				try {
-					if (cache != null) {
-						io.intino.sumus.chronos.Timeline timeline = cache.get();
-						if (timeline != null) return timeline;
-					}
-					io.intino.sumus.chronos.Timeline timeline = timelineFile().timeline();
-					cache = new java.lang.ref.SoftReference<>(timeline);
-					return timeline;
+					return timelineFile().timeline();
 				} catch(Exception e) {
 					throw new TimelineNotAvailableException(e);
 				}
@@ -96,10 +89,9 @@ def type(timelineNode & default) trigger(nodeImpl)
 			synchronized(this) {
 				if (disposed) throw new TimelineNotAvailableException("This " + getClass().getSimpleName() + " is disposed.");
 				try {
+					if (hasDirectAccessToFile && file != null && file.exists()) return loadFile();
 					if (timelineFile != null) return timelineFile;
-					return timelineFile = (!TimelineNode.AlwaysDownloadFromDatahub.get() && file != null && file.exists())
-						? loadFile()
-						: downloadFromDatahub();
+					return timelineFile = downloadFromDatahub();
 				} catch(Exception e) {
 					throw new TimelineNotAvailableException(e);
 				}
@@ -123,10 +115,6 @@ def type(timelineNode & default) trigger(nodeImpl)
 		}
 
 		private void clearCache() {
-			if (cache != null) {
-				cache.enqueue();
-				cache = null;
-			}
 			timelineFile = null;
 			if(!hasDirectAccessToFile) file = null;
 		}
@@ -271,10 +259,9 @@ def type(reelNode & default) trigger(nodeImpl)
 			synchronized(this) {
 				if (disposed) throw new ReelNotAvailableException("This " + getClass().getSimpleName() + " is disposed.");
 				try {
+					if (hasDirectAccessToFile && file != null && file.exists()) return loadFile();
 					if (reelFile != null) return reelFile;
-					return reelFile = (file != null && file.exists())
-						? loadFile()
-						: downloadFromDatahub();
+					return reelFile = downloadFromDatahub();
 				} catch (Exception e) {
 					throw new ReelNotAvailableException(e);
 				}
