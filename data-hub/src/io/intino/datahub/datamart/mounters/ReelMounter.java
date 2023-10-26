@@ -9,7 +9,6 @@ import io.intino.datahub.model.Attribute;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Reel;
 import io.intino.sumus.chronos.ReelFile;
-import smile.neighbor.lsh.Hash;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,10 +37,10 @@ public class ReelMounter extends MasterDatamartMounter {
 	public void mount(Message message) {
 		if (message == null) return;
 		MessageEvent event = new MessageEvent(message);
-		String ss = withoutParameters(event.ss());
-		ReelFile reelFile = datamart.reelStore().get(ss, ss);
+		String subject = subject(event);
 		try {
-			if (reelFile == null) reelFile = reelFile(message.type(), subject(event));
+			ReelFile reelFile = datamart.reelStore().get(message.type(), subject);
+			if (reelFile == null) reelFile = reelFile(message.type(), subject);
 			update(reelFile, event);
 		} catch (IOException e) {
 			Logger.error(e);
@@ -81,53 +80,6 @@ public class ReelMounter extends MasterDatamartMounter {
 		return file.exists() ? ReelFile.open(file) : ReelFile.create(file);
 	}
 
-	String withoutParameters(String ss) {
-		return ss.contains("?") ? ss.substring(0, ss.indexOf("?")) : ss;
-	}
-
-	public static class OfSingleReel extends ReelMounter implements AutoCloseable {
-
-		private final String ss;
-		private final ReelFile reelFile;
-		private ReelFile.Session session;
-
-		public OfSingleReel(MasterDatamart datamart, String tank, String ss) {
-			super(datamart);
-			this.ss = ss;
-			try {
-				this.reelFile = reelFile(tank, ss);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-
-		@Override
-		public void mount(Message message) {
-			MessageEvent event = new MessageEvent(message);
-			if (!ss.equals(subject(event))) return;
-			try {
-				update(reelFile, event);
-			} catch (IOException e) {
-				Logger.error(e);
-			}
-		}
-
-		@Override
-		protected void update(ReelFile reelFile, MessageEvent event) throws IOException {
-			Datamart datamart = this.datamart.definition();
-			List<Reel> reels = datamart.reelList(r -> r.tank().message().name$().equals(event.type()));
-			if(session == null) session = reelFile.session();
-			for (Reel reel : reels) {
-				session.set(event.ts(), group(event, reel.groupSource()), mappingAttribute(event.toMessage(), reel));
-			}
-		}
-
-		@Override
-		public void close() throws Exception {
-			if(session != null) session.close();
-		}
-	}
-
 	public static class Reflow extends ReelMounter implements AutoCloseable {
 
 		private final Map<String, ReelFile.Session> sessions = new HashMap<>();
@@ -143,7 +95,7 @@ public class ReelMounter extends MasterDatamartMounter {
 				MessageEvent event = new MessageEvent(message);
 				String key = message.type() + subject(event);
 				ReelFile.Session session = sessions.get(key);
-				if(session == null) {
+				if (session == null) {
 					session = createReelSession(message.type(), subject(event));
 					sessions.put(key, session);
 				}
@@ -166,7 +118,7 @@ public class ReelMounter extends MasterDatamartMounter {
 
 		@Override
 		public void close() {
-			for(var session : sessions.values()) {
+			for (var session : sessions.values()) {
 				try {
 					session.close();
 				} catch (Exception e) {
