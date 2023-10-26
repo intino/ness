@@ -115,7 +115,7 @@ public interface MasterDatamart extends Closeable {
 		public abstract boolean isSubscribedTo(Datalake.Tank tank);
 
 		protected File fileOf(String type, String id) {
-			return new File(root, normalizePath(type + File.pathSeparator + id + extension()));
+			return new File(root, normalizePath(type + File.separator + id + extension()));
 		}
 
 		public static String normalizePath(String path) {
