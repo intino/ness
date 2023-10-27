@@ -56,8 +56,10 @@ public class ReelMounter extends MasterDatamartMounter {
 	protected void update(ReelFile reelFile, MessageEvent event) throws IOException {
 		Datamart datamart = this.datamart.definition();
 		List<Reel> reels = datamart.reelList(r -> r.tank().message().name$().equals(event.type()));
-		for (Reel reel : reels)
-			reelFile.set(event.ts(), group(event, reel.groupSource()), mappingAttribute(event.toMessage(), reel));
+		try (ReelFile.Session session = reelFile.session()) {
+			for (Reel reel : reels)
+				session.set(event.ts(), group(event, reel.groupSource()), mappingAttribute(event.toMessage(), reel));
+		}
 	}
 
 	String group(MessageEvent event, Attribute attribute) {
