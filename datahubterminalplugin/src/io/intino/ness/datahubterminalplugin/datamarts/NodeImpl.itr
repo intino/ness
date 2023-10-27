@@ -223,13 +223,13 @@ def type(reelNode & default) trigger(nodeImpl)
 		}
 
 		@Override
-		public io.intino.sumus.chronos.Reel.State stateOf(String signal) throws ReelNotAvailableException {
+		public io.intino.sumus.chronos.State stateOf(String signal) throws ReelNotAvailableException {
 			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
 			return reelFile.stateOf(signal);
 		}
 
 		@Override
-		public List<io.intino.sumus.chronos.Reel.State> stateOf(Stream<String> signals) throws ReelNotAvailableException {
+		public List<io.intino.sumus.chronos.State> stateOf(Stream<String> signals) throws ReelNotAvailableException {
 			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
 			return signals.map(reelFile::stateOf).toList();
 		}

@@ -117,20 +117,50 @@ def type(datamart & interface)
      		interface EventListener {
         		void onEventReceived(TimelineNode node, io.intino.alexandria.event.Event event);
         	}
+
+        	static TimelineNode empty() {
+        		return new TimelineNode() {
+                    public String id(){return "";}
+                    public String type(){return "";}
+                    public void dispose(){}
+                	public boolean exists() {return false;}
+                	public io.intino.sumus.chronos.TimelineStore.TimeModel timeModel() throws TimelineNotAvailableException {throw new TimelineNotAvailableException();}
+                	public io.intino.sumus.chronos.TimelineStore.SensorModel sensorModel() throws TimelineNotAvailableException {throw new TimelineNotAvailableException();}
+                	public Instant first() throws TimelineNotAvailableException {throw new TimelineNotAvailableException();}
+                	public Instant last() throws TimelineNotAvailableException {throw new TimelineNotAvailableException();}
+                	public io.intino.sumus.chronos.Timeline get() throws TimelineNotAvailableException {throw new TimelineNotAvailableException();}
+                	public void setEventListener(EventListener listener) {}
+        		};
+        	}
         }
 
         interface ReelNode extends ChronosNode {
 			boolean exists();
         	java.time.Instant start() throws ReelNotAvailableException;
-        	io.intino.sumus.chronos.Reel.State stateOf(String signal) throws ReelNotAvailableException;
-			default List<io.intino.sumus.chronos.Reel.State> stateOf(List<String> signals) throws ReelNotAvailableException {return signals.isEmpty() ? java.util.Collections.emptyList() : stateOf(signals.stream());}
-			List<io.intino.sumus.chronos.Reel.State> stateOf(Stream<String> signals) throws ReelNotAvailableException;
+        	io.intino.sumus.chronos.State stateOf(String signal) throws ReelNotAvailableException;
+			default List<io.intino.sumus.chronos.State> stateOf(List<String> signals) throws ReelNotAvailableException {return signals.isEmpty() ? java.util.Collections.emptyList() : stateOf(signals.stream());}
+			List<io.intino.sumus.chronos.State> stateOf(Stream<String> signals) throws ReelNotAvailableException;
         	io.intino.sumus.chronos.Reel get(io.intino.sumus.chronos.Period period) throws ReelNotAvailableException;
         	io.intino.sumus.chronos.Reel get(java.time.Instant from, java.time.Instant to, io.intino.sumus.chronos.Period period) throws ReelNotAvailableException;
         	void setEventListener(EventListener listener);
 
      		interface EventListener {
         		void onEventReceived(ReelNode node, io.intino.alexandria.event.Event event);
+        	}
+
+        	static ReelNode empty() {
+        		return new ReelNode() {
+        	        public String id(){return "";}
+                    public String type(){return "";}
+                    public void dispose(){}
+        			public boolean exists() {return false;}
+                	public java.time.Instant start() throws ReelNotAvailableException {throw new ReelNotAvailableException();}
+                	public io.intino.sumus.chronos.State stateOf(String signal) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
+                	public List<io.intino.sumus.chronos.State> stateOf(Stream<String> signals) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
+                	public io.intino.sumus.chronos.Reel get(io.intino.sumus.chronos.Period period) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
+                	public io.intino.sumus.chronos.Reel get(java.time.Instant from, java.time.Instant to, io.intino.sumus.chronos.Period period) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
+                	public void setEventListener(EventListener listener) {}
+        		};
         	}
         }
 
@@ -166,11 +196,13 @@ def type(datamart & interface)
 		}
 
 		public static class TimelineNotAvailableException extends Exception {
+        	public TimelineNotAvailableException() {}
         	public TimelineNotAvailableException(String message) {super(message);}
         	public TimelineNotAvailableException(Throwable e) {super(e);}
         }
 
 		public static class ReelNotAvailableException extends Exception {
+        	public ReelNotAvailableException() {}
         	public ReelNotAvailableException(String message) {super(message);}
         	public ReelNotAvailableException(Throwable e) {super(e);}
         }
@@ -217,7 +249,9 @@ def type(datamart & message & impl)
 		private final Map<String, List<MasterMounter>> mounters = new HashMap<>();
 		private final $name+FirstUpperCase~Datamart.Entities entities;
 		private Instant ts;
+		[$hasTimelines~private boolean hasLocalAccessToTimelines;]
 		[$hasTimelines~private final Map<String, TimelineNodeImpl> timelines = new java.util.concurrent.ConcurrentHashMap<>();]
+		[$hasReels~private boolean hasLocalAccessToReels;]
 		[$hasReels~private final Map<String, ReelNodeImpl> reels = new java.util.concurrent.ConcurrentHashMap<>();]
 		private volatile DictionaryImpl dictionary = new DictionaryImpl();
 
@@ -684,6 +718,7 @@ end
 def type(timeline) trigger(getter)
 	@Override
 	public TimelineNode $name+FirstLowerCase~Timeline(String id) {
+		if(hasLocalAccessToTimelines) return timelines.containsKey(id) ? timelines.get(id) : TimelineNode.empty();
 		return timelines.computeIfAbsent(id + ":$name", theId -> new TimelineNodeImpl(id, "$name", Set.of($sources)));
 	}
 end
@@ -691,6 +726,7 @@ end
 def type(reel) trigger(getter)
 	@Override
 	public ReelNode $name+FirstLowerCase~Reel(String id) {
+		if(hasLocalAccessToReels) return reels.containsKey(id) ? reels.get(id) : ReelNode.empty();
 		return reels.computeIfAbsent(id + ":$name", theId -> new ReelNodeImpl(id, "$name", Set.of($sources)));
 	}
 
@@ -783,6 +819,7 @@ end
 def trigger(loadTimelinesFromDatahubMethod)
 	private void loadTimelinesFromDatahub() {
 		Logger.debug("Downloading timelines...");
+		Boolean hasLocalAccessToTimelines = null;
         for(String filename : listTimelineFiles()) {
         	if(filename == null || filename.isBlank()) continue;
         	try {
@@ -791,11 +828,14 @@ def trigger(loadTimelinesFromDatahubMethod)
                	String type = file.getParentFile().getName();
                	TimelineNodeImpl node = new TimelineNodeImpl(id, type, sourcesOfTimeline(type), file.exists() ? file : null);
                	timelines.put(id + ":" + type, node);
+               	if(hasLocalAccessToTimelines == null) hasLocalAccessToTimelines = file.exists();
+               	else hasLocalAccessToTimelines &= file.exists();
             } catch (Exception e) {
                	Logger.debug("Could not load timeline " + filename + " -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
             }
         }
-        Logger.debug("Loaded " + timelines.size() + " timelines");
+        this.hasLocalAccessToTimelines = hasLocalAccessToTimelines != null && hasLocalAccessToTimelines;
+        Logger.debug("Loaded " + timelines.size() + " timelines (hasLocalAccessToTimelines=" + this.hasLocalAccessToTimelines + ")");
     }
 
     private String$[$] listTimelineFiles() {
@@ -815,6 +855,7 @@ end
 def trigger(loadReelsFromDatahubMethod)
 	private void loadReelsFromDatahub() {
 		Logger.debug("Downloading reels...");
+		Boolean hasLocalAccessToReels = null;
     	for(String filename : listReelFiles()) {
     		if(filename == null || filename.isBlank()) continue;
     		try {
@@ -823,10 +864,13 @@ def trigger(loadReelsFromDatahubMethod)
     	    	String type = file.getParentFile().getName();
     	    	ReelNodeImpl node = new ReelNodeImpl(id, type, sourcesOfReel(type), file.exists() ? file : null);
     	    	reels.put(id + ":" + type, node);
+    	    	if(hasLocalAccessToReels == null) hasLocalAccessToReels = file.exists();
+                else hasLocalAccessToReels &= file.exists();
     	    } catch (Exception e) {
     	    	Logger.debug("Could not load reel " + filename + " -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
     	    }
     	}
+    	this.hasLocalAccessToReels = hasLocalAccessToReels != null && hasLocalAccessToReels;
     	Logger.debug("Loaded " + reels.size() + " reels");
     }
 
