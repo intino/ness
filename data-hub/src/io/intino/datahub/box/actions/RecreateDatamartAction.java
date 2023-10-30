@@ -57,6 +57,7 @@ public class RecreateDatamartAction {
 			Datamart datamart = datamartList.get(i);
 			Logger.info("Creating " + datamart.name$() + " (" + (i + 1) + "/" + datamartList.size() + ")...");
 			recreate(datamart);
+
 			notifySubscribers(datamart.name$());
 		}
 	}
@@ -64,6 +65,7 @@ public class RecreateDatamartAction {
 	private void recreate(Datamart definition) {
 		try {
 			synchronized (RecreateDatamartAction.class) {
+				box.brokerService().manager().pauseTankConsumers();
 				MasterDatamart datamart = box.datamarts().get(datamartName);
 				if (datamart == null) {
 					datamart = new LocalMasterDatamart(box, definition);
@@ -71,10 +73,13 @@ public class RecreateDatamartAction {
 				}
 				datamart.clear();
 				new DatamartFactory(box, box.datalake()).reflow(datamart, null, definition);
+
 				Logger.info("Datamart " + definition.name$() + " recreated!");
 			}
 		} catch (Throwable e) {
 			Logger.error(e);
+		} finally {
+			box.brokerService().manager().startTankConsumers();
 		}
 	}
 
