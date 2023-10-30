@@ -140,6 +140,10 @@ def type(datamart & interface)
         	io.intino.sumus.chronos.State stateOf(String signal) throws ReelNotAvailableException;
 			default List<io.intino.sumus.chronos.State> stateOf(List<String> signals) throws ReelNotAvailableException {return signals.isEmpty() ? java.util.Collections.emptyList() : stateOf(signals.stream());}
 			List<io.intino.sumus.chronos.State> stateOf(Stream<String> signals) throws ReelNotAvailableException;
+			io.intino.sumus.chronos.Shot lastShotOf(String signal) throws ReelNotAvailableException;
+            List<io.intino.sumus.chronos.Shot> lastShots() throws ReelNotAvailableException;
+            List<io.intino.sumus.chronos.Shot> lastShots(String group) throws ReelNotAvailableException;
+            List<io.intino.sumus.chronos.Shot> lastShots(io.intino.sumus.chronos.Group group) throws ReelNotAvailableException;
         	io.intino.sumus.chronos.Reel get(io.intino.sumus.chronos.Period period) throws ReelNotAvailableException;
         	io.intino.sumus.chronos.Reel get(java.time.Instant from, java.time.Instant to, io.intino.sumus.chronos.Period period) throws ReelNotAvailableException;
         	void setEventListener(EventListener listener);
@@ -157,6 +161,10 @@ def type(datamart & interface)
                 	public java.time.Instant start() throws ReelNotAvailableException {throw new ReelNotAvailableException();}
                 	public io.intino.sumus.chronos.State stateOf(String signal) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
                 	public List<io.intino.sumus.chronos.State> stateOf(Stream<String> signals) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
+                	public io.intino.sumus.chronos.Shot lastShotOf(String signal) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
+					public List<io.intino.sumus.chronos.Shot> lastShots() throws ReelNotAvailableException{throw new ReelNotAvailableException();}
+					public List<io.intino.sumus.chronos.Shot> lastShots(String group) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
+					public List<io.intino.sumus.chronos.Shot> lastShots(io.intino.sumus.chronos.Group group) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
                 	public io.intino.sumus.chronos.Reel get(io.intino.sumus.chronos.Period period) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
                 	public io.intino.sumus.chronos.Reel get(java.time.Instant from, java.time.Instant to, io.intino.sumus.chronos.Period period) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
                 	public void setEventListener(EventListener listener) {}
