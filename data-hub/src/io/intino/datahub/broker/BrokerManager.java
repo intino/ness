@@ -1,6 +1,5 @@
 package io.intino.datahub.broker;
 
-import io.intino.alexandria.jms.QueueConsumer;
 import io.intino.alexandria.jms.QueueProducer;
 import io.intino.alexandria.jms.TopicConsumer;
 import io.intino.alexandria.jms.TopicProducer;
@@ -11,9 +10,15 @@ import java.util.function.Consumer;
 
 public interface BrokerManager {
 
-	TopicConsumer registerTopicConsumer(String topic, Consumer<Message> consumer);
+	void registerTopicConsumer(String topic, Consumer<Message> consumer);
 
-	QueueConsumer registerQueueConsumer(String topic, Consumer<Message> consumer);
+	void registerQueueConsumer(String topic, Consumer<Message> consumer);
+
+	void startTankConsumers();
+
+	void pauseTankConsumers();
+
+	void unregisterConsumer(String topic);
 
 	void unregisterConsumer(TopicConsumer consumer);
 

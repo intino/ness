@@ -46,10 +46,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
@@ -294,7 +291,7 @@ public class JmsBrokerService implements BrokerService {
 
 		void start() {
 			startNessSession();
-			initTankConsumers();
+			startTankConsumers();
 			Datalake.ProcessStatus processStatus = graph.datalake().processStatus();
 			if (processStatus != null) registerProcessStatus(datalakeScale(), processStatus);
 		}
@@ -321,22 +318,20 @@ public class JmsBrokerService implements BrokerService {
 			return session;
 		}
 
-		public TopicConsumer registerTopicConsumer(String topic, Consumer<Message> consumer) {
+		public void registerTopicConsumer(String topic, Consumer<Message> consumer) {
 			List<JmsConsumer> list = new ArrayList<>();
 			if (!this.consumers.containsKey(topic)) this.consumers.putIfAbsent(topic, list);
 			else list = this.consumers.get(topic);
 			try {
-				TopicConsumer topicConsumer = new TopicConsumer(nessSession(), topic);
+				DurableTopicConsumer topicConsumer = new DurableTopicConsumer(nessSession(), topic, NESS + "-" + topic);
 				topicConsumer.listen(consumer);
 				list.add(topicConsumer);
-				return topicConsumer;
 			} catch (JMSException e) {
 				Logger.error(e);
 			}
-			return null;
 		}
 
-		public QueueConsumer registerQueueConsumer(String topic, Consumer<Message> consumer) {
+		public void registerQueueConsumer(String topic, Consumer<Message> consumer) {
 			List<JmsConsumer> list = new ArrayList<>();
 			if (!this.consumers.containsKey(topic)) this.consumers.putIfAbsent(topic, list);
 			else list = this.consumers.get(topic);
@@ -344,11 +339,13 @@ public class JmsBrokerService implements BrokerService {
 				QueueConsumer queueConsumer = new QueueConsumer(nessSession(), topic);
 				queueConsumer.listen(consumer);
 				list.add(queueConsumer);
-				return queueConsumer;
 			} catch (JMSException e) {
 				Logger.error(e);
 			}
-			return null;
+		}
+
+		public void unregisterConsumer(String topic) {
+			Optional.ofNullable(consumers.remove(topic)).ifPresent(c -> c.forEach(JmsConsumer::close));
 		}
 
 		public void unregisterConsumer(TopicConsumer consumer) {
@@ -403,11 +400,23 @@ public class JmsBrokerService implements BrokerService {
 			}
 		}
 
-		private void initTankConsumers() {
+		public void startTankConsumers() {
 			if (graph.datalake() == null) return;
 			brokerStage.mkdirs();
 			graph.datalake().tankList().forEach(this::registerTankConsumer);
 			Logger.info("Tanks ignited!");
+		}
+
+
+		public void pauseTankConsumers() {
+			if (graph.datalake() == null) return;
+			brokerStage.mkdirs();
+			graph.datalake().tankList().forEach(this::unregisterTankConsumer);
+			Logger.info("Tanks ignited!");
+		}
+
+		private void unregisterTankConsumer(Datalake.Tank t) {
+			brokerManager.unregisterConsumer(t.qn());
 		}
 
 		private void registerTankConsumer(Datalake.Tank t) {
