@@ -45,7 +45,6 @@
     <orderEntry type="library" name="Intino: io.intino.ness:master:2.1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:terminal-jms:5.6.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:2.0.6" level="project" />
-    <orderEntry type="library" name="Intino: io.intino:data-hub:9.11.3" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.4.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.2.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.1.2" level="project" />
@@ -122,7 +121,6 @@
     <orderEntry type="library" name="Intino: com.mchange:mchange-commons-java:0.2.15" level="project" />
     <orderEntry type="library" name="Intino: com.zaxxer:HikariCP-java7:2.4.13" level="project" />
     <orderEntry type="library" name="Intino: org.quartz-scheduler:quartz-jobs:2.3.2" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.sumus:chronos:2.3.0" level="project" />
     <orderEntry type="library" name="Intino: com.tdunning:t-digest:3.3" level="project" />
     <orderEntry type="library" name="Intino: com.github.haifengl:smile-core:3.0.2" level="project" />
     <orderEntry type="library" name="Intino: com.github.haifengl:smile-base:3.0.2" level="project" />
@@ -161,8 +159,17 @@
     <orderEntry type="library" name="Intino: org.xerial:sqlite-jdbc:3.43.2.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:event:5.0.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zit:1.0.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.6.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.5" level="project" />
+    <orderEntry type="library" name="Intino: io.intino:data-hub:9.12.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:jmx:1.0.5" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:7.0.6" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:5.0.5" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.28.9" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:jms:1.6.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.sumus:chronos:2.4.0" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.activemq:activemq-mqtt:5.18.3" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.activemq:activemq-kahadb-store:5.18.3" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.activemq:activemq-jaas:5.18.3" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.activemq:activemq-runtime-config:5.18.3" level="project" />
   </component>
 </module>

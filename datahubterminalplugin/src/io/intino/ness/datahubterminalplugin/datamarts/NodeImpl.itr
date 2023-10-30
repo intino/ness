@@ -225,13 +225,33 @@ def type(reelNode & default) trigger(nodeImpl)
 		@Override
 		public io.intino.sumus.chronos.State stateOf(String signal) throws ReelNotAvailableException {
 			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
-			return reelFile.stateOf(signal);
+			return reelFile.lastStateOf(signal);
 		}
 
 		@Override
 		public List<io.intino.sumus.chronos.State> stateOf(Stream<String> signals) throws ReelNotAvailableException {
 			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
-			return signals.map(reelFile::stateOf).toList();
+			return signals.map(reelFile::lastStateOf).toList();
+		}
+
+		public io.intino.sumus.chronos.Shot lastShotOf(String signal) throws ReelNotAvailableException {
+			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
+			return reelFile.lastShotOf(signal);
+		}
+
+		public List<io.intino.sumus.chronos.Shot> lastShots() throws ReelNotAvailableException {
+			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
+			return reelFile.lastShots();
+		}
+
+		public List<io.intino.sumus.chronos.Shot> lastShots(String group) throws ReelNotAvailableException {
+			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
+			return reelFile.lastShots(group);
+		}
+
+		public List<io.intino.sumus.chronos.Shot> lastShots(io.intino.sumus.chronos.Group group) throws ReelNotAvailableException {
+			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
+			return reelFile.lastShots(group);
 		}
 
 		@Override
