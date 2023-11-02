@@ -129,6 +129,7 @@ public class TimelineMounter extends MasterDatamartMounter {
 					.datamartDir(datamart.box().datamartTimelinesDirectory(datamart.name()))
 					.type(tank)
 					.entity(ss)
+					.start(ts)
 					.withExtension(".session")
 					.createIfNotExists();
 			this.rawMounter = new TimelineRawMounter.OfSingleTimeline(datamart, this::getTimelineWriter);
