@@ -58,7 +58,7 @@ public class ReelMounter extends MasterDatamartMounter {
 	}
 
 	protected void update(ReelFile reelFile, MessageEvent event) throws IOException {
-		File file = reelFile.file(); // TODO: implement in chronos
+		File file = reelFile.file();
 		File sessionFile = copyOf(file, ".session");
 		try {
 			Datamart datamart = this.datamart.definition();
@@ -144,7 +144,7 @@ public class ReelMounter extends MasterDatamartMounter {
 			for (var session : sessions.values()) {
 				try {
 					session.close();
-					File sessionFile = session.file(); // TODO: implement in chronos
+					File sessionFile = session.file();
 					File reelFile = new File(sessionFile.getAbsolutePath().replace(".session", ""));
 					Files.move(sessionFile.toPath(), reelFile.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
 				} catch (Exception e) {
