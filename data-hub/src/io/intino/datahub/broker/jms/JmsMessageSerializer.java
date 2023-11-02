@@ -32,7 +32,6 @@ import static java.nio.file.StandardOpenOption.CREATE;
 import static java.time.ZoneOffset.UTC;
 import static java.util.stream.Collectors.toMap;
 
-@SuppressWarnings("unchecked")
 public class JmsMessageSerializer {
 	private final File stage;
 	private final Datalake.Tank tank;
@@ -56,7 +55,6 @@ public class JmsMessageSerializer {
 		this.tank = tank;
 		this.scale = scale;
 		this.mounters = createMountersFor(tank, datamarts);
-
 	}
 
 	Consumer<javax.jms.Message> create() {

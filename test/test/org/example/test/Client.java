@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public class Client {
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, MasterDatamart.TimelineNotAvailableException {
 
 		TrooperTerminal terminal = new TrooperTerminal(connector("test", "test", "test"));
 		terminal.initDatamarts();

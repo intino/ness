@@ -14,12 +14,14 @@ import io.intino.sumus.chronos.TimelineStore.SensorModel;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class TimelineUtils {
 
@@ -108,35 +110,83 @@ public class TimelineUtils {
 		return tank.message().core$().fullName().replace("$", ".");
 	}
 
+	public static TimelineStoreBuilder rawTimelineBuilder() {
+		return new TimelineStoreBuilder();
+	}
 
 	public static String tankName(Entity e) {
 		return e.from() == null ? null : e.from().message().core$().fullName().replace("$", ".");
-	}
-
-	public static TimelineStore getOrCreateTimelineStoreOfRawTimeline(File datamartDir, MasterDatamart datamart, Instant start, String name, String entity) throws IOException {
-		File file = timelineFileOf(datamartDir, name, entity);
-		file.getParentFile().mkdirs();
-		if(file.exists()) return TimelineStore.of(file);
-
-		Timeline tlDefinition = datamart.definition().timelineList().stream()
-				.filter(Timeline::isRaw)
-				.filter(t -> t.asRaw().tank().sensor().name$().equals(name))
-				.findFirst()
-				.orElseThrow(() -> new IOException("Tank not found: " + name));
-
-		return TimelineStore.createIfNotExists(entity, file)
-				.withSensorModel(sensorModel(null, datamart.entityStore().get(entity), tlDefinition))
-				.withTimeModel(start, new Period(tlDefinition.asRaw().tank().period(), tlDefinition.asRaw().tank().periodScale().chronoUnit()))
-				.build();
 	}
 
 	public static File timelineFileOf(File datamartDir, String name, String entity) {
 		return new File(datamartDir, name + File.separator + entity + TIMELINE_EXTENSION);
 	}
 
-
 	private static String valueOf(Message message, Entity.Attribute source) {
 		return message.get(source.name$()).asString();
 	}
 
+	public static File copyOf(File file, String newExtension) throws IOException {
+		File copy = new File(file.getAbsolutePath() + newExtension);
+		if(file.exists()) Files.copy(file.toPath(), copy.toPath(), REPLACE_EXISTING);
+		return copy;
+	}
+
+	public static class TimelineStoreBuilder {
+
+		private File datamartDir;
+		private MasterDatamart datamart;
+		private Instant start;
+		private String type;
+		private String entity;
+		private String extension;
+
+		public TimelineStore createIfNotExists() throws IOException {
+			File file = timelineFileOf(datamartDir, type, entity);
+			if(extension != null) file = new File(file.getAbsolutePath() + extension);
+			file.getParentFile().mkdirs();
+			if(file.exists()) return TimelineStore.of(file);
+
+			Timeline tlDefinition = datamart.definition().timelineList().stream()
+					.filter(Timeline::isRaw)
+					.filter(t -> t.asRaw().tank().sensor().name$().equals(type))
+					.findFirst()
+					.orElseThrow(() -> new IOException("Tank not found: " + type));
+
+			return TimelineStore.createIfNotExists(entity, file)
+					.withSensorModel(sensorModel(null, datamart.entityStore().get(entity), tlDefinition))
+					.withTimeModel(start, new Period(tlDefinition.asRaw().tank().period(), tlDefinition.asRaw().tank().periodScale().chronoUnit()))
+					.build();
+		}
+
+		public TimelineStoreBuilder withExtension(String extension) {
+			this.extension = extension;
+			return this;
+		}
+
+		public TimelineStoreBuilder datamartDir(File datamartDir) {
+			this.datamartDir = datamartDir;
+			return this;
+		}
+
+		public TimelineStoreBuilder datamart(MasterDatamart datamart) {
+			this.datamart = datamart;
+			return this;
+		}
+
+		public TimelineStoreBuilder start(Instant start) {
+			this.start = start;
+			return this;
+		}
+
+		public TimelineStoreBuilder type(String type) {
+			this.type = type;
+			return this;
+		}
+
+		public TimelineStoreBuilder entity(String entity) {
+			this.entity = entity;
+			return this;
+		}
+	}
 }

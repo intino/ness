@@ -19,9 +19,11 @@ import io.intino.sumus.chronos.Period;
 import io.intino.sumus.chronos.TimeSeries.Point;
 import io.intino.sumus.chronos.TimelineStore;
 import io.intino.sumus.chronos.timelines.TimelineWriter;
+import io.intino.sumus.chronos.timelines.stores.FileTimelineStore;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,9 @@ import java.util.Set;
 
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
 import static io.intino.datahub.datamart.MasterDatamart.ChronosDirectory.normalizePath;
+import static io.intino.datahub.datamart.mounters.TimelineUtils.copyOf;
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.stream.Collectors.toMap;
@@ -85,13 +90,20 @@ public class TimelineCookedMounter {
 		}
 	}
 
-	private void update(TimelineStore tlFile, Cooked definition, MessageEvent event) {
-		try (TimelineWriter writer = tlFile.writer()) {
-			writer.set(event.ts());
-			for (TimeSeries ts : timeSeries(definition, event.type()))
-				writer.set(measurementsIn(tlFile, event, ts));
+	private void update(TimelineStore tlStore, Cooked definition, MessageEvent event) {
+		File timelineFile = ((FileTimelineStore) tlStore).file();
+		File sessionFile = null;
+		try {
+			sessionFile = copyOf(timelineFile, ".session");
+			try (TimelineWriter writer = TimelineStore.of(sessionFile).writer()) {
+				writer.set(event.ts());
+				for (TimeSeries ts : timeSeries(definition, event.type()))
+					writer.set(measurementsIn(tlStore, event, ts));
+			}
+			Files.move(sessionFile.toPath(), timelineFile.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
 		} catch (IOException e) {
 			Logger.error(e);
+			if(sessionFile != null) sessionFile.delete();
 		}
 	}
 

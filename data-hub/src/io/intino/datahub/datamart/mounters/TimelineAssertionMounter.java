@@ -10,10 +10,14 @@ import io.intino.sumus.chronos.timelines.TimelineWriter;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.function.Supplier;
 
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
+import static io.intino.datahub.datamart.mounters.TimelineUtils.copyOf;
 import static io.intino.datahub.datamart.mounters.TimelineUtils.sensorModel;
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class TimelineAssertionMounter {
 	private final DataHubBox box;
@@ -32,15 +36,19 @@ public class TimelineAssertionMounter {
 	}
 
 	void updateSensorModel(MessageEvent assertion, Timeline t) {
+		File timelineDirectory = new File(box.datamartTimelinesDirectory(datamart.name()), t.asRaw().tank().sensor().name$());
+		File timelineFile = new File(timelineDirectory, assertion.toMessage().get("id").asString() + TIMELINE_EXTENSION);
+		if (!timelineFile.exists()) return;
+		File session = null;
 		try {
-			File timelineDirectory = new File(box.datamartTimelinesDirectory(datamart.name()), t.asRaw().tank().sensor().name$());
-			File file = new File(timelineDirectory, assertion.toMessage().get("id").asString() + TIMELINE_EXTENSION);
-			if (!file.exists()) return;
-			try(TimelineWriter writer = TimelineStore.of(file).writer()) {
-				writer.sensorModel(sensorModel(TimelineStore.of(file).sensorModel(), assertion.toMessage(), t));
+			session = copyOf(timelineFile, ".session");
+			try(TimelineWriter writer = TimelineStore.of(session).writer()) {
+				writer.sensorModel(sensorModel(TimelineStore.of(timelineFile).sensorModel(), assertion.toMessage(), t));
 			}
+			Files.move(session.toPath(), timelineFile.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
 		} catch (IOException e) {
 			Logger.error(e);
+			if(session != null) session.delete();
 		}
 	}
 
