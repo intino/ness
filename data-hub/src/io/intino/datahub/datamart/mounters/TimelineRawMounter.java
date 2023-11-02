@@ -6,15 +6,19 @@ import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.sumus.chronos.TimelineStore;
 import io.intino.sumus.chronos.timelines.TimelineWriter;
+import io.intino.sumus.chronos.timelines.stores.FileTimelineStore;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
-import static io.intino.datahub.datamart.mounters.TimelineUtils.getOrCreateTimelineStoreOfRawTimeline;
-import static io.intino.datahub.datamart.mounters.TimelineUtils.sourceSensor;
+import static io.intino.datahub.datamart.mounters.TimelineUtils.*;
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class TimelineRawMounter {
 	private final DataHubBox box;
@@ -28,26 +32,36 @@ public class TimelineRawMounter {
 	public void mount(MeasurementEvent event) {
 		try {
 			if (event.ss() == null) return;
-			TimelineStore store = getOrCreate(event, sourceSensor(event));
+			TimelineStore store = getOrCreateTimelineStore(event, sourceSensor(event));
 			update(store, event);
 		} catch (Exception e) {
 			Logger.error("Could not mount event " + event.type() + ", ss = " + event.ss() + ": " + e.getMessage(), e);
 		}
 	}
 
-	private TimelineStore getOrCreate(MeasurementEvent event, String sensor) throws IOException {
-		TimelineStore store = datamart.timelineStore().get(event.type(), sensor);
-		if (store == null)
-			store = getOrCreateTimelineStoreOfRawTimeline(box.datamartTimelinesDirectory(datamart.name()), datamart, event.ts(), event.type(), sensor);
-		return store;
+	private TimelineStore getOrCreateTimelineStore(MeasurementEvent event, String sensor) throws IOException {
+		return rawTimelineBuilder()
+				.datamart(datamart)
+				.datamartDir(box.datamartTimelinesDirectory(datamart.name()))
+				.start(event.ts())
+				.type(event.type())
+				.entity(sensor)
+				.createIfNotExists();
 	}
 
-	protected void update(TimelineStore tlStore, MeasurementEvent event) {
-		try (TimelineWriter writer = tlStore.writer()) {
-			checkTs(event.ts(), writer);
-			writer.set(event.values()); // TODO: measurements must be present in sensorModel and in the order defined by the sensorModel
+	protected void update(TimelineStore tlStore, MeasurementEvent event) throws IOException {
+		File timelineFile = ((FileTimelineStore) tlStore).file();
+		File sessionFile = copyOf(timelineFile, ".session");
+		try {
+			try (TimelineWriter writer = TimelineStore.of(sessionFile).writer()) {
+				checkTs(event.ts(), writer);
+				// measurements must be present in sensorModel and in the order defined by the sensorModel
+				writer.set(event.values());
+			}
+			Files.move(sessionFile.toPath(), timelineFile.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
 		} catch (IOException e) {
-			Logger.error(e);
+			sessionFile.delete();
+			throw e;
 		}
 	}
 

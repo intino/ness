@@ -11,7 +11,10 @@ import io.intino.datahub.model.Timeline;
 import io.intino.magritte.framework.Layer;
 import io.intino.sumus.chronos.TimelineStore;
 import io.intino.sumus.chronos.timelines.TimelineWriter;
+import io.intino.sumus.chronos.timelines.stores.FileTimelineStore;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +26,8 @@ import static io.intino.alexandria.event.measurement.MeasurementEvent.ATTRIBUTE_
 import static io.intino.alexandria.event.measurement.MeasurementEvent.NAME_VALUE_SEP;
 import static io.intino.datahub.datamart.mounters.TimelineUtils.sourceSensor;
 import static io.intino.datahub.datamart.mounters.TimelineUtils.types;
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Arrays.stream;
 
 public class TimelineMounter extends MasterDatamartMounter {
@@ -115,10 +120,18 @@ public class TimelineMounter extends MasterDatamartMounter {
 
 		private TimelineWriter writer;
 		private final TimelineFileFactory timelineFactory;
+		private File sessionFile;
 
 		public OfSingleTimeline(MasterDatamart datamart, Timeline timeline, String tank, String ss) {
 			this.ss = ss;
-			this.timelineFactory = ts -> TimelineUtils.getOrCreateTimelineStoreOfRawTimeline(datamart.box().datamartTimelinesDirectory(datamart.name()), datamart, ts, tank, ss);
+			this.timelineFactory = ts -> TimelineUtils.rawTimelineBuilder()
+					.datamart(datamart)
+					.datamartDir(datamart.box().datamartTimelinesDirectory(datamart.name()))
+					.type(tank)
+					.entity(ss)
+					.start(ts)
+					.withExtension(".session")
+					.createIfNotExists();
 			this.rawMounter = new TimelineRawMounter.OfSingleTimeline(datamart, this::getTimelineWriter);
 			this.assertionMounter = new TimelineAssertionMounter.OfSingleTimeline(datamart, timeline, this::getTimelineWriter);
 		}
@@ -135,7 +148,9 @@ public class TimelineMounter extends MasterDatamartMounter {
 		private void createTimelineFileIfNotExists(Instant ts) {
 			if (writer != null) return;
 			try {
-				writer = timelineFactory.create(ts).writer();
+				TimelineStore store = timelineFactory.create(ts);
+				writer = store.writer();
+				sessionFile = ((FileTimelineStore)store).file();
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -143,7 +158,11 @@ public class TimelineMounter extends MasterDatamartMounter {
 
 		@Override
 		public void close() throws Exception {
-			if (writer != null) writer.close();
+			if (writer != null) {
+				writer.close();
+				File timelineFile = new File(sessionFile.getAbsolutePath().replace(".session", ""));
+				Files.move(sessionFile.toPath(), timelineFile.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
+			}
 		}
 
 		private TimelineWriter getTimelineWriter() {

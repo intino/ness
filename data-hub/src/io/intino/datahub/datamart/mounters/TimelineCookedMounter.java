@@ -19,9 +19,11 @@ import io.intino.sumus.chronos.Period;
 import io.intino.sumus.chronos.TimeSeries.Point;
 import io.intino.sumus.chronos.TimelineStore;
 import io.intino.sumus.chronos.timelines.TimelineWriter;
+import io.intino.sumus.chronos.timelines.stores.FileTimelineStore;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,9 @@ import java.util.Set;
 
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
 import static io.intino.datahub.datamart.MasterDatamart.ChronosDirectory.normalizePath;
+import static io.intino.datahub.datamart.mounters.TimelineUtils.copyOf;
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.stream.Collectors.toMap;
@@ -85,23 +90,49 @@ public class TimelineCookedMounter {
 		}
 	}
 
-	private void update(TimelineStore tlFile, Cooked definition, MessageEvent event) {
-		try (TimelineWriter writer = tlFile.writer()) {
-			writer.set(event.ts());
-			for (TimeSeries ts : timeSeries(definition, event.type()))
-				writer.set(measurementsIn(tlFile, event, ts));
+	private void update(TimelineStore tlStore, Cooked definition, MessageEvent event) {
+		File timelineFile = ((FileTimelineStore) tlStore).file();
+		File sessionFile = null;
+		try {
+			io.intino.sumus.chronos.Timeline timeline = tlStore.timeline();
+			sessionFile = copyOf(timelineFile, ".session");
+			try (TimelineWriter writer = TimelineStore.of(sessionFile).writer()) {
+				MeasurementsVector vector = createVector(tlStore.sensorModel());
+				writer.set(event.ts());
+				for (TimeSeries ts : timeSeries(definition, event.type()))
+					fillMeasurements(tlStore, vector, event, ts);
+				fillNaNValues(tlStore.sensorModel(), vector, timeline);
+				writer.set(vector);
+			}
+			Files.move(sessionFile.toPath(), timelineFile.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
 		} catch (IOException e) {
 			Logger.error(e);
+			if (sessionFile != null) sessionFile.delete();
 		}
 	}
 
-	private MeasurementsVector measurementsIn(TimelineStore tlFile, MessageEvent event, TimeSeries ts) throws IOException {
+
+	private static MeasurementsVector createVector(TimelineStore.SensorModel sensorModel) {
+		MeasurementsVector measurements = new MeasurementsVector(sensorModel);
+		sensorModel.forEach(m -> measurements.set(m.label, Double.NaN));
+		return measurements;
+	}
+
+	private static void fillNaNValues(TimelineStore.SensorModel sensorModel, MeasurementsVector measurements, io.intino.sumus.chronos.Timeline timeline) {
+		sensorModel.forEach(m -> {
+			if (Double.isNaN(measurements.toArray()[measurements.sensorModel().indexOf(m.label)])) {
+				Point last = timeline.get(m.label).last();
+				if (last != null) measurements.set(m.label, last.value());
+			}
+		});
+	}
+
+
+	private void fillMeasurements(TimelineStore tlFile, MeasurementsVector vector, MessageEvent event, TimeSeries ts) throws IOException {
 		MeasurementsVector measurements = new MeasurementsVector(tlFile.sensorModel());
 		if (ts.isCount())
 			processCount(measurements, ts.asCount(), lastValue(tlFile, ts), operationOf(ts.asCount().operationList(), event.type()));
-		else
-			processTimeShift(measurements, ts.asTimeShift(), event);
-		return measurements;
+		else if (ts.isTimeShift()) processTimeShift(measurements, ts.asTimeShift(), event);
 	}
 
 	private Operation operationOf(List<Operation> operations, String type) {

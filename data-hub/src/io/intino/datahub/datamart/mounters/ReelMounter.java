@@ -12,6 +12,7 @@ import io.intino.sumus.chronos.ReelFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,9 @@ import java.util.stream.Stream;
 
 import static io.intino.datahub.box.DataHubBox.REEL_EXTENSION;
 import static io.intino.datahub.datamart.MasterDatamart.ChronosDirectory.normalizePath;
+import static io.intino.datahub.datamart.mounters.TimelineUtils.copyOf;
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class ReelMounter extends MasterDatamartMounter {
 
@@ -54,11 +58,20 @@ public class ReelMounter extends MasterDatamartMounter {
 	}
 
 	protected void update(ReelFile reelFile, MessageEvent event) throws IOException {
-		Datamart datamart = this.datamart.definition();
-		List<Reel> reels = datamart.reelList(r -> r.tank().message().name$().equals(event.type()));
-		try (ReelFile.Session session = reelFile.session()) {
-			for (Reel reel : reels)
-				session.set(event.ts(), group(event, reel.groupSource()), mappingAttribute(event.toMessage(), reel));
+		File file = reelFile.file();
+		File sessionFile = copyOf(file, ".session");
+		try {
+			Datamart datamart = this.datamart.definition();
+			List<Reel> reels = datamart.reelList(r -> r.tank().message().name$().equals(event.type()));
+			try (ReelFile.Session session = ReelFile.open(sessionFile).session()) {
+				for (Reel reel : reels) {
+					session.set(event.ts(), group(event, reel.groupSource()), mappingAttribute(event.toMessage(), reel));
+				}
+			}
+			Files.move(sessionFile.toPath(), file.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
+		} catch (IOException e) {
+			sessionFile.delete();
+			throw e;
 		}
 	}
 
@@ -107,6 +120,14 @@ public class ReelMounter extends MasterDatamartMounter {
 			}
 		}
 
+		@Override
+		ReelFile reelFile(String type, String subject) throws IOException {
+			File sessionFile = new File(box().datamartReelsDirectory(datamart.name(), type), normalizePath(subject + REEL_EXTENSION + ".session"));
+			if(sessionFile.exists()) sessionFile.delete();
+			else sessionFile.getParentFile().mkdirs();
+			return ReelFile.create(sessionFile);
+		}
+
 		private ReelFile.Session createReelSession(String type, String subject) throws IOException {
 			return reelFile(type, subject).session();
 		}
@@ -123,6 +144,9 @@ public class ReelMounter extends MasterDatamartMounter {
 			for (var session : sessions.values()) {
 				try {
 					session.close();
+					File sessionFile = session.file();
+					File reelFile = new File(sessionFile.getAbsolutePath().replace(".session", ""));
+					Files.move(sessionFile.toPath(), reelFile.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
 				} catch (Exception e) {
 					Logger.error(e);
 				}
