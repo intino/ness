@@ -1,27 +1,28 @@
 def type(entity & base)
 	package $package;
 
-	import java.util.Collection;
-	import java.util.Map;
-	import java.util.List;
-	import java.util.ArrayList;
-	import java.util.Objects;
+	import java.util.*;
+	import java.util.stream.Collectors;
 
 	import io.intino.ness.master.model.*;
 	import io.intino.ness.master.reflection.*;
 	import io.intino.ness.master.model.Concept.Attribute.Value;
 
-	public abstract class $datamart+FirstUpperCase~Entity implements Entity {
+	public class $datamart+FirstUpperCase~Entity implements Entity {
 
 		private final String id;
 		private final $datamart+FirstUpperCase~Datamart datamart;
 		private final Map<String, Attribute> attributes;
+		private final EntityDefinition definition;
 		private List<ChangeListener> listeners;
 
-		public $datamart+FirstUpperCase~Entity(String id, $datamart+FirstUpperCase~Datamart datamart) {
+		public $datamart+FirstUpperCase~Entity(String id, $datamart+FirstUpperCase~Datamart datamart, EntityDefinition definition) {
 			this.id = id;
 			this.datamart = datamart;
-			this.attributes = createAllAttributes();
+			this.attributes = definition.attributes().stream()
+				.map(a -> new Attribute(a.name(), null))
+				.collect(Collectors.toMap(a -> a.name, a -> a, (a,b) -> b, LinkedHashMap::new));
+			this.definition = definition;
 		}
 
 		@Override
@@ -37,6 +38,11 @@ def type(entity & base)
 		@Override
 		public $datamart+FirstUpperCase~Datamart datamart() {
 			return datamart;
+		}
+
+		@Override
+		public EntityDefinition getDefinition() {
+			return definition;
 		}
 
 		@Override
@@ -57,7 +63,7 @@ def type(entity & base)
 		}
 
 		private static final java.util.Set<String> ExcludedAttributeNames = java.util.Set.of("id", "enabled", "ts", "ss");
-		synchronized void addAttribute(String name, Object value) {
+		public synchronized void addAttribute(String name, Object value) {
 			if(ExcludedAttributeNames.contains(name)) return;
 			attributes.put(name, new Attribute(name, value));
 			var attributeDefinitions = getDefinition().declaredAttributes();
@@ -105,21 +111,7 @@ def type(entity & base)
 			return id;
 		}
 
-		protected Collection<Attribute> initDeclaredAttributes() {
-			List<Attribute> attributes = new ArrayList<>();
-			attributes.add(new Attribute("id", id));
-			attributes.add(new Attribute("enabled", true));
-			return attributes;
-		}
-
-		private Map<String, Attribute> createAllAttributes() {
-			Collection<Attribute> declaredAttribs = initDeclaredAttributes();
-			Map<String, Attribute> attributes = new java.util.LinkedHashMap<>(2 + declaredAttribs.size());
-	        declaredAttribs.forEach(attr -> attributes.put(attr.name(), attr));
-	        return attributes;
-		}
-
-		protected final class Attribute implements Concept.Attribute {
+		public final class Attribute implements Concept.Attribute {
 
 			private final String name;
 			private Value value;
@@ -190,7 +182,7 @@ def type(entity & base)
 			}
 		}
 
-		protected static final class EntityDefinitionInternal implements EntityDefinition {
+		public static final class EntityDefinitionInternal implements EntityDefinition {
 
         	private final String entityName;
 
@@ -254,5 +246,103 @@ def type(entity & base)
         		return $datamart+FirstUpperCase~Datamart.definition.entity(entityName).orElseThrow(() -> new IllegalStateException("$datamart+FirstUpperCase~Datamart is not initialized"));
         	}
         }
+	}
+end
+
+def type(entityBaseReference)
+	package $package;
+
+	import io.intino.cosmos.datahub.datamarts.master.$datamart+FirstUpperCase~Entity;
+	import io.intino.ness.master.Datamart;
+	import io.intino.ness.master.model.Entity;
+	import io.intino.ness.master.reflection.EntityDefinition;
+
+	import java.util.List;
+	import java.util.NoSuchElementException;
+	import java.util.function.Supplier;
+
+	public class $datamart+FirstUpperCase~EntityReference implements Entity {
+
+		private final Supplier<$datamart+FirstUpperCase~Entity> entity;
+
+		public $datamart+FirstUpperCase~EntityReference(Supplier<$datamart+FirstUpperCase~Entity> entity) {
+			this.entity = entity;
+		}
+
+		@Override
+		public String id() {
+			return entity.get().id();
+		}
+
+		@Override
+		public boolean enabled() {
+			return entity.get().enabled();
+		}
+
+		@Override
+		public $datamart+FirstUpperCase~Datamart datamart() {
+			return entity.get().datamart();
+		}
+
+		@Override
+		public Attribute attribute(String name) {
+			return entity.get().attribute(name);
+		}
+
+		@Override
+		public List<Attribute> attributes() {
+			return entity.get().attributes();
+		}
+
+		@Override
+		public void addChangeListener(ChangeListener listener) {
+			entity.get().addChangeListener(listener);
+		}
+
+		@Override
+		public EntityDefinition getDefinition() {
+			return entity.get().getDefinition();
+		}
+
+		public final boolean isValidEntityReference() {
+			try {
+				return entity.get() != null;
+			} catch (Throwable e) {
+				return false;
+			}
+		}
+
+		@Override
+        public boolean equals(Object o) {
+        	if (this == o) return true;
+        	if (o == null || getClass() != o.getClass()) return false;
+        	return id().equals(((Entity) o).id());
+        }
+
+        @Override
+        public int hashCode() {
+        	return entity.get().hashCode();
+        }
+
+		@Override
+		public String toString() {
+			return entity.get().toString();
+		}
+
+		public static class InvalidEntityReferenceException extends NoSuchElementException {
+			public InvalidEntityReferenceException() {}
+
+			public InvalidEntityReferenceException(String s, Throwable cause) {
+				super(s, cause);
+			}
+
+			public InvalidEntityReferenceException(Throwable cause) {
+				super(cause);
+			}
+
+			public InvalidEntityReferenceException(String s) {
+				super(s);
+			}
+		}
 	}
 end

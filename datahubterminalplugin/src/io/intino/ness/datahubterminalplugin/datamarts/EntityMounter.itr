@@ -73,7 +73,7 @@ def !type(abstract) type(mounter) type(message)
 		private $datamart+FirstUpperCase~Entity findOrCreateEntity(String id, Operation$[$] operation) {
 			$datamart+FirstUpperCase~Entity entity = entities.get($package.entities.$name+FirstUpperCase.definition, id);
 			if(entity == null) {
-				entity = new $name+FirstUpperCase(id, entities.datamart());
+				entity = new $datamart+FirstUpperCase~Entity(id, entities.datamart(), $name+FirstUpperCase~.definition);
 				entities.add(entity);
 				operation$[0$] = Create;
 			}

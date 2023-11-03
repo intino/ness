@@ -71,7 +71,7 @@ public class EntityFrameFactory implements ConceptRenderer {
 	}
 
 	private String baseEntityName() {
-		return workingPackage + "." + firstUpperCase(datamart.name$()) + "Entity";
+		return firstUpperCase(datamart.name$()) + "EntityReference";
 	}
 
 	private Frame structFrame(Struct struct, Entity owner) {
