@@ -69,7 +69,7 @@ public class ReelMounter extends MasterDatamartMounter {
 				}
 			}
 			Files.move(sessionFile.toPath(), file.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			sessionFile.delete();
 			throw e;
 		}
@@ -123,7 +123,7 @@ public class ReelMounter extends MasterDatamartMounter {
 		@Override
 		ReelFile reelFile(String type, String subject) throws IOException {
 			File sessionFile = new File(box().datamartReelsDirectory(datamart.name(), type), normalizePath(subject + REEL_EXTENSION + ".session"));
-			if(sessionFile.exists()) sessionFile.delete();
+			if (sessionFile.exists()) sessionFile.delete();
 			else sessionFile.getParentFile().mkdirs();
 			return ReelFile.create(sessionFile);
 		}
