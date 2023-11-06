@@ -238,6 +238,7 @@ def type(datamart & message & impl)
 
 	import java.io.File;
 	import java.util.*;
+	import java.util.function.BiFunction;
 	import java.util.concurrent.atomic.AtomicBoolean;
 	import java.util.stream.Stream;
 	import java.util.stream.Collectors;
@@ -269,6 +270,7 @@ def type(datamart & message & impl)
 		[$hasReels~private boolean hasLocalAccessToReels;]
 		[$hasReels~private final Map<String, ReelNodeImpl> reels = new java.util.concurrent.ConcurrentHashMap<>();]
 		private volatile DictionaryImpl dictionary = new DictionaryImpl();
+		private final Map<Class<?>, BiFunction<EntityDefinition, String, $name+FirstUpperCase~EntityReference>> entityReferenceFactory = createEntityReferenceFactory();
 
     	public $name+FirstUpperCase~DatamartImpl(Connector connector, $terminal~.DatamartsRetryConfig retryConfig) {
     		this.connector = requireNonNull(connector);
@@ -300,8 +302,7 @@ def type(datamart & message & impl)
 			if(entity == null) return null;
 			EntityDefinition definition = entity.getDefinition();
 			Class<?> javaClass = definition.javaClass();
-			$entity+instantiationConditional...[$NL]
-			return null;
+			return (T) entityReferenceFactory.getOrDefault(javaClass, (BiFunction<EntityDefinition, String, $name+FirstUpperCase~EntityReference>) ((a,b) -> null)).apply(definition, id);
 		}
 
 		@Override
@@ -539,6 +540,12 @@ def type(datamart & message & impl)
         	};
         }
 
+        Map<Class<?>, BiFunction<EntityDefinition, String, $name+FirstUpperCase~EntityReference>> createEntityReferenceFactory() {
+        	Map<Class<?>, BiFunction<EntityDefinition, String, $name+FirstUpperCase~EntityReference>> map = new HashMap<>();
+        	$entity+referenceFactoryEntry...[$NL]
+        	return map;
+        }
+
 		// WARNING: extremely compacted and ugly code ahead... continue at your own discretion.
 		public static final class $name+FirstUpperCase~DatamartDefinition implements DatamartDefinition {
 
@@ -599,6 +606,10 @@ def type(datamart & message & impl)
 			}
 		}
     }
+end
+
+def type(entity) !type(abstract) trigger(referenceFactoryEntry)
+	map.put($package.entities.$name+FirstUpperCase.class, (definition, id) -> new $package.entities.$name+FirstUpperCase~(() -> entities.get(definition, id)));
 end
 
 def type(entity) trigger(definition)
@@ -735,14 +746,6 @@ def type(subclasstop) trigger(getAllStream)
 	$name+Plural+firstLowerCase()
 end
 
-def type(subclass) trigger(instantiationConditional)
-	if(javaClass == $package.$name+FirstUpperCase.class) return new $package.$name+FirstUpperCase(() -> entities.get(definition, id));
-end
-
-def type(entity) !type(abstract) trigger(instantiationConditional)
-	if(javaClass == $package.entities.$name+FirstUpperCase.class) return (T) new $package.entities.$name+FirstUpperCase(() -> entities.get(definition, id));
-end
-
 def type(timeline) trigger(getter)
 	@Override
 	public TimelineNode $name+FirstLowerCase~Timeline(String id) {
@@ -793,8 +796,7 @@ def type(abstract) trigger(getter)
 		if(entity == null) return null;
 		EntityDefinition definition = entity.getDefinition();
 		Class<?> javaClass = definition.javaClass();
-		$subclass+instantiationConditional...[$NL]
-		return null;
+		return ($package.entities.$name+FirstUpperCase) entityReferenceFactory.getOrDefault(javaClass, (BiFunction<EntityDefinition, String, $datamart+FirstUpperCase~EntityReference>) ((a,b) -> null)).apply(definition, id);
 	}
 
 	@Override
@@ -813,8 +815,7 @@ def type(superclass) !type(abstract) trigger(getter)
 		if(entity == null) return null;
 		EntityDefinition definition = entity.getDefinition();
 		Class<?> javaClass = definition.javaClass();
-		$subclass+instantiationConditional...[$NL]
-		return null;
+		return ($package.entities.$name+FirstUpperCase) entityReferenceFactory.getOrDefault(javaClass, (BiFunction<EntityDefinition, String, $datamart+FirstUpperCase~EntityReference>) ((a,b) -> null)).apply(definition, id);
 	}
 
 	@Override

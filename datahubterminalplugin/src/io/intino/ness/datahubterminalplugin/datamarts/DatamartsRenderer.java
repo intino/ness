@@ -355,6 +355,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 				.map(entity -> {
 					final FrameBuilder b = new FrameBuilder("entity").add("package", modelPackage);
 					b.add("name", firstUpperCase(entity.name$())).add("fullName", fullNameOf(entity));
+					b.add("datamart", datamart.name$());
 					b.add("attribute", attributeFrames(attributesOf(entity)));
 					if (entity.from() != null) b.add("event", firstUpperCase(entity.from().message().name$()));
 					if (entity.isExtensionOf()) {
