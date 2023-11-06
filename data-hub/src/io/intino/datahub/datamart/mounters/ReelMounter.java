@@ -9,6 +9,7 @@ import io.intino.datahub.model.Attribute;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Reel;
 import io.intino.sumus.chronos.ReelFile;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,8 +69,8 @@ public class ReelMounter extends MasterDatamartMounter {
 					session.set(event.ts(), group(event, reel.groupSource()), mappingAttribute(event.toMessage(), reel));
 				}
 			}
-			Files.move(sessionFile.toPath(), file.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
-		} catch (IOException e) {
+			FileUtils.moveFile(sessionFile, file, REPLACE_EXISTING, ATOMIC_MOVE);
+		} catch (Exception e) {
 			sessionFile.delete();
 			throw e;
 		}
@@ -123,7 +124,7 @@ public class ReelMounter extends MasterDatamartMounter {
 		@Override
 		ReelFile reelFile(String type, String subject) throws IOException {
 			File sessionFile = new File(box().datamartReelsDirectory(datamart.name(), type), normalizePath(subject + REEL_EXTENSION + ".session"));
-			if(sessionFile.exists()) sessionFile.delete();
+			if (sessionFile.exists()) sessionFile.delete();
 			else sessionFile.getParentFile().mkdirs();
 			return ReelFile.create(sessionFile);
 		}
