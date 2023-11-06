@@ -1,14 +1,14 @@
 dsl Legio
 
-Artifact("io.intino", "9.12.1") data-hub as Product
+Artifact("io.intino", "9.12.2") data-hub as Product
 	Model("Proteo", "3.4.7", "4.2.3") > outLanguage = "Ness"
-	Box("Konos", "10.6.11")
+	Box("Konos", "10.6.13")
 	Imports
 		Compile("io.intino.alexandria", "json", "1.2.3")
 		Compile("io.intino.alexandria", "core-framework", "2.2.0")
 		Compile("io.intino.alexandria", "jmx", "1.0.5")
 		Compile("io.intino.alexandria", "primitives", "1.1.2")
-		Compile("io.intino.alexandria", "sealing", "7.0.6")
+		Compile("io.intino.alexandria", "sealing", "7.0.7")
 		Compile("io.intino.alexandria", "ui-framework", "4.28.9")
 			Exclude("io.intino.alexandria", "driver-r")
 			Exclude("io.intino.alexandria", "driver-shiny")
@@ -24,7 +24,7 @@ Artifact("io.intino", "9.12.1") data-hub as Product
 		Compile("org.apache.activemq", "activemq-kahadb-store", "5.18.3")
 		Compile("org.apache.activemq", "activemq-jaas", "5.18.3")
 		Compile("org.apache.activemq", "activemq-runtime-config", "5.18.3")
-		Compile("org.xerial", "sqlite-jdbc", "3.43.2.1")
+		Compile("org.xerial", "sqlite-jdbc", "3.43.2.2")
 		Test("junit", "junit", "4.13.2")
 		Web("io.intino", "datalake-inspector", "9.12.2")
 	Code("io.intino.datahub")
