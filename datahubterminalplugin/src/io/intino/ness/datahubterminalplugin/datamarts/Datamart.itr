@@ -51,21 +51,29 @@ def type(datamart & interface)
         		return entitiesByType.values().stream().mapToInt(Map::size).sum();
         	}
 
+        	public boolean contains(String id) {
+        		return get(id) != null;
+        	}
+
+        	public boolean contains(EntityDefinition definition, String id) {
+        		return get(definition, id) != null;
+        	}
+
         	public $name+FirstUpperCase~Entity get(String id) {
         		return mapOf(id).map(map -> map.get(id)).orElse(null);
         	}
 
-        	public <T extends $name+FirstUpperCase~Entity> T getDescendant(EntityDefinition definition, String id) {
-        		T entity = get(definition, id);
-        		return entity != null ? entity: definition.descendants().stream()
+        	public $name+FirstUpperCase~Entity getDescendant(EntityDefinition definition, String id) {
+        		$name+FirstUpperCase~Entity entity = get(definition, id);
+        		return entity != null ? entity : definition.descendants().stream()
         			.filter(descendant -> !descendant.isAbstract())
-        			.map(descendant -> this.<T>get(descendant, id))
+        			.map(descendant -> get(descendant, id))
         			.filter(java.util.Objects::nonNull).findFirst().orElse(null);
         	}
 
 			@SuppressWarnings("unchecked")
-        	public <T extends $name+FirstUpperCase~Entity> T get(EntityDefinition type, String id) {
-        		return entitiesByType.containsKey(type) ? (T) entitiesByType.get(type).get(id) : null;
+        	public $name+FirstUpperCase~Entity get(EntityDefinition type, String id) {
+        		return entitiesByType.containsKey(type) ? entitiesByType.get(type).get(id) : null;
             }
 
         	public void add($name+FirstUpperCase~Entity entity) {
@@ -80,9 +88,8 @@ def type(datamart & interface)
         		return entitiesByType.values().stream().flatMap(map -> map.values().stream());
         	}
 
-			@SuppressWarnings("unchecked")
-        	public <T extends $name+FirstUpperCase~Entity> Stream<T> stream(EntityDefinition type) {
-        		return (Stream<T>) (entitiesByType.containsKey(type) ? entitiesByType.get(type).values().stream() : Stream.empty());
+        	public Stream<$name+FirstUpperCase~Entity> stream(EntityDefinition type) {
+        		return entitiesByType.containsKey(type) ? entitiesByType.get(type).values().stream() : Stream.empty();
         	}
 
         	public Stream<Entity> streamGeneric() {
@@ -723,6 +730,10 @@ def type(subclass) trigger(getAllStream)
 	$name+Plural+firstLowerCase()
 end
 
+def type(subclass) trigger(instantiationConditional)
+	if(javaClass == $package.$name+FirstUpperCase.class) return new $package.$name+FirstUpperCase(() -> entities.get(definition, id));
+end
+
 def type(timeline) trigger(getter)
 	@Override
 	public TimelineNode $name+FirstLowerCase~Timeline(String id) {
@@ -768,7 +779,13 @@ end
 def type(abstract) trigger(getter)
 	@Override
 	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
-		return id == null ? null : entities.getDescendant(definition.$name+firstLowerCase~EntityDefinition, id);
+		if(id == null) return null;
+		var entity = entities.getDescendant(definition.$name+firstLowerCase~EntityDefinition, id);
+		if(entity == null) return null;
+		EntityDefinition definition = entity.getDefinition();
+		Class<?> javaClass = definition.javaClass();
+		$subclass+instantiationConditional...[$NL]
+		return null;
 	}
 
 	@Override
@@ -782,13 +799,19 @@ end
 def type(superclass) !type(abstract) trigger(getter)
 	@Override
 	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
-		return id == null ? null : entities.getDescendant(definition.$name+firstLowerCase~EntityDefinition, id);
+		if(id == null) return null;
+		var entity = entities.getDescendant(definition.$name+firstLowerCase~EntityDefinition, id);
+		if(entity == null) return null;
+		EntityDefinition definition = entity.getDefinition();
+		Class<?> javaClass = definition.javaClass();
+		$subclass+instantiationConditional...[$NL]
+		return null;
 	}
 
 	@Override
 	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
 		return Stream.of(
-			entities.<$package.entities.$name+FirstUpperCase>stream(definition.$name+firstLowerCase~EntityDefinition),
+			entities.<$package.entities.$name+FirstUpperCase>stream(definition.$name+firstLowerCase~EntityDefinition).map(Entity::id).map(id -> new $package.entities.$name+FirstUpperCase(() -> entities.get(definition.$name+firstLowerCase~EntityDefinition, id))),
 			$subclass+getAllStream...[,$NL]
 		).<$package.entities.$name+FirstUpperCase>flatMap(java.util.function.Function.identity());//.distinct();
 	}
@@ -797,12 +820,15 @@ end
 def trigger(getter)
 	@Override
 	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
-		return id == null ? null : entities.get(definition.$name+firstLowerCase~EntityDefinition, id);
+		return id == null || !entities.contains(definition.$name+firstLowerCase~EntityDefinition, id) ? null : new $package.entities.$name+FirstUpperCase(() -> entities.get(definition.$name+firstLowerCase~EntityDefinition, id));
 	}
 
 	@Override
 	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
-		return entities.stream(definition.$name+firstLowerCase~EntityDefinition);
+		return entities.stream(definition.$name+firstLowerCase~EntityDefinition)
+			.map(Entity::id)
+			.map(this::$name+firstLowerCase)
+			.filter(java.util.Objects::nonNull);
 	}
 end
 

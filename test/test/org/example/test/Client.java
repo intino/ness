@@ -4,6 +4,8 @@ import io.intino.alexandria.terminal.JmsConnector;
 import io.intino.cosmos.datahub.TrooperTerminal;
 import io.intino.cosmos.datahub.datamarts.master.MasterDatamart;
 import io.intino.cosmos.datahub.datamarts.master.MasterDatamartImpl;
+import io.intino.cosmos.datahub.datamarts.master.entities.Observable;
+import io.intino.cosmos.datahub.datamarts.master.entities.Place;
 import io.intino.ness.master.Datamart;
 import io.intino.sumus.chronos.Timeline;
 
