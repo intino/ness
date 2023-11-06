@@ -9,7 +9,6 @@ import io.intino.datahub.model.Attribute;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Reel;
 import io.intino.sumus.chronos.ReelFile;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,7 +68,7 @@ public class ReelMounter extends MasterDatamartMounter {
 					session.set(event.ts(), group(event, reel.groupSource()), mappingAttribute(event.toMessage(), reel));
 				}
 			}
-			FileUtils.moveFile(sessionFile, file, REPLACE_EXISTING, ATOMIC_MOVE);
+			Files.move(sessionFile.toPath(), file.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
 		} catch (Exception e) {
 			sessionFile.delete();
 			throw e;
