@@ -737,16 +737,16 @@ end
 def type(timeline) trigger(getter)
 	@Override
 	public TimelineNode $name+FirstLowerCase~Timeline(String id) {
-		if(hasLocalAccessToTimelines) return timelines.containsKey(id) ? timelines.get(id) : TimelineNode.empty();
-		return timelines.computeIfAbsent(id + ":$name", theId -> new TimelineNodeImpl(id, "$name", Set.of($sources)));
+		if(hasLocalAccessToTimelines) return timelines.containsKey(id.replace(":", "-")) ? timelines.get(id.replace(":", "-")) : TimelineNode.empty();
+		return timelines.computeIfAbsent(id.replace(":", "-") + ":$name", theId -> new TimelineNodeImpl(id, "$name", Set.of($sources)));
 	}
 end
 
 def type(reel) trigger(getter)
 	@Override
 	public ReelNode $name+FirstLowerCase~Reel(String id) {
-		if(hasLocalAccessToReels) return reels.containsKey(id + ":$name") ? reels.get(id + ":$name") : ReelNode.empty();
-		return reels.computeIfAbsent(id + ":$name", theId -> new ReelNodeImpl(id, "$name", Set.of($sources)));
+		if(hasLocalAccessToReels) return reels.containsKey(id.replace(":", "-") + ":$name") ? reels.get(id.replace(":", "-") + ":$name") : ReelNode.empty();
+		return reels.computeIfAbsent(id.replace(":", "-") + ":$name", theId -> new ReelNodeImpl(id, "$name", Set.of($sources)));
 	}
 
 	@Override
