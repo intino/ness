@@ -43,20 +43,16 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.2.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:json:1.2.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.ness:master:2.1.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:terminal-jms:5.6.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-api:2.0.6" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:framework:3.4.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.2.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.1.2" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:datalake:7.0.7" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:event:5.0.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:iterator-stream:1.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:resource-cleaner:1.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zim:5.1.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:message:4.1.2" level="project" />
     <orderEntry type="library" name="Intino: com.github.luben:zstd-jni:1.5.4-1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zit:1.0.1" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.alexandria:session:2.0.5" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:http:1.7.7" level="project" />
     <orderEntry type="library" name="Intino: com.sparkjava:spark-core:2.9.4" level="project" />
     <orderEntry type="library" name="Intino: org.bouncycastle:bcmail-jdk15:1.46" level="project" />
@@ -156,14 +152,9 @@
     <orderEntry type="library" name="Intino: javax.xml.bind:jaxb-api:2.3.1" level="project" />
     <orderEntry type="library" name="Intino: javax.activation:javax.activation-api:1.2.0" level="project" />
     <orderEntry type="library" name="Intino: org.jvnet.jaxb2_commons:jaxb2-basics-runtime:0.12.0" level="project" />
-    <orderEntry type="library" name="Intino: org.xerial:sqlite-jdbc:3.43.2.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:event:5.0.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zit:1.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.6.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.5" level="project" />
     <orderEntry type="library" name="Intino: io.intino:data-hub:9.12.2" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.sumus:chronos:2.4.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.sumus:chronos:2.4.0" level="project" />
   </component>
 </module>
