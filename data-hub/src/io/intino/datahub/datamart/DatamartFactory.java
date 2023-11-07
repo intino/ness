@@ -78,7 +78,7 @@ public class DatamartFactory {
 
 	private void reflowEntities(MasterDatamart datamart, Instant fromTs, Set<String> entityTanks) {
 		Logger.debug("Reflowing entities...");
-		reflow(new EntityMounter(datamart), entityTanks, reflowTanks(fromTs, entityTanks));
+		reflow(new EntityMounter(datamart), reflowTanks(fromTs, entityTanks));
 	}
 
 	private void reflowRawTimelines(MasterDatamart datamart, Datamart definition) {
@@ -88,7 +88,7 @@ public class DatamartFactory {
 
 	private void reflowCookedTimelines(MasterDatamart datamart, Set<String> cookedTimelineTanks) {
 		Logger.debug("Reflowing cooked timelines...");
-		reflow(new TimelineMounter(datamart), cookedTimelineTanks, reflowTanks(null, cookedTimelineTanks));
+		reflow(new TimelineMounter(datamart), reflowTanks(null, cookedTimelineTanks));
 	}
 
 	private void reflowReels(MasterDatamart datamart, Set<String> tanks) {
@@ -101,19 +101,16 @@ public class DatamartFactory {
 		}
 	}
 
-	private void reflow(TimelineMounter timelineMounter, Set<String> cookedTimelineTanks, Iterator<Event> events) {
-		cookedTimelineTanks = cookedTimelineTanks.stream().map(this::getTankEventName).collect(Collectors.toSet());
+	private void reflow(TimelineMounter timelineMounter, Iterator<Event> events) {
 		while (events.hasNext()) {
 			Event event = events.next();
-			if (cookedTimelineTanks.contains(event.type())) timelineMounter.mount(event);
+			timelineMounter.mount(event);
 		}
 	}
 
-	private void reflow(EntityMounter entityMounter, Set<String> entityTanks, Iterator<Event> events) {
-		entityTanks = entityTanks.stream().map(this::getTankEventName).collect(Collectors.toSet());
+	private void reflow(EntityMounter entityMounter, Iterator<Event> events) {
 		while (events.hasNext()) {
-			Event event = events.next();
-			if (entityTanks.contains(event.type())) entityMounter.mount(event);
+			entityMounter.mount(events.next());
 		}
 	}
 
