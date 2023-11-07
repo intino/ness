@@ -51,7 +51,7 @@ public class DatamartFactory {
 		}
 		// If loaded from snapshot, reflow events between the snapshot's timetag and the most recent timetag
 		// If no snapshot was loaded, reflow all events
-		return reflow(datamart.value, fromTs.value, definition);
+		return reflow(datamart.value, definition);
 	}
 
 	private boolean failedToLoadLastSnapshotOf(Datamart definition, Reference<MasterDatamart> datamart, Reference<Instant> fromTs) {
@@ -64,10 +64,10 @@ public class DatamartFactory {
 		return true;
 	}
 
-	public MasterDatamart reflow(MasterDatamart datamart, Instant fromTs, Datamart definition) throws Exception {
+	public MasterDatamart reflow(MasterDatamart datamart, Datamart definition) throws Exception {
 		FileUtils.deleteDirectory(box.datamartTimelinesDirectory(datamart.name()));
 		FileUtils.deleteDirectory(box.datamartReelsDirectory(datamart.name()));
-		reflowEntities(datamart, fromTs, entityTanks(definition));
+		reflowEntities(datamart, entityTanks(definition));
 		reflowCookedTimelines(datamart, cookedTimelinesTanks(definition));
 		reflowRawTimelines(datamart, definition);
 		reflowReels(datamart, reelTanks(definition));
@@ -76,9 +76,9 @@ public class DatamartFactory {
 		return datamart;
 	}
 
-	private void reflowEntities(MasterDatamart datamart, Instant fromTs, Set<String> entityTanks) {
+	private void reflowEntities(MasterDatamart datamart, Set<String> entityTanks) {
 		Logger.debug("Reflowing entities...");
-		reflow(new EntityMounter(datamart), reflowTanks(fromTs, entityTanks));
+		reflow(new EntityMounter(datamart), reflowTanks(entityTanks));
 	}
 
 	private void reflowRawTimelines(MasterDatamart datamart, Datamart definition) {
@@ -88,7 +88,7 @@ public class DatamartFactory {
 
 	private void reflowCookedTimelines(MasterDatamart datamart, Set<String> cookedTimelineTanks) {
 		Logger.debug("Reflowing cooked timelines...");
-		reflow(new TimelineMounter(datamart), reflowTanks(null, cookedTimelineTanks));
+		reflow(new TimelineMounter(datamart), reflowTanks(cookedTimelineTanks));
 	}
 
 	private void reflowReels(MasterDatamart datamart, Set<String> tanks) {
@@ -205,10 +205,9 @@ public class DatamartFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Iterator<Event> reflowTanks(Instant fromTs, Set<String>... tanks) {
+	private Iterator<Event> reflowTanks(Set<String>... tanks) {
 		Set<String> tankNames = new HashSet<>();
 		Arrays.stream(tanks).forEach(tankNames::addAll);
-		if (fromTs != null) return merge(fromTs, tankNames);
 		return EventStream.merge(tanks(tankNames).map(tank -> (Stream<Event>) tank.content())).iterator();
 	}
 
