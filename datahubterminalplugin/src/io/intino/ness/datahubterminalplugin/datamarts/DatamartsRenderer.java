@@ -355,6 +355,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 				.map(entity -> {
 					final FrameBuilder b = new FrameBuilder("entity").add("package", modelPackage);
 					b.add("name", firstUpperCase(entity.name$())).add("fullName", fullNameOf(entity));
+					b.add("datamart", datamart.name$());
 					b.add("attribute", attributeFrames(attributesOf(entity)));
 					if (entity.from() != null) b.add("event", firstUpperCase(entity.from().message().name$()));
 					if (entity.isExtensionOf()) {
@@ -389,7 +390,8 @@ public class DatamartsRenderer implements ConceptRenderer {
 		if (descendants.length == 0) return;
 		b.add("superclass");
 		b.add("descendant", Arrays.stream(descendants).map(e -> new FrameBuilder("descendant").add("entity").add("name", e.name$()).toFrame()).toArray(Frame[]::new));
-		b.add("subclass", framesOfUpperLevelDescendants(entity, datamart));
+		b.add("subclasstop", framesOfNonAbstractTopLevelDescendants(entity, datamart));
+		b.add("subclass", framesOfNonAbstractDescendants(entity, datamart));
 	}
 
 	private Frame[] ancestorsOf(Entity entity) {
@@ -499,8 +501,16 @@ public class DatamartsRenderer implements ConceptRenderer {
 //		return String.join(".", names);
 	}
 
-	private Frame[] framesOfUpperLevelDescendants(Entity parent, Datamart datamart) {
+	private Frame[] framesOfNonAbstractTopLevelDescendants(Entity parent, Datamart datamart) {
 		return Arrays.stream(upperLevelDescendantsOf(parent, datamart))
+				.map(c -> new FrameBuilder("subclasstop")
+						.add("package", modelPackage + ".entities")
+						.add("name", c.name$()).toFrame())
+				.toArray(Frame[]::new);
+	}
+
+	private Frame[] framesOfNonAbstractDescendants(Entity parent, Datamart datamart) {
+		return Arrays.stream(nonAbstractDescendants(parent, datamart))
 				.map(c -> new FrameBuilder("subclass")
 						.add("package", modelPackage + ".entities")
 						.add("name", c.name$()).toFrame())
@@ -509,6 +519,10 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 	private Entity[] descendantsOf(Entity parent, Datamart datamart) {
 		return datamart.entityList(e -> isDescendantOf(e, parent)).toArray(Entity[]::new);
+	}
+
+	private Entity[] nonAbstractDescendants(Entity parent, Datamart datamart) {
+		return datamart.entityList(e -> !e.isAbstract() && isDescendantOf(e, parent)).toArray(Entity[]::new);
 	}
 
 	private Entity[] upperLevelDescendantsOf(Entity parent, Datamart datamart) {

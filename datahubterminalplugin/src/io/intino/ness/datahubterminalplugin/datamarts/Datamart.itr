@@ -238,6 +238,7 @@ def type(datamart & message & impl)
 
 	import java.io.File;
 	import java.util.*;
+	import java.util.function.BiFunction;
 	import java.util.concurrent.atomic.AtomicBoolean;
 	import java.util.stream.Stream;
 	import java.util.stream.Collectors;
@@ -269,6 +270,7 @@ def type(datamart & message & impl)
 		[$hasReels~private boolean hasLocalAccessToReels;]
 		[$hasReels~private final Map<String, ReelNodeImpl> reels = new java.util.concurrent.ConcurrentHashMap<>();]
 		private volatile DictionaryImpl dictionary = new DictionaryImpl();
+		private final Map<Class<?>, BiFunction<EntityDefinition, String, $name+FirstUpperCase~EntityReference>> entityReferenceFactory = createEntityReferenceFactory();
 
     	public $name+FirstUpperCase~DatamartImpl(Connector connector, $terminal~.DatamartsRetryConfig retryConfig) {
     		this.connector = requireNonNull(connector);
@@ -296,7 +298,11 @@ def type(datamart & message & impl)
 		@Override
 		@SuppressWarnings("unchecked")
 		public <T extends Entity> T get(String id) {
-			return (T) entities.get(id);
+			MasterEntity entity = entities.get(id);
+			if(entity == null) return null;
+			EntityDefinition definition = entity.getDefinition();
+			Class<?> javaClass = definition.javaClass();
+			return (T) entityReferenceFactory.getOrDefault(javaClass, (BiFunction<EntityDefinition, String, $name+FirstUpperCase~EntityReference>) ((a,b) -> null)).apply(definition, id);
 		}
 
 		@Override
@@ -534,6 +540,12 @@ def type(datamart & message & impl)
         	};
         }
 
+        Map<Class<?>, BiFunction<EntityDefinition, String, $name+FirstUpperCase~EntityReference>> createEntityReferenceFactory() {
+        	Map<Class<?>, BiFunction<EntityDefinition, String, $name+FirstUpperCase~EntityReference>> map = new HashMap<>();
+        	$entity+referenceFactoryEntry...[$NL]
+        	return map;
+        }
+
 		// WARNING: extremely compacted and ugly code ahead... continue at your own discretion.
 		public static final class $name+FirstUpperCase~DatamartDefinition implements DatamartDefinition {
 
@@ -594,6 +606,10 @@ def type(datamart & message & impl)
 			}
 		}
     }
+end
+
+def type(entity) !type(abstract) trigger(referenceFactoryEntry)
+	map.put($package.entities.$name+FirstUpperCase.class, (definition, id) -> new $package.entities.$name+FirstUpperCase~(() -> entities.get(definition, id)));
 end
 
 def type(entity) trigger(definition)
@@ -726,12 +742,8 @@ def !type(abstract) type(entity) trigger(registerMounter)
 	mounters.computeIfAbsent("$event+firstUpperCase", type -> new ArrayList<>(1)).add(new $package.mounters.$name+FirstUpperCase~Mounter(entities, entityListeners));
 end
 
-def type(subclass) trigger(getAllStream)
+def type(subclasstop) trigger(getAllStream)
 	$name+Plural+firstLowerCase()
-end
-
-def type(subclass) trigger(instantiationConditional)
-	if(javaClass == $package.$name+FirstUpperCase.class) return new $package.$name+FirstUpperCase(() -> entities.get(definition, id));
 end
 
 def type(timeline) trigger(getter)
@@ -784,14 +796,13 @@ def type(abstract) trigger(getter)
 		if(entity == null) return null;
 		EntityDefinition definition = entity.getDefinition();
 		Class<?> javaClass = definition.javaClass();
-		$subclass+instantiationConditional...[$NL]
-		return null;
+		return ($package.entities.$name+FirstUpperCase) entityReferenceFactory.getOrDefault(javaClass, (BiFunction<EntityDefinition, String, $datamart+FirstUpperCase~EntityReference>) ((a,b) -> null)).apply(definition, id);
 	}
 
 	@Override
 	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
 		return Stream.of(
-			$subclass+getAllStream...[,$NL]
+			$subclasstop+getAllStream...[,$NL]
 		).<$package.entities.$name+FirstUpperCase>flatMap(java.util.function.Function.identity());//.distinct();
 	}
 end
@@ -804,15 +815,14 @@ def type(superclass) !type(abstract) trigger(getter)
 		if(entity == null) return null;
 		EntityDefinition definition = entity.getDefinition();
 		Class<?> javaClass = definition.javaClass();
-		$subclass+instantiationConditional...[$NL]
-		return null;
+		return ($package.entities.$name+FirstUpperCase) entityReferenceFactory.getOrDefault(javaClass, (BiFunction<EntityDefinition, String, $datamart+FirstUpperCase~EntityReference>) ((a,b) -> null)).apply(definition, id);
 	}
 
 	@Override
 	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
 		return Stream.of(
 			entities.<$package.entities.$name+FirstUpperCase>stream(definition.$name+firstLowerCase~EntityDefinition).map(Entity::id).map(id -> new $package.entities.$name+FirstUpperCase(() -> entities.get(definition.$name+firstLowerCase~EntityDefinition, id))),
-			$subclass+getAllStream...[,$NL]
+			$subclasstop+getAllStream...[,$NL]
 		).<$package.entities.$name+FirstUpperCase>flatMap(java.util.function.Function.identity());//.distinct();
 	}
 end

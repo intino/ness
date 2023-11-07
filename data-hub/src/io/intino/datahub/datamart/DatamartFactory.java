@@ -67,7 +67,8 @@ public class DatamartFactory {
 	public MasterDatamart reflow(MasterDatamart datamart, Instant fromTs, Datamart definition) throws Exception {
 		FileUtils.deleteDirectory(box.datamartTimelinesDirectory(datamart.name()));
 		FileUtils.deleteDirectory(box.datamartReelsDirectory(datamart.name()));
-		reflowEntitiesAndCookedTimelines(datamart, fromTs, entityTanks(definition), cookedTimelinesTanks(definition));
+		reflowEntities(datamart, fromTs, entityTanks(definition));
+		reflowCookedTimelines(datamart, cookedTimelinesTanks(definition));
 		reflowRawTimelines(datamart, definition);
 		reflowReels(datamart, reelTanks(definition));
 		Logger.debug("Reflow complete");
@@ -75,14 +76,19 @@ public class DatamartFactory {
 		return datamart;
 	}
 
+	private void reflowEntities(MasterDatamart datamart, Instant fromTs, Set<String> entityTanks) {
+		Logger.debug("Reflowing entities...");
+		reflow(new EntityMounter(datamart), entityTanks, reflowTanks(fromTs, entityTanks));
+	}
+
 	private void reflowRawTimelines(MasterDatamart datamart, Datamart definition) {
 		Logger.debug("Reflowing raw timelines...");
 		reflowTimelines(datamart, definition);
 	}
 
-	private void reflowEntitiesAndCookedTimelines(MasterDatamart datamart, Instant fromTs, Set<String> entityTanks, Set<String> cookedTimelineTanks) {
-		Logger.debug("Reflowing entities and cooked timelines...");
-		reflow(new EntityMounter(datamart), new TimelineMounter(datamart), entityTanks, cookedTimelineTanks, reflowTanks(fromTs, entityTanks, cookedTimelineTanks));
+	private void reflowCookedTimelines(MasterDatamart datamart, Set<String> cookedTimelineTanks) {
+		Logger.debug("Reflowing cooked timelines...");
+		reflow(new TimelineMounter(datamart), cookedTimelineTanks, reflowTanks(null, cookedTimelineTanks));
 	}
 
 	private void reflowReels(MasterDatamart datamart, Set<String> tanks) {
@@ -95,13 +101,19 @@ public class DatamartFactory {
 		}
 	}
 
-	private void reflow(EntityMounter entityMounter, TimelineMounter timelineMounter, Set<String> entityTanks, Set<String> cookedTimelineTanks, Iterator<Event> events) {
-		entityTanks = entityTanks.stream().map(this::getTankEventName).collect(Collectors.toSet());
+	private void reflow(TimelineMounter timelineMounter, Set<String> cookedTimelineTanks, Iterator<Event> events) {
 		cookedTimelineTanks = cookedTimelineTanks.stream().map(this::getTankEventName).collect(Collectors.toSet());
 		while (events.hasNext()) {
 			Event event = events.next();
-			if (entityTanks.contains(event.type())) entityMounter.mount(event);
 			if (cookedTimelineTanks.contains(event.type())) timelineMounter.mount(event);
+		}
+	}
+
+	private void reflow(EntityMounter entityMounter, Set<String> entityTanks, Iterator<Event> events) {
+		entityTanks = entityTanks.stream().map(this::getTankEventName).collect(Collectors.toSet());
+		while (events.hasNext()) {
+			Event event = events.next();
+			if (entityTanks.contains(event.type())) entityMounter.mount(event);
 		}
 	}
 
@@ -199,13 +211,7 @@ public class DatamartFactory {
 	private Iterator<Event> reflowTanks(Instant fromTs, Set<String>... tanks) {
 		Set<String> tankNames = new HashSet<>();
 		Arrays.stream(tanks).forEach(tankNames::addAll);
-		if (fromTs != null) {
-			Timetag fromTimetag = Timetag.of(fromTs, Scale.Minute);
-			return EventStream.merge(tanks(tankNames).map(tank -> (Stream<Event>) tank.content((ss, tt) -> tt.isAfter(fromTimetag))))
-					.filter(e -> e.ts().isAfter(fromTs))
-					.iterator();
-		}
-
+		if (fromTs != null) return merge(fromTs, tankNames);
 		return EventStream.merge(tanks(tankNames).map(tank -> (Stream<Event>) tank.content())).iterator();
 	}
 
@@ -214,15 +220,15 @@ public class DatamartFactory {
 		Set<String> tankNames = new HashSet<>(entityTanks);
 		tankNames.addAll(timelineTanks);
 		tankNames.addAll(reelTanks);
-
-		if (fromTs != null) {
-			Timetag fromTimetag = Timetag.of(fromTs, Scale.Minute);
-			return EventStream.merge(tanks(tankNames).map(tank -> (Stream<Event>) tank.content((ss, tt) -> tt.isAfter(fromTimetag))))
-					.filter(e -> e.ts().isAfter(fromTs))
-					.iterator();
-		}
-
+		if (fromTs != null) return merge(fromTs, tankNames);
 		return EventStream.merge(tanks(tankNames).map(tank -> (Stream<Event>) tank.content())).iterator();
+	}
+
+	private Iterator<Event> merge(Instant fromTs, Set<String> tankNames) {
+		Timetag fromTimetag = Timetag.of(fromTs, Scale.Minute);
+		return EventStream.merge(tanks(tankNames).map(tank -> (Stream<Event>) tank.content((ss, tt) -> tt.isAfter(fromTimetag))))
+				.filter(e -> e.ts().isAfter(fromTs))
+				.iterator();
 	}
 
 	private Stream<Datalake.Store.Tank<? extends Event>> tanks(Set<String> tankNames) {

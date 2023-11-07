@@ -22,6 +22,8 @@ def type(entity & base)
 			this.attributes = definition.attributes().stream()
 				.map(a -> new Attribute(a.name(), null))
 				.collect(Collectors.toMap(a -> a.name, a -> a, (a,b) -> b, LinkedHashMap::new));
+			this.attributes.put("id", new Attribute("id", id));
+			this.attributes.put("enabled", new Attribute("enabled", true));
 			this.definition = definition;
 		}
 
