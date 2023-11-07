@@ -199,7 +199,7 @@ def type(datamart & interface)
             	return definition().struct(fullName);
             }
 			private DatamartDefinition definition() {
-				if(definition == null) throw new IllegalStateException("$name+FirstUpperCase~Datamart is not initialized");
+				if (definition == null) throw new IllegalStateException("$name+FirstUpperCase~Datamart is not initialized");
 				return definition;
 			}
 		}
@@ -299,7 +299,7 @@ def type(datamart & message & impl)
 		@SuppressWarnings("unchecked")
 		public <T extends Entity> T get(String id) {
 			MasterEntity entity = entities.get(id);
-			if(entity == null) return null;
+			if (entity == null) return null;
 			EntityDefinition definition = entity.getDefinition();
 			Class<?> javaClass = definition.javaClass();
 			return (T) entityReferenceFactory.getOrDefault(javaClass, (BiFunction<EntityDefinition, String, $name+FirstUpperCase~EntityReference>) ((a,b) -> null)).apply(definition, id);
@@ -312,7 +312,7 @@ def type(datamart & message & impl)
 
 		@Override
 		public void addEntityListener(EntityListener listener) {
-			if(listener == null) throw new NullPointerException("EntityListener cannot be null");
+			if (listener == null) throw new NullPointerException("EntityListener cannot be null");
 			entityListeners.add(listener);
 		}
 
@@ -345,7 +345,7 @@ def type(datamart & message & impl)
 
         @Override
         public synchronized $name+FirstUpperCase~Datamart snapshot(String timetag) {
-        	if(timetag == null) return this;
+        	if (timetag == null) return this;
         	return new $name+FirstUpperCase~DatamartImpl(connector, retryConfig) {
         		@Override
         		protected String snapshotTimetag() {
@@ -377,8 +377,8 @@ def type(datamart & message & impl)
 
     	@Override
         public Dictionary dictionary(String name) {
-        	if(name == null) name = "";
-        	if(dictionary.name.equals(name)) return dictionary;
+        	if (name == null) name = "";
+        	if (dictionary.name.equals(name)) return dictionary;
         	loadDictionaryFromDatahub(name);
         	return dictionary;
         }
@@ -450,7 +450,7 @@ def type(datamart & message & impl)
 		}
 
 		public synchronized void mount(Event event) {
-			if(event == null) return;
+			if (event == null) return;
 			this.ts = event.ts();
 			mountEntities(event);
 			[$hasTimelines~mountTimelines(event);]
@@ -459,11 +459,11 @@ def type(datamart & message & impl)
 		}
 
 		[$hasReels~private void mountReels(Event event) {
-			if(!REEL_EVENTS.contains(event.type())) return;
+			if (!REEL_EVENTS.contains(event.type())) return;
 			String id = sensorParameter(event.ss());
 			String type = event.type();
 			String key = id + ":" + type;
-			if(!reels.containsKey(key)) {
+			if (!reels.containsKey(key)) {
 				ReelNodeImpl node = new ReelNodeImpl(id, type, sourcesOfReel(type), null);
 				reels.put(key, node);
 			}
@@ -471,7 +471,7 @@ def type(datamart & message & impl)
 		}]
 
 		[$hasTimelines~private void mountTimelines(Event event) {
-			if(!TIMELINE_EVENTS.contains(event.type())) return;
+			if (!TIMELINE_EVENTS.contains(event.type())) return;
 			String id = sensorParameter(event.ss());
 			String type = event.type();
 			TimelineNodeImpl node = timelines.computeIfAbsent(id + ":" + type, k -> new TimelineNodeImpl(id, type, sourcesOfTimeline(type), null));
@@ -513,8 +513,8 @@ def type(datamart & message & impl)
         	long timeout = retryConfig.initialTimeoutAmount;
         	for(int i = 0; i < retryConfig.maxAttempts; i++) {
         		javax.jms.Message message = connector.requestResponse(DATAHUB_MESSAGE_TOPIC, request, timeout, retryConfig.timeoutUnit);
-        		if(message != null) return message;
-        		if(i < retryConfig.maxAttempts - 1) Logger.warn("("+(i+1)+") Datahub did not respond after " + timeout + " " + retryConfig.timeoutUnit + " to the request '" + requestName + "'. Trying again...");
+        		if (message != null) return message;
+        		if (i < retryConfig.maxAttempts - 1) Logger.warn("("+(i+1)+") Datahub did not respond after " + timeout + " " + retryConfig.timeoutUnit + " to the request '" + requestName + "'. Trying again...");
         		timeout *= retryConfig.timeoutMultiplier;
         	}
         	throw new DatahubRequestException("Datahub did not respond to the request '" + requestName + "' after " + retryConfig.maxAttempts);
@@ -646,7 +646,7 @@ def type(entity) trigger(declareDefinition)
         	return Collections.synchronizedList(list);
 		}
 		public boolean equals(Object other) {
-			if(other == null || other.getClass() != getClass()) return false;
+			if (other == null || other.getClass() != getClass()) return false;
 			return fullName().equals(((EntityDefinition)other).fullName());
 		}
 		public int hashCode() {return fullName().hashCode();}
@@ -670,7 +670,7 @@ def type(struct) trigger(declareDefinition)
         	return Collections.synchronizedList(list);
 		}
 		public boolean equals(Object other) {
-        	if(other == null || other.getClass() != getClass()) return false;
+        	if (other == null || other.getClass() != getClass()) return false;
         	return fullName().equals(((StructDefinition)other).fullName());
         }
         public int hashCode() {return fullName().hashCode();}
@@ -749,7 +749,7 @@ end
 def type(timeline) trigger(getter)
 	@Override
 	public TimelineNode $name+FirstLowerCase~Timeline(String id) {
-		if(hasLocalAccessToTimelines) return timelines.containsKey(id.replace(":", "-")) ? timelines.get(id.replace(":", "-")) : TimelineNode.empty();
+		if (hasLocalAccessToTimelines) return timelines.containsKey(id.replace(":", "-") + ":$name") ? timelines.get(id.replace(":", "-") + ":$name") : TimelineNode.empty();
 		return timelines.computeIfAbsent(id.replace(":", "-") + ":$name", theId -> new TimelineNodeImpl(id, "$name", Set.of($sources)));
 	}
 end
@@ -757,7 +757,7 @@ end
 def type(reel) trigger(getter)
 	@Override
 	public ReelNode $name+FirstLowerCase~Reel(String id) {
-		if(hasLocalAccessToReels) return reels.containsKey(id.replace(":", "-") + ":$name") ? reels.get(id.replace(":", "-") + ":$name") : ReelNode.empty();
+		if (hasLocalAccessToReels) return reels.containsKey(id.replace(":", "-") + ":$name") ? reels.get(id.replace(":", "-") + ":$name") : ReelNode.empty();
 		return reels.computeIfAbsent(id.replace(":", "-") + ":$name", theId -> new ReelNodeImpl(id, "$name", Set.of($sources)));
 	}
 
@@ -791,9 +791,9 @@ end
 def type(abstract) trigger(getter)
 	@Override
 	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
-		if(id == null) return null;
+		if (id == null) return null;
 		var entity = entities.getDescendant(definition.$name+firstLowerCase~EntityDefinition, id);
-		if(entity == null) return null;
+		if (entity == null) return null;
 		EntityDefinition definition = entity.getDefinition();
 		Class<?> javaClass = definition.javaClass();
 		return ($package.entities.$name+FirstUpperCase) entityReferenceFactory.getOrDefault(javaClass, (BiFunction<EntityDefinition, String, $datamart+FirstUpperCase~EntityReference>) ((a,b) -> null)).apply(definition, id);
@@ -810,9 +810,9 @@ end
 def type(superclass) !type(abstract) trigger(getter)
 	@Override
 	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
-		if(id == null) return null;
+		if (id == null) return null;
 		var entity = entities.getDescendant(definition.$name+firstLowerCase~EntityDefinition, id);
-		if(entity == null) return null;
+		if (entity == null) return null;
 		EntityDefinition definition = entity.getDefinition();
 		Class<?> javaClass = definition.javaClass();
 		return ($package.entities.$name+FirstUpperCase) entityReferenceFactory.getOrDefault(javaClass, (BiFunction<EntityDefinition, String, $datamart+FirstUpperCase~EntityReference>) ((a,b) -> null)).apply(definition, id);
@@ -865,14 +865,14 @@ def trigger(loadTimelinesFromDatahubMethod)
 		Logger.debug("Downloading timelines...");
 		Boolean hasLocalAccessToTimelines = null;
         for(String filename : listTimelineFiles()) {
-        	if(filename == null || filename.isBlank()) continue;
+        	if (filename == null || filename.isBlank()) continue;
         	try {
                	File file = new File(filename);
                	String id = file.getName().replace(".timeline", "");
                	String type = file.getParentFile().getName();
                	TimelineNodeImpl node = new TimelineNodeImpl(id, type, sourcesOfTimeline(type), file.exists() ? file : null);
                	timelines.put(id + ":" + type, node);
-               	if(hasLocalAccessToTimelines == null) hasLocalAccessToTimelines = file.exists();
+               	if (hasLocalAccessToTimelines == null) hasLocalAccessToTimelines = file.exists();
                	else hasLocalAccessToTimelines &= file.exists();
             } catch (Exception e) {
                	Logger.debug("Could not load timeline " + filename + " -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
@@ -901,14 +901,14 @@ def trigger(loadReelsFromDatahubMethod)
 		Logger.debug("Downloading reels...");
 		Boolean hasLocalAccessToReels = null;
     	for(String filename : listReelFiles()) {
-    		if(filename == null || filename.isBlank()) continue;
+    		if (filename == null || filename.isBlank()) continue;
     		try {
     	    	File file = new File(filename);
     	    	String id = file.getName().replace(".reel", "");
     	    	String type = file.getParentFile().getName();
     	    	ReelNodeImpl node = new ReelNodeImpl(id, type, sourcesOfReel(type), file.exists() ? file : null);
     	    	reels.put(id + ":" + type, node);
-    	    	if(hasLocalAccessToReels == null) hasLocalAccessToReels = file.exists();
+    	    	if (hasLocalAccessToReels == null) hasLocalAccessToReels = file.exists();
                 else hasLocalAccessToReels &= file.exists();
     	    } catch (Exception e) {
     	    	Logger.debug("Could not load reel " + filename + " -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
