@@ -127,12 +127,10 @@ public class TimelineCookedMounter {
 		});
 	}
 
-
 	private void fillMeasurements(TimelineStore tlFile, MeasurementsVector vector, MessageEvent event, TimeSeries ts) throws IOException {
-		MeasurementsVector measurements = new MeasurementsVector(tlFile.sensorModel());
 		if (ts.isCount())
-			processCount(measurements, ts.asCount(), lastValue(tlFile, ts), operationOf(ts.asCount().operationList(), event.type()));
-		else if (ts.isTimeShift()) processTimeShift(measurements, ts.asTimeShift(), event);
+			processCount(vector, ts.asCount(), lastValue(tlFile, ts), operationOf(ts.asCount().operationList(), event.type()));
+		else if (ts.isTimeShift()) processTimeShift(vector, ts.asTimeShift(), event);
 	}
 
 	private Operation operationOf(List<Operation> operations, String type) {
