@@ -34,7 +34,6 @@ import static io.intino.datahub.datamart.MasterDatamart.ChronosDirectory.normali
 import static io.intino.datahub.datamart.mounters.TimelineUtils.copyOf;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.stream.Collectors.toMap;
 
@@ -178,7 +177,7 @@ public class TimelineCookedMounter {
 		File file = new File(directory, normalizePath(timeline.name$() + File.separator + entity + TIMELINE_EXTENSION));
 		file.getParentFile().mkdirs();
 		return TimelineStore.createIfNotExists(entity, file)
-				.withTimeModel(start, new Period(1, MILLIS))
+				.withTimeModel(start, new Period(1, SECONDS))
 				.withSensorModel(sensorModel(timeline))
 				.build();
 	}
