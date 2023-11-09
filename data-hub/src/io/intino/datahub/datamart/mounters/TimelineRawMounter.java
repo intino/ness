@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static io.intino.datahub.datamart.mounters.TimelineUtils.*;
@@ -37,6 +37,10 @@ public class TimelineRawMounter {
 		} catch (Exception e) {
 			Logger.error("Could not mount event " + event.type() + ", ss = " + event.ss() + ": " + e.getMessage(), e);
 		}
+	}
+
+	public List<String> destinationsOf(MeasurementEvent event) {
+		return List.of(event.type() + "\0" + sourceSensor(event));
 	}
 
 	private TimelineStore getOrCreateTimelineStore(MeasurementEvent event, String sensor) throws IOException {
@@ -63,18 +67,6 @@ public class TimelineRawMounter {
 			sessionFile.delete();
 			throw e;
 		}
-	}
-
-	private static double[] measurementsOf(MeasurementEvent event, TimelineStore tlStore) {
-		TimelineStore.SensorModel sensorModel = tlStore.sensorModel();
-		double[] measurements = new double[sensorModel.size()];
-		Arrays.fill(measurements, Double.NaN);
-		for (int i = 0; i < event.magnitudes().length; i++) {
-			int index = sensorModel.indexOf(name(event, i));
-			double value = index >= 0 ? event.values()[i] : Double.NaN;
-			measurements[index] = value;
-		}
-		return measurements;
 	}
 
 	private static void checkTs(Instant ts, TimelineWriter writer) throws IOException {

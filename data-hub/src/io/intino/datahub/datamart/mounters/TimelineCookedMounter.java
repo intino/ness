@@ -66,6 +66,15 @@ public class TimelineCookedMounter {
 		}
 	}
 
+	public List<String> destinationsOf(MessageEvent event) {
+		return datamart.definition().timelineList().stream()
+				.filter(Timeline::isCooked)
+				.map(Timeline::asCooked)
+				.filter(t -> timelineTypes.getOrDefault(t.name$(), Set.of()).contains(event.type()))
+				.map(t -> t.name$() + "\0" + entityOf(event, t))
+				.toList();
+	}
+
 	private TimelineStore getOrCreateTimelineStore(MessageEvent event, Cooked timelineDef) throws IOException {
 		String entityId = entityOf(event, timelineDef);
 		if (entityId == null) return null;
