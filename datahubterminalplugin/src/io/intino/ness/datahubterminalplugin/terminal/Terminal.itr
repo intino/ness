@@ -319,7 +319,7 @@ end
 def type(datamart) trigger(addDatamartSubscribers)
 	private void addDatamartSubscribers(String sourceSelector) {
 		addDatamartEventSubscribers(sourceSelector,  ts -> ts.isAfter(datamart.ts()));
-		if (!datamart.isLocal()) //TODO
+		if (datamart.requiresDatahubNotifications())
 			connector.attachListener("service.ness.datamarts.notifications", null, (m, c) -> new Thread(() -> manageDatamartNotification(m)).start());
 		connector.attachListener("service.ness.datamarts", null, (m, c) -> new Thread(() -> manageDatamartMessage(m)).start());
 	}
@@ -333,10 +333,7 @@ def type(datamart) trigger(addDatamartSubscribers)
 	private final Object monitor = new Object();
 
 	private synchronized void manageDatamartNotification(String message) {
-		Arrays.stream(message.split("\n")).forEach(n -> {
-			String$[] typeAndSs = n.split("\0");
-			//TODO
-		});
+		java.util.Arrays.stream(message.split("$dhNotificationsSep")).forEach(datamart::handleDatahubNotification);
 	}
 
 	private synchronized void manageDatamartMessage(String message) {

@@ -120,10 +120,10 @@ def type(datamart & interface)
 			Instant last() throws TimelineNotAvailableException;
         	io.intino.sumus.chronos.Timeline get() throws TimelineNotAvailableException;
 
-        	void setEventListener(EventListener listener);
+        	void setChangeListener(ChangeListener listener);
 
-     		interface EventListener {
-        		void onEventReceived(TimelineNode node, io.intino.alexandria.event.Event event);
+     		interface ChangeListener {
+        		void notifyChange(TimelineNode timeline);
         	}
 
         	static TimelineNode empty() {
@@ -137,7 +137,7 @@ def type(datamart & interface)
                 	public Instant first() throws TimelineNotAvailableException {throw new TimelineNotAvailableException();}
                 	public Instant last() throws TimelineNotAvailableException {throw new TimelineNotAvailableException();}
                 	public io.intino.sumus.chronos.Timeline get() throws TimelineNotAvailableException {throw new TimelineNotAvailableException();}
-                	public void setEventListener(EventListener listener) {}
+                	public void setChangeListener(ChangeListener listener) {}
         		};
         	}
         }
@@ -154,10 +154,10 @@ def type(datamart & interface)
             List<io.intino.sumus.chronos.Shot> lastShots(io.intino.sumus.chronos.Group group) throws ReelNotAvailableException;
         	io.intino.sumus.chronos.Reel get(io.intino.sumus.chronos.Period period) throws ReelNotAvailableException;
         	io.intino.sumus.chronos.Reel get(java.time.Instant from, java.time.Instant to, io.intino.sumus.chronos.Period period) throws ReelNotAvailableException;
-        	void setEventListener(EventListener listener);
+        	void setChangeListener(ChangeListener listener);
 
-     		interface EventListener {
-        		void onEventReceived(ReelNode node, io.intino.alexandria.event.Event event);
+     		interface ChangeListener {
+        		void notifyChange(ReelNode reel);
         	}
 
         	static ReelNode empty() {
@@ -175,7 +175,7 @@ def type(datamart & interface)
 					public List<io.intino.sumus.chronos.Shot> lastShots(io.intino.sumus.chronos.Group group) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
                 	public io.intino.sumus.chronos.Reel get(io.intino.sumus.chronos.Period period) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
                 	public io.intino.sumus.chronos.Reel get(java.time.Instant from, java.time.Instant to, io.intino.sumus.chronos.Period period) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
-                	public void setEventListener(EventListener listener) {}
+                	public void setChangeListener(ChangeListener listener) {}
         		};
         	}
         }
@@ -287,6 +287,13 @@ def type(datamart & message & impl)
 				throw new ExceptionInInitializerError("$name+FirstUpperCase~Datamart failed to start because a " + e.getClass().getName() + " occurred: " + e.getMessage());
 			}
 			return this;
+		}
+
+		public boolean requiresDatahubNotifications() {
+			boolean flag = false;
+			[$hasTimelines~flag |= !hasLocalAccessToTimelines;]
+			[$hasReels~flag |= !hasLocalAccessToReels;]
+			return flag;
 		}
 
 		@Override
@@ -445,52 +452,45 @@ def type(datamart & message & impl)
 		}
 
 		public synchronized void mount(Event event) {
-			if (event == null) return;
-			this.ts = event.ts();
-			mountEntities(event);
-			[$hasTimelines~mountTimelines(event);]
-			[$hasReels~mountReels(event);]
-			// TODO: update dictionary when resource event arrives
+			try {
+				if (event == null) return;
+            	this.ts = event.ts();
+            	mountEntities(event);
+            	// TODO: update dictionary when resource event arrives
+			} catch(Throwable e) {
+				Logger.error("Error while mounting event ss=" + event.ss() + ", ts=" + event.ts() + " -> " + e.getMessage(), e);
+			}
 		}
 
-		[$hasReels~private void mountReels(Event event) {
-			if (!REEL_EVENTS.contains(event.type())) return;
-			String id = sensorParameter(event.ss());
-			String type = event.type();
+		public synchronized void handleDatahubNotification(String notification) {
+			try {
+				if(notification == null || notification.isBlank()) return;
+				String$[$] typeAndSs = notification.split("\\0");
+        		[$hasTimelines~handleTimelineNotification(typeAndSs$[0$], typeAndSs$[1$]);]
+        		[$hasReels~handleReelNotification(typeAndSs$[0$], typeAndSs$[1$]);]
+			} catch(Throwable e) {
+				Logger.error("Error while processing datahub notification " + notification + ": " + e.getMessage(), e);
+			}
+		}
+
+		[$hasReels~private void handleReelNotification(String type, String id) {
+			if (!REEL_EVENTS.contains(type)) return;
 			String key = id + ":" + type;
-			if (!reels.containsKey(key)) {
-				ReelNodeImpl node = new ReelNodeImpl(id, type, sourcesOfReel(type), null);
-				reels.put(key, node);
-			}
-			reels.values().forEach(reel -> reel.notifyEvent(event));
+			ReelNodeImpl reel = reels.computeIfAbsent(id + ":" + type, k -> new ReelNodeImpl(id, type, null));
+			reel.notifyChange();
 		}]
 
-		[$hasTimelines~private void mountTimelines(Event event) {
-			if (!TIMELINE_EVENTS.contains(event.type())) return;
-			String id = sensorParameter(event.ss());
-			String type = event.type();
-			TimelineNodeImpl node = timelines.computeIfAbsent(id + ":" + type, k -> new TimelineNodeImpl(id, type, sourcesOfTimeline(type), null));
-			node.notifyEvent(event);
+		[$hasTimelines~private void handleTimelineNotification(String type, String id) {
+			if (!TIMELINE_EVENTS.contains(type)) return;
+			TimelineNodeImpl timeline = timelines.computeIfAbsent(id + ":" + type, k -> new TimelineNodeImpl(id, type, null));
+			timeline.notifyChange();
 		}]
-
-		private static String sensorParameter(String ss) {
-			if (ss.contains("?")) {
-				try {
-					Map<String, String> map = Arrays.stream(ss.substring(ss.indexOf("?") + 1).split(";"))
-							.map(p -> p.split("="))
-							.collect(Collectors.toMap(f -> f$[0], f -> f$[1]));
-					if (map.containsKey("sensor")) return map.get("sensor");
-					else ss.substring(0, ss.indexOf("?"));
-				} catch (Exception e) {
-					Logger.error(e);
-				}
-			}
-			return ss;
-		}
 
 		private void mountEntities(Event event) {
 			try {
-				java.util.Optional.ofNullable(this.mounters.get(event.type())).ifPresent(mounters -> mounters.forEach(mounter -> mounter.mount(event)));
+				List<$name+FirstUpperCase~Mounter> mounters = this.mounters.get(event.type());
+				if(mounters == null) return;
+				mounters.forEach(mounter -> mounter.mount(event));
 			} catch (Exception e) {
 				Logger.error("Failed to mount event of type " + event.type() + ": " + e.getMessage(), e);
 			}
@@ -735,7 +735,7 @@ def type(timeline) trigger(getter)
 	@Override
 	public TimelineNode $name+FirstLowerCase~Timeline(String id) {
 		if (hasLocalAccessToTimelines) return timelines.containsKey(id.replace(":", "-") + ":$name") ? timelines.get(id.replace(":", "-") + ":$name") : TimelineNode.empty();
-		return timelines.computeIfAbsent(id.replace(":", "-") + ":$name", theId -> new TimelineNodeImpl(id, "$name", Set.of($sources)));
+		return timelines.computeIfAbsent(id.replace(":", "-") + ":$name", theId -> new TimelineNodeImpl(id, "$name"));
 	}
 end
 
@@ -743,7 +743,7 @@ def type(reel) trigger(getter)
 	@Override
 	public ReelNode $name+FirstLowerCase~Reel(String id) {
 		if (hasLocalAccessToReels) return reels.containsKey(id.replace(":", "-") + ":$name") ? reels.get(id.replace(":", "-") + ":$name") : ReelNode.empty();
-		return reels.computeIfAbsent(id.replace(":", "-") + ":$name", theId -> new ReelNodeImpl(id, "$name", Set.of($sources)));
+		return reels.computeIfAbsent(id.replace(":", "-") + ":$name", theId -> new ReelNodeImpl(id, "$name"));
 	}
 
 	@Override
@@ -842,7 +842,7 @@ def trigger(loadTimelinesFromDatahubMethod)
                	File file = new File(filename);
                	String id = file.getName().replace(".timeline", "");
                	String type = file.getParentFile().getName();
-               	TimelineNodeImpl node = new TimelineNodeImpl(id, type, sourcesOfTimeline(type), file.exists() ? file : null);
+               	TimelineNodeImpl node = new TimelineNodeImpl(id, type, file.exists() ? file : null);
                	timelines.put(id + ":" + type, node);
                	if (hasLocalAccessToTimelines == null) hasLocalAccessToTimelines = file.exists();
                	else hasLocalAccessToTimelines &= file.exists();
@@ -878,7 +878,7 @@ def trigger(loadReelsFromDatahubMethod)
     	    	File file = new File(filename);
     	    	String id = file.getName().replace(".reel", "");
     	    	String type = file.getParentFile().getName();
-    	    	ReelNodeImpl node = new ReelNodeImpl(id, type, sourcesOfReel(type), file.exists() ? file : null);
+    	    	ReelNodeImpl node = new ReelNodeImpl(id, type, file.exists() ? file : null);
     	    	reels.put(id + ":" + type, node);
     	    	if (hasLocalAccessToReels == null) hasLocalAccessToReels = file.exists();
                 else hasLocalAccessToReels &= file.exists();
