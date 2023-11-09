@@ -126,21 +126,10 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 	private void renderEntityBase(Datamart datamart, Map<String, String> outputs) {
 		outputs.put(entityDestination(entityBaseName(datamart)), templates.entityBase.render(entityBaseBuilder(datamart)));
-		outputs.put(entityDestination(entityBaseReferenceName(datamart)), templates.entityBase.render(entityBaseReferenceBuilder(datamart)));
-	}
-
-	private String entityBaseReferenceName(Datamart datamart) {
-		return modelPackage + "." + javaValidName().format(firstUpperCase(datamart.name$()) + "EntityReference").toString();
 	}
 
 	private String entityBaseName(Datamart datamart) {
 		return modelPackage + "." + javaValidName().format(firstUpperCase(datamart.name$()) + "Entity").toString();
-	}
-
-	private FrameBuilder entityBaseReferenceBuilder(Datamart datamart) {
-		return new FrameBuilder("entityBaseReference")
-				.add("package", modelPackage)
-				.add("datamart", datamart.name$());
 	}
 
 	private FrameBuilder entityBaseBuilder(Datamart datamart) {

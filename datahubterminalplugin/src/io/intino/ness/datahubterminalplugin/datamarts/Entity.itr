@@ -3,10 +3,7 @@ def type(entity & class)
 
 	import io.intino.ness.master.model.*;
 	import io.intino.ness.master.reflection.*;
-	import $package.$datamart+FirstUpperCase~Entity;
-	import $package.$datamart+FirstUpperCase~EntityReference;
 
-	import java.util.function.Supplier;
 	import java.time.*;
 	import java.util.*;
 	import java.util.stream.*;
@@ -19,8 +16,8 @@ def type(entity & class)
 
 		[$attribute+wordDeclaration...[$NL]]
 
-		public $abstract~$name+FirstUpperCase(Supplier<$datamart+FirstUpperCase~Entity> entity) {
-			super(entity);
+		public $abstract~$name+FirstUpperCase(String id, $datamart+FirstUpperCase~Datamart datamart) {
+			$parent+super
 		}
 
 		@Override
@@ -34,6 +31,12 @@ def type(entity & class)
 
 		[$expression+expressionDeclaration...[$NL$NL]]
 
+		@Override
+		protected Collection<Attribute> initDeclaredAttributes() {
+			Collection<Attribute> attributes = super.initDeclaredAttributes();
+			[$attribute+initAttribute...[$NL]]
+			return attributes;
+		}
     	[$struct+struct...[$NL$NL]]
     }
 end
