@@ -260,7 +260,6 @@ def type(datamart & message & impl)
 
 		private final Connector connector;
 		private final $terminal~.DatamartsRetryConfig retryConfig;
-		private final AtomicBoolean initialized = new AtomicBoolean(false);
 		private final List<EntityListener> entityListeners = new ArrayList<>();
 		private final Map<String, List<MasterMounter>> mounters = new HashMap<>();
 		private final $name+FirstUpperCase~Datamart.Entities entities;
@@ -280,7 +279,6 @@ def type(datamart & message & impl)
 
 		public synchronized $name+FirstUpperCase~DatamartImpl init(String datamartSourceSelector) {
 			try {
-				if (!initialized.compareAndSet(false, true)) return this;
 				downloadDatamartFromDatahub(datamartSourceSelector);
 				Logger.info("$name+FirstUpperCase~Datamart (" + (snapshotTimetag().isEmpty() ? "" : "snapshot " + snapshotTimetag() + ", ")  + connector.clientId() + ") initialized successfully.");
 			} catch (Exception e) {
