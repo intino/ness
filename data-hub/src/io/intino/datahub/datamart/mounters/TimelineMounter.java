@@ -29,6 +29,7 @@ import static io.intino.datahub.datamart.mounters.TimelineUtils.types;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Arrays.stream;
+import static java.util.Collections.emptyList;
 
 public class TimelineMounter extends MasterDatamartMounter {
 	private final TimelineRawMounter rawMounter;
@@ -61,7 +62,15 @@ public class TimelineMounter extends MasterDatamartMounter {
 		if (message == null) return;
 		if (isAssertion(message)) assertionMounter.mount(new MessageEvent(message));
 		else if (isCooked(message)) cookedMounter.mount(new MessageEvent(message));
-		else if (hasValues(message)) rawMounter.mount((measurementEvent(message)));
+		else if (hasValues(message)) rawMounter.mount(measurementEvent(message));
+	}
+
+	@Override
+	public List<String> destinationsOf(Message message) {
+		if (message == null || isAssertion(message)) return emptyList();
+		else if (isCooked(message)) return cookedMounter.destinationsOf(new MessageEvent(message));
+		else if (hasValues(message)) return rawMounter.destinationsOf(measurementEvent(message));
+		return emptyList();
 	}
 
 
@@ -150,7 +159,7 @@ public class TimelineMounter extends MasterDatamartMounter {
 			try {
 				TimelineStore store = timelineFactory.create(ts);
 				writer = store.writer();
-				sessionFile = ((FileTimelineStore)store).file();
+				sessionFile = ((FileTimelineStore) store).file();
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

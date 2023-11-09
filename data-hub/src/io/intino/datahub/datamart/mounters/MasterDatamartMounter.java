@@ -4,6 +4,8 @@ import io.intino.alexandria.message.Message;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
 
+import java.util.List;
+
 public abstract class MasterDatamartMounter {
 
 	protected final MasterDatamart datamart;
@@ -19,4 +21,8 @@ public abstract class MasterDatamartMounter {
 	public abstract void mount(io.intino.alexandria.event.Event event);
 
 	public abstract void mount(Message message);
+
+	public abstract List<String> destinationsOf(Message message);
+
+
 }

@@ -62,6 +62,7 @@ class TerminalRenderer {
 		if (terminal.datamarts() != null) {
 			renderDatamarts(builder);
 			addSubscribeForTheEvents(builder);
+			builder.add("dhNotificationsSep", "\n");
 		}
 
 		if (!messageTanks.isEmpty()) builder.add("message", messageFrames());
@@ -147,32 +148,8 @@ class TerminalRenderer {
 	}
 
 	private FrameBuilder[] eventsOf(Datamart datamart) {
-		Map<String, FrameBuilder> events = new HashMap<>();
-		events.putAll(entityEventsOf(datamart));
-		events.putAll(timelineEventsOf(datamart));
-		events.putAll(reelEventsOf(datamart));
+		Map<String, FrameBuilder> events = new HashMap<>(entityEventsOf(datamart));
 		return events.values().toArray(FrameBuilder[]::new);
-	}
-
-	private Map<String, FrameBuilder> reelEventsOf(Datamart datamart) {
-		return datamart.reelList().stream()
-				.map(s -> s.tank().message())
-				.filter(Objects::nonNull)
-				.distinct()
-				.collect(toMap(Layer::name$, tank -> frameOf(tank, datamart)));
-	}
-
-	private Map<String, FrameBuilder> timelineEventsOf(Datamart datamart) {
-		return datamart.timelineList().stream()
-				.flatMap(TimelineUtils::tanksOf)
-				.distinct()
-				.map(this::findTankByQn)
-				.filter(Objects::nonNull)
-				.collect(toMap(Layer::name$, tank -> frameOf(tank, datamart)));
-	}
-
-	private FrameBuilder frameOf(Tank tank, Datamart datamart) {
-		return tank.isMessage() ? frameOf(tank.asMessage().message(), datamart) : frameOf(tank.asMeasurement().sensor(), datamart);
 	}
 
 	private Map<String, FrameBuilder> entityEventsOf(Datamart datamart) {
@@ -182,13 +159,6 @@ class TerminalRenderer {
 				.map(Tank.Message::message)
 				.distinct()
 				.collect(toMap(Layer::name$, tank -> frameOf(tank, datamart)));
-	}
-
-	private FrameBuilder frameOf(Sensor sensor, Datamart datamart) {
-		return new FrameBuilder("devent")
-				.add("message", sensor.name$())
-				.add("namespaceQn", namespace(sensor).replace(".", ""))
-				.add("datamart", datamart.name$());
 	}
 
 	private FrameBuilder frameOf(Message message, Datamart datamart) {

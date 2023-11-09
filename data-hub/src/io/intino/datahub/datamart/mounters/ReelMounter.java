@@ -51,6 +51,11 @@ public class ReelMounter extends MasterDatamartMounter {
 		}
 	}
 
+	@Override
+	public List<String> destinationsOf(Message message) {
+		return List.of(message.type() + "\0" + subject(new MessageEvent(message)));
+	}
+
 	String subject(MessageEvent event) {
 		Datamart datamart = this.datamart.definition();
 		Reel reel = datamart.reel(r -> r.tank().message().name$().equals(event.type()));

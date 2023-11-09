@@ -63,17 +63,17 @@ def type(datamart & interface)
         		return mapOf(id).map(map -> map.get(id)).orElse(null);
         	}
 
-        	public $name+FirstUpperCase~Entity getDescendant(EntityDefinition definition, String id) {
-        		$name+FirstUpperCase~Entity entity = get(definition, id);
-        		return entity != null ? entity : definition.descendants().stream()
+        	public <T extends $name+FirstUpperCase~Entity> T getDescendant(EntityDefinition definition, String id) {
+        		T entity = get(definition, id);
+        		return entity != null ? entity: definition.descendants().stream()
         			.filter(descendant -> !descendant.isAbstract())
-        			.map(descendant -> get(descendant, id))
+        			.map(descendant -> this.<T>get(descendant, id))
         			.filter(java.util.Objects::nonNull).findFirst().orElse(null);
         	}
 
 			@SuppressWarnings("unchecked")
-        	public $name+FirstUpperCase~Entity get(EntityDefinition type, String id) {
-        		return entitiesByType.containsKey(type) ? entitiesByType.get(type).get(id) : null;
+        	public <T extends $name+FirstUpperCase~Entity> T get(EntityDefinition type, String id) {
+        		return entitiesByType.containsKey(type) ? (T) entitiesByType.get(type).get(id) : null;
             }
 
         	public void add($name+FirstUpperCase~Entity entity) {
@@ -88,8 +88,9 @@ def type(datamart & interface)
         		return entitiesByType.values().stream().flatMap(map -> map.values().stream());
         	}
 
-        	public Stream<$name+FirstUpperCase~Entity> stream(EntityDefinition type) {
-        		return entitiesByType.containsKey(type) ? entitiesByType.get(type).values().stream() : Stream.empty();
+			@SuppressWarnings("unchecked")
+        	public <T extends $name+FirstUpperCase~Entity> Stream<T> stream(EntityDefinition type) {
+        		return (Stream<T>) (entitiesByType.containsKey(type) ? entitiesByType.get(type).values().stream() : Stream.empty());
         	}
 
         	public Stream<Entity> streamGeneric() {
@@ -119,10 +120,10 @@ def type(datamart & interface)
 			Instant last() throws TimelineNotAvailableException;
         	io.intino.sumus.chronos.Timeline get() throws TimelineNotAvailableException;
 
-        	void setEventListener(EventListener listener);
+        	void setChangeListener(ChangeListener listener);
 
-     		interface EventListener {
-        		void onEventReceived(TimelineNode node, io.intino.alexandria.event.Event event);
+     		interface ChangeListener {
+        		void notifyChange(TimelineNode timeline);
         	}
 
         	static TimelineNode empty() {
@@ -136,7 +137,7 @@ def type(datamart & interface)
                 	public Instant first() throws TimelineNotAvailableException {throw new TimelineNotAvailableException();}
                 	public Instant last() throws TimelineNotAvailableException {throw new TimelineNotAvailableException();}
                 	public io.intino.sumus.chronos.Timeline get() throws TimelineNotAvailableException {throw new TimelineNotAvailableException();}
-                	public void setEventListener(EventListener listener) {}
+                	public void setChangeListener(ChangeListener listener) {}
         		};
         	}
         }
@@ -153,10 +154,10 @@ def type(datamart & interface)
             List<io.intino.sumus.chronos.Shot> lastShots(io.intino.sumus.chronos.Group group) throws ReelNotAvailableException;
         	io.intino.sumus.chronos.Reel get(io.intino.sumus.chronos.Period period) throws ReelNotAvailableException;
         	io.intino.sumus.chronos.Reel get(java.time.Instant from, java.time.Instant to, io.intino.sumus.chronos.Period period) throws ReelNotAvailableException;
-        	void setEventListener(EventListener listener);
+        	void setChangeListener(ChangeListener listener);
 
-     		interface EventListener {
-        		void onEventReceived(ReelNode node, io.intino.alexandria.event.Event event);
+     		interface ChangeListener {
+        		void notifyChange(ReelNode reel);
         	}
 
         	static ReelNode empty() {
@@ -174,7 +175,7 @@ def type(datamart & interface)
 					public List<io.intino.sumus.chronos.Shot> lastShots(io.intino.sumus.chronos.Group group) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
                 	public io.intino.sumus.chronos.Reel get(io.intino.sumus.chronos.Period period) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
                 	public io.intino.sumus.chronos.Reel get(java.time.Instant from, java.time.Instant to, io.intino.sumus.chronos.Period period) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
-                	public void setEventListener(EventListener listener) {}
+                	public void setChangeListener(ChangeListener listener) {}
         		};
         	}
         }
@@ -238,7 +239,6 @@ def type(datamart & message & impl)
 
 	import java.io.File;
 	import java.util.*;
-	import java.util.function.BiFunction;
 	import java.util.concurrent.atomic.AtomicBoolean;
 	import java.util.stream.Stream;
 	import java.util.stream.Collectors;
@@ -260,7 +260,6 @@ def type(datamart & message & impl)
 
 		private final Connector connector;
 		private final $terminal~.DatamartsRetryConfig retryConfig;
-		private final AtomicBoolean initialized = new AtomicBoolean(false);
 		private final List<EntityListener> entityListeners = new ArrayList<>();
 		private final Map<String, List<MasterMounter>> mounters = new HashMap<>();
 		private final $name+FirstUpperCase~Datamart.Entities entities;
@@ -270,7 +269,6 @@ def type(datamart & message & impl)
 		[$hasReels~private boolean hasLocalAccessToReels;]
 		[$hasReels~private final Map<String, ReelNodeImpl> reels = new java.util.concurrent.ConcurrentHashMap<>();]
 		private volatile DictionaryImpl dictionary = new DictionaryImpl();
-		private final Map<Class<?>, BiFunction<EntityDefinition, String, $name+FirstUpperCase~EntityReference>> entityReferenceFactory = createEntityReferenceFactory();
 
     	public $name+FirstUpperCase~DatamartImpl(Connector connector, $terminal~.DatamartsRetryConfig retryConfig) {
     		this.connector = requireNonNull(connector);
@@ -281,13 +279,19 @@ def type(datamart & message & impl)
 
 		public synchronized $name+FirstUpperCase~DatamartImpl init(String datamartSourceSelector) {
 			try {
-				if (!initialized.compareAndSet(false, true)) return this;
 				downloadDatamartFromDatahub(datamartSourceSelector);
 				Logger.info("$name+FirstUpperCase~Datamart (" + (snapshotTimetag().isEmpty() ? "" : "snapshot " + snapshotTimetag() + ", ")  + connector.clientId() + ") initialized successfully.");
 			} catch (Exception e) {
 				throw new ExceptionInInitializerError("$name+FirstUpperCase~Datamart failed to start because a " + e.getClass().getName() + " occurred: " + e.getMessage());
 			}
 			return this;
+		}
+
+		public boolean requiresDatahubNotifications() {
+			boolean flag = false;
+			[$hasTimelines~flag |= !hasLocalAccessToTimelines;]
+			[$hasReels~flag |= !hasLocalAccessToReels;]
+			return flag;
 		}
 
 		@Override
@@ -298,11 +302,7 @@ def type(datamart & message & impl)
 		@Override
 		@SuppressWarnings("unchecked")
 		public <T extends Entity> T get(String id) {
-			MasterEntity entity = entities.get(id);
-			if (entity == null) return null;
-			EntityDefinition definition = entity.getDefinition();
-			Class<?> javaClass = definition.javaClass();
-			return (T) entityReferenceFactory.getOrDefault(javaClass, (BiFunction<EntityDefinition, String, $name+FirstUpperCase~EntityReference>) ((a,b) -> null)).apply(definition, id);
+			return (T) entities.get(id);
 		}
 
 		@Override
@@ -450,52 +450,45 @@ def type(datamart & message & impl)
 		}
 
 		public synchronized void mount(Event event) {
-			if (event == null) return;
-			this.ts = event.ts();
-			mountEntities(event);
-			[$hasTimelines~mountTimelines(event);]
-			[$hasReels~mountReels(event);]
-			// TODO: update dictionary when resource event arrives
+			try {
+				if (event == null) return;
+            	this.ts = event.ts();
+            	mountEntities(event);
+            	// TODO: update dictionary when resource event arrives
+			} catch(Throwable e) {
+				Logger.error("Error while mounting event ss=" + event.ss() + ", ts=" + event.ts() + " -> " + e.getMessage(), e);
+			}
 		}
 
-		[$hasReels~private void mountReels(Event event) {
-			if (!REEL_EVENTS.contains(event.type())) return;
-			String id = sensorParameter(event.ss());
-			String type = event.type();
+		public synchronized void handleDatahubNotification(String notification) {
+			try {
+				if(notification == null || notification.isBlank()) return;
+				String$[$] typeAndSs = notification.split("\\0");
+        		[$hasTimelines~handleTimelineNotification(typeAndSs$[0$], typeAndSs$[1$]);]
+        		[$hasReels~handleReelNotification(typeAndSs$[0$], typeAndSs$[1$]);]
+			} catch(Throwable e) {
+				Logger.error("Error while processing datahub notification " + notification + ": " + e.getMessage(), e);
+			}
+		}
+
+		[$hasReels~private void handleReelNotification(String type, String id) {
+			if (!REEL_EVENTS.contains(type)) return;
 			String key = id + ":" + type;
-			if (!reels.containsKey(key)) {
-				ReelNodeImpl node = new ReelNodeImpl(id, type, sourcesOfReel(type), null);
-				reels.put(key, node);
-			}
-			reels.values().forEach(reel -> reel.notifyEvent(event));
+			ReelNodeImpl reel = reels.computeIfAbsent(id + ":" + type, k -> new ReelNodeImpl(id, type, null));
+			reel.notifyChange();
 		}]
 
-		[$hasTimelines~private void mountTimelines(Event event) {
-			if (!TIMELINE_EVENTS.contains(event.type())) return;
-			String id = sensorParameter(event.ss());
-			String type = event.type();
-			TimelineNodeImpl node = timelines.computeIfAbsent(id + ":" + type, k -> new TimelineNodeImpl(id, type, sourcesOfTimeline(type), null));
-			node.notifyEvent(event);
+		[$hasTimelines~private void handleTimelineNotification(String type, String id) {
+			if (!TIMELINE_EVENTS.contains(type)) return;
+			TimelineNodeImpl timeline = timelines.computeIfAbsent(id + ":" + type, k -> new TimelineNodeImpl(id, type, null));
+			timeline.notifyChange();
 		}]
-
-		private static String sensorParameter(String ss) {
-			if (ss.contains("?")) {
-				try {
-					Map<String, String> map = Arrays.stream(ss.substring(ss.indexOf("?") + 1).split(";"))
-							.map(p -> p.split("="))
-							.collect(Collectors.toMap(f -> f$[0], f -> f$[1]));
-					if (map.containsKey("sensor")) return map.get("sensor");
-					else ss.substring(0, ss.indexOf("?"));
-				} catch (Exception e) {
-					Logger.error(e);
-				}
-			}
-			return ss;
-		}
 
 		private void mountEntities(Event event) {
 			try {
-				java.util.Optional.ofNullable(this.mounters.get(event.type())).ifPresent(mounters -> mounters.forEach(mounter -> mounter.mount(event)));
+				List<$name+FirstUpperCase~Mounter> mounters = this.mounters.get(event.type());
+				if(mounters == null) return;
+				mounters.forEach(mounter -> mounter.mount(event));
 			} catch (Exception e) {
 				Logger.error("Failed to mount event of type " + event.type() + ": " + e.getMessage(), e);
 			}
@@ -538,12 +531,6 @@ def type(datamart & message & impl)
         		[$reel+sourcesSwitchCase...[$NL]]
         		default -> java.util.Collections.emptySet();
         	};
-        }
-
-        Map<Class<?>, BiFunction<EntityDefinition, String, $name+FirstUpperCase~EntityReference>> createEntityReferenceFactory() {
-        	Map<Class<?>, BiFunction<EntityDefinition, String, $name+FirstUpperCase~EntityReference>> map = new HashMap<>();
-        	$entity+referenceFactoryEntry...[$NL]
-        	return map;
         }
 
 		// WARNING: extremely compacted and ugly code ahead... continue at your own discretion.
@@ -606,10 +593,6 @@ def type(datamart & message & impl)
 			}
 		}
     }
-end
-
-def type(entity) !type(abstract) trigger(referenceFactoryEntry)
-	map.put($package.entities.$name+FirstUpperCase.class, (definition, id) -> new $package.entities.$name+FirstUpperCase~(() -> entities.get(definition, id)));
 end
 
 def type(entity) trigger(definition)
@@ -750,7 +733,7 @@ def type(timeline) trigger(getter)
 	@Override
 	public TimelineNode $name+FirstLowerCase~Timeline(String id) {
 		if (hasLocalAccessToTimelines) return timelines.containsKey(id.replace(":", "-") + ":$name") ? timelines.get(id.replace(":", "-") + ":$name") : TimelineNode.empty();
-		return timelines.computeIfAbsent(id.replace(":", "-") + ":$name", theId -> new TimelineNodeImpl(id, "$name", Set.of($sources)));
+		return timelines.computeIfAbsent(id.replace(":", "-") + ":$name", theId -> new TimelineNodeImpl(id, "$name"));
 	}
 end
 
@@ -758,7 +741,7 @@ def type(reel) trigger(getter)
 	@Override
 	public ReelNode $name+FirstLowerCase~Reel(String id) {
 		if (hasLocalAccessToReels) return reels.containsKey(id.replace(":", "-") + ":$name") ? reels.get(id.replace(":", "-") + ":$name") : ReelNode.empty();
-		return reels.computeIfAbsent(id.replace(":", "-") + ":$name", theId -> new ReelNodeImpl(id, "$name", Set.of($sources)));
+		return reels.computeIfAbsent(id.replace(":", "-") + ":$name", theId -> new ReelNodeImpl(id, "$name"));
 	}
 
 	@Override
@@ -791,12 +774,7 @@ end
 def type(abstract) trigger(getter)
 	@Override
 	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
-		if (id == null) return null;
-		var entity = entities.getDescendant(definition.$name+firstLowerCase~EntityDefinition, id);
-		if (entity == null) return null;
-		EntityDefinition definition = entity.getDefinition();
-		Class<?> javaClass = definition.javaClass();
-		return ($package.entities.$name+FirstUpperCase) entityReferenceFactory.getOrDefault(javaClass, (BiFunction<EntityDefinition, String, $datamart+FirstUpperCase~EntityReference>) ((a,b) -> null)).apply(definition, id);
+		return id == null ? null : entities.getDescendant(definition.$name+firstLowerCase~EntityDefinition, id);
 	}
 
 	@Override
@@ -810,18 +788,13 @@ end
 def type(superclass) !type(abstract) trigger(getter)
 	@Override
 	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
-		if (id == null) return null;
-		var entity = entities.getDescendant(definition.$name+firstLowerCase~EntityDefinition, id);
-		if (entity == null) return null;
-		EntityDefinition definition = entity.getDefinition();
-		Class<?> javaClass = definition.javaClass();
-		return ($package.entities.$name+FirstUpperCase) entityReferenceFactory.getOrDefault(javaClass, (BiFunction<EntityDefinition, String, $datamart+FirstUpperCase~EntityReference>) ((a,b) -> null)).apply(definition, id);
+		return id == null ? null : entities.getDescendant(definition.$name+firstLowerCase~EntityDefinition, id);
 	}
 
 	@Override
 	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
 		return Stream.of(
-			entities.<$package.entities.$name+FirstUpperCase>stream(definition.$name+firstLowerCase~EntityDefinition).map(Entity::id).map(id -> new $package.entities.$name+FirstUpperCase(() -> entities.get(definition.$name+firstLowerCase~EntityDefinition, id))),
+			entities.<$package.entities.$name+FirstUpperCase>stream(definition.$name+firstLowerCase~EntityDefinition),
 			$subclasstop+getAllStream...[,$NL]
 		).<$package.entities.$name+FirstUpperCase>flatMap(java.util.function.Function.identity());//.distinct();
 	}
@@ -830,15 +803,12 @@ end
 def trigger(getter)
 	@Override
 	public $package.entities.$name+FirstUpperCase $name+firstLowerCase(String id) {
-		return id == null || !entities.contains(definition.$name+firstLowerCase~EntityDefinition, id) ? null : new $package.entities.$name+FirstUpperCase(() -> entities.get(definition.$name+firstLowerCase~EntityDefinition, id));
+		return id == null ? null : entities.get(definition.$name+firstLowerCase~EntityDefinition, id);
 	}
 
 	@Override
 	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
-		return entities.stream(definition.$name+firstLowerCase~EntityDefinition)
-			.map(Entity::id)
-			.map(this::$name+firstLowerCase)
-			.filter(java.util.Objects::nonNull);
+		return entities.stream(definition.$name+firstLowerCase~EntityDefinition);
 	}
 end
 
@@ -870,7 +840,7 @@ def trigger(loadTimelinesFromDatahubMethod)
                	File file = new File(filename);
                	String id = file.getName().replace(".timeline", "");
                	String type = file.getParentFile().getName();
-               	TimelineNodeImpl node = new TimelineNodeImpl(id, type, sourcesOfTimeline(type), file.exists() ? file : null);
+               	TimelineNodeImpl node = new TimelineNodeImpl(id, type, file.exists() ? file : null);
                	timelines.put(id + ":" + type, node);
                	if (hasLocalAccessToTimelines == null) hasLocalAccessToTimelines = file.exists();
                	else hasLocalAccessToTimelines &= file.exists();
@@ -906,7 +876,7 @@ def trigger(loadReelsFromDatahubMethod)
     	    	File file = new File(filename);
     	    	String id = file.getName().replace(".reel", "");
     	    	String type = file.getParentFile().getName();
-    	    	ReelNodeImpl node = new ReelNodeImpl(id, type, sourcesOfReel(type), file.exists() ? file : null);
+    	    	ReelNodeImpl node = new ReelNodeImpl(id, type, file.exists() ? file : null);
     	    	reels.put(id + ":" + type, node);
     	    	if (hasLocalAccessToReels == null) hasLocalAccessToReels = file.exists();
                 else hasLocalAccessToReels &= file.exists();

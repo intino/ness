@@ -5,8 +5,10 @@ import io.intino.cosmos.datahub.TrooperTerminal;
 import io.intino.cosmos.datahub.datamarts.master.MasterDatamart;
 import io.intino.cosmos.datahub.datamarts.master.MasterDatamartImpl;
 import io.intino.cosmos.datahub.datamarts.master.entities.Observable;
+import io.intino.cosmos.datahub.datamarts.master.entities.Observer;
 import io.intino.cosmos.datahub.datamarts.master.entities.Place;
 import io.intino.ness.master.Datamart;
+import io.intino.ness.master.model.Concept;
 import io.intino.sumus.chronos.Timeline;
 
 import java.io.File;
@@ -24,27 +26,19 @@ public class Client {
 
 		MasterDatamartImpl dm = (MasterDatamartImpl) terminal.datamart();
 
-		Datamart.Dictionary.Word word = dm.dictionary().get("Brasil");
+		Observer observer = dm.observer("tcconsul-472DSTUNELIN");
 
-		Optional<String> valueInEnglish = dm.dictionary("tc").get("Brasil").in("en");
+		System.out.println(observer.installedActivities());
+		System.out.println(observer.container());
 
-		Optional<String> label = dm.area("Mexico").label("en");
+		observer.addChangeListener((concept, attribute, oldValue) -> {
+			System.out.println("update -> " + attribute);
+		});
 
+		System.out.println("--> waiting for change...");
 
-		var timelines = dm.timelines("45-79-45-227-ip-linodeusercontent-com").toList();
-
-		for(var t : timelines) {
-			Timeline timeline = t.get();
-			System.out.println(timeline);
-		}
-
-//		Stream<MasterDatamart.TimelineNode> timelines = dm.timelines("EC2AMAZ-D67CFU1_Code");
-
-//		MasterDatamart.TimelineNode timeline = timelines.findFirst().get();
-
-//		dm.mount(new ApplicationJavaAssertion(new MessageReader(message()).next()));
-
-		System.out.println();
+		System.out.println(observer.installedActivities());
+		System.out.println(observer.container());
 	}
 
 	private static String message() {

@@ -4,21 +4,19 @@ def type(timelineNode & default) trigger(nodeImpl)
 
 		private final String id;
 		private final String type;
-		private final Set<String> sources;
 		private volatile File file;
 		private volatile boolean hasDirectAccessToFile;
 		private volatile io.intino.sumus.chronos.TimelineStore timelineFile;
-		private volatile EventListener listener;
+		private volatile ChangeListener listener;
 		private volatile boolean disposed;
 
-		private TimelineNodeImpl(String id, String type, Set<String> sources) {
-			this(id, type, sources, null);
+		private TimelineNodeImpl(String id, String type) {
+			this(id, type, null);
 		}
 
-		private TimelineNodeImpl(String id, String type, Set<String> sources, File file) {
+		private TimelineNodeImpl(String id, String type, File file) {
 			this.id = requireNonNull(id);
 			this.type = requireNonNull(type);
-			this.sources = requireNonNull(sources);
 			this.file = file;
 			this.hasDirectAccessToFile = file != null;
 		}
@@ -99,17 +97,16 @@ def type(timelineNode & default) trigger(nodeImpl)
 		}
 
 		@Override
-		public void setEventListener(EventListener listener) {
+		public void setChangeListener(ChangeListener listener) {
 			this.listener = listener;
 		}
 
-		private void notifyEvent(io.intino.alexandria.event.Event event) {
+		private void notifyChange() {
 			synchronized(this) {
 				if (disposed) return;
 				try {
-					if (!sources.contains(event.type())) return;
 					clearCache();
-					if (listener != null) listener.onEventReceived(this, event);
+					if (listener != null) listener.notifyChange(this);
 				} catch(Throwable ignored) {}
 			}
 		}
@@ -175,21 +172,19 @@ def type(reelNode & default) trigger(nodeImpl)
 	private class ReelNodeImpl implements ReelNode {
 		private final String id;
 		private final String type;
-		private final Set<String> sources;
 		private volatile File file;
 		private volatile boolean hasDirectAccessToFile;
 		private volatile io.intino.sumus.chronos.ReelFile reelFile;
-		private volatile EventListener listener;
+		private volatile ChangeListener listener;
 		private volatile boolean disposed;
 
-		private ReelNodeImpl(String id, String type, Set<String> sources) {
-			this(id, type, sources, null);
+		private ReelNodeImpl(String id, String type) {
+			this(id, type, null);
 		}
 
-		private ReelNodeImpl(String id, String type, Set<String> sources, File file) {
+		private ReelNodeImpl(String id, String type, File file) {
 			this.id = requireNonNull(id);
 			this.type = requireNonNull(type);
-			this.sources = requireNonNull(sources);
 			this.file = file;
 			this.hasDirectAccessToFile = file != null;
 		}
@@ -289,17 +284,16 @@ def type(reelNode & default) trigger(nodeImpl)
 		}
 
 		@Override
-		public void setEventListener(EventListener listener) {
+		public void setChangeListener(ChangeListener listener) {
 			this.listener = listener;
 		}
 
-		private void notifyEvent(io.intino.alexandria.event.Event event) {
+		private void notifyChange() {
 			synchronized(this) {
 				if (disposed) return;
 				try {
-					if (!sources.contains(event.type())) return;
 					clearCache();
-					if (listener != null) listener.onEventReceived(this, event);
+					if (listener != null) listener.notifyChange(this);
 				} catch(Throwable ignored) {}
 			}
 		}
