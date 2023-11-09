@@ -319,7 +319,8 @@ end
 def type(datamart) trigger(addDatamartSubscribers)
 	private void addDatamartSubscribers(String sourceSelector) {
 		addDatamartEventSubscribers(sourceSelector,  ts -> ts.isAfter(datamart.ts()));
-		connector.attachListener("service.ness.datamarts.notifications", null, (m, c) -> new Thread(() -> manageDatamartNotification(m)).start());
+		if (!datamart.isLocal()) //TODO
+			connector.attachListener("service.ness.datamarts.notifications", null, (m, c) -> new Thread(() -> manageDatamartNotification(m)).start());
 		connector.attachListener("service.ness.datamarts", null, (m, c) -> new Thread(() -> manageDatamartMessage(m)).start());
 	}
 
