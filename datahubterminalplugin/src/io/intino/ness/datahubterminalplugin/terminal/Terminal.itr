@@ -320,7 +320,7 @@ def type(datamart) trigger(addDatamartSubscribers)
 	private void addDatamartSubscribers(String sourceSelector) {
 		addDatamartEventSubscribers(sourceSelector,  ts -> ts.isAfter(datamart.ts()));
 		if (datamart.requiresDatahubNotifications())
-			connector.attachListener("service.ness.datamarts.notifications", null, (m, c) -> new Thread(() -> manageDatamartNotification(m)).start());
+			connector.attachListener("service.ness.datamarts.notifications", null, (m, c) -> new Thread(() -> manageDatamartMessage(m)).start());
 		connector.attachListener("service.ness.datamarts", null, (m, c) -> new Thread(() -> manageDatamartMessage(m)).start());
 	}
 
@@ -332,10 +332,6 @@ def type(datamart) trigger(addDatamartSubscribers)
 
 	private final Object monitor = new Object();
 
-	private synchronized void manageDatamartNotification(String message) {
-		java.util.Arrays.stream(message.split("$dhNotificationsSep")).forEach(datamart::handleDatahubNotification);
-	}
-
 	private synchronized void manageDatamartMessage(String message) {
 		synchronized(monitor) {
 			JsonObject jsonObject = Json.fromJson(message, JsonObject.class);
@@ -344,7 +340,10 @@ def type(datamart) trigger(addDatamartSubscribers)
 				this.datamartConsumers.forEach(c -> consumers.get(c).forEach(connector::detachListeners));
 				datamart.init(this.sourceSelector);
 				addDatamartEventSubscribers(this.sourceSelector, ts -> ts.isAfter(datamart.ts()));
-			}
+			} else if (operation.equals("refresh"))
+				jsonObject.get("changes").getAsJsonArray().asList().stream()
+					.map(e -> e.getAsString())
+					.forEach(datamart::handleDatahubNotification);
 		}
 	}
 end

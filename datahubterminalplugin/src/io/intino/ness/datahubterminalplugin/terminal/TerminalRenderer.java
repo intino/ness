@@ -10,7 +10,6 @@ import io.intino.magritte.framework.Layer;
 import io.intino.ness.datahubterminalplugin.Commons;
 import io.intino.ness.datahubterminalplugin.Formatters;
 import io.intino.ness.datahubterminalplugin.datamarts.DatamartsRenderer;
-import io.intino.ness.datahubterminalplugin.datamarts.TimelineUtils;
 import io.intino.plugin.PluginLauncher;
 
 import java.io.File;
@@ -62,7 +61,6 @@ class TerminalRenderer {
 		if (terminal.datamarts() != null) {
 			renderDatamarts(builder);
 			addSubscribeForTheEvents(builder);
-			builder.add("dhNotificationsSep", "\n");
 		}
 
 		if (!messageTanks.isEmpty()) builder.add("message", messageFrames());
