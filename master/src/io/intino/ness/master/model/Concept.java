@@ -4,8 +4,11 @@ import io.intino.ness.master.Datamart;
 import io.intino.ness.master.reflection.AttributeDefinition;
 import io.intino.ness.master.reflection.ConceptDefinition;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 public sealed interface Concept permits Entity, Struct {
 
@@ -48,8 +51,13 @@ public sealed interface Concept permits Entity, Struct {
 				return value;
 			}
 
+			@SuppressWarnings("unchecked")
 			public <T> T as(Class<T> type) {
-				return type.cast(value);
+				if(value == null) return null;
+				if(value.getClass() == String.class && StringParsers.containsKey(type)) {
+					return (T) StringParsers.get(type).apply(value.toString());
+				}
+				return (T) value;
 			}
 
 			@SuppressWarnings("unchecked")
@@ -73,6 +81,23 @@ public sealed interface Concept permits Entity, Struct {
 			public String toString() {
 				return String.valueOf(get());
 			}
+
+			private static final Map<Class<?>, Function<String, Object>> StringParsers = new HashMap<>() {{
+				put(byte.class, Byte::parseByte);
+				put(short.class, Short::parseShort);
+				put(int.class, Integer::parseInt);
+				put(long.class, Long::parseLong);
+				put(float.class, Float::parseFloat);
+				put(double.class, Double::parseDouble);
+				put(boolean.class, Boolean::parseBoolean);
+				put(Byte.class, Byte::parseByte);
+				put(Short.class, Short::parseShort);
+				put(Integer.class, Integer::parseInt);
+				put(Long.class, Long::parseLong);
+				put(Float.class, Float::parseFloat);
+				put(Double.class, Double::parseDouble);
+				put(Boolean.class, Boolean::parseBoolean);
+			}};
 		}
 
 		@FunctionalInterface
