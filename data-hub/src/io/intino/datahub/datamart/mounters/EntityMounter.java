@@ -31,11 +31,6 @@ public final class EntityMounter extends MasterDatamartMounter {
 
 			Message oldMessage = datamart.entityStore().get(id);
 
-			if(isDisabled(message)) {
-				if(oldMessage != null) datamart.entityStore().remove(id);
-				return;
-			}
-
 			if (oldMessage != null) {
 				update(message, id, oldMessage);
 			} else {

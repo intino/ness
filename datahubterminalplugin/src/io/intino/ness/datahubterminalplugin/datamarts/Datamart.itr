@@ -20,6 +20,8 @@ def type(datamart & interface)
 		List<String> listSnapshots();
 		$name+FirstUpperCase~Datamart snapshot(String timetag);
 
+		int sizeDisabled();
+
 		[$entity+getterSignature...[$NL$NL]]
 
 		[$hasTimelines~Stream<TimelineNode> timelines(String id);]
@@ -36,11 +38,14 @@ def type(datamart & interface)
 
 			private final $name+FirstUpperCase~Datamart datamart;
 			private final Map<EntityDefinition, Map<String, $name+FirstUpperCase~Entity>> entitiesByType;
+			private final Map<EntityDefinition, Map<String, $name+FirstUpperCase~Entity>> entitiesByTypeDisabled;
 
 			public Entities($name+FirstUpperCase~Datamart datamart) {
 				this.datamart = datamart;
 				this.entitiesByType = new ConcurrentHashMap<>();
+				this.entitiesByTypeDisabled = new ConcurrentHashMap<>();
 				datamart.getDefinition().entities().stream().filter(e -> !e.isAbstract()).forEach(entity -> entitiesByType.put(entity, new ConcurrentHashMap<>()));
+				datamart.getDefinition().entities().stream().filter(e -> !e.isAbstract()).forEach(entity -> entitiesByTypeDisabled.put(entity, new ConcurrentHashMap<>()));
 			}
 
 			public $name+FirstUpperCase~Datamart datamart() {
@@ -51,16 +56,40 @@ def type(datamart & interface)
         		return entitiesByType.values().stream().mapToInt(Map::size).sum();
         	}
 
+        	public int sizeDisabled() {
+        		return entitiesByTypeDisabled.values().stream().mapToInt(Map::size).sum();
+        	}
+
+        	public boolean exists(String id) {
+        		return contains(id) || containsDisabled(id);
+        	}
+
         	public boolean contains(String id) {
         		return get(id) != null;
+        	}
+
+        	public boolean containsDisabled(String id) {
+        		return getDisabled(id) != null;
+        	}
+
+        	public boolean exists(EntityDefinition definition, String id) {
+        		return contains(definition, id) || containsDisabled(definition, id);
         	}
 
         	public boolean contains(EntityDefinition definition, String id) {
         		return get(definition, id) != null;
         	}
 
+        	public boolean containsDisabled(EntityDefinition definition, String id) {
+        		return getDisabled(definition, id) != null;
+        	}
+
         	public $name+FirstUpperCase~Entity get(String id) {
         		return mapOf(id).map(map -> map.get(id)).orElse(null);
+        	}
+
+        	public $name+FirstUpperCase~Entity getDisabled(String id) {
+        		return mapOfDisabled(id).map(map -> map.get(id)).orElse(null);
         	}
 
         	public <T extends $name+FirstUpperCase~Entity> T getDescendant(EntityDefinition definition, String id) {
@@ -71,21 +100,51 @@ def type(datamart & interface)
         			.filter(java.util.Objects::nonNull).findFirst().orElse(null);
         	}
 
+        	public <T extends $name+FirstUpperCase~Entity> T getDescendantDisabled(EntityDefinition definition, String id) {
+        		T entity = getDisabled(definition, id);
+        		return entity != null ? entity: definition.descendants().stream()
+        			.filter(descendant -> !descendant.isAbstract())
+        			.map(descendant -> this.<T>getDisabled(descendant, id))
+        			.filter(java.util.Objects::nonNull).findFirst().orElse(null);
+        	}
+
 			@SuppressWarnings("unchecked")
         	public <T extends $name+FirstUpperCase~Entity> T get(EntityDefinition type, String id) {
         		return entitiesByType.containsKey(type) ? (T) entitiesByType.get(type).get(id) : null;
+            }
+
+			@SuppressWarnings("unchecked")
+        	public <T extends $name+FirstUpperCase~Entity> T getDisabled(EntityDefinition type, String id) {
+        		return entitiesByTypeDisabled.containsKey(type) ? (T) entitiesByTypeDisabled.get(type).get(id) : null;
             }
 
         	public void add($name+FirstUpperCase~Entity entity) {
         		entitiesByType.get(entity.getDefinition()).put(entity.id(), entity);
         	}
 
-        	public void remove(String id) {
+        	public void addDisabled($name+FirstUpperCase~Entity entity) {
+        		entitiesByTypeDisabled.get(entity.getDefinition()).put(entity.id(), entity);
+        	}
+
+        	public void disable(String id) {
+        		mapOf(id).map(m -> m.remove(id)).ifPresent(this::addDisabled);
+        	}
+
+        	public void enable(String id) {
+        		mapOfDisabled(id).map(m -> m.remove(id)).ifPresent(this::add);
+        	}
+
+        	public void delete(String id) {
         		mapOf(id).ifPresent(map -> map.remove(id));
+        		mapOfDisabled(id).ifPresent(map -> map.remove(id));
         	}
 
         	public Stream<$name+FirstUpperCase~Entity> stream() {
         		return entitiesByType.values().stream().flatMap(map -> map.values().stream());
+        	}
+
+        	public Stream<$name+FirstUpperCase~Entity> streamDisabled() {
+        		return entitiesByTypeDisabled.values().stream().flatMap(map -> map.values().stream());
         	}
 
 			@SuppressWarnings("unchecked")
@@ -93,12 +152,25 @@ def type(datamart & interface)
         		return (Stream<T>) (entitiesByType.containsKey(type) ? entitiesByType.get(type).values().stream() : Stream.empty());
         	}
 
+			@SuppressWarnings("unchecked")
+        	public <T extends $name+FirstUpperCase~Entity> Stream<T> streamDisabled(EntityDefinition type) {
+        		return (Stream<T>) (entitiesByTypeDisabled.containsKey(type) ? entitiesByTypeDisabled.get(type).values().stream() : Stream.empty());
+        	}
+
         	public Stream<Entity> streamGeneric() {
             	return entitiesByType.values().stream().flatMap(map -> map.values().stream());
             }
 
+        	public Stream<Entity> streamGenericDisabled() {
+            	return entitiesByTypeDisabled.values().stream().flatMap(map -> map.values().stream());
+            }
+
         	private java.util.Optional<Map<String, $name+FirstUpperCase~Entity>> mapOf(String id) {
         		return entitiesByType.values().stream().filter(map -> map.containsKey(id)).findFirst();
+        	}
+
+        	private java.util.Optional<Map<String, $name+FirstUpperCase~Entity>> mapOfDisabled(String id) {
+        		return entitiesByTypeDisabled.values().stream().filter(map -> map.containsKey(id)).findFirst();
         	}
         }
 
@@ -297,6 +369,11 @@ def type(datamart & message & impl)
 		@Override
 		public int size() {
 			return entities.size();
+		}
+
+		@Override
+		public int sizeDisabled() {
+			return entities.sizeDisabled();
 		}
 
 		@Override
@@ -729,6 +806,10 @@ def type(subclasstop) trigger(getAllStream)
 	$name+Plural+firstLowerCase()
 end
 
+def type(subclasstop) trigger(getAllStreamDisabled)
+	$name+Plural+firstLowerCase~Disabled()
+end
+
 def type(timeline) trigger(getter)
 	@Override
 	public TimelineNode $name+FirstLowerCase~Timeline(String id) {
@@ -778,10 +859,22 @@ def type(abstract) trigger(getter)
 	}
 
 	@Override
+	public $package.entities.$name+FirstUpperCase $name+firstLowerCase~Disabled(String id) {
+		return id == null ? null : entities.getDescendantDisabled(definition.$name+firstLowerCase~EntityDefinition, id);
+	}
+
+	@Override
 	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
 		return Stream.of(
 			$subclasstop+getAllStream...[,$NL]
-		).<$package.entities.$name+FirstUpperCase>flatMap(java.util.function.Function.identity());//.distinct();
+		).<$package.entities.$name+FirstUpperCase>flatMap(java.util.function.Function.identity());
+	}
+
+	@Override
+	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase~Disabled() {
+		return Stream.of(
+			$subclasstop+getAllStreamDisabled...[,$NL]
+		).<$package.entities.$name+FirstUpperCase>flatMap(java.util.function.Function.identity());
 	}
 end
 
@@ -792,11 +885,24 @@ def type(superclass) !type(abstract) trigger(getter)
 	}
 
 	@Override
+	public $package.entities.$name+FirstUpperCase $name+firstLowerCase~Disabled(String id) {
+		return id == null ? null : entities.getDescendantDisabled(definition.$name+firstLowerCase~EntityDefinition, id);
+	}
+
+	@Override
 	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
 		return Stream.of(
 			entities.<$package.entities.$name+FirstUpperCase>stream(definition.$name+firstLowerCase~EntityDefinition),
 			$subclasstop+getAllStream...[,$NL]
 		).<$package.entities.$name+FirstUpperCase>flatMap(java.util.function.Function.identity());//.distinct();
+	}
+
+	@Override
+	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase~Disabled() {
+		return Stream.of(
+			entities.<$package.entities.$name+FirstUpperCase>streamDisabled(definition.$name+firstLowerCase~EntityDefinition),
+			$subclasstop+getAllStreamDisabled...[,$NL]
+		).<$package.entities.$name+FirstUpperCase>flatMap(java.util.function.Function.identity());
 	}
 end
 
@@ -807,16 +913,30 @@ def trigger(getter)
 	}
 
 	@Override
+	public $package.entities.$name+FirstUpperCase $name+firstLowerCase~Disabled(String id) {
+		return id == null ? null : entities.getDisabled(definition.$name+firstLowerCase~EntityDefinition, id);
+	}
+
+	@Override
 	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
 		return entities.stream(definition.$name+firstLowerCase~EntityDefinition);
+	}
+
+	@Override
+	public Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase~Disabled() {
+		return entities.streamDisabled(definition.$name+firstLowerCase~EntityDefinition);
 	}
 end
 
 def type(entity) trigger(getterSignature)
 	$package.entities.$name+FirstUpperCase $name+firstLowerCase(String id);
+	$package.entities.$name+FirstUpperCase $name+firstLowerCase~Disabled(String id);
 	Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase();
+	Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase~Disabled();
 	default List<$package.entities.$name+FirstUpperCase> $name+firstLowerCase~List() {return $name+Plural+firstLowerCase().collect(Collectors.toList());}
-	default java.util.Optional<$package.entities.$name+FirstUpperCase> $name+firstLowerCase~(java.util.function.Predicate<$package.entities.$name+FirstUpperCase~> predicate) {return $name+Plural+firstLowerCase().filter(predicate).findFirst();}
+	default List<$package.entities.$name+FirstUpperCase> $name+firstLowerCase~DisabledList() {return $name+Plural+firstLowerCase~Disabled().collect(Collectors.toList());}
+	default java.util.Optional<$package.entities.$name+FirstUpperCase> $name+firstLowerCase(java.util.function.Predicate<$package.entities.$name+FirstUpperCase~> predicate) {return $name+Plural+firstLowerCase().filter(predicate).findFirst();}
+	default java.util.Optional<$package.entities.$name+FirstUpperCase> $name+firstLowerCase~Disabled(java.util.function.Predicate<$package.entities.$name+FirstUpperCase~> predicate) {return $name+Plural+firstLowerCase~Disabled().filter(predicate).findFirst();}
 end
 
 def type(timeline) trigger(getterSignature)
