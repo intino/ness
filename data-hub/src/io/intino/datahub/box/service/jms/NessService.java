@@ -26,11 +26,16 @@ import java.util.stream.Stream;
 public class NessService {
 	public static final String SERVICE_NESS_DATAMARTS = "service.ness.datamarts";
 	public static final String SERVICE_NESS_DATAMARTS_NOTIFICATIONS = "service.ness.datamarts.notifications";
-	private final BrokerManager manager;
-	private final ExecutorService dispatcherService;
-	private final TopicProducer notifier;
+	private BrokerManager manager;
+	private ExecutorService dispatcherService;
+	private TopicProducer notifier;
+	private final DataHubBox box;
 
 	public NessService(DataHubBox box) {
+		this.box = box;
+	}
+
+	public void start() {
 		dispatcherService = Executors.newFixedThreadPool(16, r -> new Thread(r, "Ness Datamarts Service"));
 		manager = box.brokerService().manager();
 		notifier = manager.topicProducerOf(SERVICE_NESS_DATAMARTS_NOTIFICATIONS);

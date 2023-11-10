@@ -341,6 +341,7 @@ def type(datamart & message & impl)
 		[$hasReels~private boolean hasLocalAccessToReels;]
 		[$hasReels~private final Map<String, ReelNodeImpl> reels = new java.util.concurrent.ConcurrentHashMap<>();]
 		private volatile DictionaryImpl dictionary = new DictionaryImpl();
+		private volatile boolean initializing = false;
 
     	public $name+FirstUpperCase~DatamartImpl(Connector connector, $terminal~.DatamartsRetryConfig retryConfig) {
     		this.connector = requireNonNull(connector);
@@ -351,10 +352,13 @@ def type(datamart & message & impl)
 
 		public synchronized $name+FirstUpperCase~DatamartImpl init(String datamartSourceSelector) {
 			try {
+				initializing = true;
 				downloadDatamartFromDatahub(datamartSourceSelector);
 				Logger.info("$name+FirstUpperCase~Datamart (" + (snapshotTimetag().isEmpty() ? "" : "snapshot " + snapshotTimetag() + ", ")  + connector.clientId() + ") initialized successfully.");
 			} catch (Exception e) {
 				throw new ExceptionInInitializerError("$name+FirstUpperCase~Datamart failed to start because a " + e.getClass().getName() + " occurred: " + e.getMessage());
+			} finally {
+				initializing = false;
 			}
 			return this;
 		}
@@ -565,7 +569,7 @@ def type(datamart & message & impl)
 			try {
 				List<$name+FirstUpperCase~Mounter> mounters = this.mounters.get(event.type());
 				if(mounters == null) return;
-				mounters.forEach(mounter -> mounter.mount(event));
+				mounters.forEach(mounter -> mounter.useListeners(!initializing).mount(event));
 			} catch (Exception e) {
 				Logger.error("Failed to mount event of type " + event.type() + ": " + e.getMessage(), e);
 			}

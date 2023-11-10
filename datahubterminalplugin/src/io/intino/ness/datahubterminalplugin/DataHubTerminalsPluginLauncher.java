@@ -14,7 +14,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DataHubTerminalsPluginLauncher extends PluginLauncher {
@@ -26,7 +28,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private static final String MAX_TERMINAL_JMS_VERSION = "6.0.0";
 	private static final String MINIMUM_INGESTION_VERSION = "5.0.2";
 	private static final String MAX_INGESTION_VERSION = "6.0.0";
-	private static final String MINIMUM_MASTER_VERSION = "2.1.0";
+	private static final String MINIMUM_MASTER_VERSION = "2.1.1";
 	private static final String MAX_MASTER_VERSION = "3.0.0";
 	private static final String MINIMUM_DATALAKE_VERSION = "7.0.2";
 	private static final String MAX_DATALAKE_VERSION = "8.0.0";
@@ -84,16 +86,28 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private void publishTerminals(NessGraph nessGraph, Map<String, String> versions, File tempDir) {
 		try {
 			AtomicBoolean published = new AtomicBoolean(true);
-			nessGraph.terminalList().parallelStream().forEach(terminal -> {
-				published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, configuration(), versions, systemProperties(), invokedPhase, logger(), notifier()).publish() & published.get());
-				if (published.get() && notifier() != null)
-					notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n" + accessorDependency(configuration().artifact().groupId() + "." + Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(), terminalNameArtifact(terminal), configuration().artifact().version()));
-			});
+			ExecutorService threadPool = Executors.newFixedThreadPool(Math.max(1, Runtime.getRuntime().availableProcessors()/2));
+			threadPool.invokeAll(nessGraph.terminalList().stream().map(terminal -> (Callable<Void>) () -> publishTerminal(versions, tempDir, published, terminal)).toList());
+			threadPool.shutdownNow();
 			handleTempDir(tempDir, published);
 		} catch (Throwable e) {
 			logger().println(e.getMessage());
 			e.printStackTrace();
 		}
+	}
+
+	private Void publishTerminal(Map<String, String> versions, File tempDir, AtomicBoolean published, Terminal terminal) {
+		published.set(new TerminalPublisher(new File(tempDir, terminal.name$()), terminal, configuration(), versions,
+				systemProperties(), invokedPhase, logger(), notifier()).publish() & published.get());
+
+		if (published.get() && notifier() != null) {
+			notifier().notify("Terminal " + terminal.name$() + " " + participle() + ". Copy maven dependency:\n"
+					+ accessorDependency(configuration().artifact().groupId() + "."
+							+ Formatters.snakeCaseToCamelCase().format(configuration().artifact().name()).toString().toLowerCase(),
+					terminalNameArtifact(terminal), configuration().artifact().version()));
+		}
+
+		return null;
 	}
 
 	private void handleTempDir(File tempDir, AtomicBoolean published) throws IOException {

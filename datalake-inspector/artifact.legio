@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino", "9.12.3") datalake-inspector
+Artifact("io.intino", "9.13.0-SNAPSHOT") datalake-inspector
 	WebImports
 		WebArtifact("io.intino.alexandria", "ui-framework-elements", "4.28.9") alexandria-ui-elements
 

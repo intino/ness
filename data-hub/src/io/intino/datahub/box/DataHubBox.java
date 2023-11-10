@@ -214,8 +214,9 @@ public class DataHubBox extends AbstractBox {
 
 	private void startBroker() {
 		try {
-			brokerService.start();
 			nessService = new NessService(this);
+			brokerService.start();
+			nessService.start();
 		} catch (Exception e) {
 			Logger.error(e);
 		}

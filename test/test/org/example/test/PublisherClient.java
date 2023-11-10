@@ -33,10 +33,7 @@ public class PublisherClient {
 				ts: ::ts::
 				ss: tcconsul-472DSTUNELIN
 				id: tcconsul-472DSTUNELIN
-				version: 1.3.1
-				installedActivities: io.intino.consul:logging-activity:1.0.0
-				enabledActivities:
-				container: tcconsul-1226MOV06
+				enabled: true
 				""";
 	}
 
