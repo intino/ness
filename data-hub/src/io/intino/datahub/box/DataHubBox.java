@@ -237,6 +237,10 @@ public class DataHubBox extends AbstractBox {
 		return lastSeal;
 	}
 
+	public NessService nessService() {
+		return nessService;
+	}
+
 	private void initMasterDatamarts() {
 		this.datamartSerializer = new MasterDatamartSerializer(this);
 		this.masterDatamarts = new MasterDatamartRepository(datamartsDirectory());

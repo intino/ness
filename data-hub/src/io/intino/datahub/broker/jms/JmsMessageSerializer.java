@@ -6,16 +6,14 @@ import io.intino.alexandria.event.EventWriter;
 import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.event.resource.ResourceEvent;
 import io.intino.alexandria.event.resource.ResourceEventWriter;
-import io.intino.alexandria.jms.MessageWriter;
-import io.intino.alexandria.jms.TopicProducer;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
+import io.intino.datahub.box.service.jms.NessService;
 import io.intino.datahub.datamart.MasterDatamartRepository;
 import io.intino.datahub.datamart.mounters.MasterDatamartMounter;
 import io.intino.datahub.model.Datalake;
 
 import javax.jms.BytesMessage;
-import javax.jms.JMSException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,7 +27,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
@@ -40,7 +37,7 @@ public class JmsMessageSerializer {
 	private final File stage;
 	private final Datalake.Tank tank;
 	private final Scale scale;
-	private final TopicProducer notifier;
+	private final NessService service;
 	private final MasterDatamartMounter[] mounters;
 	private static final ExecutorService executorService = Executors.newSingleThreadExecutor(r -> new Thread(r, "JmsSerializer"));
 
@@ -55,11 +52,11 @@ public class JmsMessageSerializer {
 		}));
 	}
 
-	JmsMessageSerializer(File stage, Datalake.Tank tank, Scale scale, MasterDatamartRepository datamarts, TopicProducer notifier) {
+	JmsMessageSerializer(File stage, Datalake.Tank tank, Scale scale, MasterDatamartRepository datamarts, NessService service) {
 		this.stage = stage;
 		this.tank = tank;
 		this.scale = scale;
-		this.notifier = notifier;
+		this.service = service;
 		this.mounters = createMountersFor(tank, datamarts);
 	}
 
@@ -117,13 +114,7 @@ public class JmsMessageSerializer {
 		}
 
 		private void notifyChange(Message message) {
-			executorService.execute(() -> {
-				try {
-					notifier.produce(MessageWriter.write(Arrays.stream(mounters).flatMap(m -> m.destinationsOf(message).stream()).distinct().collect(Collectors.joining("\n"))));
-				} catch (JMSException e) {
-					Logger.error(e);
-				}
-			});
+			executorService.execute(() -> service.notifyDatamartChange(Arrays.stream(mounters).flatMap(m -> m.destinationsOf(message).stream()).toList()));
 
 		}
 
