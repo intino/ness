@@ -65,8 +65,7 @@ public class DatamartFactory {
 	}
 
 	public MasterDatamart reflow(MasterDatamart datamart, Datamart definition) throws Exception {
-		FileUtils.deleteDirectory(box.datamartTimelinesDirectory(datamart.name()));
-		FileUtils.deleteDirectory(box.datamartReelsDirectory(datamart.name()));
+		removeAllChronosFiles(datamart);
 		reflowEntities(datamart, entityTanks(definition));
 		reflowCookedTimelines(datamart, cookedTimelinesTanks(definition));
 		reflowRawTimelines(datamart, definition);
@@ -76,8 +75,14 @@ public class DatamartFactory {
 		return datamart;
 	}
 
+	private void removeAllChronosFiles(MasterDatamart datamart) throws IOException {
+		FileUtils.deleteDirectory(box.datamartTimelinesDirectory(datamart.name()));
+		FileUtils.deleteDirectory(box.datamartReelsDirectory(datamart.name()));
+	}
+
 	private void reflowEntities(MasterDatamart datamart, Set<String> entityTanks) {
 		Logger.debug("Reflowing entities...");
+		// TODO: create past snapshots while reflowing
 		reflow(new EntityMounter(datamart), reflowTanks(entityTanks));
 	}
 

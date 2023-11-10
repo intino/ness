@@ -5,6 +5,8 @@ def type(mounter & interface)
 
     	void mount(io.intino.alexandria.event.Event event);
 
+    	$datamart+FirstUpperCase~Mounter useListeners(boolean useListeners);
+
     	default void update($datamart+FirstUpperCase~Entity entity, String attribute, Object value) {
     		entity.updateAttribute(attribute, value);
     	}
@@ -41,10 +43,17 @@ def !type(abstract) type(mounter) type(message)
 
 		private final $datamart+FirstUpperCase~Datamart.Entities entities;
 		private final List<EntityListener> listeners;
+		private boolean useListeners = true;
 
 		public $name+FirstUpperCase~Mounter($datamart+FirstUpperCase~Datamart.Entities entities, List<EntityListener> listeners) {
 			this.entities = entities;
 			this.listeners = listeners;
+		}
+
+		@Override
+		public $name+FirstUpperCase~Mounter useListeners(boolean useListeners) {
+			this.useListeners = useListeners;
+			return this;
 		}
 
 		@Override
@@ -54,7 +63,7 @@ def !type(abstract) type(mounter) type(message)
 			Operation$[$] operation = {Update};
 			$datamart+FirstUpperCase~Entity entity = findOrCreateEntity(id, operation);
 			updateAttributes(message, operation, entity);
-			if(operation$[0$] != Skip) notifyListeners(operation$[0$], entity);
+			if(operation$[0$] != Skip && useListeners) notifyListeners(operation$[0$], entity);
 		}
 
 		private void updateAttributes(Message message, Operation$[$] operation, $datamart+FirstUpperCase~Entity owner) {
