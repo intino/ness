@@ -1,8 +1,13 @@
 package io.intino.datahub.box.service.jms;
 
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import io.intino.alexandria.Json;
 import io.intino.alexandria.jms.MessageReader;
+import io.intino.alexandria.jms.MessageWriter;
 import io.intino.alexandria.jms.QueueProducer;
+import io.intino.alexandria.jms.TopicProducer;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.broker.BrokerManager;
@@ -12,23 +17,28 @@ import org.apache.activemq.command.ActiveMQTempQueue;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 public class NessService {
+	public static final String SERVICE_NESS_DATAMARTS = "service.ness.datamarts";
+	public static final String SERVICE_NESS_DATAMARTS_NOTIFICATIONS = "service.ness.datamarts.notifications";
 	private final BrokerManager manager;
 	private final ExecutorService dispatcherService;
+	private final TopicProducer notifier;
 
 	public NessService(DataHubBox box) {
 		dispatcherService = Executors.newFixedThreadPool(16, r -> new Thread(r, "Ness Datamarts Service"));
 		manager = box.brokerService().manager();
+		notifier = manager.topicProducerOf(SERVICE_NESS_DATAMARTS_NOTIFICATIONS);
 		manager.registerQueueConsumer("service.ness.seal", m -> response(manager, m, new SealRequest(box).accept(MessageReader.textFrom(m))));
 		manager.registerQueueConsumer("service.ness.seal.last", m -> response(manager, m, new LastSealRequest(box).accept(MessageReader.textFrom(m))));
 		manager.registerQueueConsumer("service.ness.backup", m -> response(manager, m, new BackupRequest(box).accept(MessageReader.textFrom(m))));
 		manager.registerQueueConsumer("service.ness.datalake", m -> response(manager, m, new DatalakeRequest(box).accept(m)));
-		manager.registerQueueConsumer("service.ness.datamarts", m -> response(manager, m, new DatamartsRequest(box).accept(m)));
+		manager.registerQueueConsumer(SERVICE_NESS_DATAMARTS, m -> response(manager, m, new DatamartsRequest(box).accept(m)));
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			try {
 				dispatcherService.shutdown();
@@ -37,6 +47,20 @@ public class NessService {
 				Logger.error(e);
 			}
 		}));
+	}
+
+	public void notifyDatamartChange(List<String> sourcesChanged) {
+		JsonObject notification = new JsonObject();
+		notification.addProperty("operation", "refresh");
+		JsonArray jsonElements = new JsonArray();
+		sourcesChanged.forEach(jsonElements::add);
+		notification.add("changes", jsonElements);
+		try {
+			notifier.produce(MessageWriter.write(Json.toJson(notification)));
+		} catch (JMSException e) {
+			Logger.error(e);
+		}
+
 	}
 
 	private void response(BrokerManager manager, Message requestMessage, String response) {

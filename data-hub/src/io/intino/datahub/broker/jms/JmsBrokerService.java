@@ -403,8 +403,7 @@ public class JmsBrokerService implements BrokerService {
 		public void startTankConsumers() {
 			if (graph.datalake() == null) return;
 			brokerStage.mkdirs();
-			TopicProducer notifier = brokerManager.topicProducerOf("service.ness.datamarts.notifications");
-			graph.datalake().tankList().forEach(t -> registerTankConsumer(t, notifier));
+			graph.datalake().tankList().forEach(this::registerTankConsumer);
 			Logger.info("Tanks ignited!");
 		}
 
@@ -413,15 +412,15 @@ public class JmsBrokerService implements BrokerService {
 			if (graph.datalake() == null) return;
 			brokerStage.mkdirs();
 			graph.datalake().tankList().forEach(this::unregisterTankConsumer);
-			Logger.info("Tanks ignited!");
+			Logger.info("Tanks paused!");
 		}
 
 		private void unregisterTankConsumer(Datalake.Tank t) {
 			brokerManager.unregisterConsumer(t.qn());
 		}
 
-		private void registerTankConsumer(Datalake.Tank t, TopicProducer notifier) {
-			brokerManager.registerTopicConsumer(t.qn(), new JmsMessageSerializer(brokerStage, t, scale(t), box.datamarts(), notifier).create());
+		private void registerTankConsumer(Datalake.Tank t) {
+			brokerManager.registerTopicConsumer(t.qn(), new JmsMessageSerializer(brokerStage, t, scale(t), box.datamarts(), box.nessService()).create());
 		}
 
 		private void registerProcessStatus(Scale scale, Datalake.ProcessStatus ps) {

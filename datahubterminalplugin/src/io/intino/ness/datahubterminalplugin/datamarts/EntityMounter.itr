@@ -60,10 +60,12 @@ def !type(abstract) type(mounter) type(message)
 		private void updateAttributes(Message message, Operation$[$] operation, $datamart+FirstUpperCase~Entity owner) {
 			for(String attr : message.attributes()) {
 				update(owner, attr, parse(attr, message));
-				if(attr.equals("enabled") && !message.get("enabled").asBoolean()) {
-					operation$[0$] = operation$[0$] == Create ? Skip : Remove;
-					entities.remove(owner.id());
-					return;
+				if(attr.equals("enabled")) {
+					if(message.get("enabled").asBoolean()) {
+						entities.enable(owner.id());
+					} else {
+						entities.disable(owner.id());
+					}
 				}
 			}
 
@@ -72,6 +74,7 @@ def !type(abstract) type(mounter) type(message)
 
 		private $datamart+FirstUpperCase~Entity findOrCreateEntity(String id, Operation$[$] operation) {
 			$datamart+FirstUpperCase~Entity entity = entities.get($package.entities.$name+FirstUpperCase.definition, id);
+			if(entity == null) entity = entities.getDisabled($package.entities.$name+FirstUpperCase.definition, id);
 			if(entity == null) {
 				entity = new $name+FirstUpperCase(id, entities.datamart());
 				entities.add(entity);

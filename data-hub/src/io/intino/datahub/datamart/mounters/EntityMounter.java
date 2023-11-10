@@ -6,6 +6,9 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.datahub.datamart.MasterDatamart;
 
+import java.util.Collections;
+import java.util.List;
+
 public final class EntityMounter extends MasterDatamartMounter {
 
 	public EntityMounter(MasterDatamart datamart) {
@@ -28,11 +31,6 @@ public final class EntityMounter extends MasterDatamartMounter {
 
 			Message oldMessage = datamart.entityStore().get(id);
 
-			if(isDisabled(message)) {
-				if(oldMessage != null) datamart.entityStore().remove(id);
-				return;
-			}
-
 			if (oldMessage != null) {
 				update(message, id, oldMessage);
 			} else {
@@ -41,6 +39,11 @@ public final class EntityMounter extends MasterDatamartMounter {
 		} catch (Throwable e) {
 			Logger.error("Failed to mount message of type " + message.type() + ": " + e.getMessage(), e);
 		}
+	}
+
+	@Override
+	public List<String> destinationsOf(Message message) {
+		return Collections.emptyList();
 	}
 
 	private void addNewEntity(Message message, String id) {
