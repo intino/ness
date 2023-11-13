@@ -8,6 +8,7 @@ import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.RuleSet;
 import io.intino.itrules.Template;
 import io.intino.ness.datahubterminalplugin.Formatters;
+import io.intino.ness.datahubterminalplugin.datamarts.nodes.IndicatorImplTemplate;
 import io.intino.ness.datahubterminalplugin.datamarts.nodes.NodeImplTemplate;
 import io.intino.ness.datahubterminalplugin.util.ErrorUtils;
 import io.intino.plugin.PluginLauncher;
@@ -246,7 +247,17 @@ public class DatamartsRenderer implements ConceptRenderer {
 		List<Frame> frames = new ArrayList<>();
 		frames.addAll(datamart.timelineList().stream().filter(Timeline::isRaw).map(Timeline::asRaw).map(this::timelineFrame).toList());
 		frames.addAll(datamart.timelineList().stream().filter(Timeline::isCooked).map(Timeline::asCooked).map(this::timelineFrame).toList());
+		frames.addAll(datamart.timelineList().stream().filter(Timeline::isCooked).map(Timeline::asCooked).map(this::indicatorFrame).toList());
 		return frames.toArray(new Frame[0]);
+	}
+
+	private Frame indicatorFrame(Timeline.Cooked timeline) {
+		FrameBuilder b = new FrameBuilder("indicator", "cooked");
+		b.add("package", modelPackage);
+		b.add("name", timeline.name$());
+		b.add("sources", types(timeline.asTimeline()).map(t -> quoted().format(t).toString()).collect(joining(",")));
+		b.add("entity", firstUpperCase(timeline.entity().name$()));
+		return b.toFrame();
 	}
 
 	private Frame timelineFrame(Timeline.Raw timeline) {
@@ -615,7 +626,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 	private static class Templates {
 		final Template datamartBase = append(customize(new DatamartBaseTemplate()));
-		final Template datamart = append(customize(new DatamartTemplate()), customize(new NodeImplTemplate()), customize(new DictionaryImplTemplate()));
+		final Template datamart = append(customize(new DatamartTemplate()), customize(new NodeImplTemplate()), customize(new IndicatorImplTemplate()), customize(new DictionaryImplTemplate()));
 		final Template entityBase = customize(new EntityBaseTemplate());
 		final Template entity = append(customize(new EntityTemplate()), customize(new StructTemplate()), customize(new AttributesTemplate()));
 		final Template entityMounter = customize(new EntityMounterTemplate());

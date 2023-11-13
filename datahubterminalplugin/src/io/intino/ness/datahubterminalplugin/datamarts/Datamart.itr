@@ -1,5 +1,3 @@
-
-
 def type(datamart & message & impl)
 	package $package;
 
@@ -41,6 +39,7 @@ def type(datamart & message & impl)
 		private Instant ts;
 		[$hasTimelines~private boolean hasLocalAccessToTimelines;]
 		[$hasTimelines~private final Map<String, TimelineNodeImpl> timelines = new java.util.concurrent.ConcurrentHashMap<>();]
+		[$hasTimelines~private final Map<String, IndicatorNodeImpl> indicators = new java.util.concurrent.ConcurrentHashMap<>();]
 		[$hasReels~private boolean hasLocalAccessToReels;]
 		[$hasReels~private final Map<String, ReelNodeImpl> reels = new java.util.concurrent.ConcurrentHashMap<>();]
 		private volatile DictionaryImpl dictionary = new DictionaryImpl();
@@ -153,6 +152,7 @@ def type(datamart & message & impl)
 
 		[$hasReels+reelsByIdMethod]
     	[$reel+getter...[$NL$NL]]
+		[$indicator+getter...[$NL$NL]]
 
     	@Override
     	public Dictionary dictionary() {
@@ -177,6 +177,7 @@ def type(datamart & message & impl)
     		loadEntitiesFromEvents(downloadEntities(eventCount, datamartSourceSelector), eventCount);
 
     		[$hasTimelines~loadTimelinesFromDatahub();]
+    		[$hasTimelines~loadIndicatorsFromDatahub();]
 
     		[$hasReels~loadReelsFromDatahub();]
 
@@ -538,6 +539,14 @@ def type(reel) trigger(getter)
 	}
 end
 
+def type(indicator) trigger(getter)
+	@Override
+	public IndicatorNode $name+FirstLowerCase~Indicator() {
+		if (hasLocalAccessToTimelines) return indicators.containsKey("$name") ? indicators.get("$name") : IndicatorNode.empty();
+		return indicators.computeIfAbsent($name", theId -> new IndicatorNodeImpl("$name", null));
+	}
+end
+
 def trigger(timelinesByIdMethod)
 	@Override
 	public Stream<TimelineNode> timelines(String id) {
@@ -634,32 +643,6 @@ def trigger(getter)
 	}
 end
 
-def type(entity) trigger(getterSignature)
-	$package.entities.$name+FirstUpperCase $name+firstLowerCase(String id);
-	$package.entities.$name+FirstUpperCase $name+firstLowerCase~Disabled(String id);
-	Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase();
-	Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase~Disabled();
-	default List<$package.entities.$name+FirstUpperCase> $name+firstLowerCase~List() {return $name+Plural+firstLowerCase().collect(Collectors.toList());}
-	default List<$package.entities.$name+FirstUpperCase> $name+firstLowerCase~DisabledList() {return $name+Plural+firstLowerCase~Disabled().collect(Collectors.toList());}
-	default java.util.Optional<$package.entities.$name+FirstUpperCase> $name+firstLowerCase(java.util.function.Predicate<$package.entities.$name+FirstUpperCase~> predicate) {return $name+Plural+firstLowerCase().filter(predicate).findFirst();}
-	default java.util.Optional<$package.entities.$name+FirstUpperCase> $name+firstLowerCase~Disabled(java.util.function.Predicate<$package.entities.$name+FirstUpperCase~> predicate) {return $name+Plural+firstLowerCase~Disabled().filter(predicate).findFirst();}
-end
-
-def type(timeline) trigger(getterSignature)
-	default TimelineNode $name+firstLowerCase~Timeline($package.entities.$entity+firstUpperCase entity) {return $name+firstLowerCase~Timeline(entity.id());}
-	TimelineNode $name+firstLowerCase~Timeline(String id);
-end
-
-def type(reel) trigger(getterSignature)
-	default ReelNode $name+firstLowerCase~Reel($package.entities.$entity+firstUpperCase entity) {return $name+firstLowerCase~Reel(entity.id());}
-	ReelNode $name+firstLowerCase~Reel(String id);
-	Stream<ReelNode> $name+firstLowerCase~Reels();
-end
-
-def type(indicator) trigger(getterSignature)
-	IndicatorNode $name+firstLowerCase~Indicator();
-end
-
 def trigger(loadTimelinesFromDatahubMethod)
 	private void loadTimelinesFromDatahub() {
 		Logger.debug("Downloading timelines...");
@@ -671,6 +654,43 @@ def trigger(loadTimelinesFromDatahubMethod)
                	String id = file.getName().replace(".timeline", "");
                	String type = file.getParentFile().getName();
                	TimelineNodeImpl node = new TimelineNodeImpl(id, type, file.exists() ? file : null);
+               	timelines.put(id + ":" + type, node);
+               	if (hasLocalAccessToTimelines == null) hasLocalAccessToTimelines = file.exists();
+               	else hasLocalAccessToTimelines &= file.exists();
+            } catch (Exception e) {
+               	Logger.debug("Could not load timeline " + filename + " -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
+            }
+        }
+        this.hasLocalAccessToTimelines = hasLocalAccessToTimelines != null && hasLocalAccessToTimelines;
+        Logger.debug("Loaded " + timelines.size() + " timelines (hasLocalAccessToTimelines=" + this.hasLocalAccessToTimelines + ")");
+    }
+
+    private String$[$] listTimelineFiles() {
+    	try {
+    		ActiveMQTextMessage request = new ActiveMQTextMessage();
+    		request.setText("datamart=" + name() + ";operation=list-timelines;");
+    		javax.jms.Message message = requestResponseFromDatahub("list-timelines", request);
+    		if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
+    		return ((javax.jms.TextMessage)message).getText().split(",");
+    	} catch (Exception e) {
+    		Logger.error(e);
+    		return new String$[0$];
+    	}
+    }
+end
+
+
+def trigger(loadIndicatorsFromDatahubMethod)
+	private void loadIndicatorsFromDatahub() {
+		Logger.debug("Downloading indicators...");
+		Boolean hasLocalAccessToTimelines = null;
+        for(String filename : listIndicatorFiles()) {
+        	if (filename == null || filename.isBlank()) continue;
+        	try {
+               	File file = new File(filename);
+               	String id = file.getName().replace(".indicator", "");
+               	String type = file.getParentFile().getName();
+               	IndicatorNodeImpl node = new IndicatorNodeImpl(id, type, file.exists() ? file : null);
                	timelines.put(id + ":" + type, node);
                	if (hasLocalAccessToTimelines == null) hasLocalAccessToTimelines = file.exists();
                	else hasLocalAccessToTimelines &= file.exists();

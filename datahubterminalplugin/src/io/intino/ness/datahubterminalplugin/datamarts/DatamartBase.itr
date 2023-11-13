@@ -37,7 +37,6 @@ def type(datamart & interface)
 		Dictionary dictionary(String name);
 
 		class Entities {
-
 			private final $name+FirstUpperCase~Datamart datamart;
 			private final Map<EntityDefinition, Map<String, $name+FirstUpperCase~Entity>> entitiesByType;
 			private final Map<EntityDefinition, Map<String, $name+FirstUpperCase~Entity>> entitiesByTypeDisabled;
@@ -180,6 +179,13 @@ def type(datamart & interface)
         interface IndicatorNode {
         	boolean exists();
         	Indicator get() throws IndicatorNotAvailableException;
+
+        	static IndicatorNode empty() {
+				return new IndicatorNode() {
+					public boolean exists() {return false;}
+					public Indicator get() throws IndicatorNotAvailableException {throw new IndicatorNotAvailableException();}
+				};
+			}
         }
 
         public record Indicator(Map<String, Shot> shots) {
@@ -318,4 +324,30 @@ def type(datamart & interface)
         	public ReelNotAvailableException(Throwable e) {super(e);}
         }
 	}
+end
+
+def type(entity) trigger(getterSignature)
+	$package.entities.$name+FirstUpperCase $name+firstLowerCase(String id);
+	$package.entities.$name+FirstUpperCase $name+firstLowerCase~Disabled(String id);
+	Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase();
+	Stream<$package.entities.$name+FirstUpperCase> $name+Plural+firstLowerCase~Disabled();
+	default List<$package.entities.$name+FirstUpperCase> $name+firstLowerCase~List() {return $name+Plural+firstLowerCase().collect(Collectors.toList());}
+	default List<$package.entities.$name+FirstUpperCase> $name+firstLowerCase~DisabledList() {return $name+Plural+firstLowerCase~Disabled().collect(Collectors.toList());}
+	default java.util.Optional<$package.entities.$name+FirstUpperCase> $name+firstLowerCase(java.util.function.Predicate<$package.entities.$name+FirstUpperCase~> predicate) {return $name+Plural+firstLowerCase().filter(predicate).findFirst();}
+	default java.util.Optional<$package.entities.$name+FirstUpperCase> $name+firstLowerCase~Disabled(java.util.function.Predicate<$package.entities.$name+FirstUpperCase~> predicate) {return $name+Plural+firstLowerCase~Disabled().filter(predicate).findFirst();}
+end
+
+def type(timeline) trigger(getterSignature)
+	default TimelineNode $name+firstLowerCase~Timeline($package.entities.$entity+firstUpperCase entity) {return $name+firstLowerCase~Timeline(entity.id());}
+	TimelineNode $name+firstLowerCase~Timeline(String id);
+end
+
+def type(reel) trigger(getterSignature)
+	default ReelNode $name+firstLowerCase~Reel($package.entities.$entity+firstUpperCase entity) {return $name+firstLowerCase~Reel(entity.id());}
+	ReelNode $name+firstLowerCase~Reel(String id);
+	Stream<ReelNode> $name+firstLowerCase~Reels();
+end
+
+def type(indicator) trigger(getterSignature)
+	IndicatorNode $name+firstLowerCase~Indicator();
 end
