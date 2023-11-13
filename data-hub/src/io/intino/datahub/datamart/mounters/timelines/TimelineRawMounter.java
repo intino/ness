@@ -1,4 +1,4 @@
-package io.intino.datahub.datamart.mounters;
+package io.intino.datahub.datamart.mounters.timelines;
 
 import io.intino.alexandria.event.measurement.MeasurementEvent;
 import io.intino.alexandria.logger.Logger;
@@ -16,7 +16,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static io.intino.datahub.datamart.mounters.TimelineUtils.*;
+import static io.intino.datahub.datamart.mounters.MounterUtils.*;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 

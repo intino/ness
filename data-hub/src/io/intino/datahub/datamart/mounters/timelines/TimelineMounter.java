@@ -1,4 +1,4 @@
-package io.intino.datahub.datamart.mounters;
+package io.intino.datahub.datamart.mounters.timelines;
 
 import io.intino.alexandria.event.Event;
 import io.intino.alexandria.event.measurement.MeasurementEvent;
@@ -7,6 +7,8 @@ import io.intino.alexandria.event.measurement.MeasurementEvent.Magnitude.Attribu
 import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.message.Message;
 import io.intino.datahub.datamart.MasterDatamart;
+import io.intino.datahub.datamart.mounters.MasterDatamartMounter;
+import io.intino.datahub.datamart.mounters.MounterUtils;
 import io.intino.datahub.model.Timeline;
 import io.intino.magritte.framework.Layer;
 import io.intino.sumus.chronos.TimelineStore;
@@ -24,8 +26,8 @@ import java.util.stream.Collectors;
 
 import static io.intino.alexandria.event.measurement.MeasurementEvent.ATTRIBUTE_SEP;
 import static io.intino.alexandria.event.measurement.MeasurementEvent.NAME_VALUE_SEP;
-import static io.intino.datahub.datamart.mounters.TimelineUtils.sourceSensor;
-import static io.intino.datahub.datamart.mounters.TimelineUtils.types;
+import static io.intino.datahub.datamart.mounters.MounterUtils.sourceSensor;
+import static io.intino.datahub.datamart.mounters.MounterUtils.types;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Arrays.stream;
@@ -133,7 +135,7 @@ public class TimelineMounter extends MasterDatamartMounter {
 
 		public OfSingleTimeline(MasterDatamart datamart, Timeline timeline, String tank, String ss) {
 			this.ss = ss;
-			this.timelineFactory = ts -> TimelineUtils.rawTimelineBuilder()
+			this.timelineFactory = ts -> MounterUtils.rawTimelineBuilder()
 					.datamart(datamart)
 					.datamartDir(datamart.box().datamartTimelinesDirectory(datamart.name()))
 					.type(tank)

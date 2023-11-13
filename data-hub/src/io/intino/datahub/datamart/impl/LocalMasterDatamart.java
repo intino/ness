@@ -5,7 +5,10 @@ import io.intino.alexandria.message.Message;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.datamart.TimeShiftCache;
-import io.intino.datahub.datamart.mounters.*;
+import io.intino.datahub.datamart.mounters.EntityMounter;
+import io.intino.datahub.datamart.mounters.MasterDatamartMounter;
+import io.intino.datahub.datamart.mounters.ReelMounter;
+import io.intino.datahub.datamart.mounters.timelines.TimelineMounter;
 import io.intino.datahub.model.Datalake;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Entity;
@@ -13,26 +16,23 @@ import io.intino.sumus.chronos.ReelFile;
 import io.intino.sumus.chronos.TimelineStore;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.intino.datahub.box.DataHubBox.REEL_EXTENSION;
-import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
-import static io.intino.datahub.datamart.MasterDatamart.ChronosDirectory.normalizePath;
+import static io.intino.datahub.datamart.MasterDatamart.normalizePath;
 import static java.util.Collections.synchronizedMap;
 
 public class LocalMasterDatamart implements MasterDatamart {
-
 	private final DataHubBox box;
 	private final Datamart definition;
 	private final File directory;
 	private final Store<Message> entities;
 	private final ChronosDirectory<TimelineStore> timelines;
 	private final ChronosDirectory<ReelFile> reels;
+	private final IndicatorDirectory indicators;
 	private final Map<String, TimeShiftCache> caches;
 
 	public LocalMasterDatamart(DataHubBox box, Datamart definition) {
@@ -41,6 +41,7 @@ public class LocalMasterDatamart implements MasterDatamart {
 		this.directory = box.datamartDirectory(definition.name$());
 		this.entities = new EntityStore(definition);
 		this.timelines = new TimelineDirectory(definition, new File(directory, "timelines"));
+		this.indicators = new IndicatorDirectory(definition, new File(directory, "indicators"));
 		this.reels = new ReelDirectory(definition, new File(directory, "reels"));
 		this.caches = new HashMap<>();
 	}
@@ -72,6 +73,11 @@ public class LocalMasterDatamart implements MasterDatamart {
 	@Override
 	public ChronosDirectory<TimelineStore> timelineStore() {
 		return timelines;
+	}
+
+	@Override
+	public IndicatorDirectory indicatorStore() {
+		return indicators;
 	}
 
 	@Override
@@ -196,102 +202,4 @@ public class LocalMasterDatamart implements MasterDatamart {
 		}
 	}
 
-	private static class TimelineDirectory extends ChronosDirectory<TimelineStore> {
-
-		private final Set<String> subscribedEvents;
-
-		public TimelineDirectory(Datamart definition, File root) {
-			super(root);
-			this.subscribedEvents = definition.timelineList().stream()
-					.flatMap(TimelineUtils::types)
-					.collect(Collectors.toSet());
-		}
-
-		@Override
-		protected String extension() {
-			return TIMELINE_EXTENSION;
-		}
-
-		@Override
-		public TimelineStore get(String type, String id) {
-			try {
-				return contains(type, id) ? TimelineStore.of(fileOf(type, id)) : null;
-			} catch (IOException e) {
-				Logger.error(e);
-				return null;
-			}
-		}
-
-		@Override
-		public Stream<TimelineStore> stream() {
-			return listFiles().stream().map(f -> {
-				try {
-					return TimelineStore.of(f);
-				} catch (IOException e) {
-					return null;
-				}
-			}).filter(Objects::nonNull);
-		}
-
-		@Override
-		public Collection<String> subscribedEvents() {
-			return subscribedEvents;
-		}
-
-		@Override
-		public boolean isSubscribedTo(Datalake.Tank tank) {
-			Collection<String> events = subscribedEvents();
-			if (tank.isMeasurement() && events.contains(tank.asMeasurement().sensor().name$())) return true;
-			return tank.isMessage() && events.contains(tank.asMessage().message().name$());
-		}
-	}
-
-	private static class ReelDirectory extends ChronosDirectory<ReelFile> {
-
-		private final Set<String> subscribedEvents;
-
-		public ReelDirectory(Datamart definition, File root) {
-			super(root);
-			this.subscribedEvents = definition.reelList().stream()
-					.map(r -> r.tank().message().name$())
-					.collect(Collectors.toSet());
-		}
-
-		@Override
-		protected String extension() {
-			return REEL_EXTENSION;
-		}
-
-		@Override
-		public ReelFile get(String type, String id) {
-			try {
-				return contains(type, id) ? ReelFile.open(fileOf(type, id)) : null;
-			} catch (IOException e) {
-				Logger.error(e);
-				return null;
-			}
-		}
-
-		@Override
-		public Stream<ReelFile> stream() {
-			return listFiles().stream().map(f -> {
-				try {
-					return ReelFile.open(f);
-				} catch (IOException e) {
-					return null;
-				}
-			}).filter(Objects::nonNull);
-		}
-
-		@Override
-		public Collection<String> subscribedEvents() {
-			return subscribedEvents;
-		}
-
-		@Override
-		public boolean isSubscribedTo(Datalake.Tank tank) {
-			if (!tank.isMessage() || tank.asMessage() == null || tank.asMessage().message() == null) return false;
-			return subscribedEvents().contains(tank.asMessage().message().name$());
-		}
-	}
 }

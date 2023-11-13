@@ -1,0 +1,321 @@
+def type(datamart & interface)
+	package $package;
+
+	import java.util.List;
+	import java.util.Map;
+	import java.util.concurrent.ConcurrentHashMap;
+	import java.util.stream.Stream;
+	import java.util.stream.Collectors;
+	import java.time.Instant;
+	import java.util.Optional;
+
+	import io.intino.ness.master.Datamart;
+	import io.intino.ness.master.model.Entity;
+	import io.intino.ness.master.reflection.*;
+
+	public interface $name+FirstUpperCase~Datamart extends Datamart {
+
+		DatamartDefinition definition = new $name+FirstUpperCase~Datamart.DatamartDefinitionInternal();
+
+		List<String> listSnapshots();
+		$name+FirstUpperCase~Datamart snapshot(String timetag);
+
+		int sizeDisabled();
+
+		[$entity+getterSignature...[$NL$NL]]
+
+		[$hasTimelines~Stream<TimelineNode> timelines(String id);]
+
+		[$timeline+getterSignature...[$NL$NL]]
+
+		[$hasReels~Stream<ReelNode> reels(String id);]
+
+		[$reel+getterSignature...[$NL$NL]]
+
+		[$indicator+getterSignature...[$NL$NL]]
+
+		Dictionary dictionary(String name);
+
+		class Entities {
+
+			private final $name+FirstUpperCase~Datamart datamart;
+			private final Map<EntityDefinition, Map<String, $name+FirstUpperCase~Entity>> entitiesByType;
+			private final Map<EntityDefinition, Map<String, $name+FirstUpperCase~Entity>> entitiesByTypeDisabled;
+
+			public Entities($name+FirstUpperCase~Datamart datamart) {
+				this.datamart = datamart;
+				this.entitiesByType = new ConcurrentHashMap<>();
+				this.entitiesByTypeDisabled = new ConcurrentHashMap<>();
+				datamart.getDefinition().entities().stream().filter(e -> !e.isAbstract()).forEach(entity -> entitiesByType.put(entity, new ConcurrentHashMap<>()));
+				datamart.getDefinition().entities().stream().filter(e -> !e.isAbstract()).forEach(entity -> entitiesByTypeDisabled.put(entity, new ConcurrentHashMap<>()));
+			}
+
+			public $name+FirstUpperCase~Datamart datamart() {
+				return datamart;
+			}
+
+        	public int size() {
+        		return entitiesByType.values().stream().mapToInt(Map::size).sum();
+        	}
+
+        	public int sizeDisabled() {
+        		return entitiesByTypeDisabled.values().stream().mapToInt(Map::size).sum();
+        	}
+
+        	public boolean exists(String id) {
+        		return contains(id) || containsDisabled(id);
+        	}
+
+        	public boolean contains(String id) {
+        		return get(id) != null;
+        	}
+
+        	public boolean containsDisabled(String id) {
+        		return getDisabled(id) != null;
+        	}
+
+        	public boolean exists(EntityDefinition definition, String id) {
+        		return contains(definition, id) || containsDisabled(definition, id);
+        	}
+
+        	public boolean contains(EntityDefinition definition, String id) {
+        		return get(definition, id) != null;
+        	}
+
+        	public boolean containsDisabled(EntityDefinition definition, String id) {
+        		return getDisabled(definition, id) != null;
+        	}
+
+        	public $name+FirstUpperCase~Entity get(String id) {
+        		return mapOf(id).map(map -> map.get(id)).orElse(null);
+        	}
+
+        	public $name+FirstUpperCase~Entity getDisabled(String id) {
+        		return mapOfDisabled(id).map(map -> map.get(id)).orElse(null);
+        	}
+
+        	public <T extends $name+FirstUpperCase~Entity> T getDescendant(EntityDefinition definition, String id) {
+        		T entity = get(definition, id);
+        		return entity != null ? entity: definition.descendants().stream()
+        			.filter(descendant -> !descendant.isAbstract())
+        			.map(descendant -> this.<T>get(descendant, id))
+        			.filter(java.util.Objects::nonNull).findFirst().orElse(null);
+        	}
+
+        	public <T extends $name+FirstUpperCase~Entity> T getDescendantDisabled(EntityDefinition definition, String id) {
+        		T entity = getDisabled(definition, id);
+        		return entity != null ? entity: definition.descendants().stream()
+        			.filter(descendant -> !descendant.isAbstract())
+        			.map(descendant -> this.<T>getDisabled(descendant, id))
+        			.filter(java.util.Objects::nonNull).findFirst().orElse(null);
+        	}
+
+			@SuppressWarnings("unchecked")
+        	public <T extends $name+FirstUpperCase~Entity> T get(EntityDefinition type, String id) {
+        		return entitiesByType.containsKey(type) ? (T) entitiesByType.get(type).get(id) : null;
+            }
+
+			@SuppressWarnings("unchecked")
+        	public <T extends $name+FirstUpperCase~Entity> T getDisabled(EntityDefinition type, String id) {
+        		return entitiesByTypeDisabled.containsKey(type) ? (T) entitiesByTypeDisabled.get(type).get(id) : null;
+            }
+
+        	public void add($name+FirstUpperCase~Entity entity) {
+        		entitiesByType.get(entity.getDefinition()).put(entity.id(), entity);
+        	}
+
+        	public void addDisabled($name+FirstUpperCase~Entity entity) {
+        		entitiesByTypeDisabled.get(entity.getDefinition()).put(entity.id(), entity);
+        	}
+
+        	public void disable(String id) {
+        		mapOf(id).map(m -> m.remove(id)).ifPresent(this::addDisabled);
+        	}
+
+        	public void enable(String id) {
+        		mapOfDisabled(id).map(m -> m.remove(id)).ifPresent(this::add);
+        	}
+
+        	public void delete(String id) {
+        		mapOf(id).ifPresent(map -> map.remove(id));
+        		mapOfDisabled(id).ifPresent(map -> map.remove(id));
+        	}
+
+        	public Stream<$name+FirstUpperCase~Entity> stream() {
+        		return entitiesByType.values().stream().flatMap(map -> map.values().stream());
+        	}
+
+        	public Stream<$name+FirstUpperCase~Entity> streamDisabled() {
+        		return entitiesByTypeDisabled.values().stream().flatMap(map -> map.values().stream());
+        	}
+
+			@SuppressWarnings("unchecked")
+        	public <T extends $name+FirstUpperCase~Entity> Stream<T> stream(EntityDefinition type) {
+        		return (Stream<T>) (entitiesByType.containsKey(type) ? entitiesByType.get(type).values().stream() : Stream.empty());
+        	}
+
+			@SuppressWarnings("unchecked")
+        	public <T extends $name+FirstUpperCase~Entity> Stream<T> streamDisabled(EntityDefinition type) {
+        		return (Stream<T>) (entitiesByTypeDisabled.containsKey(type) ? entitiesByTypeDisabled.get(type).values().stream() : Stream.empty());
+        	}
+
+        	public Stream<Entity> streamGeneric() {
+            	return entitiesByType.values().stream().flatMap(map -> map.values().stream());
+            }
+
+        	public Stream<Entity> streamGenericDisabled() {
+            	return entitiesByTypeDisabled.values().stream().flatMap(map -> map.values().stream());
+            }
+
+        	private java.util.Optional<Map<String, $name+FirstUpperCase~Entity>> mapOf(String id) {
+        		return entitiesByType.values().stream().filter(map -> map.containsKey(id)).findFirst();
+        	}
+
+        	private java.util.Optional<Map<String, $name+FirstUpperCase~Entity>> mapOfDisabled(String id) {
+        		return entitiesByTypeDisabled.values().stream().filter(map -> map.containsKey(id)).findFirst();
+        	}
+        }
+
+
+        interface IndicatorNode {
+        	boolean exists();
+        	Indicator get() throws IndicatorNotAvailableException;
+        }
+
+        public record Indicator(Map<String, Shot> shots) {
+        	public Shot get(String sensor) {
+        		return shots.get(sensor);
+        	}
+
+        	public record Shot(Instant ts, double value) {
+        	}
+        }
+
+        interface ChronosNode {
+        	/**<p>Returns the id of the chronos object</p>*/
+        	String id();
+        	/**<p>Returns the type of the chronos object, as defined in the model</p>*/
+        	String type();
+        	/**Clears this node's internal cache, if any, and notifies the datamart to unload this node from memory.*/
+        	void dispose();
+        }
+
+        interface TimelineNode extends ChronosNode {
+        	java.util.concurrent.atomic.AtomicBoolean AlwaysDownloadFromDatahub = new java.util.concurrent.atomic.AtomicBoolean();
+			boolean exists();
+			io.intino.sumus.chronos.TimelineStore.TimeModel timeModel() throws TimelineNotAvailableException;
+			io.intino.sumus.chronos.TimelineStore.SensorModel sensorModel() throws TimelineNotAvailableException;
+			Instant first() throws TimelineNotAvailableException;
+			Instant last() throws TimelineNotAvailableException;
+        	io.intino.sumus.chronos.Timeline get() throws TimelineNotAvailableException;
+
+        	void setChangeListener(ChangeListener listener);
+
+     		interface ChangeListener {
+        		void notifyChange(TimelineNode timeline);
+        	}
+
+        	static TimelineNode empty() {
+        		return new TimelineNode() {
+                    public String id(){return "";}
+                    public String type(){return "";}
+                    public void dispose(){}
+                	public boolean exists() {return false;}
+                	public io.intino.sumus.chronos.TimelineStore.TimeModel timeModel() throws TimelineNotAvailableException {throw new TimelineNotAvailableException();}
+                	public io.intino.sumus.chronos.TimelineStore.SensorModel sensorModel() throws TimelineNotAvailableException {throw new TimelineNotAvailableException();}
+                	public Instant first() throws TimelineNotAvailableException {throw new TimelineNotAvailableException();}
+                	public Instant last() throws TimelineNotAvailableException {throw new TimelineNotAvailableException();}
+                	public io.intino.sumus.chronos.Timeline get() throws TimelineNotAvailableException {throw new TimelineNotAvailableException();}
+                	public void setChangeListener(ChangeListener listener) {}
+        		};
+        	}
+        }
+
+        interface ReelNode extends ChronosNode {
+			boolean exists();
+        	java.time.Instant start() throws ReelNotAvailableException;
+        	io.intino.sumus.chronos.State stateOf(String signal) throws ReelNotAvailableException;
+			default List<io.intino.sumus.chronos.State> stateOf(List<String> signals) throws ReelNotAvailableException {return signals.isEmpty() ? java.util.Collections.emptyList() : stateOf(signals.stream());}
+			List<io.intino.sumus.chronos.State> stateOf(Stream<String> signals) throws ReelNotAvailableException;
+			io.intino.sumus.chronos.Shot lastShotOf(String signal) throws ReelNotAvailableException;
+            List<io.intino.sumus.chronos.Shot> lastShots() throws ReelNotAvailableException;
+            List<io.intino.sumus.chronos.Shot> lastShots(String group) throws ReelNotAvailableException;
+            List<io.intino.sumus.chronos.Shot> lastShots(io.intino.sumus.chronos.Group group) throws ReelNotAvailableException;
+        	io.intino.sumus.chronos.Reel get(io.intino.sumus.chronos.Period period) throws ReelNotAvailableException;
+        	io.intino.sumus.chronos.Reel get(java.time.Instant from, java.time.Instant to, io.intino.sumus.chronos.Period period) throws ReelNotAvailableException;
+        	void setChangeListener(ChangeListener listener);
+
+     		interface ChangeListener {
+        		void notifyChange(ReelNode reel);
+        	}
+
+        	static ReelNode empty() {
+        		return new ReelNode() {
+        	        public String id(){return "";}
+                    public String type(){return "";}
+                    public void dispose(){}
+        			public boolean exists() {return false;}
+                	public java.time.Instant start() throws ReelNotAvailableException {throw new ReelNotAvailableException();}
+                	public io.intino.sumus.chronos.State stateOf(String signal) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
+                	public List<io.intino.sumus.chronos.State> stateOf(Stream<String> signals) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
+                	public io.intino.sumus.chronos.Shot lastShotOf(String signal) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
+					public List<io.intino.sumus.chronos.Shot> lastShots() throws ReelNotAvailableException{throw new ReelNotAvailableException();}
+					public List<io.intino.sumus.chronos.Shot> lastShots(String group) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
+					public List<io.intino.sumus.chronos.Shot> lastShots(io.intino.sumus.chronos.Group group) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
+                	public io.intino.sumus.chronos.Reel get(io.intino.sumus.chronos.Period period) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
+                	public io.intino.sumus.chronos.Reel get(java.time.Instant from, java.time.Instant to, io.intino.sumus.chronos.Period period) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
+                	public void setChangeListener(ChangeListener listener) {}
+        		};
+        	}
+        }
+
+		final class DatamartDefinitionInternal implements DatamartDefinition {
+			private DatamartDefinition definition;
+			private DatamartDefinitionInternal() {}
+			@Override
+			public String name() {return definition().name();}
+			@Override
+			public Datamart.Scale scale() {return definition().scale();}
+			@Override
+			public Query<EntityDefinition> entities() {return definition().entities();}
+			@Override
+			public Query<StructDefinition> structs() {return definition().structs();}
+			@Override
+			public Optional<EntityDefinition> entity(String fullName) {
+            	return definition().entity(fullName);
+            }
+            @Override
+            public Optional<StructDefinition> struct(String fullName) {
+            	return definition().struct(fullName);
+            }
+			private DatamartDefinition definition() {
+				if (definition == null) throw new IllegalStateException("$name+FirstUpperCase~Datamart is not initialized");
+				return definition;
+			}
+		}
+
+		public static class DatahubRequestException extends Exception {
+			public DatahubRequestException() {}
+			public DatahubRequestException(String message) {super(message);}
+			public DatahubRequestException(String message, Throwable cause) {super(message, cause);}
+		}
+
+		public static class IndicatorNotAvailableException extends Exception {
+        	public IndicatorNotAvailableException() {}
+        	public IndicatorNotAvailableException(String message) {super(message);}
+        	public IndicatorNotAvailableException(Throwable e) {super(e);}
+        }
+
+        public static class TimelineNotAvailableException extends Exception {
+			public TimelineNotAvailableException() {}
+			public TimelineNotAvailableException(String message) {super(message);}
+			public TimelineNotAvailableException(Throwable e) {super(e);}
+		}
+
+		public static class ReelNotAvailableException extends Exception {
+        	public ReelNotAvailableException() {}
+        	public ReelNotAvailableException(String message) {super(message);}
+        	public ReelNotAvailableException(Throwable e) {super(e);}
+        }
+	}
+end

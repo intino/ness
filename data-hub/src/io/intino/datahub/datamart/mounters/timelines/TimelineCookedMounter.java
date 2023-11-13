@@ -1,4 +1,4 @@
-package io.intino.datahub.datamart.mounters;
+package io.intino.datahub.datamart.mounters.timelines;
 
 import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.logger.Logger;
@@ -30,8 +30,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
-import static io.intino.datahub.datamart.MasterDatamart.ChronosDirectory.normalizePath;
-import static io.intino.datahub.datamart.mounters.TimelineUtils.copyOf;
+import static io.intino.datahub.datamart.MasterDatamart.normalizePath;
+import static io.intino.datahub.datamart.mounters.MounterUtils.copyOf;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -40,12 +40,14 @@ import static java.util.stream.Collectors.toMap;
 public class TimelineCookedMounter {
 	private final MasterDatamart datamart;
 	private final Map<String, Set<String>> timelineTypes;
-	private final File directory;
+	private final File tlDirectory;
+	private final IndicatorMounter indicatorMounter;
 
 	public TimelineCookedMounter(DataHubBox box, MasterDatamart datamart, Map<String, Set<String>> timelineTypes) {
 		this.datamart = datamart;
 		this.timelineTypes = timelineTypes;
-		this.directory = box.datamartTimelinesDirectory(datamart.name());
+		this.tlDirectory = box.datamartTimelinesDirectory(datamart.name());
+		this.indicatorMounter = new IndicatorMounter(datamart);
 	}
 
 	public void mount(MessageEvent event) {
@@ -54,16 +56,6 @@ public class TimelineCookedMounter {
 				.map(Timeline::asCooked)
 				.filter(t -> timelineTypes.getOrDefault(t.name$(), Set.of()).contains(event.type()))
 				.forEach(t -> process(event, t));
-	}
-
-	private void process(MessageEvent event, Cooked definition) {
-		try {
-			TimelineStore timelineFile = getOrCreateTimelineStore(event, definition);
-			if (timelineFile == null) return;
-			update(timelineFile, definition, event);
-		} catch (IOException e) {
-			Logger.error(e);
-		}
 	}
 
 	public List<String> destinationsOf(MessageEvent event) {
@@ -75,30 +67,43 @@ public class TimelineCookedMounter {
 				.toList();
 	}
 
-	private TimelineStore getOrCreateTimelineStore(MessageEvent event, Cooked timelineDef) throws IOException {
-		String entityId = entityOf(event, timelineDef);
-		if (entityId == null) return null;
+	private void process(MessageEvent event, Cooked timelineDefinition) {
+		String entityId = entityOf(event, timelineDefinition);
+		if (entityId == null) return;
+		TimelineStore timelineStore = updateTimeline(event, timelineDefinition, entityId);
+		if (timelineStore != null) indicatorMounter.mount(timelineDefinition.name$(), timelineStore);
+	}
+
+	private TimelineStore updateTimeline(MessageEvent event, Cooked definition, String entityId) {
+		try {
+			TimelineStore store = getOrCreateTimelineStore(event, definition, entityId);
+			if (store == null) return null;
+			updateTimeline(store, definition, event);
+			return store;
+		} catch (IOException e) {
+			Logger.error(e);
+			return null;
+		}
+	}
+
+	private TimelineStore getOrCreateTimelineStore(MessageEvent event, Cooked timelineDef, String entityId) throws IOException {
 		TimelineStore timelineFile = datamart.timelineStore().get(timelineDef.name$(), entityId);
-		if (timelineFile == null)
-			timelineFile = createTimelineStore(timelineDef, event.ts(), entityId);
-		return timelineFile;
+		return timelineFile == null ? createTimelineStore(timelineDef, event.ts(), entityId) : timelineFile;
 	}
 
 	private String entityOf(MessageEvent event, Cooked definition) {
 		TimeSeries timeSeries = definition.timeSeries(ts -> ts.tank().message().name$().equals(event.type()));
 		if (timeSeries != null) return event.toMessage().get(timeSeries.entityId().name$()).asString();
-		else {
-			for (TimeSeries series : definition.timeSeriesList())
-				if (series.isCount()) {
-					Operation operation = series.asCount().operation(o -> o.tank().message().name$().equals(event.type()));
-					if (operation != null) return event.toMessage().get(operation.entityId().name$()).asString();
-				} else if (series.asTimeShift().withTank().message().name$().equals(event.type()))
-					return event.toMessage().get(series.asTimeShift().withEntityId().name$()).asString();
-			return null;
-		}
+		for (TimeSeries series : definition.timeSeriesList())
+			if (series.isCount()) {
+				Operation operation = series.asCount().operation(o -> o.tank().message().name$().equals(event.type()));
+				if (operation != null) return event.toMessage().get(operation.entityId().name$()).asString();
+			} else if (series.asTimeShift().withTank().message().name$().equals(event.type()))
+				return event.toMessage().get(series.asTimeShift().withEntityId().name$()).asString();
+		return null;
 	}
 
-	private void update(TimelineStore tlStore, Cooked definition, MessageEvent event) {
+	private void updateTimeline(TimelineStore tlStore, Cooked definition, MessageEvent event) {
 		File timelineFile = ((FileTimelineStore) tlStore).file();
 		File sessionFile = null;
 		try {
@@ -183,7 +188,7 @@ public class TimelineCookedMounter {
 	}
 
 	private TimelineStore createTimelineStore(Cooked timeline, Instant start, String entity) throws IOException {
-		File file = new File(directory, normalizePath(timeline.name$() + File.separator + entity + TIMELINE_EXTENSION));
+		File file = new File(tlDirectory, normalizePath(timeline.name$() + File.separator + entity + TIMELINE_EXTENSION));
 		file.getParentFile().mkdirs();
 		return TimelineStore.createIfNotExists(entity, file)
 				.withTimeModel(start, new Period(1, SECONDS))

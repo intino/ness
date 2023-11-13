@@ -1,7 +1,5 @@
 def type(timelineNode & default) trigger(nodeImpl)
-
 	private class TimelineNodeImpl implements TimelineNode {
-
 		private final String id;
 		private final String type;
 		private volatile File file;

@@ -8,6 +8,7 @@ import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.RuleSet;
 import io.intino.itrules.Template;
 import io.intino.ness.datahubterminalplugin.Formatters;
+import io.intino.ness.datahubterminalplugin.datamarts.nodes.NodeImplTemplate;
 import io.intino.ness.datahubterminalplugin.util.ErrorUtils;
 import io.intino.plugin.PluginLauncher;
 
@@ -163,7 +164,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 	private Map<String, String> renderInterfaceOf(Datamart datamart) {
 		String theInterface = modelPackage + DOT + firstUpperCase(javaValidName().format(datamart.name$() + "Datamart").toString());
-		return Map.of(destination(theInterface), templates.datamart.render(datamartInterfaceBuilder(datamart).toFrame()));
+		return Map.of(destination(theInterface), templates.datamartBase.render(datamartInterfaceBuilder(datamart).toFrame()));
 	}
 
 	private Map<String, String> renderImplementationOf(Datamart datamart, TerminalInfo terminalInfo) {
@@ -613,6 +614,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private static class Templates {
+		final Template datamartBase = append(customize(new DatamartBaseTemplate()));
 		final Template datamart = append(customize(new DatamartTemplate()), customize(new NodeImplTemplate()), customize(new DictionaryImplTemplate()));
 		final Template entityBase = customize(new EntityBaseTemplate());
 		final Template entity = append(customize(new EntityTemplate()), customize(new StructTemplate()), customize(new AttributesTemplate()));
