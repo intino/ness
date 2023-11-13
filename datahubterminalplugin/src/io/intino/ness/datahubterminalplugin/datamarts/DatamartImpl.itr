@@ -543,7 +543,7 @@ def type(indicator) trigger(getter)
 	@Override
 	public IndicatorNode $name+FirstLowerCase~Indicator() {
 		if (hasLocalAccessToTimelines) return indicators.containsKey("$name") ? indicators.get("$name") : IndicatorNode.empty();
-		return indicators.computeIfAbsent($name", theId -> new IndicatorNodeImpl("$name", null));
+		return indicators.computeIfAbsent("$name", theId -> new IndicatorNodeImpl("$name", null));
 	}
 end
 
