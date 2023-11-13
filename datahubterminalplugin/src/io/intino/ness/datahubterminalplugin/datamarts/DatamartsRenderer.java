@@ -192,8 +192,9 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return b.toFrame();
 	}
 
-	private Frame reelNode() {
+	private Frame reelNode(Datamart datamart) {
 		FrameBuilder b = new FrameBuilder("reelNode", "default");
+		b.add("datamart", datamart.name$());
 		b.add("chronosObject", "Reel");
 		return b.toFrame();
 	}
@@ -225,8 +226,9 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return String.join(",", sources);
 	}
 
-	private Frame timelineNode() {
+	private Frame timelineNode(Datamart datamart) {
 		FrameBuilder b = new FrameBuilder("timelineNode", "default");
+		b.add("datamart", datamart.name$());
 		b.add("chronosObject", "Timeline");
 		return b.toFrame();
 	}
@@ -288,14 +290,14 @@ public class DatamartsRenderer implements ConceptRenderer {
 			builder.add("hasTimelines", "");
 			builder.add("timelineEvents", timelineEvents(datamart));
 			builder.add("timeline", timelinesOf(datamart));
-			builder.add("timelineNode", timelineNode());
+			builder.add("timelineNode", timelineNode(datamart));
 		}
 
 		if (!datamart.reelList().isEmpty()) {
 			builder.add("hasReels", "");
 			builder.add("reelEvents", reelEvents(datamart));
 			builder.add("reel", reelsOf(datamart));
-			builder.add("reelNode", reelNode());
+			builder.add("reelNode", reelNode(datamart));
 		}
 
 		builder.add("hasDictionary", "").add("dictionary", dictionaryImpl());
