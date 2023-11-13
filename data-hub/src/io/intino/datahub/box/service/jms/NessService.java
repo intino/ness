@@ -36,7 +36,7 @@ public class NessService {
 	}
 
 	public void start() {
-		dispatcherService = Executors.newFixedThreadPool(16, r -> new Thread(r, "Ness Datamarts Service"));
+		dispatcherService = Executors.newFixedThreadPool(1, r -> new Thread(r, "Ness Datamarts Service"));
 		manager = box.brokerService().manager();
 		notifier = manager.topicProducerOf(SERVICE_NESS_DATAMARTS_NOTIFICATIONS);
 		manager.registerQueueConsumer("service.ness.seal", m -> response(manager, m, new SealRequest(box).accept(MessageReader.textFrom(m))));
@@ -73,7 +73,7 @@ public class NessService {
 	}
 
 	private void response(BrokerManager manager, Message request, Message response) {
-		new Thread(() -> {
+		dispatcherService.execute(() -> {
 			try {
 				if (response == null) return;
 				QueueProducer queueProducer = producer(manager, request);
@@ -83,7 +83,7 @@ public class NessService {
 			} catch (Throwable e) {
 				Logger.error("Error while handling response: " + e.getMessage(), e);
 			}
-		}).start();
+		});
 	}
 
 	private void response(BrokerManager manager, Message request, Stream<Message> response) {

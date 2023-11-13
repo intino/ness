@@ -362,7 +362,7 @@ public class JmsBrokerService implements BrokerService {
 
 		public QueueProducer queueProducerOf(String queue) {
 			try {
-				if (!this.producers.containsKey(queue))
+				if (!this.producers.containsKey(queue) || producers.get(queue).isClosed())
 					this.producers.put(queue, new QueueProducer(nessSession(), queue));
 				return (QueueProducer) this.producers.get(queue);
 			} catch (JMSException e) {
