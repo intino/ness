@@ -1,0 +1,66 @@
+def type(entity & class)
+	package $package.entities;
+
+	import io.intino.ness.master.model.*;
+	import io.intino.ness.master.reflection.*;
+
+	import java.time.*;
+	import java.util.*;
+	import java.util.stream.*;
+
+	import $package.$datamart+FirstUpperCase~Datamart;
+
+	public[$isAbstract+firstLowerCase] class $name+FirstUpperCase extends $parent {
+
+		public static final EntityDefinition definition = new $package.$datamart+FirstUpperCase~Entity.EntityDefinitionInternal("$name+FirstUpperCase");
+
+		[$attribute+wordDeclaration...[$NL]]
+
+		public $abstract~$name+FirstUpperCase(String id, $datamart+FirstUpperCase~Datamart datamart) {
+			$parent+super
+		}
+
+		@Override
+        public EntityDefinition getDefinition() {
+        	return definition;
+        }
+
+		[$attribute+getter...[$NL$NL]]
+
+		[$attribute+translation...[$NL$NL]]
+
+		[$expression+expressionDeclaration...[$NL$NL]]
+
+		@Override
+		protected Collection<Attribute> initDeclaredAttributes() {
+			Collection<Attribute> attributes = super.initDeclaredAttributes();
+			[$attribute+initAttribute...[$NL]]
+			return attributes;
+		}
+    	[$struct+struct...[$NL$NL]]
+    }
+end
+
+def trigger(super)
+	super(id, datamart);
+end
+
+def trigger(abstract)
+	Abstract
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

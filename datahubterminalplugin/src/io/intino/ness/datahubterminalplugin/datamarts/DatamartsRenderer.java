@@ -8,8 +8,8 @@ import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.RuleSet;
 import io.intino.itrules.Template;
 import io.intino.ness.datahubterminalplugin.Formatters;
-import io.intino.ness.datahubterminalplugin.datamarts.nodes.IndicatorImplTemplate;
-import io.intino.ness.datahubterminalplugin.datamarts.nodes.NodeImplTemplate;
+import io.intino.ness.datahubterminalplugin.datamarts.nodes.ReelNodeImplTemplate;
+import io.intino.ness.datahubterminalplugin.datamarts.nodes.TimelineNodeImplTemplate;
 import io.intino.ness.datahubterminalplugin.util.ErrorUtils;
 import io.intino.plugin.PluginLauncher;
 
@@ -127,7 +127,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private void renderEntityBase(Datamart datamart, Map<String, String> outputs) {
-		outputs.put(entityDestination(entityBaseName(datamart)), templates.entityBase.render(entityBaseBuilder(datamart)));
+		outputs.put(entityDestination(entityBaseName(datamart)), templates.entity.render(entityBaseBuilder(datamart)));
 	}
 
 	private String entityBaseName(Datamart datamart) {
@@ -150,7 +150,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private void renderStructBase(Datamart datamart, Map<String, String> output) {
-		output.put(destination(structBaseName(datamart)), templates.structBase.render(structBaseBuilder(datamart)));
+		output.put(destination(structBaseName(datamart)), templates.struct.render(structBaseBuilder(datamart)));
 	}
 
 	private String structBaseName(Datamart datamart) {
@@ -165,12 +165,12 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 	private Map<String, String> renderInterfaceOf(Datamart datamart) {
 		String theInterface = modelPackage + DOT + firstUpperCase(javaValidName().format(datamart.name$() + "Datamart").toString());
-		return Map.of(destination(theInterface), templates.datamartBase.render(datamartInterfaceBuilder(datamart).toFrame()));
+		return Map.of(destination(theInterface), templates.datamart.render(datamartInterfaceBuilder(datamart).toFrame()));
 	}
 
 	private Map<String, String> renderImplementationOf(Datamart datamart, TerminalInfo terminalInfo) {
 		String theImplementation = modelPackage + DOT + firstUpperCase(javaValidName().format(datamart.name$() + "DatamartImpl").toString());
-		return Map.of(destination(theImplementation), templates.datamart.render(datamartImplBuilder(datamart, terminalInfo).toFrame()));
+		return Map.of(destination(theImplementation), templates.datamartImpl.render(datamartImplBuilder(datamart, terminalInfo).toFrame()));
 	}
 
 	private FrameBuilder datamartInterfaceBuilder(Datamart datamart) {
@@ -558,7 +558,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return new EntityFrameFactory(modelPackage, datamart).create(entity).entrySet().stream()
 				.collect(toMap(
 						e -> entityDestination(e.getKey()),
-						e -> templates.entity.render(e.getValue()))
+						e -> templates.entityImpl.render(e.getValue()))
 				);
 	}
 
@@ -566,7 +566,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return new StructFrameFactory(datamart, modelPackage).create(struct).entrySet().stream()
 				.collect(toMap(
 						e -> destination(e.getKey()),
-						e -> templates.struct.render(e.getValue()))
+						e -> templates.structImpl.render(e.getValue()))
 				);
 	}
 
@@ -625,13 +625,13 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private static class Templates {
-		final Template datamartBase = append(customize(new DatamartBaseTemplate()));
-		final Template datamart = append(customize(new DatamartTemplate()), customize(new NodeImplTemplate()), customize(new IndicatorImplTemplate()), customize(new DictionaryImplTemplate()));
-		final Template entityBase = customize(new EntityBaseTemplate());
-		final Template entity = append(customize(new EntityTemplate()), customize(new StructTemplate()), customize(new AttributesTemplate()));
+		final Template datamart = append(customize(new DatamartTemplate()));
+		final Template datamartImpl = append(customize(new DatamartImplTemplate()), customize(new ReelNodeImplTemplate()), customize(new TimelineNodeImplTemplate()), customize(new DictionaryImplTemplate()));
+		final Template entity = customize(new EntityTemplate());
+		final Template entityImpl = append(customize(new EntityImplTemplate()), customize(new StructImplTemplate()), customize(new AttributesTemplate()));
 		final Template entityMounter = customize(new EntityMounterTemplate());
-		final Template struct = customize(new StructTemplate());
-		final Template structBase = append(customize(new StructBaseTemplate()), customize(new AttributesTemplate()));
+		final Template structImpl = customize(new StructImplTemplate());
+		final Template struct = append(customize(new StructTemplate()), customize(new AttributesTemplate()));
 
 		private static Template append(Template t1, Template... others) {
 			RuleSet rules = new RuleSet();
