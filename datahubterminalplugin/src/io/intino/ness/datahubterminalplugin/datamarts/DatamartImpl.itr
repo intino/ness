@@ -12,6 +12,7 @@ def type(datamart & message & impl)
 
 	import java.io.File;
 	import java.util.*;
+	import java.io.*;
 	import java.util.concurrent.atomic.AtomicBoolean;
 	import java.util.stream.Stream;
 	import java.util.stream.Collectors;
@@ -188,6 +189,7 @@ def type(datamart & message & impl)
 		}
 
 		[$hasTimelines+loadTimelinesFromDatahubMethod]
+		[$hasTimelines+loadIndicatorsFromDatahubMethod]
 
 		[$hasReels+loadReelsFromDatahubMethod]
 
@@ -301,6 +303,8 @@ def type(datamart & message & impl)
 		[$timelineNode+nodeImpl]
 
 		[$reelNode+nodeImpl]
+
+		[$indicatorNode+nodeImpl]
 
 		[$dictionary+dictionaryImpl]
 
@@ -671,7 +675,7 @@ def trigger(loadTimelinesFromDatahubMethod)
     		request.setText("datamart=" + name() + ";operation=list-timelines;");
     		javax.jms.Message message = requestResponseFromDatahub("list-timelines", request);
     		if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
-    		return ((javax.jms.TextMessage)message).getText().split(",");
+    		return ((javax.jms.TextMessage) message).getText().split(",");
     	} catch (Exception e) {
     		Logger.error(e);
     		return new String$[0$];
@@ -685,30 +689,29 @@ def trigger(loadIndicatorsFromDatahubMethod)
 		Logger.debug("Downloading indicators...");
 		Boolean hasLocalAccessToTimelines = null;
         for(String filename : listIndicatorFiles()) {
-        	if (filename == null || filename.isBlank()) continue;
-        	try {
-               	File file = new File(filename);
-               	String id = file.getName().replace(".indicator", "");
-               	String type = file.getParentFile().getName();
-               	IndicatorNodeImpl node = new IndicatorNodeImpl(id, type, file.exists() ? file : null);
-               	timelines.put(id + ":" + type, node);
-               	if (hasLocalAccessToTimelines == null) hasLocalAccessToTimelines = file.exists();
-               	else hasLocalAccessToTimelines &= file.exists();
-            } catch (Exception e) {
-               	Logger.debug("Could not load timeline " + filename + " -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
-            }
-        }
-        this.hasLocalAccessToTimelines = hasLocalAccessToTimelines != null && hasLocalAccessToTimelines;
-        Logger.debug("Loaded " + timelines.size() + " timelines (hasLocalAccessToTimelines=" + this.hasLocalAccessToTimelines + ")");
+			if (filename == null || filename.isBlank()) continue;
+			try {
+				File file = new File(filename);
+				String id = file.getName().replace(".indicator", "");
+				IndicatorNodeImpl node = new IndicatorNodeImpl(id, file.exists() ? file : null);
+				indicators.put(id, node);
+				if (hasLocalAccessToTimelines == null) hasLocalAccessToTimelines = file.exists();
+				else hasLocalAccessToTimelines &= file.exists();
+			} catch (Exception e) {
+				Logger.debug("Could not load timeline " + filename + " -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			}
+		}
+		this.hasLocalAccessToTimelines = hasLocalAccessToTimelines != null && hasLocalAccessToTimelines;
+		Logger.debug("Loaded " + indicators.size() + " timelines (hasLocalAccessToTimelines=" + this.hasLocalAccessToTimelines + ")");
     }
 
-    private String$[$] listTimelineFiles() {
+    private String$[$] listIndicatorFiles() {
     	try {
     		ActiveMQTextMessage request = new ActiveMQTextMessage();
     		request.setText("datamart=" + name() + ";operation=list-timelines;");
     		javax.jms.Message message = requestResponseFromDatahub("list-timelines", request);
     		if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
-    		return ((javax.jms.TextMessage)message).getText().split(",");
+    		return ((javax.jms.TextMessage) message).getText().split(",");
     	} catch (Exception e) {
     		Logger.error(e);
     		return new String$[0$];

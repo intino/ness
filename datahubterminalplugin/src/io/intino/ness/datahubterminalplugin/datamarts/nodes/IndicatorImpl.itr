@@ -11,48 +11,62 @@ def type(indicatorNode & default) trigger(nodeImpl)
 		}
 
 		@Override
-		public Indicator get() throws Indicator NotAvailableException {
+		public boolean exists() {
+			try {
+				return get() != null;
+			} catch(IndicatorNotAvailableException e) {
+				return false;
+			}
+		}
+
+		@Override
+		public Indicator get() throws IndicatorNotAvailableException {
 			synchronized(this) {
-				if (disposed) throw new Indicator NotAvailableException("This " + getClass().getSimpleName() + " is disposed.");
 				try {
 					if (hasDirectAccessToFile) return loadFile(this.file);
 					return downloadFromDatahub();
 				} catch(Exception e) {
-					throw new Indicator NotAvailableException(e);
+					throw new IndicatorNotAvailableException(e);
 				}
 			}
 		}
 
 		public Indicator loadFile(File file) throws IOException {
-			Map<String, Shot> shots;
+			Map<String, Indicator.Shot> shots;
 			if (!file.exists()) return new Indicator(new HashMap<>());
 			try (var stream = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)))) {
 				int size = stream.readInt();
 				shots = new HashMap<>(size);
 				for (int i = 0; i < size; i++)
-					shots.put(stream.readUTF(), new Shot(ofEpochMilli(stream.readLong()), stream.readDouble()));
+					shots.put(stream.readUTF(), new Indicator.Shot(Instant.ofEpochMilli(stream.readLong()), stream.readDouble()));
 			}
 			return new Indicator(shots);
 		}
 
-		private Datamart.Indicator downloadFromDatahub() throws Exception {
-			response = requestResponseFromDatahub("get-indicator=" + id(), request("download"));
+		private Indicator downloadFromDatahub() throws Exception {
+			javax.jms.Message response = requestResponseFromDatahub("get-indicator=" + id, request("download"));
 			if (!response.getBooleanProperty("success")) throw new IndicatorNotAvailableException("Could not get indicator " + id + " because datahub returned success=false in the response");
 			return readFromBytes((javax.jms.BytesMessage) response);
 		}
 
-		private Datamart.Indicator readFromBytes(javax.jms.BytesMessage m) throws Exception {
-			int size = m.getIntProperty("size");
-			byte$[$] bytes = new byte$[size$];
-			m.readBytes(bytes, size);
-			Map<String, Shot> shots;
-			try (var stream = new ObjectInputStream(new BufferedInputStream(new ByteArrayInputStream(bytes))))) {
+		private Indicator readFromBytes(javax.jms.BytesMessage m) throws Exception {
+			int messageSize = m.getIntProperty("size");
+			byte$[$] bytes = new byte$[messageSize$];
+			m.readBytes(bytes, messageSize);
+			Map<String, Indicator.Shot> shots;
+			try (var stream = new ObjectInputStream(new BufferedInputStream(new ByteArrayInputStream(bytes)))) {
 				int size = stream.readInt();
 				shots = new HashMap<>(size);
 				for (int i = 0; i < size; i++)
-					shots.put(stream.readUTF(), new Indicator.Shot(ofEpochMilli(stream.readLong()), stream.readDouble()));
+					shots.put(stream.readUTF(), new Indicator.Shot(Instant.ofEpochMilli(stream.readLong()), stream.readDouble()));
 			}
 			return new Indicator(shots);
+		}
+
+		private javax.jms.Message request(String mode) throws Exception {
+			ActiveMQTextMessage message = new ActiveMQTextMessage();
+			message.setText("datamart=" + name() + ";operation=get-indicator;id=" + id + ";mode=" + mode);
+			return message;
 		}
 	}
 end

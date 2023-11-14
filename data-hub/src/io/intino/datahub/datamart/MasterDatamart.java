@@ -188,7 +188,7 @@ public interface MasterDatamart extends Closeable {
 		}
 
 		public IndicatorFile get(String indicator) {
-			return contains(indicator) ? IndicatorFile.of(fileOf(indicator)) : null;
+			return IndicatorFile.of(fileOf(indicator));
 		}
 
 		public boolean contains(String indicator) {

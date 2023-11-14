@@ -8,6 +8,7 @@ import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.RuleSet;
 import io.intino.itrules.Template;
 import io.intino.ness.datahubterminalplugin.Formatters;
+import io.intino.ness.datahubterminalplugin.datamarts.nodes.IndicatorImplTemplate;
 import io.intino.ness.datahubterminalplugin.datamarts.nodes.ReelNodeImplTemplate;
 import io.intino.ness.datahubterminalplugin.datamarts.nodes.TimelineNodeImplTemplate;
 import io.intino.ness.datahubterminalplugin.util.ErrorUtils;
@@ -181,6 +182,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 		if (!datamart.timelineList().isEmpty()) {
 			builder.add("hasTimelines", "");
 			builder.add("timeline", timelinesOf(datamart));
+			builder.add("indicator", indicatorsOf(datamart));
 		}
 		if (!datamart.reelList().isEmpty()) {
 			builder.add("hasReels", "");
@@ -235,6 +237,13 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return b.toFrame();
 	}
 
+	private Frame indicatorNode(Datamart datamart) {
+		FrameBuilder b = new FrameBuilder("indicatorNode", "default");
+		b.add("datamart", datamart.name$());
+		b.add("chronosObject", "Indicator");
+		return b.toFrame();
+	}
+
 	private String timelineEvents(Datamart datamart) {
 		return datamart.timelineList().stream()
 				.flatMap(TimelineUtils::types)
@@ -243,13 +252,17 @@ public class DatamartsRenderer implements ConceptRenderer {
 				.collect(joining(","));
 	}
 
+	private Frame[] indicatorsOf(Datamart datamart) {
+		return datamart.timelineList().stream().filter(Timeline::isCooked).map(Timeline::asCooked).map(this::indicatorFrame).toArray(Frame[]::new);
+	}
+
 	private Frame[] timelinesOf(Datamart datamart) {
 		List<Frame> frames = new ArrayList<>();
 		frames.addAll(datamart.timelineList().stream().filter(Timeline::isRaw).map(Timeline::asRaw).map(this::timelineFrame).toList());
 		frames.addAll(datamart.timelineList().stream().filter(Timeline::isCooked).map(Timeline::asCooked).map(this::timelineFrame).toList());
-		frames.addAll(datamart.timelineList().stream().filter(Timeline::isCooked).map(Timeline::asCooked).map(this::indicatorFrame).toList());
 		return frames.toArray(new Frame[0]);
 	}
+
 
 	private Frame indicatorFrame(Timeline.Cooked timeline) {
 		FrameBuilder b = new FrameBuilder("indicator", "cooked");
@@ -303,15 +316,15 @@ public class DatamartsRenderer implements ConceptRenderer {
 			builder.add("timelineEvents", timelineEvents(datamart));
 			builder.add("timeline", timelinesOf(datamart));
 			builder.add("timelineNode", timelineNode(datamart));
+			builder.add("indicator", indicatorsOf(datamart));
+			builder.add("indicatorNode", indicatorNode(datamart));
 		}
-
 		if (!datamart.reelList().isEmpty()) {
 			builder.add("hasReels", "");
 			builder.add("reelEvents", reelEvents(datamart));
 			builder.add("reel", reelsOf(datamart));
 			builder.add("reelNode", reelNode(datamart));
 		}
-
 		builder.add("hasDictionary", "").add("dictionary", dictionaryImpl());
 
 		return builder;
@@ -335,18 +348,13 @@ public class DatamartsRenderer implements ConceptRenderer {
 		String fullname = owner == null ? fullNameOf(struct) : owner + STRUCT_INTERNAL_CLASS_SEP + fullNameOf(struct);
 		List<ConceptAttribute> attributes = attributesOf(struct);
 		attributes.forEach(a -> a.ownerFullName(fullname));
-
 		FrameBuilder b = new FrameBuilder("struct");
 		b.add("package", thePackage);
 		b.add("name", firstUpperCase(struct.name$()));
 		b.add("fullName", fullname);
-
-
 		b.add("attribute", attributeFrames(attributes));
-
 		List<Frame> frames = new ArrayList<>(1);
 		frames.add(b.toFrame());
-
 		for (Struct s : struct.structList())
 			framesOf(s, thePackage + "." + struct.name$(), fullname).forEach(frames::add);
 
@@ -364,9 +372,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 					if (entity.isExtensionOf()) {
 						b.add("parent", entity.asExtensionOf().entity().name$());
 						b.add("ancestor", ancestorsOf(entity));
-					} else {
-						b.add("hasNoParents", "true");
-					}
+					} else b.add("hasNoParents", "true");
 					if (entity.isAbstract()) b.add("abstract");
 					b.add("isAbstract", entity.isAbstract());
 					setDescendantsInfo(datamart, entity, b);
@@ -626,7 +632,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 	private static class Templates {
 		final Template datamart = append(customize(new DatamartTemplate()));
-		final Template datamartImpl = append(customize(new DatamartImplTemplate()), customize(new ReelNodeImplTemplate()), customize(new TimelineNodeImplTemplate()), customize(new DictionaryImplTemplate()));
+		final Template datamartImpl = append(customize(new DatamartImplTemplate()), customize(new IndicatorImplTemplate()), customize(new ReelNodeImplTemplate()), customize(new TimelineNodeImplTemplate()), customize(new DictionaryImplTemplate()));
 		final Template entity = customize(new EntityTemplate());
 		final Template entityImpl = append(customize(new EntityImplTemplate()), customize(new StructImplTemplate()), customize(new AttributesTemplate()));
 		final Template entityMounter = customize(new EntityMounterTemplate());
