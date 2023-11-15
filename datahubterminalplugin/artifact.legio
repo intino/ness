@@ -1,9 +1,9 @@
 dsl Legio
 
-Artifact("io.intino.ness", "6.16.0-SNAPSHOT") data-hub-terminal-plugin
+Artifact("io.intino.ness", "6.16.0") data-hub-terminal-plugin
 	Imports
 		Compile("io.intino.ness", "master", "2.1.0")
-		Compile("io.intino", "data-hub", "9.13.0-SNAPSHOT")
+		Compile("io.intino", "data-hub", "9.14.0")
 			Exclude("io.intino.alexandria", "exceptions")
 			Exclude("io.intino.alexandria", "jms")
 			Exclude("io.intino.alexandria", "jmx")
