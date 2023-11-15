@@ -13,9 +13,9 @@ import io.intino.alexandria.zim.ZimWriter;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.impl.LocalMasterDatamart;
 import io.intino.datahub.datamart.mounters.EntityMounter;
+import io.intino.datahub.datamart.mounters.MounterUtils;
 import io.intino.datahub.datamart.mounters.ReelMounter;
-import io.intino.datahub.datamart.mounters.TimelineMounter;
-import io.intino.datahub.datamart.mounters.TimelineUtils;
+import io.intino.datahub.datamart.mounters.timelines.TimelineMounter;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.Sensor;
@@ -122,7 +122,7 @@ public class DatamartFactory {
 	private Set<String> cookedTimelinesTanks(Datamart definition) {
 		return definition.timelineList().stream()
 				.filter(Timeline::isCooked)
-				.map(TimelineUtils::getCookedTanks)
+				.map(MounterUtils::getCookedTanks)
 				.flatMap(Collection::stream)
 				.collect(Collectors.toSet());
 	}
@@ -247,7 +247,7 @@ public class DatamartFactory {
 
 	private static Set<String> timelineTanks(Datamart definition) {
 		return definition.timelineList().stream()
-				.flatMap(TimelineUtils::tanksOf)
+				.flatMap(MounterUtils::tanksOf)
 				.filter(Objects::nonNull)
 				.collect(Collectors.toSet());
 	}

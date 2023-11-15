@@ -23,13 +23,58 @@ import java.util.stream.Stream;
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
-public class TimelineUtils {
+public class MounterUtils {
 
 	public static String sourceSensor(Event event) {
 		Map<String, String> parameters = parameters(event.ss());
 		String sensor = parameters.get("sensor");
 		String cleanSS = withOutParameters(event.ss());
 		return sensor == null ? cleanSS : sensor;
+	}
+
+	public static Magnitude[] sensorModel(SensorModel current, Message assertion, Timeline timeline) {
+		Sensor sensor = timeline.asRaw().tank().sensor();
+		return sensor.magnitudeList().stream()
+				.map(m -> new Magnitude(m.id(), new Magnitude.Model(merge(m, current, assertion, m.attributeList(), timeline.asRaw().attributeList()))))
+				.toArray(Magnitude[]::new);
+	}
+
+	public static Stream<String> types(Timeline t) {
+		return asTypes(tanksOf(t));
+	}
+
+	public static Stream<String> tanksOf(Timeline t) {
+		Set<String> tanks = new HashSet<>();
+		String entityTank = tankName(t.entity());
+		if (entityTank != null) tanks.add(entityTank);
+		if (t.isRaw()) tanks.add(tankName(t.asRaw().tank().sensor()));
+		else tanks.addAll(getCookedTanks(t));
+		return tanks.stream();
+	}
+
+	public static Set<String> getCookedTanks(Timeline t) {
+		Set<String> tanks = new HashSet<>();
+		t.asCooked().timeSeriesList().stream().map(ts -> tankName(ts.tank())).forEach(tanks::add);
+		t.asCooked().timeSeriesList().stream().filter(Timeline.Cooked.TimeSeries::isCount).flatMap(ts -> tanksOf(ts.asCount())).forEach(tanks::add);
+		return tanks;
+	}
+
+	public static TimelineStoreBuilder rawTimelineBuilder() {
+		return new TimelineStoreBuilder();
+	}
+
+	public static File timelineFileOf(File datamartDir, String name, String entity) {
+		return new File(datamartDir, name + File.separator + entity + TIMELINE_EXTENSION);
+	}
+
+	public static File copyOf(File file, String newExtension) throws IOException {
+		File copy = new File(file.getAbsolutePath() + newExtension);
+		if (file.exists()) Files.copy(file.toPath(), copy.toPath(), REPLACE_EXISTING);
+		return copy;
+	}
+
+	private static String tankName(Entity e) {
+		return e.from() == null ? null : e.from().message().core$().fullName().replace("$", ".");
 	}
 
 	private static String withOutParameters(String ss) {
@@ -43,11 +88,8 @@ public class TimelineUtils {
 		return Arrays.stream(parameters).map(p -> p.split("=")).collect(Collectors.toMap(p -> p[0], p -> p[1]));
 	}
 
-	static Magnitude[] sensorModel(SensorModel current, Message assertion, Timeline timeline) {
-		Sensor sensor = timeline.asRaw().tank().sensor();
-		return sensor.magnitudeList().stream()
-				.map(m -> new Magnitude(m.id(), new Magnitude.Model(merge(m, current, assertion, m.attributeList(), timeline.asRaw().attributeList()))))
-				.toArray(Magnitude[]::new);
+	private static Stream<String> tanksOf(Timeline.Cooked.TimeSeries.Count ts) {
+		return ts.operationList().stream().map(d -> tankName(d.tank()));
 	}
 
 	private static Map<String, String> merge(Sensor.Magnitude m, SensorModel current, Message message, List<Sensor.Magnitude.Attribute> magnitudeAttr, List<Attribute> timelineAttr) {
@@ -74,32 +116,8 @@ public class TimelineUtils {
 	}
 
 
-	public static Stream<String> types(Timeline t) {
-		return asTypes(tanksOf(t));
-	}
-
-	public static Stream<String> tanksOf(Timeline t) {
-		Set<String> tanks = new HashSet<>();
-		String entityTank = tankName(t.entity());
-		if (entityTank != null) tanks.add(entityTank);
-		if (t.isRaw()) tanks.add(tankName(t.asRaw().tank().sensor()));
-		else tanks.addAll(getCookedTanks(t));
-		return tanks.stream();
-	}
-
-	public static Set<String> getCookedTanks(Timeline t) {
-		Set<String> tanks = new HashSet<>();
-		t.asCooked().timeSeriesList().stream().map(ts -> tankName(ts.tank())).forEach(tanks::add);
-		t.asCooked().timeSeriesList().stream().filter(Timeline.Cooked.TimeSeries::isCount).flatMap(ts -> tanksOf(ts.asCount())).forEach(tanks::add);
-		return tanks;
-	}
-
 	private static Stream<String> asTypes(Stream<String> tanks) {
 		return tanks.map(t -> t.contains(".") ? t.substring(t.lastIndexOf(".") + 1) : t);
-	}
-
-	public static Stream<String> tanksOf(Timeline.Cooked.TimeSeries.Count ts) {
-		return ts.operationList().stream().map(d -> tankName(d.tank()));
 	}
 
 	private static String tankName(Sensor sensor) {
@@ -110,26 +128,8 @@ public class TimelineUtils {
 		return tank.message().core$().fullName().replace("$", ".");
 	}
 
-	public static TimelineStoreBuilder rawTimelineBuilder() {
-		return new TimelineStoreBuilder();
-	}
-
-	public static String tankName(Entity e) {
-		return e.from() == null ? null : e.from().message().core$().fullName().replace("$", ".");
-	}
-
-	public static File timelineFileOf(File datamartDir, String name, String entity) {
-		return new File(datamartDir, name + File.separator + entity + TIMELINE_EXTENSION);
-	}
-
 	private static String valueOf(Message message, Entity.Attribute source) {
 		return message.get(source.name$()).asString();
-	}
-
-	public static File copyOf(File file, String newExtension) throws IOException {
-		File copy = new File(file.getAbsolutePath() + newExtension);
-		if(file.exists()) Files.copy(file.toPath(), copy.toPath(), REPLACE_EXISTING);
-		return copy;
 	}
 
 	public static class TimelineStoreBuilder {

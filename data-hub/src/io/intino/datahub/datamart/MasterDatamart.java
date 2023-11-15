@@ -5,8 +5,10 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.mounters.MasterDatamartMounter;
+import io.intino.datahub.datamart.mounters.MounterUtils;
 import io.intino.datahub.model.Datalake;
 import io.intino.datahub.model.Datamart;
+import io.intino.datahub.model.IndicatorFile;
 import io.intino.datahub.model.rules.SnapshotScale;
 import io.intino.sumus.chronos.ReelFile;
 import io.intino.sumus.chronos.TimelineStore;
@@ -17,8 +19,10 @@ import java.io.File;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.intino.datahub.box.DataHubBox.INDICATOR_EXTENSION;
 import static java.util.Collections.emptyList;
 
 public interface MasterDatamart extends Closeable {
@@ -32,6 +36,8 @@ public interface MasterDatamart extends Closeable {
 	Store<Message> entityStore();
 
 	ChronosDirectory<TimelineStore> timelineStore();
+
+	IndicatorDirectory indicatorStore();
 
 	ChronosDirectory<ReelFile> reelStore();
 
@@ -73,8 +79,8 @@ public interface MasterDatamart extends Closeable {
 		boolean isSubscribedTo(Datalake.Tank tank);
 	}
 
-	abstract class ChronosDirectory<T> {
 
+	abstract class ChronosDirectory<T> {
 		private final File root;
 
 		public ChronosDirectory(File root) {
@@ -118,9 +124,6 @@ public interface MasterDatamart extends Closeable {
 			return new File(root, normalizePath(type + File.separator + id + extension()));
 		}
 
-		public static String normalizePath(String path) {
-			return path.replace(":", "-");
-		}
 
 		protected List<File> listFiles() {
 			return root.exists()
@@ -128,6 +131,11 @@ public interface MasterDatamart extends Closeable {
 					: emptyList();
 		}
 	}
+
+	static String normalizePath(String path) {
+		return path.replace(":", "-");
+	}
+
 
 	record Snapshot(Timetag timetag, MasterDatamart datamart) {
 
@@ -161,6 +169,54 @@ public interface MasterDatamart extends Closeable {
 
 		private static boolean isFirstDayOfWeek(Timetag today, io.intino.datahub.model.rules.DayOfWeek firstDayOfWeek) {
 			return today.datetime().getDayOfWeek().name().equalsIgnoreCase(firstDayOfWeek.name());
+		}
+	}
+
+	class IndicatorDirectory {
+		private final Set<String> subscribedEvents;
+		private final File root;
+
+		public IndicatorDirectory(Datamart definition, File root) {
+			this.subscribedEvents = definition.timelineList().stream()
+					.flatMap(MounterUtils::types)
+					.collect(Collectors.toSet());
+			this.root = root;
+		}
+
+		protected String extension() {
+			return INDICATOR_EXTENSION;
+		}
+
+		public IndicatorFile get(String indicator) {
+			return IndicatorFile.of(fileOf(indicator));
+		}
+
+		public boolean contains(String indicator) {
+			return fileOf(indicator).exists();
+		}
+
+		public Stream<IndicatorFile> stream() {
+			return listFiles().stream().map(IndicatorFile::of);
+		}
+
+		protected File fileOf(String indicator) {
+			return new File(root, normalizePath(indicator) + extension());
+		}
+
+		protected List<File> listFiles() {
+			return root.exists()
+					? new ArrayList<>(FileUtils.listFiles(root, new String[]{extension(), extension().substring(1)}, true))
+					: emptyList();
+		}
+
+		public Collection<String> subscribedEvents() {
+			return subscribedEvents;
+		}
+
+		public boolean isSubscribedTo(Datalake.Tank tank) {
+			Collection<String> events = subscribedEvents();
+			if (tank.isMeasurement() && events.contains(tank.asMeasurement().sensor().name$())) return true;
+			return tank.isMessage() && events.contains(tank.asMessage().message().name$());
 		}
 	}
 }

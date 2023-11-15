@@ -35,6 +35,7 @@ import java.util.List;
 public class DataHubBox extends AbstractBox {
 
 	public static final String TIMELINE_EXTENSION = ".timeline";
+	public static final String INDICATOR_EXTENSION = ".indicator";
 	public static final String REEL_EXTENSION = ".reel";
 
 	private FileDatalake datalake;
@@ -140,6 +141,10 @@ public class DataHubBox extends AbstractBox {
 		return new File(datamartDirectory(name), "timelines");
 	}
 
+	public File datamartIndicatorsDirectory(String name) {
+		return new File(datamartDirectory(name), "indicators");
+	}
+
 	public File datamartReelsDirectory(String name) {
 		return new File(datamartDirectory(name), "reels");
 	}
@@ -153,15 +158,23 @@ public class DataHubBox extends AbstractBox {
 		return listFiles(datamartTimelinesDirectory(datamartName), TIMELINE_EXTENSION, id);
 	}
 
+	public List<File> datamartIndicatorFiles(String datamartName) {
+		return (List<File>) listFiles(datamartIndicatorsDirectory(datamartName), INDICATOR_EXTENSION);
+	}
+
 	public List<File> datamartReelFiles(String datamartName, String id, String type) {
 		return listFiles(datamartReelsDirectory(datamartName, type), REEL_EXTENSION, id);
 	}
 
 	private List<File> listFiles(File directory, String extension, String id) {
 		if (!directory.exists()) return Collections.emptyList();
-		Collection<File> files = FileUtils.listFiles(directory, new String[]{extension, extension.substring(extension.indexOf('.') + 1)}, true);
+		Collection<File> files = listFiles(directory, extension);
 		if (id != null && !id.isEmpty()) return files.stream().filter(f -> f.getName().equals(id + extension)).toList();
 		return files instanceof List<File> list ? list : new ArrayList<>(files);
+	}
+
+	private static Collection<File> listFiles(File directory, String extension) {
+		return FileUtils.listFiles(directory, new String[]{extension, extension.substring(extension.indexOf('.') + 1)}, true);
 	}
 
 	public MasterDatamartSerializer datamartSerializer() {

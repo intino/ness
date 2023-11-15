@@ -95,9 +95,9 @@ def !type(abstract) type(mounter) type(message)
 		private void notifyListeners(Operation operation, $datamart+FirstUpperCase~Entity entity) {
 			for(EntityListener listener : listeners) {
 				switch(operation) {
-					case Create: listener.onCreate(entity); break;
-					case Update: listener.onUpdate(entity); break;
-					case Remove: listener.onRemove(entity); break;
+					case Create: new Thread(() -> listener.onCreate(entity), "$datamart+FirstUpperCase~Listener-$name+FirstUpperCase~Mounter-" + System.currentTimeMillis()).start(); break;
+					case Update: new Thread(() -> listener.onUpdate(entity), "$datamart+FirstUpperCase~Listener-$name+FirstUpperCase~Mounter-" + System.currentTimeMillis()).start(); break;
+					case Remove: new Thread(() -> listener.onRemove(entity), "$datamart+FirstUpperCase~Listener-$name+FirstUpperCase~Mounter-" + System.currentTimeMillis()).start(); break;
 				}
 			}
 		}

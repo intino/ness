@@ -6,7 +6,6 @@ import io.intino.alexandria.jms.MessageReader;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
-import io.intino.datahub.datamart.MasterDatamart.ChronosDirectory;
 import org.apache.activemq.broker.region.MessageReference;
 import org.apache.activemq.command.ActiveMQBytesMessage;
 import org.apache.activemq.command.ActiveMQMessage;
@@ -31,8 +30,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.intino.datahub.box.DataHubBox.REEL_EXTENSION;
-import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
+import static io.intino.datahub.box.DataHubBox.*;
+import static io.intino.datahub.datamart.MasterDatamart.normalizePath;
 
 /**
  * <p>Handles datamart requests. The request is a string with key-value pairs, separated by ;</p>
@@ -77,6 +76,8 @@ public class DatamartsRequest {
 			case "entities" -> downloadEntities(datamart, args);
 			case "list-timelines" -> listTimelineFiles(datamart, args);
 			case "get-timeline" -> getTimeline(datamart, args);
+			case "list-indicators" -> listIndicatorFiles(datamart);
+			case "get-indicator" -> getIndicator(datamart, args);
 			case "list-reels" -> listReelFiles(datamart, args);
 			case "get-reel" -> getReel(datamart, args);
 			case "get-dictionary" -> getDictionary(datamart, args);
@@ -110,6 +111,23 @@ public class DatamartsRequest {
 		return getChronos(args, box.datamartTimelinesDirectory(datamart.name()), TIMELINE_EXTENSION);
 	}
 
+	private Stream<Message> getIndicator(MasterDatamart datamart, Map<String, String> args) {
+		return getIndicator(args, box.datamartIndicatorsDirectory(datamart.name()));
+	}
+
+	private Stream<Message> getIndicator(Map<String, String> args, File dir) {
+		String id = args.get("id");
+		if (id == null) {
+			String message = "Indicator object download requested but id argument not found";
+			Logger.error(message);
+			return errorMessage(message);
+		}
+		File file = new File(dir, normalizePath(id + INDICATOR_EXTENSION));
+		if (!file.exists()) return errorMessage(INDICATOR_EXTENSION + " file not found");
+		String mode = args.getOrDefault("mode", "download");
+		return mode.equals("path") ? path(file) : download(file);
+	}
+
 	private Stream<Message> getChronos(Map<String, String> args, File dir, String extension) {
 		String id = args.get("id");
 		if (id == null) {
@@ -123,7 +141,7 @@ public class DatamartsRequest {
 			Logger.error(message);
 			return errorMessage(message);
 		}
-		File file = new File(dir, ChronosDirectory.normalizePath(type + File.separator + id + extension));
+		File file = new File(dir, normalizePath(type + File.separator + id + extension));
 		if (!file.exists()) return errorMessage(extension + " file not found");
 		String mode = args.getOrDefault("mode", "download");
 		return mode.equals("path") ? path(file) : download(file);
@@ -186,6 +204,10 @@ public class DatamartsRequest {
 
 	private Stream<Message> listTimelineFiles(MasterDatamart datamart, Map<String, String> args) {
 		return listFiles(datamart.name(), box.datamartTimelineFiles(datamart.name(), args.get("id")));
+	}
+
+	private Stream<Message> listIndicatorFiles(MasterDatamart datamart) {
+		return listFiles(datamart.name(), box.datamartIndicatorFiles(datamart.name()));
 	}
 
 	private Stream<Message> listFiles(String datamart, List<File> files) {

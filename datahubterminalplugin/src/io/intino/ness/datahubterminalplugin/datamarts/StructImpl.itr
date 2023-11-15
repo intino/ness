@@ -1,0 +1,65 @@
+def type(struct & class)
+
+	[$standalone+header]
+
+	public[$static] class $name+FirstUpperCase extends $parent {
+
+		public static final StructDefinition definition = new $package.$datamart+FirstUpperCase~Struct.StructDefinitionInternal("$definitionname+FirstUpperCase");
+
+		[$attribute+wordDeclaration...[$NL]]
+
+		public $name+FirstUpperCase($datamart+FirstUpperCase~Datamart datamart) {
+			super(datamart);
+		}
+
+		[$attribute+getter...[$NL$NL]]
+
+		[$expression+expressionDeclaration...[$NL$NL]]
+
+		@Override
+		public StructDefinition getDefinition() {
+			return definition;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if(obj == null) return false;
+			if(!obj.getClass().equals(getClass())) return false;
+			$name+FirstUpperCase other = ($name+FirstUpperCase) obj;
+			return $attribute+equals...[ && ];
+		}
+
+		@Override
+        public int hashCode() {
+        	return Objects.hash($attribute+get...[, ]);
+        }
+
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			$attribute+toString...[$NL]
+			if(sb.length() > 0) sb.setLength(sb.length() - 1);
+			return sb.toString();
+		}
+
+		@Override
+		protected Collection<Attribute> initDeclaredAttributes() {
+			Collection<Attribute> attributes = super.initDeclaredAttributes();
+			[$attribute+initAttribute...[$NL]]
+			return attributes;
+		}
+    	[$struct+struct...[$NL$NL]]
+	}
+end
+
+def trigger(header)
+	package $package.structs;
+
+    import io.intino.ness.master.reflection.StructDefinition;
+
+	import java.time.*;
+	import java.util.*;
+	import java.util.stream.*;
+
+	import $package.$datamart+FirstUpperCase~Datamart;
+end

@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static io.intino.datahub.box.DataHubBox.REEL_EXTENSION;
-import static io.intino.datahub.datamart.MasterDatamart.ChronosDirectory.normalizePath;
-import static io.intino.datahub.datamart.mounters.TimelineUtils.copyOf;
+import static io.intino.datahub.datamart.MasterDatamart.normalizePath;
+import static io.intino.datahub.datamart.mounters.MounterUtils.copyOf;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 

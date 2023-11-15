@@ -1,7 +1,5 @@
 def type(dictionary & default) trigger(dictionaryImpl)
-
-	private class DictionaryImpl implements Dictionary {
-
+	private static class DictionaryImpl implements Dictionary {
 		private final String name;
 		private final Map<String, WordImpl> words;
 
@@ -33,7 +31,6 @@ def type(dictionary & default) trigger(dictionaryImpl)
 		}
 
 		private static class WordImpl implements Dictionary.Word {
-
 			private final String id;
 			private final Map<String, String> translations;
 
