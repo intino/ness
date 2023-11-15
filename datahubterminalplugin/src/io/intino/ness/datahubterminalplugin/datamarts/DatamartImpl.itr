@@ -545,7 +545,7 @@ end
 
 def type(indicator) trigger(getter)
 	@Override
-	public IndicatorNode $name+FirstLowerCase~Indicator() {
+	public IndicatorNode $label+FirstLowerCase~Indicator() {
 		if (hasLocalAccessToTimelines) return indicators.containsKey("$name") ? indicators.get("$name") : IndicatorNode.empty();
 		return indicators.computeIfAbsent("$name", theId -> new IndicatorNodeImpl("$name", null));
 	}
@@ -698,7 +698,7 @@ def trigger(loadIndicatorsFromDatahubMethod)
 				if (hasLocalAccessToTimelines == null) hasLocalAccessToTimelines = file.exists();
 				else hasLocalAccessToTimelines &= file.exists();
 			} catch (Exception e) {
-				Logger.debug("Could not load timeline " + filename + " -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
+				Logger.debug("Could not load indicator " + filename + " -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
 			}
 		}
 		this.hasLocalAccessToTimelines = hasLocalAccessToTimelines != null && hasLocalAccessToTimelines;
@@ -708,8 +708,8 @@ def trigger(loadIndicatorsFromDatahubMethod)
     private String$[$] listIndicatorFiles() {
     	try {
     		ActiveMQTextMessage request = new ActiveMQTextMessage();
-    		request.setText("datamart=" + name() + ";operation=list-timelines;");
-    		javax.jms.Message message = requestResponseFromDatahub("list-timelines", request);
+    		request.setText("datamart=" + name() + ";operation=list-indicators;");
+    		javax.jms.Message message = requestResponseFromDatahub("list-indicators", request);
     		if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
     		return ((javax.jms.TextMessage) message).getText().split(",");
     	} catch (Exception e) {

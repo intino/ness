@@ -200,7 +200,7 @@ public interface MasterDatamart extends Closeable {
 		}
 
 		protected File fileOf(String indicator) {
-			return new File(root, normalizePath(indicator));
+			return new File(root, normalizePath(indicator) + extension());
 		}
 
 		protected List<File> listFiles() {

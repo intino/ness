@@ -349,5 +349,5 @@ def type(reel) trigger(getterSignature)
 end
 
 def type(indicator) trigger(getterSignature)
-	IndicatorNode $name+firstLowerCase~Indicator();
+	IndicatorNode $label+firstLowerCase~Indicator();
 end

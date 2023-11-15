@@ -253,7 +253,11 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private Frame[] indicatorsOf(Datamart datamart) {
-		return datamart.timelineList().stream().filter(Timeline::isCooked).map(Timeline::asCooked).map(this::indicatorFrame).toArray(Frame[]::new);
+		return datamart.timelineList().stream()
+				.filter(Timeline::isCooked)
+				.map(Timeline::asCooked)
+				.flatMap(this::indicatorFrames)
+				.toArray(Frame[]::new);
 	}
 
 	private Frame[] timelinesOf(Datamart datamart) {
@@ -263,14 +267,16 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return frames.toArray(new Frame[0]);
 	}
 
-
-	private Frame indicatorFrame(Timeline.Cooked timeline) {
-		FrameBuilder b = new FrameBuilder("indicator", "cooked");
-		b.add("package", modelPackage);
-		b.add("name", timeline.name$());
-		b.add("sources", types(timeline.asTimeline()).map(t -> quoted().format(t).toString()).collect(joining(",")));
-		b.add("entity", firstUpperCase(timeline.entity().name$()));
-		return b.toFrame();
+	private Stream<Frame> indicatorFrames(Timeline.Cooked timeline) {
+		return timeline.timeSeriesList().stream().map(ts -> {
+			FrameBuilder b = new FrameBuilder("indicator", "cooked");
+			b.add("package", modelPackage);
+			b.add("name", timeline.name$() + "." + ts.name$());
+			b.add("label", Formatters.firstLowerCase(ts.name$()));
+			b.add("sources", types(timeline.asTimeline()).map(t -> quoted().format(t).toString()).collect(joining(",")));
+			b.add("entity", firstUpperCase(timeline.entity().name$()));
+			return b.toFrame();
+		});
 	}
 
 	private Frame timelineFrame(Timeline.Raw timeline) {

@@ -40,6 +40,7 @@ public class IndicatorFile {
 	}
 
 	public void save(Indicator indicator) throws IOException {
+		file.getParentFile().mkdirs();
 		try (var stream = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file)))) {
 			stream.writeInt(indicator.shots().size());
 			for (Map.Entry<String, Shot> entry : indicator.shots().entrySet()) {
