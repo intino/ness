@@ -10,7 +10,6 @@ import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.datamart.mounters.MasterDatamartMounter;
 import io.intino.datahub.datamart.mounters.MounterUtils;
 import io.intino.datahub.model.Timeline;
-import io.intino.magritte.framework.Layer;
 import io.intino.sumus.chronos.TimelineStore;
 import io.intino.sumus.chronos.timelines.TimelineWriter;
 import io.intino.sumus.chronos.timelines.stores.FileTimelineStore;
@@ -22,12 +21,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static io.intino.alexandria.event.measurement.MeasurementEvent.ATTRIBUTE_SEP;
 import static io.intino.alexandria.event.measurement.MeasurementEvent.NAME_VALUE_SEP;
 import static io.intino.datahub.datamart.mounters.MounterUtils.sourceSensor;
-import static io.intino.datahub.datamart.mounters.MounterUtils.types;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Arrays.stream;
@@ -41,7 +38,7 @@ public class TimelineMounter extends MasterDatamartMounter {
 
 	public TimelineMounter(MasterDatamart datamart) {
 		super(datamart);
-		timelineTypes = datamart.definition().timelineList().stream().collect(Collectors.toMap(Layer::name$, t -> types(t).collect(Collectors.toSet())));
+		timelineTypes = MounterUtils.timelineTypes(datamart);
 		rawMounter = new TimelineRawMounter(box(), datamart, timelineTypes);
 		assertionMounter = new TimelineAssertionMounter(box(), datamart);
 		cookedMounter = new TimelineCookedMounter(box(), datamart, timelineTypes);

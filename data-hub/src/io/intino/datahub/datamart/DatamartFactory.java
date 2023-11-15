@@ -16,6 +16,7 @@ import io.intino.datahub.datamart.mounters.EntityMounter;
 import io.intino.datahub.datamart.mounters.MounterUtils;
 import io.intino.datahub.datamart.mounters.ReelMounter;
 import io.intino.datahub.datamart.mounters.timelines.IndicatorMounter;
+import io.intino.datahub.datamart.mounters.timelines.TimelineCookedMounter;
 import io.intino.datahub.datamart.mounters.timelines.TimelineMounter;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Entity;
@@ -79,6 +80,7 @@ public class DatamartFactory {
 	private void removeAllChronosFiles(MasterDatamart datamart) throws IOException {
 		FileUtils.deleteDirectory(box.datamartTimelinesDirectory(datamart.name()));
 		FileUtils.deleteDirectory(box.datamartReelsDirectory(datamart.name()));
+		FileUtils.deleteDirectory(box.datamartIndicatorsDirectory(datamart.name()));
 	}
 
 	private void reflowEntities(MasterDatamart datamart, Set<String> entityTanks) {
@@ -91,14 +93,20 @@ public class DatamartFactory {
 		reflowTimelines(datamart, definition);
 	}
 
-	private void reflowRawIndicators(MasterDatamart datamart, Datamart definition) {
-		Logger.debug("Reflowing indicators...");
-		reflowIndicators(datamart, definition);
-	}
-
 	private void reflowCookedTimelines(MasterDatamart datamart, Set<String> cookedTimelineTanks) {
 		Logger.debug("Reflowing cooked timelines...");
-		reflow(new TimelineMounter(datamart), reflowTanks(cookedTimelineTanks));
+		reflow(new TimelineCookedMounter.OneShot(box, datamart, MounterUtils.timelineTypes(datamart)), reflowTanks(cookedTimelineTanks));
+	}
+
+	private void reflowIndicators(MasterDatamart datamart, Datamart definition) {
+		Logger.debug("Reflowing indicators...");
+		IndicatorMounter indicatorMounter = new IndicatorMounter(datamart);
+		Map<String, Timeline> definitions = definition.timelineList().stream()
+				.filter(Timeline::isIndicator)
+				.collect(Collectors.toMap(t -> t.isRaw() ? t.asRaw().tank().asTank().asMeasurement().sensor().name$() : t.asCooked().name$(), t -> t));
+		datamart.timelineStore().listFiles().stream()
+				.filter(f -> definitions.containsKey(f.getParentFile().getName()))
+				.forEach(f -> indicatorMounter.mount(f.getParentFile().getName(), timelineStore(f)));
 	}
 
 	private void reflowReels(MasterDatamart datamart, Set<String> tanks) {
@@ -111,21 +119,8 @@ public class DatamartFactory {
 		}
 	}
 
-	private void reflow(TimelineMounter timelineMounter, Iterator<Event> events) {
-		while (events.hasNext()) {
-			Event event = events.next();
-			timelineMounter.mount(event);
-		}
-	}
-
-	private void reflowIndicators(MasterDatamart datamart, Datamart definition) {
-		IndicatorMounter indicatorMounter = new IndicatorMounter(datamart);
-		Map<String, Timeline> definitions = definition.timelineList().stream()
-				.filter(Timeline::isIndicator)
-				.collect(Collectors.toMap(t -> t.isRaw() ? t.asRaw().tank().asTank().asMeasurement().sensor().name$() : t.asCooked().name$(), t -> t));
-		datamart.timelineStore().listFiles().stream()
-				.filter(f -> definitions.containsKey(f.getParentFile().getName()))
-				.forEach(f -> indicatorMounter.mount(f.getParentFile().getName(), timelineStore(f)));
+	private void reflow(TimelineCookedMounter timelineMounter, Iterator<Event> events) {
+		while (events.hasNext()) timelineMounter.mount((MessageEvent) events.next());
 	}
 
 	private static TimelineStore timelineStore(File f) {
@@ -237,15 +232,6 @@ public class DatamartFactory {
 	private Iterator<Event> reflowTanks(Set<String>... tanks) {
 		Set<String> tankNames = new HashSet<>();
 		Arrays.stream(tanks).forEach(tankNames::addAll);
-		return EventStream.merge(tanks(tankNames).map(tank -> (Stream<Event>) tank.content())).iterator();
-	}
-
-	@SuppressWarnings("unchecked")
-	private Iterator<Event> reflowTanks(Set<String> entityTanks, Set<String> timelineTanks, Set<String> reelTanks, Instant fromTs) {
-		Set<String> tankNames = new HashSet<>(entityTanks);
-		tankNames.addAll(timelineTanks);
-		tankNames.addAll(reelTanks);
-		if (fromTs != null) return merge(fromTs, tankNames);
 		return EventStream.merge(tanks(tankNames).map(tank -> (Stream<Event>) tank.content())).iterator();
 	}
 
