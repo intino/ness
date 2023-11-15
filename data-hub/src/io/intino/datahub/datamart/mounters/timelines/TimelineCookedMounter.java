@@ -71,7 +71,8 @@ public class TimelineCookedMounter {
 		String entityId = entityOf(event, timelineDefinition);
 		if (entityId == null) return;
 		TimelineStore timelineStore = updateTimeline(event, timelineDefinition, entityId);
-		if (timelineStore != null) indicatorMounter.mount(timelineDefinition.name$(), timelineStore);
+		if (timelineStore != null && timelineDefinition.asTimeline().isIndicator())
+			indicatorMounter.mount(timelineDefinition.name$(), timelineStore);
 	}
 
 	private TimelineStore updateTimeline(MessageEvent event, Cooked definition, String entityId) {

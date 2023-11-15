@@ -19,6 +19,7 @@ public class IndicatorMounter {
 	}
 
 	public void mount(String timeline, TimelineStore timelineStore) {
+		if (timelineStore == null) return;
 		IndicatorDirectory indicatorStore = datamart.indicatorStore();
 		for (Magnitude magnitude : timelineStore.sensorModel().magnitudes()) {
 			IndicatorFile indicatorFile = indicatorStore.get(timeline + "." + magnitude.label());

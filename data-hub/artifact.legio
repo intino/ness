@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino", "9.14.0") data-hub as Product
+Artifact("io.intino", "9.15.0") data-hub as Product
 	Model("Proteo", "3.4.7", "4.2.3") > outLanguage = "Ness"
 	Box("Konos", "10.6.13")
 	Imports
@@ -24,9 +24,9 @@ Artifact("io.intino", "9.14.0") data-hub as Product
 		Compile("org.apache.activemq", "activemq-kahadb-store", "5.18.3")
 		Compile("org.apache.activemq", "activemq-jaas", "5.18.3")
 		Compile("org.apache.activemq", "activemq-runtime-config", "5.18.3")
-		Compile("org.xerial", "sqlite-jdbc", "3.43.2.2")
+		Compile("org.xerial", "sqlite-jdbc", "3.44.0.0")
 		Test("junit", "junit", "4.13.2")
-		Web("io.intino", "datalake-inspector", "9.14.0")
+		Web("io.intino", "datalake-inspector", "9.15.0")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
 	Distribution > Artifactory("intino-maven")

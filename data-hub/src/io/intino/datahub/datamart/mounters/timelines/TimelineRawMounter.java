@@ -4,6 +4,7 @@ import io.intino.alexandria.event.measurement.MeasurementEvent;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
+import io.intino.datahub.model.Timeline;
 import io.intino.sumus.chronos.TimelineStore;
 import io.intino.sumus.chronos.timelines.TimelineWriter;
 import io.intino.sumus.chronos.timelines.stores.FileTimelineStore;
@@ -14,19 +15,26 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import static io.intino.datahub.datamart.mounters.MounterUtils.*;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.Collections.emptyMap;
 
 public class TimelineRawMounter {
 	private final DataHubBox box;
 	private final MasterDatamart datamart;
+	private final Map<String, Set<String>> timelineTypes;
+	private final IndicatorMounter indicatorMounter;
 
-	public TimelineRawMounter(DataHubBox box, MasterDatamart datamart) {
+	public TimelineRawMounter(DataHubBox box, MasterDatamart datamart, Map<String, Set<String>> timelineTypes) {
 		this.box = box;
 		this.datamart = datamart;
+		this.timelineTypes = timelineTypes;
+		this.indicatorMounter = new IndicatorMounter(datamart);
 	}
 
 	public void mount(MeasurementEvent event) {
@@ -34,9 +42,25 @@ public class TimelineRawMounter {
 			if (event.ss() == null) return;
 			TimelineStore store = getOrCreateTimelineStore(event, sourceSensor(event));
 			update(store, event);
+			mountIndicator(event, store);
 		} catch (Exception e) {
 			Logger.error("Could not mount event " + event.type() + ", ss = " + event.ss() + ": " + e.getMessage(), e);
 		}
+	}
+
+	private void mountIndicator(MeasurementEvent event, TimelineStore store) {
+		var definition = definitionOf(event);
+		if (store != null && definition != null && definition.asTimeline().isIndicator())
+			indicatorMounter.mount(definition.name$(), store);
+	}
+
+	private Timeline.Raw definitionOf(MeasurementEvent event) {
+		return datamart.definition().timelineList().stream()
+				.filter(Timeline::isRaw)
+				.map(Timeline::asRaw)
+				.filter(t -> timelineTypes.getOrDefault(t.name$(), Set.of()).contains(event.type()))
+				.findFirst()
+				.orElse(null);
 	}
 
 	public List<String> destinationsOf(MeasurementEvent event) {
@@ -81,12 +105,12 @@ public class TimelineRawMounter {
 	}
 
 	public static class OfSingleTimeline extends TimelineRawMounter {
-
 		private final Supplier<TimelineWriter> writer;
 
 		public OfSingleTimeline(MasterDatamart datamart, Supplier<TimelineWriter> writer) {
-			super(datamart.box(), datamart);
+			super(datamart.box(), datamart, emptyMap());
 			this.writer = writer;
+
 		}
 
 		@Override
@@ -94,7 +118,7 @@ public class TimelineRawMounter {
 			try {
 				TimelineWriter writer = this.writer.get();
 				checkTs(event.ts(), writer);
-				writer.set(event.values()); // TODO: measurements must be present in sensorModel and in the order defined by the sensorModel
+				writer.set(event.values());
 			} catch (Exception e) {
 				Logger.error("Could not mount event " + event.type() + ", ss = " + event.ss() + ": " + e.getMessage(), e);
 			}

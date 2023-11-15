@@ -42,13 +42,9 @@ public class TimelineMounter extends MasterDatamartMounter {
 	public TimelineMounter(MasterDatamart datamart) {
 		super(datamart);
 		timelineTypes = datamart.definition().timelineList().stream().collect(Collectors.toMap(Layer::name$, t -> types(t).collect(Collectors.toSet())));
-		rawMounter = rawMounter(datamart);
+		rawMounter = new TimelineRawMounter(box(), datamart, timelineTypes);
 		assertionMounter = new TimelineAssertionMounter(box(), datamart);
 		cookedMounter = new TimelineCookedMounter(box(), datamart, timelineTypes);
-	}
-
-	protected TimelineRawMounter rawMounter(MasterDatamart datamart) {
-		return new TimelineRawMounter(box(), datamart);
 	}
 
 	@Override
@@ -124,13 +120,11 @@ public class TimelineMounter extends MasterDatamartMounter {
 	}
 
 	public static class OfSingleTimeline implements AutoCloseable {
-
 		private final TimelineRawMounter.OfSingleTimeline rawMounter;
 		private final TimelineAssertionMounter.OfSingleTimeline assertionMounter;
 		private final String ss;
-
-		private TimelineWriter writer;
 		private final TimelineFileFactory timelineFactory;
+		private TimelineWriter writer;
 		private File sessionFile;
 
 		public OfSingleTimeline(MasterDatamart datamart, Timeline timeline, String tank, String ss) {
