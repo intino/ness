@@ -163,6 +163,6 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.6.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.6" level="project" />
-    <orderEntry type="library" name="Intino: io.intino:data-hub:9.13.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Intino: io.intino:data-hub:9.14.0" level="project" />
   </component>
 </module>
