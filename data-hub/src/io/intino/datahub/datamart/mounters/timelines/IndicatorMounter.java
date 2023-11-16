@@ -19,19 +19,19 @@ public class IndicatorMounter {
 	}
 
 	public void mount(String timeline, TimelineStore timelineStore) {
+		if (timelineStore == null) return;
 		IndicatorDirectory indicatorStore = datamart.indicatorStore();
 		for (Magnitude magnitude : timelineStore.sensorModel().magnitudes()) {
 			IndicatorFile indicatorFile = indicatorStore.get(timeline + "." + magnitude.label());
 			try {
-				Indicator indicator = indicatorFile.get();
 				Timeline.Point last = timelineStore.timeline().last();
+				if (last == null || last.instant() == null) return;
+				Indicator indicator = indicatorFile.get();
 				indicator.put(timelineStore.sensor(), last.instant(), last.value(magnitude));
 				indicatorFile.save(indicator);
 			} catch (IOException e) {
 				Logger.error(e);
 			}
-
 		}
-
 	}
 }

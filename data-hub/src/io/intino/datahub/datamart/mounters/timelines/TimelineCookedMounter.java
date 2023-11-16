@@ -55,7 +55,7 @@ public class TimelineCookedMounter {
 				.filter(Timeline::isCooked)
 				.map(Timeline::asCooked)
 				.filter(t -> timelineTypes.getOrDefault(t.name$(), Set.of()).contains(event.type()))
-				.forEach(t -> process(event, t));
+				.forEach(t -> mount(event, t));
 	}
 
 	public List<String> destinationsOf(MessageEvent event) {
@@ -67,14 +67,15 @@ public class TimelineCookedMounter {
 				.toList();
 	}
 
-	private void process(MessageEvent event, Cooked timelineDefinition) {
+	protected void mount(MessageEvent event, Cooked timelineDefinition) {
 		String entityId = entityOf(event, timelineDefinition);
 		if (entityId == null) return;
 		TimelineStore timelineStore = updateTimeline(event, timelineDefinition, entityId);
-		if (timelineStore != null) indicatorMounter.mount(timelineDefinition.name$(), timelineStore);
+		if (timelineStore != null && timelineDefinition.asTimeline().isIndicator())
+			indicatorMounter.mount(timelineDefinition.name$(), timelineStore);
 	}
 
-	private TimelineStore updateTimeline(MessageEvent event, Cooked definition, String entityId) {
+	protected TimelineStore updateTimeline(MessageEvent event, Cooked definition, String entityId) {
 		try {
 			TimelineStore store = getOrCreateTimelineStore(event, definition, entityId);
 			if (store == null) return null;
@@ -91,7 +92,7 @@ public class TimelineCookedMounter {
 		return timelineFile == null ? createTimelineStore(timelineDef, event.ts(), entityId) : timelineFile;
 	}
 
-	private String entityOf(MessageEvent event, Cooked definition) {
+	private static String entityOf(MessageEvent event, Cooked definition) {
 		TimeSeries timeSeries = definition.timeSeries(ts -> ts.tank().message().name$().equals(event.type()));
 		if (timeSeries != null) return event.toMessage().get(timeSeries.entityId().name$()).asString();
 		for (TimeSeries series : definition.timeSeriesList())
@@ -200,5 +201,19 @@ public class TimelineCookedMounter {
 		return timeline.timeSeriesList().stream()
 				.map(ts -> new Magnitude(ts.name$(), new Model(ts.attributeList().stream().collect(toMap(Layer::name$, TimeSeries.Attribute::value)))))
 				.toArray(Magnitude[]::new);
+	}
+
+
+	public static class OneShot extends TimelineCookedMounter {
+
+		public OneShot(DataHubBox box, MasterDatamart datamart, Map<String, Set<String>> timelineTypes) {
+			super(box, datamart, timelineTypes);
+		}
+
+		protected void mount(MessageEvent event, Cooked timelineDefinition) {
+			String entityId = entityOf(event, timelineDefinition);
+			if (entityId != null) updateTimeline(event, timelineDefinition, entityId);
+		}
+
 	}
 }

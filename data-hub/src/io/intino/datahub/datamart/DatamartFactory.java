@@ -15,11 +15,14 @@ import io.intino.datahub.datamart.impl.LocalMasterDatamart;
 import io.intino.datahub.datamart.mounters.EntityMounter;
 import io.intino.datahub.datamart.mounters.MounterUtils;
 import io.intino.datahub.datamart.mounters.ReelMounter;
-import io.intino.datahub.datamart.mounters.timelines.TimelineMounter;
+import io.intino.datahub.datamart.mounters.timelines.IndicatorMounter;
+import io.intino.datahub.datamart.mounters.timelines.TimelineCookedMounter;
+import io.intino.datahub.datamart.mounters.timelines.TimelineMounter.OfSingleTimeline;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.Sensor;
 import io.intino.datahub.model.Timeline;
+import io.intino.sumus.chronos.TimelineStore;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -32,6 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+@SuppressWarnings("unchecked")
 public class DatamartFactory {
 	private final DataHubBox box;
 	private final Datalake datalake;
@@ -44,13 +48,10 @@ public class DatamartFactory {
 	public MasterDatamart create(Datamart definition) throws Exception {
 		Reference<MasterDatamart> datamart = new Reference<>();
 		Reference<Instant> fromTs = new Reference<>();
-
 		if (failedToLoadLastSnapshotOf(definition, datamart, fromTs)) {
 			datamart.value = new LocalMasterDatamart(box, definition);
 			fromTs.value = null;
 		}
-		// If loaded from snapshot, reflow events between the snapshot's timetag and the most recent timetag
-		// If no snapshot was loaded, reflow all events
 		return reflow(datamart.value, definition);
 	}
 
@@ -69,6 +70,7 @@ public class DatamartFactory {
 		reflowEntities(datamart, entityTanks(definition));
 		reflowCookedTimelines(datamart, cookedTimelinesTanks(definition));
 		reflowRawTimelines(datamart, definition);
+		reflowIndicators(datamart, definition);
 		reflowReels(datamart, reelTanks(definition));
 		Logger.debug("Reflow complete");
 		box.datamartSerializer().saveSnapshot(Timetag.today(), datamart);
@@ -78,11 +80,11 @@ public class DatamartFactory {
 	private void removeAllChronosFiles(MasterDatamart datamart) throws IOException {
 		FileUtils.deleteDirectory(box.datamartTimelinesDirectory(datamart.name()));
 		FileUtils.deleteDirectory(box.datamartReelsDirectory(datamart.name()));
+		FileUtils.deleteDirectory(box.datamartIndicatorsDirectory(datamart.name()));
 	}
 
 	private void reflowEntities(MasterDatamart datamart, Set<String> entityTanks) {
 		Logger.debug("Reflowing entities...");
-		// TODO: create past snapshots while reflowing
 		reflow(new EntityMounter(datamart), reflowTanks(entityTanks));
 	}
 
@@ -93,7 +95,18 @@ public class DatamartFactory {
 
 	private void reflowCookedTimelines(MasterDatamart datamart, Set<String> cookedTimelineTanks) {
 		Logger.debug("Reflowing cooked timelines...");
-		reflow(new TimelineMounter(datamart), reflowTanks(cookedTimelineTanks));
+		reflow(new TimelineCookedMounter.OneShot(box, datamart, MounterUtils.timelineTypes(datamart)), reflowTanks(cookedTimelineTanks));
+	}
+
+	private void reflowIndicators(MasterDatamart datamart, Datamart definition) {
+		Logger.debug("Reflowing indicators...");
+		IndicatorMounter indicatorMounter = new IndicatorMounter(datamart);
+		Map<String, Timeline> definitions = definition.timelineList().stream()
+				.filter(Timeline::isIndicator)
+				.collect(Collectors.toMap(t -> t.isRaw() ? t.asRaw().tank().asTank().asMeasurement().sensor().name$() : t.asCooked().name$(), t -> t));
+		datamart.timelineStore().listFiles().stream()
+				.filter(f -> definitions.containsKey(f.getParentFile().getName()))
+				.forEach(f -> indicatorMounter.mount(f.getParentFile().getName(), timelineStore(f)));
 	}
 
 	private void reflowReels(MasterDatamart datamart, Set<String> tanks) {
@@ -106,10 +119,16 @@ public class DatamartFactory {
 		}
 	}
 
-	private void reflow(TimelineMounter timelineMounter, Iterator<Event> events) {
-		while (events.hasNext()) {
-			Event event = events.next();
-			timelineMounter.mount(event);
+	private void reflow(TimelineCookedMounter timelineMounter, Iterator<Event> events) {
+		while (events.hasNext()) timelineMounter.mount((MessageEvent) events.next());
+	}
+
+	private static TimelineStore timelineStore(File f) {
+		try {
+			return TimelineStore.of(f);
+		} catch (IOException e) {
+			Logger.error(e);
+			return null;
 		}
 	}
 
@@ -197,13 +216,11 @@ public class DatamartFactory {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void reflowTimelinesOf(MasterDatamart datamart, Timeline timeline, String measurementTank,
 								   Datalake.Store.Source<MeasurementEvent> ss, MessageEventStream messageEvents) {
-		try (TimelineMounter.OfSingleTimeline mounter = new TimelineMounter.OfSingleTimeline(datamart, timeline, measurementTank, ss.name()); messageEvents) {
+		try (OfSingleTimeline mounter = new OfSingleTimeline(datamart, timeline, measurementTank, ss.name()); messageEvents) {
 			Stream messages = messageEvents.stream();
 			List<MeasurementEvent> measurements = ss.tubs().flatMap(Datalake.Store.Tub::events).toList();
 			Iterator<Event> events = EventStream.merge(Stream.of(messages, measurements.stream())).iterator();
-			while (events.hasNext()) {
-				mounter.mount(events.next());
-			}
+			while (events.hasNext()) mounter.mount(events.next());
 		} catch (Exception e) {
 			Logger.error(e);
 		}
@@ -213,15 +230,6 @@ public class DatamartFactory {
 	private Iterator<Event> reflowTanks(Set<String>... tanks) {
 		Set<String> tankNames = new HashSet<>();
 		Arrays.stream(tanks).forEach(tankNames::addAll);
-		return EventStream.merge(tanks(tankNames).map(tank -> (Stream<Event>) tank.content())).iterator();
-	}
-
-	@SuppressWarnings("unchecked")
-	private Iterator<Event> reflowTanks(Set<String> entityTanks, Set<String> timelineTanks, Set<String> reelTanks, Instant fromTs) {
-		Set<String> tankNames = new HashSet<>(entityTanks);
-		tankNames.addAll(timelineTanks);
-		tankNames.addAll(reelTanks);
-		if (fromTs != null) return merge(fromTs, tankNames);
 		return EventStream.merge(tanks(tankNames).map(tank -> (Stream<Event>) tank.content())).iterator();
 	}
 
@@ -245,17 +253,6 @@ public class DatamartFactory {
 				.collect(Collectors.toSet());
 	}
 
-	private static Set<String> timelineTanks(Datamart definition) {
-		return definition.timelineList().stream()
-				.flatMap(MounterUtils::tanksOf)
-				.filter(Objects::nonNull)
-				.collect(Collectors.toSet());
-	}
-
-	public static Stream<String> tanksOf(Timeline.Cooked.TimeSeries.Count ts) {
-		return ts.operationList().stream().map(d -> tankName(d.tank()));
-	}
-
 	private static Set<String> entityTanks(Datamart definition) {
 		return definition.entityList().stream().filter(e -> e.from() != null).map(DatamartFactory::tankName).collect(Collectors.toSet());
 	}
@@ -270,14 +267,6 @@ public class DatamartFactory {
 
 	private static String tankName(Sensor sensor) {
 		return sensor.core$().fullName().replace("$", ".");
-	}
-
-	private void deleteDirectorySafe(File backup) {
-		try {
-			FileUtils.deleteDirectory(backup);
-		} catch (Exception e) {
-			Logger.error(e);
-		}
 	}
 
 	private static class Reference<T> {

@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino", "9.14.0") data-hub as Product
+Artifact("io.intino", "9.15.0") data-hub as Product
 	Model("Proteo", "3.4.7", "4.2.3") > outLanguage = "Ness"
 	Box("Konos", "10.6.13")
 	Imports
@@ -8,7 +8,7 @@ Artifact("io.intino", "9.14.0") data-hub as Product
 		Compile("io.intino.alexandria", "core-framework", "2.2.0")
 		Compile("io.intino.alexandria", "jmx", "1.0.5")
 		Compile("io.intino.alexandria", "primitives", "1.1.2")
-		Compile("io.intino.alexandria", "sealing", "7.0.7")
+		Compile("io.intino.alexandria", "sealing", "7.0.8")
 		Compile("io.intino.alexandria", "ui-framework", "4.28.9")
 			Exclude("io.intino.alexandria", "driver-r")
 			Exclude("io.intino.alexandria", "driver-shiny")
@@ -17,16 +17,16 @@ Artifact("io.intino", "9.14.0") data-hub as Product
 		Compile("io.intino.alexandria", "zip", "1.0.5")
 		Compile("io.intino.alexandria", "logger4j", "1.0.1")
 		Compile("io.intino.alexandria", "scheduler-framework", "1.2.0") > Exclude("org.slf4j", "slf4j-api")
-		Compile("io.intino.sumus", "chronos", "2.4.2")
+		Compile("io.intino.sumus", "chronos", "2.4.3")
 		Compile("commons-io", "commons-io", "2.15.0")
 		Compile("org.apache.activemq", "activemq-broker", "5.18.3")
 		Compile("org.apache.activemq", "activemq-mqtt", "5.18.3")
 		Compile("org.apache.activemq", "activemq-kahadb-store", "5.18.3")
 		Compile("org.apache.activemq", "activemq-jaas", "5.18.3")
 		Compile("org.apache.activemq", "activemq-runtime-config", "5.18.3")
-		Compile("org.xerial", "sqlite-jdbc", "3.43.2.2")
+		Compile("org.xerial", "sqlite-jdbc", "3.44.0.0")
 		Test("junit", "junit", "4.13.2")
-		Web("io.intino", "datalake-inspector", "9.14.0")
+		Web("io.intino", "datalake-inspector", "9.15.0")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
 	Distribution > Artifactory("intino-maven")

@@ -17,10 +17,14 @@ import io.intino.datahub.model.Sensor;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 class MeasurementEventSealer {
 	private final Datalake datalake;
@@ -32,12 +36,27 @@ class MeasurementEventSealer {
 	}
 
 	public void seal(Fingerprint fingerprint, List<File> sessions) throws IOException {
-		File file = datalakeFile(fingerprint);
-		try (ZitWriter writer = file.exists() && file.length() > 0 ? new ZitWriter(file) : initFile(fingerprint, file)) {
+		File dlFile = datalakeFile(fingerprint);
+		File session = new File(dlFile.getAbsolutePath() + ".session");
+		Stream<MeasurementEvent> eventStream = streamOf(sessions)
+				.map(e -> new MeasurementEvent(e.type(), e.ss(), e.ts(), magnitudes(e), values(e.toMessage())));
+		try (ZitWriter writer = initFile(fingerprint, session)) {
 			if (writer == null) return;
-			streamOf(sessions)
-					.map(e -> new MeasurementEvent(e.type(), e.ss(), e.ts(), magnitudes(e), values(e.toMessage())))
-					.forEach(m -> writer.put(m.ts(), m.values()));
+			final String[][] magnitudes = {writer.sensorModel()};
+			EventStream.merge(Stream.of(EventStream.of(dlFile), eventStream))
+					.forEach(m -> {
+						updateMagnitudes(m, magnitudes, writer);
+						writer.put(m.ts(), m.values());
+					});
+		}
+		Files.move(session.toPath(), dlFile.toPath(), ATOMIC_MOVE, REPLACE_EXISTING);
+	}
+
+	private static void updateMagnitudes(MeasurementEvent m, String[][] magnitudes, ZitWriter writer) {
+		String[] array = Arrays.stream(m.magnitudes()).map(MeasurementEvent.Magnitude::toString).toArray(String[]::new);
+		if (!Arrays.equals(magnitudes[0], array)) {
+			writer.put(array);
+			magnitudes[0] = array;
 		}
 	}
 
@@ -76,10 +95,10 @@ class MeasurementEventSealer {
 	}
 
 	private Stream<MessageEvent> streamOf(List<File> files) throws IOException {
-		if (files.size() == 1) return new EventStream<>(new MessageEventReader(files.get(0)));
+		if (files.size() == 1) return new EventStream<>(new MessageEventReader(files.get(0))).sorted();
 		return EventStream.merge(files.stream().map(file -> {
 			try {
-				return new EventStream<>((new MessageEventReader(files.get(0))));
+				return new EventStream<>((new MessageEventReader(files.get(0)))).sorted();
 			} catch (IOException e) {
 				Logger.error(e);
 				return Stream.empty();

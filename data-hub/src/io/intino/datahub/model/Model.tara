@@ -71,6 +71,7 @@ Concept:Named Timeline is component
 		Concept:Named Attribute
 			var Sensor.Magnitude magnitude
 			var Entity.Attribute from
+	Aspect Indicator
 	Aspect Cooked
 		Concept TimeSeries
 			var Datalake.Tank.Message tank

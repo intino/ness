@@ -7,6 +7,7 @@ import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.Sensor;
 import io.intino.datahub.model.Timeline;
 import io.intino.datahub.model.Timeline.Raw.Attribute;
+import io.intino.magritte.framework.Layer;
 import io.intino.sumus.chronos.Magnitude;
 import io.intino.sumus.chronos.Period;
 import io.intino.sumus.chronos.TimelineStore;
@@ -24,6 +25,10 @@ import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class MounterUtils {
+
+	public static Map<String, Set<String>> timelineTypes(MasterDatamart datamart) {
+		return datamart.definition().timelineList().stream().collect(Collectors.toMap(Layer::name$, t -> types(t).collect(Collectors.toSet())));
+	}
 
 	public static String sourceSensor(Event event) {
 		Map<String, String> parameters = parameters(event.ss());
