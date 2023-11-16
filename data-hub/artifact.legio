@@ -17,7 +17,7 @@ Artifact("io.intino", "9.15.0") data-hub as Product
 		Compile("io.intino.alexandria", "zip", "1.0.5")
 		Compile("io.intino.alexandria", "logger4j", "1.0.1")
 		Compile("io.intino.alexandria", "scheduler-framework", "1.2.0") > Exclude("org.slf4j", "slf4j-api")
-		Compile("io.intino.sumus", "chronos", "2.4.2")
+		Compile("io.intino.sumus", "chronos", "2.4.3")
 		Compile("commons-io", "commons-io", "2.15.0")
 		Compile("org.apache.activemq", "activemq-broker", "5.18.3")
 		Compile("org.apache.activemq", "activemq-mqtt", "5.18.3")
