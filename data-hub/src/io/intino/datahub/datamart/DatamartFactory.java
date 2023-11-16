@@ -17,7 +17,7 @@ import io.intino.datahub.datamart.mounters.MounterUtils;
 import io.intino.datahub.datamart.mounters.ReelMounter;
 import io.intino.datahub.datamart.mounters.timelines.IndicatorMounter;
 import io.intino.datahub.datamart.mounters.timelines.TimelineCookedMounter;
-import io.intino.datahub.datamart.mounters.timelines.TimelineMounter;
+import io.intino.datahub.datamart.mounters.timelines.TimelineMounter.OfSingleTimeline;
 import io.intino.datahub.model.Datamart;
 import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.Sensor;
@@ -216,13 +216,11 @@ public class DatamartFactory {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void reflowTimelinesOf(MasterDatamart datamart, Timeline timeline, String measurementTank,
 								   Datalake.Store.Source<MeasurementEvent> ss, MessageEventStream messageEvents) {
-		try (TimelineMounter.OfSingleTimeline mounter = new TimelineMounter.OfSingleTimeline(datamart, timeline, measurementTank, ss.name()); messageEvents) {
+		try (OfSingleTimeline mounter = new OfSingleTimeline(datamart, timeline, measurementTank, ss.name()); messageEvents) {
 			Stream messages = messageEvents.stream();
 			List<MeasurementEvent> measurements = ss.tubs().flatMap(Datalake.Store.Tub::events).toList();
 			Iterator<Event> events = EventStream.merge(Stream.of(messages, measurements.stream())).iterator();
-			while (events.hasNext()) {
-				mounter.mount(events.next());
-			}
+			while (events.hasNext()) mounter.mount(events.next());
 		} catch (Exception e) {
 			Logger.error(e);
 		}

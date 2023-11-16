@@ -139,12 +139,11 @@ public class TimelineMounter extends MasterDatamartMounter {
 		}
 
 		public void mount(Event event) {
-			createTimelineFileIfNotExists(event.ts());
 			if (event instanceof MeasurementEvent e) {
+				createTimelineFileIfNotExists(event.ts());
 				rawMounter.mount(e);
-			} else if (event instanceof MessageEvent e && ss.equals(sourceSensor(event))) {
+			} else if (event instanceof MessageEvent e && ss.equals(sourceSensor(event)))
 				assertionMounter.mount(new MessageEvent(e.toMessage()));
-			}
 		}
 
 		private void createTimelineFileIfNotExists(Instant ts) {
