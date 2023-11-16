@@ -253,17 +253,6 @@ public class DatamartFactory {
 				.collect(Collectors.toSet());
 	}
 
-	private static Set<String> timelineTanks(Datamart definition) {
-		return definition.timelineList().stream()
-				.flatMap(MounterUtils::tanksOf)
-				.filter(Objects::nonNull)
-				.collect(Collectors.toSet());
-	}
-
-	public static Stream<String> tanksOf(Timeline.Cooked.TimeSeries.Count ts) {
-		return ts.operationList().stream().map(d -> tankName(d.tank()));
-	}
-
 	private static Set<String> entityTanks(Datamart definition) {
 		return definition.entityList().stream().filter(e -> e.from() != null).map(DatamartFactory::tankName).collect(Collectors.toSet());
 	}
@@ -278,14 +267,6 @@ public class DatamartFactory {
 
 	private static String tankName(Sensor sensor) {
 		return sensor.core$().fullName().replace("$", ".");
-	}
-
-	private void deleteDirectorySafe(File backup) {
-		try {
-			FileUtils.deleteDirectory(backup);
-		} catch (Exception e) {
-			Logger.error(e);
-		}
 	}
 
 	private static class Reference<T> {
