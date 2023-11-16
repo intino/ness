@@ -42,7 +42,7 @@ class MeasurementEventSealer {
 				.map(e -> new MeasurementEvent(e.type(), e.ss(), e.ts(), magnitudes(e), values(e.toMessage())));
 		try (ZitWriter writer = initFile(fingerprint, session)) {
 			if (writer == null) return;
-			final String[][] magnitudes = {null};
+			final String[][] magnitudes = {writer.sensorModel()};
 			EventStream.merge(Stream.of(EventStream.of(dlFile), eventStream))
 					.forEach(m -> {
 						updateMagnitudes(m, magnitudes, writer);
