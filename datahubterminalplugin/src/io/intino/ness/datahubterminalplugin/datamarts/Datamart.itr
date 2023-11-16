@@ -34,6 +34,13 @@ def type(datamart & interface)
 
 		[$indicator+getterSignature...[$NL$NL]]
 
+		[default IndicatorNode indicator(String name) {
+			return switch(name) {
+				$indicator+case...[$NL]
+				default -> null;
+			};
+		}]
+
 		Dictionary dictionary(String name);
 
 		class Entities {
@@ -351,3 +358,8 @@ end
 def type(indicator) trigger(getterSignature)
 	IndicatorNode $label+firstLowerCase~Indicator();
 end
+
+def type(indicator) trigger(case)
+	case "$label" -> $label+firstLowerCase~Indicator();
+end
+
