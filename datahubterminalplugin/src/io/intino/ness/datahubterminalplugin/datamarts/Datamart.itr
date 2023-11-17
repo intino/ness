@@ -34,6 +34,10 @@ def type(datamart & interface)
 
 		[$indicator+getterSignature...[$NL$NL]]
 
+		[default IndicatorNode indicators() {
+			return List.of($indicator+name...[, ]);
+		}]
+
 		[default IndicatorNode indicator(String name) {
 			return switch(name) {
 				$indicator+case...[$NL]
@@ -361,5 +365,9 @@ end
 
 def type(indicator) trigger(case)
 	case "$label" -> $label+firstLowerCase~Indicator();
+end
+
+def type(indicator) trigger(name)
+	"$name"
 end
 

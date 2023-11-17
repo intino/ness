@@ -167,5 +167,7 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zit:1.0.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:session:2.0.6" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.sumus:chronos:2.4.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:jms:1.6.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
   </component>
 </module>
