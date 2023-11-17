@@ -220,6 +220,17 @@ def type(datamart & interface)
 				}
 				return new Indicator(shots);
 			}
+
+			public static void serialize(Indicator indicator, java.io.OutputStream os) throws IOException {
+				try (var stream = new java.io.ObjectOutputStream(new java.io.BufferedOutputStream(os))) {
+					stream.writeInt(indicator.shots().size());
+					for (Map.Entry<String, Shot> entry : indicator.shots().entrySet()) {
+						stream.writeUTF(entry.getKey());
+						stream.writeLong(entry.getValue().ts().toEpochMilli());
+						stream.writeDouble(entry.getValue().value());
+					}
+				}
+			}
         }
 
         interface ChronosNode {
