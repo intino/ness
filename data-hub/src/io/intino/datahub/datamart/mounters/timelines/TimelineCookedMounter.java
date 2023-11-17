@@ -153,7 +153,7 @@ public class TimelineCookedMounter {
 
 	private void processCount(MeasurementsVector measurements, TimeSeries.Count ts, Point last, Operation operation) {
 		double value = last == null ? 0 : last.value();
-		if (operation instanceof Difference) measurements.set(ts.name$(), value - 1);
+		if (operation instanceof Difference) measurements.set(ts.name$(), Math.max(0, value - 1));
 		else measurements.set(ts.name$(), value + 1);
 	}
 
