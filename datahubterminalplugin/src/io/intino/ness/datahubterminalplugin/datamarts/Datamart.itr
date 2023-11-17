@@ -1,8 +1,10 @@
 def type(datamart & interface)
 	package $package;
 
+	import java.io.IOException;
 	import java.util.List;
 	import java.util.Map;
+	import java.util.HashMap;
 	import java.util.concurrent.ConcurrentHashMap;
 	import java.util.stream.Stream;
 	import java.util.stream.Collectors;
@@ -199,13 +201,25 @@ def type(datamart & interface)
 			}
         }
 
-        public record Indicator(Map<String, Shot> shots) {
+        record Indicator(Map<String, Shot> shots) {
         	public Shot get(String sensor) {
         		return shots.get(sensor);
         	}
 
         	public record Shot(Instant ts, double value) {
         	}
+
+        	public static Indicator load(java.io.InputStream is) throws IOException {
+				Map<String, Indicator.Shot> shots;
+				if (is.available() == 0) return new Indicator(new HashMap<>());
+				try (var stream = new java.io.ObjectInputStream(new java.io.BufferedInputStream(is))) {
+					int size = stream.readInt();
+					shots = new HashMap<>(size);
+					for (int i = 0; i < size; i++)
+						shots.put(stream.readUTF(), new Indicator.Shot(Instant.ofEpochMilli(stream.readLong()), stream.readDouble()));
+				}
+				return new Indicator(shots);
+			}
         }
 
         interface ChronosNode {
