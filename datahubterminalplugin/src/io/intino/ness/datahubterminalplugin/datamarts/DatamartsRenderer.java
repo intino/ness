@@ -7,6 +7,7 @@ import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.RuleSet;
 import io.intino.itrules.Template;
+import io.intino.magritte.framework.Layer;
 import io.intino.ness.datahubterminalplugin.Formatters;
 import io.intino.ness.datahubterminalplugin.datamarts.nodes.IndicatorImplTemplate;
 import io.intino.ness.datahubterminalplugin.datamarts.nodes.ReelNodeImplTemplate;
@@ -253,11 +254,17 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private Frame[] indicatorsOf(Datamart datamart) {
-		return datamart.timelineList().stream()
+		Stream<Frame> cooked = datamart.timelineList().stream()
 				.filter(Timeline::isCooked)
+				.filter(Timeline::isIndicator)
 				.map(Timeline::asCooked)
-				.flatMap(this::indicatorFrames)
-				.toArray(Frame[]::new);
+				.flatMap(this::indicatorFrames);
+		Stream<Frame> raw = datamart.timelineList().stream()
+				.filter(Timeline::isRaw)
+				.filter(Timeline::isIndicator)
+				.map(Timeline::asRaw)
+				.flatMap(this::indicatorFrames);
+		return Stream.concat(cooked, raw).toArray(Frame[]::new);
 	}
 
 	private Frame[] timelinesOf(Datamart datamart) {
@@ -268,15 +275,24 @@ public class DatamartsRenderer implements ConceptRenderer {
 	}
 
 	private Stream<Frame> indicatorFrames(Timeline.Cooked timeline) {
-		return timeline.timeSeriesList().stream().map(ts -> {
-			FrameBuilder b = new FrameBuilder("indicator", "cooked");
-			b.add("package", modelPackage);
-			b.add("name", timeline.name$() + "." + ts.name$());
-			b.add("label", Formatters.firstLowerCase(ts.name$()));
-			b.add("sources", types(timeline.asTimeline()).map(t -> quoted().format(t).toString()).collect(joining(",")));
-			b.add("entity", firstUpperCase(timeline.entity().name$()));
-			return b.toFrame();
-		});
+		return timeline.timeSeriesList().stream()
+				.map(Layer::name$)
+				.map(ts -> new FrameBuilder("indicator")
+						.add("package", modelPackage)
+						.add("label", Formatters.firstLowerCase(ts))
+						.add("name", timeline.name$() + "." + ts)
+						.add("sources", types(timeline.asTimeline()).map(t -> quoted().format(t).toString()).collect(joining(",")))
+						.add("entity", firstUpperCase(timeline.entity().name$())).toFrame());
+	}
+
+	private Stream<Frame> indicatorFrames(Timeline.Raw timeline) {
+		return timeline.tank().sensor().magnitudeList().stream().map(Layer::name$)
+				.map(ts -> new FrameBuilder("indicator")
+						.add("package", modelPackage)
+						.add("label", Formatters.firstLowerCase(ts))
+						.add("name", timeline.tank().asTank().asMeasurement().sensor().name$() + "." + ts)
+						.add("sources", types(timeline.asTimeline()).map(t -> quoted().format(t).toString()).collect(joining(",")))
+						.add("entity", firstUpperCase(timeline.entity().name$())).toFrame());
 	}
 
 	private Frame timelineFrame(Timeline.Raw timeline) {
