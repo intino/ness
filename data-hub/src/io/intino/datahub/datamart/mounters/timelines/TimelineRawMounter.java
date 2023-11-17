@@ -51,7 +51,7 @@ public class TimelineRawMounter {
 	private void mountIndicator(MeasurementEvent event, TimelineStore store) {
 		var definition = definitionOf(event);
 		if (store != null && definition != null && definition.asTimeline().isIndicator())
-			indicatorMounter.mount(definition.name$(), store);
+			indicatorMounter.mount(definition.tank().asTank().asMeasurement().sensor().name$(), store);
 	}
 
 	private Timeline.Raw definitionOf(MeasurementEvent event) {
