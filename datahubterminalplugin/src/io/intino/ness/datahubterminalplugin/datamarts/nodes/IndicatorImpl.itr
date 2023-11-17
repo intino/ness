@@ -23,7 +23,7 @@ def type(indicatorNode & default) trigger(nodeImpl)
 		public Indicator get() throws IndicatorNotAvailableException {
 			synchronized(this) {
 				try {
-					if (hasDirectAccessToFile) return loadFile(this.file);
+					if (hasDirectAccessToFile) return Indicator.load(new java.io.FileInputStream(this.file));
 					return downloadFromDatahub();
 				} catch(Exception e) {
 					throw new IndicatorNotAvailableException(e);
@@ -31,17 +31,6 @@ def type(indicatorNode & default) trigger(nodeImpl)
 			}
 		}
 
-		public Indicator loadFile(File file) throws IOException {
-			Map<String, Indicator.Shot> shots;
-			if (!file.exists()) return new Indicator(new HashMap<>());
-			try (var stream = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)))) {
-				int size = stream.readInt();
-				shots = new HashMap<>(size);
-				for (int i = 0; i < size; i++)
-					shots.put(stream.readUTF(), new Indicator.Shot(Instant.ofEpochMilli(stream.readLong()), stream.readDouble()));
-			}
-			return new Indicator(shots);
-		}
 
 		private Indicator downloadFromDatahub() throws Exception {
 			javax.jms.Message response = requestResponseFromDatahub("get-indicator=" + id, request("download"));
@@ -53,14 +42,7 @@ def type(indicatorNode & default) trigger(nodeImpl)
 			int messageSize = m.getIntProperty("size");
 			byte$[$] bytes = new byte$[messageSize$];
 			m.readBytes(bytes, messageSize);
-			Map<String, Indicator.Shot> shots;
-			try (var stream = new ObjectInputStream(new BufferedInputStream(new ByteArrayInputStream(bytes)))) {
-				int size = stream.readInt();
-				shots = new HashMap<>(size);
-				for (int i = 0; i < size; i++)
-					shots.put(stream.readUTF(), new Indicator.Shot(Instant.ofEpochMilli(stream.readLong()), stream.readDouble()));
-			}
-			return new Indicator(shots);
+			return Indicator.load(new ByteArrayInputStream(bytes));
 		}
 
 		private javax.jms.Message request(String mode) throws Exception {
