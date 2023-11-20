@@ -524,16 +524,31 @@ end
 def type(timeline) trigger(getter)
 	@Override
 	public TimelineNode $name+FirstLowerCase~Timeline(String id) {
-		if (hasLocalAccessToTimelines) return timelines.containsKey(id.replace(":", "-") + ":$name") ? timelines.get(id.replace(":", "-") + ":$name") : TimelineNode.empty();
-		return timelines.computeIfAbsent(id.replace(":", "-") + ":$name", theId -> new TimelineNodeImpl(id, "$name"));
+		String key = id.replace(":", "-") + ":$name";
+		if (timelines.containsKey(key)) return timelines.get(key);
+		if (!hasLocalAccessToTimelines) return timelines.computeIfAbsent(key, theId -> new TimelineNodeImpl(id, "$name"));
+		var timeline = new TimelineNodeImpl(id, "$name");
+		if (timeline.exists()) {
+			timelines.put(key, timeline);
+			return timeline;
+		}
+		return TimelineNode.empty();
 	}
 end
 
 def type(reel) trigger(getter)
 	@Override
 	public ReelNode $name+FirstLowerCase~Reel(String id) {
-		if (hasLocalAccessToReels) return reels.containsKey(id.replace(":", "-") + ":$name") ? reels.get(id.replace(":", "-") + ":$name") : ReelNode.empty();
-		return reels.computeIfAbsent(id.replace(":", "-") + ":$name", theId -> new ReelNodeImpl(id, "$name"));
+		String key = id.replace(":", "-") + ":$name";
+		if (reels.containsKey(key)) return reels.get(key);
+		if (!hasLocalAccessToReels) return reels.computeIfAbsent(key, theId -> new ReelNodeImpl(id, "$name"));
+		var reel = new ReelNodeImpl(id, "$name");
+		if (reel.exists()) {
+			reels.put(key, reel);
+			return reel;
+		}
+		return ReelNode.empty();
+
 	}
 
 	@Override
