@@ -39,15 +39,17 @@ public class ReelMounter extends MasterDatamartMounter {
 
 	@Override
 	public void mount(Message message) {
-		if (message == null) return;
-		MessageEvent event = new MessageEvent(message);
-		String subject = subject(event);
-		try {
-			ReelFile reelFile = datamart.reelStore().get(message.type(), subject);
-			if (reelFile == null) reelFile = reelFile(message.type(), subject);
-			update(reelFile, event);
-		} catch (IOException e) {
-			Logger.error(e);
+		synchronized (datamart) {
+			if (message == null) return;
+			MessageEvent event = new MessageEvent(message);
+			String subject = subject(event);
+			try {
+				ReelFile reelFile = datamart.reelStore().get(message.type(), subject);
+				if (reelFile == null) reelFile = reelFile(message.type(), subject);
+				update(reelFile, event);
+			} catch (IOException e) {
+				Logger.error(e);
+			}
 		}
 	}
 

@@ -54,6 +54,12 @@ def type(reelNode & default) trigger(nodeImpl)
 		}
 
 		@Override
+		public java.utl.Set<String> signals() throws ReelNotAvailableException {
+			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
+			return reelFile.signals();
+		}
+
+		@Override
 		public List<io.intino.sumus.chronos.State> stateOf(Stream<String> signals) throws ReelNotAvailableException {
 			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
 			return signals.map(reelFile::lastStateOf).toList();
