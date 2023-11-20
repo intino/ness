@@ -206,7 +206,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 	private String reelEvents(Datamart datamart) {
 		return datamart.reelList().stream()
-				.map(r -> quoted().format(r.tank().name$()).toString())
+				.map(r -> quoted().format(r.tank().message().name$()).toString())
 				.distinct()
 				.collect(joining(","));
 	}
