@@ -8,10 +8,10 @@ import io.intino.alexandria.event.message.MessageEvent;
 import io.intino.alexandria.jms.MessageReader;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 import org.apache.activemq.command.ActiveMQBytesMessage;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

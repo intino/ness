@@ -1,9 +1,9 @@
 package org.example.test;
 
 import io.intino.alexandria.terminal.JmsConnector;
+import jakarta.jms.Message;
 import org.apache.activemq.command.ActiveMQTextMessage;
 
-import javax.jms.Message;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 

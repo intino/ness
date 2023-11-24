@@ -1,11 +1,11 @@
 package io.intino.datahub.broker.jms;
 
 import io.intino.alexandria.logger.Logger;
+import jakarta.jms.*;
 import org.apache.activemq.advisory.AdvisorySupport;
 import org.apache.activemq.broker.Broker;
 import org.apache.activemq.command.ActiveMQDestination;
 
-import javax.jms.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;

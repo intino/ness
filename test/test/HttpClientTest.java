@@ -2,7 +2,10 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.jms.*;
+import javax.jms.JMSException;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 
 public class HttpClientTest {
 

@@ -33,7 +33,7 @@ class ProcessStatusSerializer {
 		this.scale = scale;
 	}
 
-	Consumer<javax.jms.Message> create() {
+	Consumer<jakarta.jms.Message> create() {
 		return message -> save(JmsMessageTranslator.toInlMessages(message));
 	}
 

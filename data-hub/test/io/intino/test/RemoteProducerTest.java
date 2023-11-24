@@ -3,19 +3,19 @@ package io.intino.test;
 import io.intino.alexandria.jms.TopicProducer;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
+import jakarta.jms.Connection;
+import jakarta.jms.MessageNotWriteableException;
+import jakarta.jms.Session;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.jms.Connection;
-import javax.jms.MessageNotWriteableException;
-import javax.jms.Session;
 import java.time.Instant;
 import java.util.Random;
 
+import static jakarta.jms.Session.AUTO_ACKNOWLEDGE;
 import static java.lang.Thread.sleep;
-import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 import static org.apache.activemq.ActiveMQConnection.makeConnection;
 
 public class RemoteProducerTest {

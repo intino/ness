@@ -1,11 +1,11 @@
 package org.example.test.ssl;
 
+import jakarta.jms.Connection;
+import jakarta.jms.Session;
 import org.apache.activemq.ActiveMQSslConnectionFactory;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.jms.Connection;
-import javax.jms.Session;
 import java.io.File;
 
 public class SSL_ {

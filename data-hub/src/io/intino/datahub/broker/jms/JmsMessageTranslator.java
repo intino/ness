@@ -3,16 +3,16 @@ package io.intino.datahub.broker.jms;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.alexandria.message.MessageReader;
+import jakarta.jms.MessageNotWriteableException;
+import jakarta.jms.TextMessage;
 import org.apache.activemq.command.ActiveMQTextMessage;
 
-import javax.jms.MessageNotWriteableException;
-import javax.jms.TextMessage;
 import java.util.Collections;
 import java.util.Iterator;
 
 public class JmsMessageTranslator {
 
-	public static Iterator<Message> toInlMessages(javax.jms.Message message) {
+	public static Iterator<Message> toInlMessages(jakarta.jms.Message message) {
 		try {
 			return readMessages(((TextMessage) message).getText());
 		} catch (Throwable e) {
@@ -25,7 +25,7 @@ public class JmsMessageTranslator {
 		return new MessageReader(text).iterator();
 	}
 
-	public static javax.jms.Message toJmsMessage(String message) {
+	public static jakarta.jms.Message toJmsMessage(String message) {
 		ActiveMQTextMessage activeMQTextMessage = new ActiveMQTextMessage();
 		try {
 			activeMQTextMessage.setText(message);

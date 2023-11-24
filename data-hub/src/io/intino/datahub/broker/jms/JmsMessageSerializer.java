@@ -12,8 +12,8 @@ import io.intino.datahub.box.service.jms.NessService;
 import io.intino.datahub.datamart.MasterDatamartRepository;
 import io.intino.datahub.datamart.mounters.MasterDatamartMounter;
 import io.intino.datahub.model.Datalake;
+import jakarta.jms.BytesMessage;
 
-import javax.jms.BytesMessage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -60,7 +60,7 @@ public class JmsMessageSerializer {
 		this.mounters = createMountersFor(tank, datamarts);
 	}
 
-	Consumer<javax.jms.Message> create() {
+	Consumer<jakarta.jms.Message> create() {
 		if (tank.isMessage()) return new MessageHandler();
 		if (tank.isMeasurement()) return new MeasurementHandler();
 		if (tank.isResource()) return new ResourceHandler();
@@ -78,7 +78,7 @@ public class JmsMessageSerializer {
 				.toArray(MasterDatamartMounter[]::new);
 	}
 
-	private interface Handler extends Consumer<javax.jms.Message> {
+	private interface Handler extends Consumer<jakarta.jms.Message> {
 		static Handler empty() {
 			return m -> {
 			};
@@ -88,7 +88,7 @@ public class JmsMessageSerializer {
 	private class MessageHandler implements Handler {
 
 		@Override
-		public void accept(javax.jms.Message message) {
+		public void accept(jakarta.jms.Message message) {
 			executorService.execute(() -> consume(JmsMessageTranslator.toInlMessages(message)));
 		}
 
@@ -160,7 +160,7 @@ public class JmsMessageSerializer {
 
 	private class ResourceHandler implements Handler {
 		@Override
-		public void accept(javax.jms.Message message) {
+		public void accept(jakarta.jms.Message message) {
 			try {
 				ResourceEvent event = readResourceEventFrom((BytesMessage) message);
 				String fingerprint = Fingerprint.of(tank.qn(), withOutParameters(event.ss()), timetag(event.ts()), Format.Resource).name();

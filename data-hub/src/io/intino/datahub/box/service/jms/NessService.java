@@ -12,11 +12,11 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.broker.BrokerManager;
 import io.intino.datahub.broker.jms.JmsMessageTranslator;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 import org.apache.activemq.command.ActiveMQTempQueue;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
