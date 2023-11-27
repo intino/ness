@@ -2,13 +2,12 @@ package io.intino.test;
 
 import io.intino.alexandria.jms.TopicConsumer;
 import io.intino.alexandria.logger.Logger;
+import jakarta.jms.JMSException;
+import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
-import javax.jms.JMSException;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-
-import static javax.jms.Session.AUTO_ACKNOWLEDGE;
+import static jakarta.jms.Session.AUTO_ACKNOWLEDGE;
 
 public class Consumer {
 
@@ -30,7 +29,7 @@ public class Consumer {
 	private static Session sessionLocal() {
 		try {
 			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("failover:(tcp://localhost:63000)");
-			javax.jms.Connection connection = connectionFactory.createConnection("cobel", "cobel");
+			jakarta.jms.Connection connection = connectionFactory.createConnection("cobel", "cobel");
 			connection.start();
 			return connection.createSession(false, AUTO_ACKNOWLEDGE);
 		} catch (JMSException e) {

@@ -277,6 +277,7 @@ def type(datamart & interface)
 			boolean exists();
         	java.time.Instant start() throws ReelNotAvailableException;
         	io.intino.sumus.chronos.State stateOf(String signal) throws ReelNotAvailableException;
+        	java.util.Set<String> signals() throws ReelNotAvailableException;
 			default List<io.intino.sumus.chronos.State> stateOf(List<String> signals) throws ReelNotAvailableException {return signals.isEmpty() ? java.util.Collections.emptyList() : stateOf(signals.stream());}
 			List<io.intino.sumus.chronos.State> stateOf(Stream<String> signals) throws ReelNotAvailableException;
 			io.intino.sumus.chronos.Shot lastShotOf(String signal) throws ReelNotAvailableException;
@@ -299,6 +300,7 @@ def type(datamart & interface)
         			public boolean exists() {return false;}
                 	public java.time.Instant start() throws ReelNotAvailableException {throw new ReelNotAvailableException();}
                 	public io.intino.sumus.chronos.State stateOf(String signal) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
+                	public java.util.Set<String> signals() throws ReelNotAvailableException {throw new ReelNotAvailableException();}
                 	public List<io.intino.sumus.chronos.State> stateOf(Stream<String> signals) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
                 	public io.intino.sumus.chronos.Shot lastShotOf(String signal) throws ReelNotAvailableException{throw new ReelNotAvailableException();}
 					public List<io.intino.sumus.chronos.Shot> lastShots() throws ReelNotAvailableException{throw new ReelNotAvailableException();}

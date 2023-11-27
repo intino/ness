@@ -119,9 +119,9 @@ def type(timelineNode & default) trigger(nodeImpl)
 		}
 
 		private io.intino.sumus.chronos.TimelineStore downloadFromDatahub() throws Exception {
-			javax.jms.Message response = requestResponseFromDatahub("get-timeline=" + id(), request(hasDirectAccessToFile ? "path" : "download"));
+			jakarta.jms.Message response = requestResponseFromDatahub("get-timeline=" + id(), request(hasDirectAccessToFile ? "path" : "download"));
 			if (!response.getBooleanProperty("success")) throw new TimelineNotAvailableException("Could not get timeline " + id + " because datahub returned success=false in the response");;
-			if (response instanceof javax.jms.TextMessage textResponse) {
+			if (response instanceof jakarta.jms.TextMessage textResponse) {
 				file = getFile(textResponse);
 				hasDirectAccessToFile = true;
 				if (file != null && file.exists()) return loadFile();
@@ -130,10 +130,10 @@ def type(timelineNode & default) trigger(nodeImpl)
 				response = requestResponseFromDatahub("get-timeline=" + id(), request("download"));
 			}
 			if (!response.getBooleanProperty("success")) throw new TimelineNotAvailableException("Could not get timeline " + id + " because datahub returned success=false in the response");;
-			return readFromBytes((javax.jms.BytesMessage) response);
+			return readFromBytes((jakarta.jms.BytesMessage) response);
 		}
 
-		private io.intino.sumus.chronos.TimelineStore readFromBytes(javax.jms.BytesMessage m) throws Exception {
+		private io.intino.sumus.chronos.TimelineStore readFromBytes(jakarta.jms.BytesMessage m) throws Exception {
 			int size = m.getIntProperty("size");
 			byte$[$] bytes = new byte$[size$];
 			m.readBytes(bytes, size);
@@ -146,7 +146,7 @@ def type(timelineNode & default) trigger(nodeImpl)
 			return loadFile();
 		}
 
-		private File getFile(javax.jms.TextMessage m) {
+		private File getFile(jakarta.jms.TextMessage m) {
 			try {
 				return new File(m.getText());
 			} catch(Exception e) {
@@ -154,7 +154,7 @@ def type(timelineNode & default) trigger(nodeImpl)
 			}
 		}
 
-		private javax.jms.Message request(String mode) throws Exception {
+		private jakarta.jms.Message request(String mode) throws Exception {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
 			String command = "datamart=" + name() + ";operation=get-timeline;id=" + id() + ";mode=" + mode + ";type=" + type;
 			message.setText(command);

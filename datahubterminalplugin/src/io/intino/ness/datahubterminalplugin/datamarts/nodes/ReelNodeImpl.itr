@@ -54,6 +54,12 @@ def type(reelNode & default) trigger(nodeImpl)
 		}
 
 		@Override
+		public java.util.Set<String> signals() throws ReelNotAvailableException {
+			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
+			return reelFile.signals();
+		}
+
+		@Override
 		public List<io.intino.sumus.chronos.State> stateOf(Stream<String> signals) throws ReelNotAvailableException {
 			io.intino.sumus.chronos.ReelFile reelFile = reelFile();
 			return signals.map(reelFile::lastStateOf).toList();
@@ -138,9 +144,9 @@ def type(reelNode & default) trigger(nodeImpl)
 		}
 
 		private io.intino.sumus.chronos.ReelFile downloadFromDatahub() throws Exception {
-			javax.jms.Message response = requestResponseFromDatahub("get-reel=" + id(), request(hasDirectAccessToFile ? "path" : "download"));
+			jakarta.jms.Message response = requestResponseFromDatahub("get-reel=" + id(), request(hasDirectAccessToFile ? "path" : "download"));
 			if (!response.getBooleanProperty("success")) throw new ReelNotAvailableException("Could not get reel " + id + " because datahub returned success=false in the response");
-			if (response instanceof javax.jms.TextMessage textResponse) {
+			if (response instanceof jakarta.jms.TextMessage textResponse) {
 				file = getFile(textResponse);
 				hasDirectAccessToFile = true;
 				if (file != null && file.exists()) return loadFile();
@@ -149,10 +155,10 @@ def type(reelNode & default) trigger(nodeImpl)
 				response = requestResponseFromDatahub("get-reel=" + id(), request("download"));
 			}
 			if (!response.getBooleanProperty("success")) throw new ReelNotAvailableException("Could not get reel " + id + " because datahub returned success=false in the response");
-			return readFromBytes((javax.jms.BytesMessage) response);
+			return readFromBytes((jakarta.jms.BytesMessage) response);
 		}
 
-		private io.intino.sumus.chronos.ReelFile readFromBytes(javax.jms.BytesMessage m) throws Exception {
+		private io.intino.sumus.chronos.ReelFile readFromBytes(jakarta.jms.BytesMessage m) throws Exception {
 			int size = m.getIntProperty("size");
 			byte$[$] bytes = new byte$[size$];
 			m.readBytes(bytes, size);
@@ -163,7 +169,7 @@ def type(reelNode & default) trigger(nodeImpl)
 			return loadFile();
 		}
 
-		private File getFile(javax.jms.TextMessage m) {
+		private File getFile(jakarta.jms.TextMessage m) {
 			try {
 				return new File(m.getText());
 			} catch(Exception e) {
@@ -171,7 +177,7 @@ def type(reelNode & default) trigger(nodeImpl)
 			}
 		}
 
-		private javax.jms.Message request(String mode) throws Exception {
+		private jakarta.jms.Message request(String mode) throws Exception {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
 			String command = "datamart=" + name() + ";operation=get-reel;id=" + id() + ";mode=" + mode + ";type=" + type;
 			message.setText(command);

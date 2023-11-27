@@ -9,6 +9,7 @@ import io.intino.datahub.model.Broker;
 import io.intino.datahub.model.Broker.CompositeDestination.Type;
 import io.intino.datahub.model.Datalake;
 import io.intino.datahub.model.NessGraph;
+import jakarta.jms.*;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQSession;
 import org.apache.activemq.broker.BrokerPlugin;
@@ -34,7 +35,6 @@ import org.apache.activemq.security.AuthenticationUser;
 import org.apache.activemq.security.SimpleAuthenticationPlugin;
 import org.apache.activemq.store.kahadb.KahaDBPersistenceAdapter;
 
-import javax.jms.*;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.File;
@@ -51,7 +51,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import static io.intino.alexandria.jms.MessageReader.textFrom;
-import static javax.jms.Session.AUTO_ACKNOWLEDGE;
+import static jakarta.jms.Session.AUTO_ACKNOWLEDGE;
 
 public class JmsBrokerService implements BrokerService {
 	private static final String NESS = "ness";

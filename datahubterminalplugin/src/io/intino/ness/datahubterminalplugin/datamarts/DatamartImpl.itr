@@ -108,8 +108,8 @@ def type(datamart & message & impl)
 		@Override
         public List<String> listSnapshots() {
         	try {
-        		javax.jms.Message message = requestResponseFromDatahub("listSnapshots", listSnapshotsRequest());
-        		if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
+        		jakarta.jms.Message message = requestResponseFromDatahub("listSnapshots", listSnapshotsRequest());
+        		if (!message.getBooleanProperty("success")) throw new Exception(((jakarta.jms.TextMessage) message).getText());
         		return handleListSnapshotsResponse(message);
         	} catch (Exception e) {
         		Logger.error("Could not download list of available snapshots: " + e.getMessage(), e);
@@ -117,14 +117,14 @@ def type(datamart & message & impl)
         	}
         }
 
-        private javax.jms.Message listSnapshotsRequest() throws Exception {
+        private jakarta.jms.Message listSnapshotsRequest() throws Exception {
         	ActiveMQTextMessage message = new ActiveMQTextMessage();
         	message.setText("datamart=" + name() + ";operation=snapshots");
         	return message;
         }
 
-        private List<String> handleListSnapshotsResponse(javax.jms.Message message) throws Exception {
-        	return java.util.Arrays.stream(((javax.jms.TextMessage) message).getText().split(",")).collect(Collectors.toList());
+        private List<String> handleListSnapshotsResponse(jakarta.jms.Message message) throws Exception {
+        	return java.util.Arrays.stream(((jakarta.jms.TextMessage) message).getText().split(",")).collect(Collectors.toList());
         }
 
         @Override
@@ -197,8 +197,8 @@ def type(datamart & message & impl)
 
 		private Stream<Event> downloadEntities(int$[$] eventCount, String datamartSourceSelector) throws DatahubRequestException {
 			try {
-				javax.jms.Message message = requestResponseFromDatahub("downloadEvents", downloadEntitiesRequest(datamartSourceSelector));
-				if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
+				jakarta.jms.Message message = requestResponseFromDatahub("downloadEvents", downloadEntitiesRequest(datamartSourceSelector));
+				if (!message.getBooleanProperty("success")) throw new Exception(((jakarta.jms.TextMessage) message).getText());
 				return handleDownloadResponse(message, eventCount);
 			} catch (NullPointerException e) {
 				throw new DatahubRequestException("Could not download datamart: no response from datahub.");
@@ -209,7 +209,7 @@ def type(datamart & message & impl)
 			}
 		}
 
-		private javax.jms.Message downloadEntitiesRequest(String datamartSourceSelector) throws Exception {
+		private jakarta.jms.Message downloadEntitiesRequest(String datamartSourceSelector) throws Exception {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
 			message.setText("datamart=" + name() +
 				";operation=entities" +
@@ -223,8 +223,8 @@ def type(datamart & message & impl)
 			return "";
 		}
 
-		private Stream<Event> handleDownloadResponse(javax.jms.Message message, int$[$] eventCount) throws Exception {
-			javax.jms.BytesMessage m = (javax.jms.BytesMessage) message;
+		private Stream<Event> handleDownloadResponse(jakarta.jms.Message message, int$[$] eventCount) throws Exception {
+			jakarta.jms.BytesMessage m = (jakarta.jms.BytesMessage) message;
 			eventCount$[0$] = m.getIntProperty("size");
 			int size = m.getIntProperty("size");
 			byte$[$] bytes = new byte$[size$];
@@ -289,10 +289,10 @@ def type(datamart & message & impl)
 			return Runtime.getRuntime().availableProcessors();
 		}
 
-		private javax.jms.Message requestResponseFromDatahub(String requestName, javax.jms.Message request) throws DatahubRequestException {
+		private jakarta.jms.Message requestResponseFromDatahub(String requestName, jakarta.jms.Message request) throws DatahubRequestException {
         	long timeout = retryConfig.initialTimeoutAmount;
         	for(int i = 0; i < retryConfig.maxAttempts; i++) {
-        		javax.jms.Message message = connector.requestResponse(DATAHUB_MESSAGE_TOPIC, request, timeout, retryConfig.timeoutUnit);
+        		jakarta.jms.Message message = connector.requestResponse(DATAHUB_MESSAGE_TOPIC, request, timeout, retryConfig.timeoutUnit);
         		if (message != null) return message;
         		if (i < retryConfig.maxAttempts - 1) Logger.warn("("+(i+1)+") Datahub did not respond after " + timeout + " " + retryConfig.timeoutUnit + " to the request '" + requestName + "'. Trying again...");
         		timeout *= retryConfig.timeoutMultiplier;
@@ -688,9 +688,9 @@ def trigger(loadTimelinesFromDatahubMethod)
     	try {
     		ActiveMQTextMessage request = new ActiveMQTextMessage();
     		request.setText("datamart=" + name() + ";operation=list-timelines;");
-    		javax.jms.Message message = requestResponseFromDatahub("list-timelines", request);
-    		if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
-    		return ((javax.jms.TextMessage) message).getText().split(",");
+    		jakarta.jms.Message message = requestResponseFromDatahub("list-timelines", request);
+    		if (!message.getBooleanProperty("success")) throw new Exception(((jakarta.jms.TextMessage) message).getText());
+    		return ((jakarta.jms.TextMessage) message).getText().split(",");
     	} catch (Exception e) {
     		Logger.error(e);
     		return new String$[0$];
@@ -724,9 +724,9 @@ def trigger(loadIndicatorsFromDatahubMethod)
     	try {
     		ActiveMQTextMessage request = new ActiveMQTextMessage();
     		request.setText("datamart=" + name() + ";operation=list-indicators;");
-    		javax.jms.Message message = requestResponseFromDatahub("list-indicators", request);
-    		if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
-    		return ((javax.jms.TextMessage) message).getText().split(",");
+    		jakarta.jms.Message message = requestResponseFromDatahub("list-indicators", request);
+    		if (!message.getBooleanProperty("success")) throw new Exception(((jakarta.jms.TextMessage) message).getText());
+    		return ((jakarta.jms.TextMessage) message).getText().split(",");
     	} catch (Exception e) {
     		Logger.error(e);
     		return new String$[0$];
@@ -760,9 +760,9 @@ def trigger(loadReelsFromDatahubMethod)
     	try {
     		ActiveMQTextMessage request = new ActiveMQTextMessage();
     		request.setText("datamart=" + name() + ";operation=list-reels;");
-    		javax.jms.Message message = requestResponseFromDatahub("list-reels", request);
-    		if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
-    		return ((javax.jms.TextMessage)message).getText().split(",");
+    		jakarta.jms.Message message = requestResponseFromDatahub("list-reels", request);
+    		if (!message.getBooleanProperty("success")) throw new Exception(((jakarta.jms.TextMessage) message).getText());
+    		return ((jakarta.jms.TextMessage)message).getText().split(",");
     	} catch (Exception e) {
     		Logger.error(e);
     		return new String$[0$];
@@ -786,10 +786,10 @@ def trigger(loadDictionaryFromDatahubMethod)
     	try {
     		ActiveMQTextMessage request = new ActiveMQTextMessage();
     		request.setText("datamart=" + name() + ";operation=get-dictionary;name="+name);
-    		javax.jms.Message message = requestResponseFromDatahub("get-dictionary", request);
+    		jakarta.jms.Message message = requestResponseFromDatahub("get-dictionary", request);
     		if (message == null) return new String$[0$]$[0$];
-    		if (!message.getBooleanProperty("success")) throw new Exception(((javax.jms.TextMessage) message).getText());
-    		String text = ((javax.jms.TextMessage) message).getText();
+    		if (!message.getBooleanProperty("success")) throw new Exception(((jakarta.jms.TextMessage) message).getText());
+    		String text = ((jakarta.jms.TextMessage) message).getText();
     		if (text == null) return new String$[0$]$[0$];
     		return java.util.Arrays.stream(text.split("\\n"))
     			.filter(l -> !l.isBlank())

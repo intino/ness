@@ -24,8 +24,8 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private static final String MAX_CHRONOS_VERSION = "3.0.0";
 	private static final String MINIMUM_BPM_VERSION = "3.1.1";
 	private static final String MAX_BPM_VERSION = "4.0.0";
-	private static final String MINIMUM_TERMINAL_JMS_VERSION = "5.4.0";
-	private static final String MAX_TERMINAL_JMS_VERSION = "6.0.0";
+	private static final String MINIMUM_TERMINAL_JMS_VERSION = "6.0.0";
+	private static final String MAX_TERMINAL_JMS_VERSION = "7.0.0";
 	private static final String MINIMUM_INGESTION_VERSION = "5.0.2";
 	private static final String MAX_INGESTION_VERSION = "6.0.0";
 	private static final String MINIMUM_MASTER_VERSION = "2.1.1";
