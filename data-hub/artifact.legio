@@ -24,11 +24,9 @@ Artifact("io.intino", "10.0.0") data-hub as Product
 		Compile("org.apache.activemq", "activemq-kahadb-store", "6.0.0")
 		Compile("org.apache.activemq", "activemq-jaas", "6.0.0")
 		Compile("org.apache.activemq", "activemq-runtime-config", "6.0.0")
-
-
 		Compile("org.xerial", "sqlite-jdbc", "3.44.0.0")
 		Test("junit", "junit", "4.13.2")
-		Web("io.intino", "datalake-inspector", "9.16.0")
+		Web("io.intino", "datalake-inspector", "10.0.0")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
 	Distribution > Artifactory("intino-maven")
