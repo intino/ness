@@ -1,15 +1,15 @@
 dsl Legio
 
-Artifact("io.intino", "10.0.0") data-hub as Product
-	Model("Proteo", "3.4.7", "4.2.3") > outLanguage = "Ness"
-	Box("Konos", "10.6.14")
+Artifact("io.intino", "10.1.0") data-hub
+	Model("Proteo", "4.0.0", "5.0.0") > outLanguage = "Ness"
+	Box("Konos", "11.0.0")
 	Imports
 		Compile("io.intino.alexandria", "json", "1.2.3")
 		Compile("io.intino.alexandria", "core-framework", "2.2.0")
 		Compile("io.intino.alexandria", "jmx", "1.0.5")
 		Compile("io.intino.alexandria", "primitives", "1.1.2")
 		Compile("io.intino.alexandria", "sealing", "7.0.8")
-		Compile("io.intino.alexandria", "ui-framework", "4.28.9")
+		Compile("io.intino.alexandria", "ui-framework", "4.28.18")
 			Exclude("io.intino.alexandria", "driver-r")
 			Exclude("io.intino.alexandria", "driver-shiny")
 		Compile("io.intino.alexandria", "exceptions", "2.1.1")
@@ -18,15 +18,15 @@ Artifact("io.intino", "10.0.0") data-hub as Product
 		Compile("io.intino.alexandria", "logger4j", "1.0.1")
 		Compile("io.intino.alexandria", "scheduler-framework", "1.2.0") > Exclude("org.slf4j", "slf4j-api")
 		Compile("io.intino.sumus", "chronos", "2.4.3")
-		Compile("commons-io", "commons-io", "2.15.0")
-		Compile("org.apache.activemq", "activemq-broker", "6.0.0")
-		Compile("org.apache.activemq", "activemq-mqtt", "6.0.0")
-		Compile("org.apache.activemq", "activemq-kahadb-store", "6.0.0")
-		Compile("org.apache.activemq", "activemq-jaas", "6.0.0")
-		Compile("org.apache.activemq", "activemq-runtime-config", "6.0.0")
-		Compile("org.xerial", "sqlite-jdbc", "3.44.0.0")
+		Compile("commons-io", "commons-io", "2.15.1")
+		Compile("org.apache.activemq", "activemq-broker", "6.0.1")
+		Compile("org.apache.activemq", "activemq-mqtt", "6.0.1")
+		Compile("org.apache.activemq", "activemq-kahadb-store", "6.0.1")
+		Compile("org.apache.activemq", "activemq-jaas", "6.0.1")
+		Compile("org.apache.activemq", "activemq-runtime-config", "6.0.1")
+		Compile("org.xerial", "sqlite-jdbc", "3.44.1.0")
 		Test("junit", "junit", "4.13.2")
-		Web("io.intino", "datalake-inspector", "10.0.0")
+		Web("io.intino", "datalake-inspector", "10.1.0")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
 	Distribution > Artifactory("intino-maven")

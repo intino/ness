@@ -40,10 +40,10 @@ Concept:{0..1} Datalake
 			var string timeZone
 	Concept:{0..1} ProcessStatus
 		var string name = "ProcessStatus" is private final
-	Concept:{1..*}:AspectRequired Tank
+	Concept:{1..*}:TankTypeRequired Tank
 		var word:Scale scale = empty
 		var string qn = @qn is private reactive
-		Aspect TankType
+		Facet TankType
 			sub Message
 				var Model.Message message
 				var boolean sortingRequired = true
@@ -66,24 +66,24 @@ Concept:Named Datamart
 
 Concept:Named Timeline is component
 	var Entity entity
-	Aspect Raw
+	Facet Raw
 		var Datalake.Tank.Measurement tank
 		Concept:Named Attribute
 			var Sensor.Magnitude magnitude
 			var Entity.Attribute from
-	Aspect Indicator
-	Aspect Cooked
+	Facet Indicator
+	Facet Cooked
 		Concept TimeSeries
 			var Datalake.Tank.Message tank
 			var Attribute entityId = empty
 			Concept:Named Attribute > var string value
-			Aspect Count
+			Facet Count
 				Concept Operation
 					var Datalake.Tank.Message tank
 					var Model.Attribute entityId
 					sub Difference
 					sub Join
-			Aspect TimeShift
+			Facet TimeShift
 				var Datalake.Tank.Message withTank
 				var Model.Attribute withEntityId
 
@@ -127,13 +127,13 @@ Concept Sensor
 Concept Resource
 
 Concept:AvoidEventAttributes Message
-	has:Named:RequiresAspect Attribute
+	has:Named:RequiresFacet Attribute
 	has Component
 	Concept Has
 		var Component element
 		var boolean multiple = true
-	Aspect ExtensionOf > var Message parent
-	Aspect Assertion
+	Facet ExtensionOf > var Message parent
+	Facet Assertion
 
 Concept Component
 	var boolean multiple = true
@@ -142,13 +142,13 @@ Concept Component
 	Concept Has
 		var Component element
 		var boolean multiple = true
-	Aspect ExtensionOf > var Component parent
+	Facet ExtensionOf > var Component parent
 
-Concept:Named:RequiresAspect Attribute extends Data is component
+Concept:Named:RequiresFacet Attribute extends Data is component
 
 Concept Data is abstract component
-	Aspect List
-	Aspect Type
+	Facet List
+	Facet Type
 		var string type is reactive private
 		var string primitive = 'self.type()' is reactive private
 		var integer:{bits} size = 0 bits
