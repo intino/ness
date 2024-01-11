@@ -1,6 +1,7 @@
 package io.intino.datahub.model.rules;
 
-import io.intino.magritte.lang.model.Rule;
+
+import io.intino.tara.language.model.Rule;
 
 public enum SnapshotScale implements Rule<Enum> {
 
