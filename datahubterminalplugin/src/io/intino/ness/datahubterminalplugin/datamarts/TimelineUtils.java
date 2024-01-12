@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 
 public class TimelineUtils {
 
-
 	public static Stream<String> types(Timeline t) {
 		return asTypes(tanksOf(t));
 	}
