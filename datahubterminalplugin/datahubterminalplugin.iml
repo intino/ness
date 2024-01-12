@@ -60,7 +60,6 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:iterator-stream:1.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:resource-cleaner:1.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zim:5.1.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:message:4.1.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: com.github.luben:zstd-jni:1.5.4-1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zit:1.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.sumus:chronos:2.4.3" level="project" />
@@ -89,5 +88,6 @@
     <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-core:2.16.0" level="project" />
     <orderEntry type="library" name="Intino: org.xerial:sqlite-jdbc:3.44.1.0" level="project" />
     <orderEntry type="library" name="Intino: org.slf4j:slf4j-api:1.7.36" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:message:4.1.2" level="project" />
   </component>
 </module>
