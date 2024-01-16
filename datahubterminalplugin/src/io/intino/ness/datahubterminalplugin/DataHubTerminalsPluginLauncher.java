@@ -1,10 +1,9 @@
 package io.intino.ness.datahubterminalplugin;
 
+import io.intino.Configuration;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.model.NessGraph;
 import io.intino.datahub.model.Terminal;
-import io.intino.magritte.framework.Graph;
-import io.intino.magritte.framework.stores.FileSystemStore;
 import io.intino.ness.datahubterminalplugin.ontology.OntologyPublisher;
 import io.intino.ness.datahubterminalplugin.terminal.TerminalPublisher;
 import io.intino.plugin.PluginLauncher;
@@ -12,8 +11,14 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -47,9 +52,12 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 
 	public void run(File tempDir) {
 		if (logger() != null) logger().println("Maven HOME: " + systemProperties.mavenHome.getAbsolutePath());
-		File resDirectory = resDirectory(moduleStructure().resDirectories);
-		if (resDirectory == null) return;
-		NessGraph graph = loadGraph(resDirectory);
+		File outDirectory = moduleStructure().outDirectory;
+		if (!outDirectory.exists()) {
+			notifier().notifyError("Compiled model not found. Please compile module");
+			return;
+		}
+		NessGraph graph = loadGraph(outDirectory);
 		if (hasErrors(graph)) return;
 		Map<String, String> versions = versions();
 		if (!publishOntology(graph, versions, tempDir) && !publishTerminalsIfOntologyFails) return;
@@ -86,7 +94,7 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	private void publishTerminals(NessGraph nessGraph, Map<String, String> versions, File tempDir) {
 		try {
 			AtomicBoolean published = new AtomicBoolean(true);
-			ExecutorService threadPool = Executors.newFixedThreadPool(Math.max(1, Runtime.getRuntime().availableProcessors()/2));
+			ExecutorService threadPool = Executors.newFixedThreadPool(Math.max(1, Runtime.getRuntime().availableProcessors() / 2));
 			threadPool.invokeAll(nessGraph.terminalList().stream().map(terminal -> (Callable<Void>) () -> publishTerminal(versions, tempDir, published, terminal)).toList());
 			threadPool.shutdownNow();
 			handleTempDir(tempDir, published);
@@ -114,12 +122,28 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 		if (published.get() && deleteTempDirOnPublish) FileUtils.deleteDirectory(tempDir);
 	}
 
-	private static NessGraph loadGraph(File resDirectory) {
-		String[] stashes = Arrays.stream(Objects.requireNonNull(resDirectory.listFiles(f -> f.getName().endsWith(".stash")))).map(f -> f.getName().replace(".stash", "")).toArray(String[]::new);
-		final NessGraph graph = new Graph(new FileSystemStore(resDirectory)).loadStashes(stashes).as(NessGraph.class);
-		if (graph.messageList(t -> t.name$().equals("Session")).findAny().isEmpty())
-			graph.create("Session", "Session").message();
-		return graph;
+	private NessGraph loadGraph(File outDirectory) {
+		try (URLClassLoader urlClassLoader = new URLClassLoader(urlOf(outDirectory), this.getClass().getClassLoader())) {
+			Configuration.Artifact.Code code = configuration().artifact().code();
+			Class<?> aClass = urlClassLoader.loadClass(code.generationPackage() + "." + code.modelPackage() + ".GraphLoader");
+			final NessGraph graph = (NessGraph) aClass.getMethod("load").invoke(null);
+			if (graph.messageList(t -> t.name$().equals("Session")).findAny().isEmpty())
+				graph.create("Session", "Session").message();
+			return graph;
+		} catch (ClassNotFoundException | NoSuchMethodException | IOException | IllegalAccessException |
+				 InvocationTargetException e) {
+			Logger.error(e);
+			return null;
+		}
+	}
+
+	private URL[] urlOf(File outDirectory) {
+		try {
+			return new URL[]{outDirectory.toPath().toUri().toURL()};
+		} catch (MalformedURLException e) {
+			Logger.error(e);
+			return new URL[0];
+		}
 	}
 
 	private boolean hasErrors(NessGraph graph) {
@@ -135,15 +159,15 @@ public class DataHubTerminalsPluginLauncher extends PluginLauncher {
 	}
 
 	private File resDirectory(List<File> directories) {
-		File resDirectory = directories.stream().filter(d -> {
+		File stashFiles = directories.stream().filter(d -> {
 			File[] files = d.getAbsoluteFile().listFiles(f -> f.getName().endsWith(".stash"));
 			return files != null && files.length > 0;
 		}).findFirst().orElse(null);
-		if (resDirectory == null) {
+		if (stashFiles == null) {
 			notifier().notifyError("Stashes not found. Please compile module");
 			return null;
 		}
-		return resDirectory;
+		return stashFiles;
 	}
 
 	private String terminalNameArtifact(Terminal terminal) {
