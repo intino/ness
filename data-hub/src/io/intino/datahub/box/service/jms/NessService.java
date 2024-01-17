@@ -23,6 +23,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import static io.intino.datahub.broker.jms.JmsMessageTranslator.toJmsMessage;
+
 public class NessService {
 	public static final String SERVICE_NESS_DATAMARTS = "service.ness.datamarts";
 	public static final String SERVICE_NESS_DATAMARTS_NOTIFICATIONS = "service.ness.datamarts.notifications";
@@ -52,6 +54,12 @@ public class NessService {
 				Logger.error(e);
 			}
 		}));
+	}
+
+	public void notifyDatamartReload(String datamartName) {
+		TopicProducer topicProducer = box.brokerService().manager().topicProducerOf("service.ness.datamarts");
+		topicProducer.produce(toJmsMessage("{\"operation\":\"reload\", datamart:\"" + datamartName + "\"}"));
+		topicProducer.close();
 	}
 
 	public void notifyDatamartChange(List<String> sourcesChanged) {

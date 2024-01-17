@@ -1,6 +1,5 @@
 package io.intino.datahub.box.actions;
 
-import io.intino.alexandria.jms.TopicProducer;
 import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.DatamartFactory;
@@ -9,8 +8,6 @@ import io.intino.datahub.datamart.impl.LocalMasterDatamart;
 import io.intino.datahub.model.Datamart;
 
 import java.util.List;
-
-import static io.intino.datahub.broker.jms.JmsMessageTranslator.toJmsMessage;
 
 
 public class RecreateDatamartAction {
@@ -39,15 +36,9 @@ public class RecreateDatamartAction {
 		executeAsync(() -> {
 			new SealAction(box).execute();
 			recreate(datamart);
-			new Thread(() -> notifySubscribers(datamart.name$())).start();
+			new Thread(() -> box.nessService().notifyDatamartReload(datamartName)).start();
 		});
 		return "Recreation of datamart " + datamartName + " launched. Check log for more info.";
-	}
-
-	private void notifySubscribers(String dm) {
-		TopicProducer topicProducer = box.brokerService().manager().topicProducerOf("service.ness.datamarts");
-		topicProducer.produce(toJmsMessage("{\"operation\":\"reload\", datamart:\"" + dm + "\"}"));
-		topicProducer.close();
 	}
 
 	private void recreateAll() {
@@ -58,7 +49,7 @@ public class RecreateDatamartAction {
 			Logger.info("Creating " + datamart.name$() + " (" + (i + 1) + "/" + datamartList.size() + ")...");
 			recreate(datamart);
 
-			notifySubscribers(datamart.name$());
+			box.nessService().notifyDatamartReload(datamart.name$());
 		}
 	}
 

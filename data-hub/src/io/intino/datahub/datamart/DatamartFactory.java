@@ -46,23 +46,7 @@ public class DatamartFactory {
 	}
 
 	public MasterDatamart create(Datamart definition) throws Exception {
-		Reference<MasterDatamart> datamart = new Reference<>();
-		Reference<Instant> fromTs = new Reference<>();
-		if (failedToLoadLastSnapshotOf(definition, datamart, fromTs)) {
-			datamart.value = new LocalMasterDatamart(box, definition);
-			fromTs.value = null;
-		}
-		return reflow(datamart.value, definition);
-	}
-
-	private boolean failedToLoadLastSnapshotOf(Datamart definition, Reference<MasterDatamart> datamart, Reference<Instant> fromTs) {
-		Optional<MasterDatamart.Snapshot> snapshot = box.datamartSerializer().loadMostRecentSnapshot(definition.name$());
-		if (snapshot.isPresent()) {
-			datamart.value = snapshot.get().datamart();
-			fromTs.value = snapshot.get().datamart().ts();
-			return false;
-		}
-		return true;
+		return reflow(new LocalMasterDatamart(box, definition), definition);
 	}
 
 	public MasterDatamart reflow(MasterDatamart datamart, Datamart definition) throws Exception {
