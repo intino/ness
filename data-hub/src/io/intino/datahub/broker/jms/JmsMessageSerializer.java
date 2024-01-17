@@ -115,7 +115,6 @@ public class JmsMessageSerializer {
 
 		private void notifyChange(Message message) {
 			executorService.execute(() -> service.notifyDatamartChange(Arrays.stream(mounters).flatMap(m -> m.destinationsOf(message).stream()).toList()));
-
 		}
 
 		protected File destination(Message message) {
