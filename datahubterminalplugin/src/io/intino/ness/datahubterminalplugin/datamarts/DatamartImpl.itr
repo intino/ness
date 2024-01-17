@@ -527,11 +527,6 @@ def type(timeline) trigger(getter)
 		String key = id.replace(":", "-") + ":$name";
 		if (timelines.containsKey(key)) return timelines.get(key);
 		if (!hasLocalAccessToTimelines) return timelines.computeIfAbsent(key, theId -> new TimelineNodeImpl(id, "$name"));
-		var timeline = new TimelineNodeImpl(id, "$name");
-		if (timeline.exists()) {
-			timelines.put(key, timeline);
-			return timeline;
-		}
 		return TimelineNode.empty();
 	}
 end
@@ -542,13 +537,7 @@ def type(reel) trigger(getter)
 		String key = id.replace(":", "-") + ":$name";
 		if (reels.containsKey(key)) return reels.get(key);
 		if (!hasLocalAccessToReels) return reels.computeIfAbsent(key, theId -> new ReelNodeImpl(id, "$name"));
-		var reel = new ReelNodeImpl(id, "$name");
-		if (reel.exists()) {
-			reels.put(key, reel);
-			return reel;
-		}
 		return ReelNode.empty();
-
 	}
 
 	@Override
