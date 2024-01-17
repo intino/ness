@@ -67,10 +67,7 @@ def type(datamart & message & impl)
 		}
 
 		public boolean requiresDatahubNotifications() {
-			boolean flag = false;
-			[$hasTimelines~flag |= !hasLocalAccessToTimelines;]
-			[$hasReels~flag |= !hasLocalAccessToReels;]
-			return flag;
+			return true;
 		}
 
 		@Override
