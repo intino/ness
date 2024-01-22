@@ -148,5 +148,6 @@
     <orderEntry type="library" name="Intino: jakarta.activation:jakarta.activation-api:2.1.0" level="project" />
     <orderEntry type="library" name="Intino: org.xerial:sqlite-jdbc:3.44.1.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:ui-framework:4.28.18" level="project" />
+    <orderEntry type="module" module-name="datalake-inspector" />
   </component>
 </module>

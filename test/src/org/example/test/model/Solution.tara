@@ -1,0 +1,41 @@
+dsl Ness
+
+use Datamart
+use Datalake
+
+Broker(path = empty, port = 63000, secondaryPort = 1884)
+	User("trooper", "trooper")
+	User("monet", "monet")
+	User("wizard", "wizard")
+	User("consul", "consul")
+	User("cesar", "cesar")
+	User("connector", "connector")
+	User("federation", "federation")
+	User("master", "master")
+
+Terminal monet-terminal
+	Publish(dl.assertion dl.orderStarted dl.orderFinished dl.orderCancelled)
+	Subscribe(dl.assertion dl.orderStarted dl.orderFinished dl.orderCancelled)
+	Datamarts(master)
+
+Terminal observer-terminal
+	Publish(dl.status dl.incident dl.placeAssertion dl.areaAssertion dl.modelAssertion dl.orderTypeAssertion dl.personAssertion dl.processAssertion dl.assetAssertion dl.partAssertion dl.hardwareAssertion dl.computerAssertion dl.applianceAssertion dl.softwareAssertion dl.observerAssertion dl.applicationAssertion dl.applicationJavaAssertion dl.serviceAssertion, dl.computer dl.application dl.camera dl.cellularGateway dl.switch dl.wireless, dl.log)
+	Datamarts(master, autoLoad = false)
+
+Terminal trooper-terminal
+	Publish(dl.incident dl.incidentFinished dl.partAssertion dl.assetAssertion dl.hardwareAssertion dl.applianceAssertion dl.observerAssertion dl.computerAssertion dl.softwareAssertion dl.serviceAssertion dl.applicationAssertion dl.applicationJavaAssertion dl.processAssertion dl.personAssertion dl.rollout dl.assertion dl.orderStarted dl.orderCancelled dl.orderFinished dl.inform dl.staffLogin dl.staffLogout dl.staffWorkReport dl.staffEmailSubscription dl.staffObservableVisit dl.notification dl.activityInstalled dl.activityUninstalled dl.activityConfiguration dl.activityUpgraded dl.activityEnabled dl.activityDisabled dl.operationScheduled dl.operationStarted dl.operationFinished dl.operationCancelled)
+	Subscribe(dl.operationScheduled dl.assertion dl.operationStarted dl.operationFinished dl.operationCancelled dl.status dl.incident dl.incidentFinished dl.rollout dl.orderStarted dl.orderCancelled dl.orderFinished dl.inform dl.staffLogin dl.staffLogout dl.workOrderAssertion dl.staffWorkReport dl.staffEmailSubscription dl.staffObservableVisit dl.notification, dl.analysis dl.computer dl.application dl.camera dl.cellularGateway dl.switch dl.rdbmsStatement)
+	Datamarts(master, autoLoad = false)
+
+Terminal wizard-terminal
+	Publish(dl.incident dl.incidentFinished dl.status dl.operationStarted dl.operationFinished, dl.analysis)
+	Subscribe(dl.incident dl.status dl.computerAssertion dl.operationStarted dl.operationFinished dl.operationCancelled dl.orderStarted dl.orderFinished dl.orderCancelled, dl.computer dl.rdbmsStatement dl.application dl.camera dl.cellularGateway dl.switch, dl.log)
+	Datamarts(master)
+
+Terminal master-terminal
+	Publish(dl.status dl.areaAssertion dl.partAssertion dl.assetAssertion dl.hardwareAssertion dl.applianceAssertion dl.computerAssertion dl.softwareAssertion dl.observerAssertion dl.serviceAssertion dl.processAssertion dl.personAssertion dl.applicationAssertion dl.applicationJavaAssertion, dl.computer dl.application dl.rdbmsStatement)
+	Subscribe(dl.status, empty)
+	Datamarts(master)
+
+Terminal federation-terminal
+	Datamarts(master)
