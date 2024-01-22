@@ -13,3 +13,5 @@ webpack.config.js
 gen
 *.stash
 .out/
+terminal-builder/test-res/cosmos.txt
+terminal-builder/test-res/workspace.txt
