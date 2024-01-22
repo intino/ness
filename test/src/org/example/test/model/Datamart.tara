@@ -1,0 +1,162 @@
+dsl Ness
+
+use Events
+use Datalake
+
+Datamart master
+	Snapshots(scale = Day)
+	Timeline(Observable) Analysis as Raw(dl.analysis) Indicator
+	Timeline(Computer) AssetStatus as Raw(dl.computer) Indicator
+		Attribute(monitoring.Computer.usageRAM, Computer.memorySize) max
+		Attribute(monitoring.Computer.usageHDD, Computer.diskSize) max
+		Attribute(monitoring.Computer.usageFiles, Computer.maxOpenFiles) max
+	Timeline(Appliance) switchMeasurements as Raw(dl.switch)
+	Timeline(Appliance) cellularMeasurements as Raw(dl.cellularGateway)
+	Timeline(Appliance) wirelessMeasurements as Raw(dl.wireless)
+	Timeline(Appliance) cameraMeasurements as Raw(dl.camera)
+	Timeline(Application) ApplicationStatus as Raw(dl.application)
+
+	Timeline(Observable) incidents as Cooked Indicator
+		TimeSeries(dl.incident, monitoring.Incident.observable) pendingIncidents as Count
+			Attribute("Pending incidents") label;Attribute("%d") format; Attribute("avg") operator; Attribute("Up") tail; Attribute("Poisson") distribution;
+			Difference(dl.incidentFinished, monitoring.IncidentFinished.observable)
+		TimeSeries(dl.incident, monitoring.Incident.observable) incidentFinishedTime as TimeShift(dl.incidentFinished, monitoring.IncidentFinished.observable)
+			Attribute("Incident response time") label;Attribute("%d") format; Attribute("avg") operator; Attribute("Up") tail; Attribute("Poisson") distribution; Attribute("seconds") unit;
+
+	Reel(tank = dl.status, entity = Observable, signals = monitoring.Status.signals, groupSource = monitoring.Status.group, entitySource = monitoring.Status.observable) ObservableReel
+
+	Entity(dl.placeAssertion) Place
+		Attribute label as Text
+		Attribute coordinates as Text
+		Attribute timeOffset as Integer
+		Attribute region as Text
+		Attribute city as Text
+		Attribute area as Entity(Area)
+		Attribute address as Text
+		Attribute postalCode as Text
+
+	Entity(dl.areaAssertion) Area > Attribute label as Text
+
+	Entity(dl.incidentRuleAssertion) IncidentRule
+		Attribute target as Text
+		Attribute model as Text
+		Attribute condition as Text
+		Attribute precondition as Text
+		Attribute level as Word("Low" "Medium" "High")
+		Attribute tracking as Text
+		Attribute dismissCondition as Text
+		Attribute description as Text
+		Attribute triggers as Text List
+
+	Entity(dl.countermeasureAssertion) Countermeasure
+		Attribute condition as Text
+		Attribute priority as Text
+		Struct Actuation
+			Attribute id as Text
+			Attribute name as Text
+			Attribute label as Text
+			Attribute target as Text
+			Attribute tries as Integer
+			Attribute tryInterval as Integer
+			Attribute extraCondition as Text
+
+	Entity(dl.modelAssertion) Model
+		Attribute type as Text
+		Attribute target as Text
+		Struct(multiple=false) Profile
+			Struct Variable
+				Attribute name as Text
+				Attribute className as Text
+				Attribute label as Text
+				Attribute type as Text
+				Attribute operator as Text
+				Attribute unit as Text
+				Attribute symbol as Text
+				Attribute values as Text List
+				Attribute priority as Integer
+				Attribute min as Text
+				Attribute max as Text
+				Attribute description as Text
+				Attribute format as Text
+
+	Entity(dl.orderTypeAssertion) OrderType
+
+	Entity Observable as Abstract
+		Attribute label as Text
+		Attribute place as Entity(Place)
+		Attribute team as Text
+		Attribute model as Entity(Model)
+		Attribute container as Entity(Observable)
+		Attribute observer as Entity(Observer)
+		Attribute responsible as Entity(Person)
+		Attribute tags as Text List
+		Struct Operation
+			Attribute activity as Text
+			Attribute name as Text
+			Struct Procedure
+				Attribute name as Text
+				Attribute returnType as Text
+				Attribute description as Text
+				Struct Parameter
+					Attribute type as Text
+					Attribute name as Text
+
+	Entity(dl.personAssertion) Person as ExtensionOf(Observable)
+		Attribute area as Entity(Area)
+		Attribute role as Text
+		Attribute supervisor as Entity(Person)
+		Attribute email as Text
+		Attribute phone as Text
+
+	Entity(dl.processAssertion) Process as ExtensionOf(Observable)
+
+	Entity(dl.assetAssertion) Asset as ExtensionOf(Observable)
+	Entity(dl.partAssertion) Part as ExtensionOf(Observable)
+
+	Entity(dl.hardwareAssertion) Hardware as ExtensionOf(Observable)
+		Attribute sn as Text
+		Attribute ip as Text
+		Attribute publicIp as Text
+
+	Entity(dl.applianceAssertion) Appliance as ExtensionOf(Hardware)
+
+	Entity(dl.computerAssertion) Computer as ExtensionOf(Hardware)
+		Attribute architecture as Text
+		Attribute os as Text
+		Attribute cores as Integer
+		Attribute diskSize as Long  //MB
+		Attribute memorySize as Long //MB
+		Attribute processes as Integer
+		Attribute maxOpenFiles as Long
+		Attribute jvm as Text
+		Attribute isp as Text
+
+	Entity(dl.softwareAssertion) Software as ExtensionOf(Observable)
+	Entity(dl.observerAssertion) Observer as ExtensionOf(Software)
+		Attribute version as Text
+		Attribute installedActivities as Text List
+		Attribute enabledActivities as Text List
+
+	Entity(dl.serviceAssertion) Service as ExtensionOf(Software)
+		Attribute url as Text
+
+	Entity(dl.applicationAssertion) Application as ExtensionOf(Software)
+		Attribute name as Text
+		Attribute user as Text
+		Attribute systemService as Text
+		Attribute startingTime as DateTime
+		Attribute pid as Integer
+		Attribute commandLine as Text
+		Attribute state as Word("NEW" "RUNNING" "SLEEPING" "WAITING" "ZOMBIE" "STOPPED" "OTHER" "INVALID" "SUSPENDED")
+
+	Entity(dl.applicationJavaAssertion) ApplicationJava as ExtensionOf(Application)
+		Attribute classpathPrefix as Text
+		Attribute mainArtifact as Text
+		Attribute debugPort as Integer
+		Attribute jmxPort as Integer
+		Attribute minMemory as Integer
+		Attribute maxMemory as Integer
+		Attribute classpath as Text List
+		Attribute inputArguments as Text List
+		Attribute jvmParameter as Text List
+		Attribute jvmVersion as Text

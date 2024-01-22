@@ -5,7 +5,6 @@ import io.intino.alexandria.logger.Logger;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.box.DataHubConfiguration;
 import io.intino.datahub.model.NessGraph;
-import io.intino.magritte.framework.Graph;
 import org.apache.log4j.Level;
 
 import java.io.File;
@@ -16,11 +15,9 @@ import static io.intino.alexandria.logger4j.Logger.setLevel;
 
 public class Main {
 
-	private static final String[] stashes = {"Solution", "Events", "Datamart", "Datalake"};
-
 	public static void main(String[] args) {
 		DataHubConfiguration configuration = new DataHubConfiguration(args);
-		NessGraph graph = new Graph().loadStashes(stashes).as(NessGraph.class);
+		NessGraph graph = GraphLoader.load();
 		loadUsers(configuration.home(), graph);
 		Box box = new DataHubBox(args).put(graph.core$());
 		setLevel(Level.ERROR);
@@ -30,7 +27,7 @@ public class Main {
 
 	private static void loadUsers(File workspace, NessGraph nessGraph) {
 		try {
-			File file = new File(workspace, "datahub/users.bin");
+			File file = new File(workspace, "datahub/config/users.bin");
 			if (!file.exists()) return;
 			nessGraph.broker().clear().user(u -> true);
 			String[] users = new String(Files.readAllBytes(file.toPath())).split("\n");

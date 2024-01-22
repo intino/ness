@@ -1,12 +1,11 @@
 dsl Legio
 
 Artifact("org.example", "1.0.0") test
-	Model("Ness", "10.1.0", sdkVersion = "4.2.3")
+	Model("Ness", "10.1.0", sdkVersion = "5.0.0")
 	Imports
 		Test("junit", "junit", "4.13.2")
 		Test("org.apache.activemq", "activemq-client", "6.0.1")
 		Test("io.intino.cosmos.datahub", "trooper-terminal", "1.0.0")
-
 	Package(mode = ModulesAndLibrariesLinkedByManifest) as Runnable(mainClass = "org.example.test.model.Main")
 	Parameter("home")
 	Parameter("backup_directory")
