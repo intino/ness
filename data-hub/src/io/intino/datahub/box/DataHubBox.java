@@ -200,7 +200,7 @@ public class DataHubBox extends AbstractBox {
 	}
 
 	public void afterStart() {
-
+		for (Datamart datamart : graph.datamartList()) nessService.notifyDatamartReload(datamart.name$());
 	}
 
 	public void beforeStop() {
@@ -272,7 +272,6 @@ public class DataHubBox extends AbstractBox {
 		try {
 			Logger.info("Initializing MasterDatamart " + datamart.name$() + "...");
 			masterDatamarts.put(datamart.name$(), datamartFactory.create(datamart));
-			nessService.notifyDatamartReload(datamart.name$());
 			Logger.debug("MasterDatamart " + datamart.name$() + " initialized!");
 		} catch (Throwable e) {
 			Logger.error("Could not initialize datamart " + datamart.name$() + ": " + e.getMessage(), e);
