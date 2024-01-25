@@ -1,9 +1,9 @@
 dsl Legio
 
-Artifact("io.intino.ness", "1.0.0") terminal-builder
+Artifact("io.intino.ness", "1.0.1") terminal-builder
 	Imports
 		Compile("io.intino.ness", "master", "2.1.1")
-		Compile("io.intino", "data-hub", "10.1.0")
+		Compile("io.intino", "data-hub", "11.1.0")
 			Exclude("io.intino.alexandria", "exceptions")
 			Exclude("io.intino.alexandria", "jms")
 			Exclude("io.intino.alexandria", "jmx")
