@@ -15,11 +15,16 @@ import io.intino.datahub.broker.jms.JmsMessageTranslator;
 import jakarta.jms.Destination;
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
+import org.apache.activemq.Closeable;
 import org.apache.activemq.command.ActiveMQTempQueue;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -30,7 +35,7 @@ public class NessService {
 	public static final String SERVICE_NESS_DATAMARTS_NOTIFICATIONS = "service.ness.datamarts.notifications";
 	private BrokerManager manager;
 	private ExecutorService dispatcherService;
-	private TopicProducer notifier;
+	private DatamartNotifier datamartNotifier;
 	private final DataHubBox box;
 
 	public NessService(DataHubBox box) {
@@ -38,21 +43,17 @@ public class NessService {
 	}
 
 	public void start() {
-		dispatcherService = Executors.newFixedThreadPool(1, r -> new Thread(r, "Ness Datamarts Service"));
+		dispatcherService = Executors.newSingleThreadExecutor(r -> new Thread(r, "Ness Datamarts Service"));
 		manager = box.brokerService().manager();
-		notifier = manager.topicProducerOf(SERVICE_NESS_DATAMARTS_NOTIFICATIONS);
+		datamartNotifier = new DatamartNotifier(5, TimeUnit.SECONDS);
 		manager.registerQueueConsumer("service.ness.seal", m -> response(manager, m, new SealRequest(box).accept(MessageReader.textFrom(m))));
 		manager.registerQueueConsumer("service.ness.seal.last", m -> response(manager, m, new LastSealRequest(box).accept(MessageReader.textFrom(m))));
 		manager.registerQueueConsumer("service.ness.backup", m -> response(manager, m, new BackupRequest(box).accept(MessageReader.textFrom(m))));
 		manager.registerQueueConsumer("service.ness.datalake", m -> response(manager, m, new DatalakeRequest(box).accept(m)));
 		manager.registerQueueConsumer(SERVICE_NESS_DATAMARTS, m -> response(manager, m, new DatamartsRequest(box).accept(m)));
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			try {
-				dispatcherService.shutdown();
-				dispatcherService.awaitTermination(1, TimeUnit.MINUTES);
-			} catch (InterruptedException e) {
-				Logger.error(e);
-			}
+			datamartNotifier.close();
+			shutdown(dispatcherService);
 		}));
 	}
 
@@ -63,17 +64,7 @@ public class NessService {
 	}
 
 	public void notifyDatamartChange(List<String> sourcesChanged) {
-		JsonObject notification = new JsonObject();
-		notification.addProperty("operation", "refresh");
-		JsonArray jsonElements = new JsonArray();
-		sourcesChanged.forEach(jsonElements::add);
-		notification.add("changes", jsonElements);
-		try {
-			notifier.produce(MessageWriter.write(Json.toJson(notification)));
-		} catch (JMSException e) {
-			Logger.error(e);
-		}
-
+		datamartNotifier.notify(sourcesChanged);
 	}
 
 	private void response(BrokerManager manager, Message requestMessage, String response) {
@@ -132,5 +123,67 @@ public class NessService {
 	private static String replyQueue(Message request) throws JMSException {
 		Destination reply = request.getJMSReplyTo();
 		return reply instanceof ActiveMQTempQueue r ? r.getQueueName() : reply.toString();
+	}
+
+	private static void shutdown(ExecutorService executorService) {
+		try {
+			if(executorService == null || executorService.isShutdown()) return;
+			executorService.shutdown();
+			executorService.awaitTermination(1, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			Logger.error(e);
+		}
+	}
+
+	private class DatamartNotifier implements Closeable {
+
+		private final TopicProducer topicProducer;
+		private final ScheduledExecutorService thread;
+		private volatile Set<String> sourcesChanged = new HashSet<>();
+
+		public DatamartNotifier(int timeAmount, TimeUnit timeUnit) {
+			this.topicProducer = manager.topicProducerOf(SERVICE_NESS_DATAMARTS_NOTIFICATIONS);
+			this.thread = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "DatamartNotifier"));
+			this.thread.scheduleAtFixedRate(this::send, timeAmount, timeAmount, timeUnit);
+		}
+
+		public void notify(Collection<String> sources) {
+			if(sources == null || sources.isEmpty()) return;
+			synchronized (this) {
+				sourcesChanged.addAll(sources);
+			}
+		}
+
+		private void send() {
+			try {
+				Set<String> sources = swap();
+				JsonObject notification = createNotificationWith(sources);
+				topicProducer.produce(MessageWriter.write(Json.toJson(notification)));
+			} catch (Throwable e) {
+				Logger.error("Error while sending datamart notifications: " + e.getMessage(), e);
+			}
+		}
+
+		private static JsonObject createNotificationWith(Set<String> sources) {
+			JsonObject notification = new JsonObject();
+			notification.addProperty("operation", "refresh");
+			JsonArray jsonElements = new JsonArray();
+			sources.forEach(jsonElements::add);
+			notification.add("changes", jsonElements);
+			return notification;
+		}
+
+		private Set<String> swap() {
+			synchronized (this) {
+				Set<String> sources = this.sourcesChanged;
+				this.sourcesChanged = new HashSet<>();
+				return sources;
+			}
+		}
+
+		@Override
+		public void close() {
+			shutdown(thread);
+		}
 	}
 }
