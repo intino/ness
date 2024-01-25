@@ -82,7 +82,7 @@ def type(terminal)
 			return datalake != null ? datalake : (datalake = instantiateDatalake());
 		}
 
-		private void io.intino.alexandria.datalake.Datalake instantiateDatalake() {
+		private io.intino.alexandria.datalake.Datalake instantiateDatalake() {
 			try {
 				Message message = connector.requestResponse(io.intino.alexandria.terminal.remotedatalake.DatalakeAccessor.PATH, request("Datalake"), 5, TimeUnit.SECONDS);
 				if (message == null) return null;
