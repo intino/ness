@@ -115,7 +115,9 @@ public class MessageRenderer {
 	}
 
 	private FrameBuilder process(Data.Real attribute) {
-		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", "double")
+		FrameBuilder frameBuilder = new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", "double");
+		if (message.isRetrocompatible()) frameBuilder.add("retrocompatible");
+		return frameBuilder
 				.add("name", attribute.a$(Attribute.class).name$())
 				.add("type", attribute.type())
 				.add("simpleType", attribute.type().substring(attribute.type().lastIndexOf(".") + 1))
@@ -124,7 +126,9 @@ public class MessageRenderer {
 	}
 
 	private FrameBuilder process(Data.Integer attribute) {
-		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type(), "int")
+		FrameBuilder frameBuilder = new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type(), "int");
+		if (message.isRetrocompatible()) frameBuilder.add("retrocompatible");
+		return frameBuilder
 				.add("name", attribute.a$(Attribute.class).name$())
 				.add("type", attribute.type())
 				.add("simpleType", attribute.type().substring(attribute.type().lastIndexOf(".") + 1))
@@ -133,7 +137,9 @@ public class MessageRenderer {
 	}
 
 	private FrameBuilder process(Data.LongInteger attribute) {
-		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type(), "long")
+		FrameBuilder frameBuilder = new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type(), "long");
+		if (message.isRetrocompatible()) frameBuilder.add("retrocompatible");
+		return frameBuilder
 				.add("name", attribute.a$(Attribute.class).name$())
 				.add("type", attribute.type())
 				.add("simpleType", attribute.type().substring(attribute.type().lastIndexOf(".") + 1))
@@ -142,7 +148,9 @@ public class MessageRenderer {
 
 
 	private FrameBuilder process(Data.Bool attribute) {
-		return new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type(), "bool")
+		FrameBuilder frameBuilder = new FrameBuilder("primitive", multiple(attribute) ? "multiple" : "single", attribute.type(), "bool");
+		if (message.isRetrocompatible()) frameBuilder.add("retrocompatible");
+		return frameBuilder
 				.add("name", attribute.a$(Attribute.class).name$())
 				.add("type", attribute.type())
 				.add("simpleType", attribute.type())

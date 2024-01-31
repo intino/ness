@@ -154,15 +154,15 @@ def type(word & multiple) trigger(getter)
 	}
 end
 
-def type(table) trigger(getter)
-	public $package.$table+FirstUpperCase $name+firstLowerCase() {
-		return this.$name+FirstLowerCase == null ? this.$name+FirstLowerCase =  new $package.$table+FirstUpperCase(message.get("$name").asTable()) : this.$name+FirstLowerCase;
-	}
-end
-
 def type(primitive & single & date) !attribute(defaultValue:null) trigger(getter)
 	public $type $name+firstLowerCase() {
 		return $type.ofInstant(message.get("$name+FirstLowerCase").asInstant(), java.time.ZoneId.systemDefault());
+	}
+end
+
+def type(primitive & single) type(retrocompatible) trigger(getter)
+	public $type $name+firstLowerCase() {
+		return !message.contains("$name+FirstLowerCase") ? $defaultValue : message.get("$name+FirstLowerCase").as$simpleType();
 	}
 end
 
