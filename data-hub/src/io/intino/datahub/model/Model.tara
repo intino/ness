@@ -134,6 +134,7 @@ Concept:AvoidEventAttributes Message
 		var boolean multiple = true
 	Facet ExtensionOf > var Message parent
 	Facet Assertion
+	Facet Retrocompatible
 
 Concept Component
 	var boolean multiple = true
