@@ -20,12 +20,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static java.nio.file.StandardOpenOption.APPEND;
@@ -38,25 +37,15 @@ public class JmsMessageSerializer {
 	private final Datalake.Tank tank;
 	private final Scale scale;
 	private final NessService service;
+	private final ExecutorService mounterService;
 	private final MasterDatamartMounter[] mounters;
-	private static final ExecutorService executorService = Executors.newSingleThreadExecutor(r -> new Thread(r, "JmsSerializer"));
 
-	static {
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			try {
-				executorService.shutdown();
-				executorService.awaitTermination(1, TimeUnit.MINUTES);
-			} catch (InterruptedException e) {
-				Logger.error(e);
-			}
-		}));
-	}
-
-	JmsMessageSerializer(File stage, Datalake.Tank tank, Scale scale, MasterDatamartRepository datamarts, NessService service) {
+	JmsMessageSerializer(File stage, Datalake.Tank tank, Scale scale, MasterDatamartRepository datamarts, NessService service, ExecutorService mounterService) {
 		this.stage = stage;
 		this.tank = tank;
 		this.scale = scale;
 		this.service = service;
+		this.mounterService = mounterService;
 		this.mounters = createMountersFor(tank, datamarts);
 	}
 
@@ -89,16 +78,15 @@ public class JmsMessageSerializer {
 
 		@Override
 		public void accept(jakarta.jms.Message message) {
-			executorService.execute(() -> consume(JmsMessageTranslator.toInlMessages(message)));
+			List<Message> messages = new ArrayList<>();
+			JmsMessageTranslator.toInlMessages(message).forEachRemaining(messages::add);
+			messages.forEach(this::save);
+			mounterService.execute(() -> mount(messages));
 		}
 
-		private void consume(Iterator<Message> messages) {
-			while (messages.hasNext()) {
-				Message message = messages.next();
-				save(message);
-				mount(message);
-				notifyChange(message);
-			}
+		private void mount(List<Message> messages) {
+			messages.forEach(this::mount);
+			notifyChange(messages);
 		}
 
 		private void save(Message message) {
@@ -113,8 +101,8 @@ public class JmsMessageSerializer {
 			}
 		}
 
-		private void notifyChange(Message message) {
-			executorService.execute(() -> service.notifyDatamartChange(Arrays.stream(mounters).flatMap(m -> m.destinationsOf(message).stream()).toList()));
+		private void notifyChange(List<Message> messages) {
+			service.notifyDatamartChange(Arrays.stream(mounters).flatMap(m -> m.destinationsOf(messages).stream()));
 		}
 
 		protected File destination(Message message) {
@@ -130,7 +118,6 @@ public class JmsMessageSerializer {
 				Logger.error(e);
 			}
 		}
-
 	}
 
 	private class MeasurementHandler extends MessageHandler {

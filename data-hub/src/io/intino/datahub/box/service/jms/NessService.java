@@ -18,9 +18,7 @@ import jakarta.jms.Message;
 import org.apache.activemq.Closeable;
 import org.apache.activemq.command.ActiveMQTempQueue;
 
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -63,7 +61,7 @@ public class NessService {
 		topicProducer.close();
 	}
 
-	public void notifyDatamartChange(List<String> sourcesChanged) {
+	public void notifyDatamartChange(Stream<String> sourcesChanged) {
 		datamartNotifier.notify(sourcesChanged);
 	}
 
@@ -127,7 +125,7 @@ public class NessService {
 
 	private static void shutdown(ExecutorService executorService) {
 		try {
-			if(executorService == null || executorService.isShutdown()) return;
+			if (executorService == null || executorService.isShutdown()) return;
 			executorService.shutdown();
 			executorService.awaitTermination(1, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
@@ -147,10 +145,10 @@ public class NessService {
 			this.thread.scheduleAtFixedRate(this::send, timeAmount, timeAmount, timeUnit);
 		}
 
-		public void notify(Collection<String> sources) {
-			if(sources == null || sources.isEmpty()) return;
+		public void notify(Stream<String> sources) {
+			if (sources == null) return;
 			synchronized (this) {
-				sourcesChanged.addAll(sources);
+				sources.forEach(s -> sourcesChanged.add(s));
 			}
 		}
 
