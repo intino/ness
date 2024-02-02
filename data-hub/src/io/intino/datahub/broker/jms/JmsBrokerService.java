@@ -48,6 +48,9 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static io.intino.alexandria.jms.MessageReader.textFrom;
@@ -63,6 +66,7 @@ public class JmsBrokerService implements BrokerService {
 	private final BrokerManager brokerManager;
 	private final PipeManager pipeManager;
 	private final Map<String, VirtualDestinationInterceptor> pipes = new HashMap<>();
+	private static ExecutorService mounterService = jmsMounterService();
 
 	private org.apache.activemq.broker.BrokerService service;
 
@@ -304,6 +308,7 @@ public class JmsBrokerService implements BrokerService {
 				producers.values().forEach(JmsProducer::close);
 				producers.clear();
 				session.close();
+				mounterService.shutdownNow();
 //			connection.stop();
 				session = null;
 				connection = null;
@@ -403,6 +408,7 @@ public class JmsBrokerService implements BrokerService {
 		public void startTankConsumers() {
 			if (graph.datalake() == null) return;
 			brokerStage.mkdirs();
+			mounterService = jmsMounterService();
 			graph.datalake().tankList().forEach(this::registerTankConsumer);
 			Logger.info("Tanks ignited!");
 		}
@@ -412,7 +418,16 @@ public class JmsBrokerService implements BrokerService {
 			if (graph.datalake() == null) return;
 			brokerStage.mkdirs();
 			graph.datalake().tankList().forEach(this::unregisterTankConsumer);
+			finishConsumerService();
 			Logger.info("Tanks paused!");
+		}
+
+		private static void finishConsumerService() {
+			try {
+				mounterService.shutdownNow();
+				mounterService.awaitTermination(1, TimeUnit.SECONDS);
+			} catch (InterruptedException ignored) {
+			}
 		}
 
 		private void unregisterTankConsumer(Datalake.Tank t) {
@@ -420,7 +435,7 @@ public class JmsBrokerService implements BrokerService {
 		}
 
 		private void registerTankConsumer(Datalake.Tank t) {
-			brokerManager.registerTopicConsumer(t.qn(), new JmsMessageSerializer(brokerStage, t, scale(t), box.datamarts(), box.nessService()).create());
+			brokerManager.registerTopicConsumer(t.qn(), new JmsMessageSerializer(brokerStage, t, scale(t), box.datamarts(), box.nessService(), mounterService).create());
 		}
 
 		private void registerProcessStatus(Scale scale, Datalake.ProcessStatus ps) {
@@ -443,6 +458,10 @@ public class JmsBrokerService implements BrokerService {
 		private boolean closedSession() {
 			return ((ActiveMQSession) session).isClosed();
 		}
+	}
+
+	private static ExecutorService jmsMounterService() {
+		return Executors.newSingleThreadExecutor(r -> new Thread(r, "MessageMounter"));
 	}
 
 	private class PipeManager {

@@ -4,7 +4,8 @@ import io.intino.alexandria.message.Message;
 import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.datamart.MasterDatamart;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 public abstract class MasterDatamartMounter {
 
@@ -22,7 +23,11 @@ public abstract class MasterDatamartMounter {
 
 	public abstract void mount(Message message);
 
-	public abstract List<String> destinationsOf(Message message);
+	public abstract Collection<String> destinationsOf(Message message);
+
+	public Collection<String> destinationsOf(Collection<Message> messages) {
+		return messages.stream().flatMap(message -> destinationsOf(message).stream()).distinct().collect(Collectors.toSet());
+	}
 
 
 }
