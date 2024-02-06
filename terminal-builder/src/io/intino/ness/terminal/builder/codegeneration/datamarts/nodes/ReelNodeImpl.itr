@@ -3,7 +3,6 @@ def type(reelNode & default) trigger(nodeImpl)
 		private final String id;
 		private final String type;
 		private volatile File file;
-		private volatile boolean hasDirectAccessToFile;
 		private volatile io.intino.sumus.chronos.ReelFile reelFile;
 		private volatile ChangeListener listener;
 		private volatile boolean disposed;
@@ -16,7 +15,7 @@ def type(reelNode & default) trigger(nodeImpl)
 			this.id = requireNonNull(id);
 			this.type = requireNonNull(type);
 			this.file = file;
-			this.hasDirectAccessToFile = file != null;
+			hasLocalAccessToReels = file != null;
 		}
 
 		@Override
@@ -110,7 +109,7 @@ def type(reelNode & default) trigger(nodeImpl)
 			synchronized(this) {
 				if (disposed) throw new ReelNotAvailableException("This " + getClass().getSimpleName() + " is disposed.");
 				try {
-					if (hasDirectAccessToFile && file != null && file.exists()) return loadFile();
+					if (hasLocalAccessToReels && file != null && file.exists()) return loadFile();
 					if (reelFile != null) return reelFile;
 					return reelFile = downloadFromDatahub();
 				} catch (Exception e) {
@@ -136,7 +135,7 @@ def type(reelNode & default) trigger(nodeImpl)
 
 		private void clearCache() {
 			reelFile = null;
-			if(!hasDirectAccessToFile) file = null;
+			if(!hasLocalAccessToReels) file = null;
 		}
 
 		private io.intino.sumus.chronos.ReelFile loadFile() throws Exception {
@@ -144,14 +143,14 @@ def type(reelNode & default) trigger(nodeImpl)
 		}
 
 		private io.intino.sumus.chronos.ReelFile downloadFromDatahub() throws Exception {
-			jakarta.jms.Message response = requestResponseFromDatahub("get-reel=" + id(), request(hasDirectAccessToFile ? "path" : "download"));
+			jakarta.jms.Message response = requestResponseFromDatahub("get-reel=" + id(), request(hasLocalAccessToReels ? "path" : "download"));
 			if (!response.getBooleanProperty("success")) throw new ReelNotAvailableException("Could not get reel " + id + " because datahub returned success=false in the response");
 			if (response instanceof jakarta.jms.TextMessage textResponse) {
 				file = getFile(textResponse);
-				hasDirectAccessToFile = true;
+				hasLocalAccessToReels = true;
 				if (file != null && file.exists()) return loadFile();
 				file = null;
-				hasDirectAccessToFile = false;
+				hasLocalAccessToReels = false;
 				response = requestResponseFromDatahub("get-reel=" + id(), request("download"));
 			}
 			if (!response.getBooleanProperty("success")) throw new ReelNotAvailableException("Could not get reel " + id + " because datahub returned success=false in the response");
@@ -165,7 +164,7 @@ def type(reelNode & default) trigger(nodeImpl)
 			file = File.createTempFile(id(), ".reel");
 			java.nio.file.Files.write(file.toPath(), bytes, java.nio.file.StandardOpenOption.CREATE);
 			file.deleteOnExit();
-			hasDirectAccessToFile = false;
+			hasLocalAccessToReels = false;
 			return loadFile();
 		}
 

@@ -40,6 +40,7 @@ def type(datamart & message & impl)
 		private Instant ts;
 		[$hasTimelines~private boolean hasLocalAccessToTimelines;]
 		[$hasTimelines~private final Map<String, TimelineNodeImpl> timelines = new java.util.concurrent.ConcurrentHashMap<>();]
+		[$hasTimelines~private boolean hasLocalAccessToIndicators;]
 		[$hasTimelines~private final Map<String, IndicatorNodeImpl> indicators = new java.util.concurrent.ConcurrentHashMap<>();]
 		[$hasReels~private boolean hasLocalAccessToReels;]
 		[$hasReels~private final Map<String, ReelNodeImpl> reels = new java.util.concurrent.ConcurrentHashMap<>();]
@@ -547,7 +548,7 @@ end
 def type(indicator) trigger(getter)
 	@Override
 	public IndicatorNode $label+FirstLowerCase~Indicator() {
-		if (hasLocalAccessToTimelines) return indicators.containsKey("$name") ? indicators.get("$name") : IndicatorNode.empty();
+		if (hasLocalAccessToIndicators) return indicators.containsKey("$name") ? indicators.get("$name") : IndicatorNode.empty();
 		return indicators.computeIfAbsent("$name", theId -> new IndicatorNodeImpl("$name", null));
 	}
 end
@@ -688,7 +689,7 @@ end
 def trigger(loadIndicatorsFromDatahubMethod)
 	private void loadIndicatorsFromDatahub() {
 		Logger.debug("Downloading indicators...");
-		Boolean hasLocalAccessToTimelines = null;
+		Boolean hasLocalAccessToIndicators = null;
         for(String filename : listIndicatorFiles()) {
 			if (filename == null || filename.isBlank()) continue;
 			try {
@@ -696,14 +697,14 @@ def trigger(loadIndicatorsFromDatahubMethod)
 				String id = file.getName().replace(".indicator", "");
 				IndicatorNodeImpl node = new IndicatorNodeImpl(id, file.exists() ? file : null);
 				indicators.put(id, node);
-				if (hasLocalAccessToTimelines == null) hasLocalAccessToTimelines = file.exists();
-				else hasLocalAccessToTimelines &= file.exists();
+				if (hasLocalAccessToIndicators == null) hasLocalAccessToIndicators = file.exists();
+				else hasLocalAccessToIndicators &= file.exists();
 			} catch (Exception e) {
 				Logger.debug("Could not load indicator " + filename + " -> " + e.getClass().getSimpleName() + ": " + e.getMessage());
 			}
 		}
-		this.hasLocalAccessToTimelines = hasLocalAccessToTimelines != null && hasLocalAccessToTimelines;
-		Logger.debug("Loaded " + indicators.size() + " timelines (hasLocalAccessToTimelines=" + this.hasLocalAccessToTimelines + ")");
+		this.hasLocalAccessToIndicators = hasLocalAccessToIndicators != null && hasLocalAccessToIndicators;
+		Logger.debug("Loaded " + indicators.size() + " indicators (hasLocalAccessToTimelines=" + this.hasLocalAccessToTimelines + ")");
     }
 
     private String$[$] listIndicatorFiles() {

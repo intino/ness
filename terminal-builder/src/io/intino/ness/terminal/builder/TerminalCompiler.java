@@ -15,7 +15,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +36,9 @@ public class TerminalCompiler {
 
 	public List<OutputItem> compile() {
 		configuration.out().println(PRESENTABLE_MESSAGE + "Terminalc: Building " + configuration.artifactId() + " terminals...");
-		File tempDir = tempDirectory();
 		try {
+			File tempDir = configuration.getTempDirectory();
+			tempDir.mkdirs();
 			run(tempDir);
 		} catch (IOException | IntinoException e) {
 			messages.add(new CompilerMessage(CompilerMessage.ERROR, ErrorUtils.getMessage(e)));
@@ -130,12 +130,4 @@ public class TerminalCompiler {
 		return false;
 	}
 
-	private File tempDirectory() {
-		try {
-			return Files.createTempDirectory("_temp").toFile();
-		} catch (IOException e) {
-			Logger.error(e);
-			return new File("");
-		}
-	}
 }
