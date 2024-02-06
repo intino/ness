@@ -74,7 +74,10 @@ public class MounterUtils {
 
 	public static File copyOf(File file, String newExtension) throws IOException {
 		File copy = new File(file.getAbsolutePath() + newExtension);
-		if (file.exists()) Files.copy(file.toPath(), copy.toPath(), REPLACE_EXISTING);
+		if (file.exists()) {
+			copy.delete();
+			Files.copy(file.toPath(), copy.toPath(), REPLACE_EXISTING);
+		}
 		return copy;
 	}
 
