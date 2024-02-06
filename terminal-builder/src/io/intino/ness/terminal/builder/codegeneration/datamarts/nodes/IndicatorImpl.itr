@@ -31,7 +31,7 @@ def type(indicatorNode & default) trigger(nodeImpl)
 
 
 		private Indicator downloadFromDatahub() throws Exception {
-			jakarta.jms.Message response = requestResponseFromDatahub("get-indicator=" + id(), request(hasLocalAccessToIndicators ? "path" : "download"));
+			jakarta.jms.Message response = requestResponseFromDatahub("get-indicator=" + id, request(hasLocalAccessToIndicators ? "path" : "download"));
         	if (!response.getBooleanProperty("success")) throw new ReelNotAvailableException("Could not get indicator " + id + " because datahub returned success=false in the response");
         	if (response instanceof jakarta.jms.TextMessage textResponse) {
         		file = getFile(textResponse);
@@ -39,7 +39,7 @@ def type(indicatorNode & default) trigger(nodeImpl)
         		if (file != null && file.exists()) return loadFile();
         		file = null;
         		hasLocalAccessToIndicators = false;
-        		response = requestResponseFromDatahub("get-indicator=" + id(), request("download"));
+        		response = requestResponseFromDatahub("get-indicator=" + id, request("download"));
         	}
         	if (!response.getBooleanProperty("success")) throw new ReelNotAvailableException("Could not get indicator " + id + " because datahub returned success=false in the response");
         	return readFromBytes((jakarta.jms.BytesMessage) response);
@@ -56,6 +56,18 @@ def type(indicatorNode & default) trigger(nodeImpl)
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
 			message.setText("datamart=" + name() + ";operation=get-indicator;id=" + id + ";mode=" + mode);
 			return message;
+		}
+
+		private File getFile(jakarta.jms.TextMessage m) {
+			try {
+				return new File(m.getText());
+			} catch(Exception e) {
+				return null;
+			}
+		}
+
+		private Indicator loadFile() throws Exception {
+			return Indicator.load(new java.io.FileInputStream(this.file));
 		}
 	}
 end

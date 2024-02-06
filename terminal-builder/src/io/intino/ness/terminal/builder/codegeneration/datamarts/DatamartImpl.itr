@@ -269,11 +269,6 @@ def type(datamart & message & impl)
 			timeline.notifyChange();
 		}]
 
-		[$hasTimelines~private void handleIndicatorNotification(String type, String id) {
-			IndicatorNodeImpl indicator = indicators.computeIfAbsent(id + ":" + type, k -> new IndicatorNodeImpl(id, type, null));
-			indicator.notifyChange();
-		}]
-
 		private void mountEntities(Event event) {
 			try {
 				List<$name+FirstUpperCase~Mounter> mounters = this.mounters.get(event.type());

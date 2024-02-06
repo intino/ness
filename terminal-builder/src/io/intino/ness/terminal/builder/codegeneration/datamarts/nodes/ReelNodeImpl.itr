@@ -15,7 +15,7 @@ def type(reelNode & default) trigger(nodeImpl)
 			this.id = requireNonNull(id);
 			this.type = requireNonNull(type);
 			this.file = file;
-			this.hasLocalAccessToReels = file != null;
+			hasLocalAccessToReels = file != null;
 		}
 
 		@Override
