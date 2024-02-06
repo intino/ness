@@ -3,7 +3,6 @@ def type(timelineNode & default) trigger(nodeImpl)
 		private final String id;
 		private final String type;
 		private volatile File file;
-		private volatile boolean hasDirectAccessToFile;
 		private volatile io.intino.sumus.chronos.TimelineStore timelineFile;
 		private volatile ChangeListener listener;
 		private volatile boolean disposed;
@@ -16,7 +15,6 @@ def type(timelineNode & default) trigger(nodeImpl)
 			this.id = requireNonNull(id);
 			this.type = requireNonNull(type);
 			this.file = file;
-			this.hasDirectAccessToFile = file != null;
 		}
 
 		@Override
@@ -85,7 +83,7 @@ def type(timelineNode & default) trigger(nodeImpl)
 			synchronized(this) {
 				if (disposed) throw new TimelineNotAvailableException("This " + getClass().getSimpleName() + " is disposed.");
 				try {
-					if (hasDirectAccessToFile && file != null && file.exists()) return loadFile();
+					if (hasLocalAccessToTimelines && file != null && file.exists()) return loadFile();
 					if (timelineFile != null) return timelineFile;
 					return timelineFile = downloadFromDatahub();
 				} catch(Exception e) {
@@ -111,7 +109,7 @@ def type(timelineNode & default) trigger(nodeImpl)
 
 		private void clearCache() {
 			timelineFile = null;
-			if(!hasDirectAccessToFile) file = null;
+			if(!hasLocalAccessToTimelines) file = null;
 		}
 
 		private io.intino.sumus.chronos.TimelineStore loadFile() throws Exception {
@@ -119,14 +117,14 @@ def type(timelineNode & default) trigger(nodeImpl)
 		}
 
 		private io.intino.sumus.chronos.TimelineStore downloadFromDatahub() throws Exception {
-			jakarta.jms.Message response = requestResponseFromDatahub("get-timeline=" + id(), request(hasDirectAccessToFile ? "path" : "download"));
+			jakarta.jms.Message response = requestResponseFromDatahub("get-timeline=" + id(), request(hasLocalAccessToTimelines ? "path" : "download"));
 			if (!response.getBooleanProperty("success")) throw new TimelineNotAvailableException("Could not get timeline " + id + " because datahub returned success=false in the response");;
 			if (response instanceof jakarta.jms.TextMessage textResponse) {
 				file = getFile(textResponse);
-				hasDirectAccessToFile = true;
+				hasLocalAccessToTimelines = true;
 				if (file != null && file.exists()) return loadFile();
 				file = null;
-				hasDirectAccessToFile = false;
+				hasLocalAccessToTimelines = false;
 				response = requestResponseFromDatahub("get-timeline=" + id(), request("download"));
 			}
 			if (!response.getBooleanProperty("success")) throw new TimelineNotAvailableException("Could not get timeline " + id + " because datahub returned success=false in the response");;
@@ -141,7 +139,7 @@ def type(timelineNode & default) trigger(nodeImpl)
 			file = File.createTempFile(id(), ".timeline");
 			java.nio.file.Files.write(file.toPath(), bytes, java.nio.file.StandardOpenOption.CREATE);
 			file.deleteOnExit();
-			hasDirectAccessToFile = false;
+			hasLocalAccessToTimelines = false;
 
 			return loadFile();
 		}

@@ -2,12 +2,10 @@ def type(indicatorNode & default) trigger(nodeImpl)
 	private class IndicatorNodeImpl implements IndicatorNode {
 		private final String id;
 		private volatile File file;
-		private volatile boolean hasDirectAccessToFile;
 
 		private IndicatorNodeImpl(String id, File file) {
 			this.id = requireNonNull(id);
 			this.file = file;
-			this.hasDirectAccessToFile = file != null;
 		}
 
 		@Override
@@ -23,7 +21,7 @@ def type(indicatorNode & default) trigger(nodeImpl)
 		public Indicator get() throws IndicatorNotAvailableException {
 			synchronized(this) {
 				try {
-					if (hasDirectAccessToFile) return Indicator.load(new java.io.FileInputStream(this.file));
+					if (hasLocalAccessToIndicators) return Indicator.load(new java.io.FileInputStream(this.file));
 					return downloadFromDatahub();
 				} catch(Exception e) {
 					throw new IndicatorNotAvailableException(e);
@@ -33,9 +31,18 @@ def type(indicatorNode & default) trigger(nodeImpl)
 
 
 		private Indicator downloadFromDatahub() throws Exception {
-			jakarta.jms.Message response = requestResponseFromDatahub("get-indicator=" + id, request("download"));
-			if (!response.getBooleanProperty("success")) throw new IndicatorNotAvailableException("Could not get indicator " + id + " because datahub returned success=false in the response");
-			return readFromBytes((jakarta.jms.BytesMessage) response);
+			jakarta.jms.Message response = requestResponseFromDatahub("get-indicator=" + id(), request(hasLocalAccessToIndicators ? "path" : "download"));
+        	if (!response.getBooleanProperty("success")) throw new ReelNotAvailableException("Could not get indicator " + id + " because datahub returned success=false in the response");
+        	if (response instanceof jakarta.jms.TextMessage textResponse) {
+        		file = getFile(textResponse);
+        		hasLocalAccessToIndicators = true;
+        		if (file != null && file.exists()) return loadFile();
+        		file = null;
+        		hasLocalAccessToIndicators = false;
+        		response = requestResponseFromDatahub("get-indicator=" + id(), request("download"));
+        	}
+        	if (!response.getBooleanProperty("success")) throw new ReelNotAvailableException("Could not get indicator " + id + " because datahub returned success=false in the response");
+        	return readFromBytes((jakarta.jms.BytesMessage) response);
 		}
 
 		private Indicator readFromBytes(jakarta.jms.BytesMessage m) throws Exception {
