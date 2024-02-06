@@ -70,7 +70,7 @@ public class ReelMounter extends MasterDatamartMounter {
 		try {
 			Datamart datamart = this.datamart.definition();
 			List<Reel> reels = datamart.reelList(r -> r.tank().message().name$().equals(event.type()));
-			try (ReelFile.Session session = ReelFile.open(sessionFile).session()) {
+			try (ReelFile.Session session = open(sessionFile).session()) {
 				for (Reel reel : reels) {
 					session.set(event.ts(), group(event, reel.groupSource()), mappingAttribute(event.toMessage(), reel));
 				}
@@ -99,6 +99,10 @@ public class ReelMounter extends MasterDatamartMounter {
 	ReelFile reelFile(String type, String subject) throws IOException {
 		File file = new File(box().datamartReelsDirectory(datamart.name(), type), normalizePath(subject + REEL_EXTENSION));
 		file.getParentFile().mkdirs();
+		return open(file);
+	}
+
+	private static ReelFile open(File file) throws IOException {
 		return file.exists() ? ReelFile.open(file) : ReelFile.create(file);
 	}
 
