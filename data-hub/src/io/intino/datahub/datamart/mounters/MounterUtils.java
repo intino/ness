@@ -1,6 +1,7 @@
 package io.intino.datahub.datamart.mounters;
 
 import io.intino.alexandria.event.Event;
+import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.message.Message;
 import io.intino.datahub.datamart.MasterDatamart;
 import io.intino.datahub.model.Entity;
@@ -72,13 +73,22 @@ public class MounterUtils {
 		return new File(datamartDir, name + File.separator + entity + TIMELINE_EXTENSION);
 	}
 
-	public static File copyOf(File file, String newExtension) throws IOException {
-		File copy = new File(file.getAbsolutePath() + newExtension);
+	public static File copyOf(File temp, File file, String newExtension) throws IOException {
+		File copy = new File(temp, file.getName() + newExtension);
 		if (file.exists()) {
 			copy.delete();
 			Files.copy(file.toPath(), copy.toPath(), REPLACE_EXISTING);
 		}
 		return copy;
+	}
+
+	public static File tempDir(String prefix) {
+		try {
+			return Files.createTempDirectory(prefix).toFile();
+		} catch (IOException e) {
+			Logger.error(e);
+			return null;
+		}
 	}
 
 	private static String tankName(Entity e) {
@@ -106,7 +116,7 @@ public class MounterUtils {
 		if (current != null) {
 			Magnitude magnitude = current.get(m.id());
 			// TODO: OR check when magnitude == null
-			if(magnitude != null) {
+			if (magnitude != null) {
 				Magnitude.Model model = magnitude.model;
 				model.attributes().forEach(a -> attrs.put(a, model.attribute(a)));
 			}
@@ -151,9 +161,9 @@ public class MounterUtils {
 
 		public TimelineStore createIfNotExists() throws IOException {
 			File file = timelineFileOf(datamartDir, type, entity);
-			if(extension != null) file = new File(file.getAbsolutePath() + extension);
+			if (extension != null) file = new File(file.getAbsolutePath() + extension);
 			file.getParentFile().mkdirs();
-			if(file.exists()) return TimelineStore.of(file);
+			if (file.exists()) return TimelineStore.of(file);
 
 			Timeline tlDefinition = datamart.definition().timelineList().stream()
 					.filter(Timeline::isRaw)

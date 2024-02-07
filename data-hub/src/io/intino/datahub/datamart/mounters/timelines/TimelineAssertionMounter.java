@@ -14,18 +14,20 @@ import java.nio.file.Files;
 import java.util.function.Supplier;
 
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
-import static io.intino.datahub.datamart.mounters.MounterUtils.copyOf;
-import static io.intino.datahub.datamart.mounters.MounterUtils.sensorModel;
+import static io.intino.datahub.datamart.mounters.MounterUtils.*;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class TimelineAssertionMounter {
 	private final DataHubBox box;
 	private final MasterDatamart datamart;
+	private final File temp;
 
 	public TimelineAssertionMounter(DataHubBox box, MasterDatamart datamart) {
 		this.box = box;
 		this.datamart = datamart;
+		temp = tempDir("timeline_assertion_mounter");
+
 	}
 
 	void mount(MessageEvent assertion) {
@@ -41,7 +43,7 @@ public class TimelineAssertionMounter {
 		if (!timelineFile.exists()) return;
 		File session = null;
 		try {
-			session = copyOf(timelineFile, ".session");
+			session = copyOf(temp, timelineFile, ".session");
 			try(TimelineWriter writer = TimelineStore.of(session).writer()) {
 				writer.sensorModel(sensorModel(TimelineStore.of(timelineFile).sensorModel(), assertion.toMessage(), t));
 			}
