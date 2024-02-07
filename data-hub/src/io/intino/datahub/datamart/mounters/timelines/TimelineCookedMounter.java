@@ -32,6 +32,7 @@ import java.util.Set;
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
 import static io.intino.datahub.datamart.MasterDatamart.normalizePath;
 import static io.intino.datahub.datamart.mounters.MounterUtils.copyOf;
+import static io.intino.datahub.datamart.mounters.MounterUtils.tempDir;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -42,12 +43,15 @@ public class TimelineCookedMounter {
 	private final Map<String, Set<String>> timelineTypes;
 	private final File tlDirectory;
 	private final IndicatorMounter indicatorMounter;
+	private final File temp;
 
 	public TimelineCookedMounter(DataHubBox box, MasterDatamart datamart, Map<String, Set<String>> timelineTypes) {
 		this.datamart = datamart;
 		this.timelineTypes = timelineTypes;
 		this.tlDirectory = box.datamartTimelinesDirectory(datamart.name());
 		this.indicatorMounter = new IndicatorMounter(datamart);
+		temp = tempDir("reel_mounter");
+
 	}
 
 	public void mount(MessageEvent event) {
@@ -109,7 +113,7 @@ public class TimelineCookedMounter {
 		File sessionFile = null;
 		try {
 			io.intino.sumus.chronos.Timeline timeline = tlStore.timeline();
-			sessionFile = copyOf(timelineFile, ".session");
+			sessionFile = copyOf(temp, timelineFile, ".session");
 			try (TimelineWriter writer = TimelineStore.of(sessionFile).writer()) {
 				MeasurementsVector vector = createVector(tlStore.sensorModel());
 				writer.set(event.ts());

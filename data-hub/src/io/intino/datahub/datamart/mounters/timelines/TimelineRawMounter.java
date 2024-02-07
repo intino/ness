@@ -29,12 +29,14 @@ public class TimelineRawMounter {
 	private final MasterDatamart datamart;
 	private final Map<String, Set<String>> timelineTypes;
 	private final IndicatorMounter indicatorMounter;
+	private final File temp;
 
 	public TimelineRawMounter(DataHubBox box, MasterDatamart datamart, Map<String, Set<String>> timelineTypes) {
 		this.box = box;
 		this.datamart = datamart;
 		this.timelineTypes = timelineTypes;
 		this.indicatorMounter = new IndicatorMounter(datamart);
+		temp = tempDir("reel_mounter");
 	}
 
 	public void mount(MeasurementEvent event) {
@@ -79,7 +81,7 @@ public class TimelineRawMounter {
 
 	protected void update(TimelineStore tlStore, MeasurementEvent event) throws IOException {
 		File timelineFile = ((FileTimelineStore) tlStore).file();
-		File sessionFile = copyOf(timelineFile, ".session");
+		File sessionFile = copyOf(temp, timelineFile, ".session");
 		try {
 			try (TimelineWriter writer = TimelineStore.of(sessionFile).writer()) {
 				checkTs(event.ts(), writer);

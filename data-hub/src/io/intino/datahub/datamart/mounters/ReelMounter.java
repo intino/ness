@@ -21,13 +21,17 @@ import java.util.stream.Stream;
 import static io.intino.datahub.box.DataHubBox.REEL_EXTENSION;
 import static io.intino.datahub.datamart.MasterDatamart.normalizePath;
 import static io.intino.datahub.datamart.mounters.MounterUtils.copyOf;
+import static io.intino.datahub.datamart.mounters.MounterUtils.tempDir;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class ReelMounter extends MasterDatamartMounter {
 
+	private final File temp;
+
 	public ReelMounter(MasterDatamart datamart) {
 		super(datamart);
+		temp = tempDir("reel_mounter");
 	}
 
 	@Override
@@ -64,7 +68,7 @@ public class ReelMounter extends MasterDatamartMounter {
 
 	protected void update(File reelFile, MessageEvent event) throws IOException {
 		reelFile.getParentFile().mkdirs();
-		File sessionFile = copyOf(reelFile, ".session");
+		File sessionFile = copyOf(temp, reelFile, ".session");
 		try {
 			Datamart datamart = this.datamart.definition();
 			List<Reel> reels = datamart.reelList(r -> r.tank().message().name$().equals(event.type()));
@@ -100,7 +104,7 @@ public class ReelMounter extends MasterDatamartMounter {
 
 	private static ReelFile open(File file) throws IOException {
 		try {
-			if(file.exists()) return ReelFile.open(file);
+			if (file.exists()) return ReelFile.open(file);
 			file.getParentFile().mkdirs();
 			return ReelFile.create(file);
 		} catch (Exception e) {
