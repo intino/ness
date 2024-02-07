@@ -44,9 +44,7 @@ public class ReelMounter extends MasterDatamartMounter {
 			MessageEvent event = new MessageEvent(message);
 			String subject = subject(event);
 			try {
-				ReelFile reelFile = datamart.reelStore().get(message.type(), subject);
-				if (reelFile == null) reelFile = reelFile(message.type(), subject);
-				update(reelFile, event);
+				update(reelFileWith(message.type(), subject), event);
 			} catch (IOException e) {
 				Logger.error(e);
 			}
@@ -64,9 +62,9 @@ public class ReelMounter extends MasterDatamartMounter {
 		return event.toMessage().get(reel.entitySource().name$()).asString();
 	}
 
-	protected void update(ReelFile reelFile, MessageEvent event) throws IOException {
-		File file = reelFile.file();
-		File sessionFile = copyOf(file, ".session");
+	protected void update(File reelFile, MessageEvent event) throws IOException {
+		reelFile.getParentFile().mkdirs();
+		File sessionFile = copyOf(reelFile, ".session");
 		try {
 			Datamart datamart = this.datamart.definition();
 			List<Reel> reels = datamart.reelList(r -> r.tank().message().name$().equals(event.type()));
@@ -75,7 +73,7 @@ public class ReelMounter extends MasterDatamartMounter {
 					session.set(event.ts(), group(event, reel.groupSource()), mappingAttribute(event.toMessage(), reel));
 				}
 			}
-			Files.move(sessionFile.toPath(), file.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
+			Files.move(sessionFile.toPath(), reelFile.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
 		} catch (Exception e) {
 			sessionFile.delete();
 			throw e;
@@ -96,14 +94,18 @@ public class ReelMounter extends MasterDatamartMounter {
 		return !value.isNull() ? value.asList(String.class).stream() : Stream.empty();
 	}
 
-	ReelFile reelFile(String type, String subject) throws IOException {
-		File file = new File(box().datamartReelsDirectory(datamart.name(), type), normalizePath(subject + REEL_EXTENSION));
-		file.getParentFile().mkdirs();
-		return open(file);
+	private File reelFileWith(String type, String subject) {
+		return new File(box().datamartReelsDirectory(datamart.name(), type), normalizePath(subject + REEL_EXTENSION));
 	}
 
 	private static ReelFile open(File file) throws IOException {
-		return file.exists() ? ReelFile.open(file) : ReelFile.create(file);
+		try {
+			if(file.exists()) return ReelFile.open(file);
+			file.getParentFile().mkdirs();
+			return ReelFile.create(file);
+		} catch (Exception e) {
+			throw new IOException("[" + Thread.currentThread().getName() + "]: Could not open reel file " + file.getAbsolutePath() + ": " + e.getMessage(), e);
+		}
 	}
 
 	public static class Reflow extends ReelMounter implements AutoCloseable {
@@ -131,8 +133,7 @@ public class ReelMounter extends MasterDatamartMounter {
 			}
 		}
 
-		@Override
-		ReelFile reelFile(String type, String subject) throws IOException {
+		private ReelFile reelFile(String type, String subject) throws IOException {
 			File sessionFile = new File(box().datamartReelsDirectory(datamart.name(), type), normalizePath(subject + REEL_EXTENSION + ".session"));
 			if (sessionFile.exists()) sessionFile.delete();
 			else sessionFile.getParentFile().mkdirs();
