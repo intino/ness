@@ -1,6 +1,5 @@
 package io.intino.datahub.box;
 
-import io.intino.alexandria.datalake.Datalake;
 import io.intino.alexandria.datalake.file.FileDatalake;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.sealing.FileSessionSealer;
@@ -141,7 +140,7 @@ public class DataHubBox extends AbstractBox {
 		config.datalakeRootPath(datalakeDirectory());
 		config.serializer(MasterSerializers.getOrDefault(configuration.masterSerializer()));
 		config.tripletsDigester(new DatahubTripletDigesterFactory().create());
-		config.tripletsLoader(new DatahubTripletLoader(datalake.tripletsStore()));
+		config.tripletsLoader(new DatahubTripletLoader());
 		return config;
 	}
 
@@ -199,25 +198,9 @@ public class DataHubBox extends AbstractBox {
 
 	private static class DatahubTripletLoader implements TripletLoader {
 
-		private final Datalake.TripletStore store;
-
-		public DatahubTripletLoader(Datalake.TripletStore store) {
-			this.store = store;
-		}
-
 		@Override
 		public Stream<Triplet> loadTriplets(Stats stats) {
-			return store.tanks()
-					.peek(t -> stats.increment("Tanks read"))
-					.flatMap(Datalake.TripletStore.Tank::tubs)
-					.flatMap(tub -> readTripletsFrom(tub, stats));
-		}
-
-		private Stream<Triplet> readTripletsFrom(Datalake.TripletStore.Tub tub, Stats stats) {
-			stats.increment(Stats.FILES_READ);
-			return tub.triplets()
-					.map(t -> new Triplet(t.subject(), t.verb(), t.object()))
-					.peek(t -> stats.increment(Stats.TRIPLETS_READ));
+			return Stream.empty();
 		}
 	}
 
