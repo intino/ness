@@ -10,7 +10,6 @@ import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.model.TripletRecord;
 import io.intino.ness.master.serialization.MasterMapSerializer;
 import org.apache.activemq.command.ActiveMQTextMessage;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.jms.Message;
 import java.util.Iterator;
@@ -74,7 +73,10 @@ public class EntityStoreRequest {
 	}
 
 	private String tankOf(String id) {
-		return StringUtils.capitalize(Triplet.typeOf(id));
+		String s = Triplet.typeOf(id);
+		if(s.isEmpty()) return s;
+		if(s.length() == 1) return s.toUpperCase();
+		return Character.toUpperCase(s.charAt(0)) + s.substring(1);
 	}
 
 	private static Message errorMessage(Throwable e) {

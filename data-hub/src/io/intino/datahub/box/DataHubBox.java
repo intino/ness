@@ -4,7 +4,6 @@ import io.intino.alexandria.datalake.file.FileDatalake;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.sealing.FileSessionSealer;
 import io.intino.alexandria.sealing.SessionSealer;
-import io.intino.alexandria.ui.services.AuthService;
 import io.intino.datahub.box.service.jms.NessService;
 import io.intino.datahub.box.service.scheduling.Sentinels;
 import io.intino.datahub.broker.BrokerService;
@@ -158,11 +157,6 @@ public class DataHubBox extends AbstractBox {
 
 	public void afterStop() {
 
-	}
-
-	@Override
-	protected AuthService authService(URL authServiceUrl) {
-		return null;
 	}
 
 	private void loadBrokerService() {
