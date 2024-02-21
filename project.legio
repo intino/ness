@@ -1,0 +1,6 @@
+dsl Legio
+
+Project("Ness Project") ness
+	Repository("intino-maven")
+    	Release("https://artifactory.intino.io/artifactory/releases")
+    	Snapshot("https://artifactory.intino.io/artifactory/snapshots")

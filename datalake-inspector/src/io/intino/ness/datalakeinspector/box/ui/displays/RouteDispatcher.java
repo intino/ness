@@ -1,4 +1,4 @@
-package io.intino.datahub.box.ui.displays;
+package io.intino.ness.datalakeinspector.box.ui.displays;
 
 import io.intino.alexandria.ui.Soul;
 

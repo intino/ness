@@ -1,6 +1,6 @@
 dsl Konos
 
-Service datalakeInspector as UI(port = "{ui_port}", title = "Data Lake Inspector", favicon = "")
+Service datalakeInspectorElements as UI(port = "{ui_port}", title = "Data Lake Inspector", favicon = "")
 	Resource(path = "/") home as Page(homeTemplate) Main
 
 Template(layout=Vertical Flexible) homeTemplate as Relative(height=100%,width=100%)

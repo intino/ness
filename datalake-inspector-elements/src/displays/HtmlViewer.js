@@ -1,10 +1,10 @@
 import React from "react";
-import { withStyles } from '@material-ui/core/styles';
+import {withStyles} from '@material-ui/core/styles';
 import AbstractHtmlViewer from "../../gen/displays/AbstractHtmlViewer";
 import HtmlViewerNotifier from "../../gen/displays/notifiers/HtmlViewerNotifier";
 import HtmlViewerRequester from "../../gen/displays/requesters/HtmlViewerRequester";
 import DisplayFactory from 'alexandria-ui-elements/src/displays/DisplayFactory';
-import { withSnackbar } from 'notistack';
+import {withSnackbar} from 'notistack';
 
 const styles = theme => ({});
 

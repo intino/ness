@@ -4,7 +4,6 @@ import io.intino.alexandria.datalake.file.FileDatalake;
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.sealing.FileSessionSealer;
 import io.intino.alexandria.sealing.SessionSealer;
-import io.intino.alexandria.ui.services.AuthService;
 import io.intino.datahub.box.actions.SealAction;
 import io.intino.datahub.box.service.jms.NessService;
 import io.intino.datahub.box.service.scheduling.Sentinels;
@@ -25,7 +24,6 @@ import io.intino.magritte.framework.Graph;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -210,11 +208,6 @@ public class DataHubBox extends AbstractBox {
 
 	public void afterStop() {
 		datamarts().datamarts().forEach(MasterDatamart::close);
-	}
-
-	@Override
-	protected AuthService authService(URL authServiceUrl) {
-		return null;
 	}
 
 	private void loadBrokerService() {

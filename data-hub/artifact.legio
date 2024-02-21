@@ -1,17 +1,14 @@
 dsl Legio
 
-Artifact("io.intino", "11.2.5") data-hub
+Artifact("io.intino", "11.3.0") data-hub
 	Model("Proteo", "4.0.0", "5.0.0") > outLanguage = "Ness"
-	Box("Konos", "11.0.0")
+	Box("Konos", "11.0.5")
 	Imports
 		Compile("io.intino.alexandria", "json", "1.2.3")
 		Compile("io.intino.alexandria", "core-framework", "2.2.0")
 		Compile("io.intino.alexandria", "jmx", "1.0.5")
 		Compile("io.intino.alexandria", "primitives", "1.1.2")
-		Compile("io.intino.alexandria", "sealing", "7.0.8")
-		Compile("io.intino.alexandria", "ui-framework", "4.28.18")
-			Exclude("io.intino.alexandria", "driver-r")
-			Exclude("io.intino.alexandria", "driver-shiny")
+		Compile("io.intino.alexandria", "sealing", "7.0.9")
 		Compile("io.intino.alexandria", "exceptions", "2.1.1")
 		Compile("io.intino.alexandria", "jms", "2.0.0")
 		Compile("io.intino.alexandria", "zip", "1.0.5")
@@ -24,15 +21,13 @@ Artifact("io.intino", "11.2.5") data-hub
 		Compile("org.apache.activemq", "activemq-kahadb-store", "6.0.1")
 		Compile("org.apache.activemq", "activemq-jaas", "6.0.1")
 		Compile("org.apache.activemq", "activemq-runtime-config", "6.0.1")
-		Compile("org.xerial", "sqlite-jdbc", "3.44.1.0")
+		Compile("org.xerial", "sqlite-jdbc", "3.45.1.0")
 		Test("junit", "junit", "4.13.2")
-		Web("io.intino", "datalake-inspector", "11.2.4")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
 	Distribution > Artifactory("intino-maven")
 			Release("https://artifactory.intino.io/artifactory/release-frameworks")
 			Snapshot("https://artifactory.intino.io/artifactory/snapshot-frameworks")
-
 	Parameter("backup_directory")
 	Parameter("broker_port")
 	Parameter("broker_secondary_port")
@@ -40,8 +35,3 @@ Artifact("io.intino", "11.2.5") data-hub
 	Parameter("keystore_password")
 	Parameter("truststore_path")
 	Parameter("truststore_password")
-	Parameter("ui_port")
-
-Repository("intino-maven")
-	Release("https://artifactory.intino.io/artifactory/releases")
-	Snapshot("https://artifactory.intino.io/artifactory/snapshots")
