@@ -1,6 +1,5 @@
 dsl Konos
 
-
 Service service as JMX
 	Operation("Show tanks") tanks
 		Response as Text

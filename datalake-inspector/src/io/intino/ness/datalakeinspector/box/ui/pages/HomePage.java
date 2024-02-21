@@ -1,6 +1,7 @@
-package io.intino.datahub.box.ui.pages;
+package io.intino.ness.datalakeinspector.box.ui.pages;
 
-import io.intino.datahub.box.ui.displays.templates.HomeTemplate;
+
+import io.intino.ness.datalakeinspector.box.ui.displays.templates.HomeTemplate;
 
 public class HomePage extends AbstractHomePage {
 

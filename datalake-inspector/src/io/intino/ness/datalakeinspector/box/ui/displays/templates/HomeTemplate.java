@@ -1,20 +1,19 @@
-package io.intino.datahub.box.ui.displays.templates;
+package io.intino.ness.datalakeinspector.box.ui.displays.templates;
 
 import io.intino.alexandria.logger.Logger;
 import io.intino.alexandria.ui.spark.UIFile;
-import io.intino.datahub.box.DataHubBox;
-import io.intino.datahub.box.ui.displays.HtmlViewer;
-import io.intino.datahub.datalake.regenerator.Mapper;
-import io.intino.datahub.datalake.regenerator.MapperLoader;
-import io.intino.datahub.datalake.regenerator.Regenerator;
+import io.intino.ness.datalakeinspector.box.DatalakeInspectorBox;
+import io.intino.ness.datalakeinspector.box.regenerator.Mapper;
+import io.intino.ness.datalakeinspector.box.regenerator.MapperLoader;
+import io.intino.ness.datalakeinspector.box.regenerator.Regenerator;
+import io.intino.ness.datalakeinspector.box.ui.displays.HtmlViewer;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.util.List;
 
-public class HomeTemplate extends AbstractHomeTemplate<DataHubBox> {
-
+public class HomeTemplate extends AbstractHomeTemplate<DatalakeInspectorBox> {
 	private static String template;
 	private HtmlViewer htmlViewer;
 	private File file;
@@ -27,7 +26,7 @@ public class HomeTemplate extends AbstractHomeTemplate<DataHubBox> {
 		}
 	}
 
-	public HomeTemplate(DataHubBox box) {
+	public HomeTemplate(DatalakeInspectorBox box) {
 		super(box);
 	}
 
@@ -69,11 +68,11 @@ public class HomeTemplate extends AbstractHomeTemplate<DataHubBox> {
 	}
 
 	private File calculateReview(String mapperCode) throws MapperLoader.CompilationException {
-		DataHubBox box = box();
+		DatalakeInspectorBox box = box();
 		try {
 			MapperLoader mapperLoader = new MapperLoader(box.configuration().home());
 			Mapper mapper = mapperLoader.compileAndLoad(mapperCode);
-			List<File> review = new Regenerator(box.datalake(), box.graph().datalake().backup() == null ? null : new File(box.graph().datalake().backup().path(), "sessions"), new File(box.configuration().home(), "reviews")).review(mapper);
+			List<File> review = new Regenerator(box.datalake(), null, new File(box.configuration().home(), "reviews")).review(mapper);
 			mapperLoader.delete(mapperCode);
 			return review.get(0);
 		} catch (IOException | InstantiationException | InvocationTargetException | IllegalAccessException |

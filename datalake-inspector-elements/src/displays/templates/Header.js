@@ -1,10 +1,9 @@
-import React from "react";
-import { withStyles } from '@material-ui/core/styles';
+import {withStyles} from '@material-ui/core/styles';
 import AbstractHeader from "../../../gen/displays/templates/AbstractHeader";
 import HeaderNotifier from "../../../gen/displays/notifiers/HeaderNotifier";
 import HeaderRequester from "../../../gen/displays/requesters/HeaderRequester";
 import DisplayFactory from 'alexandria-ui-elements/src/displays/DisplayFactory';
-import { withSnackbar } from 'notistack';
+import {withSnackbar} from 'notistack';
 
 const styles = theme => ({});
 

@@ -1,0 +1,7 @@
+dsl Legio
+
+Artifact("io.intino.ness", "1.0.0") datalake-inspector-elements
+	WebImports
+		WebArtifact("io.intino.alexandria", "ui-framework-elements", "4.28.9") alexandria-ui-elements
+
+Repository("intino-maven") > Release("https://artifactory.intino.io/artifactory/releases")
