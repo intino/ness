@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino", "11.3.0") data-hub
+Artifact("io.intino", "11.3.1") data-hub
 	Model("Proteo", "4.0.0", "5.0.0") > outLanguage = "Ness"
 	Box("Konos", "11.0.5")
 	Imports

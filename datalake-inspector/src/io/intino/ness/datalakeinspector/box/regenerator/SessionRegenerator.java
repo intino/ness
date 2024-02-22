@@ -79,7 +79,8 @@ public class SessionRegenerator {
 	private boolean notSuitable(File session, Mapper.Filter filter) {
 		Tank<MessageEvent> tank = tankOf(session);
 		Source<MessageEvent> source = sourceOf(tank, session);
-		return !filter.allow(tank) || !filter.allow(tank, source, timetagOf(session));
+		Timetag timetag = timetagOf(session);
+		return !filter.allow(tank) || (timetag != null && !filter.allow(tank, source, timetag));
 	}
 
 	private MessageEvent map(Mapper mapper, RegeneratorReporter reporter, MessageEvent e, String before) {
@@ -93,7 +94,11 @@ public class SessionRegenerator {
 	}
 
 	private Timetag timetagOf(File session) {
-		return fingerprintOf(session).timetag();
+		try {
+			return fingerprintOf(session).timetag();
+		} catch (ArrayIndexOutOfBoundsException e) {
+			return null;
+		}
 	}
 
 	private Tank<MessageEvent> tankOf(File session) {
