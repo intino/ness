@@ -8,6 +8,7 @@ import io.intino.datahub.box.service.jms.NessService;
 import io.intino.datahub.box.service.scheduling.Sentinels;
 import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.broker.jms.JmsBrokerService;
+import io.intino.datahub.broker.jms.SSLConfiguration;
 import io.intino.datahub.datalake.BrokerSessions;
 import io.intino.datahub.model.Entity;
 import io.intino.datahub.model.EntityData;
@@ -23,7 +24,6 @@ import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.serialization.MasterSerializers;
 
 import java.io.File;
-import java.net.URL;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -161,7 +161,11 @@ public class DataHubBox extends AbstractBox {
 
 	private void loadBrokerService() {
 		if (this.graph.broker() != null && graph.broker().implementation() == null)
-			graph.broker().implementation(() -> new JmsBrokerService(graph, brokerStage(),datalake(), master));
+			graph.broker().implementation(() -> new JmsBrokerService(graph, brokerStage(), datalake(), master, configuration.keystorePath() != null ? sslConfiguration() : null));
+	}
+
+	private SSLConfiguration sslConfiguration() {
+		return new SSLConfiguration(new File(configuration.keystorePath()), new File(configuration.truststorePath()), configuration.keystorePassword().toCharArray(), configuration.truststorePassword().toCharArray());
 	}
 
 	private void configureBroker() {

@@ -1,21 +1,19 @@
 dsl Legio
 
-Artifact("io.intino", "6.2.0.1-SNAPSHOT") data-hub as Product
+Artifact("io.intino", "6.2.0.2") data-hub as Product
 	Model("Proteo", "3.4.0", "4.2.0") > outLanguage = "Ness"
 	Box("Konos", "9.11.8")
 	Imports
 		Compile("io.intino.ness", "master", "1.1.0")
 		Compile("io.intino.alexandria", "core-framework", "2.1.2")
 		Compile("io.intino.alexandria", "jmx", "1.0.5")
-//		Compile("io.intino.alexandria", "ui-framework", "4.23.3")
-			Exclude("io.intino.alexandria", "driver-r")
-			Exclude("io.intino.alexandria", "driver-shiny")
 		Compile("io.intino.alexandria", "exceptions", "2.1.1")
 		Compile("io.intino.alexandria", "jms", "1.4.1")
 		Compile("io.intino.alexandria", "zip", "1.0.4")
 		Compile("io.intino.alexandria", "ingestion", "4.0.7")
 		Compile("io.intino.alexandria", "sealing", "5.0.2")
 		Compile("io.intino.alexandria", "logger4j", "1.0.1")
+		Compile("io.intino.itrules", "engine", "1.0.1")
 		Compile("io.intino.alexandria", "scheduler-framework", "1.1.1") > Exclude("org.slf4j", "slf4j-api")
 
 		Compile("commons-io", "commons-io", "2.11.0")
@@ -35,8 +33,11 @@ Artifact("io.intino", "6.2.0.1-SNAPSHOT") data-hub as Product
 	Parameter("backup_directory")
 	Parameter("broker_port")
 	Parameter("broker_secondary_port")
-	Parameter("ui_port")
 	Parameter("master_serializer")
+	Parameter("keystore_path")
+	Parameter("keystore_password")
+	Parameter("truststore_path")
+	Parameter("truststore_password")
 
 Repository("intino-maven")
 	Release("https://artifactory.intino.io/artifactory/releases")
