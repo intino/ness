@@ -45,5 +45,5 @@ Event Example
 	Attribute names as Text List
 
 Terminal testTerminal
-	Publish(tanks = dl.example)
-	Subscribe (tanks = dl.example)
+	Publish(dl.example)
+	Subscribe (dl.example)

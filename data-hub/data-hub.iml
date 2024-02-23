@@ -92,5 +92,8 @@
     <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-annotations:2.14.0" level="project" />
     <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-core:2.14.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.itrules:engine:1.0.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:4.0.7" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:zet:1.0.7" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:tris:1.0.0" level="project" />
   </component>
 </module>
