@@ -18,8 +18,8 @@ public class MqttTest {
 	static File jts = new File("/Users/oroncal/workspace/infrastructure/ness/test/res/server.keystore");
 	static File jks = new File("/Users/oroncal/workspace/infrastructure/ness/test/res/client.keystore");
 
-	@Test
-	public void name() throws Exception {
+
+	public static void main(String[] args) throws Exception {
 		MQTT mqtt = new MQTT();
 		mqtt.setConnectAttemptsMax(1);
 		mqtt.setReconnectAttemptsMax(0);
@@ -32,7 +32,7 @@ public class MqttTest {
 		ssl(mqtt);
 		BlockingConnection blockingConnection = mqtt.blockingConnection();
 		blockingConnection.connect();
-		System.out.println();
+		System.out.println("CONNECTADO!");
 	}
 
 	private static void ssl(MQTT mqtt) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException, NoSuchProviderException, KeyManagementException {

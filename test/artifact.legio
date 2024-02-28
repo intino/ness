@@ -14,6 +14,10 @@ Artifact("org.example", "1.0.0") test as Solution
 	Parameter("broker_port")
 	Parameter("broker_secondary_port")
 	Parameter("ui_port")
+	Parameter("keystore_path")
+	Parameter("keystore_password")
+	Parameter("truststore_path")
+	Parameter("truststore_password")
 
 RunConfiguration dev
 	Argument("ui_port", "9000")
@@ -22,6 +26,10 @@ RunConfiguration dev
 	Argument("backup_directory", "temp/backup")
 	Argument("broker_port", "63000")
 	Argument("broker_secondary_port", "1884")
+	Argument("keystore_path", "/Users/oroncal/workspace/infrastructure/ness/test/res/server.keystore")
+	Argument("keystore_password", "password")
+	Argument("truststore_path", "/Users/oroncal/workspace/infrastructure/ness/test/res/client.keystore")
+	Argument("truststore_password", "password")
 
 Repository("intino-maven")
 	Release("https://artifactory.intino.io/artifactory/releases")

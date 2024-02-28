@@ -8,7 +8,6 @@ import io.intino.datahub.broker.BrokerService;
 import io.intino.datahub.model.Broker;
 import io.intino.datahub.model.Datalake;
 import io.intino.datahub.model.NessGraph;
-import io.intino.ness.master.core.Master;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQSession;
 import org.apache.activemq.broker.BrokerPlugin;
@@ -55,7 +54,6 @@ public class JmsBrokerService implements BrokerService {
 	private final NessGraph graph;
 	private final File brokerStage;
 	private final FileDatalake datalake;
-	private final Master master;
 	private final SSLConfiguration sslConfiguration;
 	private final BrokerManager brokerManager;
 	private final PipeManager pipeManager;
@@ -63,12 +61,11 @@ public class JmsBrokerService implements BrokerService {
 
 	private org.apache.activemq.broker.BrokerService service;
 
-	public JmsBrokerService(NessGraph graph, File brokerStage, FileDatalake datalake, Master master, SSLConfiguration sslConfiguration) {
+	public JmsBrokerService(NessGraph graph, File brokerStage, FileDatalake datalake, SSLConfiguration sslConfiguration) {
 		this.root = new File(graph.broker().path());
 		this.graph = graph;
 		this.brokerStage = brokerStage;
 		this.datalake = datalake;
-		this.master = master;
 		this.sslConfiguration = sslConfiguration;
 		configure();
 		this.brokerManager = new BrokerManager(graph, new AdvisoryManager(jmsBroker()));
@@ -215,7 +212,7 @@ public class JmsBrokerService implements BrokerService {
 
 	private void addSSLConnector() throws Exception {
 		TransportConnector connector = new TransportConnector();
-		connector.setUri(new URI("ssl://0.0.0.0:" + (graph.broker().port() + 1) + "?transport.useKeepAlive=true&amp;needClientAuth=true"));
+		connector.setUri(new URI("ssl://0.0.0.0:" + (graph.broker().port() + 1) + "?transport.useKeepAlive=true&needClientAuth=true"));
 		connector.setName("ssl");
 		configureSSL();
 		service.addConnector(connector);
@@ -232,7 +229,7 @@ public class JmsBrokerService implements BrokerService {
 	private void addMQTTsConnector() throws Exception {
 		if (graph.broker().secondaryPort() == 0) return;
 		TransportConnector mqtt = new TransportConnector();
-		mqtt.setUri(new URI("mqtt+ssl://0.0.0.0:" + (graph.broker().secondaryPort() + 1)));
+		mqtt.setUri(new URI("mqtt+ssl://0.0.0.0:" + (graph.broker().secondaryPort() + 1) + "?transport.useKeepAlive=true&needClientAuth=true"));
 		mqtt.setName("mqtts");
 		service.addConnector(mqtt);
 	}
@@ -273,7 +270,6 @@ public class JmsBrokerService implements BrokerService {
 		void start() {
 			startNessSession();
 			initTankConsumers();
-			initEntityConsumers();
 		}
 
 		void stop() {
@@ -391,11 +387,6 @@ public class JmsBrokerService implements BrokerService {
 				brokerManager.registerTopicConsumer("Session", new EventSerializer(brokerStage, "Session", datalakeScale()).create());
 				Logger.info("Tanks ignited!");
 			}
-		}
-
-		private void initEntityConsumers() {
-			brokerManager.registerTopicConsumer(entitiesTopic, new EntitySerializer(datalake, master).create());
-			Logger.info("Master ignited!");
 		}
 
 		private Scale scale(Datalake.Tank.Event t) {
