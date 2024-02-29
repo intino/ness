@@ -83,7 +83,6 @@
     <orderEntry type="library" name="Intino: com.github.luben:zstd-jni:1.5.5-10" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zit:1.0.2" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Intino: org.eclipse.angus:angus-activation:2.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino:data-hub:11.3.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:sealing:7.0.9" level="project" />
     <orderEntry type="library" name="Intino: org.xerial:sqlite-jdbc:3.45.1.0" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-client:6.0.0" level="project" />
@@ -96,5 +95,6 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:5.0.9" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:session:2.0.8" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:jms:2.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino:data-hub:11.4.0" level="project" />
   </component>
 </module>

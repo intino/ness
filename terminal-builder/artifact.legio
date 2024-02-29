@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "1.0.4") terminal-builder
+Artifact("io.intino.ness", "1.1.0") terminal-builder
 	Imports
 		Compile("io.intino.ness", "master", "2.1.1")
 		Compile("io.intino", "data-hub", "11.2.4")
@@ -37,7 +37,3 @@ Artifact("io.intino.ness", "1.0.4") terminal-builder
 		Artifactory("intino-maven")
 			Release("https://artifactory.intino.io/artifactory/release-libraries")
 			Snapshot("https://artifactory.intino.io/artifactory/snapshot-libraries")
-
-Repository("intino-maven") intino
-	Release("https://artifactory.intino.io/artifactory/releases")
-	Snapshot("https://artifactory.intino.io/artifactory/snapshots")

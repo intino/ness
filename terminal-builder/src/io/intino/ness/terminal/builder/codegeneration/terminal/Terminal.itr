@@ -109,6 +109,24 @@ def type(terminal)
 
 		$subscribe...[$NL$NL]
 
+		public synchronized List<MetaMessage> metamodel() {
+			Message response = connector.requestResponse("service.ness.metamodel", request("Metamodel"), 10, TimeUnit.SECONDS);
+			if (response == null) return null;
+			try {
+				return Json.fromJson(((TextMessage) response).getText(), new TypeToken<ArrayList<MetaMessage>>() {}.getType());
+			} catch (Exception e) {
+				Logger.error(e);
+				return null;
+			}
+		}
+
+		public record MetaMessage(String name, boolean assertion, boolean multiple, List<MetaAttribute> attributes, List<MetaMessage> components){
+
+		}
+		public record MetaAttribute(String name, String type) {
+
+		}
+
 		public synchronized void requestSeal() {
 			connector.requestResponse("service.ness.seal", request("Seal"), 30, TimeUnit.MINUTES);
 		}
