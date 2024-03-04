@@ -1,6 +1,7 @@
 package io.intino.datahub.box.service.jms;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import io.intino.alexandria.Json;
@@ -43,11 +44,23 @@ public class MetamodelRequest {
 			if (message.isAssertion()) obj.add("assertion", new JsonPrimitive(true));
 			obj.add("name", new JsonPrimitive(message.name$()));
 			obj.add("attributes", attributes(message));
+			if (message.isExtensionOf()) obj.add("hierarchy", hierarchy(message));
 			JsonArray components = components(message);
 			if (!components.isEmpty()) obj.add("components", components);
 			elements.add(obj);
 		}
 		return Json.toJson(elements);
+	}
+
+	private JsonElement hierarchy(io.intino.datahub.model.Message message) {
+		var current = message;
+		JsonArray hierarchy = new JsonArray();
+		while (current.isExtensionOf()) {
+			io.intino.datahub.model.Message parent = current.asExtensionOf().parent();
+			hierarchy.add(new JsonPrimitive(parent.name$()));
+			current = parent;
+		}
+		return hierarchy;
 	}
 
 	private JsonArray attributes(io.intino.datahub.model.Message message) {

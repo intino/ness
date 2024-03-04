@@ -113,14 +113,14 @@ def type(terminal)
 			Message response = connector.requestResponse("service.ness.metamodel", request("Metamodel"), 10, TimeUnit.SECONDS);
 			if (response == null) return null;
 			try {
-				return Json.fromJson(((TextMessage) response).getText(), new TypeToken<ArrayList<MetaMessage>>() {}.getType());
+				return Json.fromJson(((TextMessage) response).getText(), new com.google.gson.reflect.TypeToken<java.util.ArrayList<MetaMessage>>() {}.getType());
 			} catch (Exception e) {
 				Logger.error(e);
 				return null;
 			}
 		}
 
-		public record MetaMessage(String name, boolean assertion, boolean multiple, List<MetaAttribute> attributes, List<MetaMessage> components){
+		public record MetaMessage(String name, boolean assertion, boolean multiple, List<MetaAttribute> attributes, List<MetaMessage> components, List<String> hierarchy){
 
 		}
 		public record MetaAttribute(String name, String type) {
