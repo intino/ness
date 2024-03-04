@@ -7,6 +7,7 @@ def type(datamart & message & impl)
 	import io.intino.alexandria.terminal.Connector;
 	import io.intino.ness.master.reflection.*;
 	import io.intino.ness.master.model.Entity;
+	import io.intino.ness.master.Datamart.Translator;
 
 	import org.apache.activemq.command.ActiveMQTextMessage;
 
@@ -44,7 +45,7 @@ def type(datamart & message & impl)
 		[$hasTimelines~private final Map<String, IndicatorNodeImpl> indicators = new java.util.concurrent.ConcurrentHashMap<>();]
 		[$hasReels~private boolean hasLocalAccessToReels;]
 		[$hasReels~private final Map<String, ReelNodeImpl> reels = new java.util.concurrent.ConcurrentHashMap<>();]
-		private volatile Translator translator = new Translator.Indentity();
+		private volatile Translator translator = new Translator.Identity();
 		private volatile boolean initializing = false;
 
     	public $name+FirstUpperCase~DatamartImpl(Connector connector, $terminal~.DatamartsRetryConfig retryConfig) {
@@ -138,6 +139,7 @@ def type(datamart & message & impl)
         			throw new java.lang.UnsupportedOperationException("Cannot request snapshots to snapshot instances of a datamart");
         		}
         	}.init(null);
+		}
 
         public Instant ts() {
         	return this.ts;
@@ -159,7 +161,7 @@ def type(datamart & message & impl)
 
 		@Override
 		public void translator(Translator translator) {
-			this.translator = Translator;
+			this.translator = translator;
 		}
 
 		private void downloadDatamartFromDatahub(String datamartSourceSelector) throws DatahubRequestException {

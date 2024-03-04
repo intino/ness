@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "1.1.1") terminal-builder
+Artifact("io.intino.ness", "1.2.0") terminal-builder
 	Imports
 		Compile("io.intino.ness", "master", "2.2.0")
 		Compile("io.intino", "data-hub", "11.5.0")
@@ -23,12 +23,12 @@ Artifact("io.intino.ness", "1.1.1") terminal-builder
 		Compile("io.intino.alexandria", "logger", "2.1.0")
 		Compile("io.intino.itrules", "engine", "1.0.1")
 		Compile("org.apache.maven.shared", "maven-invoker", "3.2.0")
-		Compile("commons-codec", "commons-codec", "1.16.0")
+		Compile("commons-codec", "commons-codec", "1.16.1")
 		Compile("org.apache.commons", "commons-lang3", "3.14.0")
 
 		Test("io.intino.alexandria", "terminal-jms", "6.0.0")
-		Test("io.intino.alexandria", "ingestion", "5.0.7")
-		Test("io.intino.alexandria", "bpm-framework", "3.1.1")
+		Test("io.intino.alexandria", "ingestion", "5.0.9")
+		Test("io.intino.alexandria", "bpm-framework", "3.1.3")
 		Test("io.intino.sumus", "chronos", "2.4.3")
 
 		Test("junit", "junit", "4.13.2")

@@ -5,6 +5,7 @@ import io.intino.ness.master.reflection.DatamartDefinition;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -79,13 +80,13 @@ public interface Datamart {
 	}
 
 	interface Translator {
-		String translate(String word, Locale locale);
+		Optional<String> translate(String word, Locale locale);
 
 		class Identity implements Translator {
 
 			@Override
-			public String translate(String word, Locale locale) {
-				return word;
+			public Optional<String> translate(String word, Locale locale) {
+				return Optional.of(word);
 			}
 		}
 
