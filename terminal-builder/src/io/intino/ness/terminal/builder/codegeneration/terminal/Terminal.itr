@@ -120,7 +120,7 @@ def type(terminal)
 			}
 		}
 
-		public record MetaMessage(String name, boolean assertion, boolean multiple, List<MetaAttribute> attributes, List<MetaMessage> components){
+		public record MetaMessage(String name, boolean assertion, boolean multiple, List<MetaAttribute> attributes, List<MetaMessage> components, List<String> hierarchy){
 
 		}
 		public record MetaAttribute(String name, String type) {

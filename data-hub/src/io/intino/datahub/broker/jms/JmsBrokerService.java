@@ -142,8 +142,11 @@ public class JmsBrokerService implements BrokerService {
 			}
 			service.setDestinationInterceptors(destinationInterceptors.toArray(DestinationInterceptor[]::new));
 			addPolicies();
-			if (sslConfiguration != null) addSSLConnector();
-			else {
+			if (sslConfiguration != null) {
+				configureSSL();
+				addTCPsConnector();
+				addMQTTsConnector();
+			} else {
 				addTCPConnector();
 				addMQTTConnector();
 			}
@@ -233,12 +236,28 @@ public class JmsBrokerService implements BrokerService {
 		service.addConnector(connector);
 	}
 
-	private void addSSLConnector() throws Exception {
+	private void addTCPsConnector() throws Exception {
 		TransportConnector connector = new TransportConnector();
-		connector.setUri(new URI("ssl://0.0.0.0:" + graph().broker().port() + "?transport.useKeepAlive=true&amp;needClientAuth=true"));
+		connector.setUri(new URI("ssl://0.0.0.0:" + graph().broker().port() + "?transport.useKeepAlive=true&needClientAuth=true"));
 		connector.setName("ssl");
-		configureSSL();
 		service.addConnector(connector);
+	}
+
+	private void addMQTTConnector() throws Exception {
+		if (graph().broker().secondaryPort() == 0) return;
+		TransportConnector mqtt = new TransportConnector();
+		mqtt.setUri(new URI("mqtt://0.0.0.0:" + graph().broker().secondaryPort()));
+		mqtt.setName("MQTT");
+		service.addConnector(mqtt);
+	}
+
+
+	private void addMQTTsConnector() throws Exception {
+		if (graph().broker().secondaryPort() == 0) return;
+		TransportConnector mqtt = new TransportConnector();
+		mqtt.setUri(new URI("mqtt+ssl://0.0.0.0:" + graph().broker().secondaryPort() + "?transport.useKeepAlive=true&needClientAuth=true"));
+		mqtt.setName("MQTTs");
+		service.addConnector(mqtt);
 	}
 
 	private void configureSSL() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
@@ -254,14 +273,6 @@ public class JmsBrokerService implements BrokerService {
 		trustManagerFactory.init(trustStore);
 		service.setSslContext(new SslContext(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null));
 
-	}
-
-	private void addMQTTConnector() throws Exception {
-		if (graph().broker().secondaryPort() == 0) return;
-		TransportConnector mqtt = new TransportConnector();
-		mqtt.setUri(new URI("mqtt://0.0.0.0:" + graph().broker().secondaryPort()));
-		mqtt.setName("MQTTConn");
-		service.addConnector(mqtt);
 	}
 
 	private KahaDBPersistenceAdapter persistenceAdapter() {
