@@ -186,11 +186,6 @@ public class DatamartsRenderer implements ConceptRenderer {
 		return builder;
 	}
 
-	private Frame dictionaryImpl() {
-		FrameBuilder b = new FrameBuilder("dictionary", "default");
-		return b.toFrame();
-	}
-
 	private Frame reelNode(Datamart datamart) {
 		FrameBuilder b = new FrameBuilder("reelNode", "default");
 		b.add("datamart", datamart.name$());
@@ -341,8 +336,6 @@ public class DatamartsRenderer implements ConceptRenderer {
 			builder.add("reel", reelsOf(datamart));
 			builder.add("reelNode", reelNode(datamart));
 		}
-		builder.add("hasDictionary", "").add("dictionary", dictionaryImpl());
-
 		return builder;
 	}
 
@@ -648,7 +641,7 @@ public class DatamartsRenderer implements ConceptRenderer {
 
 	private static class Templates {
 		final Template datamart = append(Formatters.customize(new DatamartTemplate()));
-		final Template datamartImpl = append(Formatters.customize(new DatamartImplTemplate()), Formatters.customize(new IndicatorImplTemplate()), Formatters.customize(new ReelNodeImplTemplate()), Formatters.customize(new TimelineNodeImplTemplate()), Formatters.customize(new DictionaryImplTemplate()));
+		final Template datamartImpl = append(Formatters.customize(new DatamartImplTemplate()), Formatters.customize(new IndicatorImplTemplate()), Formatters.customize(new ReelNodeImplTemplate()), Formatters.customize(new TimelineNodeImplTemplate()));
 		final Template entity = Formatters.customize(new EntityTemplate());
 		final Template entityImpl = append(Formatters.customize(new EntityImplTemplate()), Formatters.customize(new StructImplTemplate()), Formatters.customize(new AttributesTemplate()));
 		final Template entityMounter = Formatters.customize(new EntityMounterTemplate());

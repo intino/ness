@@ -47,7 +47,9 @@ def type(datamart & interface)
 			};
 		}]
 
-		Dictionary dictionary(String name);
+		Translator translator();
+
+		void translator(Translator translator);
 
 		class Entities {
 			private final $name+FirstUpperCase~Datamart datamart;

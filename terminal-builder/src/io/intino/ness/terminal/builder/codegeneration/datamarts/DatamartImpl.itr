@@ -44,7 +44,7 @@ def type(datamart & message & impl)
 		[$hasTimelines~private final Map<String, IndicatorNodeImpl> indicators = new java.util.concurrent.ConcurrentHashMap<>();]
 		[$hasReels~private boolean hasLocalAccessToReels;]
 		[$hasReels~private final Map<String, ReelNodeImpl> reels = new java.util.concurrent.ConcurrentHashMap<>();]
-		private volatile DictionaryImpl dictionary = new DictionaryImpl();
+		private volatile Translator translator = new Translator.Indentity();
 		private volatile boolean initializing = false;
 
     	public $name+FirstUpperCase~DatamartImpl(Connector connector, $terminal~.DatamartsRetryConfig retryConfig) {
@@ -138,7 +138,6 @@ def type(datamart & message & impl)
         			throw new java.lang.UnsupportedOperationException("Cannot request snapshots to snapshot instances of a datamart");
         		}
         	}.init(null);
-        }
 
         public Instant ts() {
         	return this.ts;
@@ -154,17 +153,14 @@ def type(datamart & message & impl)
 		[$indicator+getter...[$NL$NL]]
 
     	@Override
-    	public Dictionary dictionary() {
-    		return dictionary;
+    	public Translator translator() {
+    		return translator;
     	}
 
-    	@Override
-        public Dictionary dictionary(String name) {
-        	if (name == null) name = "";
-        	if (dictionary.name.equals(name)) return dictionary;
-        	loadDictionaryFromDatahub(name);
-        	return dictionary;
-        }
+		@Override
+		public void translator(Translator translator) {
+			this.translator = Translator;
+		}
 
 		private void downloadDatamartFromDatahub(String datamartSourceSelector) throws DatahubRequestException {
 			if (connector instanceof io.intino.alexandria.terminal.StubConnector) return;
@@ -180,8 +176,6 @@ def type(datamart & message & impl)
 
     		[$hasReels~loadReelsFromDatahub();]
 
-    		[$hasDictionary~loadDictionaryFromDatahub("");]
-
 			long time = java.lang.System.currentTimeMillis() - start;
 			Logger.debug("Datamart downloaded from datahub after " + time + " ms");
 		}
@@ -190,8 +184,6 @@ def type(datamart & message & impl)
 		[$hasTimelines+loadIndicatorsFromDatahubMethod]
 
 		[$hasReels+loadReelsFromDatahubMethod]
-
-		[$hasDictionary+loadDictionaryFromDatahubMethod]
 
 		private Stream<Event> downloadEntities(int$[$] eventCount, String datamartSourceSelector) throws DatahubRequestException {
 			try {
@@ -239,7 +231,6 @@ def type(datamart & message & impl)
 				if (event == null) return;
             	this.ts = event.ts();
             	mountEntities(event);
-            	// TODO: update dictionary when resource event arrives
 			} catch(Throwable e) {
 				Logger.error("Error while mounting event ss=" + event.ss() + ", ts=" + event.ts() + " -> " + e.getMessage(), e);
 			}
@@ -303,8 +294,6 @@ def type(datamart & message & impl)
 		[$reelNode+nodeImpl]
 
 		[$indicatorNode+nodeImpl]
-
-		[$dictionary+dictionaryImpl]
 
 		private static Set<String> sourcesOfTimeline(String type) {
         	return switch(type) {
@@ -756,37 +745,3 @@ def trigger(loadReelsFromDatahubMethod)
     	}
     }
 end
-
-def trigger(loadDictionaryFromDatahubMethod)
-	private void loadDictionaryFromDatahub(String name) {
-		Logger.debug("Downloading dictionary...");
-		Map<String, Map<String, String>> words = new HashMap<>();
-		var entries = dictionaryEntries(name);
-    	for(var triplet : entries) {
-    		words.computeIfAbsent(triplet$[0$], k -> new HashMap<>(4)).put(triplet$[1$], triplet$[2$]);
-    	}
-    	this.dictionary = new DictionaryImpl(name, words);
-    	Logger.debug("Loaded dictionary " + name + " with " + words.size() + " words");
-    }
-
-    private String$[$]$[$] dictionaryEntries(String name) {
-    	try {
-    		ActiveMQTextMessage request = new ActiveMQTextMessage();
-    		request.setText("datamart=" + name() + ";operation=get-dictionary;name="+name);
-    		jakarta.jms.Message message = requestResponseFromDatahub("get-dictionary", request);
-    		if (message == null) return new String$[0$]$[0$];
-    		if (!message.getBooleanProperty("success")) throw new Exception(((jakarta.jms.TextMessage) message).getText());
-    		String text = ((jakarta.jms.TextMessage) message).getText();
-    		if (text == null) return new String$[0$]$[0$];
-    		return java.util.Arrays.stream(text.split("\\n"))
-    			.filter(l -> !l.isBlank())
-    			.map(l -> l.trim().split("\\t", -1))
-    			.filter(t -> t.length >= 3)
-    			.toArray(String$[$]$[$]::new);
-    	} catch (Exception e) {
-    		Logger.error(e);
-    		return new String$[0$]$[0$];
-    	}
-    }
-end
-
