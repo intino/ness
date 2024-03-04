@@ -19,7 +19,6 @@ import org.apache.activemq.selector.SelectorParser;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
@@ -80,28 +79,8 @@ public class DatamartsRequest {
 			case "get-indicator" -> getIndicator(datamart, args);
 			case "list-reels" -> listReelFiles(datamart, args);
 			case "get-reel" -> getReel(datamart, args);
-			case "get-dictionary" -> getDictionary(datamart, args);
 			default -> errorMessage("Operation " + args.get("operation") + " not found");
 		};
-	}
-
-	private static final long DICTIONARY_TS = Timetag.of("00000101").instant().toEpochMilli();
-
-	private Stream<Message> getDictionary(MasterDatamart datamart, Map<String, String> args) {
-		String name = args.get("name");
-		if (name == null || name.isEmpty()) name = "default";
-		try {
-			var event = box.datalake().resourceStore().find("Dictionary/" + name + "/" + DICTIONARY_TS + "/" + name + ".dictionary.triplets").orElse(null);
-			if (event == null) return successEmptyResponse();
-			ActiveMQTextMessage message = new ActiveMQTextMessage();
-			message.setBooleanProperty("success", true);
-			message.setText(event.resource().readAsString(StandardCharsets.UTF_8));
-			return Stream.of(message);
-		} catch (Exception e) {
-			String message = "Could not send dictionary " + name + ": " + e.getMessage();
-			Logger.error(message, e);
-			return errorMessage(message);
-		}
 	}
 
 	private Stream<Message> getReel(MasterDatamart datamart, Map<String, String> args) {

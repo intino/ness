@@ -3,19 +3,21 @@ package io.intino.ness.master;
 import io.intino.ness.master.model.Entity;
 import io.intino.ness.master.reflection.DatamartDefinition;
 
-import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public interface Datamart {
 
-	default String name() {return getDefinition().name();}
+	default String name() {
+		return getDefinition().name();
+	}
 
-	default Scale scale() {return getDefinition().scale();}
+	default Scale scale() {
+		return getDefinition().scale();
+	}
 
 	int size();
 
@@ -31,33 +33,44 @@ public interface Datamart {
 
 	DatamartDefinition getDefinition();
 
-	Dictionary dictionary();
+	Translator translator();
 
 	interface EntityListener {
 
 		void onCreate(Entity entity);
+
 		void onUpdate(Entity entity);
+
 		void onRemove(Entity entity);
 
 		interface OnCreate extends EntityListener {
 			@Override
-			default void onUpdate(Entity entity) {}
+			default void onUpdate(Entity entity) {
+			}
+
 			@Override
-			default void onRemove(Entity entity) {}
+			default void onRemove(Entity entity) {
+			}
 		}
 
 		interface OnUpdate extends EntityListener {
 			@Override
-			default void onCreate(Entity entity) {}
+			default void onCreate(Entity entity) {
+			}
+
 			@Override
-			default void onRemove(Entity entity) {}
+			default void onRemove(Entity entity) {
+			}
 		}
 
 		interface OnRemove extends EntityListener {
 			@Override
-			default void onCreate(Entity entity) {}
+			default void onCreate(Entity entity) {
+			}
+
 			@Override
-			default void onUpdate(Entity entity) {}
+			default void onUpdate(Entity entity) {
+			}
 		}
 	}
 
@@ -65,35 +78,16 @@ public interface Datamart {
 		Year, Month, Week, Day, None
 	}
 
-	interface Dictionary {
+	interface Translator {
+		String translate(String word, Locale locale);
 
-		Word get(String word);
-		Stream<Word> words();
-		Set<String> languages();
+		class Identity implements Translator {
 
-		interface Word {
-			String get();
-			Set<String> languages();
-			Optional<String> in(String language);
-
-			static Word wrap(String word) {
-				return new Word() {
-					@Override
-					public String get() {
-						return word;
-					}
-
-					@Override
-					public Set<String> languages() {
-						return Collections.emptySet();
-					}
-
-					@Override
-					public Optional<String> in(String language) {
-						return Optional.empty();
-					}
-				};
+			@Override
+			public String translate(String word, Locale locale) {
+				return word;
 			}
 		}
+
 	}
 }

@@ -1,13 +1,8 @@
 dsl Legio
 
-Artifact("io.intino.ness", "2.1.1") master
-	Imports
-		Test("junit", "junit", "4.13.2")
-	Package(mode = ModulesAndLibrariesLinkedByManifest, attachSources =true)
+Artifact("io.intino.ness", "2.2.0") master
+	Imports > Test("junit", "junit", "4.13.2")
+	Package(mode = ModulesAndLibrariesLinkedByManifest, attachSources = true)
 	Distribution > Artifactory("intino-maven")
 			Release("https://artifactory.intino.io/artifactory/release-libraries")
 			Snapshot("https://artifactory.intino.io/artifactory/snapshot-libraries")
-
-Repository("intino-maven")
-	Release("https://artifactory.intino.io/artifactory/releases")
-	Snapshot("https://artifactory.intino.io/artifactory/snapshots")
