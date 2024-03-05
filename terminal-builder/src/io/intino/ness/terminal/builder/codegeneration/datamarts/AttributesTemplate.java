@@ -20,7 +20,7 @@ public class AttributesTemplate extends Template {
 			rule().condition((type("attribute")), (trigger("parameter"))).output(mark("type")).output(literal(" ")).output(mark("name", "firstLowerCase", "javaValidName")),
 			rule().condition((type("attribute")), (trigger("name"))).output(mark("name", "firstLowerCase", "javaValidName")),
 			rule().condition((trigger("putintomap"))).output(literal("put(\"")).output(mark("name", "firstLowerCase", "javaValidName")).output(literal("\", ")).output(mark("name", "firstLowerCase", "javaValidName")).output(literal(");")),
-				rule().condition((trigger("translation"))).output(literal("public Optional<String> ")).output(mark("name", "firstLowerCase", "javaValidName")).output(literal("(java.util.Locale locale) {\n\treturn datamart().translator().translate(String.valueOf(")).output(mark("name", "firstLowerCase", "javaValidName")).output(literal("()), locale);\n}"))
+				rule().condition((trigger("translation"))).output(literal("public Optional<String> ")).output(mark("name", "firstLowerCase", "javaValidName")).output(literal("(String language) {\n\treturn datamart().translator().translate(String.valueOf(")).output(mark("name", "firstLowerCase", "javaValidName")).output(literal("()), language);\n}"))
 		);
 	}
 }

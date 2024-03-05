@@ -3,7 +3,6 @@ package io.intino.ness.master;
 import io.intino.ness.master.model.Entity;
 import io.intino.ness.master.reflection.DatamartDefinition;
 
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -80,13 +79,13 @@ public interface Datamart {
 	}
 
 	interface Translator {
-		Optional<String> translate(String word, Locale locale);
+		Optional<String> translate(String text, String language);
 
 		class Identity implements Translator {
 
 			@Override
-			public Optional<String> translate(String word, Locale locale) {
-				return Optional.of(word);
+			public Optional<String> translate(String text, String language) {
+				return Optional.of(text);
 			}
 		}
 
