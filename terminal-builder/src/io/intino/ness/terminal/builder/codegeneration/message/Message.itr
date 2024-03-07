@@ -180,7 +180,8 @@ end
 
 def type(primitive & multiple) trigger(getter)
 	public java.util.List<$type+FirstUpperCase> $name+firstLowerCase() {
-		return new java.util.ArrayList<$type+FirstUpperCase>(message.contains("$name+FirstLowerCase") ? java.util.Arrays.asList(message.get("$name+FirstLowerCase").as($type$[].class)) : java.util.Collections.emptyList()) {
+		$type$[] array = message.get("$name+FirstLowerCase").as($type$[].class);
+		return new java.util.ArrayList<$type+FirstUpperCase>(array != null ? java.util.Arrays.asList(array) : java.util.Collections.emptyList()) {
 			@Override
 			public boolean add($type+FirstUpperCase value) {
 				super.add(value);
