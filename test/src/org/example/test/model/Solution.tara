@@ -12,6 +12,8 @@ Broker(path = empty, port = 63000, secondaryPort = 1884)
 	User("connector", "connector")
 	User("federation", "federation")
 	User("master", "master")
+	Bridge(topics = "example.topic1")
+		ExternalBus(url = "tcp://localhost:62000", user = "wizard", password = "wizard", sessionId = "test-bridge1")
 
 Terminal monet-terminal
 	Publish(dl.assertion dl.orderStarted dl.orderFinished dl.orderCancelled)

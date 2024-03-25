@@ -181,6 +181,7 @@ public class JmsBrokerService implements BrokerService {
 		return inboundTopics.stream().map(topicName -> {
 			InboundTopicBridge bridge = new InboundTopicBridge(topicName);
 			bridge.setLocalTopicName(topicName);
+//			bridge.setConsumerName(topicName); PUT IF DURABLE
 			return bridge;
 		}).toArray(InboundTopicBridge[]::new);
 	}
