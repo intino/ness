@@ -552,7 +552,8 @@ end
 def trigger(timelinesByIdMethod)
 	@Override
 	public Stream<TimelineNode> timelines(String id) {
-		Stream stream = timelines.values().stream().filter(t -> t.id.equals(id)).toList().stream();
+		String key = id.replace(":", "-");
+		Stream stream = timelines.values().stream().filter(t -> t.id.equals(key)).toList().stream();
 		return stream;
 	}
 end
@@ -560,7 +561,8 @@ end
 def trigger(reelsByIdMethod)
 	@Override
 	public Stream<ReelNode> reels(String id) {
-		Stream stream = reels.values().stream().filter(r -> r.id.equals(id)).toList().stream();
+		String key = id.replace(":", "-");
+		Stream stream = reels.values().stream().filter(r -> r.id.equals(key)).toList().stream();
 		return stream;
 	}
 end
