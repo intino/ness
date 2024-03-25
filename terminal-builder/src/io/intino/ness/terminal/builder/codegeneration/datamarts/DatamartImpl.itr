@@ -251,16 +251,21 @@ def type(datamart & message & impl)
 
 		[$hasReels~private void handleReelNotification(String type, String id) {
 			if (!REEL_EVENTS.contains(type)) return;
-			String key = id + ":" + type;
-			ReelNodeImpl reel = reels.computeIfAbsent(id + ":" + type, k -> new ReelNodeImpl(id, type, null));
+			String key = normalizedId(id, type);
+			ReelNodeImpl reel = reels.computeIfAbsent(key, k -> new ReelNodeImpl(id, type, null));
 			reel.notifyChange();
 		}]
 
 		[$hasTimelines~private void handleTimelineNotification(String type, String id) {
 			if (!TIMELINE_EVENTS.contains(type)) return;
-			TimelineNodeImpl timeline = timelines.computeIfAbsent(id + ":" + type, k -> new TimelineNodeImpl(id, type, null));
+			String key = normalizedId(id, type);
+			TimelineNodeImpl timeline = timelines.computeIfAbsent(key, k -> new TimelineNodeImpl(id, type, null));
 			timeline.notifyChange();
 		}]
+
+		private String normalizedId(String id, String type) {
+			return id.replace(":", "-") + ":" + type;
+		}
 
 		private void mountEntities(Event event) {
 			try {
@@ -513,7 +518,7 @@ end
 def type(timeline) trigger(getter)
 	@Override
 	public TimelineNode $name+FirstLowerCase~Timeline(String id) {
-		String key = id.replace(":", "-") + ":$name";
+		String key = normalizedId(id, "$name");
 		if (timelines.containsKey(key)) return timelines.get(key);
 		if (!hasLocalAccessToTimelines) return timelines.computeIfAbsent(key, theId -> new TimelineNodeImpl(id, "$name"));
 		return TimelineNode.empty();
@@ -523,7 +528,7 @@ end
 def type(reel) trigger(getter)
 	@Override
 	public ReelNode $name+FirstLowerCase~Reel(String id) {
-		String key = id.replace(":", "-") + ":$name";
+		String key = normalizedId(id, "$name");
 		if (reels.containsKey(key)) return reels.get(key);
 		if (!hasLocalAccessToReels) return reels.computeIfAbsent(key, theId -> new ReelNodeImpl(id, "$name"));
 		return ReelNode.empty();

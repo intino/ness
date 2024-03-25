@@ -1,9 +1,10 @@
 dsl Legio
 
 Artifact("org.example", "1.0.0") test
-	Model("Ness", "11.4.0", sdkVersion = "5.0.0")
+	Model("Ness", "11.5.1", sdkVersion = "5.0.0")
 	Imports
 		Test("junit", "junit", "4.13.2")
+		Compile ("io.intino.alexandria", "jms", "2.0.0")
 	Package(mode = ModulesAndLibrariesLinkedByManifest) as Runnable(mainClass = "org.example.test.model.Main")
 	Parameter("home")
 	Parameter("backup_directory")
@@ -18,10 +19,10 @@ RunConfiguration local
 	Argument("backup_directory", "temp/backup")
 	Argument("broker_port", "63000")
 	Argument("broker_secondary_port", "1884")
-	Argument("key_store_path", "temp/datahub/certs/datahub.jks")
-	Argument("key_store_password", "oAhGPgdAHQ3yDvohTFDc")
-	Argument("trust_store_path", "temp/datahub/certs/datahub.jts")
-	Argument("trust_store_password", "gdgJW6gnjz_Kr.pvQtVq")
+//	Argument("key_store_path", "temp/datahub/certs/datahub.jks")
+//	Argument("key_store_password", "oAhGPgdAHQ3yDvohTFDc")
+//	Argument("trust_store_path", "temp/datahub/certs/datahub.jts")
+//	Argument("trust_store_password", "gdgJW6gnjz_Kr.pvQtVq")
 
 RunConfiguration local_ssl
 	Argument("ui_port", "9000")
