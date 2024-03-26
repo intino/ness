@@ -10,7 +10,7 @@ import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.model.TripletRecord;
 import io.intino.ness.master.serialization.MasterMapSerializer;
 import org.apache.activemq.command.ActiveMQTextMessage;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StringUtils;
 
 import javax.jms.Message;
 import java.util.Iterator;

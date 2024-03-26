@@ -37,24 +37,24 @@ Concept:{0..1} Datalake
 	Concept:{0..1} ProcessStatus
 		var string name = "ProcessStatus" is private final
 		var Split split
-	Concept:Named Split
+	Concept Split
 		var string label = 'self.name$()'
 		var string qn = @qn is private reactive
 		var boolean isLeaf = @isLeaf is private reactive
 		var boolean isRoot = @isRoot is private reactive
 		var Split[] leafs = @leafs is private reactive
-		has:Named Split
-	Concept:{1..*}:AspectRequired Tank
+		has Split
+	Concept:{1..*} Tank
 		var word:Scale scale = empty
-		Aspect TankType
+		Facet TankType
 			sub Entity > var Entities.Entity entity
 			sub Event
 				var Model.Event event
 				var boolean sortingRequired = true
 				var string qn = @qn is private reactive
-		Aspect Splitted > var Split split
+		Facet Splitted > var Split split
 
-Concept:Named Terminal
+Concept Terminal
 	Concept:{0..1} Bpm
 		var string processStatusClass = "io.intino.alexandria.bpm.ProcessStatus" is private
 		var Datalake.Split split
@@ -71,12 +71,12 @@ Concept Namespace
 	has Event
 
 Concept Event
-	has:Named:RequiresAspect Attribute
+	has Attribute
 	has Component
 	Concept Has
 		var Component element
 		var boolean multiple = true
-	Aspect ExtensionOf > var Event parent
+	Facet ExtensionOf > var Event parent
 
 Concept Component
 	var boolean multiple = true
@@ -85,13 +85,13 @@ Concept Component
 	Concept Has
 		var Component element
 		var boolean multiple = true
-	Aspect ExtensionOf > var Component parent
+	Facet ExtensionOf > var Component parent
 
-Concept:Named:RequiresAspect Attribute extends Data is component
+Concept Attribute extends Data is component
 
 Concept Data is abstract
-	Aspect List
-	Aspect Type
+	Facet List
+	Facet Type
 		var string type is reactive private
 		var string primitive = 'self.type()' is reactive private
 		var integer:{bits} size = 0 bits
@@ -144,21 +144,21 @@ Concept Data is abstract
 			var Model.Wordbag wordbag;
 			var integer:{bits} size = 8 bits
 
-Concept:Named:RequiresAspect Wordbag
-	Aspect Inline
-		Concept:Named Word
+Concept Wordbag
+	Facet Inline
+		Concept Word
 			var integer:{1..*} value
 			var string label = 'self.name$()'
-	Aspect InResource
+	Facet InResource
 		var resource:{tsv} tsv
-		Concept:{2..*}:Named:RequiresAspect Attribute extends Data
+		Concept:{2..*} Attribute extends Data
 
 
-Concept:Named Lookup
+Concept Lookup
 	var string namespace
-	Concept:Named:RequiresAspect Column extends Data
+	Concept Column extends Data
 		var boolean isRequired = false
-	Concept:Named Index
+	Concept Index
 		var Column[] columns
 		var boolean createOnClose = false
-	Aspect Volatile
+	Facet Volatile

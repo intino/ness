@@ -12,7 +12,7 @@ import io.intino.ness.master.messages.UpdateMasterMessage;
 import io.intino.ness.master.model.Triplet;
 import io.intino.ness.master.model.TripletRecord;
 import io.intino.ness.master.persistence.MasterTripletWriter;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;

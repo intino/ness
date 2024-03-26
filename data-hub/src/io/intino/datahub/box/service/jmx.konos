@@ -1,7 +1,7 @@
 dsl Konos
 
 
-Service service as JMX
+Service service as JMX(path = "ness")
 	Operation("Show tanks") tanks
 		Response as Text
 	Operation("Launch datalake and datahub backup on demand") backup

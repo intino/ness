@@ -1,21 +1,21 @@
 dsl Proteo
 
-Concept:Named Entity
-	Concept:Named:RequiresAspect Attribute extends EntityData
-	Concept:Named:RequiresAspect Method extends Expression
-	Aspect ExtensionOf > var Entity entity
-	Aspect Abstract
-	Aspect Decorable
-	Aspect Component
+Concept Entity
+	Concept Attribute extends EntityData
+	Concept Method extends Expression
+	Facet ExtensionOf > var Entity entity
+	Facet Abstract
+	Facet Decorable
+	Facet Component
 
-Concept:Named Struct
-	Concept:Named:RequiresAspect Attribute extends StructData
-	Concept:Named:RequiresAspect Method extends Expression
-	Aspect ExtensionOf > var Struct struct
+Concept Struct
+	Concept Attribute extends StructData
+	Concept Method extends Expression
+	Facet ExtensionOf > var Struct struct
 
 Concept Expression is abstract
-	Aspect Private
-	Aspect Getter
+	Facet Private
+	Facet Getter
 		var string expression
 		sub DoubleGetter
 		sub IntegerGetter
@@ -25,20 +25,20 @@ Concept Expression is abstract
 		sub DateGetter
 		sub DateTimeGetter
 		sub InstantGetter
-	Aspect Function
+	Facet Function
 		var string expression
-		Concept:{1..1}:RequiresAspect ReturnType extends EntityData
-   		Concept:Named:RequiresAspect Parameter extends EntityData
-	Aspect Routine
+		Concept:{1..1} ReturnType extends EntityData
+   		Concept Parameter extends EntityData
+	Facet Routine
 		var string expression
-   		Concept:Named:RequiresAspect Parameter extends EntityData
+   		Concept Parameter extends EntityData
 
 Concept EntityData is abstract
-	Aspect Required
-	Aspect Optional
-	Aspect List
-	Aspect Set
-	Aspect Type
+	Facet Required
+	Facet Optional
+	Facet List
+	Facet Set
+	Facet Type
 		var string type is reactive private
 		sub Double
 			var double defaultValue = empty
@@ -65,14 +65,14 @@ Concept EntityData is abstract
 			var Entities.Entity entity
 		sub Map
 			var string type = "java.util.Map" is reactive private
-//			Concept:{1..1}:RequiresAspect Key extends EntityData
-//			Concept:{1..1}:RequiresAspect Value extends EntityData
+//			Concept:{1..1} Key extends EntityData
+//			Concept:{1..1} Value extends EntityData
 
 
 Concept StructData is abstract
-	Aspect Required
-	Aspect Optional
-	Aspect Type
+	Facet Required
+	Facet Optional
+	Facet Type
 		sub Double
 			var double defaultValue = empty
 		sub Integer
