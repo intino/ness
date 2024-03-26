@@ -26,7 +26,6 @@ import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class MounterUtils {
-
 	public static Map<String, Set<String>> timelineTypes(MasterDatamart datamart) {
 		return datamart.definition().timelineList().stream().collect(Collectors.toMap(Layer::name$, t -> types(t).collect(Collectors.toSet())));
 	}
@@ -133,7 +132,6 @@ public class MounterUtils {
 		});
 	}
 
-
 	private static Stream<String> asTypes(Stream<String> tanks) {
 		return tanks.map(t -> t.contains(".") ? t.substring(t.lastIndexOf(".") + 1) : t);
 	}
@@ -151,7 +149,6 @@ public class MounterUtils {
 	}
 
 	public static class TimelineStoreBuilder {
-
 		private File datamartDir;
 		private MasterDatamart datamart;
 		private Instant start;
@@ -160,21 +157,26 @@ public class MounterUtils {
 		private String extension;
 
 		public TimelineStore createIfNotExists() throws IOException {
-			File file = timelineFileOf(datamartDir, type, entity);
+			File file = timelineFileOf(datamartDir, type, entity.replace(":", "-"));
 			if (extension != null) file = new File(file.getAbsolutePath() + extension);
 			file.getParentFile().mkdirs();
 			if (file.exists()) return TimelineStore.of(file);
+			return createTimeline(file, definition());
+		}
 
-			Timeline tlDefinition = datamart.definition().timelineList().stream()
+		private TimelineStore createTimeline(File file, Timeline definition) throws IOException {
+			return TimelineStore.createIfNotExists(entity, file)
+					.withSensorModel(sensorModel(null, datamart.entityStore().get(entity), definition))
+					.withTimeModel(start, new Period(definition.asRaw().tank().period(), definition.asRaw().tank().periodScale().chronoUnit()))
+					.build();
+		}
+
+		private Timeline definition() throws IOException {
+			return datamart.definition().timelineList().stream()
 					.filter(Timeline::isRaw)
 					.filter(t -> t.asRaw().tank().sensor().name$().equals(type))
 					.findFirst()
 					.orElseThrow(() -> new IOException("Tank not found: " + type));
-
-			return TimelineStore.createIfNotExists(entity, file)
-					.withSensorModel(sensorModel(null, datamart.entityStore().get(entity), tlDefinition))
-					.withTimeModel(start, new Period(tlDefinition.asRaw().tank().period(), tlDefinition.asRaw().tank().periodScale().chronoUnit()))
-					.build();
 		}
 
 		public TimelineStoreBuilder withExtension(String extension) {
