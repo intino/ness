@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.intino.datahub.box.DataHubBox.TIMELINE_EXTENSION;
+import static io.intino.datahub.datamart.MasterDatamart.normalizePath;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class MounterUtils {
@@ -157,7 +158,7 @@ public class MounterUtils {
 		private String extension;
 
 		public TimelineStore createIfNotExists() throws IOException {
-			File file = timelineFileOf(datamartDir, type, entity.replace(":", "-"));
+			File file = timelineFileOf(datamartDir, type, normalizePath(entity));
 			if (extension != null) file = new File(file.getAbsolutePath() + extension);
 			file.getParentFile().mkdirs();
 			if (file.exists()) return TimelineStore.of(file);
