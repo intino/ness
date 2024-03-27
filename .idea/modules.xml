@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/data-hub/data-hub.iml" filepath="$PROJECT_DIR$/data-hub/data-hub.iml" group="datahub" />
       <module fileurl="file://$PROJECT_DIR$/master/master.iml" filepath="$PROJECT_DIR$/master/master.iml" group="datahub" />
+      <module fileurl="file://$PROJECT_DIR$/terminal-plugin/terminal-plugin.iml" filepath="$PROJECT_DIR$/terminal-plugin/terminal-plugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/test/test.iml" filepath="$PROJECT_DIR$/test/test.iml" />
     </modules>
   </component>
