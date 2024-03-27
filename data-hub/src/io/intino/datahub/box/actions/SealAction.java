@@ -11,9 +11,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 public class SealAction {
+	public DataHubBox box;
 	public static final String MESSAGE_PREFIX = "Sealed until ";
 	private static final Object monitor = new Object();
-	public DataHubBox box;
 
 	public SealAction() {
 	}
