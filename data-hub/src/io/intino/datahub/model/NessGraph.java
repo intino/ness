@@ -13,11 +13,11 @@ public class NessGraph extends io.intino.datahub.model.AbstractGraph {
 	}
 
 
-	public static NessGraph load(io.intino.magritte.io.Stash... startingModel) {
+	public static NessGraph load(io.intino.magritte.io.model.Stash... startingModel) {
 		return new Graph().loadLanguage("Ness", _language()).loadStashes(startingModel).as(NessGraph.class);
 	}
 
-	public static NessGraph load(io.intino.magritte.framework.Store store, io.intino.magritte.io.Stash... startingModel) {
+	public static NessGraph load(io.intino.magritte.framework.Store store, io.intino.magritte.io.model.Stash... startingModel) {
 		return new Graph(store).loadLanguage("Ness", _language()).loadStashes(startingModel).as(NessGraph.class);
 	}
 }
