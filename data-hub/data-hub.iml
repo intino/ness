@@ -71,8 +71,6 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:ingestion:4.0.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zet:1.0.7" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:tris:1.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.magritte:framework:5.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.tara:language:1.4.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:io:5.0.0" level="project" />
     <orderEntry type="library" name="Intino: com.esotericsoftware:kryo:5.4.0" level="project" />
     <orderEntry type="library" name="Intino: com.esotericsoftware:reflectasm:1.11.9" level="project" />
@@ -85,5 +83,7 @@
     <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-core:2.14.0" level="project" />
     <orderEntry type="library" name="Intino: org.slf4j:slf4j-api:1.7.36" level="project" />
     <orderEntry type="library" name="Intino: commons-logging:commons-logging:1.0.3" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.magritte:framework:5.1.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.tara:language:1.5.0" level="project" />
   </component>
 </module>
