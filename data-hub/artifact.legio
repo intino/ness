@@ -1,12 +1,12 @@
 dsl Legio
 
-Artifact("io.intino", "11.5.2") data-hub
-	Model("Proteo", "4.0.0", "5.0.0") > outLanguage = "Ness"
-	Box("Konos", "11.0.5")
+Artifact("io.intino", "11.6.0") data-hub
+	Model("Proteo", "5.1.0", "6.1.2") > outLanguage = "Ness"
+	Box("Konos", "11.1.0")
 	Imports
 		Compile("io.intino.alexandria", "json", "1.2.3")
 		Compile("io.intino.alexandria", "core-framework", "2.2.0")
-		Compile("io.intino.alexandria", "jmx", "1.0.5")
+		Compile("io.intino.alexandria", "jmx", "1.0.6")
 		Compile("io.intino.alexandria", "primitives", "1.1.2")
 		Compile("io.intino.alexandria", "sealing", "7.0.9")
 		Compile("io.intino.alexandria", "exceptions", "2.1.1")
@@ -15,13 +15,13 @@ Artifact("io.intino", "11.5.2") data-hub
 		Compile("io.intino.alexandria", "logger4j", "1.1.0")
 		Compile("io.intino.alexandria", "scheduler-framework", "1.2.0") > Exclude("org.slf4j", "slf4j-api")
 		Compile("io.intino.sumus", "chronos", "2.4.3")
-		Compile("commons-io", "commons-io", "2.15.1")
-		Compile("org.apache.activemq", "activemq-broker", "6.0.1")
-		Compile("org.apache.activemq", "activemq-mqtt", "6.0.1")
-		Compile("org.apache.activemq", "activemq-kahadb-store", "6.0.1")
-		Compile("org.apache.activemq", "activemq-jaas", "6.0.1")
-		Compile("org.apache.activemq", "activemq-runtime-config", "6.0.1")
-		Compile("org.xerial", "sqlite-jdbc", "3.45.1.0")
+		Compile("commons-io", "commons-io", "2.16.0")
+		Compile("org.apache.activemq", "activemq-broker", "6.1.0")
+		Compile("org.apache.activemq", "activemq-mqtt", "6.1.0")
+		Compile("org.apache.activemq", "activemq-kahadb-store", "6.1.0")
+		Compile("org.apache.activemq", "activemq-jaas", "6.1.0")
+		Compile("org.apache.activemq", "activemq-runtime-config", "6.1.0")
+		Compile("org.xerial", "sqlite-jdbc", "3.45.2.0")
 		Test("junit", "junit", "4.13.2")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
