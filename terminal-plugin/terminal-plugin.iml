@@ -62,5 +62,6 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:logger4j:1.0.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.slf4j:slf4j-log4j12:1.7.25" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: log4j:log4j:1.2.17" level="project" />
+    <orderEntry type="library" name="Intino: io.intino:data-hub:6.3.1" level="project" />
   </component>
 </module>
