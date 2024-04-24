@@ -2,9 +2,9 @@ package io.intino.datahub.model.rules;
 
 
 import io.intino.tara.language.model.Mogram;
-import io.intino.tara.language.model.rules.NodeRule;
+import io.intino.tara.language.model.rules.MogramRule;
 
-public class OnlyNumeric implements NodeRule {
+public class OnlyNumeric implements MogramRule {
 
 
 	public boolean accept(Mogram node) {

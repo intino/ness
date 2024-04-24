@@ -2,9 +2,9 @@ package io.intino.datahub.model.rules;
 
 
 import io.intino.tara.language.model.Mogram;
-import io.intino.tara.language.model.rules.NodeRule;
+import io.intino.tara.language.model.rules.MogramRule;
 
-public class RequiresId implements NodeRule {
+public class RequiresId implements MogramRule {
 
 
 	public boolean accept(Mogram node) {

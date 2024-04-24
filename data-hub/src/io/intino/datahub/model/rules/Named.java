@@ -2,9 +2,9 @@ package io.intino.datahub.model.rules;
 
 
 import io.intino.tara.language.model.Mogram;
-import io.intino.tara.language.model.rules.NodeRule;
+import io.intino.tara.language.model.rules.MogramRule;
 
-public class Named implements NodeRule {
+public class Named implements MogramRule {
 	@Override
 	public boolean accept(Mogram mogram) {
 		return !mogram.isAnonymous();

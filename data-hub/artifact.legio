@@ -26,7 +26,7 @@ Artifact("io.intino", "12.0.0") data-hub
 		Compile("org.xerial", "sqlite-jdbc", "3.45.2.0")
 		Test("junit", "junit", "4.13.2")
 	Code("io.intino.datahub")
-	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
+	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false) as Runnable(mainClass = "io.intino.datahub.konos.Main")
 	Distribution > Artifactory("intino-maven")
 			Release("https://artifactory.intino.io/artifactory/release-frameworks")
 			Snapshot("https://artifactory.intino.io/artifactory/snapshot-frameworks")

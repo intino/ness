@@ -3,11 +3,11 @@ package io.intino.datahub.model.rules;
 
 import io.intino.tara.language.model.Mogram;
 import io.intino.tara.language.model.MogramRoot;
-import io.intino.tara.language.model.rules.NodeRule;
+import io.intino.tara.language.model.rules.MogramRule;
 
 import java.util.List;
 
-public class AvoidEventAttributes implements NodeRule {
+public class AvoidEventAttributes implements MogramRule {
 	private List<Mogram> found;
 
 	public boolean accept(Mogram mogram) {
