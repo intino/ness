@@ -4,8 +4,7 @@ Artifact("io.intino", "12.0.0") data-hub
 	Dsl("Proteo", "1.0.0")
 		Builder(generationPackage = "model")
 		OutputDsl(name = "Ness")
-	Dsl("Konos", "12.0.0")
-		Builder(generationPackage = "box")
+	Dsl("Konos", "12.0.0") > Builder(generationPackage = "box")
 	Imports
 		Compile("io.intino.alexandria", "json", "1.2.3")
 		Compile("io.intino.alexandria", "core-framework", "2.2.0")
