@@ -11,7 +11,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="PROVIDED" name="Intino: io.intino.tara:language:1.6.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.magritte:framework:5.1.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:io:5.0.0" level="project" />
     <orderEntry type="library" name="Intino: com.esotericsoftware:kryo:5.4.0" level="project" />
     <orderEntry type="library" name="Intino: com.esotericsoftware:reflectasm:1.11.9" level="project" />
