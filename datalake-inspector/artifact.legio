@@ -1,16 +1,16 @@
 dsl Legio
 
 Artifact("io.intino.ness", "1.0.0") datalake-inspector
-	Box("Konos", "11.0.5")
+	Dsl("Konos", "12.0.0")
 	Imports
-		Test(groupId = "junit", artifactId = "junit", version = "4.13")
 		Compile("io.intino.alexandria", "core-framework", "2.2.0")
 		Compile("io.intino.alexandria", "logger", "2.1.0")
+		Compile("io.intino.alexandria", "logger4j", "1.0.1")
 		Compile("io.intino.alexandria", "datalake", "7.0.10")
 		Compile("io.intino.alexandria", "ingestion", "5.0.9")
 		Compile("io.intino.alexandria", "ui-framework", "5.1.5")
 		Web("io.intino.ness", "datalake-inspector-elements", "1.0.0")
-		Compile(groupId = "io.intino.alexandria", artifactId = "logger4j", version = "1.0.1")
+		Test("junit", "junit", "4.13")
 	Package(mode = ModulesAndLibrariesLinkedByManifest) as Runnable(mainClass = "io.intino.ness.datalakeinspector.box.Main")
 	Parameter("ui_port")
 	Parameter("datalake_directory")

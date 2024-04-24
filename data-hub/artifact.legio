@@ -1,8 +1,10 @@
 dsl Legio
 
-Artifact("io.intino", "11.6.0") data-hub
-	Model("Proteo", "5.1.0", "6.1.2") > outLanguage = "Ness"
-	Box("Konos", "11.1.0")
+Artifact("io.intino", "12.0.0") data-hub
+	Dsl("Proteo", "1.0.0")
+		Builder(generationPackage = "model")
+		OutputDsl(name = "Ness")
+	Dsl("Konos", "12.0.0")
 	Imports
 		Compile("io.intino.alexandria", "json", "1.2.3")
 		Compile("io.intino.alexandria", "core-framework", "2.2.0")
