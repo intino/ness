@@ -1,4 +1,4 @@
-keytool -genkey -alias datahub -keyalg RSA -keysize 2048 -dname "CN={XXXX},OU=IT,O=Cinepolis,L=CDMX,S=MX,C=MX" -ext "SAN=ip:10.227.62.66" -keystore datahub.jks -validity 365000 -storepass {datahub_password};
+keytool -genkey -alias datahub -keyalg RSA -keysize 2048 -dname "CN={XXXX},OU=IT,O=Cinepolis,L=CDMX,C=MX" -ext "SAN=ip:10.227.62.66" -keystore datahub.jks -validity 365000 -storepass {datahub_password};
 
 keytool -genkey -alias terminal -keyalg RSA -keysize 2048 -validity 365000 -keystore terminal.jks -validity 365000 -storepass {terminal_password};
 
@@ -10,6 +10,17 @@ keytool -importcert -alias terminal -keystore datahub.jts -file terminal.crt -st
 keytool -importcert -alias datahub -keystore terminal.jts -file datahub.crt -storepass {terminal_password};
 
 
+# Obtencion de certificados en formato PEM para mqtt client
 
+##Obtención de certificado de servidor
+keytool -exportcert -alias datahub -keystore terminal.jts -storepass {terminal_password} -file datahub.cer
+openssl x509 -inform der -in datahub.cer -out datahub.pem
 
+## Obtención de certificado de cliente
+keytool -exportcert -alias terminal -keystore terminal.jks -storepass {terminal_password} -file terminal.cer
+openssl x509 -inform der -in terminal.cer -out terminal.pem
+
+## Obtención de clave de cliente
+keytool -importkeystore -srckeystore terminal.jks -destkeystore terminal.p12 -srcstoretype JKS -deststoretype PKCS12 -srcstorepass {terminal_password} -deststorepass {terminal_password} -srcalias terminal -destalias terminal -srckeypass {terminal_password} -destkeypass {terminal_password}
+openssl pkcs12 -in terminal.p12 -nocerts -nodes -out terminal.key
 
