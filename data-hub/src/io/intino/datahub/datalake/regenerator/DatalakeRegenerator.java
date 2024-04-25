@@ -1,6 +1,7 @@
 package io.intino.datahub.datalake.regenerator;
 
 import io.intino.alexandria.datalake.Datalake;
+import io.intino.alexandria.datalake.Datalake.Store.Source;
 import io.intino.alexandria.datalake.FileTub;
 import io.intino.alexandria.datalake.file.FileDatalake;
 import io.intino.alexandria.event.Event;
@@ -10,10 +11,15 @@ import io.intino.alexandria.message.MessageWriter;
 import io.intino.alexandria.zim.Zim;
 import io.intino.datahub.datalake.pump.EventPump;
 import io.intino.datahub.datalake.pump.FileEventPump;
+import io.intino.datahub.datalake.regenerator.Mapper.Filter;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.util.Comparator;
+import java.util.stream.Stream;
+
+import static io.intino.alexandria.datalake.Datalake.Store.Tank;
+import static io.intino.alexandria.datalake.Datalake.Store.Tub;
 
 public class DatalakeRegenerator {
 	protected final FileDatalake datalake;
@@ -39,10 +45,9 @@ public class DatalakeRegenerator {
 		File reportFile = new File(datalake.root(), mapperPrefixName(mapper) + ".html");
 		RegeneratorReporter reporter = new RegeneratorReporter(reportFile);
 		datalake.messageStore().tanks()
-				.sorted(Comparator.comparing(Datalake.Store.Tank::name))
+				.sorted(Comparator.comparing(Tank::name))
 				.filter(tank -> mapper.filter().allow(tank))
-				.flatMap(Datalake.Store.Tank::sources)
-				.flatMap(Datalake.Store.Source::tubs)
+				.flatMap(tank -> tubs(tank, tank.sources(), mapper.filter()))
 				.forEach(tub -> {
 					MessageWriter writer = new MessageWriter(zim(temp(tub)));
 					tub.events().forEach(e -> {
@@ -61,6 +66,10 @@ public class DatalakeRegenerator {
 				});
 		reporter.commit();
 		return reportFile;
+	}
+
+	private Stream<Tub<MessageEvent>> tubs(Tank<MessageEvent> tank, Stream<Source<MessageEvent>> sources, Filter filter) {
+		return sources.flatMap(s -> s.tubs().filter(t -> filter.allow(tank, s, t.timetag())));
 	}
 
 	private void close(MessageWriter writer) {
