@@ -17,6 +17,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -103,11 +105,23 @@ public class TerminalCompiler {
 	}
 
 	private NessGraph loadGraph(File outDirectory) {
+		Path graphLoader = findGraphLoader(outDirectory);
+		if (graphLoader == null) return null;
+		String className = graphLoader.toFile().getPath().replace(outDirectory.getPath() + "/", "").replace("/", ".").replace(".class", "");
 		try (URLClassLoader urlClassLoader = new URLClassLoader(urlOf(outDirectory), this.getClass().getClassLoader())) {
-			Class<?> aClass = urlClassLoader.loadClass(configuration.generationPackage() + ".GraphLoader");
+			Class<?> aClass = urlClassLoader.loadClass(className);
 			return (NessGraph) aClass.getMethod("load", Store.class).invoke(null, new FileSystemStore(configuration.resDirectory()));
 		} catch (ClassNotFoundException | NoSuchMethodException | IOException | IllegalAccessException |
 				 InvocationTargetException e) {
+			Logger.error(e);
+			return null;
+		}
+	}
+
+	private static Path findGraphLoader(File outDirectory) {
+		try {
+			return Files.find(outDirectory.toPath(), 7, (path, basicFileAttributes) -> "GraphLoader.class".equals(path.toFile().getName())).findFirst().orElse(null);
+		} catch (IOException e) {
 			Logger.error(e);
 			return null;
 		}
