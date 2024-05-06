@@ -1,10 +1,8 @@
 package io.intino.ness.terminal.builder;
 
 import io.intino.plugin.*;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -46,7 +44,6 @@ class TerminalCompilerRunner {
 	}
 
 	private List<OutputItem> compile(CompilerConfiguration config, Map<File, Boolean> sources, List<CompilerMessage> messages, List<PostCompileActionMessage> postCompileActionMessages) {
-		if (!sources.containsValue(false)) cleanOut(config);
 		return new ArrayList<>(compileSources(config, messages, postCompileActionMessages));
 	}
 
@@ -121,16 +118,6 @@ class TerminalCompilerRunner {
 			out.print(file.getAbsolutePath());
 			out.print(TO_RECOMPILE_END);
 			out.println();
-		}
-	}
-
-	public static void cleanOut(CompilerConfiguration configuration) {
-		final String generationPackage = (configuration.generationPackage() == null ? configuration.module() : configuration.generationPackage()).replace(".", File.separator);
-		File out = new File(configuration.genDirectory(), generationPackage.toLowerCase());
-		if (out.exists()) try {
-			FileUtils.deleteDirectory(out);
-		} catch (IOException e) {
-			LOG.severe(e.getMessage());
 		}
 	}
 }

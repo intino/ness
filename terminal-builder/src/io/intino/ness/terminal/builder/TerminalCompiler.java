@@ -8,6 +8,8 @@ import io.intino.ness.terminal.builder.codegeneration.ontology.OntologyBuilder;
 import io.intino.ness.terminal.builder.codegeneration.terminal.TerminalBuilder;
 import io.intino.ness.terminal.builder.util.ErrorUtils;
 import io.intino.plugin.*;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +18,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -101,7 +104,7 @@ public class TerminalCompiler {
 
 	private NessGraph loadGraph(File outDirectory) {
 		try (URLClassLoader urlClassLoader = new URLClassLoader(urlOf(outDirectory), this.getClass().getClassLoader())) {
-			Class<?> aClass = urlClassLoader.loadClass(configuration.generationPackage() + "." + configuration.model().generationPackage() + ".GraphLoader");
+			Class<?> aClass = urlClassLoader.loadClass(findClass(outDirectory));
 			final NessGraph graph = (NessGraph) aClass.getMethod("load").invoke(null);
 			if (graph.messageList(t -> t.name$().equals("Session")).findAny().isEmpty())
 				graph.create("Session", "Session").message();
@@ -112,6 +115,36 @@ public class TerminalCompiler {
 			return null;
 		}
 	}
+
+	private String findClass(File outDirectory) {
+		File file = new File(outDirectory, configuration.generationPackage().replace(".", File.separator));
+		Collection<File> files = FileUtils.listFiles(file, new IOFileFilter() {
+			@Override
+			public boolean accept(File file) {
+				return file.getName().equals("GraphLoader.class");
+			}
+
+			@Override
+			public boolean accept(File file, String s) {
+				return false;
+			}
+		}, new IOFileFilter() {
+			@Override
+			public boolean accept(File file) {
+				return true;
+			}
+
+			@Override
+			public boolean accept(File file, String s) {
+				return true;
+			}
+		});
+		return files.isEmpty() ? null : files.iterator().next().getAbsolutePath()
+				.replace(outDirectory.getAbsolutePath() + File.separator, "")
+				.replace(File.separator, ".")
+				.replace(".class", "");
+	}
+
 
 	private URL[] urlOf(File outDirectory) {
 		try {
