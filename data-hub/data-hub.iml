@@ -83,7 +83,7 @@
     <orderEntry type="library" name="Intino: com.fasterxml.jackson.core:jackson-core:2.14.0" level="project" />
     <orderEntry type="library" name="Intino: org.slf4j:slf4j-api:1.7.36" level="project" />
     <orderEntry type="library" name="Intino: commons-logging:commons-logging:1.0.3" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.magritte:framework:5.1.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino.tara:language:1.5.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Intino: io.intino.tara:language:1.6.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.magritte:framework:5.2.0" level="project" />
   </component>
 </module>

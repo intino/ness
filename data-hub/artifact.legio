@@ -1,8 +1,10 @@
 dsl Legio
 
-Artifact("io.intino", "6.3.1") data-hub
-	Model("Proteo", "5.1.0", "6.1.2") > outLanguage = "Ness"
-	Box("Konos", "11.0.6")
+Artifact("io.intino", "6.3.2") data-hub
+	Dsl("Proteo", "1.0.0")
+		Builder(generationPackage = "model")
+		OutputDsl("Ness")
+	Dsl("Konos", "12.0.1") > Builder(generationPackage = "box")
 	Imports
 		Compile("io.intino.ness", "master", "1.1.1")
 		Compile("io.intino.alexandria", "core-framework", "2.2.0")
@@ -23,7 +25,7 @@ Artifact("io.intino", "6.3.1") data-hub
 		Test("junit", "junit", "4.13.2")
 		Web("io.intino", "datalake-inspector", "6.2.5-SNAPSHOT")
 	Code("io.intino.datahub")
-	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false)
+	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false) as Runnable(mainClass = "io.intino.datahub.box.Main")
 	Distribution > Artifactory("intino-maven")
 			Release("https://artifactory.intino.io/artifactory/release-frameworks")
 			Snapshot("https://artifactory.intino.io/artifactory/snapshot-frameworks")
