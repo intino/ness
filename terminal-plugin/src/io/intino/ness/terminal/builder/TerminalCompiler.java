@@ -1,6 +1,7 @@
 package io.intino.ness.terminal.builder;
 
 import io.intino.alexandria.logger.Logger;
+import io.intino.builder.*;
 import io.intino.datahub.model.NessGraph;
 import io.intino.datahub.model.Terminal;
 import io.intino.magritte.framework.Store;
@@ -9,7 +10,6 @@ import io.intino.ness.terminal.builder.codegeneration.Project;
 import io.intino.ness.terminal.builder.codegeneration.ontology.OntologyBuilder;
 import io.intino.ness.terminal.builder.codegeneration.terminal.TerminalBuilder;
 import io.intino.ness.terminal.builder.util.ErrorUtils;
-import io.intino.plugin.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
+import static io.intino.builder.BuildConstants.PRESENTABLE_MESSAGE;
 import static io.intino.ness.terminal.builder.VersionBounds.*;
-import static io.intino.plugin.BuildConstants.PRESENTABLE_MESSAGE;
 
 public class TerminalCompiler {
 	private final CompilerConfiguration configuration;
@@ -69,8 +69,8 @@ public class TerminalCompiler {
 		return new OntologyBuilder(new File(tempDir, "ontology"), graph, configuration, versions).build();
 	}
 
-	private MavenBuildActionMessage actionMessage(Project project) {
-		return new MavenBuildActionMessage(configuration.module(), project.pom(), project.coords(), configuration.phase().name());
+	private ArtifactBuildActionMessage actionMessage(Project project) {
+		return new ArtifactBuildActionMessage(configuration.module(), project.pom(), project.coords(), configuration.phase().name());
 	}
 
 	private Map<String, String> versions() {

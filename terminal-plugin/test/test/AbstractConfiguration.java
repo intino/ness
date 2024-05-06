@@ -69,16 +69,6 @@ public class AbstractConfiguration implements Configuration {
 		}
 
 		@Override
-		public Model model() {
-			return null;
-		}
-
-		@Override
-		public Box box() {
-			return null;
-		}
-
-		@Override
 		public Dependency.DataHub datahub() {
 			return null;
 		}
@@ -126,6 +116,11 @@ public class AbstractConfiguration implements Configuration {
 		@Override
 		public List<Developer> developers() {
 			return null;
+		}
+
+		@Override
+		public List<Dsl> dsls() {
+			return List.of();
 		}
 
 		@Override

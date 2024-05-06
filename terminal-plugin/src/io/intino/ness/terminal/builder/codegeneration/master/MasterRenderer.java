@@ -1,12 +1,12 @@
 package io.intino.ness.terminal.builder.codegeneration.master;
 
 import io.intino.alexandria.logger.Logger;
+import io.intino.builder.CompilerConfiguration;
 import io.intino.datahub.model.*;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import io.intino.itrules.Template;
 import io.intino.magritte.framework.Layer;
-import io.intino.plugin.CompilerConfiguration;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,10 +15,10 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.intino.builder.BuildConstants.PRESENTABLE_MESSAGE;
 import static io.intino.itrules.formatters.StringFormatters.firstUpperCase;
 import static io.intino.ness.terminal.builder.Formatters.customize;
 import static io.intino.ness.terminal.builder.Formatters.javaValidName;
-import static io.intino.plugin.BuildConstants.PRESENTABLE_MESSAGE;
 import static java.io.File.separator;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toMap;

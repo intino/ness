@@ -2,6 +2,7 @@ package io.intino.ness.terminal.builder.codegeneration.terminal;
 
 import com.google.gson.Gson;
 import io.intino.alexandria.logger.Logger;
+import io.intino.builder.CompilerConfiguration;
 import io.intino.datahub.model.Datalake;
 import io.intino.datahub.model.Datalake.Tank;
 import io.intino.datahub.model.Event;
@@ -14,7 +15,6 @@ import io.intino.ness.terminal.builder.codegeneration.Formatters;
 import io.intino.ness.terminal.builder.codegeneration.Project;
 import io.intino.ness.terminal.builder.codegeneration.master.MasterRenderer;
 import io.intino.ness.terminal.builder.util.ErrorUtils;
-import io.intino.plugin.CompilerConfiguration;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,9 +22,9 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.intino.builder.BuildConstants.PRESENTABLE_MESSAGE;
 import static io.intino.ness.terminal.builder.Formatters.firstUpperCase;
 import static io.intino.ness.terminal.builder.Formatters.snakeCaseToCamelCase;
-import static io.intino.plugin.BuildConstants.PRESENTABLE_MESSAGE;
 
 public class TerminalBuilder {
 	private final File root;

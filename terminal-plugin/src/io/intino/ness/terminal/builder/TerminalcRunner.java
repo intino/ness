@@ -1,6 +1,6 @@
 package io.intino.ness.terminal.builder;
 
-import io.intino.plugin.BuildConstants;
+import io.intino.builder.BuildConstants;
 
 import java.io.File;
 import java.util.logging.Level;

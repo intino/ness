@@ -1,6 +1,7 @@
 package io.intino.ness.terminal.builder.codegeneration.ontology;
 
 import io.intino.alexandria.logger.Logger;
+import io.intino.builder.CompilerConfiguration;
 import io.intino.datahub.model.Datalake;
 import io.intino.datahub.model.Event;
 import io.intino.datahub.model.NessGraph;
@@ -8,7 +9,6 @@ import io.intino.datahub.model.Wordbag;
 import io.intino.ness.terminal.builder.codegeneration.event.EventRenderer;
 import io.intino.ness.terminal.builder.codegeneration.event.WordbagRenderer;
 import io.intino.ness.terminal.builder.codegeneration.master.MasterRenderer;
-import io.intino.plugin.CompilerConfiguration;
 
 import java.io.File;
 import java.io.IOException;

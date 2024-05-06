@@ -1,6 +1,7 @@
 package io.intino.ness.terminal.builder.codegeneration.ontology;
 
 import io.intino.Configuration;
+import io.intino.builder.CompilerConfiguration;
 import io.intino.datahub.model.NessGraph;
 import io.intino.itrules.FrameBuilder;
 import io.intino.ness.terminal.builder.ArtifactoryConnector;
@@ -9,15 +10,14 @@ import io.intino.ness.terminal.builder.codegeneration.Formatters;
 import io.intino.ness.terminal.builder.codegeneration.PomTemplate;
 import io.intino.ness.terminal.builder.codegeneration.Project;
 import io.intino.ness.terminal.builder.util.Version;
-import io.intino.plugin.CompilerConfiguration;
-import io.intino.plugin.CompilerConfiguration.Phase;
 
 import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static io.intino.plugin.BuildConstants.PRESENTABLE_MESSAGE;
+import static io.intino.builder.BuildConstants.PRESENTABLE_MESSAGE;
+
 
 public class OntologyBuilder {
 	private final File root;
@@ -37,7 +37,7 @@ public class OntologyBuilder {
 	}
 
 	public Project build() throws IntinoException {
-		if (configuration.phase().equals(Phase.DISTRIBUTE) && !isSnapshotVersion() && isDistributed())
+		if (configuration.phase().equals(CompilerConfiguration.Phase.DISTRIBUTE) && !isSnapshotVersion() && isDistributed())
 			throw new IntinoException("The Version " + configuration.version() + " is Already Distributed.");
 		new OntologyRenderer(graph, configuration, sourceDirectory(), basePackage).render();
 		final File pom = createPom(root, basePackage, configuration.version());

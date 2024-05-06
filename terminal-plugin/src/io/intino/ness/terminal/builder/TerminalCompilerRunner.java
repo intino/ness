@@ -1,6 +1,6 @@
 package io.intino.ness.terminal.builder;
 
-import io.intino.plugin.*;
+import io.intino.builder.*;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import static io.intino.plugin.BuildConstants.*;
-import static io.intino.plugin.CompilerMessage.ERROR;
+import static io.intino.builder.BuildConstants.*;
+import static io.intino.builder.CompilerMessage.ERROR;
 
 
 class TerminalCompilerRunner {
@@ -65,7 +65,7 @@ class TerminalCompilerRunner {
 	private void processErrors(List<CompilerMessage> compilerMessages) {
 		int errorCount = 0;
 		for (CompilerMessage message : compilerMessages) {
-			if (message.category().equals(CompilerMessage.ERROR)) {
+			if (message.category().equals(ERROR)) {
 				if (errorCount > 100) continue;
 				errorCount++;
 			}

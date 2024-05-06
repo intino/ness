@@ -1,13 +1,13 @@
 package io.intino.ness.terminal.builder.codegeneration.terminal;
 
 import io.intino.Configuration.Repository;
+import io.intino.builder.CompilerConfiguration;
 import io.intino.datahub.model.Terminal;
 import io.intino.itrules.FrameBuilder;
 import io.intino.ness.terminal.builder.IntinoException;
 import io.intino.ness.terminal.builder.codegeneration.Commons;
 import io.intino.ness.terminal.builder.codegeneration.Formatters;
 import io.intino.ness.terminal.builder.codegeneration.PomTemplate;
-import io.intino.plugin.CompilerConfiguration;
 
 import java.io.File;
 import java.util.ArrayList;
