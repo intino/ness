@@ -104,7 +104,7 @@ public class TerminalCompiler {
 
 	private NessGraph loadGraph(File outDirectory) {
 		try (URLClassLoader urlClassLoader = new URLClassLoader(urlOf(outDirectory), this.getClass().getClassLoader())) {
-			Class<?> aClass = urlClassLoader.loadClass(configuration.generationPackage() + "." + configuration.model().generationPackage() + ".GraphLoader");
+			Class<?> aClass = urlClassLoader.loadClass(configuration.generationPackage() + ".GraphLoader");
 			return (NessGraph) aClass.getMethod("load", Store.class).invoke(null, new FileSystemStore(configuration.resDirectory()));
 		} catch (ClassNotFoundException | NoSuchMethodException | IOException | IllegalAccessException |
 				 InvocationTargetException e) {
