@@ -6,6 +6,7 @@ import io.intino.datahub.box.DataHubBox;
 import io.intino.datahub.box.DataHubConfiguration;
 import io.intino.datahub.model.NessGraph;
 import org.apache.log4j.Level;
+import org.example.test.ness.GraphLoader;
 
 import java.io.File;
 import java.io.IOException;
