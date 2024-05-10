@@ -1,7 +1,7 @@
 dsl Legio
 
 Artifact("io.intino.ness", "1.0.0") datalake-inspector
-	Dsl("Konos", "12.0.0")
+	Dsl("Konos", "12.0.0") > Builder(generationPackage = "box")
 	Imports
 		Compile("io.intino.alexandria", "core-framework", "2.2.0")
 		Compile("io.intino.alexandria", "logger", "2.1.0")

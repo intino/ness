@@ -21,7 +21,7 @@
       <sourceFolder url="file://$MODULE_DIR$/tmp/ontology/src" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/tmp/trooper-terminal/src" isTestSource="false" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="17" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.10.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:logger:2.1.0" level="project" />
@@ -62,11 +62,11 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zim:5.1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: com.github.luben:zstd-jni:1.5.4-1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zit:1.0.0" level="project" />
-    <orderEntry type="library" name="Intino: io.intino:data-hub:11.6.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino:builder-interface:1.1.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:framework:5.1.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.tara:language:1.5.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:io:5.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino:data-hub:12.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.2.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.1.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zip:1.0.5" level="project" />
