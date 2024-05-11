@@ -30,6 +30,7 @@ Artifact("io.intino", "12.0.2") data-hub
 	Distribution > Artifactory("intino-maven")
 			Release("https://artifactory.intino.io/artifactory/release-frameworks")
 			Snapshot("https://artifactory.intino.io/artifactory/snapshot-frameworks")
+	Parameter("home")
 	Parameter("backup_directory")
 	Parameter("broker_port")
 	Parameter("broker_secondary_port")
