@@ -70,7 +70,6 @@
     <orderEntry type="library" name="Intino: io.intino.alexandria:logger4j:1.1.0" level="project" />
     <orderEntry type="library" name="Intino: org.slf4j:slf4j-reload4j:2.0.12" level="project" />
     <orderEntry type="library" name="Intino: ch.qos.reload4j:reload4j:1.2.22" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Intino: io.intino.tara:language:1.6.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino:data-hub:12.0.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:framework:5.2.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:io:5.0.0" level="project" />
