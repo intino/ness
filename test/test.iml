@@ -97,5 +97,6 @@
     <orderEntry type="library" name="Intino: io.micrometer:micrometer-observation:1.12.3" level="project" />
     <orderEntry type="library" name="Intino: io.micrometer:micrometer-commons:1.12.3" level="project" />
     <orderEntry type="library" name="Intino: org.xerial:sqlite-jdbc:3.45.2.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.tara:language:1.6.0" level="project" />
   </component>
 </module>
