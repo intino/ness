@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino.ness", "1.4.0") terminal-builder
+Artifact("io.intino.ness", "1.4.1") terminal-builder
 	Imports
 		Compile("io.intino.ness", "master", "2.2.1")
 		Compile("io.intino", "data-hub", "12.0.0")
