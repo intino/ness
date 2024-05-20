@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_17" inherit-compiler-output="true">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_21" inherit-compiler-output="true">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/temp/cosmos/master-terminal/src" isTestSource="true" />
@@ -21,7 +21,7 @@
       <sourceFolder url="file://$MODULE_DIR$/tmp/ontology/src" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/tmp/trooper-terminal/src" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="17" jdkType="JavaSDK" />
+    <orderEntry type="jdk" jdkName="21" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.10.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:logger:2.1.0" level="project" />
@@ -55,13 +55,8 @@
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:exceptions:2.1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:ingestion:5.0.9" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:session:2.0.8" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:bpm-framework:3.1.3" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:event:5.0.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:iterator-stream:1.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:resource-cleaner:1.0.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zim:5.1.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: com.github.luben:zstd-jni:1.5.4-1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:zit:1.0.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino:builder-interface:1.1.1" level="project" />
     <orderEntry type="library" name="Intino: io.intino.magritte:framework:5.1.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.tara:language:1.5.0" level="project" />
