@@ -2,11 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/builder/builder.iml" filepath="$PROJECT_DIR$/builder/builder.iml" />
       <module fileurl="file://$PROJECT_DIR$/data-hub/data-hub.iml" filepath="$PROJECT_DIR$/data-hub/data-hub.iml" group="datahub" />
-      <module fileurl="file://$PROJECT_DIR$/datalake-inspector/datalake-inspector.iml" filepath="$PROJECT_DIR$/datalake-inspector/datalake-inspector.iml"/>
+      <module fileurl="file://$PROJECT_DIR$/datalake-inspector/datalake-inspector.iml" filepath="$PROJECT_DIR$/datalake-inspector/datalake-inspector.iml" />
       <module fileurl="file://$PROJECT_DIR$/datalake-inspector-elements/datalake-inspector-elements.iml" filepath="$PROJECT_DIR$/datalake-inspector-elements/datalake-inspector-elements.iml" />
       <module fileurl="file://$PROJECT_DIR$/master/master.iml" filepath="$PROJECT_DIR$/master/master.iml" group="datahub" />
-      <module fileurl="file://$PROJECT_DIR$/terminal-builder/terminal-builder.iml" filepath="$PROJECT_DIR$/terminal-builder/terminal-builder.iml" />
       <module fileurl="file://$PROJECT_DIR$/test/test.iml" filepath="$PROJECT_DIR$/test/test.iml" />
     </modules>
   </component>
