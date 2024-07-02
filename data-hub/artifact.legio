@@ -7,7 +7,7 @@ Artifact("io.intino", "12.0.3") data-hub
 		OutputDsl(name = "Ness")
 			Runtime("io.intino", "data-hub") as ArtifactVersionFollower
 			Builder("io.intino.ness", "builder", "1.0.0")
-	Dsl("Konos", "12.1.8") > Builder(generationPackage = "box")
+	Dsl("Konos", "12.2.4") > Builder(generationPackage = "box")
 	Imports
 		Compile("io.intino.alexandria", "json", "1.2.3")
 		Compile("io.intino.alexandria", "core-framework", "2.2.0")
