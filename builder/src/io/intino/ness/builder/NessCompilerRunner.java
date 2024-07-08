@@ -44,9 +44,8 @@ class NessCompilerRunner {
 		if (verbose) out.println(PRESENTABLE_MESSAGE + "nessc: loading sources...");
 		final List<CompilerMessage> messages = new ArrayList<>();
 		final List<PostCompileActionMessage> postCompileActionMessages = new ArrayList<>();
-		List<OutputItem> compiled = new TerminalCompiler(config, messages, postCompileActionMessages).compile();
+		new TerminalCompiler(config, messages, postCompileActionMessages).compile();
 		out.println();
-		if (verbose) report(sources, compiled);
 		processErrors(messages);
 		if (messages.stream().noneMatch(m -> m.category().equalsIgnoreCase(ERROR)))
 			processActions(postCompileActionMessages);
