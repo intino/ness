@@ -1,12 +1,12 @@
 dsl Legio
 
-Artifact("io.intino", "12.0.4") data-hub
+Artifact("io.intino", "12.0.5") data-hub
 	description = "DataHub is a software platform that facilitates the creation, management, and distribution of events in event-driven systems. Using a domain-specific language (DSL), DataHub allows users to tailor their architecture to meet specific business needs, enhancing the integration and operability of real-time data systems"
 	Dsl("Proteo", "1.0.4")
 		Builder(generationPackage = "model")
 		OutputDsl(name = "Ness")
 			Runtime("io.intino", "data-hub") as ArtifactVersionFollower
-			Builder("io.intino.ness", "builder", "1.0.1")
+			Builder("io.intino.ness", "builder", "1.0.2")
 	Dsl("Konos", "12.2.4") > Builder(generationPackage = "box")
 	Imports
 		Compile("io.intino.alexandria", "json", "1.2.3")
