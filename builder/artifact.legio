@@ -1,9 +1,9 @@
 dsl Legio
 
-Artifact("io.intino.ness", "1.0.1") builder
+Artifact("io.intino.ness", "1.0.2") builder
 	Imports
 		Compile("io.intino.ness", "master", "2.2.1")
-		Compile("io.intino", "data-hub", "12.0.4")
+		Compile("io.intino", "data-hub", "12.0.5")
 			Exclude("io.intino.alexandria", "exceptions")
 			Exclude("io.intino.alexandria", "jms")
 			Exclude("io.intino.alexandria", "jmx")
@@ -16,7 +16,7 @@ Artifact("io.intino.ness", "1.0.1") builder
 			Exclude("org.apache.activemq", "activemq-jaas")
 			Exclude("org.apache.activemq", "activemq-runtime-config")
 			Exclude("io.intino", "datalake-inspector")
-		Compile("io.intino", "builder-interface", "2.1.0")
+		Compile("io.intino", "builder-interface", "2.2.0")
 		Compile("io.intino.magritte", "builder", "7.0.5")
 		Compile("io.intino.tara", "language", "1.6.1")
 		Compile("io.intino.alexandria", "json", "1.2.3")
