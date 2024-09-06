@@ -29,7 +29,7 @@ public class IndicatorMounter {
 				indicatorFile.save(indicator);
 			}
 		} catch (Exception e) {
-			Logger.error(e);
+			Logger.error("Error processing timeline " + timeline + ": " + e.getMessage(), e);
 		}
 	}
 }
