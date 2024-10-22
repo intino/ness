@@ -207,7 +207,8 @@ public class DataHubBox extends AbstractBox {
 	}
 
 	public void afterStop() {
-		datamarts().datamarts().forEach(MasterDatamart::close);
+		if(datamarts() != null)
+			datamarts().datamarts().forEach(MasterDatamart::close);
 	}
 
 	private void loadBrokerService() {
