@@ -80,6 +80,7 @@ public class BrokerSessions {
 	}
 
 	private void moveTo(File tmp) {
+		if (!brokerStageDirectory.exists()) return;
 		for (File file : requireNonNull(brokerStageDirectory.listFiles(f -> f.getName().endsWith(SessionExtension))))
 			moveTo(file, tmp);
 	}

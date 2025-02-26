@@ -119,6 +119,8 @@ Concept Namespace
 	has Resource
 
 Concept Sensor
+	Concept:Named Attribute
+		var string value
 	Concept:{1..*} Magnitude
 		var string id
 		Concept:Named Attribute

@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("io.intino", "12.0.7") data-hub
+Artifact("io.intino", "12.0.8") data-hub
 	description = "DataHub is a software platform that facilitates the creation, management, and distribution of events in event-driven systems. Using a domain-specific language (DSL), DataHub allows users to tailor their architecture to meet specific business needs, enhancing the integration and operability of real-time data systems"
 	Dsl("Proteo", "1.0.4")
 		Builder(generationPackage = "model")
@@ -10,23 +10,23 @@ Artifact("io.intino", "12.0.7") data-hub
 	Dsl("Konos", "12.2.4") > Builder(generationPackage = "box")
 	Imports
 		Compile("io.intino.alexandria", "json", "1.2.3")
-		Compile("io.intino.alexandria", "core-framework", "2.2.0")
-		Compile("io.intino.alexandria", "jmx", "1.0.6")
-		Compile("io.intino.alexandria", "primitives", "1.1.2")
+		Compile("io.intino.alexandria", "core-framework", "2.2.2")
+		Compile("io.intino.alexandria", "jmx", "1.0.7")
+		Compile("io.intino.alexandria", "primitives", "1.1.4")
 		Compile("io.intino.alexandria", "sealing", "7.0.9")
-		Compile("io.intino.alexandria", "exceptions", "2.1.1")
+		Compile("io.intino.alexandria", "exceptions", "2.1.2")
 		Compile("io.intino.alexandria", "jms", "2.0.0")
 		Compile("io.intino.alexandria", "zip", "1.0.5")
 		Compile("io.intino.alexandria", "logger4j", "1.1.0")
 		Compile("io.intino.alexandria", "scheduler-framework", "1.2.0") > Exclude("org.slf4j", "slf4j-api")
-		Compile("io.intino.sumus", "chronos", "2.4.3")
-		Compile("commons-io", "commons-io", "2.16.0")
-		Compile("org.apache.activemq", "activemq-broker", "6.1.0")
-		Compile("org.apache.activemq", "activemq-mqtt", "6.1.0")
-		Compile("org.apache.activemq", "activemq-kahadb-store", "6.1.0")
-		Compile("org.apache.activemq", "activemq-jaas", "6.1.0")
-		Compile("org.apache.activemq", "activemq-runtime-config", "6.1.0")
-		Compile("org.xerial", "sqlite-jdbc", "3.45.2.0")
+		Compile("io.intino.sumus", "chronos", "2.4.4")
+		Compile("commons-io", "commons-io", "2.18.0")
+		Compile("org.apache.activemq", "activemq-broker", "6.1.5")
+		Compile("org.apache.activemq", "activemq-mqtt", "6.1.5")
+		Compile("org.apache.activemq", "activemq-kahadb-store", "6.1.5")
+		Compile("org.apache.activemq", "activemq-jaas", "6.1.5")
+		Compile("org.apache.activemq", "activemq-runtime-config", "6.1.5")
+		Compile("org.xerial", "sqlite-jdbc", "3.49.0.0")
 		Test("junit", "junit", "4.13.2")
 	Code("io.intino.datahub")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness", classpathPrefix = "lib", attachSources = true, attachDoc = false) as Runnable(mainClass = "io.intino.datahub.box.Main")

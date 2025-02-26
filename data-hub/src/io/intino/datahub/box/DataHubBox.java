@@ -60,10 +60,12 @@ public class DataHubBox extends AbstractBox {
 		if (o instanceof Graph) {
 			graph = ((Graph) o).as(NessGraph.class);
 			injectJmsConfiguration();
+			setupFromGraph();
 		}
 		if (o instanceof NessGraph) {
 			graph = (NessGraph) o;
 			injectJmsConfiguration();
+			setupFromGraph();
 		}
 		return this;
 	}
@@ -180,7 +182,7 @@ public class DataHubBox extends AbstractBox {
 		return datamartSerializer;
 	}
 
-	public void beforeStart() {
+	private void setupFromGraph() {
 		stageDirectory().mkdirs();
 		loadBrokerService();
 		if (graph.datalake() != null) this.datalake = new FileDatalake(datalakeDirectory());
@@ -189,9 +191,20 @@ public class DataHubBox extends AbstractBox {
 			brokerService = graph.broker().implementation().get();
 			this.brokerSessions = new BrokerSessions(brokerStage(), stageDirectory());
 		}
-		new SealAction(this).execute();
-		if (graph.datamartList() != null && !graph.datamartList().isEmpty()) initMasterDatamarts();
+		if (graph.datamartList() != null && !graph.datamartList().isEmpty()) {
+			this.datamartSerializer = new MasterDatamartSerializer(this);
+			this.masterDatamarts = new MasterDatamartRepository(datamartsDirectory());
+		}
+	}
+
+	public void beforeStart() {
+		seal();
+		initDatamarts();
 		if (graph.broker() != null) startBroker();
+	}
+
+	public void seal() {
+		new SealAction(this).execute();
 	}
 
 	private File datalakeDirectory() {
@@ -248,12 +261,6 @@ public class DataHubBox extends AbstractBox {
 
 	public NessService nessService() {
 		return nessService;
-	}
-
-	private void initMasterDatamarts() {
-		this.datamartSerializer = new MasterDatamartSerializer(this);
-		this.masterDatamarts = new MasterDatamartRepository(datamartsDirectory());
-		initDatamarts();
 	}
 
 	private void initDatamarts() {
