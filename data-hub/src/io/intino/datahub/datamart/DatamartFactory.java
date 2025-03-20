@@ -147,15 +147,7 @@ public class DatamartFactory {
 	}
 
 	private Supplier<MessageEventStream> bake(List<Datalake.Store.Tank<MessageEvent>> tanks) {
-		File file = bakeEventsInCacheFile(tanks);
-		if (file.length() < Runtime.getRuntime().freeMemory() * 0.8) {
-			return () -> {
-				var events = new MessageEventStream.InMemory(file);
-				file.delete();
-				return events;
-			};
-		}
-		return () -> new MessageEventStream.Reading(file);
+		return () -> new MessageEventStream.Reading(bakeEventsInCacheFile(tanks));
 	}
 
 	private File bakeEventsInCacheFile(List<Datalake.Store.Tank<MessageEvent>> tanks) {
