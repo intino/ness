@@ -1,6 +1,6 @@
 package io.intino.ness.datalakeinspector.box;
 
-import io.intino.alexandria.datalake.file.FileDatalake;
+import systems.intino.eventsourcing.datalake.file.FileDatalake;
 
 public class DatalakeInspectorBox extends AbstractBox {
 	private FileDatalake datalake;

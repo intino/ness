@@ -1,0 +1,148 @@
+rule type(pom)
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>$group+lowercase</groupId>
+	<artifactId>$artifact+lowercase</artifactId>
+	<version>$version</version>
+	<<~<licenses>
+		$license...[$NL]
+	</licenses>~>>
+	<properties>
+		<maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+		<outputDirectory>out/production/$artifact+lowercase</outputDirectory>
+		<testOutputDirectory>out/test/$artifact+lowercase</testOutputDirectory>
+		<directory>out/build/$artifact+lowercase</directory>
+		<resources>
+			<resource>
+				<directory>$${basedir}/res</directory>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.5.0</version>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								$sourceDirectory...[$NL]
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		$repository+release...[$NL]
+	</repositories>
+
+	<<~<distributionManagement>
+		$repository+distribution...[$NL]
+	</distributionManagement>~>>
+
+	<dependencies>
+		<<$event>>
+		<<$terminal>>
+		<<$terminalontology>>
+		<<$bpm>>
+	</dependencies>
+</project>
+
+rule trigger(terminalontology)
+	<dependency>
+      	<groupId>systems.intino.eventsourcing</groupId>
+		<artifactId>datahub-terminal</artifactId>
+      	<version>$version</version>
+    </dependency>
+
+rule trigger(event)
+	<dependency>
+		<groupId>systems.intino.eventsourcing</groupId>
+		<artifactId>event</artifactId>
+		<version>$version</version>
+	</dependency>
+
+
+rule trigger(terminal)
+	<dependency>
+		<groupId>systems.intino.eventsourcing</groupId>
+		<artifactId>ingestion</artifactId>
+		<version>$ingestionVersion</version>
+	</dependency>
+	<dependency>
+		<groupId>$group+lowercase</groupId>
+		<artifactId>$artifact+lowercase</artifactId>
+		<version>$version</version>
+	</dependency>
+
+rule type(repository, distribution) and trigger(distribution)
+	<repository>
+		<id>$name</id>
+		<name>$name</name>
+		<url>$url</url>
+	</repository>
+
+rule trigger(distribution)
+
+rule trigger(bpm)
+	<dependency>
+		<groupId>io.intino.alexandria</groupId>
+		<artifactId>bpm-framework</artifactId>
+		<version>$this</version>
+		<scope>provided</scope>
+	</dependency>
+
+
+rule type(repository) and not type(distribution) and trigger(release)
+	<repository>
+		<id>$name-~$random</id>
+		<name>$name</name>
+		<url>$url</url>
+		<<~<snapshots><enabled>$snapshot</enabled></snapshots>~>>
+	</repository>
+
+
+rule type(GPL) and trigger(license)
+	<license>
+		<name>The GNU General Public License v3.0</name>
+		<url>https://www.gnu.org/licenses/gpl-3.0.txt</url>
+	</license>
+
+rule type(BSD) and trigger(license)
+	<license>
+		<name>BSD 3-Clause License</name>
+		<url>https://opensource.org/licenses/BSD-3-Clause</url>
+	</license>
+
+
+rule trigger(sourceDirectory)
+	<source>$this</source>

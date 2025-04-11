@@ -1,0 +1,78 @@
+rule type(datamart)
+	package $package;
+
+	import systems.intino.eventsourcing.datahubterminal.Connector;
+	import systems.intino.eventsourcing.datahubterminal.datamart.ConnectionConfig;
+	import systems.intino.eventsourcing.datahubterminal.datamart.SubjectListener;
+	import systems.intino.eventsourcing.datahubterminal.datamart.SubjectNode;
+
+	import java.util.ArrayList;
+	import java.util.stream.Stream;
+
+	import $ontologypackage.*;
+
+	import static java.util.Objects.requireNonNull;
+
+	public class $name+FirstUpperCase~Datamart {
+		private final systems.intino.eventsourcing.datahubterminal.datamart.Datamart core;
+
+    	public $name+FirstUpperCase~Datamart(Connector connector, ConnectionConfig connectionConfig) {
+    		this.core = new systems.intino.eventsourcing.datahubterminal.datamart.Datamart("$name", connector, connectionConfig);
+    	}
+
+    	public $name+FirstUpperCase~Datamart init(String datamartSourceSelector) {
+    		this.core$$().init(datamartSourceSelector);
+			registerMounters();
+			return this;
+    	}
+
+    	public systems.intino.eventsourcing.datahubterminal.datamart.Datamart core$$() {
+    		return core;
+    	}
+
+    	public void addSubjectListener(String type, SubjectListener listener) {
+			if (listener == null) throw new NullPointerException("SubjectListener cannot be null");
+			core$$().addListener(type, listener);
+		}
+
+    	<<$subject+getter...[$NL$NL]>>
+
+		<<$indicator+getter...[$NL$NL]>>
+
+		private void registerMounters() {
+			<<$subject+registerMounter...[$NL]>>
+		}
+	}
+
+rule not type(abstract) and type(subject) and trigger(registerMounter)
+	this.core.register("$event+firstUpperCase", new $package.mounters.$name+FirstUpperCase~Mounter(this));
+
+rule type(abstract) and trigger(getter)
+	public $package.subjects.$name+FirstUpperCase $name+firstLowerCase(String id) {
+		if (id == null) return null;
+		SubjectNode node = core.getSubject(new String[]{$descendant+quoted...[, ]}, id);
+		if (node == null) return null;
+		return new $package.subjects.$name+FirstUpperCase(node);
+	}
+
+	public Stream<$package.subjects.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
+		return core.subjects(new String[]{$descendant+quoted...[,]}).map(s -> new $package.subjects.$name+FirstUpperCase(s));
+	}
+
+rule type(superclass) and not type(abstract) and trigger(getter)
+	public $package.subjects.$name+FirstUpperCase $name+firstLowerCase(String id) {
+		return id == null ? null : new $package.subjects.$name+FirstUpperCase(core.getSubject("$name", id));
+	}
+
+	public Stream<$package.subjects.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
+		return core.subjects("$name").map(s -> new $package.subjects.$name+FirstUpperCase(s));
+	}
+
+rule trigger(getter)
+	public $package.subjects.$name+FirstUpperCase $name+firstLowerCase(String id) {
+		return id == null ? null : new $package.subjects.$name+FirstUpperCase(core.getSubject("$name", id));
+	}
+
+	public Stream<$package.subjects.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
+		return core.subjects("$name").map(s -> new $package.subjects.$name+FirstUpperCase(s));
+	}

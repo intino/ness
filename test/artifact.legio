@@ -1,22 +1,28 @@
 dsl Legio
 
 Artifact("org.example", "1.0.0") test
-	Dsl("Ness", "12.0.1")
+	Dsl("Ness", "13.0.0")
 	Imports
 		Test("junit", "junit", "4.13.2")
-		Compile ("io.intino.alexandria", "jms", "2.0.0")
+		Test("org.example.test", "wizard-terminal", "1.0.0")
+		Compile("io.intino.alexandria", "jms", "2.0.0")
+		Compile("systems.intino.eventsourcing", "datahub-terminal", "6.1.0")
 	Package(mode = ModulesAndLibrariesLinkedByManifest) as Runnable(mainClass = "org.example.test.model.Main")
 	Parameter("home")
 	Parameter("backup_directory")
 	Parameter("datalake_directory")
 	Parameter("broker_port")
 	Parameter("broker_secondary_port")
+	Parameter("keystore_password")
+	Parameter("keystore_path")
+	Parameter("truststore_password")
+	Parameter("truststore_path")
 
 RunConfiguration local
-	Argument("home", "temp/datahub")
-	Argument("datalake_directory", "temp/datalake")
-	Argument("home", "temp")
-	Argument("backup_directory", "temp/backup")
+	Argument("home", "test/temp/datahub")
+	Argument("datalake_directory", "test/temp/datalake")
+	Argument("home", "test/temp")
+	Argument("backup_directory", "test/temp/backup")
 	Argument("broker_port", "63000")
 	Argument("broker_secondary_port", "1884")
 
@@ -32,6 +38,3 @@ RunConfiguration local_ssl
 	Argument("key_store_password", "oAhGPgdAHQ3yDvohTFDc")
 	Argument("trust_store_path", "temp/datahub/certs/datahub.jts")
 	Argument("trust_store_password", "gdgJW6gnjz_Kr.pvQtVq")
-
-Repository("intino-maven")
-	Release("https://artifactory.intino.io/artifactory/releases")

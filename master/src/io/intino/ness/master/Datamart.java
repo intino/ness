@@ -1,6 +1,6 @@
 package io.intino.ness.master;
 
-import io.intino.ness.master.model.Entity;
+import io.intino.ness.master.model.Subject;
 import io.intino.ness.master.reflection.DatamartDefinition;
 
 import java.util.Map;
@@ -21,55 +21,55 @@ public interface Datamart {
 
 	int size();
 
-	<T extends Entity> T get(String id);
+	<T extends Subject> T get(String id);
 
-	Stream<Entity> entities();
+	Stream<? extends Subject> subjects();
 
-	default Map<String, Entity> toMap() {
-		return entities().collect(Collectors.toMap(Entity::id, Function.identity()));
+	default Map<String, Subject> toMap() {
+		return subjects().collect(Collectors.toMap(Subject::id, Function.identity()));
 	}
 
-	void addEntityListener(EntityListener listener);
+	void addSubjectListener(SubjectListener listener);
 
 	DatamartDefinition getDefinition();
 
 	Translator translator();
 
-	interface EntityListener {
+	interface SubjectListener {
 
-		void onCreate(Entity entity);
+		void onCreate(Subject entity);
 
-		void onUpdate(Entity entity);
+		void onUpdate(Subject entity);
 
-		void onRemove(Entity entity);
+		void onRemove(Subject entity);
 
-		interface OnCreate extends EntityListener {
+		interface OnCreate extends SubjectListener {
 			@Override
-			default void onUpdate(Entity entity) {
+			default void onUpdate(Subject entity) {
 			}
 
 			@Override
-			default void onRemove(Entity entity) {
-			}
-		}
-
-		interface OnUpdate extends EntityListener {
-			@Override
-			default void onCreate(Entity entity) {
-			}
-
-			@Override
-			default void onRemove(Entity entity) {
+			default void onRemove(Subject entity) {
 			}
 		}
 
-		interface OnRemove extends EntityListener {
+		interface OnUpdate extends SubjectListener {
 			@Override
-			default void onCreate(Entity entity) {
+			default void onCreate(Subject entity) {
 			}
 
 			@Override
-			default void onUpdate(Entity entity) {
+			default void onRemove(Subject entity) {
+			}
+		}
+
+		interface OnRemove extends SubjectListener {
+			@Override
+			default void onCreate(Subject entity) {
+			}
+
+			@Override
+			default void onUpdate(Subject entity) {
 			}
 		}
 	}

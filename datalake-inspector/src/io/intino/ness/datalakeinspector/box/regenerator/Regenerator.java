@@ -1,7 +1,7 @@
 package io.intino.ness.datalakeinspector.box.regenerator;
 
-import io.intino.alexandria.datalake.file.FileDatalake;
 import io.intino.alexandria.logger.Logger;
+import systems.intino.eventsourcing.datalake.file.FileDatalake;
 
 import java.io.File;
 import java.time.Instant;

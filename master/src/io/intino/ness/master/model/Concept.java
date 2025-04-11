@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
-public sealed interface Concept permits Entity, Struct {
+public sealed interface Concept permits Subject, Struct {
 
 	Datamart datamart();
 
@@ -18,7 +18,7 @@ public sealed interface Concept permits Entity, Struct {
 
 	List<Attribute> attributes();
 
-	void addChangeListener(ChangeListener listener);
+//	void addChangeListener(ChangeListener listener);
 
 	ConceptDefinition<?> getDefinition();
 

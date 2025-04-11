@@ -1,7 +1,7 @@
 package io.intino.ness.master;
 
 import io.intino.ness.master.model.Concept.Attribute;
-import io.intino.ness.master.model.Entity;
+import io.intino.ness.master.model.Subject;
 import io.intino.ness.master.reflection.*;
 
 import java.util.List;
@@ -13,7 +13,7 @@ public class Reflection_ {
 	public static void main(String[] args) {
 		Datamart datamart = theMasterDatamart();
 
-		Entity entity = datamart.get("id");
+		Subject entity = datamart.get("id");
 
 		List<Attribute> attributes = entity.attributes();
 
@@ -23,7 +23,7 @@ public class Reflection_ {
 
 		// ENTITY DEF
 
-		EntityDefinition entityDefinition = entity.getDefinition();
+		SubjectDefinition entityDefinition = entity.getDefinition();
 		List<AttributeDefinition> allAttributes = entityDefinition.attributes();
 		List<AttributeDefinition> attributesDeclaredOnlyInThisClass = entityDefinition.declaredAttributes();
 
@@ -31,12 +31,12 @@ public class Reflection_ {
 			// ...
 		}
 
-		EntityDefinition otherDefinition = entity.getDefinition();
+		SubjectDefinition otherDefinition = entity.getDefinition();
 		boolean isAncestor = entityDefinition.isAncestorOf(otherDefinition);
 		boolean isDescendant = entityDefinition.isDescendantOf(otherDefinition);
 
-		List<EntityDefinition> ancestors = entityDefinition.ancestors();
-		List<EntityDefinition> descendants = entityDefinition.descendants();
+		List<SubjectDefinition> ancestors = entityDefinition.ancestors();
+		List<SubjectDefinition> descendants = entityDefinition.descendants();
 
 		String nameValueFromReflection = entityDefinition.attribute("name")
 				.flatMap(attr -> attr.value(entity)).map(v -> v.as(String.class)).orElse(null);
@@ -48,12 +48,12 @@ public class Reflection_ {
 
 		DatamartDefinition datamartDefinition = datamart.getDefinition();
 
-		Optional<EntityDefinition> entityClass = datamartDefinition.entity("EntityClass");
+		Optional<SubjectDefinition> entityClass = datamartDefinition.entity("EntityClass");
 		Optional<StructDefinition> structClass = datamartDefinition.struct("StructClass");
 
-		List<EntityDefinition> list1 = datamartDefinition.entities();
-		List<EntityDefinition> list2 = datamartDefinition.entities().of(entityDefinition);
-		List<EntityDefinition> list3 = datamartDefinition.entities().instanceOf(entityDefinition);
+		List<SubjectDefinition> list1 = datamartDefinition.entities();
+		List<SubjectDefinition> list2 = datamartDefinition.entities().of(entityDefinition);
+		List<SubjectDefinition> list3 = datamartDefinition.entities().instanceOf(entityDefinition);
 	}
 
 	private static Datamart theMasterDatamart() {

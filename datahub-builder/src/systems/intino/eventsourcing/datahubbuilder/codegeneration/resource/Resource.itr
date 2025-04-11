@@ -1,0 +1,27 @@
+rule type(root)
+	package $package+ValidPackage;
+
+	$event
+
+rule trigger(event)
+	public class $name+firstUpperCase extends systems.intino.eventsourcing.event.resource.ResourceEvent implements java.io.Serializable {
+
+		public $name+firstUpperCase(systems.intino.eventsourcing.event.resource.ResourceEvent event) {
+			super("$name", event.ss(), event.resource());
+			ts(event.ts());
+		}
+
+		public $name+firstUpperCase(String ss, io.intino.alexandria.Resource resource) {
+			super("$name", ss, resource);
+		}
+
+		public $name+firstUpperCase(String ss, java.io.File file) {
+    		super("$name", ss, file);
+    	}
+
+		@Override
+		public $name+firstUpperCase ts(java.time.Instant ts) {
+			super.ts(ts);
+			return this;
+		}
+	}

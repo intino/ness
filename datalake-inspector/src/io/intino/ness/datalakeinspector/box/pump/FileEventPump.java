@@ -1,9 +1,9 @@
 package io.intino.ness.datalakeinspector.box.pump;
 
 
-import io.intino.alexandria.datalake.Datalake;
-import io.intino.alexandria.event.Event;
-import io.intino.alexandria.event.EventStream;
+import systems.intino.eventsourcing.datalake.Datalake;
+import systems.intino.eventsourcing.event.Event;
+import systems.intino.eventsourcing.event.EventStream;
 
 import java.util.Arrays;
 import java.util.Iterator;

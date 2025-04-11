@@ -1,7 +1,7 @@
 dsl Ness
 
 Namespace universe
-	Message IncidentRuleAssertion as Assertion
+	Message IncidentRule
 		Attribute target as Text
 		Attribute model as Text
 		Attribute precondition as Text
@@ -12,7 +12,7 @@ Namespace universe
 		Attribute description as Text
 		Attribute triggers as Text List
 
-	Message CountermeasureAssertion as Assertion
+	Message Countermeasure
 		Attribute condition as Text
 		Attribute priority as Text
 		Component Actuation
@@ -24,11 +24,11 @@ Namespace universe
 			Attribute tryInterval as Integer
 			Attribute extraCondition as Text
 
-	Message BusinessUnitAssertion as Assertion
+	Message BusinessUnitAssertion
 		Attribute label as Text
 		Attribute domains as Text List
 
-	Message PlaceAssertion as Assertion
+	Message Place
 		Attribute label as Text
 		Attribute area as Text
 		Attribute coordinates as Text
@@ -38,10 +38,10 @@ Namespace universe
 		Attribute address as Text
 		Attribute postalCode as Text
 
-	Message AreaAssertion as Assertion
+	Message Area
 		Attribute label as Text
 
-	Message ModelAssertion as Assertion
+	Message ModelAssertion
 		Attribute type as Text
 //		Attribute target as Text
 
@@ -61,7 +61,7 @@ Namespace universe
 				Attribute description as Text
 				Attribute format as Text
 
-	Message OrderTypeAssertion as Assertion
+	Message OrderTypeAssertion
 		Attribute label as Text
 		Attribute input as Text List
 		Attribute model as Text
@@ -78,7 +78,7 @@ Namespace universe
 				Attribute defaultValue as Text
 				Attribute optional as Bool
 
-	Message ObservableAssertion as Assertion
+	Message Observable
 		Attribute label as Text
 		Attribute place as Text
 		Attribute team as Text
@@ -98,26 +98,26 @@ Namespace universe
 					Attribute type as Text
 					Attribute name as Text
 
-	Message PersonAssertion as ExtensionOf(ObservableAssertion)
+	Message PersonAssertion as ExtensionOf(Observable)
 		Attribute area as Text
 		Attribute role as Text
 		Attribute supervisor as Text
 		Attribute email as Text
 		Attribute phone as Text
 
-	Message ProcessAssertion as ExtensionOf(ObservableAssertion)
+	Message ProcessAssertion as ExtensionOf(Observable)
 
-	Message AssetAssertion as ExtensionOf(ObservableAssertion)
-	Message PartAssertion as ExtensionOf(ObservableAssertion)
+	Message AssetAssertion as ExtensionOf(Observable)
+	Message PartAssertion as ExtensionOf(Observable)
 
-	Message HardwareAssertion as ExtensionOf(ObservableAssertion)
+	Message HardwareAssertion as ExtensionOf(Observable)
 		Attribute sn as Text
 		Attribute ip as Text List
 		Attribute publicIp as Text
 
 	Message ApplianceAssertion as ExtensionOf(HardwareAssertion)
 
-	Message ComputerAssertion as ExtensionOf(HardwareAssertion)
+	Message Computer as ExtensionOf(HardwareAssertion)
 		Attribute architecture as Text
 		Attribute os as Text
 		Attribute cores as Integer
@@ -126,14 +126,27 @@ Namespace universe
 		Attribute maxOpenFiles as LongInteger
 		Attribute jvm as Text
 		Attribute isp as Text
+		Attribute usageRAM as Real > Metadata("MB") unit; Metadata("%,.2f") format; Metadata("avg") operator; Metadata("UP") tail; Metadata("Normal") distribution;
+		Attribute usageHDD as Real > Metadata("MB") unit; Metadata("%,.2f") format; Metadata("avg") operator; Metadata("UP") tail; Metadata("Normal") distribution
+		Attribute usageCPU as Real > Metadata("%") unit; Metadata("%,.2f") format; Metadata("avg") operator; Metadata("UP") tail; Metadata("Normal") distribution;
+		Attribute usageSystem as Real > Metadata("%,.2f") format; Metadata("avg") operator; Metadata("UP") tail; Metadata("Normal") distribution;
+		Attribute usageThreads as Real > Metadata("%d") format; Metadata("last") operator; Metadata("UP") tail; Metadata("Normal") distribution;
+		Attribute usageFiles as Real > Metadata("%d") format; Metadata("avg") operator; Metadata("UP") tail; Metadata("Normal") distribution;
+		Attribute temperatureKernel as Real > Metadata("ºC") unit; Metadata("%,.0f") format; Metadata("avg") operator; Metadata("UP") tail; Metadata("Normal") distribution;
+		Attribute temperatureExternal as Real > Metadata("ºC") unit; Metadata("%,.0f") format; Metadata("avg") operator; Metadata("UP") tail; Metadata("Normal") distribution;
+		Attribute dataReceived as Real > Metadata("MB") unit; Metadata("%,.0f") format; Metadata("sum") operator; Metadata("UP") tail;
+		Attribute dataSent as Real > Metadata("MB") unit; Metadata("%,.0f") format; Metadata("sum") operator; Metadata("UP") tail;
+		Attribute applicationsSystem as Real > Metadata("%d") format; Metadata("last") operator; Metadata("UP") tail; Metadata("Normal") distribution;
+		Attribute applicationsKnown as Real > Metadata("%d") format; Metadata("last") operator; Metadata("UP") tail;
+		Attribute applicationsUnknown as Real > Metadata("%d") format; Metadata("last") operator; Metadata("UP") tail;
 
-	Message SoftwareAssertion as ExtensionOf(ObservableAssertion)
-	Message ObserverAssertion as ExtensionOf(SoftwareAssertion)
+	Message SoftwareAssertion as ExtensionOf(Observable)
+	Message Observer as ExtensionOf(SoftwareAssertion)
 		Attribute version as Text
 		Attribute installedActivities as Text List
 		Attribute enabledActivities as Text List
 
-	Message ApplicationAssertion as ExtensionOf(SoftwareAssertion)
+	Message Application as ExtensionOf(SoftwareAssertion)
 		Attribute name as Text
 		Attribute systemService as Text
 		Attribute user as Text
@@ -141,8 +154,14 @@ Namespace universe
 		Attribute pids as Integer List
 		Attribute commandLine as Text
 		Attribute state as Word("NEW" "RUNNING" "SLEEPING" "WAITING" "ZOMBIE" "STOPPED" "OTHER" "INVALID" "SUSPENDED")
+		Attribute usageRAM as Real > Metadata("MB") unit; Metadata("%,.2f") format; Metadata("avg") operator; Metadata("UP") tail; Metadata("Normal") distribution;
+		Attribute usageCPU as Real > Metadata("%") unit; Metadata("%,.2f") format; Metadata("avg") operator; Metadata("100") max; Metadata("UP") tail;
+		Attribute usageThreads as Real > Metadata("%d") format; Metadata("avg") operator; Metadata("UP") tail; Metadata("Normal") distribution;
+		Attribute usageFiles as Real > Metadata("%d") format; Metadata("avg") operator; Metadata("UP") tail; Metadata("Normal") distribution;
+		Attribute dataRead as Real > Metadata("MB") unit; Metadata("%,.0f") format; Metadata("avg") operator; Metadata("UP") tail;
+		Attribute dataWritten as Real > Metadata("MB") unit; Metadata("%,.0f") format; Metadata("avg") operator; Metadata("UP") tail;
 
-	Message ApplicationJavaAssertion as ExtensionOf(ApplicationAssertion)
+	Message ApplicationJava as ExtensionOf(Application)
 		Attribute groupId as Text
 		Attribute artifactId as Text
 		Attribute version as Text
@@ -157,7 +176,7 @@ Namespace universe
 		Attribute jvmParameter as Text List
 		Attribute jvmVersion as Text
 
-	Message ServiceAssertion as ExtensionOf(SoftwareAssertion)
+	Message Service as ExtensionOf(SoftwareAssertion)
 		Attribute url as Text
 
 

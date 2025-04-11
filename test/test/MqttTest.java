@@ -1,11 +1,11 @@
-import io.intino.alexandria.jms.BrokerConnector;
-import io.intino.alexandria.jms.ConnectionConfig;
 import jakarta.jms.Connection;
 import jakarta.jms.JMSException;
 import org.apache.activemq.broker.SslContext;
 import org.fusesource.mqtt.client.BlockingConnection;
 import org.fusesource.mqtt.client.MQTT;
 import org.junit.Test;
+import systems.intino.eventsourcing.jms.BrokerConnector;
+import systems.intino.eventsourcing.jms.ConnectionConfig;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManagerFactory;

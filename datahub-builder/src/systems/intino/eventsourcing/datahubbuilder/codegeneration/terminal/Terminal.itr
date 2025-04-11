@@ -1,0 +1,452 @@
+rule type(terminal)
+	package $package+validPackage;
+
+	import com.google.gson.JsonObject;
+    import io.intino.alexandria.Json;
+    import io.intino.alexandria.Scale;
+    import io.intino.alexandria.Timetag;
+    import io.intino.alexandria.logger.Logger;
+    import jakarta.jms.JMSException;
+    import jakarta.jms.Message;
+    import jakarta.jms.TextMessage;
+    import org.apache.activemq.command.ActiveMQTextMessage;
+    import systems.intino.eventsourcing.event.Event;
+    import systems.intino.eventsourcing.event.message.MessageEvent;
+    import systems.intino.eventsourcing.event.resource.ResourceEvent;
+    import systems.intino.eventsourcing.datahubterminal.datamart.ConnectionConfig;
+
+	import jakarta.jms.JMSException;
+	import jakarta.jms.Message;
+	import jakarta.jms.TextMessage;
+	import java.io.File;
+    import java.time.Instant;
+    import java.util.Collections;
+    import java.util.List;
+    import java.util.Map;
+    import java.util.concurrent.TimeUnit;
+    import java.util.stream.Collectors;
+    import java.util.stream.Stream;
+
+	public class $name+snakeCaseToCamelCase+firstUpperCase {
+		public static String[] subscriptionChannels = new String[]{$subscribe+channel};
+		private final systems.intino.eventsourcing.datahubterminal.Connector connector;
+		private final java.util.Set<java.util.function.BiConsumer> datamartConsumers = new java.util.HashSet<>();
+		private volatile systems.intino.eventsourcing.datalake.Datalake datalake;
+		<<$datamart+retryconfigField>>
+		private String sourceSelector;
+		private final java.util.Map<java.util.function.BiConsumer<?, String>, List<java.util.function.Consumer<systems.intino.eventsourcing.event.Event>>> consumers = new java.util.HashMap<>();
+		<<$datamart+declaration...[$NL]>>
+
+		public $name+snakeCaseToCamelCase+firstUpperCase(systems.intino.eventsourcing.datahubterminal.Connector connector) {
+			<<this(connector, $datamart+retryConfigDefault);?this.connector = connector;>>
+		}
+
+		<<$datamart+constructor>>
+
+		<<$datamart+getter...[$NL]>>
+
+
+		public void initDatamarts() {
+			initDatamarts(null);
+		}
+
+		public void initDatamarts(String sourceSelector) {
+			<<$datamart+init...[$NL]>>
+		}
+
+		public void publish(Event event) {
+			switch (event.type()) {
+				$publish+publishSwitchCase...[$NL]
+				default: Logger.warn(getClass().getSimpleName() + " is not configured to publish " + event.type() + " events.");
+			}
+		}
+
+		public void publish(Event first, Event ...others) {
+			publish(Stream.concat(Stream.of(first), java.util.Arrays.stream(others)));
+		}
+
+		public void publish(Event[] events) {
+			publish(java.util.Arrays.stream(events));
+		}
+
+		public void publish(java.util.Collection<Event> events) {
+			publish(events.stream());
+		}
+
+		public void publish(Stream<Event> events) {
+			events.filter(e -> channelOf(e.type()) != null)
+				.collect(Collectors.groupingBy(Event::type))
+				.forEach((type, eventList) -> connector.sendEvents(channelOf(type), eventList));
+		}
+
+		public synchronized systems.intino.eventsourcing.datalake.Datalake datalake() {
+			return datalake != null ? datalake : (datalake = instantiateDatalake());
+		}
+
+		private systems.intino.eventsourcing.datalake.Datalake instantiateDatalake() {
+			try {
+				Message message = connector.requestResponse(systems.intino.eventsourcing.datahubterminal.remotedatalake.DatalakeAccessor.PATH, request("Datalake"), 5, TimeUnit.SECONDS);
+				if (message == null) return null;
+				String path = ((TextMessage) message).getText();
+				if (path == null) return null;
+				return new File(path).exists()
+						? new systems.intino.eventsourcing.datalake.file.FileDatalake(new File(path))
+						: new systems.intino.eventsourcing.datahubterminal.remotedatalake.RemoteDatalake((systems.intino.eventsourcing.datahubterminal.JmsConnector) connector);
+			} catch (JMSException e) {
+				Logger.error(e);
+				return null;
+			}
+		}
+
+		public BatchSession batch(java.io.File temporalStageDirectory) {
+			return new BatchSession(temporalStageDirectory);
+		}
+
+		public BatchSession batch(java.io.File temporalStageDirectory, Config config) {
+			return new BatchSession(temporalStageDirectory, config);
+		}
+
+		$publish...[$NL$NL]
+
+		$subscribe...[$NL$NL]
+
+		public synchronized List<MetaMessage> metamodel() {
+			Message response = connector.requestResponse("service.ness.metamodel", request("Metamodel"), 10, TimeUnit.SECONDS);
+			if (response == null) return null;
+			try {
+				return Json.fromJson(((TextMessage) response).getText(), new com.google.gson.reflect.TypeToken<java.util.ArrayList<MetaMessage>>() {}.getType());
+			} catch (Exception e) {
+				Logger.error(e);
+				return null;
+			}
+		}
+
+		public record MetaMessage(String name, boolean assertion, boolean multiple, List<MetaAttribute> attributes, List<MetaMessage> components, List<String> hierarchy){
+
+		}
+		public record MetaAttribute(String name, String type) {
+
+		}
+
+		public synchronized void requestSeal() {
+			connector.requestResponse("service.ness.seal", request("Seal"), 30, TimeUnit.MINUTES);
+		}
+
+		public synchronized Instant requestLastSeal() {
+			Message message = connector.requestResponse("service.ness.seal.last", request("LastSeal"), 10, TimeUnit.MINUTES);
+			if (message == null) return Instant.now();
+			try {
+				return Instant.parse(((TextMessage) message).getText());
+			} catch (Exception e) {
+				Logger.error(e);
+				return Instant.now();
+			}
+		}
+
+		private jakarta.jms.Message request(String type) {
+			return request(type, Collections.emptyMap());
+		}
+
+		private jakarta.jms.Message request(String type, Map<String, String> attributes) {
+			try {
+				ActiveMQTextMessage m = new ActiveMQTextMessage();
+				systems.intino.eventsourcing.message.Message message = new systems.intino.eventsourcing.message.Message(type);
+				attributes.forEach(message::set);
+				m.setText(message.toString());
+				return m;
+			} catch(Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		<<$datamart+addDatamartSubscribers...[$NL$NL]>>
+
+		private String channelOf(String type) {
+			return switch(type) {
+				<<$publish+channelOfSwitchCase...[$NL]>>
+				default -> null;
+			};
+		}
+
+		public class BatchSession {
+			private final java.io.File temporalStage;
+			private final systems.intino.eventsourcing.ingestion.SessionHandler sessionHandler;
+			private final systems.intino.eventsourcing.ingestion.EventSession session;
+			private final Scale scale;
+
+			public BatchSession(java.io.File temporalStage) {
+				this(temporalStage, new Config());
+			}
+
+			public BatchSession(java.io.File temporalStage, Config config) {
+				this.temporalStage = temporalStage;
+				this.scale = config.scale;
+				this.sessionHandler = new systems.intino.eventsourcing.ingestion.SessionHandler(temporalStage);
+				this.session = sessionHandler.createEventSession(config.eventsBufferSize);
+			}
+
+			public void feed(Event event) throws java.io.IOException {
+				session.put(tankOf(event), event.ss(), Timetag.of(event.ts(), this.scale), event.format(), event);
+			}
+
+			public void feed(Event event, Scale scale) throws java.io.IOException {
+				session.put(tankOf(event), event.ss(), Timetag.of(event.ts(), scale), event.format(), event);
+			}
+
+			public void flush() {
+				session.flush();
+			}
+
+			public void push(File dataHubStage) {
+				session.close();
+				sessionHandler.pushTo(dataHubStage);
+				//connector.sendEvent("service.ness.push", new Event(new systems.intino.eventsourcing.message.Message("Push").set("stage", temporalStage.getName())));
+			}
+
+			public void push(String host, String user, String dataHubStageAbsolutePath) {
+				session.close();
+				try {
+					List<File> files = allFilesIn(temporalStage.toPath(), path -> path.getName().endsWith(systems.intino.eventsourcing.session.Session.SessionExtension)).collect(Collectors.toList());
+					upload(files, host, user, dataHubStageAbsolutePath);
+					temporalStage.renameTo(new File(temporalStage.getParentFile(), temporalStage.getName() + ".treated"));
+				} catch(Exception e) {
+					Logger.error(e);
+				}
+			}
+
+			private static Stream<File> allFilesIn(java.nio.file.Path path, java.util.function.Predicate<File> filter) throws Exception {
+				Stream.Builder<File> streamBuilder = Stream.builder();
+				try (Stream<java.nio.file.Path> paths = java.nio.file.Files.walk(path)) {
+					paths.filter(p -> java.nio.file.Files.isRegularFile(p) && filter.test(p.toFile())).forEach(p -> streamBuilder.add(p.toFile()));
+				}
+				return streamBuilder.build();
+			}
+
+			public synchronized void seal() {
+				connector.requestResponse("service.ness.seal", request("Seal", Map.of("stage", temporalStage.getName())));
+			}
+
+			private void upload(List<File> sessions, String host, String user, String dataHubStageAbsolutePath) {
+				try {
+					String connectionChain = user + "@" + host + ":" + dataHubStageAbsolutePath;
+					Logger.info("Uploading sessions to " + connectionChain + "...");
+					for (File s : sessions) {
+						Process process = new ProcessBuilder("scp", s.getAbsolutePath(), connectionChain)
+								.inheritIO()
+								.start();
+						process.waitFor(1, java.util.concurrent.TimeUnit.HOURS);
+					}
+					Logger.info("sessions uploaded");
+				} catch (java.io.IOException | InterruptedException ignored) {
+				}
+
+			}
+
+			private String tankOf(Event event) {
+				$publish+tankOf...[$NL]
+				return event.type();
+			}
+		}
+
+		public static class Config {
+			private int eventsBufferSize = 1_000_000;
+			private int setsBufferSize = 1_000_000;
+			private Scale scale = Scale.$scale;
+
+			public Config scale(Scale scale) {
+				this.scale = scale;
+				return this;
+			}
+
+			public Config eventsBufferSize(int eventsBufferSize) {
+				this.eventsBufferSize = eventsBufferSize;
+				return this;
+			}
+
+			public Config setsBufferSize(int setsBufferSize) {
+				this.setsBufferSize = setsBufferSize;
+				return this;
+			}
+		}
+
+		$message+interface...[$NL$NL]
+		$resource+interface...[$NL$NL]
+		$processstatus+interface...[$NL$NL]
+	}
+
+rule trigger(retryConfigField)
+	private final ConnectionConfig connectionConfig;
+
+
+rule trigger(constructor)
+	public $terminal+snakeCaseToCamelCase+firstUpperCase(systems.intino.eventsourcing.datahubterminal.Connector connector, ConnectionConfig connectionConfig) {
+		this.connector = connector;
+		this.connectionConfig = connectionConfig;
+		this.datamart = new $package.$name+FirstUpperCase~Datamart(connector, connectionConfig);
+	}
+
+
+rule trigger(init)
+	this.sourceSelector = sourceSelector;
+	datamart.init(sourceSelector);
+	addDatamartSubscribers(sourceSelector);
+
+rule trigger(retryConfigAssign)
+	this.connectionConfig = connectionConfig;
+
+rule trigger(retryConfigDefault)
+	new ConnectionConfig()
+
+rule type(datamart) and trigger(declaration)
+	private volatile $package.$name+FirstUpperCase~Datamart datamart;
+
+rule type(datamart) and trigger(instantiate)
+
+
+rule type(datamart) and trigger(getter)
+	public $package.$name+FirstUpperCase~Datamart datamart() {
+		return datamart;
+	}
+
+rule type(datamart) and trigger(addDatamartSubscribers)
+	private void addDatamartSubscribers(String sourceSelector) {
+		addDatamartEventSubscribers(sourceSelector,  ts -> ts.isAfter(datamart.core$$().ts()));
+		connector.attachListener("service.ness.datamarts.notifications", null, (m, c) -> new Thread(() -> manageDatamartMessage(m)).start());
+		connector.attachListener("service.ness.datamarts", null, (m, c) -> new Thread(() -> manageDatamartMessage(m)).start());
+	}
+
+	private void addDatamartEventSubscribers(String sourceSelector, java.util.function.Predicate<Instant> predicate) {
+		this.datamartConsumers.clear();
+		java.util.function.BiConsumer subscriber;
+		<<$devent+addSubscribe...[$NL]>>
+	}
+
+	private final Object monitor = new Object();
+
+	private synchronized void manageDatamartMessage(String message) {
+		synchronized(monitor) {
+			JsonObject jsonObject = Json.fromJson(message, JsonObject.class);
+			String operation = jsonObject.getAsJsonPrimitive("operation").getAsString();
+			if (operation.equals("reload")) {
+				this.datamartConsumers.forEach(c -> consumers.get(c).forEach(connector::detachListeners));
+				datamart.init(this.sourceSelector);
+				addDatamartEventSubscribers(this.sourceSelector, ts -> ts.isAfter(datamart.core$$().ts()));
+			} else if (operation.equals("refresh"))
+				jsonObject.get("changes").getAsJsonArray().asList().stream()
+					.map(e -> e.getAsString())
+					.forEach(n -> datamart.core$$().handleDatahubNotification(n));
+		}
+	}
+
+rule type(devent) and trigger(addSubscribe)
+	subscriber = ($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer) (event, topic) -> datamart.core$$().mount(event);
+	datamartConsumers.add(subscriber);
+	subscribe(($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer) subscriber, connector.clientId() + "_$datamart_$message", predicate, sourceSelector);
+
+rule type(resource) and trigger(publishSwitchCase)
+	case "$typename+FirstUpperCase": publish(($type) event); break;
+
+
+rule trigger(publishSwitchCase)
+	case "$typename+FirstUpperCase": publish((event instanceof $type e ? e : new $type(((systems.intino.eventsourcing.event.message.MessageEvent) event).toMessage()))); break;
+
+rule trigger(channelOfSwitchCase)
+	case "$typename+FirstUpperCase" -> "$channel";
+
+rule not type(bpm) and trigger(tankOf)
+	if (event instanceof $type) return "$channel";
+
+rule type(bpm) and trigger(publish)
+	public void publish($type e) {
+		connector.sendEvent("$channel", e);
+	}
+
+
+rule not type(bpm) and trigger(publish)
+	public void publish($type e) {
+		connector.sendEvent("$channel", e);
+	}
+
+	public void publish($type first, $type ...others) {
+		$type[] array = new $type[1 + others.length];
+		array[0] = first;
+		java.lang.System.arraycopy(others, 0, array, 1, others.length);
+		publish(array);
+	}
+
+	public void publish($type[] events) {
+		connector.sendEvents("$channel", java.util.Arrays.asList(events));
+	}
+
+rule type(bpm) and trigger(subscribe)
+	public void subscribe(ProcessStatusConsumer onEventReceived, String subscriberId) {
+		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new io.intino.alexandria.bpm.ProcessStatus(((MessageEvent) event).toMessage()), "$channel");} catch(Throwable e) { Logger.error(e); }}));
+		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0));
+	}
+
+	public void subscribe(ProcessStatusConsumer onEventReceived, String subscriberId, java.util.function.Predicate<Instant> filter) {
+		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new io.intino.alexandria.bpm.ProcessStatus(((MessageEvent) event).toMessage()), "$channel");} catch(Throwable e) { Logger.error(e); }}));
+		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), filter);
+	}
+
+	public void subscribe(ProcessStatusConsumer onEventReceived) {
+		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new io.intino.alexandria.bpm.ProcessStatus(((MessageEvent) event).toMessage()), "$channel");} catch(Throwable e) { Logger.error(e); }}));
+		connector.attachListener("$channel", consumers.get(onEventReceived).get(0));
+	}
+
+	public void unsubscribe(ProcessStatusConsumer onEventReceived) {
+		consumers.get(onEventReceived).forEach(connector::detachListeners);
+	}
+
+
+rule type(message) and trigger(subscribe)
+	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId) {
+		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type((MessageEvent) event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
+		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0));
+	}
+
+	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId, String sourceSelector) {
+		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type((MessageEvent) event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
+		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), sourceSelector);
+	}
+
+	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId, java.util.function.Predicate<Instant> filter, String sourceSelector) {
+		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type((MessageEvent) event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
+		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), filter, sourceSelector);
+	}
+
+	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived) {
+		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type((MessageEvent) event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
+		connector.attachListener("$channel", consumers.get(onEventReceived).get(0));
+	}
+
+	public void unsubscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived) {
+		consumers.get(onEventReceived).forEach(connector::detachListeners);
+	}
+
+rule type(resource) and trigger(subscribe)
+	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId) {
+		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type((systems.intino.eventsourcing.event.resource.ResourceEvent) event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
+		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0));
+	}
+
+	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId, java.util.function.Predicate<Instant> filter) {
+		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type((systems.intino.eventsourcing.event.resource.ResourceEvent) event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
+		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), filter);
+	}
+
+	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived) {
+		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type((systems.intino.eventsourcing.event.resource.ResourceEvent) event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
+		connector.attachListener("$channel", consumers.get(onEventReceived).get(0));
+	}
+
+	public void unsubscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived) {
+		consumers.get(onEventReceived).forEach(connector::detachListeners);
+	}
+
+rule trigger(quoted)
+	"$this"
+
+rule trigger(interface)
+	public interface $namespaceQn+firstUpperCase$name+firstUpperCase~Consumer extends java.util.function.BiConsumer<$type, String> {
+	}

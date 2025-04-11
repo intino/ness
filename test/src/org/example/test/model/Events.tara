@@ -1,11 +1,10 @@
 dsl Ness
 
 Namespace analysis
-	Sensor Analysis
-		Magnitude("availability") availability > Attribute("100") max; Attribute("0") min; Attribute("%") unit;Attribute("avg") operator; Attribute("DOWN") tail; Attribute("Poisson") distribution;
-//		Magnitude("no availability") noAvailability > Attribute("100") max; Attribute("0") min; Attribute("%") unit;Attribute("avg") operator; Attribute("UP") tail; Attribute("Poisson") distribution;
-		Magnitude("health") health > Attribute("100") max; Attribute("0") min; Attribute("%") unit;Attribute("%,.0f") format; Attribute("avg") operator; Attribute("DOWN") tail; Attribute("Poisson") distribution;
-		Magnitude("risk") risk > Attribute("100") max; Attribute("0") min; Attribute("%") unit;Attribute("%,.0f") format; Attribute("avg") operator; Attribute("UP") tail; Attribute("Poisson") distribution;
+	Message Analysis
+		Attribute availability as Real > Metadata("100") max; Metadata("0") min; Metadata("%") unit;Metadata("avg") operator; Metadata("DOWN") tail; Metadata("Poisson") distribution;
+		Attribute health as Real > Metadata("100") max; Metadata("0") min; Metadata("%") unit;Metadata("%,.0f") format; Metadata("avg") operator; Metadata("DOWN") tail; Metadata("Poisson") distribution;
+		Attribute risk as Real > Metadata("100") max; Metadata("0") min; Metadata("%") unit;Metadata("%,.0f") format; Metadata("avg") operator; Metadata("UP") tail; Metadata("Poisson") distribution;
 
 Namespace actuation
 	Message ActivityInstalled
@@ -155,53 +154,30 @@ Namespace monitoring
 		Attribute name as Text
 		Attribute observable as Text
 
-	Sensor Camera > Magnitude("people") people > Attribute("%d") format; Attribute("count") operator; Attribute("UP") tail; Attribute("Poisson") distribution;
+	Message Camera > Attribute people as Real > Metadata("%d") format; Metadata("count") operator; Metadata("UP") tail; Metadata("Poisson") distribution;
 
-	Sensor Wireless
-		Magnitude("connection.failed.association") assoc > Attribute("%d") format; Attribute("sum") operator; Attribute("UP") tail; Attribute("Poisson") distribution;
-		Magnitude("connection.failed.authentication") auth > Attribute("%d") format; Attribute("sum") operator; Attribute("UP") tail; Attribute("Poisson") distribution;
-		Magnitude("connection.failed.dhcp") dhcp > Attribute("%d") format; Attribute("sum") operator; Attribute("UP") tail; Attribute("Poisson") distribution;
-		Magnitude("connection.failed.dns") dns > Attribute("%d") format; Attribute("sum") operator; Attribute("UP") tail; Attribute("Poisson") distribution;
-		Magnitude("connection.sucess") success > Attribute("%d") format; Attribute("sum") operator; Attribute("DOWN") tail; Attribute("Normal") distribution;
+	Message Wireless
+		Attribute connection_failed_association as Real > Metadata("%d") format; Metadata("sum") operator; Metadata("UP") tail; Metadata("Poisson") distribution;
+		Attribute connection_failed_authentication as Real > Metadata("%d") format; Metadata("sum") operator; Metadata("UP") tail; Metadata("Poisson") distribution;
+		Attribute connection_failed_dhcp as Real > Metadata("%d") format; Metadata("sum") operator; Metadata("UP") tail; Metadata("Poisson") distribution;
+		Attribute connection_failed_dns as Real > Metadata("%d") format; Metadata("sum") operator; Metadata("UP") tail; Metadata("Poisson") distribution;
+		Attribute connection_success as Real > Metadata("%d") format; Metadata("sum") operator; Metadata("DOWN") tail; Metadata("Normal") distribution;
 
-	Sensor CellularGateway
-		Magnitude("power") power > Attribute("%.1f") format; Attribute("avg") operator; Attribute("DOWN") tail; Attribute("Normal") distribution;
-		Magnitude("quality") quality > Attribute("%.1f") format; Attribute("avg") operator; Attribute("DOWN") tail; Attribute("Normal") distribution;
+	Message CellularGateway
+		Attribute power as Real > Metadata("%.1f") format; Metadata("avg") operator; Metadata("DOWN") tail; Metadata("Normal") distribution;
+		Attribute quality as Real > Metadata("%.1f") format; Metadata("avg") operator; Metadata("DOWN") tail; Metadata("Normal") distribution;
 
-	Sensor Switch
-		Magnitude("data.received") dataReceived > Attribute("MB") unit; Attribute("%,.0f") format; Attribute("sum") operator; Attribute("UP") tail;
-		Magnitude("data.sent") dataSent > Attribute("MB") unit; Attribute("%,.0f") format; Attribute("sum") operator; Attribute("UP") tail;
-		Magnitude("usage.ports") usagePorts > Attribute("%d") format; Attribute("last") operator; Attribute("UP") tail; Attribute("Normal") distribution;
-		Magnitude("clients") clients > Attribute("%d") format; Attribute("last") operator; Attribute("UP") tail; Attribute("Normal") distribution;
+	Message Switch
+		Attribute dataReceived as Real  > Metadata("MB") unit; Metadata("%,.0f") format; Metadata("sum") operator; Metadata("UP") tail;
+		Attribute dataSent as Real > Metadata("MB") unit; Metadata("%,.0f") format; Metadata("sum") operator; Metadata("UP") tail;
+		Attribute usagePorts as Real > Metadata("%d") format; Metadata("last") operator; Metadata("UP") tail; Metadata("Normal") distribution;
+		Attribute clients as Real > Metadata("%d") format; Metadata("last") operator; Metadata("UP") tail; Metadata("Normal") distribution;
 
-	Sensor Computer
-		Magnitude("usage.RAM") usageRAM > Attribute("MB") unit; Attribute("%,.2f") format; Attribute("avg") operator; Attribute("UP") tail; Attribute("Normal") distribution;
-		Magnitude("usage.HDD") usageHDD > Attribute("MB") unit; Attribute("%,.2f") format; Attribute("avg") operator; Attribute("UP") tail; Attribute("Normal") distribution
-		Magnitude("usage.CPU") usageCPU > Attribute("%") unit; Attribute("%,.2f") format; Attribute("avg") operator; Attribute("UP") tail; Attribute("Normal") distribution;
-		Magnitude("usage.system") usageSystem > Attribute("%,.2f") format; Attribute("avg") operator; Attribute("UP") tail; Attribute("Normal") distribution;
-		Magnitude("usage.threads") usageThreads > Attribute("%d") format; Attribute("last") operator; Attribute("UP") tail; Attribute("Normal") distribution;
-		Magnitude("usage.files") usageFiles > Attribute("%d") format; Attribute("avg") operator; Attribute("UP") tail; Attribute("Normal") distribution;
-		Magnitude("temperature.kernel") temperatureKernel > Attribute("ºC") unit; Attribute("%,.0f") format; Attribute("avg") operator; Attribute("UP") tail; Attribute("Normal") distribution;
-		Magnitude("temperature.external") temperatureExternal > Attribute("ºC") unit; Attribute("%,.0f") format; Attribute("avg") operator; Attribute("UP") tail; Attribute("Normal") distribution;
-		Magnitude("data.received") dataReceived > Attribute("MB") unit; Attribute("%,.0f") format; Attribute("sum") operator; Attribute("UP") tail;
-		Magnitude("data.sent") dataSent > Attribute("MB") unit; Attribute("%,.0f") format; Attribute("sum") operator; Attribute("UP") tail;
-		Magnitude("applications.system") applicationsSystem > Attribute("%d") format; Attribute("last") operator; Attribute("UP") tail; Attribute("Normal") distribution;
-		Magnitude("applications.known") applicationsKnown > Attribute("%d") format; Attribute("last") operator; Attribute("UP") tail;
-		Magnitude("applications.unknown") applicationsUnknown > Attribute("%d") format; Attribute("last") operator; Attribute("UP") tail;
-
-	Sensor Application
-		Magnitude("usage.RAM") usageRAM > Attribute("MB") unit; Attribute("%,.2f") format; Attribute("avg") operator; Attribute("UP") tail; Attribute("Normal") distribution;
-		Magnitude("usage.CPU") usageCPU > Attribute("%") unit; Attribute("%,.2f") format; Attribute("avg") operator; Attribute("100") max; Attribute("UP") tail;
-		Magnitude("usage.threads") usageThreads > Attribute("%d") format; Attribute("avg") operator; Attribute("UP") tail; Attribute("Normal") distribution;
-		Magnitude("usage.files") usageFiles > Attribute("%d") format; Attribute("avg") operator; Attribute("UP") tail; Attribute("Normal") distribution;
-		Magnitude("data.read") dataRead > Attribute("MB") unit; Attribute("%,.0f") format; Attribute("avg") operator; Attribute("UP") tail;
-		Magnitude("data.written") dataWritten > Attribute("MB") unit; Attribute("%,.0f") format; Attribute("avg") operator; Attribute("UP") tail;
-
-	Sensor RdbmsStatement
-		Magnitude("usage.executions") usageExecutions > Attribute("%,.0f") format; Attribute("UP") tail; Attribute("Normal") distribution;
-		Magnitude("usage.logical.reads") usageLogicalReads > Attribute("%,.0f") format; Attribute("UP") tail; Attribute("Normal") distribution;
-		Magnitude("usage.logical.writes") usageLogicalWrites > Attribute("%,.0f") format; Attribute("UP") tail; Attribute("Normal") distribution;
-		Magnitude("time.CPU") timeCPU > Attribute("seconds") unit; Attribute("%,.0f") format; Attribute("UP") tail; Attribute("Normal") distribution;
-		Magnitude("time.elapsed") timeElapsed > Attribute("seconds") unit; Attribute("UP") tail; Attribute("%,.0f") format
+	Message RdbmsStatement
+		Attribute usageExecutions as Real > Metadata("%,.0f") format; Metadata("UP") tail; Metadata("Normal") distribution;
+		Attribute usageLogicalReads as Real > Metadata("%,.0f") format; Metadata("UP") tail; Metadata("Normal") distribution;
+		Attribute usageLogicalWrites as Real > Metadata("%,.0f") format; Metadata("UP") tail; Metadata("Normal") distribution;
+		Attribute timeCPU as Real > Metadata("seconds") unit; Metadata("%,.0f") format; Metadata("UP") tail; Metadata("Normal") distribution;
+		Attribute timeElapsed as Real > Metadata("seconds") unit; Metadata("UP") tail; Metadata("%,.0f") format
 
 

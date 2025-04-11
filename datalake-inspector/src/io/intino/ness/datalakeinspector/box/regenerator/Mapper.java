@@ -1,8 +1,8 @@
 package io.intino.ness.datalakeinspector.box.regenerator;
 
 
-import io.intino.alexandria.event.Event;
 import io.intino.ness.datalakeinspector.box.pump.EventPump;
+import systems.intino.eventsourcing.event.Event;
 
 import java.util.function.Function;
 

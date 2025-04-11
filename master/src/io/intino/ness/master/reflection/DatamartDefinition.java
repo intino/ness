@@ -6,9 +6,7 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public interface DatamartDefinition {
 
@@ -22,7 +20,7 @@ public interface DatamartDefinition {
 		return concepts;
 	}
 
-	Query<EntityDefinition> entities();
+	Query<SubjectDefinition> entities();
 
 	Query<StructDefinition> structs();
 
@@ -30,7 +28,7 @@ public interface DatamartDefinition {
 		return concepts().stream().filter(e -> e.fullName().equals(fullName)).findFirst();
 	}
 
-	default Optional<EntityDefinition> entity(String fullName) {
+	default Optional<SubjectDefinition> entity(String fullName) {
 		return entities().stream().filter(e -> e.fullName().equals(fullName)).findFirst();
 	}
 

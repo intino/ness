@@ -1,10 +1,10 @@
-import io.intino.alexandria.jms.BrokerConnector;
-import io.intino.alexandria.jms.ConnectionConfig;
-import io.intino.alexandria.jms.ConnectionListener;
 import io.intino.alexandria.logger.Logger;
 import jakarta.jms.*;
 import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.log4j.Level;
+import systems.intino.eventsourcing.jms.BrokerConnector;
+import systems.intino.eventsourcing.jms.ConnectionConfig;
+import systems.intino.eventsourcing.jms.ConnectionListener;
 
 public class BridgeTest {
 

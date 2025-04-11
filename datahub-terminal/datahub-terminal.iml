@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module io.intino.tara.isIntinoModule="true" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_21" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" scope="PROVIDED" name="Intino: systems.intino.datamarts:subject-store:1.0.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Intino: org.slf4j:slf4j-nop:2.0.16" level="project" />
+    <orderEntry type="library" name="Intino: org.slf4j:slf4j-api:2.0.16" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Intino: org.xerial:sqlite-jdbc:3.49.1.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Intino: com.tdunning:t-digest:3.3" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Intino: com.zaxxer:HikariCP:6.3.0" level="project" />
+    <orderEntry type="library" name="Intino: systems.intino.eventsourcing:datalake:7.1.0" level="project" />
+    <orderEntry type="library" name="Intino: systems.intino.eventsourcing:event:5.1.0" level="project" />
+    <orderEntry type="library" name="Intino: systems.intino.eventsourcing:zim:5.1.2" level="project" />
+    <orderEntry type="library" name="Intino: systems.intino.eventsourcing:message:4.1.2" level="project" />
+    <orderEntry type="library" name="Intino: com.github.luben:zstd-jni:1.5.6-10" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:iterator-stream:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:resource-cleaner:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:primitives:1.1.4" level="project" />
+    <orderEntry type="library" name="Intino: systems.intino.eventsourcing:jms:2.1.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:logger:2.1.0" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:exceptions:2.1.2" level="project" />
+    <orderEntry type="library" name="Intino: org.apache.activemq:activemq-client:6.1.6" level="project" />
+    <orderEntry type="library" name="Intino: jakarta.jms:jakarta.jms-api:3.1.0" level="project" />
+    <orderEntry type="library" name="Intino: org.fusesource.hawtbuf:hawtbuf:1.11" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:json:1.2.3" level="project" />
+    <orderEntry type="library" name="Intino: com.google.code.gson:gson:2.10.1" level="project" />
+    <orderEntry type="library" name="Intino: io.intino.alexandria:logger4j:1.1.0" level="project" />
+    <orderEntry type="library" name="Intino: org.slf4j:slf4j-reload4j:2.0.12" level="project" />
+    <orderEntry type="library" name="Intino: ch.qos.reload4j:reload4j:1.2.22" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: junit:junit:4.13.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: org.hamcrest:hamcrest-core:1.3" level="project" />
+  </component>
+</module>

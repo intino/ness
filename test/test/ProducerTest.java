@@ -1,6 +1,3 @@
-import io.intino.alexandria.jms.BrokerConnector;
-import io.intino.alexandria.jms.ConnectionConfig;
-import io.intino.alexandria.jms.ConnectionListener;
 import io.intino.alexandria.logger.Logger;
 import jakarta.jms.Connection;
 import jakarta.jms.JMSException;
@@ -8,6 +5,9 @@ import jakarta.jms.MessageProducer;
 import jakarta.jms.Session;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.activemq.command.ActiveMQTopic;
+import systems.intino.eventsourcing.jms.BrokerConnector;
+import systems.intino.eventsourcing.jms.ConnectionConfig;
+import systems.intino.eventsourcing.jms.ConnectionListener;
 
 public class ProducerTest {
 

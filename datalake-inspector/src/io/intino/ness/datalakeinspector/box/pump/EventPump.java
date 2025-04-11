@@ -1,9 +1,9 @@
 package io.intino.ness.datalakeinspector.box.pump;
 
 import io.intino.alexandria.Timetag;
-import io.intino.alexandria.datalake.Datalake.Store.Source;
-import io.intino.alexandria.datalake.Datalake.Store.Tank;
-import io.intino.alexandria.event.Event;
+import systems.intino.eventsourcing.datalake.Datalake.Store.Source;
+import systems.intino.eventsourcing.datalake.Datalake.Store.Tank;
+import systems.intino.eventsourcing.event.Event;
 
 
 public interface EventPump {

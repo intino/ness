@@ -1,0 +1,182 @@
+rule type(subject, root)
+	package $package.subjects;
+
+	import java.time.*;
+	import java.util.*;
+	import java.util.stream.*;
+	import systems.intino.eventsourcing.datahubterminal.datamart.SubjectNode;
+
+	public class $name+FirstUpperCase <<extends $parent ?extends systems.intino.eventsourcing.datahubterminal.datamart.SubjectWrapper >>{
+		<<$attribute+wordDeclaration...[$NL]>>
+
+		public $abstract~$name+FirstUpperCase(SubjectNode node) {
+			super(node);
+		}
+
+		<<$attribute+getter...[$NL$NL]>>
+
+		<<$expression+expressionDeclaration...[$NL$NL]>>
+
+		<<$struct+getter...[$NL$NL]>>
+
+    	<<$struct+class...[$NL$NL]>>
+    }
+
+rule type(struct) and trigger(class)
+	public class $name+firstUpperCase {
+		private final String prefix;
+
+		public $name+FirstUpperCase(String prefix) {
+			this.prefix = prefix;
+		}
+
+		<<$attribute+getter...[$NL$NL]>>
+
+		<<$struct+getter...[$NL$NL]>>
+
+		<<$struct+class...[$NL$NL]>>
+	}
+
+rule trigger(constructor)
+	String prefix;
+
+
+
+rule trigger(super)
+	super(index)
+
+rule type(struct, multiple) and trigger(getter)
+	public java.util.stream.Stream<$name+firstUpperCase> $name+firstLowerCase+Plural() {
+		Iterator<$name+firstUpperCase> iterator = new Iterator<>() {
+			private int next = 0;
+			private String value = core.currentText(<<$isStruct+prefix ?"$name+firstUpperCase." + >>next + ".");
+
+			@Override
+			public boolean hasNext() {
+				return value != null;
+			}
+
+			@Override
+			public $name+firstUpperCase next() {
+				if (value == null) return null;
+				var currentValue = new $name+firstUpperCase(<<$isStruct+prefix ?"$name+firstUpperCase." + >>next + ".");
+				this.next++;
+				this.value = core.currentText(<<$isStruct+prefix ?"$name+firstUpperCase." + >>next + ".");
+				return currentValue;
+			}
+		};
+		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false);
+	}
+
+rule type(struct) and trigger(getter)
+	public $name+firstUpperCase $name+firstLowerCase() {
+		return new $name+firstUpperCase(<<$isStruct+prefix?"$name+firstUpperCase" + ".">>);
+	}
+
+rule type(attribute, multiple, text) and trigger(getter)
+	public java.util.List<String> $name+firstLowerCase() {
+		String value = core.currentText(<<$isStruct+prefix >>"$name");
+		return value == null ? java.util.Collections.emptyList() : java.util.List.of(value.split("\\0"));
+	}
+
+rule type(attribute, multiple, word) and trigger(getter)
+	public java.util.List<$name+FirstUpperCase> $name+firstLowerCase() {
+		String value = core.currentText(<<$isStruct+prefix >>"$name");
+		return value == null ? java.util.Collections.emptyList() : java.util.Arrays.stream(value.split("\\0")).map(v -> $name+FirstUpperCase.valueOf(v)).toList();
+	}
+
+rule type(attribute, multiple, real) and trigger(getter)
+	public java.util.List<Double> $name+firstLowerCase() {
+	String value = core.currentText(<<$isStruct+prefix >>"$name");
+	return value == null ? java.util.Collections.emptyList() : java.util.Arrays.stream(value.split("\\0")).map(v -> Double.parseDouble(v)).toList();
+	}
+
+rule type(attribute, multiple, integer) and trigger(getter)
+	public java.util.List<Integer> $name+firstLowerCase() {
+		String value = core.currentText(<<$isStruct+prefix >>"$name");
+		return value == null ? java.util.Collections.emptyList() : java.util.Arrays.stream(value.split("\\0")).map(v -> Integer.parseInt(v)).toList();
+	}
+
+rule type(attribute, multiple, longInteger) and trigger(getter)
+	public java.util.List<Long> $name+firstLowerCase() {
+		String value = core.currentText(<<$isStruct+prefix >>"$name");
+		return value == null ? java.util.Collections.emptyList() : java.util.Arrays.stream(value.split("\\0")).map(v -> Long.parseLong(v)).toList();
+	}
+
+rule type(attribute, multiple, bool) and trigger(getter)
+	public Boolean $name+firstLowerCase() {
+		String value = core.currentText(<<$isStruct+prefix >>"$name");
+		return value == null ? java.util.Collections.emptyList() : java.util.Arrays.stream(value.split("\\0")).map(v ->v.equals("0")).toList();
+	}
+
+rule type(attribute, multiple, date) and trigger(getter)
+	public java.util.Date $name+firstLowerCase() {
+		return new java.util.Date(core.currentNumber(<<$isStruct+prefix >>"$name").longValue());
+	}
+
+rule type(attribute) and (type(instant) or type(dateTime)) and trigger(getter)
+	public Instant $name+firstLowerCase() {
+		return java.time.Instant.ofEpochMilli(core.currentNumber(<<$isStruct+prefix >>"$name").longValue());
+	}
+
+rule type(attribute, subject) and trigger(getter)
+	public $targetType+FirstUpperCase $name+firstLowerCase() {
+		return new $targetType+FirstUpperCase(core.datamart().getSubject("$targetType", core.currentText(<<$isStruct+prefix >>"$name")));
+	}
+
+rule type(attribute, text) and trigger(getter)
+	public $type $name+firstLowerCase() {
+		return core.currentText(<<$isStruct+prefix >>"$name");
+	}
+
+rule type(attribute, word) and trigger(getter)
+	public $name+FirstUpperCase $name+firstLowerCase() {
+		String value = core.currentText(<<$isStruct+prefix >>"$name");
+		return value == null ? null : $name+FirstUpperCase.valueOf(value);
+	}
+
+rule type(attribute) and type(real) and trigger(getter)
+	public Double $name+firstLowerCase() {
+		return core.currentNumber(<<$isStruct+prefix >>"$name");
+	}
+
+rule type(attribute) and type(integer) and trigger(getter)
+	public Integer $name+firstLowerCase() {
+		return core.currentNumber(<<$isStruct+prefix >>"$name").intValue();
+	}
+
+rule type(attribute) and type(long) and trigger(getter)
+	public Long $name+firstLowerCase() {
+		return core.currentNumber(<<$isStruct+prefix >>"$name").longValue();
+	}
+
+rule type(attribute) and type(boolean) and trigger(getter)
+	public Boolean $name+firstLowerCase() {
+		return core.currentNumber("$name).intValue != 0;
+	}
+
+rule type(attribute) and type(date) and trigger(getter)
+	public java.util.Date $name+firstLowerCase() {
+		return new java.util.Date(core.currentNumber(<<$isStruct+prefix >>"$name").longValue());
+	}
+
+rule type(attribute) and (type(instant) or type(dateTime)) and trigger(getter)
+	public Instant $name+firstLowerCase() {
+		return java.time.Instant.ofEpochMilli(core.currentNumber(<<$isStruct+prefix >>"$name").longValue());
+	}
+
+rule attribute(this, true) and trigger(isAbstract)
+	abstract
+
+rule type(word) and trigger(wordDeclaration)
+	public enum $name+FirstUpperCase {
+		$words...[, ]
+	}
+
+rule trigger(prefix)
+	prefix +
+
+rule trigger(wordDeclaration)
+
+rule trigger(empty)
+	;
