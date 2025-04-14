@@ -8,8 +8,8 @@ rule trigger(event)
 		<<$attribute+declaration...[$NL]>>
 		<<$component+declaration...[$NL]>>
 
-		public $name+firstUpperCase(String ss<<, String $assertionId>>) {
-			this(new systems.intino.eventsourcing.event.message.MessageEvent("$name", ss).toMessage()<<, $assertionId>>);
+		public $name+firstUpperCase(String ss<<, String $subjectId>>) {
+			this(new systems.intino.eventsourcing.event.message.MessageEvent("$name", ss).toMessage()<<, $subjectId>>);
 		}
 
 		public $name+firstUpperCase(systems.intino.eventsourcing.event.message.MessageEvent event) {
@@ -17,15 +17,15 @@ rule trigger(event)
 		}
 
 		public $name+firstUpperCase(systems.intino.eventsourcing.message.Message message) {
-			<<this(message, message.get("$assertionId").asString())?super(message)>>;
+			<<this(message, message.get("$subjectId").asString())?super(message)>>;
 		}
 
 		private $name+firstUpperCase(systems.intino.eventsourcing.message.Message message, String id) {
-			super(message.set("id", java.util.Objects.requireNonNull(id, "Assertion Id cannot be null")));
+			super(message.set("subject", java.util.Objects.requireNonNull(id, "Assertion Id cannot be null")));
 		}
 
-		<<public String id() {
-			return message.get("$assertionId").asString();
+		<<public String subject() {
+			return message.get("$subjectId").asString();
 		}>>
 
 		public $name+firstUpperCase ts(java.time.Instant ts) {
@@ -38,7 +38,7 @@ rule trigger(event)
 			return this;
 		}
 
-		<<$assertionInfo+enabledGetterAndSetter>>
+		<<$subjectInfo+enabledGetterAndSetter>>
 
 		public static $name+firstUpperCase fromString(String event) {
 			return new $name+firstUpperCase(new systems.intino.eventsourcing.message.MessageReader(event).next());
@@ -74,7 +74,7 @@ rule trigger(enabledGetterAndSetter)
 
 rule trigger(put)
 	if ($this == null) throw new IllegalArgumentException("Assertion Id cannot be null");
-	this.message.set("id", $this);
+	this.message.set("subject", $this);
 
 rule trigger(component)
 	public static class $name+firstUpperCase <<extends $parent>> implements java.io.Serializable {

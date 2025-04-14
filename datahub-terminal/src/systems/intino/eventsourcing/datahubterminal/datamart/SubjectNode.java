@@ -1,7 +1,7 @@
 package systems.intino.eventsourcing.datahubterminal.datamart;
 
 import io.intino.alexandria.logger.Logger;
-import systems.intino.alexandria.datamarts.SubjectStore;
+import systems.intino.datamarts.subjectstore.SubjectStore;
 
 import java.io.Closeable;
 import java.io.File;
@@ -61,18 +61,18 @@ public class SubjectNode implements Closeable {
 	}
 
 	public void update(Instant ts, String ss, Map<String, Object> values) {
-		SubjectStore.Transaction feed = store.feed(ts, ss);
+		SubjectStore.Transaction feed = store.on(ts, ss);
 		values.forEach((k, v) -> {
 			switch (v) {
-				case Number n -> feed.add(k, (double) n);
-				case String s -> feed.add(k, s);
-				case Boolean b -> feed.add(k, !b ? 0 : 1);
-				case Instant i -> feed.add(k, i.toEpochMilli());
-				case List<?> l -> feed.add(k, l.stream().map(Object::toString).collect(Collectors.joining("\0")));
-				default -> feed.add(k, v.toString());
+				case Number n -> feed.put(k, (double) n);
+				case String s -> feed.put(k, s);
+				case Boolean b -> feed.put(k, !b ? 0 : 1);
+				case Instant i -> feed.put(k, i.toEpochMilli());
+				case List<?> l -> feed.put(k, l.stream().map(Object::toString).collect(Collectors.joining("\0")));
+				default -> feed.put(k, v.toString());
 			}
 		});
-		feed.terminate();
+		feed.commit();
 	}
 
 	public Datamart datamart() {
@@ -85,7 +85,7 @@ public class SubjectNode implements Closeable {
 
 	private SubjectStore store() {
 		if (this.store != null) return this.store;
-		if (this.file != null) return new SubjectStore(this.file, id);
+		if (this.file != null) return new SubjectStore(id, this.file);
 		this.store = downloadStore();
 		return this.store;
 	}

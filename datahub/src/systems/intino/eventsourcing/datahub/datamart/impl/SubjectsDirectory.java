@@ -2,7 +2,7 @@ package systems.intino.eventsourcing.datahub.datamart.impl;
 
 import io.intino.alexandria.logger.Logger;
 import org.apache.commons.io.FileUtils;
-import systems.intino.alexandria.datamarts.SubjectStore;
+import systems.intino.datamarts.subjectstore.SubjectStore;
 import systems.intino.eventsourcing.datahub.box.DatahubBox;
 import systems.intino.eventsourcing.datahub.model.Datalake;
 import systems.intino.eventsourcing.datahub.model.Datamart;
@@ -18,7 +18,6 @@ import static java.util.Collections.emptyList;
 import static systems.intino.eventsourcing.datahub.datamart.DatamartUtils.types;
 import static systems.intino.eventsourcing.datahub.datamart.MasterDatamart.normalizePath;
 
-
 public class SubjectsDirectory {
 	private final Set<String> subscribedEvents;
 	private final File root;
@@ -28,6 +27,7 @@ public class SubjectsDirectory {
 		subscribedEvents = types(definition.subjectList().stream()
 				.flatMap(s -> s.from().stream()))
 				.collect(Collectors.toSet());
+		boolean mkdirs = this.root.mkdirs();
 	}
 
 	protected String extension() {
@@ -35,14 +35,19 @@ public class SubjectsDirectory {
 	}
 
 	public SubjectStore get(String id) {
-		return contains(id) ? new SubjectStore(fileOf(id), id) : null;
+		return contains(id) ? new SubjectStore(id, fileOf(id)) : null;
 	}
 
-	public SubjectStore getSession(String id) {
-		return contains(id) ? new SubjectStore(sessionFileOf(id), id) : null;
+	public SubjectStore getOrCreate(String id) {
+		return new SubjectStore(id, fileOf(id));
+	}
+
+	public SubjectStore getOrCreateSession(String id) {
+		return new SubjectStore(id, sessionFileOf(id));
 	}
 
 	private File sessionFileOf(String id) {
+		root.mkdirs();
 		return new File(root, normalizePath(id + extension() + ".session"));
 	}
 
@@ -55,7 +60,7 @@ public class SubjectsDirectory {
 	}
 
 	public Stream<SubjectStore> stream() {
-		return listFiles().stream().map(s -> new SubjectStore(s, s.getName().replace(extension(), "")));
+		return listFiles().stream().map(s -> new SubjectStore(s.getName().replace(extension(), ""), s));
 	}
 
 	public void clear() {
@@ -73,6 +78,7 @@ public class SubjectsDirectory {
 	}
 
 	private File fileOf(String id) {
+		root.mkdirs();
 		return new File(root, normalizePath(id + extension()));
 	}
 

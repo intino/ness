@@ -59,10 +59,6 @@
     <orderEntry type="library" name="Intino: io.intino.magritte:builder:7.1.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.tara:builder:1.2.7" level="project" />
     <orderEntry type="library" name="Intino: systems.intino.eventsourcing:datahub:13.0.0" level="project" />
-    <orderEntry type="library" name="Intino: systems.intino.datamarts:subject-store:1.0.1" level="project" />
-    <orderEntry type="library" name="Intino: org.slf4j:slf4j-nop:2.0.16" level="project" />
-    <orderEntry type="library" name="Intino: com.tdunning:t-digest:3.3" level="project" />
-    <orderEntry type="library" name="Intino: com.zaxxer:HikariCP:6.3.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.2.2" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:zip:1.0.5" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:scheduler-framework:1.2.0" level="project" />
@@ -81,5 +77,8 @@
     <orderEntry type="library" name="Intino: org.xerial:sqlite-jdbc:3.49.0.0" level="project" />
     <orderEntry type="library" name="Intino: org.apache.activemq:activemq-client:6.1.6" level="project" />
     <orderEntry type="library" name="Intino: org.slf4j:slf4j-api:1.7.36" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:iterator-stream:1.0.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: io.intino.alexandria:resource-cleaner:1.0.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Intino: com.github.luben:zstd-jni:1.5.4-1" level="project" />
   </component>
 </module>

@@ -1,12 +1,12 @@
 package systems.intino.eventsourcing.datahub.box.actions;
 
-import systems.intino.alexandria.datamarts.SubjectStore;
+import systems.intino.datamarts.subjectstore.SubjectStore;
 import systems.intino.eventsourcing.datahub.datamart.MasterDatamart;
 
 import static java.util.stream.Collectors.joining;
 
 
-public class GetEntityAction {
+public class GetSubjectAction {
 	public systems.intino.eventsourcing.datahub.box.DatahubBox box;
 	public io.intino.alexandria.Context context = new io.intino.alexandria.Context();
 	public String id;
@@ -16,7 +16,7 @@ public class GetEntityAction {
 			SubjectStore store = d.subjectsStore().get(id);
 			if (store != null)
 				return store.tags().stream()
-						.map(t -> t + ": " + store.categoricalQuery(t).current().value())
+						.map(t -> t + ": " + store.categoricalQuery(t).get().value())
 						.collect(joining("\n"));
 		}
 		return "null";

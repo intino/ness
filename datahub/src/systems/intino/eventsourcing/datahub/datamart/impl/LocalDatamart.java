@@ -73,7 +73,7 @@ public class LocalDatamart implements MasterDatamart {
 		for (Datalake.Tank tank : box.graph().datalake().tankList())
 			tankMounters.put(tank, subjectTanks.keySet().stream()
 					.filter(subject -> subjectTanks.get(subject).contains(tank.asMessage()))
-					.map(subject -> new SubjectMounter(this, subjectTanks.get(subject))).
+					.map(subject -> new SubjectMounter(this, subject.name$(), subjectTanks.get(subject))).
 					collect(Collectors.toList()));
 		return tankMounters;
 	}

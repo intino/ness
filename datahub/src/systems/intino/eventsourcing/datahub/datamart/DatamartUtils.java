@@ -43,7 +43,7 @@ public class DatamartUtils {
 	}
 
 
-	private static String tankName(Datalake.Tank.Message e) {
+	public static String tankName(Datalake.Tank.Message e) {
 		return e == null ? null : e.message().core$().fullName().replace("$", ".");
 	}
 

@@ -5,6 +5,7 @@ Artifact("systems.intino.eventsourcing", "1.1.0") datahub-builder
 		Compile("systems.intino.eventsourcing", "datahub", "13.0.0")
 			Exclude("systems.intino.eventsourcing", "ingestion")
 			Exclude("systems.intino.eventsourcing", "sealing")
+			Exclude("systems.intino.datamarts", "subject-store")
 			Exclude("io.intino.alexandria", "exceptions")
 			Exclude("io.intino.alexandria", "jms")
 			Exclude("io.intino.alexandria", "jmx")

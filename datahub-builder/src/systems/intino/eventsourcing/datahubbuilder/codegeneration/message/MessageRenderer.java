@@ -43,8 +43,8 @@ public class MessageRenderer {
 				add("name", event.name$()).add("package", packageName).
 				add("parent", parent(event));
 		if (isUsedInSubject(event)) {
-			eventFrame.add("assertionId", "id")
-					.add("assertionInfo", new FrameBuilder("assertion").add("name", event.name$()));
+			eventFrame.add("subjectId", "subject")
+					.add("subjectInfo", new FrameBuilder("subject").add("name", event.name$()));
 		}
 		eventFrame.add("attribute", processAttributesOf(attributesOf(event), event.name$()));
 		Map<Component, Boolean> components = collectComponents(event);

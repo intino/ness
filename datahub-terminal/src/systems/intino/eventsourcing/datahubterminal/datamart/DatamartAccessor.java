@@ -4,7 +4,7 @@ import io.intino.alexandria.logger.Logger;
 import jakarta.jms.BytesMessage;
 import jakarta.jms.TextMessage;
 import org.apache.activemq.command.ActiveMQTextMessage;
-import systems.intino.alexandria.datamarts.SubjectStore;
+import systems.intino.datamarts.subjectstore.SubjectStore;
 import systems.intino.eventsourcing.datahubterminal.Connector;
 
 import java.io.File;
@@ -50,7 +50,7 @@ public class DatamartAccessor {
 			var file = getFile(textResponse);
 			if (file != null && file.exists()) {
 				localAccess = true;
-				return new SubjectStore(file, id);
+				return new SubjectStore(id, file);
 			}
 			localAccess = false;
 			response = requestResponseFromDatahub("get-subject=" + id, request(id, "download"));
@@ -80,7 +80,7 @@ public class DatamartAccessor {
 		java.nio.file.Files.write(file.toPath(), bytes, java.nio.file.StandardOpenOption.CREATE);
 		file.deleteOnExit();
 		localAccess = false;
-		return new SubjectStore(file, id);
+		return new SubjectStore(id, file);
 	}
 
 	private static String errorMessage(String id) {

@@ -8,12 +8,16 @@ import systems.intino.eventsourcing.datahub.datamart.mounters.SubjectMounter.Bat
 import systems.intino.eventsourcing.datahub.model.Datamart;
 import systems.intino.eventsourcing.datahub.model.Subject;
 import systems.intino.eventsourcing.datalake.Datalake;
+import systems.intino.eventsourcing.datalake.Datalake.Store.Source;
+import systems.intino.eventsourcing.datalake.Datalake.Store.Tank;
 import systems.intino.eventsourcing.event.EventStream;
+import systems.intino.eventsourcing.event.message.MessageEvent;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
+import static systems.intino.eventsourcing.datahub.datamart.DatamartUtils.tankName;
 
 public class DatamartFactory {
 	private final DatahubBox box;
@@ -39,15 +43,21 @@ public class DatamartFactory {
 	private void reflowSubjects(MasterDatamart datamart, List<Subject> subjects) {
 		Logger.debug("Reflowing subjects...");
 		for (Subject subject : subjects) {
-			Set<systems.intino.eventsourcing.datahub.model.Datalake.Tank.Message> subjectTanks = DatamartUtils.subjectTanks(datamart, subject);
-			try (Batch mounter = new Batch(datamart, subjectTanks)) {
-				DatamartUtils.messageTanksOf(datalake, datamart.definition(), subject).stream()
-						.flatMap(Datalake.Store.Tank::sources)
-						.collect(Collectors.groupingBy(Datalake.Store.Source::name))
-						.forEach((ss, events) -> EventStream.merge(events.stream().map(Datalake.Store.Source::content)).forEach(mounter::mount));
-			} catch (Exception e) {
-				Logger.error(e);
-			}
+			if (subject.isAbstract()) continue;
+			Batch mounter = new Batch(datamart, subject.name$(), subject.from());
+			var map = subject.from().stream().map(message -> datalake.messageStore().tank(tankName(message)))
+					.flatMap(Tank::sources)
+					.collect(groupingBy(Source::name));
+			map.forEach((ss, sources) -> mount(sources, mounter));
+		}
+	}
+
+	private static void mount(List<Source<MessageEvent>> events, Batch mounter) {
+		try (mounter) {
+			EventStream.merge(events.stream().map(Source::content))
+					.forEach(mounter::mount);
+		} catch (Exception e) {
+			Logger.error(mounter.subject() + ": " + e.getMessage());
 		}
 	}
 

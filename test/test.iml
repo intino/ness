@@ -41,8 +41,6 @@
     <orderEntry type="library" name="Intino: systems.intino.eventsourcing:sealing:7.1.0" level="project" />
     <orderEntry type="library" name="Intino: systems.intino.eventsourcing:ingestion:5.1.0" level="project" />
     <orderEntry type="library" name="Intino: systems.intino.eventsourcing:session:2.1.0" level="project" />
-    <orderEntry type="library" name="Intino: systems.intino.datamarts:subject-store:1.0.1" level="project" />
-    <orderEntry type="library" name="Intino: org.slf4j:slf4j-nop:2.0.16" level="project" />
     <orderEntry type="library" name="Intino: com.tdunning:t-digest:3.3" level="project" />
     <orderEntry type="library" name="Intino: com.zaxxer:HikariCP:6.3.0" level="project" />
     <orderEntry type="library" name="Intino: io.intino.alexandria:core-framework:2.2.2" level="project" />
@@ -99,5 +97,8 @@
     <orderEntry type="library" name="Intino: systems.intino.eventsourcing:datahub-terminal:6.1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.example.test:wizard-terminal:1.0.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Intino: org.example.test:ontology:1.0.0" level="project" />
+    <orderEntry type="library" name="Intino: systems.intino.datamarts:subject-store:1.1.1" level="project" />
+    <orderEntry type="library" name="Intino: org.slf4j:slf4j-nop:2.0.16" level="project" />
+    <orderEntry type="library" name="Intino: org.yaml:snakeyaml:2.4" level="project" />
   </component>
 </module>
