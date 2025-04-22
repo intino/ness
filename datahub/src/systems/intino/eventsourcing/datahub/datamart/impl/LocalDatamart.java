@@ -20,14 +20,14 @@ public class LocalDatamart implements MasterDatamart {
 	private final DatahubBox box;
 	private final Datamart definition;
 	private final File directory;
-	private final SubjectsDirectory subjects;
+	private final SubjectsStore subjects;
 	private final Map<Datalake.Tank, List<SubjectMounter>> subjectMounters;
 
 	public LocalDatamart(DatahubBox box, Datamart definition) {
 		this.box = box;
 		this.definition = definition;
 		this.directory = box.datamartDirectory(definition.name$());
-		this.subjects = new SubjectsDirectory(definition, new File(directory, "subjects"));
+		this.subjects = new SubjectsStore(definition, new File(directory, "subjects"));
 		this.subjectMounters = calculateSubjectMounters();
 	}
 
@@ -51,7 +51,7 @@ public class LocalDatamart implements MasterDatamart {
 	}
 
 	@Override
-	public SubjectsDirectory subjectsStore() {
+	public SubjectsStore subjectsStore() {
 		return subjects;
 	}
 

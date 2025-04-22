@@ -2,8 +2,9 @@ package systems.intino.eventsourcing.datahub.datamart.mounters;
 
 import io.intino.alexandria.logger.Logger;
 import io.intino.magritte.framework.Layer;
-import systems.intino.datamarts.subjectstore.SubjectStore;
-import systems.intino.datamarts.subjectstore.SubjectStore.Transaction;
+import systems.intino.datamarts.subjectstore.SubjectHistory;
+import systems.intino.datamarts.subjectstore.SubjectHistory.Transaction;
+import systems.intino.datamarts.subjectstore.model.Subject;
 import systems.intino.eventsourcing.datahub.datamart.MasterDatamart;
 import systems.intino.eventsourcing.datahub.model.Data;
 import systems.intino.eventsourcing.datahub.model.Datalake;
@@ -19,13 +20,13 @@ public class SubjectMounter extends DatamartMounter {
 	public static final String ID = "subject";
 	public static final String TS = "ts";
 	public static final String SS = "ss";
-	private final String subject;
+	protected final String subjectType;
 	protected final Set<String> attributes;
 	protected final Set<String> numericAttributes;
 
-	public SubjectMounter(MasterDatamart datamart, String subject, Collection<Datalake.Tank.Message> tanks) {
+	public SubjectMounter(MasterDatamart datamart, String subjectType, Collection<Datalake.Tank.Message> tanks) {
 		super(datamart);
-		this.subject = subject;
+		this.subjectType = subjectType;
 		this.attributes = tanks.stream().flatMap(t -> t.message().attributeList().stream()).map(Layer::name$).collect(Collectors.toSet());
 		this.numericAttributes = tanks.stream().flatMap(t -> t.message().attributeList().stream()).filter(Batch::isNumber).map(Layer::name$).collect(Collectors.toSet());
 	}
@@ -38,7 +39,7 @@ public class SubjectMounter extends DatamartMounter {
 	}
 
 	public String subject() {
-		return subject;
+		return subjectType;
 	}
 
 	@Override
@@ -46,13 +47,12 @@ public class SubjectMounter extends DatamartMounter {
 		if (message == null) return;
 		Message.Value id = message.get(ID);
 		if (id.isNull() || id.isEmpty()) return;
-		try (SubjectStore subjectStore = datamart.subjectsStore().getOrCreate(id.asString())) {
-			Transaction transaction = subjectStore.on(message.get(TS).asInstant(), message.get(SS).asString());
-			message.attributes().stream()
-					.filter(a -> attributes.contains(a))
-					.forEach(a -> feed(transaction, a, message.get(a)));
-			transaction.commit();
-		}
+		Subject subject = datamart.subjectsStore().getOrCreate(id.asString(), subjectType);
+		Transaction transaction = subject.history().on(message.get(TS).asInstant(), message.get(SS).asString());
+		message.attributes().stream()
+				.filter(a -> attributes.contains(a))
+				.forEach(a -> feed(transaction, a, message.get(a)));
+		transaction.terminate();
 	}
 
 	private void feed(Transaction feed, String attr, Message.Value value) {
@@ -66,8 +66,8 @@ public class SubjectMounter extends DatamartMounter {
 	}
 
 	public static class Batch extends SubjectMounter implements AutoCloseable {
-		private static final Map<String, SubjectStore> stores = new HashMap<>();
-		private static final Map<String, SubjectStore.Batch> batches = new HashMap<>();
+		private static final Map<String, Subject> subjects = new HashMap<>();
+		private static final Map<String, SubjectHistory.Batch> batches = new HashMap<>();
 
 		public Batch(MasterDatamart datamart, String subject, Collection<Datalake.Tank.Message> subjectTanks) {
 			super(datamart, subject, subjectTanks);
@@ -81,12 +81,12 @@ public class SubjectMounter extends DatamartMounter {
 			Message message = event.toMessage();
 			Message.Value id = message.get(ID);
 			if (id.isNull() || id.isEmpty()) return;
-			SubjectStore.Batch subjectStore = subjectStore(id.asString());
-			Transaction feed = subjectStore.on(event.ts(), event.ss());
+			SubjectHistory.Batch subject = subject(id.asString());
+			Transaction tr = subject.on(event.ts(), event.ss());
 			message.attributes().stream()
 					.filter(attributes::contains)
-					.forEach(a -> getFeed(a, feed, message.get(a)));
-			feed.commit();
+					.forEach(a -> getFeed(a, tr, message.get(a)));
+			tr.terminate();
 		}
 
 		private void getFeed(String attr, Transaction feed, Message.Value value) {
@@ -94,11 +94,11 @@ public class SubjectMounter extends DatamartMounter {
 			else feed.put(attr, value.asString());
 		}
 
-		private SubjectStore.Batch subjectStore(String id) {
+		private SubjectHistory.Batch subject(String id) {
 			if (batches.containsKey(id)) return batches.get(id);
-			var store = datamart.subjectsStore().getOrCreateSession(id);
-			SubjectStore.Batch batch = store.batch();
-			stores.put(id, store);
+			var subject = datamart.subjectsStore().getOrCreate(id, subjectType);
+			subjects.put(id, subject);
+			SubjectHistory.Batch batch = subject.history().batch();
 			batches.put(id, batch);
 			return batch;
 		}
@@ -112,11 +112,8 @@ public class SubjectMounter extends DatamartMounter {
 					Logger.error(subject() + ": " + e.getMessage());
 				}
 			});
-			stores.values().forEach(SubjectStore::close);
-			stores.keySet().forEach(id -> datamart.subjectsStore().commit(id));
 			batches.clear();
-			stores.clear();
+			subjects.clear();
 		}
-
 	}
 }

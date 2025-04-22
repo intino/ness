@@ -310,16 +310,10 @@ rule type(datamart) and trigger(getter)
 
 rule type(datamart) and trigger(addDatamartSubscribers)
 	private void addDatamartSubscribers(String sourceSelector) {
-		addDatamartEventSubscribers(sourceSelector,  ts -> ts.isAfter(datamart.core$$().ts()));
 		connector.attachListener("service.ness.datamarts.notifications", null, (m, c) -> new Thread(() -> manageDatamartMessage(m)).start());
 		connector.attachListener("service.ness.datamarts", null, (m, c) -> new Thread(() -> manageDatamartMessage(m)).start());
 	}
 
-	private void addDatamartEventSubscribers(String sourceSelector, java.util.function.Predicate<Instant> predicate) {
-		this.datamartConsumers.clear();
-		java.util.function.BiConsumer subscriber;
-		<<$devent+addSubscribe...[$NL]>>
-	}
 
 	private final Object monitor = new Object();
 
@@ -330,18 +324,12 @@ rule type(datamart) and trigger(addDatamartSubscribers)
 			if (operation.equals("reload")) {
 				this.datamartConsumers.forEach(c -> consumers.get(c).forEach(connector::detachListeners));
 				datamart.init(this.sourceSelector);
-				addDatamartEventSubscribers(this.sourceSelector, ts -> ts.isAfter(datamart.core$$().ts()));
 			} else if (operation.equals("refresh"))
 				jsonObject.get("changes").getAsJsonArray().asList().stream()
 					.map(e -> e.getAsString())
 					.forEach(n -> datamart.core$$().handleDatahubNotification(n));
 		}
 	}
-
-rule type(devent) and trigger(addSubscribe)
-	subscriber = ($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer) (event, topic) -> datamart.core$$().mount(event);
-	datamartConsumers.add(subscriber);
-	subscribe(($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer) subscriber, connector.clientId() + "_$datamart_$message", predicate, sourceSelector);
 
 rule type(resource) and trigger(publishSwitchCase)
 	case "$typename+FirstUpperCase": publish(($type) event); break;

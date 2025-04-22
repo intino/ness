@@ -7,11 +7,11 @@ import java.util.Comparator;
 import java.util.List;
 
 public class VersionBounds {
-	static final String MINIMUM_SUBJECT_STORE_VERSION = "1.0.0";
-	static final String MAX_SUBJECT_STORE_VERSION = "2.0.0";
+	static final String MINIMUM_SUBJECT_STORE_VERSION = "2.0.2";
+	static final String MAX_SUBJECT_STORE_VERSION = "3.0.0";
 	static final String MINIMUM_BPM_VERSION = "3.1.1";
 	static final String MAX_BPM_VERSION = "4.0.0";
-	static final String MINIMUM_TERMINAL_VERSION = "6.1.0";
+	static final String MINIMUM_TERMINAL_VERSION = "6.2.0";
 	static final String MAX_TERMINAL_VERSION = "7.0.0";
 	static final String MINIMUM_INGESTION_VERSION = "5.1.0";
 	static final String MAX_INGESTION_VERSION = "6.0.0";

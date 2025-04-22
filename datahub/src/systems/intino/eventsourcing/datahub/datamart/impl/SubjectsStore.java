@@ -3,6 +3,7 @@ package systems.intino.eventsourcing.datahub.datamart.impl;
 import io.intino.alexandria.logger.Logger;
 import org.apache.commons.io.FileUtils;
 import systems.intino.datamarts.subjectstore.SubjectStore;
+import systems.intino.datamarts.subjectstore.model.Subject;
 import systems.intino.eventsourcing.datahub.box.DatahubBox;
 import systems.intino.eventsourcing.datahub.model.Datalake;
 import systems.intino.eventsourcing.datahub.model.Datamart;
@@ -18,49 +19,50 @@ import static java.util.Collections.emptyList;
 import static systems.intino.eventsourcing.datahub.datamart.DatamartUtils.types;
 import static systems.intino.eventsourcing.datahub.datamart.MasterDatamart.normalizePath;
 
-public class SubjectsDirectory {
+public class SubjectsStore {
 	private final Set<String> subscribedEvents;
 	private final File root;
+	private final SubjectStore store;
+	private final String source;
 
-	public SubjectsDirectory(Datamart definition, File root) {
+	public SubjectsStore(Datamart definition, File root) {
 		this.root = root;
+		this.source = "jdbc:sqlite:" + normalizePath(root.getAbsolutePath()) + "/subjects" + DatahubBox.SUBJECT_EXTENSION;
 		subscribedEvents = types(definition.subjectList().stream()
 				.flatMap(s -> s.from().stream()))
 				.collect(Collectors.toSet());
 		boolean mkdirs = this.root.mkdirs();
+		store = new SubjectStore(source);
+	}
+
+	public String source() {
+		return source;
 	}
 
 	protected String extension() {
 		return DatahubBox.SUBJECT_EXTENSION;
 	}
 
-	public SubjectStore get(String id) {
-		return contains(id) ? new SubjectStore(id, fileOf(id)) : null;
+	public Subject get(String name, String type) {
+		return store.get(name, type);
 	}
 
-	public SubjectStore getOrCreate(String id) {
-		return new SubjectStore(id, fileOf(id));
-	}
-
-	public SubjectStore getOrCreateSession(String id) {
-		return new SubjectStore(id, sessionFileOf(id));
-	}
-
-	private File sessionFileOf(String id) {
-		root.mkdirs();
-		return new File(root, normalizePath(id + extension() + ".session"));
-	}
-
-	public void commit(String id) {
-		sessionFileOf(id).renameTo(fileOf(id));
+	public Subject getOrCreate(String name, String type) {
+		try {
+			Subject subject = store.get(name, type);
+			return subject != null ? subject : store.create(name, type);
+		} catch (Throwable e) {
+			Logger.error(e);
+			return null;
+		}
 	}
 
 	public boolean isSubscribedTo(Datalake.Tank tank) {
 		return tank.isMessage() && subscribedEvents.contains(tank.asMessage().message().name$());
 	}
 
-	public Stream<SubjectStore> stream() {
-		return listFiles().stream().map(s -> new SubjectStore(s.getName().replace(extension(), ""), s));
+	public Stream<Subject> stream() {
+		return store.subjects().collect().stream();
 	}
 
 	public void clear() {
@@ -71,10 +73,6 @@ public class SubjectsDirectory {
 				Logger.error(e);
 			}
 		}
-	}
-
-	public boolean contains(String id) {
-		return fileOf(id).exists();
 	}
 
 	private File fileOf(String id) {

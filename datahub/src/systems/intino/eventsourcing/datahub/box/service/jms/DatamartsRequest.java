@@ -19,10 +19,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static systems.intino.eventsourcing.datahub.box.DatahubBox.INDICATOR_EXTENSION;
-import static systems.intino.eventsourcing.datahub.box.DatahubBox.SUBJECT_EXTENSION;
-import static systems.intino.eventsourcing.datahub.datamart.MasterDatamart.normalizePath;
-
 /**
  * <p>Handles datamart requests. The request is a string with key-value pairs, separated by ;</p>
  * <p>For example:</p>
@@ -63,52 +59,9 @@ public class DatamartsRequest {
 
 		return switch (args.get("operation")) {
 			case "snapshots" -> listAvailableSnapshotsOf(datamart);
-			case "list-subjects" -> listSubjects(datamart, args);
-			case "get-subject" -> getSubject(datamart, args);
-			case "list-indicators" -> listIndicatorFiles(datamart);
-			case "get-indicator" -> getIndicator(datamart, args);
+			case "source" -> source(datamart, args);
 			default -> errorMessage("Operation " + args.get("operation") + " not found");
 		};
-	}
-
-	private Stream<Message> getSubject(MasterDatamart datamart, Map<String, String> args) {
-		return getSubject(args, box.datamartSubjectsDirectory(datamart.name()));
-	}
-
-	private Stream<Message> getIndicator(MasterDatamart datamart, Map<String, String> args) {
-		return getIndicator(args, box.datamartIndicatorsDirectory(datamart.name()));
-	}
-
-	private Stream<Message> getIndicator(Map<String, String> args, File dir) {
-		String id = args.get("id");
-		if (id == null) {
-			String message = "Indicator object download requested but id argument not found";
-			Logger.error(message);
-			return errorMessage(message);
-		}
-		File file = new File(dir, normalizePath(id + INDICATOR_EXTENSION));
-		if (!file.exists()) return errorMessage(INDICATOR_EXTENSION + " file not found");
-		String mode = args.getOrDefault("mode", "download");
-		return mode.equals("path") ? path(file) : download(file);
-	}
-
-	private Stream<Message> getSubject(Map<String, String> args, File dir) {
-		String id = args.get("id");
-		if (id == null) {
-			String message = "Chronos object download requested but id argument not found";
-			Logger.error(message);
-			return errorMessage(message);
-		}
-		String type = args.get("type");
-		if (type == null) {
-			String message = "Chronos object download requested but type argument not found";
-			Logger.error(message);
-			return errorMessage(message);
-		}
-		File file = new File(dir, normalizePath(type + File.separator + id + SUBJECT_EXTENSION));
-		if (!file.exists()) return errorMessage(SUBJECT_EXTENSION + " file not found");
-		String mode = args.getOrDefault("mode", "download");
-		return mode.equals("path") ? path(file) : download(file);
 	}
 
 	private Stream<Message> errorMessage(String errorDescription) {
@@ -162,16 +115,11 @@ public class DatamartsRequest {
 		}
 	}
 
-	private Stream<Message> listIndicatorFiles(MasterDatamart datamart) {
-		return listFiles(datamart.name(), box.datamartIndicatorFiles(datamart.name()));
-	}
-
-	private Stream<Message> listFiles(String datamart, List<File> files) {
+	private Stream<Message> source(String datamart, String source) {
 		try {
 			ActiveMQTextMessage message = new ActiveMQTextMessage();
 			message.setBooleanProperty("success", true);
-			message.setText(files.stream().map(File::getAbsolutePath).collect(Collectors.joining(",")));
-			message.setIntProperty("count", files.size());
+			message.setText(source);
 			return Stream.of(message);
 		} catch (Exception e) {
 			String message = "Could not list chronos files of " + datamart + ": " + e.getMessage();
@@ -180,8 +128,8 @@ public class DatamartsRequest {
 		}
 	}
 
-	private Stream<Message> listSubjects(MasterDatamart datamart, Map<String, String> args) {
-		return listFiles(datamart.name(), box.datamartSubjectFiles(datamart.name(), args.get("id")));
+	private Stream<Message> source(MasterDatamart datamart, Map<String, String> args) {
+		return source(datamart.name(), box.datamartSource(datamart.name()));
 	}
 
 	private Stream<Message> listAvailableSnapshotsOf(MasterDatamart datamart) {

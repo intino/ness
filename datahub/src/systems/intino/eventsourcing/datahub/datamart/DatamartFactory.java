@@ -29,11 +29,11 @@ public class DatamartFactory {
 	}
 
 	public MasterDatamart create(Datamart definition) throws Exception {
+		removeAllSubjectFiles(definition.name$());
 		return reflow(new LocalDatamart(box, definition), definition);
 	}
 
 	public MasterDatamart reflow(MasterDatamart datamart, Datamart model) throws Exception {
-		removeAllSubjectFiles(datamart);
 		reflowSubjects(datamart, model.subjectList());
 		Logger.debug("Reflow complete");
 		//TODO save snapshot
@@ -61,8 +61,8 @@ public class DatamartFactory {
 		}
 	}
 
-	private void removeAllSubjectFiles(MasterDatamart datamart) throws IOException {
-		FileUtils.deleteDirectory(box.datamartSubjectsDirectory(datamart.name()));
-		FileUtils.deleteDirectory(box.datamartIndicatorsDirectory(datamart.name()));
+	private void removeAllSubjectFiles(String datamart) throws IOException {
+		FileUtils.deleteDirectory(box.datamartSubjectsDirectory(datamart));
+		FileUtils.deleteDirectory(box.datamartIndicatorsDirectory(datamart));
 	}
 }

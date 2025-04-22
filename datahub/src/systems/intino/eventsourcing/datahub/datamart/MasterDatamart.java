@@ -2,7 +2,7 @@ package systems.intino.eventsourcing.datahub.datamart;
 
 import io.intino.alexandria.Timetag;
 import systems.intino.eventsourcing.datahub.box.DatahubBox;
-import systems.intino.eventsourcing.datahub.datamart.impl.SubjectsDirectory;
+import systems.intino.eventsourcing.datahub.datamart.impl.SubjectsStore;
 import systems.intino.eventsourcing.datahub.datamart.mounters.DatamartMounter;
 import systems.intino.eventsourcing.datahub.model.Datalake;
 import systems.intino.eventsourcing.datahub.model.Datamart;
@@ -10,6 +10,7 @@ import systems.intino.eventsourcing.datahub.model.rules.DayOfWeek;
 import systems.intino.eventsourcing.datahub.model.rules.SnapshotScale;
 
 import java.io.Closeable;
+import java.io.File;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
@@ -24,7 +25,7 @@ public interface MasterDatamart extends Closeable {
 
 	String name();
 
-	SubjectsDirectory subjectsStore();
+	SubjectsStore subjectsStore();
 
 	List<? extends DatamartMounter> mountersFor(Datalake.Tank tank);
 

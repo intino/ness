@@ -142,8 +142,8 @@ public class DatahubBox extends AbstractBox {
 		return new File(datamartDirectory(name), "indicators");
 	}
 
-	public List<File> datamartSubjectFiles(String datamartName, String id) {
-		return listFiles(datamartSubjectsDirectory(datamartName), SUBJECT_EXTENSION, id);
+	public String datamartSource(String datamartName) {
+		return datamarts().get(datamartName).subjectsStore().source();
 	}
 
 	public List<File> datamartIndicatorFiles(String datamartName) {

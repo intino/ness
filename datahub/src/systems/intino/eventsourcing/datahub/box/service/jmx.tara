@@ -21,6 +21,7 @@ Service service as JMX
 	Operation("Review datalake using a defined mapper") revise
 		Parameter mapper as Text
 		Response as Text
-	Operation("Get info of an entity based on its id") getEntity
-		Parameter id as Text
+	Operation("Get info of a subject based on its id") getSubject
+		Parameter type as Text
+		Parameter name as Text
 		Response as Text

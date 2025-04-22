@@ -4,7 +4,7 @@ rule type(datamart)
 	import systems.intino.eventsourcing.datahubterminal.Connector;
 	import systems.intino.eventsourcing.datahubterminal.datamart.ConnectionConfig;
 	import systems.intino.eventsourcing.datahubterminal.datamart.SubjectListener;
-	import systems.intino.eventsourcing.datahubterminal.datamart.SubjectNode;
+	import systems.intino.datamarts.subjectstore.model.Subject;
 
 	import java.util.ArrayList;
 	import java.util.stream.Stream;
@@ -22,7 +22,6 @@ rule type(datamart)
 
     	public $name+FirstUpperCase~Datamart init(String datamartSourceSelector) {
     		this.core$$().init(datamartSourceSelector);
-			registerMounters();
 			return this;
     	}
 
@@ -39,29 +38,23 @@ rule type(datamart)
 
 		<<$indicator+getter...[$NL$NL]>>
 
-		private void registerMounters() {
-			<<$subject+registerMounter...[$NL]>>
-		}
 	}
-
-rule not type(abstract) and type(subject) and trigger(registerMounter)
-	this.core.register("$event+firstUpperCase", new $package.mounters.$name+FirstUpperCase~Mounter(this));
 
 rule type(abstract) and trigger(getter)
 	public $package.subjects.$name+FirstUpperCase $name+firstLowerCase(String id) {
 		if (id == null) return null;
-		SubjectNode node = core.getSubject(new String[]{$descendant+quoted...[, ]}, id);
+		Subject node = core.getSubject(new String[]{$descendant+quoted...[, ]}, id);
 		if (node == null) return null;
-		return new $package.subjects.$name+FirstUpperCase(node);
+		return new $package.subjects.$name+FirstUpperCase(node, core);
 	}
 
 	public Stream<$package.subjects.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
-		return core.subjects(new String[]{$descendant+quoted...[,]}).map(s -> new $package.subjects.$name+FirstUpperCase(s));
+		return core.subjects(new String[]{$descendant+quoted...[,]}).map(s -> new $package.subjects.$name+FirstUpperCase(s, core));
 	}
 
 rule type(superclass) and not type(abstract) and trigger(getter)
 	public $package.subjects.$name+FirstUpperCase $name+firstLowerCase(String id) {
-		return id == null ? null : new $package.subjects.$name+FirstUpperCase(core.getSubject("$name", id));
+		return id == null ? null : new $package.subjects.$name+FirstUpperCase(core.getSubject("$name", id), core);
 	}
 
 	public Stream<$package.subjects.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
@@ -70,9 +63,9 @@ rule type(superclass) and not type(abstract) and trigger(getter)
 
 rule trigger(getter)
 	public $package.subjects.$name+FirstUpperCase $name+firstLowerCase(String id) {
-		return id == null ? null : new $package.subjects.$name+FirstUpperCase(core.getSubject("$name", id));
+		return id == null ? null : new $package.subjects.$name+FirstUpperCase(core.getSubject("$name", id), core);
 	}
 
 	public Stream<$package.subjects.$name+FirstUpperCase> $name+Plural+firstLowerCase() {
-		return core.subjects("$name").map(s -> new $package.subjects.$name+FirstUpperCase(s));
+		return core.subjects("$name").map(s -> new $package.subjects.$name+FirstUpperCase(s, core));
 	}

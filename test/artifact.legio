@@ -6,7 +6,7 @@ Artifact("org.example", "1.0.0") test
 		Test("junit", "junit", "4.13.2")
 		Test("org.example.test", "wizard-terminal", "1.0.0")
 		Compile("io.intino.alexandria", "jms", "2.0.0")
-		Compile("systems.intino.eventsourcing", "datahub-terminal", "6.1.0")
+		Compile("systems.intino.eventsourcing", "datahub-terminal", "6.2.0")
 	Package(mode = ModulesAndLibrariesLinkedByManifest) as Runnable(mainClass = "org.example.test.model.Main")
 	Parameter("home")
 	Parameter("backup_directory")

@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 import static io.intino.builder.BuildConstants.PRESENTABLE_MESSAGE;
@@ -60,7 +59,6 @@ public class DatamartsRenderer {
 	private void renderDatamart(Datamart datamart, TerminalInfo terminalInfo) throws IntinoException {
 		try {
 			write(render(datamart, terminalInfo));
-			write(subjectMounterClassesOf(datamart, terminalInfo));
 		} catch (Throwable e) {
 			throw new IntinoException("Error during java className generation: " + ErrorUtils.getMessage(e));
 		}
@@ -73,24 +71,6 @@ public class DatamartsRenderer {
 		} catch (Exception e) {
 			throw new IntinoException("Error during java className generation: " + ErrorUtils.getMessage(e));
 		}
-	}
-
-	private Map<String, String> subjectMounterClassesOf(Datamart datamart, TerminalInfo terminalInfo) {
-		Map<String, String> outputs = new HashMap<>();
-		outputs.put(destination(baseSubjectMounterName(datamart, terminalInfo)), engine(templates.subjectMounter).render(subjectMounter(datamart, terminalInfo)));
-		datamart.subjectList().stream().filter(e -> e.from() != null).forEach(e -> outputs.putAll(renderSubjectMounter(e, datamart, terminalInfo)));
-		return outputs;
-	}
-
-	private String baseSubjectMounterName(Datamart datamart, TerminalInfo terminalInfo) {
-		return terminalInfo.terminalPackage + "." + subPackageOf(datamart) + "." + firstUpperCase(datamart.name$()) + "Mounter";
-	}
-
-	private FrameBuilder subjectMounter(Datamart datamart, TerminalInfo terminalInfo) {
-		return new FrameBuilder("mounter", "interface")
-				.add("package", terminalInfo.terminalPackage + subPackageOf(datamart))
-				.add("ontologypackage", datamartPackage)
-				.add("datamart", datamart.name$());
 	}
 
 	private String subPackageOf(Datamart datamart) {
@@ -210,15 +190,6 @@ public class DatamartsRenderer {
 				);
 	}
 
-	private Map<String, String> renderSubjectMounter(Subject subject, Datamart datamart, TerminalInfo terminalInfo) {
-		return new SubjectMounterFrameFactory(terminalInfo.terminalPackage + subPackageOf(datamart), datamartPackage, datamart)
-				.create(subject).entrySet().stream()
-				.collect(toMap(
-						e -> subjectDestination(e.getKey()),
-						e -> engine(templates.subjectMounter).render(e.getValue()))
-				);
-	}
-
 	private Engine engine(Template template) {
 		return Formatters.customize(new Engine(template));
 	}
@@ -261,7 +232,6 @@ public class DatamartsRenderer {
 	private static class Templates {
 		final Template datamart = new DatamartTemplate();
 		final Template subject = new SubjectTemplate();
-		final Template subjectMounter = new SubjectMounterTemplate();
 		final Template struct = new StructTemplate();
 	}
 }
