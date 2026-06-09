@@ -12,7 +12,7 @@ Artifact("systems.intino.eventsourcing", "13.0.0") datahub
 	Imports
 		Compile("systems.intino.eventsourcing", "sealing", "7.1.0")
 		Compile("systems.intino.eventsourcing", "jms", "2.1.0")
-		Compile("systems.intino.datamarts", "subject-store", "2.0.0")
+		Compile("systems.intino.datamarts", "subject-store", "2.0.4")
 		Compile("io.intino.alexandria", "json", "1.2.3")
 		Compile("io.intino.alexandria", "core-framework", "2.2.2")
 		Compile("io.intino.alexandria", "jmx", "1.0.7")

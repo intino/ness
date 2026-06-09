@@ -44,12 +44,12 @@ public class SubjectsStore {
 	}
 
 	public Subject get(String name, String type) {
-		return store.get(name, type);
+		return store.open(name, type);
 	}
 
 	public Subject getOrCreate(String name, String type) {
 		try {
-			Subject subject = store.get(name, type);
+			Subject subject = store.open(name, type);
 			return subject != null ? subject : store.create(name, type);
 		} catch (Throwable e) {
 			Logger.error(e);
