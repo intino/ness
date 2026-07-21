@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("systems.intino.eventsourcing", "1.1.1") datahub-builder
+Artifact("systems.intino.eventsourcing", "1.1.2") datahub-builder
 	Imports
 		Compile("systems.intino.eventsourcing", "datahub", "13.0.0")
 			Exclude("systems.intino.eventsourcing", "ingestion")

@@ -418,6 +418,11 @@ rule type(resource) and trigger(subscribe)
 		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0));
 	}
 
+	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId, String sourceSelector) {
+    		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type((systems.intino.eventsourcing.event.resource.ResourceEvent) event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
+    		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), sourceSelector);
+    	}
+
 	public void subscribe($namespaceQn+firstUpperCase$message+firstUpperCase~Consumer onEventReceived, String subscriberId, java.util.function.Predicate<Instant> filter, String sourceSelector) {
 		consumers.put(onEventReceived, List.of(event -> { try { onEventReceived.accept(new $type((systems.intino.eventsourcing.event.resource.ResourceEvent) event), "$channel");} catch(Throwable e) { Logger.error(e); }}));
 		connector.attachListener("$channel", subscriberId, consumers.get(onEventReceived).get(0), filter, sourceSelector);
