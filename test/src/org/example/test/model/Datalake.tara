@@ -14,6 +14,7 @@ Datalake(scale = Day, path = "{datalake}") dl
 	Tank cellularGateway as Message(monitoring.CellularGateway)
 	Tank wireless as Message(monitoring.Wireless)
 	Tank rdbmsStatement as Message(monitoring.RdbmsStatement)
+	Tank inventario as Message(operation.Inventario)
 
 	Tank log as Resource(monitoring.Log)
 

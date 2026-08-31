@@ -1,5 +1,9 @@
 dsl Ness
 
+Namespace operation
+	Message Inventario
+		Attribute modelBase64 as Text
+
 Namespace analysis
 	Message Analysis
 		Attribute availability as Real > Metadata("100") max; Metadata("0") min; Metadata("%") unit;Metadata("avg") operator; Metadata("DOWN") tail; Metadata("Poisson") distribution;
