@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("systems.intino.eventsourcing", "6.2.0") datahub-terminal
+Artifact("systems.intino.eventsourcing", "6.3.0") datahub-terminal
 	Imports
 		Compile("systems.intino.datamarts", "subject-store", "2.0.2")
 		Compile("systems.intino.eventsourcing", "datalake", "7.1.0")
@@ -9,4 +9,6 @@ Artifact("systems.intino.eventsourcing", "6.2.0") datahub-terminal
 		Compile("io.intino.alexandria", "logger4j", "1.1.0")
 		Test("junit", "junit", "4.13.2")
 	Package(ModulesAndLibrariesLinkedByManifest, attachSources = true)
-	Distribution > Artifactory("intino-sonatype")
+	Distribution > Artifactory("intino-maven")
+			Release("https://artifactory.intino.io/artifactory/release-libraries")
+			Snapshot("https://artifactory.intino.io/artifactory/snapshot-libraries")
