@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("systems.intino.eventsourcing", "13.1.0") datahub
+Artifact("systems.intino.eventsourcing", "13.1.1") datahub
 	description = "DataHub is a software platform that facilitates the creation, management, and distribution of events in event-driven systems. Using a domain-specific language (DSL), DataHub allows users to tailor their architecture to meet specific business needs, enhancing the integration and operability of real-time data systems"
 	Dsl("Proteo", "1.0.4")
 		Builder(generationPackage = "model")
@@ -11,7 +11,7 @@ Artifact("systems.intino.eventsourcing", "13.1.0") datahub
 	Code("systems.intino.eventsourcing.datahub")
 	Imports
 		Compile("systems.intino.eventsourcing", "sealing", "7.1.0")
-		Compile("systems.intino.eventsourcing", "jms", "2.1.0")
+		Compile("systems.intino.eventsourcing", "jms", "2.1.1")
 		Compile("systems.intino.datamarts", "subject-store", "2.0.4")
 		Compile("io.intino.alexandria", "json", "1.2.3")
 		Compile("io.intino.alexandria", "core-framework", "2.2.2")
@@ -22,12 +22,12 @@ Artifact("systems.intino.eventsourcing", "13.1.0") datahub
 		Compile("io.intino.alexandria", "logger4j", "1.1.0")
 		Compile("io.intino.alexandria", "scheduler-framework", "1.2.0") > Exclude("org.slf4j", "slf4j-api")
 		Compile("commons-io", "commons-io", "2.22.0")
-		Compile("org.apache.activemq", "activemq-broker", "6.2.7")
-		Compile("org.apache.activemq", "activemq-mqtt", "6.2.7")
-		Compile("org.apache.activemq", "activemq-kahadb-store", "6.2.7")
-		Compile("org.apache.activemq", "activemq-jaas", "6.2.7")
-		Compile("org.apache.activemq", "activemq-runtime-config", "6.2.7")
-		Compile("org.xerial", "sqlite-jdbc", "3.53.2.0")
+		Compile("org.apache.activemq", "activemq-broker", "6.3.1")
+		Compile("org.apache.activemq", "activemq-mqtt", "6.3.1")
+		Compile("org.apache.activemq", "activemq-kahadb-store", "6.3.1")
+		Compile("org.apache.activemq", "activemq-jaas", "6.3.1")
+		Compile("org.apache.activemq", "activemq-runtime-config", "6.3.1")
+		Compile("org.xerial", "sqlite-jdbc", "3.53.4.0")
 		Test("junit", "junit", "4.13.2")
 	Package(mode = ModulesAndLibrariesLinkedByManifest, finalName = "ness",createMavenPom = true, classpathPrefix = "lib", attachSources = true, attachDoc = false) as Runnable(mainClass = "systems.intino.eventsourcing.datahub.box.Main")
 	Distribution > Artifactory("intino-maven")
