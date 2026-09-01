@@ -246,7 +246,8 @@ public class DatahubBox extends AbstractBox {
 		DatamartFactory datamartFactory = new DatamartFactory(this, datalake);
 		long start = System.currentTimeMillis();
 		for (Datamart datamart : graph.datamartList()) initDatamart(datamartFactory, datamart);
-		Logger.info("MasterDatamarts initialized (" + masterDatamarts.size() + ") after " + (System.currentTimeMillis() - start) + " ms");
+		if (!graph.datamartList().isEmpty())
+			Logger.info("MasterDatamarts initialized (" + graph.datamartList().size() + ") after " + (System.currentTimeMillis() - start) + " ms");
 	}
 
 	private void initDatamart(DatamartFactory datamartFactory, Datamart datamart) {

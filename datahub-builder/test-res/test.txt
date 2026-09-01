@@ -1,6 +1,5 @@
 def.file
 /Users/oroncal/workspace/infrastructure/ness/test/src/org/example/test/model/Datalake.tara#true
-/Users/oroncal/workspace/infrastructure/ness/test/src/org/example/test/model/Datamart.tara#true
 /Users/oroncal/workspace/infrastructure/ness/test/src/org/example/test/model/Events.tara#true
 /Users/oroncal/workspace/infrastructure/ness/test/src/org/example/test/model/Main#true
 /Users/oroncal/workspace/infrastructure/ness/test/src/org/example/test/model/Messaging.tara#true

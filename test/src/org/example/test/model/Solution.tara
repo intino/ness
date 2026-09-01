@@ -1,6 +1,5 @@
 dsl Ness
 
-use Datamart
 use Datalake
 
 Broker(path = empty, port = 63000, secondaryPort = 1884)
@@ -16,4 +15,3 @@ Broker(path = empty, port = 63000, secondaryPort = 1884)
 Terminal wizard-terminal
 	Publish(dl.incident dl.incidentFinished dl.status dl.computer dl.operationStarted dl.operationFinished dl.analysis)
 	Subscribe(dl.incident dl.inventario dl.status dl.computer dl.operationStarted dl.operationFinished dl.operationCancelled dl.orderStarted dl.orderFinished dl.orderCancelled dl.rdbmsStatement dl.application dl.camera dl.cellularGateway dl.switch, dl.log)
-	Datamarts(master)
