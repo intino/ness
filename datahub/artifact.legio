@@ -1,6 +1,6 @@
 dsl Legio
 
-Artifact("systems.intino.eventsourcing", "13.1.1") datahub
+Artifact("systems.intino.eventsourcing", "13.1.2") datahub
 	description = "DataHub is a software platform that facilitates the creation, management, and distribution of events in event-driven systems. Using a domain-specific language (DSL), DataHub allows users to tailor their architecture to meet specific business needs, enhancing the integration and operability of real-time data systems"
 	Dsl("Proteo", "1.0.4")
 		Builder(generationPackage = "model")
