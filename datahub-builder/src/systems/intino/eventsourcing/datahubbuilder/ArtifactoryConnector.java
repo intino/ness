@@ -43,7 +43,7 @@ public class ArtifactoryConnector {
 
 	public static List<Version> terminalVersions() {
 		try {
-			URL url = new URI(MAVEN_URL + "/systems/intino/eventsourcing/datahub-terminal/maven-metadata.xml").toURL();
+			URL url = new URI(INTINO_RELEASES + "/systems/intino/eventsourcing/datahub-terminal/maven-metadata.xml").toURL();
 			return extractVersions(read(connect(url)).toString());
 		} catch (Throwable e) {
 			return Collections.emptyList();

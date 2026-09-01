@@ -6,7 +6,7 @@
 	<groupId>systems.intino.eventsourcing</groupId>
 	<artifactId>datahub</artifactId>
 	<name>datahub</name>
-	<version>13.1.2</version>
+	<version>13.1.3</version>
 	<packaging>jar</packaging>
 	<description>DataHub is a software platform that facilitates the creation, management, and distribution of events in event-driven systems. Using a domain-specific language (DSL), DataHub allows users to tailor their architecture to meet specific business needs, enhancing the integration and operability of real-time data systems</description>
 	<properties>
