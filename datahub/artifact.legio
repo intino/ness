@@ -6,7 +6,7 @@ Artifact("systems.intino.eventsourcing", "13.1.5") datahub
 		Builder(generationPackage = "model")
 		OutputDsl(name = "Ness")
 			Runtime("systems.intino.eventsourcing", "datahub") as ArtifactVersionFollower
-			Builder("systems.intino.eventsourcing", "datahub-builder", "1.1.4")
+			Builder("systems.intino.eventsourcing", "datahub-builder", "1.1.5")
 	Dsl("Konos", "13.2.0") > Builder(generationPackage = "box")
 	Code("systems.intino.eventsourcing.datahub")
 	Imports
