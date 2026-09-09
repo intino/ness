@@ -65,7 +65,7 @@ public class TerminalCompiler {
 			List<Project> projects = buildTerminals(graph, versions, tempDir);
 			projects.stream().map(this::actionMessage).forEach(postCompileActionMessages::add);
 			configuration.out().println(PRESENTABLE_MESSAGE + "nessc: Finished generation of terminals!");
-		} catch (IntinoException e) {
+		} catch (Exception e) {
 			messages.add(new CompilerMessage(CompilerMessage.ERROR, e.getMessage()));
 		}
 	}
