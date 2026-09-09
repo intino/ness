@@ -59,11 +59,15 @@ public class TerminalCompiler {
 		NessGraph graph = loadGraph(outDirectory);
 		if (hasErrors(graph)) return;
 		Map<String, String> versions = versions();
-		Project project = buildOntology(graph, versions, tempDir);
-		postCompileActionMessages.add(actionMessage(project));
-		List<Project> projects = buildTerminals(graph, versions, tempDir);
-		projects.stream().map(this::actionMessage).forEach(postCompileActionMessages::add);
-		configuration.out().println(PRESENTABLE_MESSAGE + "nessc: Finished generation of terminals!");
+		try {
+			Project project = buildOntology(graph, versions, tempDir);
+			postCompileActionMessages.add(actionMessage(project));
+			List<Project> projects = buildTerminals(graph, versions, tempDir);
+			projects.stream().map(this::actionMessage).forEach(postCompileActionMessages::add);
+			configuration.out().println(PRESENTABLE_MESSAGE + "nessc: Finished generation of terminals!");
+		} catch (IntinoException e) {
+			messages.add(new CompilerMessage(CompilerMessage.ERROR, e.getMessage()));
+		}
 	}
 
 	private ArtifactBuildActionMessage actionMessage(Project project) {
