@@ -7,7 +7,6 @@
       <module fileurl="file://$PROJECT_DIR$/datahub-terminal/datahub-terminal.iml" filepath="$PROJECT_DIR$/datahub-terminal/datahub-terminal.iml" />
       <module fileurl="file://$PROJECT_DIR$/datalake-inspector/datalake-inspector.iml" filepath="$PROJECT_DIR$/datalake-inspector/datalake-inspector.iml" />
       <module fileurl="file://$PROJECT_DIR$/datalake-inspector-elements/datalake-inspector-elements.iml" filepath="$PROJECT_DIR$/datalake-inspector-elements/datalake-inspector-elements.iml" />
-      <module fileurl="file://$PROJECT_DIR$/test/test.iml" filepath="$PROJECT_DIR$/test/test.iml" />
     </modules>
   </component>
 </project>

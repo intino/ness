@@ -31,8 +31,10 @@ public class OntologyRenderer {
 		renderDatamarts();
 	}
 
-	private void renderMessages() {
-		graph.core$().find(Message.class).forEach(event -> new MessageRenderer(event, srcDir, basePackage).render());
+	private void renderMessages() throws IntinoException {
+		for (Message event : graph.core$().find(Message.class)) {
+			new MessageRenderer(event, srcDir, basePackage).render();
+		}
 	}
 
 	private void renderResources() {

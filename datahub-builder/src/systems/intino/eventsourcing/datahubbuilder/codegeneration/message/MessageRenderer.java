@@ -4,14 +4,16 @@ import io.intino.itrules.Engine;
 import io.intino.itrules.Frame;
 import io.intino.itrules.FrameBuilder;
 import systems.intino.eventsourcing.datahub.model.*;
+import systems.intino.eventsourcing.datahubbuilder.IntinoException;
 import systems.intino.eventsourcing.datahubbuilder.codegeneration.Commons;
 import systems.intino.eventsourcing.datahubbuilder.codegeneration.Formatters;
 import systems.intino.eventsourcing.datahubbuilder.codegeneration.datamarts.Utils;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 
@@ -27,7 +29,7 @@ public class MessageRenderer {
 		this.rootPackage = rootPackage;
 	}
 
-	public void render() {
+	public void render() throws IntinoException {
 		String rootPackage = messagesPackage();
 		if (message.core$().owner().is(Namespace.class))
 			rootPackage = rootPackage + "." + message.core$().ownerAs(Namespace.class).qn();
@@ -38,7 +40,7 @@ public class MessageRenderer {
 		Commons.writeFile(packageFolder, message.name$(), engine().render(root));
 	}
 
-	private Frame createEventFrame(Message event, String packageName) {
+	private Frame createEventFrame(Message event, String packageName) throws IntinoException {
 		FrameBuilder eventFrame = new FrameBuilder("event").
 				add("name", event.name$()).add("package", packageName).
 				add("parent", parent(event));
@@ -67,26 +69,33 @@ public class MessageRenderer {
 		return EVENT;
 	}
 
-	private FrameBuilder[] processAttributesOf(Stream<Attribute> attributes, String owner) {
-		FrameBuilder[] frames = attributes.map(this::process).toArray(FrameBuilder[]::new);
+	private FrameBuilder[] processAttributesOf(List<Attribute> attributes, String owner) throws IntinoException {
+		List<FrameBuilder> list = new ArrayList<>();
+		for (Attribute attribute : attributes) list.add(process(attribute));
+		FrameBuilder[] frames = list.toArray(new FrameBuilder[0]);
 		stream(frames).forEach(f -> f.add("owner", owner));
 		return frames;
 	}
 
-	private Stream<Attribute> attributesOf(Message message) {
-		return message.attributeList().stream(); // TODO: if message is an assertion, then add id and enable attributes (if not already defined)
+	private List<Attribute> attributesOf(Message message) {
+		return message.attributeList(); // TODO: if message is an assertion, then add id and enable attributes (if not already defined)
 	}
 
-	private FrameBuilder[] processComponents(Map<Component, Boolean> components, String owner) {
-		return components.entrySet().stream().map(e -> processComponent(e.getKey(), owner, e.getValue())).toArray(FrameBuilder[]::new);
+	private FrameBuilder[] processComponents(Map<Component, Boolean> components, String owner) throws IntinoException {
+		List<FrameBuilder> list = new ArrayList<>();
+		for (Map.Entry<Component, Boolean> e : components.entrySet()) {
+			FrameBuilder builder = processComponent(e.getKey(), owner, e.getValue());
+			list.add(builder);
+		}
+		return list.toArray(new FrameBuilder[0]);
 	}
 
-	private FrameBuilder processComponent(Component component, String owner, boolean multiple) {
+	private FrameBuilder processComponent(Component component, String owner, boolean multiple) throws IntinoException {
 		FrameBuilder builder = new FrameBuilder("component", multiple ? "multiple" : "single").
 				add("name", component.name$()).
 				add("type", component.name$()).
 				add("owner", owner).
-				add("attribute", processAttributesOf(component.attributeList().stream(), component.name$()));
+				add("attribute", processAttributesOf(component.attributeList(), component.name$()));
 		if (component.isExtensionOf()) builder.add("parent", component.asExtensionOf().parent().name$());
 		Map<Component, Boolean> components = collectComponents(component);
 		if (!components.isEmpty()) builder.add("component", processComponents(components, component.name$()));
@@ -105,7 +114,7 @@ public class MessageRenderer {
 		return components;
 	}
 
-	private FrameBuilder process(Attribute attribute) {
+	private FrameBuilder process(Attribute attribute) throws IntinoException {
 		if (attribute.isReal()) return process(attribute.asReal());
 		else if (attribute.isInteger()) return process(attribute.asInteger());
 		else if (attribute.isBool()) return process(attribute.asBool());
@@ -114,7 +123,7 @@ public class MessageRenderer {
 		else if (attribute.isDate()) return process(attribute.asDate());
 		else if (attribute.isLongInteger()) return process(attribute.asLongInteger());
 		else if (attribute.isWord()) return process(attribute.asWord());
-		return null;
+		throw new IntinoException("Attribute " + attribute.core$().id() + " has no type");
 	}
 
 	private FrameBuilder process(Data.Real attribute) {
