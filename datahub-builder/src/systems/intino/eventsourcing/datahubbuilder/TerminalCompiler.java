@@ -56,10 +56,10 @@ public class TerminalCompiler {
 			messages.add(new CompilerMessage(CompilerMessage.ERROR, "Compiled model not found. Please compile module"));
 			return;
 		}
-		NessGraph graph = loadGraph(outDirectory);
-		if (hasErrors(graph)) return;
-		Map<String, String> versions = versions();
 		try {
+			NessGraph graph = loadGraph(outDirectory);
+			if (hasErrors(graph)) return;
+			Map<String, String> versions = versions();
 			Project project = buildOntology(graph, versions, tempDir);
 			postCompileActionMessages.add(actionMessage(project));
 			List<Project> projects = buildTerminals(graph, versions, tempDir);
