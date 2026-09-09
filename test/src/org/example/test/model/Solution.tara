@@ -3,15 +3,27 @@ dsl Ness
 use Datalake
 
 Broker(path = empty, port = 63000, secondaryPort = 1884)
-	User("trooper", "trooper")
-	User("monet", "monet")
-	User("wizard", "wizard")
-	User("consul", "consul")
-	User("cesar", "cesar")
-	User("connector", "connector")
-	User("federation", "federation")
-	User("master", "master")
+	User("inventario", "inventario")
+	User("fuentes", "fuentes")
+	User("dominios", "dominios")
+	User("ciudad", "ciudad")
+	User("cuadro-mando", "cuadro-mando")
 
-Terminal wizard-terminal
-	Publish(dl.incident dl.incidentFinished dl.status dl.computer dl.operationStarted dl.operationFinished dl.analysis)
-	Subscribe(dl.incident dl.inventario dl.status dl.computer dl.operationStarted dl.operationFinished dl.operationCancelled dl.orderStarted dl.orderFinished dl.orderCancelled dl.rdbmsStatement dl.application dl.camera dl.cellularGateway dl.switch, dl.log)
+Terminal inventario-terminal
+	Publish(messageTanks=dl.inventario dl.unidad dl.unidadEliminada dl.fuenteCreada dl.fuenteModificada dl.fuenteEliminada dl.datasetPrimarioCreado dl.datasetPrimarioModificado dl.datasetPrimarioEliminado dl.datasetMaestroCreado dl.datasetMaestroModificado dl.datasetMaestroEliminado dl.repositorioCreado dl.repositorioModificado dl.repositorioEliminado dl.soporteCreado dl.soporteModificado dl.soporteEliminado)
+	Subscribe(messageTanks=dl.inventario)
+
+Terminal fuentes-terminal
+	Publish(messageTanks=dl.fuenteCreada dl.fuenteModificada dl.fuenteEliminada dl.proveedorCreado dl.proveedorModificado dl.proveedorEliminado dl.personaCreada dl.personaModificada dl.personaEliminada dl.integracionCreada dl.integracionModificada dl.integracionEliminada dl.soporteCreado dl.soporteModificado dl.soporteEliminado dl.brechaCreada dl.brechaModificada dl.brechaEliminada dl.mejoraCreada dl.mejoraModificada dl.mejoraEliminada dl.repositorioCreado dl.repositorioModificado dl.repositorioEliminado)
+	Subscribe(messageTanks=dl.inventario dl.cargaRealizada dl.cargaIncidencia dl.importacionRealizada dl.importacionIncidencia dl.revisionRealizada dl.revisionIncidencia dl.conciliacionRealizada dl.conciliacionIncidencia dl.consolidacionRealizada dl.consolidacionIncidencia dl.analisisPrimarioRealizado dl.analisisPrimarioIncidencia dl.analisisMaestroRealizado dl.analisisMaestroIncidencia dl.fuenteCreada dl.fuenteModificada dl.fuenteEliminada dl.proveedorCreado dl.proveedorModificado dl.proveedorEliminado dl.personaCreada dl.personaModificada dl.personaEliminada dl.integracionCreada dl.integracionModificada dl.integracionEliminada dl.soporteCreado dl.soporteModificado dl.soporteEliminado dl.brechaCreada dl.brechaModificada dl.brechaEliminada dl.mejoraCreada dl.mejoraModificada dl.mejoraEliminada dl.repositorioCreado dl.repositorioModificado dl.repositorioEliminado)
+
+Terminal dominios-terminal
+	Publish(messageTanks=dl.datasetPrimarioCreado dl.datasetPrimarioModificado dl.datasetPrimarioEliminado dl.datasetMaestroCreado dl.datasetMaestroModificado dl.datasetMaestroEliminado)
+	Subscribe(messageTanks=dl.inventario dl.cargaRealizada dl.cargaIncidencia dl.importacionRealizada dl.importacionIncidencia dl.revisionRealizada dl.revisionIncidencia dl.conciliacionRealizada dl.conciliacionIncidencia dl.consolidacionRealizada dl.consolidacionIncidencia dl.analisisPrimarioRealizado dl.analisisPrimarioIncidencia dl.analisisMaestroRealizado dl.analisisMaestroIncidencia dl.datasetPrimarioCreado dl.datasetPrimarioModificado dl.datasetPrimarioEliminado dl.datasetMaestroCreado dl.datasetMaestroModificado dl.datasetMaestroEliminado)
+
+Terminal ciudad-terminal
+	Publish(messageTanks=dl.cargaRealizada dl.cargaIncidencia dl.importacionRealizada dl.importacionIncidencia dl.revisionRealizada dl.revisionIncidencia dl.conciliacionRealizada dl.conciliacionIncidencia dl.consolidacionRealizada dl.consolidacionIncidencia dl.analisisPrimarioRealizado dl.analisisPrimarioIncidencia dl.analisisMaestroRealizado dl.analisisMaestroIncidencia)
+	Subscribe(messageTanks=dl.inventario)
+
+Terminal cuadro-mando-terminal
+	Subscribe(messageTanks=dl.inventario dl.unidad dl.unidadEliminada dl.reglaCalidad dl.fuenteCreada dl.fuenteModificada dl.fuenteEliminada dl.proveedorCreado dl.proveedorModificado dl.proveedorEliminado dl.personaCreada dl.personaModificada dl.personaEliminada dl.integracionCreada dl.integracionModificada dl.integracionEliminada dl.soporteCreado dl.soporteModificado dl.soporteEliminado dl.brechaCreada dl.brechaModificada dl.brechaEliminada dl.mejoraCreada dl.mejoraModificada dl.mejoraEliminada dl.datasetPrimarioCreado dl.datasetPrimarioModificado dl.datasetPrimarioEliminado dl.datasetMaestroCreado dl.datasetMaestroModificado dl.datasetMaestroEliminado dl.repositorioCreado dl.repositorioModificado dl.repositorioEliminado dl.cargaRealizada dl.cargaIncidencia dl.importacionRealizada dl.importacionIncidencia dl.revisionRealizada dl.revisionIncidencia dl.conciliacionRealizada dl.conciliacionIncidencia dl.consolidacionRealizada dl.consolidacionIncidencia dl.analisisPrimarioRealizado dl.analisisPrimarioIncidencia dl.analisisMaestroRealizado dl.analisisMaestroIncidencia)

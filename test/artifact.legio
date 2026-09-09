@@ -1,0 +1,29 @@
+dsl Legio
+
+Artifact(groupId = "org.example", version = "1.0.0") test
+	Dsl("Ness", "13.1.1")
+	Imports
+		Compile(groupId = "systems.intino.eventsourcing", artifactId = "datahub-terminal", version = "6.3.0")
+		Test(groupId = "junit", artifactId = "junit", version = "4.13.2")
+	Package(mode = ModulesAndLibrariesLinkedByManifest)
+	Parameter(name = "broker_port", "63000")
+	Parameter(name = "keystore_password")
+	Parameter(name = "keystore_path")
+	Parameter(name = "backup_directory")
+	Parameter(name = "truststore_password")
+	Parameter(name = "broker_secondary_port")
+	Parameter(name = "truststore_path")
+	Parameter(name = "home")
+
+RunConfiguration local
+	Argument("home", "test/temp/datahub")
+	Argument("datalake_directory", "test/temp/datalake")
+	Argument("home", "test/temp")
+	Argument("backup_directory", "test/temp/backup")
+	Argument("broker_port", "63000")
+	Argument("broker_secondary_port", "1884")
+
+Repository(identifier = "intino-maven")
+	Snapshot(url = "https://artifactory.intino.io/artifactory/releases")
+Repository(identifier = "intino-maven-snapshot")
+	Snapshot(url = "https://artifactory.intino.io/artifactory/snapshots")

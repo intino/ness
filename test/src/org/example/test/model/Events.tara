@@ -1,187 +1,311 @@
 dsl Ness
 
-Namespace operation
+Namespace inventario
+
 	Message Inventario
+		Attribute parserVersion as Text
 		Attribute modelBase64 as Text
 
-Namespace analysis
-	Message Analysis
-		Attribute availability as Real > Metadata("100") max; Metadata("0") min; Metadata("%") unit;Metadata("avg") operator; Metadata("DOWN") tail; Metadata("Poisson") distribution;
-		Attribute health as Real > Metadata("100") max; Metadata("0") min; Metadata("%") unit;Metadata("%,.0f") format; Metadata("avg") operator; Metadata("DOWN") tail; Metadata("Poisson") distribution;
-		Attribute risk as Real > Metadata("100") max; Metadata("0") min; Metadata("%") unit;Metadata("%,.0f") format; Metadata("avg") operator; Metadata("UP") tail; Metadata("Poisson") distribution;
+	Message Unidad
+		Attribute unidadId as Text
+		Attribute unidadNombre as Text
 
-Namespace actuation
-	Message ActivityInstalled
-		Attribute observer as Text
-		Attribute activity as Text
-		Attribute result as Bool
+	Message UnidadEliminada
+   		Attribute unidadId as Text
 
-	Message ActivityUninstalled
-		Attribute observer as Text
-		Attribute activity as Text
-		Attribute result as Bool
 
-	Message ActivityConfiguration
-		Attribute observer as Text
-		Attribute activity as Text
-		Attribute result as Bool
 
-	Message ActivityUpgraded
-		Attribute observer as Text
-		Attribute activity as Text
-		Attribute result as Bool
+Namespace gobierno
 
-	Message ActivityEnabled
-		Attribute observer as Text
-		Attribute activity as Text
-		Attribute result as Bool
+	Message ReglaCalidad
+		Attribute reglaId as Text
+		Attribute reglaNombre as Text
+		Attribute faseCalidad as Word("AnalisisPrimario" "AnalisisMaestro")
+		Attribute granoCalidad as Word("DatasetFuente" "DatasetMaestro" "Fuente" "Unidad")
+		Attribute entidadId as Text
+		Attribute entidadTipo as Word("Dataset" "DatasetMaestro")
+		Attribute incumplimientos as Integer
+		Attribute automatizada as Bool
+		Attribute fechaAlta as Date
+		Attribute fechaBaja as Date
 
-	Message ActivityDisabled
-		Attribute observer as Text
-		Attribute activity as Text
-		Attribute result as Bool
+Namespace dominios
 
-	Message OperationScheduled
+	Message DatasetPrimarioCreado
 		Attribute id as Text
-		Attribute name as Text
-		Attribute procedure as Text
-		Attribute activity as Text
-		Attribute observable as Text
-		Attribute when as Word("TurnOn" "AtDate")
-		Attribute whenDate as DateTime
-
-		Component Parameter
-			Attribute name as Text
-			Attribute value as Text
-
-	Message OperationStarted
+	Message DatasetPrimarioModificado
 		Attribute id as Text
-		Attribute name as Text
-		Attribute procedure as Text
-		Attribute activity as Text
-		Attribute observable as Text
-		Attribute incident as Text
-		Attribute countermeasure as Text
-
-		Component Parameter
-			Attribute name as Text
-			Attribute value as Text
-
-	Message OperationFinished
+		Component Campo
+			Attribute id as Text
+			Attribute valor as Text
+	Message DatasetPrimarioEliminado
 		Attribute id as Text
-		Attribute name as Text
-		Attribute observable as Text
-		Attribute incident as Text
 
-		Component(multiple=false) Result
-			Attribute success as Bool
-			Attribute message as Text
-
-	Message OperationCancelled
+	Message DatasetMaestroCreado
 		Attribute id as Text
-		Attribute observable as Text
-		Attribute reason as Text
-
-	Message OrderStarted
+	Message DatasetMaestroModificado
 		Attribute id as Text
-		Attribute code as Text
-		Attribute observable as Text
-		Attribute incidents as Text List
-		Attribute dueDate as Text
-		Attribute input as Text
-		Attribute category as Word("Preventive" "Corrective" "Administrative")
-		Attribute countermeasure as Text
-		Component(multiple=false) Outsourcing
-			Attribute recipient as Text
-			Attribute cc as Text List
-			Attribute bcc as Text List
-
-	Message OrderFinished
+		Component Campo
+			Attribute id as Text
+			Attribute valor as Text
+	Message DatasetMaestroEliminado
 		Attribute id as Text
-		Attribute code as Text
-		Attribute observable as Text
-		Attribute incident as Text List
-		Attribute description as Text List
-		Attribute remarks as Text
 
-	Message OrderCancelled
+
+Namespace fuentes
+
+
+	Message FuenteCreada
 		Attribute id as Text
-		Attribute code as Text
-		Attribute observable as Text
-		Attribute reason as Text
-
-	Message Inform
-		Attribute order as Text
-		Attribute observable as Text
-		Component Predicate
-			Attribute action as Text
-			Attribute Object as Text
-
-	Message Assertion
-		Attribute code as Text
-		Attribute observable as Text
-		Component Attribute
-			Attribute name as Text
-			Attribute value as Text
-
-	Message Rollout
+	Message FuenteModificada
 		Attribute id as Text
-		Attribute state as Word("Open" "Aborted" "Terminated")
-		Attribute orderCode as Text
-		Attribute hint as Text
-		Attribute startDate as Text
-		Attribute dueDate as Text
-		Attribute notification as Text
-		Attribute conditions as Text List
-
-Namespace monitoring
-	Resource Log
-
-	Message Status
-		Attribute observable as Text
-		Attribute group as Text
-		Attribute signals as Text List
-
-	Message Incident
+		Component Campo
+			Attribute id as Text
+			Attribute valor as Text
+	Message FuenteEliminada
 		Attribute id as Text
-		Attribute origin as Word("Manual" "Auto")
-		Attribute name as Text
-		Attribute place as Text
-		Attribute observable as Text
-		Attribute level as Word("Low" "Medium" "High")
-		Attribute description as Text
-		Attribute variables as Text List
-		Attribute extraInfo as Text
 
-	Message IncidentFinished
+	Message RepositorioCreado
 		Attribute id as Text
-		Attribute name as Text
-		Attribute observable as Text
+		Attribute soporte as Text
+	Message RepositorioModificado
+		Attribute id as Text
+		Component Campo
+			Attribute id as Text
+			Attribute valor as Text
+	Message RepositorioEliminado
+		Attribute id as Text
 
-	Message Camera > Attribute people as Real > Metadata("%d") format; Metadata("count") operator; Metadata("UP") tail; Metadata("Poisson") distribution;
+	Message ProveedorCreado
+		Attribute id as Text
+	Message ProveedorModificado
+		Attribute id as Text
+		Component Campo
+			Attribute id as Text
+			Attribute valor as Text
+	Message ProveedorEliminado
+		Attribute id as Text
 
-	Message Wireless
-		Attribute connection_failed_association as Real > Metadata("%d") format; Metadata("sum") operator; Metadata("UP") tail; Metadata("Poisson") distribution;
-		Attribute connection_failed_authentication as Real > Metadata("%d") format; Metadata("sum") operator; Metadata("UP") tail; Metadata("Poisson") distribution;
-		Attribute connection_failed_dhcp as Real > Metadata("%d") format; Metadata("sum") operator; Metadata("UP") tail; Metadata("Poisson") distribution;
-		Attribute connection_failed_dns as Real > Metadata("%d") format; Metadata("sum") operator; Metadata("UP") tail; Metadata("Poisson") distribution;
-		Attribute connection_success as Real > Metadata("%d") format; Metadata("sum") operator; Metadata("DOWN") tail; Metadata("Normal") distribution;
+	Message PersonaCreada
+		Attribute id as Text
+	Message PersonaModificada
+		Attribute id as Text
+		Component Campo
+			Attribute id as Text
+			Attribute valor as Text
+	Message PersonaEliminada
+		Attribute id as Text
 
-	Message CellularGateway
-		Attribute power as Real > Metadata("%.1f") format; Metadata("avg") operator; Metadata("DOWN") tail; Metadata("Normal") distribution;
-		Attribute quality as Real > Metadata("%.1f") format; Metadata("avg") operator; Metadata("DOWN") tail; Metadata("Normal") distribution;
+	Message IntegracionCreada
+		Attribute id as Text
+		Attribute soporte as Text
+	Message IntegracionModificada
+		Attribute id as Text
+		Component Campo
+			Attribute id as Text
+			Attribute valor as Text
+	Message IntegracionEliminada
+		Attribute id as Text
 
-	Message Switch
-		Attribute dataReceived as Real  > Metadata("MB") unit; Metadata("%,.0f") format; Metadata("sum") operator; Metadata("UP") tail;
-		Attribute dataSent as Real > Metadata("MB") unit; Metadata("%,.0f") format; Metadata("sum") operator; Metadata("UP") tail;
-		Attribute usagePorts as Real > Metadata("%d") format; Metadata("last") operator; Metadata("UP") tail; Metadata("Normal") distribution;
-		Attribute clients as Real > Metadata("%d") format; Metadata("last") operator; Metadata("UP") tail; Metadata("Normal") distribution;
+	Message SoporteCreado
+		Attribute id as Text
+	Message SoporteModificado
+		Attribute id as Text
+		Component Campo
+			Attribute id as Text
+			Attribute valor as Text
+	Message SoporteEliminado
+		Attribute id as Text
 
-	Message RdbmsStatement
-		Attribute usageExecutions as Real > Metadata("%,.0f") format; Metadata("UP") tail; Metadata("Normal") distribution;
-		Attribute usageLogicalReads as Real > Metadata("%,.0f") format; Metadata("UP") tail; Metadata("Normal") distribution;
-		Attribute usageLogicalWrites as Real > Metadata("%,.0f") format; Metadata("UP") tail; Metadata("Normal") distribution;
-		Attribute timeCPU as Real > Metadata("seconds") unit; Metadata("%,.0f") format; Metadata("UP") tail; Metadata("Normal") distribution;
-		Attribute timeElapsed as Real > Metadata("seconds") unit; Metadata("UP") tail; Metadata("%,.0f") format
+	Message BrechaCreada
+		Attribute id as Text
+		Attribute fuente as Text
+	Message BrechaModificada
+		Attribute id as Text
+		Component Campo
+			Attribute id as Text
+			Attribute valor as Text
+	Message BrechaEliminada
+		Attribute id as Text
+
+	Message MejoraCreada
+		Attribute id as Text
+		Attribute brecha as Text
+	Message MejoraModificada
+		Attribute id as Text
+		Component Campo
+			Attribute id as Text
+			Attribute valor as Text
+	Message MejoraEliminada
+		Attribute id as Text
+
+Namespace ciudad
+
+	Message EventoProceso is abstract
+		Attribute idEjecucion as Text
+		Attribute nombreProceso as Text
+		Attribute versionProceso as Text
+		Attribute versionControlador as Text
+
+	Message CargaIncidencia as ExtensionOf(EventoProceso)
+		Attribute fuente as Text
+    	Attribute soporte as Text
+    	Attribute vista as Text
+    	Attribute tipo as Word("ProcesoNoDefinido" "ErrorDeConexion" "ErrorDeAutenticacion" "ErrorDeTimeout" "DatasetNoDisponible" "DatasetVacio" "FormatoNoSoportado" "FicheroCorrupto" "ErrorDeAlmacenamiento" "ErrorDeBaseDeDatos" "CredencialesNoDisponibles" "EjecucionCancelada" "ErrorDesconocido" "CargaFallida")
+    	Attribute mensaje as Text
+
+	Message CargaRealizada as ExtensionOf(EventoProceso)
+		Attribute fuente as Text
+    	Attribute soporte as Text
+    	Attribute startTs as DateTime
+    	Attribute endTs as DateTime
+    	Attribute registros as LongInteger
+    	Attribute registrosError as Integer
+    	Attribute registrosNuevos as Integer
+    	Attribute registrosActualizados as Integer
+    	Attribute registrosEliminados as Integer
+    	Component(multiple=true) VistaExtraida
+    		Attribute nombre as Text
+    		Attribute exito as Bool
+    		Attribute tipo as Word ("SQL" "API")
+    		Attribute startTs as DateTime
+            Attribute endTs as DateTime
+    		Attribute registros as Integer
+    		Attribute registrosError as Integer
+    		Attribute reintentos as Integer
+    		Attribute registrosNuevos as Integer
+            Attribute registrosActualizados as Integer
+            Attribute registrosEliminados as Integer
+
+	Message ImportacionRealizada as ExtensionOf(EventoProceso)
+		Attribute fuente as Text
+		Attribute soporte as Text
+		Attribute vista as Text
+		Attribute sujetos as Integer
+		Attribute tripletas as Integer
+		Attribute tripletasTotales as Integer
+		Attribute startTs as DateTime
+		Attribute endTs as DateTime
+		Component(multiple=true) Operacion
+			Attribute tipo as Word("Transformacion" "Inferencia")
+			Attribute nombre as Text
+			Attribute atributo as Text
+			Attribute vecesEjecutada as Integer
+			Attribute errores as Integer
+
+	Message ImportacionIncidencia as ExtensionOf(EventoProceso)
+		Attribute fuente as Text
+    	Attribute soporte as Text
+    	Attribute vista as Text
+    	Attribute tipo as Word("ProcesoNoDefinido" "VistaNoDisponible" "EjecucionCancelada" "ErrorDesconocido")
+    	Attribute mensaje as Text
+
+   	Message RevisionRealizada as ExtensionOf(EventoProceso)
+   		Attribute startTs as DateTime
+        Attribute endTs as DateTime
+       	Attribute fuente as Text
+        Attribute soporte as Text
+        Attribute vista as Text
+        Component(multiple=true) Regla
+        	Attribute nombre
+        	Attribute descripcion
+        	Attribute atributos as List Text
+        	Attribute dimension as Word ("Consistencia" "Completitud" "Unicidad" "Validez" "Exactitud" "Actualidad")
+        	Attribute tipo as Word ("Sintactica" "Semantica" "Pragmatica")
+        	Attribute incumplimientos as Integer
+        	Attribute sujetosAfectados as Integer
+
+   	Message RevisionIncidencia as ExtensionOf(EventoProceso)
+   		Attribute fuente as Text
+       	Attribute soporte as Text
+       	Attribute vista as Text
+       	Attribute tipo as Word("ProcesoNoDefinido" "VistaNoDisponible" "FacetaNoDisponible" "DatasetNoDisponible" "EjecucionCancelada" "ErrorDesconocido")
+       	Attribute mensaje as Text
+
+    Message ConciliacionRealizada as ExtensionOf(EventoProceso)
+   		Attribute startTs as DateTime
+        Attribute endTs as DateTime
+    	Attribute fuente as Text
+       	Attribute soporte as Text
+        Attribute vista as Text
+        Attribute sujetos as Integer
+        Attribute sujetosUnicos as Integer
+
+    Message ConciliacionIncidencia as ExtensionOf(EventoProceso)
+   		Attribute fuente as Text
+        Attribute soporte as Text
+        Attribute vista as Text
+        Attribute tipo as Word("ProcesoNoDefinido" "VistaNoDisponible" "FacetaNoDisponible" "DatasetNoDisponible" "EjecucionCancelada" "ErrorDesconocido")
+		Attribute mensaje as Text
+
+	Message ConsolidacionRealizada as ExtensionOf(EventoProceso)
+		Attribute startTs as DateTime
+		Attribute endTs as DateTime
+		Attribute faceta as Text
+		Attribute fuentes as Text List
+        Attribute sujetos as Integer
+        Attribute sujetosUnicos as Integer
+        Component Dataset
+        	Attribute tipo as Word("Primario" "Maestro")
+        	Attribute nombre as Text
+        	Attribute fuente as Text
+        	Attribute soporte as Text
+        	Attribute vista as Text
+        	Attribute faceta as Text
+        	Attribute fecha as DateTime
+        Component(multiple=true) Solapamiento
+       		Attribute datasets as Text List
+            Attribute sujetos as Integer
+
+	Message ConsolidacionIncidencia as ExtensionOf(EventoProceso)
+		Attribute faceta as Text
+		Attribute fuentes as Text List
+    	Attribute tipo as Word("ProcesoNoDefinido" "FacetaNoDisponible" "DatasetNoDisponible" "EjecucionCancelada" "ErrorDesconocido")
+    	Attribute mensaje as Text
+
+	Message AnalisisPrimarioRealizado as ExtensionOf(EventoProceso)
+		Attribute startTs as DateTime
+    	Attribute endTs as DateTime
+   		Attribute fuente as Text
+        Attribute soporte as Text
+        Attribute vista as Text
+    	Component Calidad
+    		Component(multiple=true) Atributo
+    			Attribute nombre as Text
+    			Attribute consistencia as Real
+    			Attribute completitud as Real
+    			Attribute unicidad as Real
+    			Attribute validez as Real
+    			Attribute exactitud as Real
+    			Attribute actualidad as Real
+    	Attribute json as Text // TODO: ELIMINAR
+
+	Message AnalisisPrimarioIncidencia as ExtensionOf(EventoProceso)
+   		Attribute fuente as Text
+        Attribute soporte as Text
+        Attribute vista as Text
+    	Attribute tipo as Word("ProcesoNoDefinido" "VistaNoDisponible" "DatasetNoDisponible" "EjecucionCancelada" "ErrorDesconocido")
+    	Attribute mensaje as Text
+
+	Message AnalisisMaestroRealizado as ExtensionOf(EventoProceso)
+		Attribute startTs as DateTime
+    	Attribute endTs as DateTime
+    	Attribute faceta as Text
+    	Component Calidad
+    		Component(multiple=true) Atributo
+    			Attribute nombre as Text
+    			Attribute consistencia as Real
+    			Attribute completitud as Real
+    			Attribute unicidad as Real
+    			Attribute validez as Real
+    			Attribute exactitud as Real
+    			Attribute actualidad as Real
+    	Attribute json as Text // TODO: ELIMINAR
+
+	Message AnalisisMaestroIncidencia as ExtensionOf(EventoProceso)
+		Attribute faceta as Text
+    	Attribute tipo as Word("ProcesoNoDefinido" "FacetaNoDisponible" "DatasetNoDisponible" "EjecucionCancelada" "ErrorDesconocido")
+    	Attribute mensaje as Text
+
 
 

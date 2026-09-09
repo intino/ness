@@ -28,11 +28,15 @@ public class Main {
 
 	private static void loadUsers(File workspace, NessGraph nessGraph) {
 		try {
-			File file = new File(workspace, "datahub/config/users.bin");
-			if (!file.exists()) return;
+			File file = new File(workspace, "config/users.bin");
+			if (!file.exists()) {
+				Logger.warn("users.bin file not found. Loading users from graph.");
+				return;
+			}
 			nessGraph.broker().clear().user(u -> true);
 			String[] users = new String(Files.readAllBytes(file.toPath())).split("\n");
 			for (String user : users) nessGraph.broker().create().user(user.split("::")[0], user.split("::")[1]);
+			Logger.info("Users loaded from " + file.getAbsolutePath());
 		} catch (IOException e) {
 			Logger.error(e);
 		}

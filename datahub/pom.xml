@@ -6,7 +6,7 @@
 	<groupId>systems.intino.eventsourcing</groupId>
 	<artifactId>datahub</artifactId>
 	<name>datahub</name>
-	<version>13.1.3</version>
+	<version>13.1.4</version>
 	<packaging>jar</packaging>
 	<description>DataHub is a software platform that facilitates the creation, management, and distribution of events in event-driven systems. Using a domain-specific language (DSL), DataHub allows users to tailor their architecture to meet specific business needs, enhancing the integration and operability of real-time data systems</description>
 	<properties>
@@ -83,24 +83,24 @@
 								  <broker_secondary_port_defaultValue></broker_secondary_port_defaultValue>
 								  <backup_directory_name>backup_directory</backup_directory_name>
 								  <backup_directory_description>no description</backup_directory_description>
-									<backup_directory_required>false</backup_directory_required>
-									<backup_directory_defaultValue>empty</backup_directory_defaultValue>
+								  <backup_directory_required>true</backup_directory_required>
+								  <backup_directory_defaultValue></backup_directory_defaultValue>
 								  <keystore_path_name>keystore_path</keystore_path_name>
 								  <keystore_path_description>no description</keystore_path_description>
-									<keystore_path_required>false</keystore_path_required>
-									<keystore_path_defaultValue>empty</keystore_path_defaultValue>
+								  <keystore_path_required>true</keystore_path_required>
+								  <keystore_path_defaultValue></keystore_path_defaultValue>
 								  <keystore_password_name>keystore_password</keystore_password_name>
 								  <keystore_password_description>no description</keystore_password_description>
-									<keystore_password_required>false</keystore_password_required>
-									<keystore_password_defaultValue>empty</keystore_password_defaultValue>
+								  <keystore_password_required>true</keystore_password_required>
+								  <keystore_password_defaultValue></keystore_password_defaultValue>
 								  <truststore_path_name>truststore_path</truststore_path_name>
 								  <truststore_path_description>no description</truststore_path_description>
-									<truststore_path_required>false</truststore_path_required>
-									<truststore_path_defaultValue>empty</truststore_path_defaultValue>
+								  <truststore_path_required>true</truststore_path_required>
+								  <truststore_path_defaultValue></truststore_path_defaultValue>
 								  <truststore_password_name>truststore_password</truststore_password_name>
 								  <truststore_password_description>no description</truststore_password_description>
-									<truststore_password_required>false</truststore_password_required>
-									<truststore_password_defaultValue>empty</truststore_password_defaultValue>
+								  <truststore_password_required>true</truststore_password_required>
+								  <truststore_password_defaultValue></truststore_password_defaultValue>
 								</manifestEntries>
 							</manifestSection>
 						</manifestSections>
@@ -276,8 +276,8 @@
 			<version>1.2.0</version>
 			<exclusions>
 				<exclusion>
-					<groupId></groupId>
-					<artifactId></artifactId>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
