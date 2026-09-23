@@ -1,5 +1,4 @@
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import systems.intino.eventsourcing.datahubterminal.Broker;
@@ -11,19 +10,23 @@ import systems.intino.eventsourcing.jms.ConnectionConfig;
 
 import java.io.File;
 import java.time.Instant;
-import java.util.stream.Stream;
+import java.util.Comparator;
 
 public class JmsTerminalTest {
 
 	@Test
 	@Ignore
 	public void testRemoteDatalake() {
-		JmsConnector connector = new JmsConnector(new ConnectionConfig("tcp://localhost:62000?jms.blobTransferPolicy.uploadUrl=http://localhost:8081", "monitoring", "monitoring", "test"), null);
+		JmsConnector connector = new JmsConnector(new ConnectionConfig("tcp://localhost:63000?jms.blobTransferPolicy.uploadUrl=http://localhost:8081", "inventario", "inventario", "test"), null);
 		connector.start();
-		Datalake.Store.Tank<MessageEvent> tank = new RemoteDatalake(connector).messageStore().tank("server.Status");
-		if (tank == null) Assert.fail();
-		Stream<MessageEvent> content = tank.content();
-		content.forEach(e -> System.out.println(e.ts()));
+		Datalake datalake = new RemoteDatalake(connector);
+
+		Datalake.Store.Tub<MessageEvent> inventario = datalake.messageStore().tank("inventario.Inventario")
+				.source("inventario")
+				.tubs()
+				.max(Comparator.comparing(Datalake.Store.Tub::timetag))
+				.orElse(null);
+		inventario.events().forEach(e -> System.out.println(e.ts()));
 	}
 
 	@Test

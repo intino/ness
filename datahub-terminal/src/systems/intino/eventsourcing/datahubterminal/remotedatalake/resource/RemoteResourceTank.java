@@ -33,7 +33,7 @@ public class RemoteResourceTank implements Datalake.Store.Tank<ResourceEvent> {
 
 	@Override
 	public Datalake.Store.Source<ResourceEvent> source(String name) {
-		return null;
+		return sources().filter(s -> s.name().equals(name)).findFirst().orElse(null);
 	}
 
 	@Override

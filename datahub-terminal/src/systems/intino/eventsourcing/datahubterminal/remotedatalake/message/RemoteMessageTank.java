@@ -33,7 +33,7 @@ public class RemoteMessageTank implements Datalake.Store.Tank<MessageEvent> {
 
 	@Override
 	public Datalake.Store.Source<MessageEvent> source(String name) {
-		return null;
+		return sources().filter(s -> s.name().equals(name)).findFirst().orElse(null);
 	}
 
 	@Override

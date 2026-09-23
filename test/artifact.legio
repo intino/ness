@@ -1,9 +1,9 @@
 dsl Legio
 
 Artifact(groupId = "org.example", version = "1.0.0") test
-	Dsl("Ness", "13.1.1")
+	Dsl("Ness", "13.1.5")
 	Imports
-		Compile(groupId = "systems.intino.eventsourcing", artifactId = "datahub-terminal", version = "6.3.0")
+		Compile(groupId = "systems.intino.eventsourcing", artifactId = "datahub-terminal", version = "6.3.3")
 		Test(groupId = "junit", artifactId = "junit", version = "4.13.2")
 	Package(mode = ModulesAndLibrariesLinkedByManifest)
 	Parameter(name = "broker_port", "63000")
