@@ -479,6 +479,7 @@ public class JmsConnector implements Connector {
 				Logger.info("Connection with Data Hub (" + config.url() + ") established!");
 				connected.set(true);
 				recoverConsumers();
+				eventDispatcher.execute(JmsConnector.this::recoverEventsAndMessages);
 			}
 		};
 	}
